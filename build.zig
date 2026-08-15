@@ -10,4 +10,6 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4img_c_include", b.path("R4IMG/Bindings/C"));
     b.addNamedLazyPath("r4font_zig_binding", b.path("R4FONT/Bindings/Zig/r4font.zig"));
     b.addNamedLazyPath("r4font_c_include", b.path("R4FONT/Bindings/C"));
+    b.addNamedLazyPath("r4font_app_fonts", b.path("R4FONT/Bindings/Zig/app_fonts.zig"));
+    b.addNamedLazyPath("r4font_font_tools", b.path("R4FONT/Bindings/Zig/font_tools.zig"));
 }
