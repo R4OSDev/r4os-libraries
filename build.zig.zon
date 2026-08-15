@@ -1,0 +1,15 @@
+.{
+    .name = .r4os_libraries,
+    .version = "0.64.17",
+    .fingerprint = 0xb4b7d2df351f7e74,
+    .minimum_zig_version = "0.16.0",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "R4STD",
+        "R4IMG",
+        "R4FONT",
+        "README.txt",
+        "PROVENANCE.txt",
+    },
+}

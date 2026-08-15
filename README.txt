@@ -37,4 +37,14 @@ Die Starter wenden die Settings vor der Zig-Paketaufloesung an. SDK und
 Plattform-Contract sind im Paketbaum inhaltlich gepinnt; die gemappten lokalen
 Checkouts werden als passende Entwicklungsvarianten verwendet.
 
+Consumer-Bindings
+-----------------
+
+Das Rootpaket `r4os_libraries` stellt die Zig-Bindings als benannte Pfade
+`r4std_zig_binding`, `r4img_zig_binding` und `r4font_zig_binding` bereit. Fuer
+C-Verbraucher existieren entsprechend `r4std_c_include`, `r4img_c_include` und
+`r4font_c_include`. Ein Modul pinnt dieses Paket und uebergibt nur den
+benoetigten Pfad an den SDK-Manifestbuild; die Runtime-Implementierungen werden
+dadurch weder eingebettet noch mit dem Verbraucher gekoppelt.
+
 Herkunft und Transfergrenzen stehen in `PROVENANCE.txt`.
