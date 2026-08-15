@@ -47,4 +47,9 @@ C-Verbraucher existieren entsprechend `r4std_c_include`, `r4img_c_include` und
 benoetigten Pfad an den SDK-Manifestbuild; die Runtime-Implementierungen werden
 dadurch weder eingebettet noch mit dem Verbraucher gekoppelt.
 
+Fuer distributionseigene Hostgeneratoren exportiert das Rootpaket ausserdem
+den formatreinen Pfad `r4font_format`. Das ist kein Runtime-Provider und keine
+zweite R4FONT-API, sondern nur die gemeinsame Dateiformatdefinition fuer die
+Erzeugung installierbarer `.R4F`-Systemfonts.
+
 Herkunft und Transfergrenzen stehen in `PROVENANCE.txt`.
