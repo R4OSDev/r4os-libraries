@@ -1,0 +1,13 @@
+.{
+    .name = .r4os_library_r4img,
+    .version = "0.3.1",
+    .fingerprint = 0x7263379a8b329733,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .r4os_sdk = .{
+            .url = "https://github.com/R4OSDev/r4os-sdk/archive/210372f305086b3528f6bd386e23e6901975c153.tar.gz",
+            .hash = "r4os_sdk-0.64.12-NnPzAp9j7gBN9NS8Eeh4pR0DuZ9HtOi9yBcyITywdVZx",
+        },
+    },
+    .paths = .{ "Bindings", "Contract", "Docs", "Source", "Tests", "ThirdParty", "build.zig", "build.zig.zon", "module.R4MF", "README.txt" },
+}

@@ -1,0 +1,1108 @@
+{
+  "schema_version": 1,
+  "module_name": "R4IMG",
+  "zig_client": "R4Img",
+  "c_prefix": "r4img",
+  "c_header": "r4img.h",
+  "description": "Unabhaengige Runtime-R4L fuer begrenztes PNG-, JPEG-, BMP- und SVG-Decoding sowie ARGB-Skalierung.",
+  "interfaces": [
+    {
+      "export_name": "API_V1",
+      "symbol": "r4img_api_v1",
+      "zig_name": "api_v1",
+      "zig_type": "ApiV1",
+      "c_type": "R4ImgApiV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 5923350549304161361,
+      "interface_id_hi": 3554262199636214098,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "probe",
+          "c_name": "r4img_probe",
+          "symbol": "r4img_probe_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "encoded",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "length_by": "encoded_length",
+              "description": "Caller-eigene codierte Bilddaten."
+            },
+            {
+              "name": "encoded_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Anzahl lesbarer Bytes."
+            },
+            {
+              "name": "content_type",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "length_by": "content_type_length",
+              "description": "Optional leerer MIME-Typ ohne Nullterminierung."
+            },
+            {
+              "name": "content_type_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Laenge des MIME-Typs."
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4ImgInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Caller-eigene Metadatenausgabe."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4IMG_STATUS",
+            "ownership": "Alle Pointer werden nur waehrend des Aufrufs verwendet."
+          },
+          "description": "Erkennt Format und begrenzte intrinsische Dimensionen ohne Pixeldecoding."
+        },
+        {
+          "name": "scratch_bytes",
+          "c_name": "r4img_scratch_bytes",
+          "symbol": "r4img_scratch_bytes_impl",
+          "slot": 1,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "info",
+              "type": {
+                "name": "R4ImgInfo",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "Von probe gelieferte oder gleichwertig validierte Bildinformation."
+            },
+            {
+              "name": "encoded_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Groesse der codierten Eingabe."
+            },
+            {
+              "name": "output_bytes",
+              "type": {
+                "name": "u64",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Caller-eigene Ausgabe fuer die benoetigte Scratchgroesse."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4IMG_STATUS",
+            "ownership": "Die Funktion allokiert und behaelt keinen Speicher."
+          },
+          "description": "Berechnet die konservative Scratchobergrenze fuer einen Decodeaufruf."
+        },
+        {
+          "name": "decode",
+          "c_name": "r4img_decode",
+          "symbol": "r4img_decode_impl",
+          "slot": 2,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "encoded",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "length_by": "encoded_length",
+              "description": "Caller-eigene codierte Bilddaten."
+            },
+            {
+              "name": "encoded_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Anzahl lesbarer Eingabebytes."
+            },
+            {
+              "name": "content_type",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "length_by": "content_type_length",
+              "description": "Optional leerer MIME-Typ."
+            },
+            {
+              "name": "content_type_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Laenge des MIME-Typs."
+            },
+            {
+              "name": "pixels",
+              "type": {
+                "name": "u32",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "pixel_capacity",
+              "description": "Caller-eigener ARGB-Pixelpuffer."
+            },
+            {
+              "name": "pixel_capacity",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Kapazitaet des Pixelpuffers in u32-Pixeln."
+            },
+            {
+              "name": "scratch",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "inout",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "scratch_length",
+              "description": "Caller-eigener, waehrend des Aufrufs frei nutzbarer Scratchpuffer."
+            },
+            {
+              "name": "scratch_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Scratchkapazitaet in Bytes."
+            },
+            {
+              "name": "output_info",
+              "type": {
+                "name": "R4ImgInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Metadaten des decodierten Bildes."
+            },
+            {
+              "name": "output_pixel_count",
+              "type": {
+                "name": "u64",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Anzahl gueltiger Pixel im Ausgabepuffer."
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4IMG_STATUS",
+            "ownership": "Eingabe, Pixel und Scratch bleiben caller-owned; die Library behaelt keinen Pointer."
+          },
+          "description": "Decodiert PNG, JPEG, BMP oder SVG in ARGB; SVG nutzt dabei Standardoptionen."
+        },
+        {
+          "name": "decode_svg_at",
+          "c_name": "r4img_decode_svg_at",
+          "symbol": "r4img_decode_svg_at_impl",
+          "slot": 3,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "encoded",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "length_by": "encoded_length",
+              "description": "Caller-eigene SVG-Quelldaten."
+            },
+            {
+              "name": "encoded_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Anzahl lesbarer SVG-Bytes."
+            },
+            {
+              "name": "content_type",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "length_by": "content_type_length",
+              "description": "Optional leerer MIME-Typ."
+            },
+            {
+              "name": "content_type_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Laenge des MIME-Typs."
+            },
+            {
+              "name": "pixels",
+              "type": {
+                "name": "u32",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "pixel_capacity",
+              "description": "Caller-eigener ARGB-Pixelpuffer."
+            },
+            {
+              "name": "pixel_capacity",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Kapazitaet des Pixelpuffers in u32-Pixeln."
+            },
+            {
+              "name": "scratch",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "inout",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "scratch_length",
+              "description": "Caller-eigener Scratchpuffer."
+            },
+            {
+              "name": "scratch_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Scratchkapazitaet in Bytes."
+            },
+            {
+              "name": "width",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Zielbreite."
+            },
+            {
+              "name": "height",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Zielhoehe."
+            },
+            {
+              "name": "options",
+              "type": {
+                "name": "R4ImgSvgOptions",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "Versionierte Callback- und Hintergrundoptionen."
+            },
+            {
+              "name": "output_info",
+              "type": {
+                "name": "R4ImgInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Metadaten des gerenderten Zielbildes."
+            },
+            {
+              "name": "output_pixel_count",
+              "type": {
+                "name": "u64",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Anzahl gueltiger Zielpixel."
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4IMG_STATUS",
+            "ownership": "Alle Buffer und Callbackkontexte bleiben caller-owned und gelten nur fuer den Aufruf."
+          },
+          "description": "Rendert SVG in frei waehlbare begrenzte Zieldimensionen und ruft optionale C-ABI-Callbacks auf."
+        },
+        {
+          "name": "scale_composite",
+          "c_name": "r4img_scale_composite",
+          "symbol": "r4img_scale_composite_impl",
+          "slot": 4,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "source_info",
+              "type": {
+                "name": "R4ImgInfo",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "Dimensionen und Format des Quellbildes."
+            },
+            {
+              "name": "source_pixels",
+              "type": {
+                "name": "u32",
+                "pointer": "many",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "length_by": "source_pixel_count",
+              "description": "Caller-eigene ARGB-Quellpixel."
+            },
+            {
+              "name": "source_pixel_count",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Anzahl lesbarer Quellpixel."
+            },
+            {
+              "name": "destination",
+              "type": {
+                "name": "u32",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "destination_capacity",
+              "description": "Caller-eigener Zielpuffer."
+            },
+            {
+              "name": "destination_capacity",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Kapazitaet des Zielpuffers in Pixeln."
+            },
+            {
+              "name": "width",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Zielbreite."
+            },
+            {
+              "name": "height",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Zielhoehe."
+            },
+            {
+              "name": "background",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "RGB-Hintergrund fuer Alpha-Komposition."
+            },
+            {
+              "name": "output_pixel_count",
+              "type": {
+                "name": "u64",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Anzahl geschriebener Zielpixel."
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4IMG_STATUS",
+            "ownership": "Quell- und Zielpuffer bleiben vollstaendig caller-owned."
+          },
+          "description": "Skaliert bilinear und komponiert Alpha gegen einen RGB-Hintergrund."
+        },
+        {
+          "name": "decoder_diagnostic",
+          "c_name": "r4img_decoder_diagnostic",
+          "symbol": "r4img_decoder_diagnostic_impl",
+          "slot": 5,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "output",
+              "type": {
+                "name": "R4ImgDecoderDiagnostic",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Caller-eigene Diagnoseausgabe zum letzten Rasterdecode."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4IMG_STATUS",
+            "ownership": "Die Ausgabe wird kopiert; es wird kein Pointer behalten."
+          },
+          "description": "Liefert Scratch-Spitze und Allokationsfehler des letzten STB-Decodes."
+        }
+      ],
+      "description": "Append-only V1-Tabelle fuer Bildprobe, Decoding, SVG-Rendering, Skalierung und Diagnose."
+    }
+  ],
+  "types": [
+    {
+      "name": "R4ImgInfo",
+      "size": 16,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "format",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "R4IMG_FORMAT-Konstante."
+        },
+        {
+          "name": "width",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Breite in Pixeln."
+        },
+        {
+          "name": "height",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Hoehe in Pixeln."
+        },
+        {
+          "name": "channels",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Kanalanzahl der Quelle."
+        }
+      ],
+      "description": "Festes Bildmetadatenlayout der V1-ABI."
+    },
+    {
+      "name": "R4ImgSvgOptions",
+      "size": 56,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "flags",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "R4IMG_SVG_FLAG-Bitmaske."
+        },
+        {
+          "name": "background",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "ARGB-Hintergrund bei gesetztem Background-Flag."
+        },
+        {
+          "name": "glyph_context",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Opaker Caller-Kontext als x86_64-Adresse."
+        },
+        {
+          "name": "glyph_row",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "C-ABI-Funktionsadresse fuer Glyphenzeilen."
+        },
+        {
+          "name": "link_context",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Opaker Link-Callbackkontext als x86_64-Adresse."
+        },
+        {
+          "name": "link_record",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "C-ABI-Funktionsadresse fuer Linkregionen."
+        },
+        {
+          "name": "glyph_width",
+          "offset": 40,
+          "type": {
+            "name": "u16",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Glyphenbreite."
+        },
+        {
+          "name": "glyph_height",
+          "offset": 42,
+          "type": {
+            "name": "u16",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Glyphenhoehe."
+        },
+        {
+          "name": "glyph_advance",
+          "offset": 44,
+          "type": {
+            "name": "u16",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Horizontaler Vorschub."
+        },
+        {
+          "name": "glyph_baseline",
+          "offset": 46,
+          "type": {
+            "name": "i16",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Baseline relativ zur Glyphenoberkante."
+        },
+        {
+          "name": "reserved",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Muss in V1 null sein."
+        }
+      ],
+      "description": "Festes Optionslayout; Callbacks und Kontexte gelten nur waehrend decode_svg_at."
+    },
+    {
+      "name": "R4ImgDecoderDiagnostic",
+      "size": 16,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "scratch_peak",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Hoechster Scratchverbrauch des letzten Rasterdecodes."
+        },
+        {
+          "name": "allocation_failed",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Eins wenn die Arena keinen Speicher mehr liefern konnte."
+        },
+        {
+          "name": "reserved",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Muss null sein."
+        }
+      ],
+      "description": "Festes Diagnoseergebnis der V1-ABI."
+    }
+  ],
+  "constants": [
+    {
+      "zig_name": "status_ok",
+      "c_name": "R4IMG_STATUS_OK",
+      "type": "i32",
+      "value": 0,
+      "description": "Operation erfolgreich."
+    },
+    {
+      "zig_name": "format_png",
+      "c_name": "R4IMG_FORMAT_PNG",
+      "type": "u32",
+      "value": 0,
+      "description": "PNG-Formatkennung."
+    },
+    {
+      "zig_name": "format_jpeg",
+      "c_name": "R4IMG_FORMAT_JPEG",
+      "type": "u32",
+      "value": 1,
+      "description": "JPEG-Formatkennung."
+    },
+    {
+      "zig_name": "format_bmp",
+      "c_name": "R4IMG_FORMAT_BMP",
+      "type": "u32",
+      "value": 2,
+      "description": "BMP-Formatkennung."
+    },
+    {
+      "zig_name": "format_svg",
+      "c_name": "R4IMG_FORMAT_SVG",
+      "type": "u32",
+      "value": 3,
+      "description": "SVG-Formatkennung."
+    },
+    {
+      "zig_name": "svg_flag_glyphs",
+      "c_name": "R4IMG_SVG_FLAG_GLYPHS",
+      "type": "u32",
+      "value": 1,
+      "description": "Glyphenprovider ist gesetzt."
+    },
+    {
+      "zig_name": "svg_flag_links",
+      "c_name": "R4IMG_SVG_FLAG_LINKS",
+      "type": "u32",
+      "value": 2,
+      "description": "Linksink ist gesetzt."
+    },
+    {
+      "zig_name": "svg_flag_background",
+      "c_name": "R4IMG_SVG_FLAG_BACKGROUND",
+      "type": "u32",
+      "value": 4,
+      "description": "Hintergrundfarbe ist gesetzt."
+    },
+    {
+      "zig_name": "max_dimension",
+      "c_name": "R4IMG_MAX_DIMENSION",
+      "type": "u32",
+      "value": 4096,
+      "description": "Maximale Breite oder Hoehe."
+    },
+    {
+      "zig_name": "max_pixels",
+      "c_name": "R4IMG_MAX_PIXELS",
+      "type": "u64",
+      "value": 8847360,
+      "description": "Maximale Pixelanzahl."
+    },
+    {
+      "zig_name": "max_scratch_bytes",
+      "c_name": "R4IMG_MAX_SCRATCH_BYTES",
+      "type": "u64",
+      "value": 234881024,
+      "description": "Maximale Scratchkapazitaet."
+    },
+    {
+      "zig_name": "max_svg_source_bytes",
+      "c_name": "R4IMG_MAX_SVG_SOURCE_BYTES",
+      "type": "u64",
+      "value": 262144,
+      "description": "Maximale SVG-Quellgroesse."
+    }
+  ],
+  "errors": [
+    {
+      "zig_name": "status_empty",
+      "c_name": "R4IMG_STATUS_EMPTY",
+      "type": "i32",
+      "value": -1,
+      "description": "Die Eingabe ist leer."
+    },
+    {
+      "zig_name": "status_unsupported_format",
+      "c_name": "R4IMG_STATUS_UNSUPPORTED_FORMAT",
+      "type": "i32",
+      "value": -2,
+      "description": "Signatur oder MIME-Typ wird nicht unterstuetzt."
+    },
+    {
+      "zig_name": "status_invalid_image",
+      "c_name": "R4IMG_STATUS_INVALID_IMAGE",
+      "type": "i32",
+      "value": -3,
+      "description": "Die Bildstruktur ist ungueltig oder widerspruechlich."
+    },
+    {
+      "zig_name": "status_invalid_dimensions",
+      "c_name": "R4IMG_STATUS_INVALID_DIMENSIONS",
+      "type": "i32",
+      "value": -4,
+      "description": "Breite oder Hoehe ist null oder ausserhalb der Dimensionsgrenze."
+    },
+    {
+      "zig_name": "status_too_large",
+      "c_name": "R4IMG_STATUS_TOO_LARGE",
+      "type": "i32",
+      "value": -5,
+      "description": "Quelle, Pixelzahl oder Scratchbedarf ueberschreitet die Grenze."
+    },
+    {
+      "zig_name": "status_pixel_buffer_too_small",
+      "c_name": "R4IMG_STATUS_PIXEL_BUFFER_TOO_SMALL",
+      "type": "i32",
+      "value": -6,
+      "description": "Der caller-eigene Pixelpuffer ist zu klein."
+    },
+    {
+      "zig_name": "status_scratch_buffer_too_small",
+      "c_name": "R4IMG_STATUS_SCRATCH_BUFFER_TOO_SMALL",
+      "type": "i32",
+      "value": -7,
+      "description": "Der caller-eigene Scratchpuffer ist zu klein."
+    },
+    {
+      "zig_name": "status_decode_failed",
+      "c_name": "R4IMG_STATUS_DECODE_FAILED",
+      "type": "i32",
+      "value": -8,
+      "description": "Der Rasterdecoder konnte die Eingabe nicht decodieren."
+    },
+    {
+      "zig_name": "status_unsupported_feature",
+      "c_name": "R4IMG_STATUS_UNSUPPORTED_FEATURE",
+      "type": "i32",
+      "value": -9,
+      "description": "Die Eingabe verwendet ein bewusst nicht unterstuetztes SVG-Feature."
+    },
+    {
+      "zig_name": "status_invalid_argument",
+      "c_name": "R4IMG_STATUS_INVALID_ARGUMENT",
+      "type": "i32",
+      "value": -10,
+      "description": "Ein ABI-Argument oder Optionsflag ist ungueltig."
+    }
+  ],
+  "ownership_rules": [
+    {
+      "name": "Caller-owned Buffer",
+      "text": "Codierte Daten, Pixelpuffer und Scratchspeicher bleiben beim Caller; R4IMG verwendet sie nur waehrend des Aufrufs und allokiert nie ueber die ABI."
+    },
+    {
+      "name": "Callback-Lebensdauer",
+      "text": "SVG-Callbackadressen und ihre Kontexte muessen nur bis zur Rueckkehr von decode_svg_at gueltig bleiben und werden nicht gespeichert."
+    },
+    {
+      "name": "Providergeneration",
+      "text": "Die API-Tabelle und ihre Funktionspointer bleiben bis zum Ende der geladenen R4IMG-Providergeneration gueltig."
+    },
+    {
+      "name": "Serialisierung",
+      "text": "Rasterdecode und Decoderdiagnose muessen vom Caller serialisiert werden, weil der eingebettete STB-Adapter eine providerlokale Scratchdiagnose fuehrt."
+    }
+  ]
+}
