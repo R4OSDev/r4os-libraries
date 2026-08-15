@@ -23,11 +23,10 @@
 *.svg text eol=lf
 *.sh text eol=lf
 
-# Vendor manifests pin exact bytes. Keep every textual vendor/fixture file on
-# LF even when its upstream filename has no conventional text extension.
-R4FONT/ThirdParty/r4font/** text eol=lf
-R4FONT/Tests/Fixtures/** text eol=lf
-R4IMG/ThirdParty/stb/** text eol=lf
+# Vendor manifests pin exact bytes, including upstream line endings.
+R4FONT/ThirdParty/r4font/** -text
+R4FONT/Tests/Fixtures/** -text
+R4IMG/ThirdParty/stb/** -text
 
 *.bat text eol=crlf
 *.cmd text eol=crlf
