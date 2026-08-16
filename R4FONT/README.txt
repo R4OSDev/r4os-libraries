@@ -1,29 +1,25 @@
 ﻿R4FONT.R4L
-============
+==========
 
-R4FONT ist eine unabhaengige Runtime-R4L fuer validierte Schriftquellen. Sie
-exportiert die versionierte Funktionstabelle `API_V1:1`; Implementierung,
-Contract, Baseline, Zig-/C-Bindings sowie FreeType und Brotli liegen
-vollstaendig in dieser Library-Einheit. Das Kern-SDK kennt keine
-R4FONT-Typen oder Decoderquellen.
+R4FONT is an independent Runtime-R4L for validated font sources. It exports
+the versioned API_V1:1 table and owns its implementation, contract, baseline,
+Zig and C bindings, FreeType, Brotli, and zlib integration. The core SDK does
+not contain R4FONT types or decoder sources.
 
-Unterstuetzt werden TTF, OpenType/CFF, WOFF, WOFF2 und SFNT-Collections mit
-CMAP, Metriken, Kerning und deterministischer Alpha8-Rasterung. Quelle,
-Decoderzustand, Rasterpuffer und alle Rekonstruktionsallokationen gehoeren
-dem aufrufenden Prozess. Weder Kernel noch R4DRAW enthalten Parsercode oder
-speichern dekodierte Webfonts.
+Supported inputs include TTF, OpenType/CFF, WOFF, WOFF2, and SFNT collections
+with CMAP, metrics, kerning, and deterministic Alpha8 rasterization. Source
+data, decoder state, raster buffers, and reconstruction allocations belong to
+the calling process.
 
-Verbraucher deklarieren `IMPORT=R4FONT:API_V1:1` und binden
-`Bindings/Zig/r4font.zig` beziehungsweise `Bindings/C/r4font.h` ein. Die
-erzeugte Referenz steht in `Docs/API.md`; `zig build test` prueft Contract,
-Provider, Decoder, FaceStore und echte Zig-/C-Verbraucher.
+Consumers declare IMPORT=R4FONT:API_V1:1 and bind
+Bindings/Zig/r4font.zig or Bindings/C/r4font.h. Docs/API.md is generated from
+the contract.
 
-Build:
+Build and test:
 
     Build.bat R4FONT test
 
-Vendor- und Fixture-Provenienz lassen sich zusaetzlich aus dem
-Repository-Root pruefen:
+Verify vendored sources and generated fixtures:
 
     python R4FONT/ThirdParty/r4font/Tools/verify_vendor.py --check
     python R4FONT/Tests/Tools/generate_minimal_fonts.py --check

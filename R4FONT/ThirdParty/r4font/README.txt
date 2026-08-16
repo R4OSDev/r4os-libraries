@@ -1,28 +1,24 @@
-﻿R4FONT Drittanbieterbasis
-===========================
+﻿R4FONT Third-Party Foundation
+=============================
 
-R4FONT verwendet drei fest gepinnte Upstream-Bestandteile: FreeType, Brotli
-und den von FreeType eingebetteten zlib-Teilbestand. `UPSTREAM.json` ist die
-maschinenlesbare Herkunfts-, Versions-, Lizenz- und Patchwahrheit.
+R4FONT uses three pinned upstream components. UPSTREAM.json is the
+machine-readable source, version, license, patch, and verification record.
 
 FreeType
 --------
 
 - Version: 2.14.3
-- Kanonischer Upstream: https://gitlab.freedesktop.org/freetype/freetype.git
-- Spiegel: https://github.com/freetype/freetype.git
+- Canonical upstream: https://gitlab.freedesktop.org/freetype/freetype.git
+- Mirror: https://github.com/freetype/freetype.git
 - Tag: VER-2-14-3
-- Annotiertes Tag-Objekt: c740f0fda4274d6ffd2e5b64a25b06ef69803a07
-- Aufgeloester Quell-Commit: 0a0221a1347e2f1e07c395263540026e9a0aa7c7
-- Lizenz: FreeType License oder GPLv2; R4OS verwendet die FreeType License.
-- Lizenztexte: freetype/LICENSE.TXT, freetype/FTL.TXT,
-  freetype/GPLv2.TXT
+- Tag object: c740f0fda4274d6ffd2e5b64a25b06ef69803a07
+- Resolved commit: 0a0221a1347e2f1e07c395263540026e9a0aa7c7
+- License choice: FreeType License 1.0
+- License files: freetype/LICENSE.TXT, freetype/FTL.TXT, freetype/GPLv2.TXT
 
-Der gepinnte Baum ist auf die in `UPSTREAM.json` aufgefuehrten Verzeichnisse
-begrenzt. Der einzige R4OS-Patch liegt als
-`Patches/freetype-2.14.3-r4font.patch` vor. Er gilt fuer den aufgeloesten
-Quell-Commit, hat einen festgehaltenen Vorher-/Nachher-Hash und wird mit
-deaktivierter Zeilenendenkonvertierung angewendet.
+The vendored tree is limited to paths listed in UPSTREAM.json. The sole R4OS
+patch is Patches/freetype-2.14.3-r4font.patch. Its upstream and patched hashes
+are pinned, and it is applied with line-ending conversion disabled.
 
 Brotli
 ------
@@ -31,74 +27,51 @@ Brotli
 - Upstream: https://github.com/google/brotli
 - Tag: v1.2.0
 - Commit: 028fb5a23661f123017c060daa546b55cf4bde29
-- Lizenz: MIT
-- Lizenztext: brotli/LICENSE
+- License: MIT
+- License file: brotli/LICENSE
 
-Brotli wird ausschliesslich als begrenzter WOFF2-Decoder kompiliert.
+Only the bounded WOFF2 decoder is compiled.
 
 zlib
 ----
 
-- Version: 1.3.1, als Teilbestand des gepinnten FreeType-Baums
+- Version: 1.3.1, from the pinned FreeType snapshot
 - Upstream: https://github.com/madler/zlib.git
 - Tag: v1.3.1
-- Annotiertes Tag-Objekt: 925af44f3cde53c6b076611c297850091b5dc7bb
-- Aufgeloester Quell-Commit: 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
-- Lizenz: Zlib
-- Lizenztext: ZLIB-LICENSE
+- Tag object: 925af44f3cde53c6b076611c297850091b5dc7bb
+- Resolved commit: 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
+- License: zlib License
+- License file: ZLIB-LICENSE
 
-`freetype/src/gzip/ftgzip.c` bindet fuer WOFF die sechs in
-`UPSTREAM.json` genannten zlib-Quelldateien ein. FreeType leitet auch deren
-Allokationen an das caller-owned `FT_Memory` weiter.
+FreeType's ftgzip.c includes the six zlib source files listed in
+UPSTREAM.json and routes their allocations through caller-owned FT_Memory.
 
-Quell- und Freestanding-Vertrag
--------------------------------
+Source and freestanding contract
+--------------------------------
 
-Die produktive FreeType-/Brotli-/Bridge-Quellliste liegt ausschliesslich im
-lokalen `R4FONT/module.R4MF`. Der eigenstaendige
-Hosttest-Build verwendet dieselben Quellen ueber die lokale Hilfsfunktion
-`addHostDecoder`. Verbraucher importieren nur `R4FONT:API_V1:1` und kennen
-den Fremdcode nicht.
+R4FONT/module.R4MF is the single productive source list. Host tests use the
+same decoder sources. Consumers import only R4FONT:API_V1:1 and do not depend
+on the vendored implementation.
 
-Der Hostmodus nutzt die Host-C-Laufzeit nur fuer den Testprozess. Der
-Produktivmodus kompiliert freestanding und ohne libc:
+Production builds are freestanding and do not link host libc. The
+freestanding directory provides narrow headers, while the R4OS bridge sources
+provide the required memory, string, sorting, abort, and system-memory hooks.
 
-- `freestanding/` enthaelt die schmalen C-Header fuer die benoetigte
-  Quelloberflaeche.
-- `src/r4font_freestanding.c` implementiert genau die beim freestanding Link
-  benoetigten Speicher-, String-, Sortier- und Abbruchprimitive.
-- `src/r4font_system.c` verhindert FreeTypes unbenutzten System-Memory-Pfad.
-- Das produktive R4FONT-Artefakt linkt diese Quellen freestanding und ohne
-  Host-libc.
+R4OS configuration disables file streams, environment properties, embedded
+TrueType bytecode, and unused formats. The WOFF2 integration uses caller-owned
+memory, requires complete input and output consumption, and limits rebuilt
+SFNT data to 32 MB.
 
-R4OS-Anpassungen
-----------------
+Reproducible verification
+-------------------------
 
-- `config/r4font_ftoption.h` deaktiviert Dateistreams, Environment-
-  Properties, eingebetteten TrueType-Bytecode und nicht benoetigte Formate.
-- `config/r4font_ftmodule.h` ist die geschlossene Modulliste.
-- `freetype/src/sfnt/sfwoff2.c` bindet Brotli an dasselbe caller-owned
-  `FT_Memory`, erzwingt vollstaendigen Ein- und Ausgabeverbrauch und begrenzt
-  rekonstruierte SFNT-Daten auf 32 MB.
-- `src/r4font_bridge.c` stellt den begrenzten C-Kern bereit.
-
-R4FONT oeffnet nur vollstaendige, aufrufereigene Speicherabbilder. Es gibt
-kein Datei-I/O, keinen Host-Fallback und keine Decoderallokation im Kernel
-oder in R4DRAW. Alle Allokationen laufen ueber den vom R4OS-Verbraucher
-gelieferten und hart begrenzten Allocator.
-
-Reproduzierbare Pruefung
-------------------------
-
-`VENDOR.sha256` pinnt bytegenau alle vendorten FreeType-, Brotli-, zlib-,
-Konfigurations-, Bridge-, Freestanding- und Patchdateien. Der Check prueft
-ausserdem alle Lizenzhashes und spielt den lokalen FreeType-Patch rueckwaerts
-ab; dessen Ergebnis muss wieder den gepinnten Upstream-Hash ergeben:
+VENDOR.sha256 pins all vendored, configuration, bridge, freestanding, and
+patch files. The verification also checks license hashes and reverses the
+local FreeType patch to recover the pinned upstream hash:
 
     python R4FONT/ThirdParty/r4font/Tools/verify_vendor.py --check
 
-`--write` ist ausschliesslich fuer einen ausdruecklichen, geprueften
-Vendor-Baselinewechsel vorgesehen. Danach muessen die Manifest-, Script- und
-Patchhashes in `UPSTREAM.json` bewusst aktualisiert werden.
+Use --write only for an explicit reviewed vendor baseline change, followed by
+intentional manifest, script, and patch hash updates.
 
-Abruf und Pruefung fuer R4OS: 2026-08-08
+Retrieved and verified for R4OS: 2026-08-08

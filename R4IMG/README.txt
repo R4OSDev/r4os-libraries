@@ -1,20 +1,20 @@
 ﻿R4IMG.R4L
-==========
+=========
 
-R4IMG ist die unabhaengige Runtime-R4L fuer Raster- und Vektorbildformate.
-Die Library besitzt Implementierung, STB-Fremdcode, lokalen V1-Vertrag sowie
-generierte Zig- und C-Bindings. Verbraucher importieren R4IMG:API_V1:1 und
-rufen ausschliesslich die geladene Funktionstabelle auf. Pixelpuffer und
-Scratchspeicher bleiben immer beim aufrufenden Prozess.
+R4IMG is the independent Runtime-R4L for raster and vector image formats. It
+owns its implementation, stb_image integration, local V1 contract, and
+generated Zig and C bindings. Consumers import R4IMG:API_V1:1 and call only
+the loaded function table. Pixel and scratch buffers always remain owned by
+the calling process.
 
-Aktueller Zielstand: PNG, JPEG und BMP sowie ein statischer, begrenzter
-SVG-2-Teilbestand mit ARGB-Ausgabe, Alpha-Komposition, Seitenverhaeltnis,
-Software-Rasterung und begrenzter Skalierung. SVG-Text und Linkregionen
-werden ueber optionale Callbacks des Verbrauchers angebunden.
+The current implementation supports PNG, JPEG, BMP, and a bounded static SVG
+2 subset with ARGB output, alpha composition, aspect-ratio handling, software
+rasterization, and bounded scaling. Optional consumer callbacks handle SVG
+text and link regions.
 
-Build:
+Build and test:
 
     Build.bat R4IMG test
 
-Der Test umfasst Contract, Provider, echte Decoderpfade, Runtime-Tabelle und
-einen eigenstaendigen C-Consumer.
+Tests cover the contract, provider, real decoder paths, runtime table, and an
+independent C consumer.
