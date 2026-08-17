@@ -31,6 +31,18 @@ CONFIG_V1 receives the opaque caller-owned R4XStart context per call and uses
 it to resolve R4SYS. R4STD retains neither that context nor any other supplied
 pointer. Buffers and state objects remain caller-owned.
 
+The Zig binding also owns the shared desktop file-handler helpers. These are
+compiled into their consumers and do not add a premature R4STD runtime ABI:
+
+- `app_assoc` parses and writes APPASSOC entries for application, subsystem,
+  and deliberately removed handlers.
+- `file_handler` combines application defaults with the installed subsystem
+  resolver and emits the stable subsystem launch request.
+- `subsystem_runtime` loads the subsystem view solely from installed
+  `MODULES.JSON`, keeps bounded probe storage, and performs the final host-file
+  check. ASSOC.R4S stores only stable subsystem and format IDs, never a copied
+  host path or display name.
+
 Build and test:
 
     Build.bat R4STD test

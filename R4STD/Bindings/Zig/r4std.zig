@@ -16,6 +16,8 @@ pub const time = @import("time.zig");
 pub const config = @import("config.zig");
 pub const text_file = @import("text_file.zig");
 pub const app_assoc = @import("app_assoc.zig");
+pub const file_handler = @import("file_handler.zig");
+pub const subsystem_runtime = @import("subsystem_runtime.zig");
 pub const shortcut = @import("shortcut.zig");
 
 pub fn init(raw: *const r4os.abi.R4XStartContext) bool {

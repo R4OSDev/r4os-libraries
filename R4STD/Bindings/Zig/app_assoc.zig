@@ -2,6 +2,7 @@ const std = @import("std");
 const r4os = @import("r4os");
 const abi = r4os.abi;
 const settings = @import("settings.zig");
+const runtime = @import("runtime.zig");
 const path_contract = r4os.path;
 
 pub const schema = "APPASSOC";
@@ -16,6 +17,8 @@ pub const args_max: usize = 95;
 pub const type_name_max: usize = 23;
 pub const short_name_max: usize = 11;
 pub const prefix_max: usize = 7;
+pub const subsystem_id_max: usize = 63;
+pub const format_id_max: usize = 63;
 pub const foreign_max: usize = 16;
 pub const foreign_key_max: usize = 79;
 pub const foreign_value_max: usize = 127;
@@ -28,6 +31,12 @@ pub const ForeignEntry = struct {
 pub const LaunchKind = enum {
     direct_program,
     associated,
+};
+
+pub const HandlerKind = enum {
+    none,
+    app,
+    subsystem,
 };
 
 pub const AppEntry = struct {
@@ -58,7 +67,10 @@ pub const AppEntry = struct {
 pub const ExtEntry = struct {
     valid: bool = false,
     ext: [ext_max + 1]u8 = .{0} ** (ext_max + 1),
+    handler_kind: HandlerKind = .app,
     app_id: [app_id_max + 1]u8 = .{0} ** (app_id_max + 1),
+    subsystem_id: [subsystem_id_max + 1]u8 = .{0} ** (subsystem_id_max + 1),
+    format_id: [format_id_max + 1]u8 = .{0} ** (format_id_max + 1),
     type_name: [type_name_max + 1]u8 = .{0} ** (type_name_max + 1),
     short_name: [short_name_max + 1]u8 = .{0} ** (short_name_max + 1),
     prefix: [prefix_max + 1]u8 = .{0} ** (prefix_max + 1),
@@ -70,6 +82,14 @@ pub const ExtEntry = struct {
 
     pub fn appIdText(self: *const ExtEntry) []const u8 {
         return spanZ(self.app_id[0..]);
+    }
+
+    pub fn subsystemIdText(self: *const ExtEntry) []const u8 {
+        return spanZ(self.subsystem_id[0..]);
+    }
+
+    pub fn formatIdText(self: *const ExtEntry) []const u8 {
+        return spanZ(self.format_id[0..]);
     }
 
     pub fn typeNameText(self: *const ExtEntry) []const u8 {
@@ -193,7 +213,15 @@ pub const Config = struct {
         while (index < self.extension_count) : (index += 1) {
             const ext = &self.extensions[index];
             if (!usableExtension(self, ext)) continue;
-            if (formatKey(key[0..], "EXT", ext.extText(), "APP")) |field| writer.writePair(field, ext.appIdText());
+            if (formatKey(key[0..], "EXT", ext.extText(), "HANDLER")) |field| writer.writePair(field, handlerKindText(ext.handler_kind));
+            switch (ext.handler_kind) {
+                .none => {},
+                .app => if (formatKey(key[0..], "EXT", ext.extText(), "APP")) |field| writer.writePair(field, ext.appIdText()),
+                .subsystem => {
+                    if (formatKey(key[0..], "EXT", ext.extText(), "SUBSYSTEM")) |field| writer.writePair(field, ext.subsystemIdText());
+                    if (formatKey(key[0..], "EXT", ext.extText(), "FORMAT")) |field| writer.writePair(field, ext.formatIdText());
+                },
+            }
             if (formatKey(key[0..], "EXT", ext.extText(), "TYPE")) |field| writer.writePair(field, ext.typeNameText());
             if (formatKey(key[0..], "EXT", ext.extText(), "SHORT")) |field| writer.writePair(field, ext.shortNameText());
             if (formatKey(key[0..], "EXT", ext.extText(), "PREFIX")) |field| writer.writePair(field, ext.prefixText());
@@ -249,6 +277,7 @@ pub const Config = struct {
         }
         const ext_name = extensionOfPath(path) orelse return null;
         if (self.extensionByName(ext_name)) |ext| {
+            if (ext.handler_kind != .app) return null;
             if (self.appById(ext.appIdText())) |app| {
                 return targetFromEntry(app, ext, path, args_out);
             }
@@ -264,6 +293,39 @@ pub const Config = struct {
     pub fn expandAppArgs(self: *const Config, app_id: []const u8, file_path: []const u8, out: []u8) ?[]const u8 {
         const app = self.appById(app_id) orelse return null;
         return expandArgs(app.argsText(), file_path, out);
+    }
+
+    pub fn setExtensionApp(self: *Config, index: usize, app_id: []const u8) bool {
+        if (index >= self.extension_count or self.appById(app_id) == null) return false;
+        const ext = &self.extensions[index];
+        if (!copyNormalizedId(ext.app_id[0..], app_id)) return false;
+        ext.handler_kind = .app;
+        @memset(ext.subsystem_id[0..], 0);
+        @memset(ext.format_id[0..], 0);
+        return true;
+    }
+
+    pub fn setExtensionSubsystem(self: *Config, index: usize, subsystem_id: []const u8, format_id: []const u8) bool {
+        if (index >= self.extension_count) return false;
+        var subsystem_storage: [subsystem_id_max + 1]u8 = .{0} ** (subsystem_id_max + 1);
+        var format_storage: [format_id_max + 1]u8 = .{0} ** (format_id_max + 1);
+        if (!copyIdentifier(subsystem_storage[0..], subsystem_id) or !copyIdentifier(format_storage[0..], format_id)) return false;
+        const ext = &self.extensions[index];
+        ext.handler_kind = .subsystem;
+        ext.subsystem_id = subsystem_storage;
+        ext.format_id = format_storage;
+        @memset(ext.app_id[0..], 0);
+        return true;
+    }
+
+    pub fn setExtensionNone(self: *Config, index: usize) bool {
+        if (index >= self.extension_count) return false;
+        const ext = &self.extensions[index];
+        ext.handler_kind = .none;
+        @memset(ext.app_id[0..], 0);
+        @memset(ext.subsystem_id[0..], 0);
+        @memset(ext.format_id[0..], 0);
+        return true;
     }
 
     fn addExtensionGroup(self: *Config, comptime extensions: []const []const u8, app_id: []const u8, type_name: []const u8, short_name: []const u8, prefix: []const u8, rank: u8) void {
@@ -319,8 +381,18 @@ pub const Config = struct {
     fn applyExtField(self: *Config, ext_name: []const u8, field: []const u8, value: []const u8) bool {
         const ext = self.findOrAddExtension(ext_name) orelse return false;
         const text = settings.trim(value);
+        if (settings.equalsKey(field, "HANDLER")) {
+            ext.handler_kind = parseHandlerKind(text) orelse return false;
+            return true;
+        }
         if (settings.equalsKey(field, "APP")) {
             return copyNormalizedId(ext.app_id[0..], text);
+        }
+        if (settings.equalsKey(field, "SUBSYSTEM")) {
+            return copyIdentifier(ext.subsystem_id[0..], text);
+        }
+        if (settings.equalsKey(field, "FORMAT")) {
+            return copyIdentifier(ext.format_id[0..], text);
         }
         if (settings.equalsKey(field, "TYPE")) {
             if (text.len == 0 or text.len > type_name_max) return false;
@@ -491,7 +563,12 @@ fn usableApp(app: *const AppEntry) bool {
 }
 
 fn usableExtension(config: *const Config, ext: *const ExtEntry) bool {
-    return ext.valid and ext.extText().len != 0 and config.appById(ext.appIdText()) != null;
+    if (!ext.valid or ext.extText().len == 0) return false;
+    return switch (ext.handler_kind) {
+        .none => true,
+        .app => config.appById(ext.appIdText()) != null,
+        .subsystem => validIdentifier(ext.subsystemIdText()) and validIdentifier(ext.formatIdText()),
+    };
 }
 
 fn validAppPath(path: []const u8) bool {
@@ -505,7 +582,24 @@ fn isKnownAppField(field: []const u8) bool {
 }
 
 fn isKnownExtField(field: []const u8) bool {
-    return settings.equalsKey(field, "APP") or settings.equalsKey(field, "TYPE") or settings.equalsKey(field, "SHORT") or settings.equalsKey(field, "PREFIX") or settings.equalsKey(field, "RANK");
+    return settings.equalsKey(field, "HANDLER") or settings.equalsKey(field, "APP") or settings.equalsKey(field, "SUBSYSTEM") or
+        settings.equalsKey(field, "FORMAT") or settings.equalsKey(field, "TYPE") or settings.equalsKey(field, "SHORT") or
+        settings.equalsKey(field, "PREFIX") or settings.equalsKey(field, "RANK");
+}
+
+fn parseHandlerKind(value: []const u8) ?HandlerKind {
+    if (settings.equalsKey(value, "NONE")) return .none;
+    if (settings.equalsKey(value, "APP")) return .app;
+    if (settings.equalsKey(value, "SUBSYSTEM")) return .subsystem;
+    return null;
+}
+
+fn handlerKindText(value: HandlerKind) []const u8 {
+    return switch (value) {
+        .none => "NONE",
+        .app => "APP",
+        .subsystem => "SUBSYSTEM",
+    };
 }
 
 fn parsePolicy(value: []const u8) ?abi.LaunchPolicy {
@@ -561,6 +655,20 @@ fn copyNormalizedExt(out: []u8, value: []const u8) bool {
     var text = settings.trim(value);
     if (text.len > 0 and text[0] == '.') text = text[1..];
     return copyNormalizedSymbol(out, text, ext_max, true);
+}
+
+fn copyIdentifier(out: []u8, value: []const u8) bool {
+    const text = settings.trim(value);
+    if (!validIdentifier(text) or text.len + 1 > out.len) return false;
+    @memset(out, 0);
+    @memcpy(out[0..text.len], text);
+    return true;
+}
+
+fn validIdentifier(value: []const u8) bool {
+    if (value.len == 0 or value.len > subsystem_id_max or !std.ascii.isAlphabetic(value[0]) or !std.ascii.isAlphanumeric(value[value.len - 1])) return false;
+    for (value) |byte| if (!std.ascii.isAlphanumeric(byte) and byte != '.' and byte != '_' and byte != '-') return false;
+    return true;
 }
 
 fn copyNormalizedSymbol(out: []u8, value: []const u8, max_len: usize, extension: bool) bool {
@@ -678,10 +786,12 @@ test "r4x files stay direct program launches" {
 }
 
 test "parser accepts overrides and writer emits canonical schema" {
+    if (!runtime.hasSettings()) return error.SkipZigTest;
     var config = Config{};
     try std.testing.expect(config.loadFromBytes(
         \\R4S_FORMAT=1
         \\SCHEMA=APPASSOC
+        \\APP.NOTEPAD.TITLE=Editor
         \\APP.NOTEPAD.PATH=C:\R4OS\SOFTWARE\DESKTOP\EDITOR.R4X
         \\APP.NOTEPAD.POLICY=console
         \\APP.NOTEPAD.ARGS=/OPEN %1
@@ -689,6 +799,7 @@ test "parser accepts overrides and writer emits canonical schema" {
     ));
     var args: [128]u8 = .{0} ** 128;
     const target = config.resolvePath("C:\\AUTOEXEC.BAT", args[0..]).?;
+    try std.testing.expectEqualStrings("Editor", target.title);
     try std.testing.expectEqualStrings("C:\\R4OS\\SOFTWARE\\DESKTOP\\EDITOR.R4X", target.app_path);
     try std.testing.expectEqualStrings("/OPEN C:\\AUTOEXEC.BAT", target.args);
     try std.testing.expectEqual(abi.LaunchPolicy.console, target.policy);
@@ -701,6 +812,7 @@ test "parser accepts overrides and writer emits canonical schema" {
 }
 
 test "case-insensitive extensions and app ids resolve" {
+    if (!runtime.hasSettings()) return error.SkipZigTest;
     var config = Config{};
     try std.testing.expect(config.loadFromBytes(
         \\schema=appassoc
@@ -722,6 +834,7 @@ test "case-insensitive extensions and app ids resolve" {
 }
 
 test "broken entries keep defaults or fail visibly" {
+    if (!runtime.hasSettings()) return error.SkipZigTest;
     var config = Config{};
     try std.testing.expect(config.loadFromBytes(
         \\SCHEMA=APPASSOC
@@ -752,6 +865,7 @@ test "argument expansion requires placeholder and enough space" {
 }
 
 test "writer roundtrip preserves usable custom associations" {
+    if (!runtime.hasSettings()) return error.SkipZigTest;
     var config = Config{};
     try std.testing.expect(config.loadFromBytes(
         \\SCHEMA=APPASSOC
@@ -777,7 +891,42 @@ test "writer roundtrip preserves usable custom associations" {
     try std.testing.expectEqualStrings("D:\\FILE.DAT", target.args);
 }
 
+test "subsystem and removed handlers persist without copying installed host metadata" {
+    if (!runtime.hasSettings()) return error.SkipZigTest;
+    var config = Config{};
+    try std.testing.expect(config.loadFromBytes(
+        \\SCHEMA=APPASSOC
+        \\EXT.BAS.HANDLER=SUBSYSTEM
+        \\EXT.BAS.SUBSYSTEM=basic.qbasic
+        \\EXT.BAS.FORMAT=basic.qbasic-source
+        \\EXT.BAS.TYPE=BASIC source
+        \\EXT.BAS.SHORT=BAS
+        \\EXT.BAS.PREFIX=[BAS]
+        \\EXT.BAS.RANK=3
+        \\EXT.TXT.HANDLER=NONE
+    ));
+    const basic = config.extensionByName("BAS").?;
+    try std.testing.expectEqual(HandlerKind.subsystem, basic.handler_kind);
+    try std.testing.expectEqualStrings("basic.qbasic", basic.subsystemIdText());
+    var args: [128]u8 = undefined;
+    try std.testing.expect(config.resolvePath("C:\\GORILLA.BAS", args[0..]) == null);
+    try std.testing.expectEqual(HandlerKind.none, config.extensionByName("TXT").?.handler_kind);
+
+    var storage: [4096]u8 = undefined;
+    const written = config.writeTo(storage[0..]);
+    try std.testing.expect(std.mem.indexOf(u8, written, "EXT.BAS.HANDLER=SUBSYSTEM") != null);
+    try std.testing.expect(std.mem.indexOf(u8, written, "EXT.BAS.SUBSYSTEM=basic.qbasic") != null);
+    try std.testing.expect(std.mem.indexOf(u8, written, "SUBSYSOK.R4X") == null);
+    try std.testing.expect(std.mem.indexOf(u8, written, "EXT.TXT.HANDLER=NONE") != null);
+
+    var roundtrip = Config{};
+    try std.testing.expect(roundtrip.loadFromBytes(written));
+    try std.testing.expectEqualStrings("basic.qbasic-source", roundtrip.extensionByName("BAS").?.formatIdText());
+    try std.testing.expectEqual(HandlerKind.none, roundtrip.extensionByName("TXT").?.handler_kind);
+}
+
 test "association paths reject overlength and foreign entries survive write" {
+    if (!runtime.hasSettings()) return error.SkipZigTest;
     var long_path: [path_max + 1]u8 = .{'A'} ** (path_max + 1);
     @memcpy(long_path[0..3], "C:\\");
     @memcpy(long_path[long_path.len - 4 ..], ".R4X");
