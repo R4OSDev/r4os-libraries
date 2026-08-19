@@ -43,6 +43,10 @@ compiled into their consumers and do not add a premature R4STD runtime ABI:
   check. ASSOC.R4S stores only stable subsystem and format IDs, never a copied
   host path or display name.
 
+The shipped default maps `.BAS` to subsystem `r4os.basic` and format
+`basic.qbasic-source`. Open With still lists the ordinary Notepad application
+alongside the resolved subsystem host.
+
 Build and test:
 
     Build.bat R4STD test

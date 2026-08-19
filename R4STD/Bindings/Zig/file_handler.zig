@@ -275,10 +275,10 @@ fn fixtureCatalog() catalog_contract.Catalog {
     const features = &[_][]const u8{"basic.qbasic-source:probe.text-token-v1.7072696e74"};
     var catalog: catalog_contract.Catalog = .{};
     catalog.entries[0] = .{
-        .subsystem_id = "test.basic",
-        .host_path = "/R4OS/SUBSYSTEMS/test.basic/SUBSYSOK.R4X",
-        .display_name = "Test BASIC Runtime",
-        .module_name = "SUBSYSOK",
+        .subsystem_id = "r4os.basic",
+        .host_path = "/R4OS/SUBSYSTEMS/r4os.basic/R4BASIC.R4X",
+        .display_name = "R4BASIC",
+        .module_name = "R4BASIC",
         .module_version = "0.66.2",
         .guest_formats = formats,
         .guest_extensions = extensions,
@@ -288,8 +288,8 @@ fn fixtureCatalog() catalog_contract.Catalog {
     return catalog;
 }
 
-test "unified resolver preserves app behavior and launches subsystem by stable id" {
-    var config = app_assoc.Config.initDefault();
+test "default resolver preserves app behavior and launches BAS through r4os.basic" {
+    const config = app_assoc.Config.initDefault();
     const catalog = fixtureCatalog();
     var args: [launch_contract.max_args_bytes]u8 = undefined;
     var result: Resolution = .{};
@@ -302,17 +302,6 @@ test "unified resolver preserves app behavior and launches subsystem by stable i
     try std.testing.expectEqual(TargetKind.application, result.target.?.kind);
     try std.testing.expectEqualStrings("NOTEPAD", result.target.?.handler_id);
 
-    _ = config.loadFromBytes(
-        \\R4S_FORMAT=1
-        \\SCHEMA=APPASSOC
-        \\EXT.BAS.HANDLER=SUBSYSTEM
-        \\EXT.BAS.SUBSYSTEM=test.basic
-        \\EXT.BAS.FORMAT=basic.qbasic-source
-        \\EXT.BAS.TYPE=BASIC Source
-        \\EXT.BAS.SHORT=BAS
-        \\EXT.BAS.PREFIX=[BAS]
-        \\EXT.BAS.RANK=3
-    );
     const guest = "C:\\Games and Tools\\GORILLA.BAS";
     try resolve(&config, &catalog, .{
         .path = guest,
@@ -321,7 +310,7 @@ test "unified resolver preserves app behavior and launches subsystem by stable i
         .probe_window_complete = true,
     }, args[0..], &result);
     try std.testing.expectEqual(TargetKind.subsystem, result.target.?.kind);
-    try std.testing.expectEqualStrings("test.basic", result.target.?.handler_id);
+    try std.testing.expectEqualStrings("r4os.basic", result.target.?.handler_id);
     try std.testing.expectEqualStrings(guest, (try launch_contract.parse(result.target.?.args)).guest_path);
 }
 
@@ -350,7 +339,10 @@ test "removed handler suppresses automatic launch while Open With stays complete
         .probe_window_complete = true,
     }, &choices);
     try std.testing.expect(choices.count >= 4);
+    try std.testing.expectEqual(ChoiceKind.application, choices.items[0].kind);
+    try std.testing.expectEqualStrings("NOTEPAD", choices.items[0].handler_id);
     try std.testing.expectEqual(ChoiceKind.subsystem, choices.items[choices.count - 1].kind);
+    try std.testing.expectEqualStrings("r4os.basic", choices.items[choices.count - 1].handler_id);
 }
 
 test "extension choices resolve subsystem metadata without copying its catalog" {
@@ -358,6 +350,6 @@ test "extension choices resolve subsystem metadata without copying its catalog" 
     const catalog = fixtureCatalog();
     var choices: ChoiceList = .{};
     try collectExtensionChoices(&config, &catalog, "BAS", &choices);
-    try std.testing.expectEqualStrings("test.basic", choices.items[choices.count - 1].handler_id);
-    try std.testing.expectEqualStrings("Test BASIC Runtime", choices.items[choices.count - 1].title);
+    try std.testing.expectEqualStrings("r4os.basic", choices.items[choices.count - 1].handler_id);
+    try std.testing.expectEqualStrings("R4BASIC", choices.items[choices.count - 1].title);
 }

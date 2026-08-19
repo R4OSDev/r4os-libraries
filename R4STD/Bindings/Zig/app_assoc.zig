@@ -157,6 +157,7 @@ pub const Config = struct {
         _ = self.addApp("SYNTH", "R4Synth", "C:\\R4OS\\SOFTWARE\\TERMINAL\\SYNTH.R4X", .console, "%1");
 
         self.addExtensionGroup(&.{ "TXT", "R4S", "BAT", "LOG", "MD", "INI", "CFG" }, "NOTEPAD", "Text", "Text", "[TXT]", 3);
+        _ = self.addSubsystemExtension("BAS", "r4os.basic", "basic.qbasic-source", "BASIC source", "BAS", "[BAS]", 3);
         self.addExtensionGroup(&.{"BMP"}, "PAINT", "Bitmap", "BMP", "[BMP]", 4);
         self.addExtensionGroup(&.{"FON"}, "FONTS", "Font", "Font", "[FNT]", 4);
         self.addExtensionGroup(&.{ "WAV", "MID", "SID" }, "SYNTH", "Audio", "Audio", "[AUD]", 5);
@@ -346,6 +347,18 @@ pub const Config = struct {
     fn addExtension(self: *Config, ext_name: []const u8, app_id: []const u8, type_name: []const u8, short_name: []const u8, prefix: []const u8, rank: u8) bool {
         const ext = self.findOrAddExtension(ext_name) orelse return false;
         if (!copyNormalizedId(ext.app_id[0..], app_id)) return false;
+        setZ(ext.type_name[0..], type_name);
+        setZ(ext.short_name[0..], short_name);
+        setZ(ext.prefix[0..], prefix);
+        ext.rank = rank;
+        return true;
+    }
+
+    fn addSubsystemExtension(self: *Config, ext_name: []const u8, subsystem_id: []const u8, format_id: []const u8, type_name: []const u8, short_name: []const u8, prefix: []const u8, rank: u8) bool {
+        const ext = self.findOrAddExtension(ext_name) orelse return false;
+        if (!copyIdentifier(ext.subsystem_id[0..], subsystem_id) or !copyIdentifier(ext.format_id[0..], format_id)) return false;
+        ext.handler_kind = .subsystem;
+        @memset(ext.app_id[0..], 0);
         setZ(ext.type_name[0..], type_name);
         setZ(ext.short_name[0..], short_name);
         setZ(ext.prefix[0..], prefix);
@@ -773,6 +786,11 @@ test "default associations match Explorer contract" {
     try std.testing.expectEqualStrings("SYNTH", wav.app_id);
     try std.testing.expectEqual(abi.LaunchPolicy.console, wav.policy);
     try std.testing.expectEqualStrings("[AUD]", wav.prefix);
+
+    const basic = config.extensionByName("BAS").?;
+    try std.testing.expectEqual(HandlerKind.subsystem, basic.handler_kind);
+    try std.testing.expectEqualStrings("r4os.basic", basic.subsystemIdText());
+    try std.testing.expectEqualStrings("basic.qbasic-source", basic.formatIdText());
 }
 
 test "r4x files stay direct program launches" {
