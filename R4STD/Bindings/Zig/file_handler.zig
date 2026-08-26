@@ -1,6 +1,7 @@
 const std = @import("std");
 const r4os = @import("r4os");
 const app_assoc = @import("app_assoc.zig");
+const subsystem_runtime = @import("subsystem_runtime.zig");
 const catalog_contract = r4os.subsystem_catalog;
 const launch_contract = r4os.subsystem_launch;
 
@@ -62,6 +63,70 @@ pub const Error = catalog_contract.ResolveError || launch_contract.Error || erro
     InvalidAssociation,
     TooManyChoices,
 };
+pub const PathError = Error || subsystem_runtime.ProbeError;
+
+/// Resolves a real path from metadata first and reads the bounded content
+/// window only when that leaves the result unknown or ambiguous. `access`
+/// makes the source-I/O boundary observable without retaining any file bytes.
+pub fn resolvePath(
+    sys: anytype,
+    config: *const app_assoc.Config,
+    catalog: *const catalog_contract.Catalog,
+    path: []const u8,
+    args_out: []u8,
+    out: *Resolution,
+    access: *subsystem_runtime.AccessStats,
+) PathError!void {
+    access.* = .{};
+    if (app_assoc.isR4XPath(path)) {
+        try resolve(config, catalog, .{
+            .path = path,
+            .probe_prefix = &.{},
+            .file_size = 0,
+            .probe_window_complete = true,
+        }, args_out, out);
+        return;
+    }
+
+    var inspection = try subsystem_runtime.inspect(sys, path);
+    access.* = inspection.access;
+    try resolve(config, catalog, inspection.input, args_out, out);
+    if (out.state == .selected) return;
+
+    inspection.input = try subsystem_runtime.completeProbe(sys, inspection.input, access);
+    try resolve(config, catalog, inspection.input, args_out, out);
+}
+
+/// Builds Open With choices from metadata first. Content probing is required
+/// only when no subsystem candidate can be identified from the installed
+/// catalog and configured extension.
+pub fn collectPathChoices(
+    sys: anytype,
+    config: *const app_assoc.Config,
+    catalog: *const catalog_contract.Catalog,
+    path: []const u8,
+    out: *ChoiceList,
+    access: *subsystem_runtime.AccessStats,
+) PathError!void {
+    access.* = .{};
+    if (app_assoc.isR4XPath(path)) {
+        try collectChoices(config, catalog, .{
+            .path = path,
+            .probe_prefix = &.{},
+            .file_size = 0,
+            .probe_window_complete = true,
+        }, out);
+        return;
+    }
+
+    var inspection = try subsystem_runtime.inspect(sys, path);
+    access.* = inspection.access;
+    try collectChoices(config, catalog, inspection.input, out);
+    if (hasSubsystemChoice(out)) return;
+
+    inspection.input = try subsystem_runtime.completeProbe(sys, inspection.input, access);
+    try collectChoices(config, catalog, inspection.input, out);
+}
 
 pub fn resolve(
     config: *const app_assoc.Config,
@@ -248,6 +313,11 @@ fn appendApps(config: *const app_assoc.Config, out: *ChoiceList) Error!void {
     }
 }
 
+fn hasSubsystemChoice(choices: *const ChoiceList) bool {
+    for (choices.slice()) |choice| if (choice.kind == .subsystem) return true;
+    return false;
+}
+
 fn appendSubsystem(out: *ChoiceList, candidate: catalog_contract.Candidate) Error!void {
     try appendChoice(out, .{
         .kind = .subsystem,
@@ -352,4 +422,45 @@ test "extension choices resolve subsystem metadata without copying its catalog" 
     try collectExtensionChoices(&config, &catalog, "BAS", &choices);
     try std.testing.expectEqualStrings("r4os.basic", choices.items[choices.count - 1].handler_id);
     try std.testing.expectEqualStrings("R4BASIC", choices.items[choices.count - 1].title);
+}
+
+test "BAS path resolution remains metadata-only through the 256 KiB source limit" {
+    const FakeSys = struct {
+        size: u64,
+        info_calls: u32 = 0,
+        read_calls: u32 = 0,
+
+        pub fn fileInfo(self: *@This(), _: [*:0]const u8) ?r4os.abi.FileInfo {
+            self.info_calls += 1;
+            return .{ .exists = 1, .size = self.size };
+        }
+
+        pub fn fileReadAt(self: *@This(), _: [*:0]const u8, _: u32, _: []u8) i32 {
+            self.read_calls += 1;
+            return -1;
+        }
+    };
+
+    const config = app_assoc.Config.initDefault();
+    const catalog = fixtureCatalog();
+    const sizes = [_]u64{
+        128 * 1024 - 1,
+        128 * 1024,
+        128 * 1024 + 1,
+        256 * 1024,
+    };
+    for (sizes) |size| {
+        var sys = FakeSys{ .size = size };
+        var args: [launch_contract.max_args_bytes]u8 = undefined;
+        var result: Resolution = .{};
+        var access: subsystem_runtime.AccessStats = .{};
+        try resolvePath(&sys, &config, &catalog, "C:\\TEMP\\BOUNDARY.BAS", args[0..], &result, &access);
+        try std.testing.expectEqual(ResolutionState.selected, result.state);
+        try std.testing.expectEqualStrings("r4os.basic", result.target.?.handler_id);
+        try std.testing.expectEqual(@as(u32, 1), access.info_calls);
+        try std.testing.expectEqual(@as(u32, 0), access.read_calls);
+        try std.testing.expectEqual(@as(u64, 0), access.read_bytes);
+        try std.testing.expectEqual(@as(u32, 1), sys.info_calls);
+        try std.testing.expectEqual(@as(u32, 0), sys.read_calls);
+    }
 }

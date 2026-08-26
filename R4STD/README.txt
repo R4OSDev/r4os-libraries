@@ -39,9 +39,12 @@ compiled into their consumers and do not add a premature R4STD runtime ABI:
 - `file_handler` combines application defaults with the installed subsystem
   resolver and emits the stable subsystem launch request.
 - `subsystem_runtime` loads the subsystem view solely from installed
-  `MODULES.JSON`, keeps bounded probe storage, and performs the final host-file
-  check. ASSOC.R4S stores only stable subsystem and format IDs, never a copied
-  host path or display name.
+  `MODULES.JSON`, keeps bounded 256 KiB probe storage, and performs the final
+  host-file check. Metadata inspection precedes resolution; only an unknown or
+  ambiguous result completes the content window through range reads. Access
+  counters expose info calls, read calls, and bytes without retaining source
+  data across a launch. ASSOC.R4S stores only stable subsystem and format IDs,
+  never a copied host path or display name.
 
 The shipped default maps `.BAS` to subsystem `r4os.basic` and format
 `basic.qbasic-source`. Open With still lists the ordinary Notepad application
