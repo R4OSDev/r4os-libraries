@@ -15,6 +15,16 @@ text and link regions.
 Build and test:
 
     Build.bat R4IMG test
+    ./Build.sh R4IMG test
+
+The optional host profile compares the same opaque Full-HD bilinear scaling
+workload under both manifest optimization modes. It is not part of the normal
+test gate:
+
+    Build.bat R4IMG profile -Dhost-test-optimize=ReleaseSmall
+    Build.bat R4IMG profile -Dhost-test-optimize=ReleaseFast
+    ./Build.sh R4IMG profile -Dhost-test-optimize=ReleaseSmall
+    ./Build.sh R4IMG profile -Dhost-test-optimize=ReleaseFast
 
 Tests cover the contract, provider, real decoder paths, runtime table, and an
 independent C consumer.

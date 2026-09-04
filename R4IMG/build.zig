@@ -11,6 +11,11 @@ fn addStb(b: *std.Build, module: *std.Build.Module) void {
 }
 
 pub fn build(b: *std.Build) void {
+    const host_test_optimize = b.option(
+        std.builtin.OptimizeMode,
+        "host-test-optimize",
+        "Override only the host-side owner workload optimization",
+    ) orelse .Debug;
     const sdk_build = b.lazyImport(@This(), "r4os_sdk") orelse return;
     const sdk_dep = b.dependencyFromBuildZig(sdk_build, .{});
     const sdk = sdk_build.sdk(b, sdk_dep, .{});
@@ -66,7 +71,7 @@ pub fn build(b: *std.Build) void {
     const provider_root = b.createModule(.{
         .root_source_file = b.path("Source/main.zig"),
         .target = b.graph.host,
-        .optimize = .Debug,
+        .optimize = host_test_optimize,
     });
     provider_root.addImport("r4os", host_r4os);
     provider_root.addImport("r4l_contract", implementation);
@@ -74,19 +79,32 @@ pub fn build(b: *std.Build) void {
     const provider_tests = b.addTest(.{ .root_module = provider_root });
     const run_provider = b.addRunArtifact(provider_tests);
 
+    const host_codec = b.createModule(.{
+        .root_source_file = b.path("Source/codec.zig"),
+        .target = b.graph.host,
+        .optimize = host_test_optimize,
+    });
     const decoder_root = b.createModule(.{
         .root_source_file = b.path("Tests/Decoder/decoder_test.zig"),
         .target = b.graph.host,
-        .optimize = .Debug,
+        .optimize = host_test_optimize,
     });
-    decoder_root.addImport("r4img", b.createModule(.{
-        .root_source_file = b.path("Source/codec.zig"),
-        .target = b.graph.host,
-        .optimize = .Debug,
-    }));
+    decoder_root.addImport("r4img", host_codec);
     addStb(b, decoder_root);
     const decoder_tests = b.addTest(.{ .root_module = decoder_root });
     const run_decoder = b.addRunArtifact(decoder_tests);
+
+    const profile_root = b.createModule(.{
+        .root_source_file = b.path("Tests/performance_profile.zig"),
+        .target = b.graph.host,
+        .optimize = host_test_optimize,
+    });
+    profile_root.addImport("r4img", host_codec);
+    addStb(b, profile_root);
+    const profile_exe = b.addExecutable(.{ .name = "r4img-profile", .root_module = profile_root });
+    const run_profile = b.addRunArtifact(profile_exe);
+    const profile_step = b.step("profile", "Run the opt-in R4IMG scaling profile");
+    profile_step.dependOn(&run_profile.step);
 
     const runtime_root = b.createModule(.{
         .root_source_file = b.path("Tests/runtime_test.zig"),

@@ -18,6 +18,16 @@ the contract.
 Build and test:
 
     Build.bat R4FONT test
+    ./Build.sh R4FONT test
+
+The optional host profile compares the same 32-pixel glyph-raster workload
+under both manifest optimization modes. It is not part of the normal test
+gate:
+
+    Build.bat R4FONT profile -Dhost-test-optimize=ReleaseSmall
+    Build.bat R4FONT profile -Dhost-test-optimize=ReleaseFast
+    ./Build.sh R4FONT profile -Dhost-test-optimize=ReleaseSmall
+    ./Build.sh R4FONT profile -Dhost-test-optimize=ReleaseFast
 
 Verify vendored sources and generated fixtures:
 
