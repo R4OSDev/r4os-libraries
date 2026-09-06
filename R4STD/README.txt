@@ -50,6 +50,7 @@ The shipped default maps `.BAS` to subsystem `r4os.basic` and format
 `basic.qbasic-source`. Open With still lists the ordinary Notepad application
 alongside the resolved subsystem host.
 
-Build and test:
+Build and test from the owning Repositories/Libraries directory:
 
-    Build.bat R4STD test
+    Windows: Build.bat R4STD test
+    Linux:   ./Build.sh R4STD test
