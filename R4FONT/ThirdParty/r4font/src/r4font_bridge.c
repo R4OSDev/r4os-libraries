@@ -429,7 +429,7 @@ static int r4font_container_limit_result(const uint8_t* bytes, size_t length,
     break;
   case R4FONT_FORMAT_WOFF:
   case R4FONT_FORMAT_WOFF2:
-    if (length >= 18 &&
+    if (length >= 20 &&
         (r4font_be16(bytes + 12) > R4FONT_MAX_TABLES ||
          r4font_be32(bytes + 16) > R4FONT_MAX_RECONSTRUCTED_BYTES))
       return R4FONT_ERROR_TOO_LARGE;

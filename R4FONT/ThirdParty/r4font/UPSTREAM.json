@@ -101,7 +101,7 @@
   },
   "verification": {
     "file_manifest": "VENDOR.sha256",
-    "file_manifest_sha256": "14fa81639eb8e88078129f7ec427cacf1cadd5a7641ddb13a6fad708332efc46",
+    "file_manifest_sha256": "d6e0b7d67c16b03c00dda57ac97ef2321c97d6b730ce76be0e7e7f74f5373c71",
     "tracked_file_count": 399,
     "check_script": "Tools/verify_vendor.py",
     "check_script_sha256": "2402885a0a91aec1c4171e4e0074341cbd7a7af4c48894e148570ed049b6e548",

@@ -294,7 +294,8 @@ fn extractV1Glyphs(
         const bytes_per_row: usize = (@as(usize, width) + 7) / 8;
         const glyph = try allocator.alloc(u8, bytes_per_row * info.pix_height);
         @memset(glyph, 0);
-        errdefer allocator.free(glyph);
+        var local_owns_glyph = true;
+        errdefer if (local_owns_glyph) allocator.free(glyph);
 
         var row: usize = 0;
         while (row < info.pix_height) : (row += 1) {
@@ -309,6 +310,7 @@ fn extractV1Glyphs(
             }
         }
         try owned_glyphs.append(allocator, glyph);
+        local_owns_glyph = false;
         try glyphs.append(allocator, .{
             .codepoint = @as(u32, info.first_char) + @as(u32, @intCast(index)),
             .width = width,
@@ -348,9 +350,11 @@ fn extractV1VectorGlyphs(
         const bytes_per_row: usize = (@as(usize, width) + 7) / 8;
         const glyph = try allocator.alloc(u8, bytes_per_row * info.pix_height);
         @memset(glyph, 0);
-        errdefer allocator.free(glyph);
+        var local_owns_glyph = true;
+        errdefer if (local_owns_glyph) allocator.free(glyph);
         try rasterizeVectorPath(glyph, width, info.pix_height, data[start..end]);
         try owned_glyphs.append(allocator, glyph);
+        local_owns_glyph = false;
         try glyphs.append(allocator, .{
             .codepoint = @as(u32, info.first_char) + @as(u32, @intCast(index)),
             .width = width,
@@ -434,7 +438,8 @@ fn extractV2Glyphs(
         const raw_offset: u32 = if (entry_size == 6) le32(data, entry + 2) else le16(data, entry + 2);
         const glyph_base = v2GlyphBase(data, info, raw_offset, bytes_per_row) orelse return error.BadFntGlyphOffset;
         var glyph = try allocator.alloc(u8, bytes_per_row * info.pix_height);
-        errdefer allocator.free(glyph);
+        var local_owns_glyph = true;
+        errdefer if (local_owns_glyph) allocator.free(glyph);
         var row: usize = 0;
         while (row < info.pix_height) : (row += 1) {
             const source = glyph_base + row * info.width_bytes;
@@ -442,6 +447,7 @@ fn extractV2Glyphs(
             @memcpy(glyph[row * bytes_per_row .. row * bytes_per_row + bytes_per_row], data[source .. source + bytes_per_row]);
         }
         try owned_glyphs.append(allocator, glyph);
+        local_owns_glyph = false;
         try glyphs.append(allocator, .{
             .codepoint = @as(u32, info.first_char) + @as(u32, @intCast(index)),
             .width = width,
@@ -497,10 +503,25 @@ fn readFntString(data: []const u8, offset: u32, fallback: []const u8) []const u8
     return if (end > begin) data[begin..end] else fallback;
 }
 
+fn within(total: usize, offset: usize, length: usize) bool {
+    return offset <= total and length <= total - offset;
+}
+
+fn recordsWithin(total: usize, offset: usize, count: usize, stride: usize) bool {
+    return offset <= total and stride != 0 and count <= (total - offset) / stride;
+}
+
+fn shiftedOffset(value: u16, shift: u16) ?usize {
+    if (shift >= @bitSizeOf(usize)) return null;
+    const amount: std.math.Log2Int(usize) = @intCast(shift);
+    if (@as(usize, value) > @as(usize, std.math.maxInt(usize)) >> amount) return null;
+    return @as(usize, value) << amount;
+}
+
 fn isNeExecutable(data: []const u8) bool {
     if (data.len < 0x40 or !std.mem.eql(u8, data[0..2], "MZ")) return false;
-    const offset = le32(data, 0x3C);
-    return offset + 2 <= data.len and std.mem.eql(u8, data[offset .. offset + 2], "NE");
+    const offset: usize = le32(data, 0x3C);
+    return within(data.len, offset, 2) and std.mem.eql(u8, data[offset .. offset + 2], "NE");
 }
 
 fn looksLikeFnt(data: []const u8) bool {
@@ -511,18 +532,18 @@ fn looksLikeFnt(data: []const u8) bool {
 
 fn neFontCount(data: []const u8) usize {
     if (!isNeExecutable(data)) return 0;
-    const ne_offset = le32(data, 0x3C);
-    if (ne_offset + 0x26 >= data.len) return 0;
-    const resource_offset = ne_offset + le16(data, ne_offset + 0x24);
-    if (resource_offset + 2 > data.len) return 0;
+    const ne_offset: usize = le32(data, 0x3C);
+    if (!within(data.len, ne_offset, 0x26)) return 0;
+    const resource_offset = std.math.add(usize, ne_offset, le16(data, ne_offset + 0x24)) catch return 0;
+    if (!within(data.len, resource_offset, 2)) return 0;
     var cursor: usize = resource_offset + 2;
     var count: usize = 0;
-    while (cursor + 8 <= data.len) {
+    while (within(data.len, cursor, 8)) {
         const type_id = le16(data, cursor);
         if (type_id == 0) break;
         const resource_count = le16(data, cursor + 2);
         cursor += 8;
-        if (cursor + @as(usize, resource_count) * 12 > data.len) return count;
+        if (!recordsWithin(data.len, cursor, resource_count, 12)) return count;
         if ((type_id & 0x7FFF) == RT_FONT) count += resource_count;
         cursor += @as(usize, resource_count) * 12;
     }
@@ -531,27 +552,28 @@ fn neFontCount(data: []const u8) usize {
 
 fn extractNeFont(data: []const u8, wanted_index: usize) ![]const u8 {
     if (!isNeExecutable(data)) return error.NotNeExecutable;
-    const ne_offset = le32(data, 0x3C);
-    if (ne_offset + 0x26 >= data.len) return error.ShortNeHeader;
-    const resource_offset = ne_offset + le16(data, ne_offset + 0x24);
-    if (resource_offset + 2 > data.len) return error.NoResourceTable;
+    const ne_offset: usize = le32(data, 0x3C);
+    if (!within(data.len, ne_offset, 0x26)) return error.ShortNeHeader;
+    const resource_offset = std.math.add(usize, ne_offset, le16(data, ne_offset + 0x24)) catch return error.NoResourceTable;
+    if (!within(data.len, resource_offset, 2)) return error.NoResourceTable;
     const align_shift = le16(data, resource_offset);
+    if (align_shift >= @bitSizeOf(usize)) return error.BadFontResource;
     var cursor: usize = resource_offset + 2;
     var seen: usize = 0;
-    while (cursor + 8 <= data.len) {
+    while (within(data.len, cursor, 8)) {
         const type_id = le16(data, cursor);
         if (type_id == 0) break;
         const count = le16(data, cursor + 2);
         cursor += 8;
-        if (cursor + @as(usize, count) * 12 > data.len) return error.ShortResourceRecords;
+        if (!recordsWithin(data.len, cursor, count, 12)) return error.ShortResourceRecords;
         var index: usize = 0;
         while (index < count) : (index += 1) {
             if ((type_id & 0x7FFF) != RT_FONT) continue;
             const record = cursor + index * 12;
-            const offset: usize = @as(usize, le16(data, record)) << @intCast(align_shift);
-            const length: usize = @as(usize, le16(data, record + 2)) << @intCast(align_shift);
+            const offset = shiftedOffset(le16(data, record), align_shift) orelse return error.BadFontResource;
+            const length = shiftedOffset(le16(data, record + 2), align_shift) orelse return error.BadFontResource;
             if (seen == wanted_index) {
-                if (length == 0 or offset >= data.len or offset + length > data.len) return error.BadFontResource;
+                if (length == 0 or !within(data.len, offset, length)) return error.BadFontResource;
                 return data[offset .. offset + length];
             }
             seen += 1;

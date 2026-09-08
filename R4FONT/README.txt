@@ -33,3 +33,16 @@ Verify vendored sources and generated fixtures:
 
     python R4FONT/ThirdParty/r4font/Tools/verify_vendor.py --check
     python R4FONT/Tests/Tools/generate_minimal_fonts.py --check
+
+
+Input bounds and ownership (0.78.65)
+-----------------------------------
+R4FONT 0.2.2 reads the WOFF/WOFF2 size field only with at least 20 input bytes.
+The FNT import helper transfers each bitmap to its owning list exactly once;
+a later RasterGlyph allocation failure no longer frees it twice. FON/NE
+header and resource offsets use checked, input-bounded arithmetic, including
+resource alignment shifts. FONTS 0.1.4 embeds the corrected import helper.
+No decoder API, interface layout or upstream library version changes.
+The existing vendor byte manifest records the corrected local bridge.
+Focused checks reuse the small R4F/FNT/FON/WOFF examples; no raster profiles
+or long font runs are added.
