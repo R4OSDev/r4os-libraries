@@ -45,6 +45,9 @@ test "text settings date and time calls cross local runtime tables" {
     raw.imports = @intFromPtr(&imports);
     try std.testing.expect(r4std.init(&raw));
 
+    try std.testing.expect(r4std.config.pathsEqualIgnoreCase("C:\\A.TXT", "c:\\a.txt"));
+    try std.testing.expect(!r4std.config.pathsEqualIgnoreCase("C:\\A.TXT", "C:\\B.TXT"));
+
     const utf8 = try r4std.text.Utf8Text.init("Gru\xC3\x9F");
     try std.testing.expectEqual(@as(usize, 4), utf8.scalarCount());
     var canonical_buffer: [64]u8 = undefined;

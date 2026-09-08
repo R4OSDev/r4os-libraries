@@ -54,3 +54,31 @@ Build and test from the owning Repositories/Libraries directory:
 
     Windows: Build.bat R4STD test
     Linux:   ./Build.sh R4STD test
+
+
+Konfigurationsspeicherung ab 0.78.63
+-----------------------------------
+R4STD0.2.2 behandelt nur R4SYS-Read -3 als fehlende Datei. Null Bytes
+bezeichnen einen vorhandenen leeren Bestand. Zu grosse Dateien ergeben
+config_error_buffer_too_small (-3); sonstige Lesefehler werden als neuer
+config_error_read_failed (-9) gemeldet. Die bestehenden Fehlernummern und
+Tabellenlayouts bleiben gleich; der Library-Contract wurde ausschliesslich
+um diese Fehlerkonstante erweitert und kontrolliert neu generiert.
+
+Einzelwerte werden erst nach erfolgreicher TMP-/BAK-Wiederherstellung aus
+dem tatsaechlichen Zielinhalt komponiert. Unveraenderte Schluessel bleiben
+erhalten. Nicht lesbare oder ungeeignete Zieldaten und nicht lesbare
+Sicherungen stoppen den Vorgang vor Loeschen oder Schreiben. Ein gueltiges
+TMP hat bei fehlendem Ziel Vorrang; sonst kann eine lesbare BAK verwendet
+werden. Fehlgeschlagenes Umbenennen einer brauchbaren Sicherung behaelt sie.
+Scheitern Publikation und Rueckbenennung, liefert saveDocument
+error_recovery_failed; TMP und BAK bleiben fuer die Wiederherstellung stehen.
+Es gibt keine bedingungslose Aussage, dass ein Rueckbau abgeschlossen sei.
+Der Zig-Pfadvergleich ruft den kanonischen SDK-Helfer equalsIgnoreCase auf.
+
+Nachweis: bestehender R4STD-Build mit47 Hosttests einschliesslich zweier
+gebuendelter Fehler-/Wiederherstellungsfaelle und instanziiertem Binding-
+Pfadvergleich; fuenf gezielte Hostfaelle fuer die betroffenen Oberflaechen und
+REG; ein SMP4-Gastlauf mit privaten TMP/BAK-Daten, erhaltenem Fremdschluessel,
+geaendertem COUNT, unveraenderter4097-Byte-Datei nach Groessenfehler und
+vorhandener leerer Datei. Kein neuer kanonischer Testlauf angelegt.

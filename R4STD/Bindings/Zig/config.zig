@@ -21,6 +21,7 @@ pub const error_rename_failed: i32 = abi.config_error_rename_failed;
 pub const error_invalid_value: i32 = abi.config_error_invalid_value;
 pub const error_verify_failed: i32 = abi.config_error_verify_failed;
 pub const error_recovery_failed: i32 = abi.config_error_recovery_failed;
+pub const error_read_failed: i32 = abi.config_error_read_failed;
 
 pub fn ok(result: i32) bool {
     return result >= 0;
@@ -43,7 +44,7 @@ pub fn parseRegistryPath(bytes: []const u8) r4os.path.Error!r4os.path.RegistryPa
 }
 
 pub fn pathsEqualIgnoreCase(left: []const u8, right: []const u8) bool {
-    return r4os.path.eqlIgnoreCase(left, right);
+    return r4os.path.equalsIgnoreCase(left, right);
 }
 
 pub fn readString(ctx: anytype, path: [*:0]const u8, key: []const u8, fallback: []const u8, out: []u8) i32 {

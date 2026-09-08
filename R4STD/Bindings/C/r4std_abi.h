@@ -249,6 +249,7 @@ _Static_assert(offsetof(R4StdTimeConfig, clock_format) == 4u, "R4StdTimeConfig.c
 #define R4STD_CONFIG_ERROR_INVALID_VALUE ((int32_t)-6)
 #define R4STD_CONFIG_ERROR_VERIFY_FAILED ((int32_t)-7)
 #define R4STD_CONFIG_ERROR_RECOVERY_FAILED ((int32_t)-8)
+#define R4STD_CONFIG_ERROR_READ_FAILED ((int32_t)-9)
 
 #define R4STD_TEXT_V1_EXPORT_NAME "TEXT_V1"
 #define R4STD_TEXT_V1_ABI_MAJOR 1u

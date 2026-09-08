@@ -23,6 +23,16 @@ pub const error_rename_failed: i32 = -5;
 pub const error_invalid_value: i32 = -6;
 pub const error_verify_failed: i32 = -7;
 pub const error_recovery_failed: i32 = -8;
+pub const error_read_failed: i32 = -9;
+
+// R4SYS whole-file read: only -3 means absent; zero is an existing empty file.
+const file_not_found: i32 = -3;
+
+fn readFailure(read: i32, capacity: usize) ?i32 {
+    if (read == -5 or read > @as(i32, @intCast(capacity))) return error_buffer_too_small;
+    if (read < 0 and read != file_not_found) return error_read_failed;
+    return null;
+}
 
 const RawRead = union(enum) {
     value: []const u8,
@@ -165,12 +175,14 @@ pub fn writeString(ctx: anytype, path: [*:0]const u8, key: []const u8, value: []
     _ = settings.parseUtf8Text(value) catch return error_invalid_value;
     for (value) |byte| if (byte == '\r' or byte == '\n') return error_invalid_value;
 
+    const recovered = recoverDocumentSave(ctx, path);
+    if (recovered < 0) return recovered;
     var document: [max_output_bytes]u8 = undefined;
     const composed = composeDocument(ctx, path, key, value, document[0..]);
     if (composed.code < 0) return composed.code;
     const saved = saveDocument(ctx, path, document[0..composed.len]);
     if (saved < 0) return saved;
-    return composed.code;
+    return if (recovered == result_recovered) result_recovered else composed.code;
 }
 
 pub fn writeBool(ctx: anytype, path: [*:0]const u8, key: []const u8, value: bool) i32 {
@@ -221,12 +233,13 @@ pub fn hasDocumentSaveLeftovers(ctx: anytype, path: [*:0]const u8) bool {
 
 fn readRaw(ctx: anytype, path: [*:0]const u8, key: []const u8, scratch: *[max_file_bytes]u8) RawRead {
     const read = ctx.fileRead(path, scratch[0..]);
-    if (read <= 0) return .defaulted;
-    if (read > @as(i32, @intCast(scratch.len))) return .defaulted;
+    if (readFailure(read, scratch.len)) |err| return .{ .err = err };
+    if (read == file_not_found or read == 0) return .defaulted;
 
     const bytes = scratch[0..@as(usize, @intCast(read))];
+    _ = settings.parseSystemText(bytes) catch return .{ .err = error_invalid_value };
     const doc = settings.Document.init(bytes);
-    if (!documentFormatUsable(doc)) return .defaulted;
+    if (!documentFormatUsable(doc)) return .{ .err = error_invalid_value };
     if (doc.value(key)) |value| return .{ .value = value };
     return .defaulted;
 }
@@ -234,8 +247,10 @@ fn readRaw(ctx: anytype, path: [*:0]const u8, key: []const u8, scratch: *[max_fi
 fn composeDocument(ctx: anytype, path: [*:0]const u8, key: []const u8, value: []const u8, out: []u8) ComposeResult {
     var existing: [max_file_bytes]u8 = undefined;
     const read = ctx.fileRead(path, existing[0..]);
-    const has_existing = read > 0 and read <= @as(i32, @intCast(existing.len));
+    if (readFailure(read, existing.len)) |err| return .{ .code = err, .len = 0 };
+    const has_existing = read != file_not_found;
     const existing_bytes = if (has_existing) existing[0..@as(usize, @intCast(read))] else existing[0..0];
+    if (has_existing and !existingDocumentUsable(existing_bytes)) return .{ .code = error_invalid_value, .len = 0 };
 
     var schema_storage: [32]u8 = .{0} ** 32;
     const existing_schema = if (has_existing) settings.Document.init(existing_bytes).schemaName() else null;
@@ -270,7 +285,11 @@ fn atomicSave(ctx: anytype, path: [*:0]const u8, bytes: []const u8) i32 {
     const recovery = recoverAtomicSiblings(ctx, path, tmp_path, bak_path);
     if (recovery < 0) return recovery;
 
-    _ = ctx.fileDelete(tmp_path);
+    var original: [max_file_bytes]u8 = undefined;
+    const original_read = ctx.fileRead(path, &original);
+    if (readFailure(original_read, original.len)) |err| return err;
+    const existed = original_read != file_not_found;
+    if (existed and !existingDocumentUsable(original[0..@intCast(original_read)])) return error_invalid_value;
     const written = ctx.fileWrite(tmp_path, bytes);
     if (written != @as(i32, @intCast(bytes.len))) {
         _ = ctx.fileDelete(tmp_path);
@@ -284,28 +303,37 @@ fn atomicSave(ctx: anytype, path: [*:0]const u8, bytes: []const u8) i32 {
         return error_verify_failed;
     }
 
-    const existed = ctx.exists(path);
     if (existed) {
-        _ = ctx.fileDelete(bak_path);
         if (ctx.fileRename(path, bak_path) < 0) {
             _ = ctx.fileDelete(tmp_path);
             return error_rename_failed;
         }
     }
     if (ctx.fileRename(tmp_path, path) < 0) {
-        if (existed) _ = ctx.fileRename(bak_path, path);
+        if (existed and ctx.fileRename(bak_path, path) < 0) return error_recovery_failed;
         _ = ctx.fileDelete(tmp_path);
         return error_rename_failed;
     }
-    if (existed) _ = ctx.fileDelete(bak_path);
+    if (existed and !deleteExisting(ctx, bak_path)) return error_recovery_failed;
     if (recovery == result_recovered) return result_recovered;
     return if (existed) result_ok else result_created;
 }
 
 fn recoverAtomicSiblings(ctx: anytype, path: [*:0]const u8, tmp_path: [*:0]const u8, bak_path: [*:0]const u8) i32 {
-    const target_exists = ctx.exists(path);
-    const tmp_exists = ctx.exists(tmp_path);
-    const bak_exists = ctx.exists(bak_path);
+    var target: [max_file_bytes]u8 = undefined;
+    const target_read = ctx.fileRead(path, &target);
+    if (readFailure(target_read, target.len)) |err| return err;
+    const target_exists = target_read != file_not_found;
+    if (target_exists and !existingDocumentUsable(target[0..@intCast(target_read)])) return error_invalid_value;
+    var sibling: [max_file_bytes]u8 = undefined;
+    const tmp_read = ctx.fileRead(tmp_path, &sibling);
+    if (readFailure(tmp_read, sibling.len)) |err| return err;
+    const tmp_exists = tmp_read != file_not_found;
+    const tmp_usable = tmp_read > 0 and documentBytesUsable(sibling[0..@intCast(tmp_read)]);
+    const bak_read = ctx.fileRead(bak_path, &sibling);
+    if (readFailure(bak_read, sibling.len)) |err| return err;
+    const bak_exists = bak_read != file_not_found;
+    const bak_usable = bak_exists and existingDocumentUsable(sibling[0..@intCast(bak_read)]);
 
     if (target_exists) {
         if (tmp_exists and !deleteExisting(ctx, tmp_path)) return error_recovery_failed;
@@ -314,21 +342,18 @@ fn recoverAtomicSiblings(ctx: anytype, path: [*:0]const u8, tmp_path: [*:0]const
     }
 
     if (tmp_exists) {
-        var tmp_bytes: [max_file_bytes]u8 = undefined;
-        const read = ctx.fileRead(tmp_path, tmp_bytes[0..]);
-        const tmp_usable = read > 0 and read <= @as(i32, @intCast(tmp_bytes.len)) and
-            documentBytesUsable(tmp_bytes[0..@as(usize, @intCast(read))]);
         if (tmp_usable) {
-            if (ctx.fileRename(tmp_path, path) >= 0) {
-                if (bak_exists and !deleteExisting(ctx, bak_path)) return error_recovery_failed;
-                return result_recovered;
-            }
+            if (ctx.fileRename(tmp_path, path) < 0) return error_recovery_failed;
+            if (bak_exists and !deleteExisting(ctx, bak_path)) return error_recovery_failed;
+            return result_recovered;
         }
-        if (!deleteExisting(ctx, tmp_path)) return error_recovery_failed;
+        if (!bak_exists) return error_recovery_failed;
     }
 
     if (bak_exists) {
+        if (!bak_usable) return error_recovery_failed;
         if (ctx.fileRename(bak_path, path) < 0) return error_recovery_failed;
+        if (tmp_exists and !deleteExisting(ctx, tmp_path)) return error_recovery_failed;
         return result_recovered;
     }
 
@@ -350,6 +375,11 @@ fn validPath(path: [*:0]const u8) bool {
 fn documentFormatUsable(doc: settings.Document) bool {
     const version = doc.formatVersion() orelse return true;
     return version == settings.current_format_version;
+}
+
+fn existingDocumentUsable(bytes: []const u8) bool {
+    _ = settings.parseSystemText(bytes) catch return false;
+    return documentFormatUsable(settings.Document.init(bytes));
 }
 
 fn documentBytesUsable(bytes: []const u8) bool {
@@ -499,7 +529,10 @@ const TestFs = struct {
     write_fail: bool = false,
     rename_fail: bool = false,
     rename_fail_on_call: usize = 0,
+    rename_fail_from_call: usize = 0,
     rename_calls: usize = 0,
+    read_failure_path: ?[]const u8 = null,
+    read_failure_code: i32 = -6,
 
     pub fn put(self: *TestFs, path: []const u8, data: []const u8) void {
         const slot = self.slotFor(path).?;
@@ -509,8 +542,12 @@ const TestFs = struct {
     }
 
     pub fn readFile(self: *const TestFs, path: []const u8, out: []u8) i32 {
-        const slot = self.find(path) orelse return -1;
+        if (self.read_failure_path) |failure_path| {
+            if (std.mem.eql(u8, path, failure_path)) return self.read_failure_code;
+        }
+        const slot = self.find(path) orelse return file_not_found;
         const len: usize = @intCast(slot.data_len);
+        if (len > out.len) return -5;
         const count = @min(len, out.len);
         if (count > 0) @memcpy(out[0..count], slot.data[0..count]);
         return @intCast(count);
@@ -542,6 +579,7 @@ const TestFs = struct {
         self.rename_calls += 1;
         if (self.rename_fail) return -1;
         if (self.rename_fail_on_call != 0 and self.rename_calls == self.rename_fail_on_call) return -1;
+        if (self.rename_fail_from_call != 0 and self.rename_calls >= self.rename_fail_from_call) return -1;
         const old_text = std.mem.span(old_path);
         const old_slot = self.findMutable(old_text) orelse return -1;
         const len: usize = @intCast(old_slot.data_len);
@@ -784,4 +822,67 @@ test "config path and value boundaries reject without persistent mutation" {
     too_long[too_long.len - 1] = 0;
     try std.testing.expectEqual(error_invalid_path, writeString(&fs, @ptrCast(&too_long), "TITLE", "New"));
     try expectFile(&fs, path, original);
+}
+
+test "config preserves originals and siblings on read failures" {
+    const path = "C:\\TEMP\\SAFE.R4S";
+    const tmp = "C:\\TEMP\\SAFE.TMP";
+    const bak = "C:\\TEMP\\SAFE.BAK";
+    const original = settings.utf8_bom ++ "R4S_FORMAT=1\r\nSCHEMA=SAFE\r\nKEEP=old\r\nCOUNT=1\r\n";
+    for ([_]i32{ -6, -5, 4097 }) |failure| {
+        var fs = TestFs{ .read_failure_path = path, .read_failure_code = failure };
+        fs.put(path, original);
+        fs.put(bak, original);
+        const expected = if (failure == -6) error_read_failed else error_buffer_too_small;
+        try std.testing.expectEqual(expected, writeU32(&fs, path, "COUNT", 2));
+        var value: u32 = 91;
+        try std.testing.expectEqual(expected, readU32(&fs, path, "COUNT", 7, &value));
+        try std.testing.expectEqual(@as(u32, 91), value);
+        try std.testing.expectEqual(@as(usize, 0), fs.rename_calls);
+        fs.read_failure_path = null;
+        try expectFile(&fs, path, original);
+        try expectFile(&fs, bak, original);
+        try std.testing.expect(!fs.exists(tmp));
+    }
+    var fs = TestFs{};
+    try std.testing.expectEqual(result_created, writeU32(&fs, path, "COUNT", 1));
+    fs.put(path, "");
+    try std.testing.expectEqual(result_ok, writeU32(&fs, path, "COUNT", 2));
+    fs.put(tmp, original);
+    fs.read_failure_path = tmp;
+    try std.testing.expectEqual(error_read_failed, recoverDocumentSave(&fs, path));
+    fs.read_failure_path = null;
+    try expectFile(&fs, tmp, original);
+}
+
+test "config composes recovered content and retains recoverable data after failed rollback" {
+    const path = "C:\\TEMP\\SAFE.R4S";
+    const tmp = "C:\\TEMP\\SAFE.TMP";
+    const bak = "C:\\TEMP\\SAFE.BAK";
+    const old = settings.utf8_bom ++ "R4S_FORMAT=1\r\nSCHEMA=SAFE\r\nKEEP=old\r\nCOUNT=1\r\n";
+    const next = settings.utf8_bom ++ "R4S_FORMAT=1\r\nSCHEMA=SAFE\r\nKEEP=new\r\nCOUNT=1\r\n";
+    for ([_]bool{ false, true }) |with_tmp| {
+        var fs = TestFs{};
+        fs.put(bak, old);
+        if (with_tmp) fs.put(tmp, next);
+        try std.testing.expectEqual(result_recovered, writeU32(&fs, path, "COUNT", 2));
+        var kept: [16]u8 = undefined;
+        try std.testing.expectEqual(result_ok, readString(&fs, path, "KEEP", "missing", &kept));
+        try std.testing.expectEqualStrings(if (with_tmp) "new" else "old", spanZ(&kept));
+        var count: u32 = 0;
+        try std.testing.expectEqual(result_ok, readU32(&fs, path, "COUNT", 0, &count));
+        try std.testing.expectEqual(@as(u32, 2), count);
+    }
+    var fs = TestFs{ .rename_fail = true };
+    fs.put(tmp, next);
+    fs.put(bak, old);
+    try std.testing.expectEqual(error_recovery_failed, writeU32(&fs, path, "COUNT", 2));
+    try expectFile(&fs, tmp, next);
+    try expectFile(&fs, bak, old);
+    fs = .{ .rename_fail_from_call = 2 };
+    fs.put(path, old);
+    try std.testing.expectEqual(error_recovery_failed, saveDocument(&fs, path, next));
+    try expectFile(&fs, tmp, next);
+    try expectFile(&fs, bak, old);
+    try std.testing.expect(!fs.exists(path));
 }

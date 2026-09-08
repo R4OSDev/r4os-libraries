@@ -176,6 +176,7 @@ pub const config_error_rename_failed: i32 = -5;
 pub const config_error_invalid_value: i32 = -6;
 pub const config_error_verify_failed: i32 = -7;
 pub const config_error_recovery_failed: i32 = -8;
+pub const config_error_read_failed: i32 = -9;
 
 pub const text_v1_export_name = "TEXT_V1";
 pub const text_v1_revision: u16 = 1;

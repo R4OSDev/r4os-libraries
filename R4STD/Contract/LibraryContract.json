@@ -4722,6 +4722,13 @@
       "type": "i32",
       "value": -8,
       "description": "Recovery fehlgeschlagen."
+    },
+    {
+      "zig_name": "config_error_read_failed",
+      "c_name": "R4STD_CONFIG_ERROR_READ_FAILED",
+      "type": "i32",
+      "value": -9,
+      "description": "Vorhandene Konfigurationsdatei nicht vollstaendig lesbar; Bestand erhalten."
     }
   ],
   "ownership_rules": [
