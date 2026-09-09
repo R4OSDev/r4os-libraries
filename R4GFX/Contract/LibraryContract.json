@@ -1,0 +1,451 @@
+{
+  "schema_version": 1,
+  "module_name": "R4GFX",
+  "zig_client": "R4Gfx",
+  "c_prefix": "r4gfx",
+  "c_header": "r4gfx.h",
+  "description": "Userland-Grafikbibliothek: gepruefte lineare Layouts und Softwarezugriff auf caller-eigene CPU-Maps des gemeinsamen BO-Vertrags.",
+  "interfaces": [
+    {
+      "export_name": "API_V1",
+      "symbol": "r4gfx_api_v1",
+      "zig_name": "api_v1",
+      "zig_type": "ApiV1",
+      "c_type": "R4GfxApiV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 878200391,
+      "interface_id_hi": 892942128,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "linear_layout",
+          "c_name": "r4gfx_linear_layout",
+          "symbol": "r4gfx_linear_layout_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "width",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "width"
+            },
+            {
+              "name": "height",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "height"
+            },
+            {
+              "name": "format",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "format"
+            },
+            {
+              "name": "row_alignment",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "row_alignment"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxLinearLayout",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Keine Allokation; Caller haelt die CPU-Map fuer den gesamten Aufruf."
+          },
+          "description": "Berechnet lineare XRGB8888-, ARGB8888- oder R8-Layouts mit gepruefter 64-Bit-Groesse."
+        },
+        {
+          "name": "fill_rect",
+          "c_name": "r4gfx_fill_rect",
+          "symbol": "r4gfx_fill_rect_impl",
+          "slot": 1,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "image",
+              "type": {
+                "name": "R4GfxCpuImage",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "image"
+            },
+            {
+              "name": "rect",
+              "type": {
+                "name": "R4GfxRect",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "rect"
+            },
+            {
+              "name": "color",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "color"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Keine Allokation; Caller haelt die CPU-Map fuer den gesamten Aufruf."
+          },
+          "description": "Validiert Bildspanne und Rechteck vor dem ersten Schreibzugriff; beruehrt kein Zeilenpadding."
+        }
+      ],
+      "description": "Unabhaengiger R4GFX V1-Laufzeitvertrag."
+    }
+  ],
+  "types": [
+    {
+      "name": "R4GfxLinearLayout",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "byte_length",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte_length"
+        },
+        {
+          "name": "pitch",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pitch"
+        },
+        {
+          "name": "width",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width"
+        },
+        {
+          "name": "height",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "format",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "format"
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Feste V1-Payload. Adressen sind ausschliesslich CPU-Maps."
+    },
+    {
+      "name": "R4GfxCpuImage",
+      "size": 40,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "cpu_address",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "cpu_address"
+        },
+        {
+          "name": "byte_length",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte_length"
+        },
+        {
+          "name": "pitch",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pitch"
+        },
+        {
+          "name": "width",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width"
+        },
+        {
+          "name": "height",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "format",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "format"
+        },
+        {
+          "name": "reserved",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Feste V1-Payload. Adressen sind ausschliesslich CPU-Maps."
+    },
+    {
+      "name": "R4GfxRect",
+      "size": 16,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "x",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "x"
+        },
+        {
+          "name": "y",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "y"
+        },
+        {
+          "name": "width",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width"
+        },
+        {
+          "name": "height",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        }
+      ],
+      "description": "Feste V1-Payload. Adressen sind ausschliesslich CPU-Maps."
+    }
+  ],
+  "constants": [
+    {
+      "zig_name": "status_ok",
+      "c_name": "R4GFX_STATUS_OK",
+      "type": "i32",
+      "value": 0,
+      "description": "status_ok"
+    },
+    {
+      "zig_name": "format_xrgb8888",
+      "c_name": "R4GFX_FORMAT_XRGB8888",
+      "type": "u32",
+      "value": 875713112,
+      "description": "format_xrgb8888"
+    },
+    {
+      "zig_name": "format_argb8888",
+      "c_name": "R4GFX_FORMAT_ARGB8888",
+      "type": "u32",
+      "value": 875713089,
+      "description": "format_argb8888"
+    },
+    {
+      "zig_name": "format_r8",
+      "c_name": "R4GFX_FORMAT_R8",
+      "type": "u32",
+      "value": 538982482,
+      "description": "format_r8"
+    }
+  ],
+  "errors": [
+    {
+      "zig_name": "status_invalid",
+      "c_name": "R4GFX_STATUS_INVALID",
+      "type": "i32",
+      "value": -1,
+      "description": "status_invalid"
+    },
+    {
+      "zig_name": "status_unsupported",
+      "c_name": "R4GFX_STATUS_UNSUPPORTED",
+      "type": "i32",
+      "value": -2,
+      "description": "status_unsupported"
+    },
+    {
+      "zig_name": "status_overflow",
+      "c_name": "R4GFX_STATUS_OVERFLOW",
+      "type": "i32",
+      "value": -3,
+      "description": "status_overflow"
+    }
+  ],
+  "ownership_rules": [
+    {
+      "name": "CPU-Map",
+      "text": "fill_rect borgt nur die CPU-Adresse waehrend des Aufrufs. Der Caller haelt eine exklusive CPU-Schreibmap des gemeinsamen R4DRAW-BO-Vertrags und fuehrt danach unmap aus. Keine verborgene Kopie, GPU-Adresse oder VRAM-Lesung."
+    },
+    {
+      "name": "Layout",
+      "text": "Lineares RAM-Bild. Andere Modifier, GPU-Seitentabellen, Speicherallokation und Scanout bleiben bei ihren Besitzern."
+    }
+  ]
+}

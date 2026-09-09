@@ -5,6 +5,7 @@ Dieses Repository enthaelt die offiziellen unabhaengigen Runtime-R4Ls:
 
 - `R4STD` fuer Text, Settings, Datum, Zeit und Konfiguration
 - `R4IMG` fuer Raster- und Vektorbildformate
+- `R4GFX` fuer Grafiklayouts und Softwarezugriffe auf gemeinsame BO-CPU-Maps
 - `R4FONT` fuer TTF, OpenType/CFF, WOFF, WOFF2 und Font-Rasterung
 
 Jede Library besitzt ihren Contract, ihre Baseline, Implementierung,
@@ -30,8 +31,9 @@ Unter Windows:
     Build.bat R4IMG test
     Build.bat R4FONT test
 
-Unter Linux und macOS stehen dieselben Schritte ueber `Build.sh` bereit. Der
-praktische 0.64-Umbau wird ausschliesslich auf Windows abgenommen.
+Unter Linux stehen dieselben Schritte ueber `Build.sh` bereit. Beide
+Starter fuehren die gemeinsame PowerShell-7-Logik in Build.ps1 aus.
+0.79.5 wurde unter Debian abgenommen; kein Windows-Lauf wird behauptet.
 
 Die Starter wenden die Settings vor der Zig-Paketaufloesung an. SDK und
 Plattform-Contract sind im Paketbaum inhaltlich gepinnt; die gemappten lokalen
@@ -41,9 +43,9 @@ Consumer-Bindings
 -----------------
 
 Das Rootpaket `r4os_libraries` stellt die Zig-Bindings als benannte Pfade
-`r4std_zig_binding`, `r4img_zig_binding` und `r4font_zig_binding` bereit. Fuer
+`r4std_zig_binding`, `r4img_zig_binding`, `r4gfx_zig_binding` und `r4font_zig_binding` bereit. Fuer
 C-Verbraucher existieren entsprechend `r4std_c_include`, `r4img_c_include` und
-`r4font_c_include`. Ein Modul pinnt dieses Paket und uebergibt nur den
+`r4font_c_include` sowie `r4gfx_c_include`. Ein Modul pinnt dieses Paket und uebergibt nur den
 benoetigten Pfad an den SDK-Manifestbuild; die Runtime-Implementierungen werden
 dadurch weder eingebettet noch mit dem Verbraucher gekoppelt.
 

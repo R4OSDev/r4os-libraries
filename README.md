@@ -1,6 +1,6 @@
 ﻿# R4OS Runtime Libraries
 
-This repository contains the independent Runtime-R4L units R4STD, R4IMG, and
+This repository contains the independent Runtime-R4L units R4STD, R4IMG, R4GFX, and
 R4FONT. Each library owns its implementation, contract, baseline, Zig and C
 bindings, manifest, and tests.
 
@@ -15,8 +15,9 @@ Build and test one unit:
     Build.bat R4STD test
     Build.bat R4IMG test
     Build.bat R4FONT test
+    ./Build.sh R4GFX test
 
-The host-neutral starter is `./Build.sh`. Dependency paths are mapped by
+Both `Build.bat` and `./Build.sh` use the shared PowerShell 7 `Build.ps1`. Dependency paths are mapped by
 `Settings.R4S`.
 
 Detailed German migration notes are preserved in
