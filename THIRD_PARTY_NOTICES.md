@@ -25,3 +25,14 @@ fixtures under BSD-3-Clause. Per-file paths, hashes, transformations, and
 notices are recorded in `R4FONT/Tests/Fixtures/FIXTURES.json` and
 `R4IMG/Tests/Decoder/Fixtures/FIXTURES.json` with their adjacent license
 files. Other listed fixtures are original or generated R4OS material.
+
+## R4GFX receiver information
+
+The compiled EDID helper includes 154 CTA timing records derived from the
+MIT-licensed libdisplay-info table. Receiver tests include its unchanged
+QEMU, Hisense 55U8K and Apple XDR EDID fixtures. Copyright (c) 2022 The
+libdisplay-info Contributors. Exact hashes, transformations and the MIT
+license are in `R4GFX/ThirdParty/DisplayInfo/PROVENANCE.json` and `LICENSE`.
+The OssiPC 65U8QF base block is an earlier original R4OS measurement.
+The parser implementation itself is original R4OS code; no Linux GPL
+implementation has been incorporated.

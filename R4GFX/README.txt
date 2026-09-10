@@ -19,3 +19,13 @@ endlicher Deadline und expliziten Abhaengigkeiten. Handles und Backing
 bleiben caller-eigen; es gibt keine versteckte Allokation oder Threadpool.
 Die R4L-Implementierung und ihr eigener Vertrag bleiben bei 0.1.0.
 Systemvertrag: Docs/Drivers/GrafikQueues07906.txt.
+
+The compiled Zig helpers `r4gfx_edid` and `r4gfx_outputs` add bounded EDID
+base/CTA/DisplayID decoding and generation-consistent receiver reads through
+R4DRAW ABI12. The caller owns storage; no I/O policy or allocator is hidden.
+Bad extensions contribute no partial modes/audio. Missing blocks, unknown
+metadata and nominal-only timings remain explicit. Only complete timings
+can become programmable output modes. Supported DisplayID timing blocks
+are type I (1.x) and VII (2.x); CVT/GTF synthesis, DSC, VRR and vendor-specific
+policy are not implemented. License/provenance: ThirdParty/DisplayInfo/.
+These helpers do not change the R4GFX 0.1.0 runtime artifact or its own ABI.

@@ -9,5 +9,5 @@
             .hash = "r4os_sdk-0.64.12-NnPzAp9j7gBN9NS8Eeh4pR0DuZ9HtOi9yBcyITywdVZx",
         },
     },
-    .paths = .{ "Bindings", "Contract", "Docs", "Source", "Tests", "build.zig", "build.zig.zon", "module.R4MF", "README.txt" },
+    .paths = .{ "Bindings", "Contract", "Docs", "Display", "Source", "Tests", "ThirdParty", "display_tests.zig", "build.zig", "build.zig.zon", "module.R4MF", "README.txt" },
 }
