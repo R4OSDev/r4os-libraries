@@ -22,6 +22,7 @@ test "licensed receiver fixtures and actual OssiPC base preserve missing extensi
     try t.expect(result.warnings & edid.Warning.missing != 0);
     try t.expectEqual(@as(usize, 0), result.audio_count);
     try t.expect(!result.hdmi and !result.basic_audio);
+    try t.expect(!result.scdc and !result.scrambling_low_rates);
     try t.expect(result.mode_count > 0);
     try edid.parse(qemu, &result);
     try t.expect(result.complete());
@@ -45,6 +46,7 @@ test "licensed receiver fixtures and actual OssiPC base preserve missing extensi
     // The raw receiver blob is malformed; never silently accept its extension.
     try t.expect(result.warnings & edid.Warning.malformed != 0);
     try t.expect(!result.hdmi and result.audio_count == 0);
+    try t.expect(!result.scdc and !result.scrambling_low_rates);
     var corrected = television[0..256].*;
     corrected[128 + 105] &= 7; // Test-only repair of the out-of-range bitmap.
     fix(corrected[128..]);
@@ -53,6 +55,7 @@ test "licensed receiver fixtures and actual OssiPC base preserve missing extensi
     try t.expect(result.hdmi and result.basic_audio and result.audio_count > 0);
     try t.expect(contains(&result, 3840, 2160));
     try t.expect(result.colors & 8 != 0);
+    try t.expect(result.scdc and !result.scrambling_low_rates and result.max_tmds_hz == 600_000_000);
     try edid.parse(apple, &result);
     try t.expect(result.complete());
     try t.expectEqual(@as(u8, 6), result.valid_extensions);
@@ -71,6 +74,23 @@ test "extension checksums and malformed lengths cannot leak partial audio or tim
     try edid.parse(&bytes, &result);
     try t.expect(result.warnings & edid.Warning.malformed != 0);
     try t.expect(!result.hdmi and result.audio_count == 0);
+    // Each HF-VSDB flag is independent, and a bad later data block rolls
+    // back capabilities from the entire extension, including these flags.
+    for ([_]u8{ 0, 8, 128, 136 }) |flags| {
+        bytes = qemu[0..256].*;
+        @memset(bytes[128..], 0);
+        const block = bytes[128..];
+        block[0] = 2; block[1] = 3; block[2] = 12;
+        block[4] = 0x67; block[5] = 0xd8; block[6] = 0x5d; block[7] = 0xc4;
+        block[8] = 1; block[9] = 120; block[10] = flags;
+        fix(block);
+        try edid.parse(&bytes, &result);
+        try t.expect(result.complete() and result.hdmi and result.max_tmds_hz == 600_000_000);
+        try t.expect(result.scdc == (flags & 128 != 0) and result.scrambling_low_rates == (flags & 8 != 0));
+        block[2] = 14; block[12] = 0x63; block[13] = 1; fix(block);
+        try edid.parse(&bytes, &result);
+        try t.expect(result.warnings & edid.Warning.malformed != 0 and !result.scdc and !result.scrambling_low_rates and !result.hdmi);
+    }
     bytes = television[0..256].*;
     bytes[126] = 0;
     fix(bytes[0..128]);

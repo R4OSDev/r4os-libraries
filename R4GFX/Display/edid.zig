@@ -31,6 +31,8 @@ pub const Report = struct {
     basic_audio: bool = false,
     hdmi: bool = false,
     max_tmds_hz: u64 = 0,
+    scdc: bool = false,
+    scrambling_low_rates: bool = false,
     colorimetry: u16 = 0,
     hdr_eotf: u8 = 0,
     hdr_static: u8 = 0,
@@ -264,6 +266,8 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
                     if (len < 7 or data[3] != 1) return false;
                     result.hdmi = true;
                     result.max_tmds_hz = @max(result.max_tmds_hz, @as(u64, data[4]) * 5_000_000);
+                    result.scdc = result.scdc or data[5] & 0x80 != 0;
+                    result.scrambling_low_rates = result.scrambling_low_rates or data[5] & 8 != 0;
                 } else result.warnings |= Warning.unknown;
             },
             4 => { if (len != 3) return false; result.speakers |= le24(data); },

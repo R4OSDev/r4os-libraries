@@ -36,3 +36,6 @@ license are in `R4GFX/ThirdParty/DisplayInfo/PROVENANCE.json` and `LICENSE`.
 The OssiPC 65U8QF base block is an earlier original R4OS measurement.
 The parser implementation itself is original R4OS code; no Linux GPL
 implementation has been incorporated.
+
+HF-VSDB SCDC and low-rate scrambling field meanings follow the pinned
+libdisplay-info cta.c; its source hash is also recorded in that provenance.

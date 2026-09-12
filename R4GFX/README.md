@@ -3,6 +3,9 @@
 R4GFX is the userland graphics library. Its runtime module owns CPU rendering;
 R4DRAW owns shared buffers, queues and presentation. The compiled `Display/`
 helpers parse receiver metadata and the Zig bindings expose queue/output helpers.
+The Report keeps SCDC and low-rate scrambling separate; malformed extensions
+contribute neither flag. Consumers decide link policy from a complete report.
+These source helpers compile in their consumers, separately from R4GFX.R4L.
 
 Build this unit with `../Build.sh R4GFX` on Linux or `..\Build.bat R4GFX` on
 Windows. Both use the same PS7 build. Add `test` for the existing seven owner
