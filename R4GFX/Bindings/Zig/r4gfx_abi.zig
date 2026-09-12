@@ -30,13 +30,76 @@ pub const R4GfxRect = extern struct {
     width: u32,
     height: u32,
 };
+
+pub const R4GfxRenderCaps = extern struct {
+    version: u32,
+    size: u32,
+    backend: u32,
+    formats: u32,
+    operations: u32,
+    samplers: u32,
+    max_images: u32,
+    max_commands: u32,
+    max_pixels: u64,
+    features: u32,
+    reserved: u32,
+};
+
+pub const R4GfxCpuDraw = extern struct {
+    operation: u32,
+    source_index: u32,
+    target_index: u32,
+    sampler: u32,
+    source_rect: R4GfxRect,
+    target_rect: R4GfxRect,
+    color: u32,
+    opacity: u32,
+    reserved0: u32,
+    reserved1: u32,
+};
+
+pub const R4GfxCpuBatch = extern struct {
+    images: u64,
+    commands: u64,
+    image_count: u32,
+    command_count: u32,
+    pixel_budget: u64,
+    flags: u32,
+    reserved: u32,
+};
+
+pub const R4GfxCpuStats = extern struct {
+    read_bytes: u64,
+    write_bytes: u64,
+    pixels: u64,
+    commands: u32,
+    reserved: u32,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
 pub const format_r8: u32 = 538982482;
+pub const render_backend_software: u32 = 1;
+pub const render_format_xrgb8888: u32 = 1;
+pub const render_format_argb8888: u32 = 2;
+pub const render_format_r8: u32 = 4;
+pub const render_operation_fill: u32 = 1;
+pub const render_operation_blit: u32 = 2;
+pub const render_operation_over: u32 = 4;
+pub const render_sampler_nearest: u32 = 0;
+pub const render_sampler_bilinear: u32 = 1;
+pub const render_feature_validate_first: u32 = 1;
+pub const render_feature_cpu_maps: u32 = 2;
+pub const render_feature_memmove: u32 = 4;
+pub const render_feature_premultiplied: u32 = 8;
+pub const render_max_images: u32 = 64;
+pub const render_max_commands: u32 = 1024;
+pub const render_max_pixels: u64 = 16777216;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
+pub const status_limit: i32 = -4;
+pub const status_alias: i32 = -5;
 
 pub const api_v1_export_name = "API_V1";
 pub const api_v1_revision: u16 = 1;
@@ -56,6 +119,26 @@ pub const ApiV1 = extern struct {
     header: InterfaceHeader,
     linear_layout: ApiV1LinearLayoutFn,
     fill_rect: ApiV1FillRectFn,
+};
+
+pub const render_v1_export_name = "RENDER_V1";
+pub const render_v1_revision: u16 = 1;
+pub const render_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 48,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x52454e4445523147,
+    .interface_id_hi = 0x52344f5352474658,
+};
+pub const RenderV1CapabilitiesFn = *const fn (output: *R4GfxRenderCaps) callconv(.c) i32;
+pub const RenderV1ExecuteCpuFn = *const fn (batch: *const R4GfxCpuBatch, output: *R4GfxCpuStats) callconv(.c) i32;
+pub const RenderV1 = extern struct {
+    header: InterfaceHeader,
+    capabilities: RenderV1CapabilitiesFn,
+    execute_cpu: RenderV1ExecuteCpuFn,
 };
 
 pub const ApiV1Client = struct {
@@ -84,5 +167,34 @@ pub const ApiV1Client = struct {
     pub fn fill_rect(self: *const ApiV1Client, image: *const R4GfxCpuImage, rect: *const R4GfxRect, color: u32) i32 {
         const function = r4os.runtime_r4l.functionAt(ApiV1FillRectFn, self.header, 40) orelse unreachable;
         return function(image, rect, color);
+    }
+};
+
+pub const RenderV1Client = struct {
+    header: *const InterfaceHeader,
+
+    pub fn init(raw: *const r4os.abi.R4XStartContext) !RenderV1Client {
+        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, render_v1_export_name) orelse return error.MissingImport;
+        const header = try r4os.runtime_r4l.validateImport(item, .{
+            .interface_id_lo = 0x52454e4445523147,
+            .interface_id_hi = 0x52344f5352474658,
+            .abi_major = 1,
+            .min_revision = 1,
+            .required_size = 48,
+            .known_required_flags = 0,
+        });
+        if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 40) == null) return error.MissingSlot;
+        return .{ .header = header };
+    }
+
+    pub fn capabilities(self: *const RenderV1Client, output: *R4GfxRenderCaps) i32 {
+        const function = r4os.runtime_r4l.functionAt(RenderV1CapabilitiesFn, self.header, 32) orelse unreachable;
+        return function(output);
+    }
+
+    pub fn execute_cpu(self: *const RenderV1Client, batch: *const R4GfxCpuBatch, output: *R4GfxCpuStats) i32 {
+        const function = r4os.runtime_r4l.functionAt(RenderV1ExecuteCpuFn, self.header, 40) orelse unreachable;
+        return function(batch, output);
     }
 };

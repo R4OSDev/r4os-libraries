@@ -24,12 +24,54 @@ comptime {
     if (@offsetOf(implementation.R4GfxRect, "y") != 4 or @offsetOf(binding.R4GfxRect, "y") != 4) @compileError("R4GfxRect.y offset drift");
     if (@offsetOf(implementation.R4GfxRect, "width") != 8 or @offsetOf(binding.R4GfxRect, "width") != 8) @compileError("R4GfxRect.width offset drift");
     if (@offsetOf(implementation.R4GfxRect, "height") != 12 or @offsetOf(binding.R4GfxRect, "height") != 12) @compileError("R4GfxRect.height offset drift");
+    if (@sizeOf(implementation.R4GfxRenderCaps) != 48 or @sizeOf(binding.R4GfxRenderCaps) != 48) @compileError("R4GfxRenderCaps size drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "version") != 0 or @offsetOf(binding.R4GfxRenderCaps, "version") != 0) @compileError("R4GfxRenderCaps.version offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "size") != 4 or @offsetOf(binding.R4GfxRenderCaps, "size") != 4) @compileError("R4GfxRenderCaps.size offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "backend") != 8 or @offsetOf(binding.R4GfxRenderCaps, "backend") != 8) @compileError("R4GfxRenderCaps.backend offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "formats") != 12 or @offsetOf(binding.R4GfxRenderCaps, "formats") != 12) @compileError("R4GfxRenderCaps.formats offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "operations") != 16 or @offsetOf(binding.R4GfxRenderCaps, "operations") != 16) @compileError("R4GfxRenderCaps.operations offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "samplers") != 20 or @offsetOf(binding.R4GfxRenderCaps, "samplers") != 20) @compileError("R4GfxRenderCaps.samplers offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "max_images") != 24 or @offsetOf(binding.R4GfxRenderCaps, "max_images") != 24) @compileError("R4GfxRenderCaps.max_images offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "max_commands") != 28 or @offsetOf(binding.R4GfxRenderCaps, "max_commands") != 28) @compileError("R4GfxRenderCaps.max_commands offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "max_pixels") != 32 or @offsetOf(binding.R4GfxRenderCaps, "max_pixels") != 32) @compileError("R4GfxRenderCaps.max_pixels offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "features") != 40 or @offsetOf(binding.R4GfxRenderCaps, "features") != 40) @compileError("R4GfxRenderCaps.features offset drift");
+    if (@offsetOf(implementation.R4GfxRenderCaps, "reserved") != 44 or @offsetOf(binding.R4GfxRenderCaps, "reserved") != 44) @compileError("R4GfxRenderCaps.reserved offset drift");
+    if (@sizeOf(implementation.R4GfxCpuDraw) != 64 or @sizeOf(binding.R4GfxCpuDraw) != 64) @compileError("R4GfxCpuDraw size drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "operation") != 0 or @offsetOf(binding.R4GfxCpuDraw, "operation") != 0) @compileError("R4GfxCpuDraw.operation offset drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "source_index") != 4 or @offsetOf(binding.R4GfxCpuDraw, "source_index") != 4) @compileError("R4GfxCpuDraw.source_index offset drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "target_index") != 8 or @offsetOf(binding.R4GfxCpuDraw, "target_index") != 8) @compileError("R4GfxCpuDraw.target_index offset drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "sampler") != 12 or @offsetOf(binding.R4GfxCpuDraw, "sampler") != 12) @compileError("R4GfxCpuDraw.sampler offset drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "source_rect") != 16 or @offsetOf(binding.R4GfxCpuDraw, "source_rect") != 16) @compileError("R4GfxCpuDraw.source_rect offset drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "target_rect") != 32 or @offsetOf(binding.R4GfxCpuDraw, "target_rect") != 32) @compileError("R4GfxCpuDraw.target_rect offset drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "color") != 48 or @offsetOf(binding.R4GfxCpuDraw, "color") != 48) @compileError("R4GfxCpuDraw.color offset drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "opacity") != 52 or @offsetOf(binding.R4GfxCpuDraw, "opacity") != 52) @compileError("R4GfxCpuDraw.opacity offset drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "reserved0") != 56 or @offsetOf(binding.R4GfxCpuDraw, "reserved0") != 56) @compileError("R4GfxCpuDraw.reserved0 offset drift");
+    if (@offsetOf(implementation.R4GfxCpuDraw, "reserved1") != 60 or @offsetOf(binding.R4GfxCpuDraw, "reserved1") != 60) @compileError("R4GfxCpuDraw.reserved1 offset drift");
+    if (@sizeOf(implementation.R4GfxCpuBatch) != 40 or @sizeOf(binding.R4GfxCpuBatch) != 40) @compileError("R4GfxCpuBatch size drift");
+    if (@offsetOf(implementation.R4GfxCpuBatch, "images") != 0 or @offsetOf(binding.R4GfxCpuBatch, "images") != 0) @compileError("R4GfxCpuBatch.images offset drift");
+    if (@offsetOf(implementation.R4GfxCpuBatch, "commands") != 8 or @offsetOf(binding.R4GfxCpuBatch, "commands") != 8) @compileError("R4GfxCpuBatch.commands offset drift");
+    if (@offsetOf(implementation.R4GfxCpuBatch, "image_count") != 16 or @offsetOf(binding.R4GfxCpuBatch, "image_count") != 16) @compileError("R4GfxCpuBatch.image_count offset drift");
+    if (@offsetOf(implementation.R4GfxCpuBatch, "command_count") != 20 or @offsetOf(binding.R4GfxCpuBatch, "command_count") != 20) @compileError("R4GfxCpuBatch.command_count offset drift");
+    if (@offsetOf(implementation.R4GfxCpuBatch, "pixel_budget") != 24 or @offsetOf(binding.R4GfxCpuBatch, "pixel_budget") != 24) @compileError("R4GfxCpuBatch.pixel_budget offset drift");
+    if (@offsetOf(implementation.R4GfxCpuBatch, "flags") != 32 or @offsetOf(binding.R4GfxCpuBatch, "flags") != 32) @compileError("R4GfxCpuBatch.flags offset drift");
+    if (@offsetOf(implementation.R4GfxCpuBatch, "reserved") != 36 or @offsetOf(binding.R4GfxCpuBatch, "reserved") != 36) @compileError("R4GfxCpuBatch.reserved offset drift");
+    if (@sizeOf(implementation.R4GfxCpuStats) != 32 or @sizeOf(binding.R4GfxCpuStats) != 32) @compileError("R4GfxCpuStats size drift");
+    if (@offsetOf(implementation.R4GfxCpuStats, "read_bytes") != 0 or @offsetOf(binding.R4GfxCpuStats, "read_bytes") != 0) @compileError("R4GfxCpuStats.read_bytes offset drift");
+    if (@offsetOf(implementation.R4GfxCpuStats, "write_bytes") != 8 or @offsetOf(binding.R4GfxCpuStats, "write_bytes") != 8) @compileError("R4GfxCpuStats.write_bytes offset drift");
+    if (@offsetOf(implementation.R4GfxCpuStats, "pixels") != 16 or @offsetOf(binding.R4GfxCpuStats, "pixels") != 16) @compileError("R4GfxCpuStats.pixels offset drift");
+    if (@offsetOf(implementation.R4GfxCpuStats, "commands") != 24 or @offsetOf(binding.R4GfxCpuStats, "commands") != 24) @compileError("R4GfxCpuStats.commands offset drift");
+    if (@offsetOf(implementation.R4GfxCpuStats, "reserved") != 28 or @offsetOf(binding.R4GfxCpuStats, "reserved") != 28) @compileError("R4GfxCpuStats.reserved offset drift");
     if (@sizeOf(implementation.ApiV1) != 48 or @sizeOf(binding.ApiV1) != 48) @compileError("ApiV1 size drift");
     if (@offsetOf(implementation.ApiV1, "linear_layout") != 32 or @offsetOf(binding.ApiV1, "linear_layout") != 32) @compileError("ApiV1.linear_layout slot drift");
     if (@offsetOf(implementation.ApiV1, "fill_rect") != 40 or @offsetOf(binding.ApiV1, "fill_rect") != 40) @compileError("ApiV1.fill_rect slot drift");
+    if (@sizeOf(implementation.RenderV1) != 48 or @sizeOf(binding.RenderV1) != 48) @compileError("RenderV1 size drift");
+    if (@offsetOf(implementation.RenderV1, "capabilities") != 32 or @offsetOf(binding.RenderV1, "capabilities") != 32) @compileError("RenderV1.capabilities slot drift");
+    if (@offsetOf(implementation.RenderV1, "execute_cpu") != 40 or @offsetOf(binding.RenderV1, "execute_cpu") != 40) @compileError("RenderV1.execute_cpu slot drift");
 }
 
 test "generated implementation and binding views are identical" {
     try std.testing.expectEqual(implementation.api_v1_header.size, binding.api_v1_header.size);
     try std.testing.expectEqual(implementation.api_v1_header.interface_id_lo, binding.api_v1_header.interface_id_lo);
+    try std.testing.expectEqual(implementation.render_v1_header.size, binding.render_v1_header.size);
+    try std.testing.expectEqual(implementation.render_v1_header.interface_id_lo, binding.render_v1_header.interface_id_lo);
 }

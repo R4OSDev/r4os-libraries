@@ -52,13 +52,113 @@ _Static_assert(offsetof(R4GfxRect, y) == 4u, "R4GfxRect.y offset mismatch");
 _Static_assert(offsetof(R4GfxRect, width) == 8u, "R4GfxRect.width offset mismatch");
 _Static_assert(offsetof(R4GfxRect, height) == 12u, "R4GfxRect.height offset mismatch");
 
+typedef struct R4GfxRenderCaps {
+    uint32_t version;
+    uint32_t size;
+    uint32_t backend;
+    uint32_t formats;
+    uint32_t operations;
+    uint32_t samplers;
+    uint32_t max_images;
+    uint32_t max_commands;
+    uint64_t max_pixels;
+    uint32_t features;
+    uint32_t reserved;
+} R4GfxRenderCaps;
+_Static_assert(sizeof(R4GfxRenderCaps) == 48u, "R4GfxRenderCaps size mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, version) == 0u, "R4GfxRenderCaps.version offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, size) == 4u, "R4GfxRenderCaps.size offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, backend) == 8u, "R4GfxRenderCaps.backend offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, formats) == 12u, "R4GfxRenderCaps.formats offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, operations) == 16u, "R4GfxRenderCaps.operations offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, samplers) == 20u, "R4GfxRenderCaps.samplers offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, max_images) == 24u, "R4GfxRenderCaps.max_images offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, max_commands) == 28u, "R4GfxRenderCaps.max_commands offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, max_pixels) == 32u, "R4GfxRenderCaps.max_pixels offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, features) == 40u, "R4GfxRenderCaps.features offset mismatch");
+_Static_assert(offsetof(R4GfxRenderCaps, reserved) == 44u, "R4GfxRenderCaps.reserved offset mismatch");
+
+typedef struct R4GfxCpuDraw {
+    uint32_t operation;
+    uint32_t source_index;
+    uint32_t target_index;
+    uint32_t sampler;
+    R4GfxRect source_rect;
+    R4GfxRect target_rect;
+    uint32_t color;
+    uint32_t opacity;
+    uint32_t reserved0;
+    uint32_t reserved1;
+} R4GfxCpuDraw;
+_Static_assert(sizeof(R4GfxCpuDraw) == 64u, "R4GfxCpuDraw size mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, operation) == 0u, "R4GfxCpuDraw.operation offset mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, source_index) == 4u, "R4GfxCpuDraw.source_index offset mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, target_index) == 8u, "R4GfxCpuDraw.target_index offset mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, sampler) == 12u, "R4GfxCpuDraw.sampler offset mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, source_rect) == 16u, "R4GfxCpuDraw.source_rect offset mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, target_rect) == 32u, "R4GfxCpuDraw.target_rect offset mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, color) == 48u, "R4GfxCpuDraw.color offset mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, opacity) == 52u, "R4GfxCpuDraw.opacity offset mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, reserved0) == 56u, "R4GfxCpuDraw.reserved0 offset mismatch");
+_Static_assert(offsetof(R4GfxCpuDraw, reserved1) == 60u, "R4GfxCpuDraw.reserved1 offset mismatch");
+
+typedef struct R4GfxCpuBatch {
+    uint64_t images;
+    uint64_t commands;
+    uint32_t image_count;
+    uint32_t command_count;
+    uint64_t pixel_budget;
+    uint32_t flags;
+    uint32_t reserved;
+} R4GfxCpuBatch;
+_Static_assert(sizeof(R4GfxCpuBatch) == 40u, "R4GfxCpuBatch size mismatch");
+_Static_assert(offsetof(R4GfxCpuBatch, images) == 0u, "R4GfxCpuBatch.images offset mismatch");
+_Static_assert(offsetof(R4GfxCpuBatch, commands) == 8u, "R4GfxCpuBatch.commands offset mismatch");
+_Static_assert(offsetof(R4GfxCpuBatch, image_count) == 16u, "R4GfxCpuBatch.image_count offset mismatch");
+_Static_assert(offsetof(R4GfxCpuBatch, command_count) == 20u, "R4GfxCpuBatch.command_count offset mismatch");
+_Static_assert(offsetof(R4GfxCpuBatch, pixel_budget) == 24u, "R4GfxCpuBatch.pixel_budget offset mismatch");
+_Static_assert(offsetof(R4GfxCpuBatch, flags) == 32u, "R4GfxCpuBatch.flags offset mismatch");
+_Static_assert(offsetof(R4GfxCpuBatch, reserved) == 36u, "R4GfxCpuBatch.reserved offset mismatch");
+
+typedef struct R4GfxCpuStats {
+    uint64_t read_bytes;
+    uint64_t write_bytes;
+    uint64_t pixels;
+    uint32_t commands;
+    uint32_t reserved;
+} R4GfxCpuStats;
+_Static_assert(sizeof(R4GfxCpuStats) == 32u, "R4GfxCpuStats size mismatch");
+_Static_assert(offsetof(R4GfxCpuStats, read_bytes) == 0u, "R4GfxCpuStats.read_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxCpuStats, write_bytes) == 8u, "R4GfxCpuStats.write_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxCpuStats, pixels) == 16u, "R4GfxCpuStats.pixels offset mismatch");
+_Static_assert(offsetof(R4GfxCpuStats, commands) == 24u, "R4GfxCpuStats.commands offset mismatch");
+_Static_assert(offsetof(R4GfxCpuStats, reserved) == 28u, "R4GfxCpuStats.reserved offset mismatch");
+
 #define R4GFX_STATUS_OK ((int32_t)0)
 #define R4GFX_FORMAT_XRGB8888 ((uint32_t)875713112)
 #define R4GFX_FORMAT_ARGB8888 ((uint32_t)875713089)
 #define R4GFX_FORMAT_R8 ((uint32_t)538982482)
+#define R4GFX_RENDER_BACKEND_SOFTWARE ((uint32_t)1)
+#define R4GFX_RENDER_FORMAT_XRGB8888 ((uint32_t)1)
+#define R4GFX_RENDER_FORMAT_ARGB8888 ((uint32_t)2)
+#define R4GFX_RENDER_FORMAT_R8 ((uint32_t)4)
+#define R4GFX_RENDER_OPERATION_FILL ((uint32_t)1)
+#define R4GFX_RENDER_OPERATION_BLIT ((uint32_t)2)
+#define R4GFX_RENDER_OPERATION_OVER ((uint32_t)4)
+#define R4GFX_RENDER_SAMPLER_NEAREST ((uint32_t)0)
+#define R4GFX_RENDER_SAMPLER_BILINEAR ((uint32_t)1)
+#define R4GFX_RENDER_FEATURE_VALIDATE_FIRST ((uint32_t)1)
+#define R4GFX_RENDER_FEATURE_CPU_MAPS ((uint32_t)2)
+#define R4GFX_RENDER_FEATURE_MEMMOVE ((uint32_t)4)
+#define R4GFX_RENDER_FEATURE_PREMULTIPLIED ((uint32_t)8)
+#define R4GFX_RENDER_MAX_IMAGES ((uint32_t)64)
+#define R4GFX_RENDER_MAX_COMMANDS ((uint32_t)1024)
+#define R4GFX_RENDER_MAX_PIXELS ((uint64_t)16777216)
 #define R4GFX_STATUS_INVALID ((int32_t)-1)
 #define R4GFX_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4GFX_STATUS_OVERFLOW ((int32_t)-3)
+#define R4GFX_STATUS_LIMIT ((int32_t)-4)
+#define R4GFX_STATUS_ALIAS ((int32_t)-5)
 
 #define R4GFX_API_V1_EXPORT_NAME "API_V1"
 #define R4GFX_API_V1_ABI_MAJOR 1u
@@ -101,6 +201,49 @@ static inline int32_t r4gfx_linear_layout(R4GfxApiV1Client *client, uint32_t wid
 static inline int32_t r4gfx_fill_rect(R4GfxApiV1Client *client, const R4GfxCpuImage * image, const R4GfxRect * rect, uint32_t color) {
     R4GfxApiV1FillRectFn function = (R4GfxApiV1FillRectFn)r4l_slot_address(client->header, 40u);
     return function(image, rect, color);
+}
+
+#define R4GFX_RENDER_V1_EXPORT_NAME "RENDER_V1"
+#define R4GFX_RENDER_V1_ABI_MAJOR 1u
+#define R4GFX_RENDER_V1_REVISION 1u
+#define R4GFX_RENDER_V1_INTERFACE_ID_LO 0x52454e4445523147ull
+#define R4GFX_RENDER_V1_INTERFACE_ID_HI 0x52344f5352474658ull
+#define R4GFX_RENDER_V1_TABLE_SIZE 48u
+#define R4GFX_RENDER_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4GFX_RENDER_V1_TABLE_SIZE, R4GFX_RENDER_V1_ABI_MAJOR, R4GFX_RENDER_V1_REVISION, R4GFX_RENDER_V1_INTERFACE_ID_LO, R4GFX_RENDER_V1_INTERFACE_ID_HI }
+typedef int32_t (*R4GfxRenderV1CapabilitiesFn)(R4GfxRenderCaps * output);
+typedef int32_t (*R4GfxRenderV1ExecuteCpuFn)(const R4GfxCpuBatch * batch, R4GfxCpuStats * output);
+typedef struct R4GfxRenderV1 {
+    R4LInterfaceHeader header;
+    R4GfxRenderV1CapabilitiesFn capabilities;
+    R4GfxRenderV1ExecuteCpuFn execute_cpu;
+} R4GfxRenderV1;
+_Static_assert(sizeof(R4GfxRenderV1) == 48u, "R4GfxRenderV1 size mismatch");
+_Static_assert(offsetof(R4GfxRenderV1, capabilities) == 32u, "R4GfxRenderV1.capabilities offset mismatch");
+_Static_assert(offsetof(R4GfxRenderV1, execute_cpu) == 40u, "R4GfxRenderV1.execute_cpu offset mismatch");
+typedef struct R4GfxRenderV1Client { const R4LInterfaceHeader *header; } R4GfxRenderV1Client;
+
+static inline int32_t r4gfx_render_v1_init(const R4XStartContext *ctx, R4GfxRenderV1Client *out_client) {
+    if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "RENDER_V1");
+    const R4LInterfaceExpectation expected = { 0x52454e4445523147ull, 0x52344f5352474658ull, 1u, 1u, 48u, 0u, 0u };
+    const R4LInterfaceHeader *header = 0;
+    int32_t status = r4l_validate_import(item, &expected, &header);
+    if (status != R4L_BINDING_OK) return status;
+    if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    out_client->header = header;
+    return R4L_BINDING_OK;
+}
+
+static inline int32_t r4gfx_render_capabilities(R4GfxRenderV1Client *client, R4GfxRenderCaps * output) {
+    R4GfxRenderV1CapabilitiesFn function = (R4GfxRenderV1CapabilitiesFn)r4l_slot_address(client->header, 32u);
+    return function(output);
+}
+
+static inline int32_t r4gfx_render_execute_cpu(R4GfxRenderV1Client *client, const R4GfxCpuBatch * batch, R4GfxCpuStats * output) {
+    R4GfxRenderV1ExecuteCpuFn function = (R4GfxRenderV1ExecuteCpuFn)r4l_slot_address(client->header, 40u);
+    return function(batch, output);
 }
 
 #endif

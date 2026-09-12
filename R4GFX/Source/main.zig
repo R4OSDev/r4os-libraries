@@ -1,6 +1,7 @@
 const std = @import("std");
 const r4os = @import("r4os");
 const c = @import("r4l_contract");
+const render = @import("cpu_render.zig");
 
 export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}
 
@@ -56,6 +57,11 @@ pub export var r4gfx_api_v1: c.ApiV1 align(8) linksection(".data.r4l_exports") =
     .linear_layout = r4gfx_linear_layout_impl,
     .fill_rect = r4gfx_fill_rect_impl,
 };
+pub export var r4gfx_render_v1: c.RenderV1 align(8) linksection(".data.r4l_exports") = .{
+    .header = c.render_v1_header,
+    .capabilities = render.capabilities,
+    .execute_cpu = render.execute,
+};
 pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
     .magic = r4os.abi.r4l_abi_magic,
     .abi_version = r4os.abi.r4l_abi_version,
@@ -65,6 +71,7 @@ pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_ex
     .reserved = 0,
 };
 test "layout overflow and rejected rectangles preserve bytes including padding" {
+    try @import("cpu_render_test.zig").check();
     const t = std.testing;
     var layout: c.R4GfxLinearLayout = undefined;
     try t.expectEqual(c.status_ok, r4gfx_linear_layout_impl(3, 2, c.format_xrgb8888, 16, &layout));

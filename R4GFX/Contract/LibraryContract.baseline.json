@@ -170,6 +170,106 @@
         }
       ],
       "description": "Unabhaengiger R4GFX V1-Laufzeitvertrag."
+    },
+    {
+      "export_name": "RENDER_V1",
+      "symbol": "r4gfx_render_v1",
+      "zig_name": "render_v1",
+      "zig_type": "RenderV1",
+      "c_type": "R4GfxRenderV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 5928230539630883143,
+      "interface_id_hi": 5923446629180327512,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "capabilities",
+          "c_name": "r4gfx_render_capabilities",
+          "symbol": "r4gfx_render_capabilities_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxRenderCaps",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Synchronous bounded CPU work; caller holds read/write maps and immutable input metadata. No allocation, I/O, wait, retained pointer or service hop."
+          },
+          "description": "Report the actual bounded software profile."
+        },
+        {
+          "name": "execute_cpu",
+          "c_name": "r4gfx_render_execute_cpu",
+          "symbol": "r4gfx_render_execute_cpu_impl",
+          "slot": 1,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "batch",
+              "type": {
+                "name": "R4GfxCpuBatch",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "batch"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxCpuStats",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Synchronous bounded CPU work; caller holds read/write maps and immutable input metadata. No allocation, I/O, wait, retained pointer or service hop."
+          },
+          "description": "Validate the complete ordered batch before the first pixel write, then execute fill, scaled blit and premultiplied source-over."
+        }
+      ],
+      "description": "Independent bounded CPU 2D execution table. Existing API_V1 remains byte-for-byte compatible."
     }
   ],
   "types": [
@@ -383,6 +483,401 @@
         }
       ],
       "description": "Feste V1-Payload. Adressen sind ausschliesslich CPU-Maps."
+    },
+    {
+      "name": "R4GfxRenderCaps",
+      "size": 48,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "1"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "48"
+        },
+        {
+          "name": "backend",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Actual execution profile; software only in this interface."
+        },
+        {
+          "name": "formats",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Supported format bitset."
+        },
+        {
+          "name": "operations",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Supported operation bitset; source-over requires four-byte color formats."
+        },
+        {
+          "name": "samplers",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Nearest and bilinear, clamp-to-source-rectangle."
+        },
+        {
+          "name": "max_images",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Maximum views in one batch."
+        },
+        {
+          "name": "max_commands",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Maximum commands in one batch."
+        },
+        {
+          "name": "max_pixels",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Maximum destination pixels across the whole batch."
+        },
+        {
+          "name": "features",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Validation-first and explicit CPU-map properties."
+        },
+        {
+          "name": "reserved",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        }
+      ],
+      "description": "Fixed capability snapshot; no GPU or native display claim."
+    },
+    {
+      "name": "R4GfxCpuDraw",
+      "size": 64,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "operation",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "fill, blit or premultiplied source-over."
+        },
+        {
+          "name": "source_index",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Source view index; zero for fill."
+        },
+        {
+          "name": "target_index",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Target view index."
+        },
+        {
+          "name": "sampler",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Nearest=0, bilinear=1; zero for fill."
+        },
+        {
+          "name": "source_rect",
+          "offset": 16,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Whole in-bounds source rectangle; zero for fill."
+        },
+        {
+          "name": "target_rect",
+          "offset": 32,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Whole in-bounds destination rectangle; caller clips."
+        },
+        {
+          "name": "color",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Stored fill color; zero for blit/over."
+        },
+        {
+          "name": "opacity",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0..255 for source-over; 255 for blit, zero for fill."
+        },
+        {
+          "name": "reserved0",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        },
+        {
+          "name": "reserved1",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        }
+      ],
+      "description": "Fixed ordered 2D command. Equal-size same-view blit supports memmove; other source/target aliases are rejected."
+    },
+    {
+      "name": "R4GfxCpuBatch",
+      "size": 40,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "images",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Address of immutable, aligned R4GfxCpuImage array, or zero with count0."
+        },
+        {
+          "name": "commands",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Address of immutable, aligned R4GfxCpuDraw array, or zero with count0."
+        },
+        {
+          "name": "image_count",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Number of borrowed image views."
+        },
+        {
+          "name": "command_count",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Number of borrowed draw commands."
+        },
+        {
+          "name": "pixel_budget",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Explicit caller work limit, at most max_pixels."
+        },
+        {
+          "name": "flags",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        },
+        {
+          "name": "reserved",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        }
+      ],
+      "description": "Synchronous caller-owned batch. All metadata and CPU maps stay valid and exclusively bound until return; no allocation or retained pointer."
+    },
+    {
+      "name": "R4GfxCpuStats",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "read_bytes",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Logical pixel reads, including filtering and destination reads; not measured bus traffic."
+        },
+        {
+          "name": "write_bytes",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Logical pixel stores, excluding row padding."
+        },
+        {
+          "name": "pixels",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Destination pixels processed."
+        },
+        {
+          "name": "commands",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Accepted commands including empty rectangles."
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        }
+      ],
+      "description": "Only written after successful validation and execution; rejected batches preserve output and image bytes."
     }
   ],
   "constants": [
@@ -413,6 +908,118 @@
       "type": "u32",
       "value": 538982482,
       "description": "format_r8"
+    },
+    {
+      "zig_name": "render_backend_software",
+      "c_name": "R4GFX_RENDER_BACKEND_SOFTWARE",
+      "type": "u32",
+      "value": 1,
+      "description": "render_backend_software"
+    },
+    {
+      "zig_name": "render_format_xrgb8888",
+      "c_name": "R4GFX_RENDER_FORMAT_XRGB8888",
+      "type": "u32",
+      "value": 1,
+      "description": "render_format_xrgb8888"
+    },
+    {
+      "zig_name": "render_format_argb8888",
+      "c_name": "R4GFX_RENDER_FORMAT_ARGB8888",
+      "type": "u32",
+      "value": 2,
+      "description": "render_format_argb8888"
+    },
+    {
+      "zig_name": "render_format_r8",
+      "c_name": "R4GFX_RENDER_FORMAT_R8",
+      "type": "u32",
+      "value": 4,
+      "description": "render_format_r8"
+    },
+    {
+      "zig_name": "render_operation_fill",
+      "c_name": "R4GFX_RENDER_OPERATION_FILL",
+      "type": "u32",
+      "value": 1,
+      "description": "render_operation_fill"
+    },
+    {
+      "zig_name": "render_operation_blit",
+      "c_name": "R4GFX_RENDER_OPERATION_BLIT",
+      "type": "u32",
+      "value": 2,
+      "description": "render_operation_blit"
+    },
+    {
+      "zig_name": "render_operation_over",
+      "c_name": "R4GFX_RENDER_OPERATION_OVER",
+      "type": "u32",
+      "value": 4,
+      "description": "render_operation_over"
+    },
+    {
+      "zig_name": "render_sampler_nearest",
+      "c_name": "R4GFX_RENDER_SAMPLER_NEAREST",
+      "type": "u32",
+      "value": 0,
+      "description": "render_sampler_nearest"
+    },
+    {
+      "zig_name": "render_sampler_bilinear",
+      "c_name": "R4GFX_RENDER_SAMPLER_BILINEAR",
+      "type": "u32",
+      "value": 1,
+      "description": "render_sampler_bilinear"
+    },
+    {
+      "zig_name": "render_feature_validate_first",
+      "c_name": "R4GFX_RENDER_FEATURE_VALIDATE_FIRST",
+      "type": "u32",
+      "value": 1,
+      "description": "render_feature_validate_first"
+    },
+    {
+      "zig_name": "render_feature_cpu_maps",
+      "c_name": "R4GFX_RENDER_FEATURE_CPU_MAPS",
+      "type": "u32",
+      "value": 2,
+      "description": "render_feature_cpu_maps"
+    },
+    {
+      "zig_name": "render_feature_memmove",
+      "c_name": "R4GFX_RENDER_FEATURE_MEMMOVE",
+      "type": "u32",
+      "value": 4,
+      "description": "render_feature_memmove"
+    },
+    {
+      "zig_name": "render_feature_premultiplied",
+      "c_name": "R4GFX_RENDER_FEATURE_PREMULTIPLIED",
+      "type": "u32",
+      "value": 8,
+      "description": "render_feature_premultiplied"
+    },
+    {
+      "zig_name": "render_max_images",
+      "c_name": "R4GFX_RENDER_MAX_IMAGES",
+      "type": "u32",
+      "value": 64,
+      "description": "render_max_images"
+    },
+    {
+      "zig_name": "render_max_commands",
+      "c_name": "R4GFX_RENDER_MAX_COMMANDS",
+      "type": "u32",
+      "value": 1024,
+      "description": "render_max_commands"
+    },
+    {
+      "zig_name": "render_max_pixels",
+      "c_name": "R4GFX_RENDER_MAX_PIXELS",
+      "type": "u64",
+      "value": 16777216,
+      "description": "render_max_pixels"
     }
   ],
   "errors": [
@@ -436,6 +1043,20 @@
       "type": "i32",
       "value": -3,
       "description": "status_overflow"
+    },
+    {
+      "zig_name": "status_limit",
+      "c_name": "R4GFX_STATUS_LIMIT",
+      "type": "i32",
+      "value": -4,
+      "description": "Declared work/capacity limit exceeded."
+    },
+    {
+      "zig_name": "status_alias",
+      "c_name": "R4GFX_STATUS_ALIAS",
+      "type": "i32",
+      "value": -5,
+      "description": "Unsupported source/target or pixel/metadata alias."
     }
   ],
   "ownership_rules": [
@@ -446,6 +1067,18 @@
     {
       "name": "Layout",
       "text": "Lineares RAM-Bild. Andere Modifier, GPU-Seitentabellen, Speicherallokation und Scanout bleiben bei ihren Besitzern."
+    },
+    {
+      "name": "RENDER_V1 maps",
+      "text": "R4GfxCpuImage addresses are caller-owned readable/writable CPU maps, never physical or GPU addresses. The caller holds exclusive target access, read access to sources, and immutable metadata until return. Different virtual mappings of the same backing must not be presented as independent images."
+    },
+    {
+      "name": "RENDER_V1 execution",
+      "text": "Commands execute in order with an explicit total-pixel budget. Whole rectangles must already be clipped by the caller. Images and output may not alias metadata. Complete validation precedes every write; no hidden frame copy, allocation, thread or graphics service."
+    },
+    {
+      "name": "RENDER_V1 colors",
+      "text": "Source-over uses premultiplied ARGB8888 and integer rounding; XRGB is opaque with zero stored padding byte. Blit converts XRGB/ARGB and scales with pixel-center nearest or bilinear filtering clamped to the source rectangle. R8 supports fill/blit, not source-over. Color space conversion remains a separate stage."
     }
   ]
 }
