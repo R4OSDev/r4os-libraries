@@ -1,4 +1,4 @@
-# R4GFX
+﻿# R4GFX
 
 R4GFX is the userland graphics library. Its runtime module owns CPU rendering;
 R4DRAW owns shared buffers, queues and presentation. The compiled `Display/`
