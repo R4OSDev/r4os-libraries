@@ -75,6 +75,133 @@ pub const R4GfxCpuStats = extern struct {
     commands: u32,
     reserved: u32,
 };
+
+pub const R4GfxDevice = extern struct {
+    address: u64,
+    generation: u64,
+};
+
+pub const R4GfxDeviceConfig = extern struct {
+    version: u32,
+    size: u32,
+    storage_address: u64,
+    storage_bytes: u64,
+    start_context: u64,
+    preferred_adapter: u32,
+    flags: u32,
+};
+
+pub const R4GfxDeviceInfo = extern struct {
+    version: u32,
+    size: u32,
+    generation: u64,
+    adapter_id: u32,
+    backend: u32,
+    device_generation: u64,
+    reset_generation: u64,
+    formats: u32,
+    operations: u32,
+    samplers: u32,
+    gpu_operations: u32,
+    resource_capacity: u32,
+    job_capacity: u32,
+    imports: u64,
+    imported_bytes: u64,
+    cpu_read_bytes: u64,
+    cpu_write_bytes: u64,
+    gpu_copy_bytes: u64,
+    upload_bytes: u64,
+    backend_changes: u64,
+};
+
+pub const R4GfxResource = extern struct {
+    slot: u32,
+    kind: u32,
+    generation: u64,
+    device_generation: u64,
+    device_address: u64,
+};
+
+pub const R4GfxResourceDesc = extern struct {
+    version: u32,
+    size: u32,
+    kind: u32,
+    flags: u32,
+    source_kind: u32,
+    sampler: u32,
+    operation: u32,
+    reserved: u32,
+    source_address: u64,
+    source_generation: u64,
+    image: R4GfxCpuImage,
+};
+
+pub const R4GfxResourceInfo = extern struct {
+    version: u32,
+    size: u32,
+    resource: R4GfxResource,
+    source_kind: u32,
+    flags: u32,
+    source_generation: u64,
+    buffer_id: u32,
+    references: u32,
+    buffer_generation: u64,
+    image: R4GfxCpuImage,
+};
+
+pub const R4GfxDraw = extern struct {
+    target: R4GfxResource,
+    source: R4GfxResource,
+    sampler: R4GfxResource,
+    pipeline: R4GfxResource,
+    source_rect: R4GfxRect,
+    target_rect: R4GfxRect,
+    color: u32,
+    opacity: u32,
+};
+
+pub const R4GfxRenderBatch = extern struct {
+    commands: u64,
+    command_count: u32,
+    flags: u32,
+    pixel_budget: u64,
+};
+
+pub const R4GfxRenderStats = extern struct {
+    cpu: R4GfxCpuStats,
+    backend: u32,
+    fallback: u32,
+};
+
+pub const R4GfxCopyRequest = extern struct {
+    source: R4GfxResource,
+    target: R4GfxResource,
+    source_offset: u64,
+    target_offset: u64,
+    byte_length: u64,
+    deadline_ns: u64,
+};
+
+pub const R4GfxJob = extern struct {
+    slot: u32,
+    reserved: u32,
+    generation: u64,
+    device_generation: u64,
+    device_address: u64,
+};
+
+pub const R4GfxJobInfo = extern struct {
+    version: u32,
+    size: u32,
+    phase: u32,
+    result: u32,
+    flags: u32,
+    backend: u32,
+    timeline: u64,
+    point: u64,
+    device_generation: u64,
+    reset_generation: u64,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -95,11 +222,29 @@ pub const render_feature_premultiplied: u32 = 8;
 pub const render_max_images: u32 = 64;
 pub const render_max_commands: u32 = 1024;
 pub const render_max_pixels: u64 = 16777216;
+pub const device_software_only: u32 = 1;
+pub const render_backend_nvidia: u32 = 2;
+pub const resource_image: u32 = 1;
+pub const resource_sampler: u32 = 2;
+pub const resource_pipeline: u32 = 3;
+pub const image_target: u32 = 1;
+pub const source_create_system: u32 = 0;
+pub const source_import_buffer: u32 = 1;
+pub const source_shared_raster: u32 = 2;
+pub const source_borrow_cpu: u32 = 3;
+pub const device_resource_capacity: u32 = 256;
+pub const device_job_capacity: u32 = 16;
+pub const device_storage_alignment: u32 = 8;
+pub const device_gpu_copy: u32 = 1;
+pub const resource_invalidated: u32 = 2147483648;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
 pub const status_limit: i32 = -4;
 pub const status_alias: i32 = -5;
+pub const status_busy: i32 = -6;
+pub const status_stale: i32 = -7;
+pub const status_unavailable: i32 = -8;
 
 pub const api_v1_export_name = "API_V1";
 pub const api_v1_revision: u16 = 1;
@@ -139,4 +284,48 @@ pub const RenderV1 = extern struct {
     header: InterfaceHeader,
     capabilities: RenderV1CapabilitiesFn,
     execute_cpu: RenderV1ExecuteCpuFn,
+};
+
+pub const device_v1_export_name = "DEVICE_V1";
+pub const device_v1_revision: u16 = 1;
+pub const device_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 144,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x5234474658444556,
+    .interface_id_hi = 0x52344f5330373931,
+};
+pub const DeviceV1StorageSizeFn = *const fn () callconv(.c) u64;
+pub const DeviceV1DeviceOpenFn = *const fn (config: *const R4GfxDeviceConfig, output: *R4GfxDevice) callconv(.c) i32;
+pub const DeviceV1DeviceCloseFn = *const fn (device: *const R4GfxDevice) callconv(.c) i32;
+pub const DeviceV1DeviceInfoFn = *const fn (device: *const R4GfxDevice, output: *R4GfxDeviceInfo) callconv(.c) i32;
+pub const DeviceV1DeviceRefreshFn = *const fn (device: *const R4GfxDevice, output: *R4GfxDeviceInfo) callconv(.c) i32;
+pub const DeviceV1ResourceCreateFn = *const fn (device: *const R4GfxDevice, descriptor: *const R4GfxResourceDesc, output: *R4GfxResource) callconv(.c) i32;
+pub const DeviceV1ResourceRetainFn = *const fn (device: *const R4GfxDevice, resource: *const R4GfxResource) callconv(.c) i32;
+pub const DeviceV1ResourceReleaseFn = *const fn (device: *const R4GfxDevice, resource: *const R4GfxResource) callconv(.c) i32;
+pub const DeviceV1ResourceInfoFn = *const fn (device: *const R4GfxDevice, resource: *const R4GfxResource, output: *R4GfxResourceInfo) callconv(.c) i32;
+pub const DeviceV1RenderFn = *const fn (device: *const R4GfxDevice, batch: *const R4GfxRenderBatch, output: *R4GfxRenderStats) callconv(.c) i32;
+pub const DeviceV1CopySubmitFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxCopyRequest, output: *R4GfxJob) callconv(.c) i32;
+pub const DeviceV1JobInfoFn = *const fn (device: *const R4GfxDevice, job: *const R4GfxJob, output: *R4GfxJobInfo) callconv(.c) i32;
+pub const DeviceV1JobCancelFn = *const fn (device: *const R4GfxDevice, job: *const R4GfxJob) callconv(.c) i32;
+pub const DeviceV1JobReleaseFn = *const fn (device: *const R4GfxDevice, job: *const R4GfxJob) callconv(.c) i32;
+pub const DeviceV1 = extern struct {
+    header: InterfaceHeader,
+    storage_size: DeviceV1StorageSizeFn,
+    device_open: DeviceV1DeviceOpenFn,
+    device_close: DeviceV1DeviceCloseFn,
+    device_info: DeviceV1DeviceInfoFn,
+    device_refresh: DeviceV1DeviceRefreshFn,
+    resource_create: DeviceV1ResourceCreateFn,
+    resource_retain: DeviceV1ResourceRetainFn,
+    resource_release: DeviceV1ResourceReleaseFn,
+    resource_info: DeviceV1ResourceInfoFn,
+    render: DeviceV1RenderFn,
+    copy_submit: DeviceV1CopySubmitFn,
+    job_info: DeviceV1JobInfoFn,
+    job_cancel: DeviceV1JobCancelFn,
+    job_release: DeviceV1JobReleaseFn,
 };

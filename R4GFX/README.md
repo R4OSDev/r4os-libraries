@@ -1,6 +1,7 @@
 ﻿# R4GFX
 
-R4GFX is the userland graphics library. Its runtime module owns CPU rendering;
+R4GFX is the userland graphics library. Its runtime module owns render resources,
+backend selection and CPU rendering;
 R4DRAW owns shared buffers, queues and presentation. The compiled `Display/`
 helpers parse receiver metadata and the Zig bindings expose queue/output helpers.
 The Report keeps SCDC and low-rate scrambling separate; malformed extensions
@@ -8,22 +9,75 @@ contribute neither flag. Consumers decide link policy from a complete report.
 These source helpers compile in their consumers, separately from R4GFX.R4L.
 
 Build this unit with `../Build.sh R4GFX` on Linux or `..\Build.bat R4GFX` on
-Windows. Both use the same PS7 build. Add `test` for the existing seven owner
+Windows. Both use the same PS7 build. Add `test` for the existing eight owner
 and C/Zig conformance cases. No guest or benchmark runs automatically.
 
 ## Runtime interfaces
 
-`module.R4MF` is authoritative. Module 0.1.1 exports two independent tables:
+`module.R4MF` is authoritative. Module 0.1.2 exports three independent tables:
 
 | Import | Behavior |
 | --- | --- |
 | `R4GFX:API_V1:1` | Checked linear layouts and rectangle fill; original table and payloads unchanged. |
 | `R4GFX:RENDER_V1:1` | Capability query and ordered, bounded CPU 2D batches. |
+| `R4GFX:DEVICE_V1:1` | Caller-owned devices, images/targets, samplers, pipelines, raster imports and canonical copy receipts. |
 
 Bindings and API documentation are generated from `Contract/LibraryContract.json`.
 Use `ApiV1Client.init` or `RenderV1Client.init` with the app start context. The
 generated clients check interface identity, revision, size and required slots.
-The new renderer reports the software backend; it does not require R4NV.
+RENDER_V1 reports software rendering. DEVICE_V1 selects a compatible native copy
+backend when the caller also imports `R4NV:BACKEND_V1:1:1`; a missing or incompatible
+R4NV keeps software rendering and copying available.
+
+## Device resources
+
+Allocate `storage_size()` bytes at `device_storage_alignment`, zero the storage
+before its first open, and pass the app start context to `device_open`. Serialize
+calls for a device. Keep its storage, imported libraries and start context alive
+until `device_close` succeeds; never move an open device. Device, resource and job
+handles include owner/generation identity. Handles cannot survive freed storage.
+
+There are at most 256 resources and 16 jobs per device. Create system-memory images,
+import a canonical BO reference or immutable shared-raster lease, or borrow CPU
+storage with an explicit source generation. Images also act as render targets when
+`image_target` is set and writable access is allowed. Samplers and operation
+pipelines are immutable resources. Retain/release is explicit; a job independently
+holds its source and target until its exact receipt is physically retired.
+
+Overlapping leases for the same immutable shared-raster generation reuse one BO
+import. No upload or raster conversion occurs. Imported BO descriptors supply their
+real geometry; borrowed CPU storage remains the caller's responsibility. `resource_info`
+reports source kind/generation and canonical BO identity. Device counters distinguish
+imports/imported bytes, successful CPU reads/writes and completed native copy bytes.
+Upload bytes remain zero in this profile; these are logical costs, not bus measurements.
+
+The kernel publishes a coherent opaque backend profile and exact device/reset binding.
+R4NV validates its interface, command ABI, pinned RM release and Copy Engine class.
+The generation must still open successfully through the common queue. `device_refresh`
+changes the selected backend while preserving system images and immutable source
+imports. Device-local imports affected by reset/change become `resource_invalidated`;
+render/copy rejects them as stale, while information and release stay available.
+The caller recreates those resources from retained sources; old GPU addresses are
+never transferred to a new binding.
+
+`render` resolves a whole resource batch through the same software 2D implementation
+as RENDER_V1 and maps each distinct BO once. All primitive validation precedes pixel
+writes. A failed physical unmap can still return busy after rendering; resources
+remain tracked until release succeeds. Result metadata and input/storage ranges must
+not alias. Native capabilities currently advertise copy only: unsupported drawing
+uses this bounded CPU path and its result identifies the actual software backend.
+
+`copy_submit` uses the canonical queue and returns a job, not synthetic completion.
+Query/cancel/release preserve its original device/reset generation. An old queue stays
+open until its last receipt is released. Cancellation/deadline alone never frees active
+GPU resources. Close is retryable (`status_busy`); continue querying/releasing or retry
+close while retaining storage. Opaque device-local images are not CPU shadows.
+
+The Desktop batches fills through DEVICE_V1, flushes before other scene operations
+and retains imported shared rasters with its active/staging frame leases. Its borrowed
+scene target is released at each scene boundary. R4DRAW still handles presentation.
+DISPLAYD `/BUFFERS` includes a 64-byte canonical copy and exact 16-pixel readback through
+this interface, in addition to the original RENDER_V1 scene.
 
 ## CPU batch ownership
 
@@ -70,6 +124,7 @@ the renderer. Map release and presentation are separate caller actions.
 `Repositories/Diagnostics/DisplayDiag/src/buffers.zig` is the executable client
 example, including read leases surviving producer release and balanced teardown.
 
-Device selection, persistent GPU resources, R4NV encoding and native dispatch
-remain work in roadmap 0.79.17. A passing CPU scene does not qualify NVIDIA
-rendering. Evidence and remaining work: `Docs/Drivers/GrafikRender07917.txt`.
+Native shader rendering and complete GPU Desktop composition belong to 0.79.19/20.
+A passing CPU scene does not qualify NVIDIA hardware. Software evidence lives in
+`Docs/Drivers/GrafikRender07917.txt`; physical follow-up remains in
+`ExFiles/Reports/OssiGPU.txt`, section 0.79.17.

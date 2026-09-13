@@ -1,0 +1,299 @@
+//! Focused device integration inside the existing R4GFX provider test.
+//! Kernel callbacks below model ownership/retirement; R4NV negotiation and
+//! the CPU renderer are the actual providers, not test substitutes.
+const std = @import("std");
+const t = std.testing;
+const a = @import("r4os").abi;
+const nv = @import("r4nv_binding");
+const nv_provider = @import("r4nv_backend");
+const d = @import("device.zig");
+const c = d.c;
+const api = &@import("main.zig").r4gfx_device_v1;
+const Model = struct {
+    const Object = struct { bytes: [64]u8 = @splat(0), descriptor: a.GfxBufferDescriptor = .{}, live: bool = false };
+    const Ref = struct { object: ?usize = null, generation: u64 = 0, mapped: bool = false };
+    const Queue = struct { handle: a.GfxQueueHandle = .{}, config: a.GfxQueueConfig = .{} };
+    var objects: [4]Object = @splat(.{});
+    var references: [16]Ref = @splat(.{});
+    var queues: [4]Queue = @splat(.{});
+    var serial: u64 = 0x100000000;
+    var exports: usize = 0;
+    var maps: usize = 0;
+    var fail_unmap = false;
+    var premature_closes: usize = 0;
+    var inventory_reads: usize = 0;
+    var status: a.GfxFenceStatus = .{};
+    var job_live = false;
+    var job_request: a.GfxSubmission = .{};
+    var binding: a.GfxBackendBinding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
+    var nv_table: nv.BackendV1 = .{ .header = nv.backend_v1_header,
+        .negotiate = @ptrCast(&nv_provider.r4nv_negotiate_impl), .encode_copy = @ptrCast(&nv_provider.r4nv_encode_copy_impl) };
+
+    fn reset() void {
+        objects = @splat(.{}); references = @splat(.{}); queues = @splat(.{});
+        serial = 0x100000000; exports = 0; maps = 0; fail_unmap = false; premature_closes = 0; inventory_reads = 0; job_live = false;
+        binding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
+        nv_table.header = nv.backend_v1_header;
+    }
+    fn ref(handle: a.GfxBufferHandle) *Ref {
+        std.debug.assert(handle.id != 0 and handle.id <= references.len and handle.reserved0 == 0);
+        const value = &references[handle.id - 1];
+        std.debug.assert(value.object != null and value.generation == handle.generation);
+        return value;
+    }
+    fn lend(index: usize, out: *a.GfxBufferReference, immutable: bool) i32 {
+        std.debug.assert(out.version == 1 and out.size == 48);
+        for (&references, 0..) |*value, i| if (value.object == null) {
+            serial += 1;
+            value.* = .{ .object = index, .generation = serial };
+            out.* = .{ .buffer = .{ .id = @intCast(index + 100), .generation = 1 },
+                .reference = .{ .id = @intCast(i + 1), .generation = serial }, .flags = if (immutable) a.gfx_buffer_reference_immutable else 0 };
+            return 1;
+        };
+        return a.gfx_buffer_error_capacity;
+    }
+    fn create(input: *const a.GfxBufferDescriptor, out: *a.GfxBufferReference) callconv(.c) i32 {
+        for (&objects, 0..) |*object, i| if (!object.live) {
+            std.debug.assert(input.byte_length <= object.bytes.len);
+            object.* = .{ .live = true, .descriptor = input.* };
+            return lend(i, out, false);
+        };
+        return a.gfx_buffer_error_capacity;
+    }
+    fn describe(input: *const a.GfxBufferHandle, out: *a.GfxBufferDescriptor) callconv(.c) i32 {
+        out.* = objects[ref(input.*).object.?].descriptor; return 1;
+    }
+    fn import(input: *const a.GfxBufferHandle, out: *a.GfxBufferReference) callconv(.c) i32 { return lend(ref(input.*).object.?, out, false); }
+    fn release(input: *const a.GfxBufferHandle) callconv(.c) i32 {
+        const value = ref(input.*); std.debug.assert(!value.mapped);
+        const object = value.object.?; value.object = null;
+        for (&references) |*other| if (other.object == object) return 1;
+        objects[object].live = false; return 1;
+    }
+    fn map(input: *const a.GfxBufferHandle, access: u32, offset: u64, bytes: u64, out: *a.GfxBufferMap) callconv(.c) i32 {
+        const value = ref(input.*);
+        std.debug.assert(!value.mapped and access <= 1 and offset == 0 and bytes == 64);
+        value.mapped = true; maps += 1;
+        out.* = .{ .lease = input.*, .cpu_address = @intFromPtr(&objects[value.object.?].bytes), .byte_length = bytes };
+        return 1;
+    }
+    fn unmap(input: *const a.GfxBufferHandle) callconv(.c) i32 {
+        const value = ref(input.*); std.debug.assert(value.mapped);
+        if (fail_unmap) return a.gfx_buffer_error_busy;
+        value.mapped = false; return 1;
+    }
+    fn exportRaster(input: *const a.GuiSharedRasterLease, out: *a.GfxBufferReference) callconv(.c) i32 {
+        std.debug.assert(input.handle.id == 0x100000011 and input.handle.generation == 0x200000011 and input.raster_generation == 7 and input.lease_token == 9);
+        exports += 1;
+        objects[3] = .{ .live = true, .descriptor = .{ .byte_length = 64, .width = 4, .height = 4, .format = c.format_xrgb8888,
+            .plane_count = 1, .plane_pitches = .{ 16, 0, 0, 0 }, .usage = 5 } };
+        return lend(3, out, true);
+    }
+    fn backendInfo(index: u32, out: *a.GfxBackendInfo) callconv(.c) i32 {
+        inventory_reads += 1;
+        if (index != 1) return 0;
+        out.* = .{ .binding = binding, .profile = .{ .interface_id_lo = nv.backend_v1_header.interface_id_lo,
+            .interface_id_hi = nv.backend_v1_header.interface_id_hi, .revision = 1, .data_bytes = 32 } };
+        const details: nv.R4NvDriverProfile = .{ .version = 1, .size = 32, .vendor_id = 0x10de, .copy_class = 0xc6b5,
+            .rm_release = nv.rm_release, .command_abi = nv.command_abi, .reserved0 = 0, .reserved1 = 0 };
+        @memcpy(out.profile.data[0..32], std.mem.asBytes(&details)); return 1;
+    }
+    fn open(input: *const a.GfxQueueConfig, out: *a.GfxQueueHandle) callconv(.c) i32 {
+        if (input.adapter_id != 0) std.debug.assert(input.adapter_id == binding.adapter_id and input.device_generation == binding.device_generation and input.reset_generation == binding.reset_generation);
+        for (&queues) |*queue| if (queue.handle.timeline == 0) {
+            serial += 1; queue.* = .{ .handle = .{ .timeline = serial }, .config = input.* }; out.* = queue.handle; return 1;
+        };
+        return a.gfx_queue_error_capacity;
+    }
+    fn close(input: *const a.GfxQueueHandle) callconv(.c) i32 {
+        if (job_live and status.fence.timeline == input.timeline) { premature_closes += 1; return a.gfx_queue_error_busy; }
+        for (&queues) |*queue| if (queue.handle.timeline == input.timeline) { queue.* = .{}; return 1; };
+        return a.gfx_queue_error_stale;
+    }
+    fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        std.debug.assert(!job_live and input.operation == a.gfx_queue_operation_copy and input.dependency_count == 0 and input.byte_length == 16);
+        const found = for (&queues) |*entry| { if (entry.handle.timeline == queue.timeline) break entry; } else unreachable;
+        status = .{ .fence = .{ .slot = 1, .timeline = queue.timeline, .point = 0x400000017, .adapter_id = found.config.adapter_id,
+            .device_generation = found.config.device_generation, .reset_generation = found.config.reset_generation },
+            .phase = a.gfx_queue_phase_running, .flags = a.gfx_queue_flag_device_active | a.gfx_queue_flag_resources_held, .milestone = found.config.milestone };
+        job_request = input.*; job_live = true; out.* = status; return 1;
+    }
+    fn query(input: *const a.GfxFence, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        std.debug.assert(job_live and std.meta.eql(input.*, status.fence)); out.* = status; return 1;
+    }
+    fn cancel(input: *const a.GfxFence) callconv(.c) i32 {
+        std.debug.assert(job_live and std.meta.eql(input.*, status.fence));
+        if (status.phase == a.gfx_queue_phase_terminal) return a.gfx_queue_error_already_completed;
+        status.phase = a.gfx_queue_phase_terminal; status.result = a.gfx_queue_result_cancelled; return 1;
+    }
+    fn drop(input: *const a.GfxFence) callconv(.c) i32 {
+        std.debug.assert(job_live and std.meta.eql(input.*, status.fence) and status.phase == a.gfx_queue_phase_terminal and status.flags == 0);
+        job_live = false; return 1;
+    }
+    fn complete() void {
+        const source = ref(job_request.source); const target = ref(job_request.target);
+        std.debug.assert(!source.mapped and !target.mapped);
+        @memcpy(objects[target.object.?].bytes[job_request.target_offset..][0..16], objects[source.object.?].bytes[job_request.source_offset..][0..16]);
+        status.phase = a.gfx_queue_phase_terminal; status.result = a.gfx_queue_result_complete; status.flags = 0;
+    }
+    fn referenceCount() usize { var count: usize = 0; for (&references) |*value| if (value.object != null) { count += 1; }; return count; }
+};
+
+fn descriptor(kind: u32) c.R4GfxResourceDesc {
+    var value = std.mem.zeroes(c.R4GfxResourceDesc);
+    value.version = 1; value.size = @sizeOf(c.R4GfxResourceDesc); value.kind = kind; return value;
+}
+fn cpuImage(bytes: []u8) c.R4GfxResourceDesc {
+    var value = descriptor(c.resource_image); value.flags = c.image_target; value.source_kind = c.source_borrow_cpu; value.source_generation = 1;
+    value.image = .{ .cpu_address = @intFromPtr(bytes.ptr), .byte_length = bytes.len, .pitch = 16, .width = 4, .height = 4, .format = c.format_xrgb8888, .reserved = 0 };
+    return value;
+}
+pub fn check() !void {
+    Model.reset();
+    const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
+    const other_storage = try t.allocator.create(d.Device); defer t.allocator.destroy(other_storage); other_storage.* = .{};
+    const sys: a.R4XStartR4Sys = .{};
+    var draw: a.R4XStartR4Draw = .{ .gfx_buffer_create = @intFromPtr(&Model.create), .gfx_buffer_describe = @intFromPtr(&Model.describe),
+        .gfx_buffer_import = @intFromPtr(&Model.import), .gfx_buffer_release = @intFromPtr(&Model.release), .gfx_buffer_map = @intFromPtr(&Model.map),
+        .gfx_buffer_unmap = @intFromPtr(&Model.unmap), .gfx_buffer_export_raster = @intFromPtr(&Model.exportRaster), .gfx_queue_backend_info = @intFromPtr(&Model.backendInfo),
+        .gfx_queue_open = @intFromPtr(&Model.open), .gfx_queue_close = @intFromPtr(&Model.close), .gfx_queue_submit = @intFromPtr(&Model.submit),
+        .gfx_fence_query = @intFromPtr(&Model.query), .gfx_fence_cancel = @intFromPtr(&Model.cancel), .gfx_fence_release = @intFromPtr(&Model.drop) };
+    var imports = [_]a.R4XStartImport{
+        .{ .group_id = @intFromEnum(a.R4LGroup.r4sys), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&sys) },
+        .{ .group_id = @intFromEnum(a.R4LGroup.r4draw), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&draw) },
+        .{ .module_name = @intFromPtr("R4NV"), .symbol_name = @intFromPtr("BACKEND_V1"), .min_version = 1 },
+    };
+    const raw: a.R4XStartContext = .{ .flags = a.r4xstart_flag_imports_valid, .imports = @intFromPtr(&imports), .import_count = imports.len, .instance_id = 7 };
+    var config: c.R4GfxDeviceConfig = .{ .version = 1, .size = @sizeOf(c.R4GfxDeviceConfig), .storage_address = @intFromPtr(storage),
+        .storage_bytes = api.storage_size(), .start_context = @intFromPtr(&raw), .preferred_adapter = 0, .flags = 0 };
+    var handle: c.R4GfxDevice = undefined; var other: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(&config, &handle));
+    var state: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.device_info(&handle, &state));
+    try t.expect(state.backend == c.render_backend_software and state.gpu_operations == 0 and Model.inventory_reads == 0);
+    var alias_bytes: [@sizeOf(c.R4GfxDeviceInfo)]u8 align(8) = @splat(0);
+    @memcpy(alias_bytes[0..@sizeOf(c.R4GfxDevice)], std.mem.asBytes(&handle));
+    try t.expectEqual(c.status_alias, api.device_info(@ptrCast(&alias_bytes), @ptrCast(&alias_bytes)));
+    try t.expectEqualSlices(u8, std.mem.asBytes(&handle), alias_bytes[0..@sizeOf(c.R4GfxDevice)]);
+    config.storage_address = @intFromPtr(other_storage); try t.expectEqual(c.status_ok, api.device_open(&config, &other));
+    var pixels: [64]u8 align(8) = @splat(0xa5);
+    var target: c.R4GfxResource = undefined; var fill: c.R4GfxResource = undefined;
+    const image = cpuImage(&pixels);
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &image, &target));
+    var fill_desc = descriptor(c.resource_pipeline); fill_desc.operation = c.render_operation_fill;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &fill_desc, &fill));
+    try t.expectEqual(c.status_stale, api.resource_retain(&other, &target));
+    var commands: [2]c.R4GfxDraw = @splat(std.mem.zeroes(c.R4GfxDraw));
+    commands[0].target = target; commands[0].pipeline = fill; commands[0].target_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 }; commands[0].color = 0x123456;
+    commands[1] = commands[0]; commands[1].target_rect.width = 5;
+    var batch: c.R4GfxRenderBatch = .{ .commands = @intFromPtr(&commands), .command_count = 2, .flags = 0, .pixel_budget = 32 };
+    var stats = std.mem.zeroes(c.R4GfxRenderStats); stats.cpu.pixels = 71;
+    const aliased_batch: *c.R4GfxRenderBatch = @ptrCast(&storage.images);
+    aliased_batch.* = .{ .commands = 0, .command_count = 0, .flags = 0, .pixel_budget = 0 };
+    try t.expectEqual(c.status_alias, api.render(&handle, aliased_batch, &stats));
+    try t.expectEqual(c.status_invalid, api.render(&handle, &batch, &stats));
+    try t.expect(stats.cpu.pixels == 71 and std.mem.allEqual(u8, &pixels, 0xa5));
+    batch.command_count = 1;
+    try t.expectEqual(c.status_ok, api.render(&handle, &batch, &stats));
+    try t.expect(stats.cpu.pixels == 16 and stats.cpu.write_bytes == 64 and stats.fallback == 0 and Model.maps == 0);
+    for (0..16) |i| try t.expectEqual(@as(u32, 0x123456), std.mem.readInt(u32, pixels[i * 4 ..][0..4], .little));
+    var twin: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &image, &twin));
+    try t.expectEqualDeep(target, twin);
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &twin));
+    const old = handle;
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    config.storage_address = @intFromPtr(storage);
+    try t.expectEqual(c.status_ok, api.device_open(&config, &handle));
+    try t.expect(handle.generation > old.generation);
+    try t.expectEqual(c.status_stale, api.resource_retain(&handle, &target));
+    try t.expectEqual(c.status_stale, api.device_info(&old, &state));
+    try t.expectEqual(c.status_ok, api.device_close(&other));
+    // A mismatched optional R4NV interface preserves the same software device.
+    imports[2].table = @intFromPtr(&Model.nv_table); imports[2].resolved_version = 1;
+    Model.nv_table.header.abi_major = 2;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expect(state.backend == c.render_backend_software);
+    Model.nv_table.header = nv.backend_v1_header;
+    draw.size = 640; // Legacy R4DRAW has no profile tail.
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expect(state.backend == c.render_backend_software);
+    draw.size = @sizeOf(a.R4XStartR4Draw);
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expect(state.backend == c.render_backend_nvidia and state.gpu_operations == c.device_gpu_copy and state.reset_generation == Model.binding.reset_generation);
+    // Canonical shared raster generation is exported once and never uploaded.
+    const lease: a.GuiSharedRasterLease = .{ .handle = .{ .id = 0x100000011, .generation = 0x200000011 }, .raster_generation = 7, .lease_token = 9 };
+    var shared_desc = descriptor(c.resource_image); shared_desc.source_kind = c.source_shared_raster; shared_desc.source_address = @intFromPtr(&lease);
+    var shared: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &shared_desc, &shared));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &shared_desc, &twin));
+    try t.expectEqualDeep(shared, twin); try t.expect(Model.exports == 1);
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &twin));
+    var system = cpuImage(&pixels); system.source_kind = c.source_create_system; system.source_generation = 0; system.image.cpu_address = 0;
+    var source: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &system, &source));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &system, &target));
+    // A native imported BO has its own lifetime and must become stale at
+    // reset, while the two system images and the immutable raster survive.
+    Model.objects[2] = .{ .live = true, .descriptor = Model.objects[0].descriptor };
+    Model.objects[2].descriptor.location = a.gfx_buffer_location_device_local;
+    Model.objects[2].descriptor.adapter_id = Model.binding.adapter_id;
+    Model.objects[2].descriptor.device_generation = Model.binding.device_generation;
+    var native_reference: a.GfxBufferReference = .{};
+    try t.expectEqual(@as(i32, 1), Model.lend(2, &native_reference, false));
+    var native_desc = descriptor(c.resource_image); native_desc.flags = c.image_target;
+    native_desc.source_kind = c.source_import_buffer; native_desc.source_address = @intFromPtr(&native_reference.reference);
+    var native: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &native_desc, &native));
+    try t.expectEqual(@as(i32, 1), Model.release(&native_reference.reference));
+    @memset(&Model.objects[0].bytes, 0x31);
+    var job: c.R4GfxJob = undefined;
+    const copy: c.R4GfxCopyRequest = .{ .source = source, .target = target, .source_offset = 8, .target_offset = 12, .byte_length = 16, .deadline_ns = 99999999 };
+    try t.expectEqual(c.status_ok, api.copy_submit(&handle, &copy, &job));
+    var receipt: c.R4GfxJobInfo = undefined;
+    try t.expectEqual(c.status_ok, api.job_info(&handle, &job, &receipt));
+    const old_reset = receipt.reset_generation;
+    Model.binding.reset_generation += 1;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expect(state.reset_generation != old_reset and Model.premature_closes == 0);
+    var native_info: c.R4GfxResourceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.resource_info(&handle, &native, &native_info));
+    try t.expect(native_info.flags & c.resource_invalidated != 0);
+    var invalid_copy = copy; invalid_copy.source = native;
+    var rejected_job: c.R4GfxJob = undefined;
+    try t.expectEqual(c.status_stale, api.copy_submit(&handle, &invalid_copy, &rejected_job));
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &native));
+    try t.expectEqual(c.status_busy, api.job_release(&handle, &job));
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &source));
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &target));
+    try t.expect(Model.referenceCount() == 3); // Two copy sources plus the retained raster.
+    Model.complete();
+    try t.expectEqual(c.status_ok, api.job_info(&handle, &job, &receipt));
+    try t.expect(receipt.reset_generation == old_reset and receipt.flags == 0);
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expect(Model.referenceCount() == 1 and Model.premature_closes == 0);
+    try t.expectEqual(c.status_ok, api.device_info(&handle, &state));
+    try t.expect(state.gpu_copy_bytes == 16 and state.upload_bytes == 0 and state.imports == 2 and state.imported_bytes == 128 and Model.exports == 1);
+    // Cancellation is logical. Close must not lose its still-active fence.
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &system, &source));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &system, &target));
+    var cancelled_copy = copy; cancelled_copy.source = source; cancelled_copy.target = target;
+    try t.expectEqual(c.status_ok, api.copy_submit(&handle, &cancelled_copy, &job));
+    try t.expectEqual(c.status_busy, api.device_close(&handle));
+    try t.expect(Model.status.result == a.gfx_queue_result_cancelled and Model.referenceCount() == 2 and Model.job_live and Model.premature_closes == 0);
+    Model.status.flags = 0; // Explicit model acknowledgement of physical stop.
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and !Model.job_live and Model.premature_closes == 0);
+    // Failed CPU unmap retains backing until explicit recovery.
+    try t.expectEqual(c.status_ok, api.device_open(&config, &handle));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &system, &target));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &fill_desc, &fill));
+    commands[0].target = target; commands[0].pipeline = fill;
+    Model.fail_unmap = true;
+    try t.expectEqual(c.status_busy, api.render(&handle, &batch, &stats));
+    try t.expectEqual(c.status_busy, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 1);
+    Model.fail_unmap = false;
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
+}

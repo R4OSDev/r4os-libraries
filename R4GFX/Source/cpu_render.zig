@@ -143,10 +143,16 @@ fn put(image: *const c.R4GfxCpuImage, x: u64, y: u64, value: u32) void {
 }
 fn fill(target: *const c.R4GfxCpuImage, command: *const c.R4GfxCpuDraw) void {
     const r = command.target_rect;
+    const color = std.mem.nativeToLittle(u32, if (target.format == c.format_xrgb8888) command.color & 0xffffff else command.color);
     for (0..r.height) |y| {
         if (target.format == c.format_r8) {
             @memset(address(target, r.x, r.y + y)[0..r.width], @as(u8, @truncate(command.color)));
-        } else for (0..r.width) |x| put(target, r.x + x, r.y + y, command.color);
+        } else {
+            // Keep the Desktop fill path as a whole-row store. The CPU-map
+            // contract permits unaligned addresses and nonaligned pitches.
+            const row: [*]align(1) u32 = @ptrCast(address(target, r.x, r.y + y));
+            @memset(row[0..r.width], color);
+        }
     }
 }
 fn copyRect(source: *const c.R4GfxCpuImage, target: *const c.R4GfxCpuImage, command: *const c.R4GfxCpuDraw) void {

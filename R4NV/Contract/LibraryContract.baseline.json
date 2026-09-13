@@ -1,0 +1,705 @@
+{
+  "schema_version": 1,
+  "module_name": "R4NV",
+  "zig_client": "R4Nv",
+  "c_prefix": "r4nv",
+  "c_header": "r4nv.h",
+  "description": "NVIDIA backend command encoding and explicit software/driver protocol pairing. Physical GPU ownership remains in NVIDIA.R4D.",
+  "interfaces": [
+    {
+      "export_name": "BACKEND_V1",
+      "symbol": "r4nv_backend_v1",
+      "zig_name": "backend_v1",
+      "zig_type": "BackendV1",
+      "c_type": "R4NvBackendV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 5923445542285037124,
+      "interface_id_hi": 5923446628608850225,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "negotiate",
+          "c_name": "r4nv_negotiate",
+          "symbol": "r4nv_negotiate_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "profile",
+              "type": {
+                "name": "R4NvDeviceProfile",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "profile"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4NvFeatures",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4NV_STATUS",
+            "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
+          },
+          "description": "Validates a driver-supplied profile; reported features describe encoding support, not physical qualification."
+        },
+        {
+          "name": "encode_copy",
+          "c_name": "r4nv_encode_copy",
+          "symbol": "r4nv_encode_copy_impl",
+          "slot": 1,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4NvCopy",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "commands",
+              "type": {
+                "name": "u32",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "capacity",
+              "description": "commands"
+            },
+            {
+              "name": "capacity",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "capacity"
+            },
+            {
+              "name": "written",
+              "type": {
+                "name": "u32",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "written"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4NV_STATUS",
+            "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
+          },
+          "description": "Encodes virtual CE copies and system-scope semaphore release. Validation precedes every output write."
+        }
+      ],
+      "description": "Versioned, allocation-free NVIDIA encoding backend."
+    }
+  ],
+  "types": [
+    {
+      "name": "R4NvDeviceProfile",
+      "size": 48,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "vendor_id",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "vendor_id"
+        },
+        {
+          "name": "copy_class",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "copy_class"
+        },
+        {
+          "name": "rm_release",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "rm_release"
+        },
+        {
+          "name": "command_abi",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "command_abi"
+        },
+        {
+          "name": "adapter_id",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "adapter_id"
+        },
+        {
+          "name": "flags",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "device_generation",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_generation"
+        },
+        {
+          "name": "reset_generation",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reset_generation"
+        }
+      ],
+      "description": "Exact live driver binding plus its pinned command/firmware profile."
+    },
+    {
+      "name": "R4NvFeatures",
+      "size": 48,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "command_abi",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "command_abi"
+        },
+        {
+          "name": "features",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "features"
+        },
+        {
+          "name": "copy_class",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "copy_class"
+        },
+        {
+          "name": "gpu_address_bits",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "gpu_address_bits"
+        },
+        {
+          "name": "max_command_words",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "max_command_words"
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "max_copy_bytes",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "max_copy_bytes"
+        },
+        {
+          "name": "max_rows",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "max_rows"
+        }
+      ],
+      "description": "Actual encoder limits; no rendering or hardware validation claim."
+    },
+    {
+      "name": "R4NvCopy",
+      "size": 64,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "source",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source"
+        },
+        {
+          "name": "target",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target"
+        },
+        {
+          "name": "bytes",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "bytes"
+        },
+        {
+          "name": "semaphore",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "semaphore"
+        },
+        {
+          "name": "copy_class",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "copy_class"
+        },
+        {
+          "name": "rows",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "rows"
+        },
+        {
+          "name": "source_pitch",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_pitch"
+        },
+        {
+          "name": "target_pitch",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_pitch"
+        },
+        {
+          "name": "point",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "point"
+        },
+        {
+          "name": "flags",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        }
+      ],
+      "description": "GPU virtual operands supplied by the owning driver. Zero rows denotes a linear transfer; otherwise bytes per row."
+    },
+    {
+      "name": "R4NvDriverProfile",
+      "size": 32,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "vendor_id",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "vendor_id"
+        },
+        {
+          "name": "copy_class",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "copy_class"
+        },
+        {
+          "name": "rm_release",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "rm_release"
+        },
+        {
+          "name": "command_abi",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "command_abi"
+        },
+        {
+          "name": "reserved0",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved0"
+        },
+        {
+          "name": "reserved1",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved1"
+        }
+      ],
+      "description": "Immutable driver protocol payload in GfxBackendProfile.data. Version 1, size 32, vendor 0x10de and actual allocated copy-engine class; reserved fields zero. Identity/revision are BACKEND_V1. Kernel-assigned adapter and generations come from the accompanying binding, never these bytes."
+    }
+  ],
+  "constants": [
+    {
+      "zig_name": "command_abi",
+      "c_name": "R4NV_COMMAND_ABI",
+      "type": "u32",
+      "value": 1,
+      "description": "command_abi"
+    },
+    {
+      "zig_name": "rm_release",
+      "c_name": "R4NV_RM_RELEASE",
+      "type": "u32",
+      "value": 570144,
+      "description": "rm_release"
+    },
+    {
+      "zig_name": "feature_copy_linear",
+      "c_name": "R4NV_FEATURE_COPY_LINEAR",
+      "type": "u32",
+      "value": 1,
+      "description": "feature_copy_linear"
+    },
+    {
+      "zig_name": "feature_copy_rows",
+      "c_name": "R4NV_FEATURE_COPY_ROWS",
+      "type": "u32",
+      "value": 2,
+      "description": "feature_copy_rows"
+    },
+    {
+      "zig_name": "max_command_words",
+      "c_name": "R4NV_MAX_COMMAND_WORDS",
+      "type": "u32",
+      "value": 19,
+      "description": "max_command_words"
+    },
+    {
+      "zig_name": "status_ok",
+      "c_name": "R4NV_STATUS_OK",
+      "type": "i32",
+      "value": 0,
+      "description": "status_ok"
+    }
+  ],
+  "errors": [
+    {
+      "zig_name": "status_invalid",
+      "c_name": "R4NV_STATUS_INVALID",
+      "type": "i32",
+      "value": -1,
+      "description": "status_invalid"
+    },
+    {
+      "zig_name": "status_unsupported",
+      "c_name": "R4NV_STATUS_UNSUPPORTED",
+      "type": "i32",
+      "value": -2,
+      "description": "status_unsupported"
+    },
+    {
+      "zig_name": "status_capacity",
+      "c_name": "R4NV_STATUS_CAPACITY",
+      "type": "i32",
+      "value": -3,
+      "description": "status_capacity"
+    }
+  ],
+  "ownership_rules": [
+    {
+      "name": "hardware",
+      "text": "The library creates command words only. NVIDIA.R4D validates mappings, current generation, channel state and completion; only that driver submits or frees GPU resources."
+    },
+    {
+      "name": "outputs",
+      "text": "Inputs are immutable for the call. Output commands and written count must be separate from each other and request metadata. Rejection leaves both outputs unchanged."
+    },
+    {
+      "name": "version",
+      "text": "BACKEND_V1 is independent of R4GFX and the platform ABI. Optional consumers validate the library header and negotiate the actual driver profile; absent/incompatible backends keep software available."
+    }
+  ]
+}

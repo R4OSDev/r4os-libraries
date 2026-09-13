@@ -270,6 +270,732 @@
         }
       ],
       "description": "Independent bounded CPU 2D execution table. Existing API_V1 remains byte-for-byte compatible."
+    },
+    {
+      "export_name": "DEVICE_V1",
+      "symbol": "r4gfx_device_v1",
+      "zig_name": "device_v1",
+      "zig_type": "DeviceV1",
+      "c_type": "R4GfxDeviceV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 5923437777353196886,
+      "interface_id_hi": 5923446628608850225,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "storage_size",
+          "c_name": "r4gfx_storage_size",
+          "symbol": "r4gfx_storage_size_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library."
+        },
+        {
+          "name": "device_open",
+          "c_name": "r4gfx_device_open",
+          "symbol": "r4gfx_device_open_impl",
+          "slot": 1,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "config",
+              "type": {
+                "name": "R4GfxDeviceConfig",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "config"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Initializes caller storage and negotiates an optional backend; software fallback remains available."
+        },
+        {
+          "name": "device_close",
+          "c_name": "r4gfx_device_close",
+          "symbol": "r4gfx_device_close_impl",
+          "slot": 2,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Retryable close: cancel jobs, release only retired resources, retain unresolved backing; success invalidates the device handle."
+        },
+        {
+          "name": "device_info",
+          "c_name": "r4gfx_device_info",
+          "symbol": "r4gfx_device_info_impl",
+          "slot": 3,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxDeviceInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Reports the currently selected backend, feature limits and actual work counters."
+        },
+        {
+          "name": "device_refresh",
+          "c_name": "r4gfx_device_refresh",
+          "symbol": "r4gfx_device_refresh_impl",
+          "slot": 4,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxDeviceInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Revalidates the live backend binding, discards stale GPU state and preserves source resources."
+        },
+        {
+          "name": "resource_create",
+          "c_name": "r4gfx_resource_create",
+          "symbol": "r4gfx_resource_create_impl",
+          "slot": 5,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "descriptor",
+              "type": {
+                "name": "R4GfxResourceDesc",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "descriptor"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Creates an image/sampler/pipeline resource. Repeated immutable source generations retain the existing import."
+        },
+        {
+          "name": "resource_retain",
+          "c_name": "r4gfx_resource_retain",
+          "symbol": "r4gfx_resource_retain_impl",
+          "slot": 6,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "resource",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "resource"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Adds one logical resource reference without copying pixels or reimporting a BO."
+        },
+        {
+          "name": "resource_release",
+          "c_name": "r4gfx_resource_release",
+          "symbol": "r4gfx_resource_release_impl",
+          "slot": 7,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "resource",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "resource"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Drops one logical reference; jobs independently retain their source and target until physical retirement."
+        },
+        {
+          "name": "resource_info",
+          "c_name": "r4gfx_resource_info",
+          "symbol": "r4gfx_resource_info_impl",
+          "slot": 8,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "resource",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "resource"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxResourceInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Returns source provenance without borrowing a new CPU map."
+        },
+        {
+          "name": "render",
+          "c_name": "r4gfx_render",
+          "symbol": "r4gfx_render_impl",
+          "slot": 9,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "batch",
+              "type": {
+                "name": "R4GfxRenderBatch",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "batch"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxRenderStats",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Resolves the complete bounded scene, maps each image once, validates all commands, renders and releases the CPU maps."
+        },
+        {
+          "name": "copy_submit",
+          "c_name": "r4gfx_copy_submit",
+          "symbol": "r4gfx_copy_submit_impl",
+          "slot": 10,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxCopyRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Submits one ordered BO copy and retains both resources until actual fence retirement."
+        },
+        {
+          "name": "job_info",
+          "c_name": "r4gfx_job_info",
+          "symbol": "r4gfx_job_info_impl",
+          "slot": 11,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "job",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "job"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJobInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Reads canonical completion and physical resource-retirement state without waiting."
+        },
+        {
+          "name": "job_cancel",
+          "c_name": "r4gfx_job_cancel",
+          "symbol": "r4gfx_job_cancel_impl",
+          "slot": 12,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "job",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "job"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Requests cancellation; does not claim GPU quiescence or release referenced resources."
+        },
+        {
+          "name": "job_release",
+          "c_name": "r4gfx_job_release",
+          "symbol": "r4gfx_job_release_impl",
+          "slot": 13,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "job",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "job"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Releases a retired fence and its resource references; returns busy while physical use remains."
+        }
+      ],
+      "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
     }
   ],
   "types": [
@@ -878,6 +1604,1103 @@
         }
       ],
       "description": "Only written after successful validation and execution; rejected batches preserve output and image bytes."
+    },
+    {
+      "name": "R4GfxDevice",
+      "size": 16,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "address",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "address"
+        },
+        {
+          "name": "generation",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "generation"
+        }
+      ],
+      "description": "Caller-owned storage identity. Memory stays valid through successful close; first allocation must be zeroed. Reopening the same retained storage advances its generation."
+    },
+    {
+      "name": "R4GfxDeviceConfig",
+      "size": 40,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "storage_address",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "storage_address"
+        },
+        {
+          "name": "storage_bytes",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "storage_bytes"
+        },
+        {
+          "name": "start_context",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "start_context"
+        },
+        {
+          "name": "preferred_adapter",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "preferred_adapter"
+        },
+        {
+          "name": "flags",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        }
+      ],
+      "description": "Version 1; storage_size bytes aligned to 8, borrowed R4XStartContext for this caller. Preferred adapter zero selects automatically. software_only prevents native selection. Storage and outputs must not overlap input/start metadata."
+    },
+    {
+      "name": "R4GfxDeviceInfo",
+      "size": 120,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "generation",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "generation"
+        },
+        {
+          "name": "adapter_id",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "adapter_id"
+        },
+        {
+          "name": "backend",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "backend"
+        },
+        {
+          "name": "device_generation",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_generation"
+        },
+        {
+          "name": "reset_generation",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reset_generation"
+        },
+        {
+          "name": "formats",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "formats"
+        },
+        {
+          "name": "operations",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "operations"
+        },
+        {
+          "name": "samplers",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "samplers"
+        },
+        {
+          "name": "gpu_operations",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "gpu_operations"
+        },
+        {
+          "name": "resource_capacity",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "resource_capacity"
+        },
+        {
+          "name": "job_capacity",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "job_capacity"
+        },
+        {
+          "name": "imports",
+          "offset": 64,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "imports"
+        },
+        {
+          "name": "imported_bytes",
+          "offset": 72,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "imported_bytes"
+        },
+        {
+          "name": "cpu_read_bytes",
+          "offset": 80,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "cpu_read_bytes"
+        },
+        {
+          "name": "cpu_write_bytes",
+          "offset": 88,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "cpu_write_bytes"
+        },
+        {
+          "name": "gpu_copy_bytes",
+          "offset": 96,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "gpu_copy_bytes"
+        },
+        {
+          "name": "upload_bytes",
+          "offset": 104,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "upload_bytes"
+        },
+        {
+          "name": "backend_changes",
+          "offset": 112,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "backend_changes"
+        }
+      ],
+      "description": "Software render capabilities and separately negotiated native copy capabilities. Counters are actual work; direct imports do not count as uploads. Refresh changes GPU identity only, preserving portable sources."
+    },
+    {
+      "name": "R4GfxResource",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "slot",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "slot"
+        },
+        {
+          "name": "kind",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "kind"
+        },
+        {
+          "name": "generation",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "generation"
+        },
+        {
+          "name": "device_generation",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_generation"
+        },
+        {
+          "name": "device_address",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact owner storage address; together with device_generation rejects handles from any other live device."
+        }
+      ],
+      "description": "Opaque, nonwrapping resource identity local to one device storage generation. Retain/release are explicit; jobs hold independent internal references."
+    },
+    {
+      "name": "R4GfxResourceDesc",
+      "size": 88,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "kind",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "kind"
+        },
+        {
+          "name": "flags",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "source_kind",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_kind"
+        },
+        {
+          "name": "sampler",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "sampler"
+        },
+        {
+          "name": "operation",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "operation"
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "source_address",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_address"
+        },
+        {
+          "name": "source_generation",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_generation"
+        },
+        {
+          "name": "image",
+          "offset": 48,
+          "type": {
+            "name": "R4GfxCpuImage",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "image"
+        }
+      ],
+      "description": "Image, immutable sampler or 2D pipeline. Image source is a new system BO, pointer to canonical GfxBufferHandle, pointer to GuiSharedRasterLease, or explicitly borrowed CPU image. Image target flag permits writes; immutable rasters cannot be targets. Import forms derive image geometry from the canonical BO. Borrowed CPU bytes remain valid while any reference/job exists. Unused fields are zero."
+    },
+    {
+      "name": "R4GfxResourceInfo",
+      "size": 112,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "resource",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "resource"
+        },
+        {
+          "name": "source_kind",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_kind"
+        },
+        {
+          "name": "flags",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "source_generation",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_generation"
+        },
+        {
+          "name": "buffer_id",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "buffer_id"
+        },
+        {
+          "name": "references",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "references"
+        },
+        {
+          "name": "buffer_generation",
+          "offset": 64,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "buffer_generation"
+        },
+        {
+          "name": "image",
+          "offset": 72,
+          "type": {
+            "name": "R4GfxCpuImage",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "image"
+        }
+      ],
+      "description": "Source provenance and current logical reference count. Image addresses are exposed only for explicitly borrowed CPU sources; BO CPU mapping remains internal and transient."
+    },
+    {
+      "name": "R4GfxDraw",
+      "size": 168,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "target",
+          "offset": 0,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target"
+        },
+        {
+          "name": "source",
+          "offset": 32,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source"
+        },
+        {
+          "name": "sampler",
+          "offset": 64,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "sampler"
+        },
+        {
+          "name": "pipeline",
+          "offset": 96,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pipeline"
+        },
+        {
+          "name": "source_rect",
+          "offset": 128,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_rect"
+        },
+        {
+          "name": "target_rect",
+          "offset": 144,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_rect"
+        },
+        {
+          "name": "color",
+          "offset": 160,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "color"
+        },
+        {
+          "name": "opacity",
+          "offset": 164,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "opacity"
+        }
+      ],
+      "description": "Ordered 2D operation through immutable pipeline and sampler resources. Fill uses zero source/sampler/source_rect/opacity. Blit uses opacity 255; over uses premultiplied alpha."
+    },
+    {
+      "name": "R4GfxRenderBatch",
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "commands",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "commands"
+        },
+        {
+          "name": "command_count",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "command_count"
+        },
+        {
+          "name": "flags",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "pixel_budget",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pixel_budget"
+        }
+      ],
+      "description": "Borrowed array of R4GfxDraw. Reuses RENDER_V1 limits and all-before-write validation. No service IPC per draw; unavailable native operations use the shared CPU renderer."
+    },
+    {
+      "name": "R4GfxRenderStats",
+      "size": 40,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "cpu",
+          "offset": 0,
+          "type": {
+            "name": "R4GfxCpuStats",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "cpu"
+        },
+        {
+          "name": "backend",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "backend"
+        },
+        {
+          "name": "fallback",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "fallback"
+        }
+      ],
+      "description": "Actual execution backend and byte counts. fallback is one only when the selected native device used software for unsupported drawing features."
+    },
+    {
+      "name": "R4GfxCopyRequest",
+      "size": 96,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "source",
+          "offset": 0,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source"
+        },
+        {
+          "name": "target",
+          "offset": 32,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target"
+        },
+        {
+          "name": "source_offset",
+          "offset": 64,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_offset"
+        },
+        {
+          "name": "target_offset",
+          "offset": 72,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_offset"
+        },
+        {
+          "name": "byte_length",
+          "offset": 80,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte_length"
+        },
+        {
+          "name": "deadline_ns",
+          "offset": 88,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "deadline_ns"
+        }
+      ],
+      "description": "Asynchronous whole-range BO copy on the selected common queue. Borrowed CPU pointers are never submitted as GPU addresses. Serial queue ordering applies; explicit deadline uses the platform monotonic clock."
+    },
+    {
+      "name": "R4GfxJob",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "slot",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "slot"
+        },
+        {
+          "name": "reserved",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "generation",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "generation"
+        },
+        {
+          "name": "device_generation",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_generation"
+        },
+        {
+          "name": "device_address",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact owner storage address; together with device_generation rejects handles from any other live device."
+        }
+      ],
+      "description": "Device-local copy-job identity. A terminal logical result is independent of physical resource retirement. Release requires actual resources_released."
+    },
+    {
+      "name": "R4GfxJobInfo",
+      "size": 56,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "phase",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "phase"
+        },
+        {
+          "name": "result",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "result"
+        },
+        {
+          "name": "flags",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "backend",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "backend"
+        },
+        {
+          "name": "timeline",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "timeline"
+        },
+        {
+          "name": "point",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "point"
+        },
+        {
+          "name": "device_generation",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_generation"
+        },
+        {
+          "name": "reset_generation",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reset_generation"
+        }
+      ],
+      "description": "Canonical queue phase/result/flags, including device_active/resources_held, and original fence identity. Backend reports where the job ran; a software completion is not a GPU completion."
     }
   ],
   "constants": [
@@ -1020,6 +2843,111 @@
       "type": "u64",
       "value": 16777216,
       "description": "render_max_pixels"
+    },
+    {
+      "zig_name": "device_software_only",
+      "c_name": "R4GFX_DEVICE_SOFTWARE_ONLY",
+      "type": "u32",
+      "value": 1,
+      "description": "device_software_only"
+    },
+    {
+      "zig_name": "render_backend_nvidia",
+      "c_name": "R4GFX_RENDER_BACKEND_NVIDIA",
+      "type": "u32",
+      "value": 2,
+      "description": "render_backend_nvidia"
+    },
+    {
+      "zig_name": "resource_image",
+      "c_name": "R4GFX_RESOURCE_IMAGE",
+      "type": "u32",
+      "value": 1,
+      "description": "resource_image"
+    },
+    {
+      "zig_name": "resource_sampler",
+      "c_name": "R4GFX_RESOURCE_SAMPLER",
+      "type": "u32",
+      "value": 2,
+      "description": "resource_sampler"
+    },
+    {
+      "zig_name": "resource_pipeline",
+      "c_name": "R4GFX_RESOURCE_PIPELINE",
+      "type": "u32",
+      "value": 3,
+      "description": "resource_pipeline"
+    },
+    {
+      "zig_name": "image_target",
+      "c_name": "R4GFX_IMAGE_TARGET",
+      "type": "u32",
+      "value": 1,
+      "description": "image_target"
+    },
+    {
+      "zig_name": "source_create_system",
+      "c_name": "R4GFX_SOURCE_CREATE_SYSTEM",
+      "type": "u32",
+      "value": 0,
+      "description": "source_create_system"
+    },
+    {
+      "zig_name": "source_import_buffer",
+      "c_name": "R4GFX_SOURCE_IMPORT_BUFFER",
+      "type": "u32",
+      "value": 1,
+      "description": "source_import_buffer"
+    },
+    {
+      "zig_name": "source_shared_raster",
+      "c_name": "R4GFX_SOURCE_SHARED_RASTER",
+      "type": "u32",
+      "value": 2,
+      "description": "source_shared_raster"
+    },
+    {
+      "zig_name": "source_borrow_cpu",
+      "c_name": "R4GFX_SOURCE_BORROW_CPU",
+      "type": "u32",
+      "value": 3,
+      "description": "source_borrow_cpu"
+    },
+    {
+      "zig_name": "device_resource_capacity",
+      "c_name": "R4GFX_DEVICE_RESOURCE_CAPACITY",
+      "type": "u32",
+      "value": 256,
+      "description": "device_resource_capacity"
+    },
+    {
+      "zig_name": "device_job_capacity",
+      "c_name": "R4GFX_DEVICE_JOB_CAPACITY",
+      "type": "u32",
+      "value": 16,
+      "description": "device_job_capacity"
+    },
+    {
+      "zig_name": "device_storage_alignment",
+      "c_name": "R4GFX_DEVICE_STORAGE_ALIGNMENT",
+      "type": "u32",
+      "value": 8,
+      "description": "device_storage_alignment"
+    },
+    {
+      "zig_name": "device_gpu_copy",
+      "c_name": "R4GFX_DEVICE_GPU_COPY",
+      "type": "u32",
+      "value": 1,
+      "description": "device_gpu_copy"
+    },
+    {
+      "zig_name": "resource_invalidated",
+      "c_name": "R4GFX_RESOURCE_INVALIDATED",
+      "type": "u32",
+      "value": 2147483648,
+      "description": "ResourceInfo-only flag: native device/reset generation lost; read/copy/render are stale, explicit release remains valid."
     }
   ],
   "errors": [
@@ -1057,6 +2985,27 @@
       "type": "i32",
       "value": -5,
       "description": "Unsupported source/target or pixel/metadata alias."
+    },
+    {
+      "zig_name": "status_busy",
+      "c_name": "R4GFX_STATUS_BUSY",
+      "type": "i32",
+      "value": -6,
+      "description": "status_busy"
+    },
+    {
+      "zig_name": "status_stale",
+      "c_name": "R4GFX_STATUS_STALE",
+      "type": "i32",
+      "value": -7,
+      "description": "status_stale"
+    },
+    {
+      "zig_name": "status_unavailable",
+      "c_name": "R4GFX_STATUS_UNAVAILABLE",
+      "type": "i32",
+      "value": -8,
+      "description": "status_unavailable"
     }
   ],
   "ownership_rules": [
@@ -1079,6 +3028,14 @@
     {
       "name": "RENDER_V1 colors",
       "text": "Source-over uses premultiplied ARGB8888 and integer rounding; XRGB is opaque with zero stored padding byte. Blit converts XRGB/ARGB and scales with pixel-center nearest or bilinear filtering clamped to the source rectangle. R8 supports fill/blit, not source-over. Color space conversion remains a separate stage."
+    },
+    {
+      "name": "device_storage",
+      "text": "DEVICE_V1 storage belongs to one serialized caller. Keep its allocation, start context and imported R4Ls alive through successful device_close. No R4L-global allocator or context. Library outputs and original batch metadata never alias writable image bytes or internal storage."
+    },
+    {
+      "name": "resource_retirement",
+      "text": "Logical release and device change never prove GPU quiescence. Jobs retain their exact canonical fences and BO sources until actual resource retirement. Portable CPU/immutable raster sources remain reconstructable after backend reset. Driver mapping caches may retain bounded backing until confirmed eviction."
     }
   ]
 }

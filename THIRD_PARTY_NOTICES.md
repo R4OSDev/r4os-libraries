@@ -39,3 +39,7 @@ implementation has been incorporated.
 
 HF-VSDB SCDC and low-rate scrambling field meanings follow the pinned
 libdisplay-info cta.c; its source hash is also recorded in that provenance.
+
+## R4NV command encoding
+
+R4NV/Source/copy.zig contains the existing NVIDIA 570.144 and Nouveau-based CE encoding implementation, now shared with NVIDIA.R4D. Full NVIDIA and Red Hat MIT notices are preserved in the source and R4NV/ThirdParty/Nvidia/LICENSES.txt. No firmware is embedded in R4NV.R4L. The existing distributed NVIDIA-GSP-RUNTIME-LICENSE.txt contains these notices.
