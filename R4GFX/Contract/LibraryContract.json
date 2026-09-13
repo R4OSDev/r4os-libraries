@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 5,
+      "revision": 6,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -1241,6 +1241,68 @@
             "ownership": "Preparation may wait for native allocation, outside frame submission. Retained resource and copy job/fence use the existing lifecycle. Output/ready fence bytes remain unchanged on failure; failed cleanup stays tracked by the device."
           },
           "description": "Reuse a compatible image or explicitly allocate and asynchronously copy/convert its layout within a byte budget. No image scaling or hidden per-draw preparation. Unknown modifiers cannot be interpreted as linear; scanout preparation does not activate an output."
+        },
+        {
+          "name": "image_present",
+          "c_name": "r4gfx_image_present",
+          "symbol": "r4gfx_image_present_impl",
+          "slot": 18,
+          "since_revision": 6,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxImagePresentRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Copies request/dependencies and retains source through the existing job lifecycle. A Busy result has no output side effects; leave the previous complete image visible and retry from the event loop."
+          },
+          "description": "Submit an already rendered image through the shared active-output owner and queue. Device capability device_gpu_present is required; incompatible size, adapter or format is rejected. No scanout handle or NVIDIA detail crosses the library boundary."
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
@@ -3654,6 +3716,102 @@
         }
       ],
       "description": "Caller owns one returned image reference and, for conversion, its asynchronous copy job. Flags1=copy pending,2=software image,4=reused. dependency_count fences were written to the caller ready array; pass them to a subsequent draw. Successful prepare is not copy completion. Release the job only after physical retirement, and release the image reference independently."
+    },
+    {
+      "name": "R4GfxImagePresentRequest",
+      "size": 72,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "source",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source"
+        },
+        {
+          "name": "deadline_ns",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "deadline_ns"
+        },
+        {
+          "name": "frame_key",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "frame_key"
+        },
+        {
+          "name": "dependency_count",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dependency_count"
+        },
+        {
+          "name": "reserved",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "dependencies",
+          "offset": 64,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dependencies"
+        }
+      ],
+      "description": "Present one complete native XRGB image to the active output at unchanged dimensions. frame_key is a nonzero producer generation; deadline_ns is a finite absolute deadline. At most8 copied dependencies; reserved is zero. Return is ordinary R4GfxJob ownership. Source stays retained until job_release after physical retirement. Completion means the device copied into private scanout storage; visible scanout remains the platform DisplayPresentationStats receipt. No CPU image mapping or blocking GPU wait."
     }
   ],
   "constants": [
@@ -4027,6 +4185,13 @@
       "type": "u32",
       "value": 4,
       "description": "prepared_reused"
+    },
+    {
+      "zig_name": "device_gpu_present",
+      "c_name": "R4GFX_DEVICE_GPU_PRESENT",
+      "type": "u32",
+      "value": 16,
+      "description": "Asynchronous native image-to-output submission is supported; actual output admission may still return Busy, Unavailable or Unsupported."
     }
   ],
   "errors": [

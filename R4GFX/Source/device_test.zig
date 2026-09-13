@@ -151,7 +151,8 @@ const Model = struct {
         return a.gfx_queue_error_stale;
     }
     fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
-        std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows or input.operation == a.gfx_queue_operation_render) and input.dependency_count <= 1);
+        std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows or
+            input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_present) and input.dependency_count <= 1);
         if (input.dependency_count == 1) {
             std.debug.assert(job_live and std.meta.eql(input.dependencies[0], status.fence));
             dependency_seen = true;
@@ -400,6 +401,7 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
     try checkNativeRender(&config);
+    try checkNativePresent(&config);
     try checkImagePreparation(&config);
     try checkTiledPreparation(&config);
 }
@@ -603,6 +605,65 @@ fn checkNativeRender(config: *const c.R4GfxDeviceConfig) !void {
     try t.expect(Model.referenceCount() == 2 and Model.maps == 0);
     Model.status.flags = 0;
     try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
+}
+
+fn checkNativePresent(config: *const c.R4GfxDeviceConfig) !void {
+    Model.reset(); Model.operations = 29;
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    const device = try d.get(&handle, false);
+    const timeline = device.queue.timeline;
+    const native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999,
+        .width = 4, .height = 4, .format = c.format_xrgb8888, .layout = 1 };
+    var desc = descriptor(c.resource_image);
+    desc.flags = c.image_target; desc.source_kind = c.source_create_native; desc.source_address = @intFromPtr(&native);
+    var image: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &desc, &image));
+    var request: c.R4GfxImagePresentRequest = .{ .version = 1, .size = 72, .source = image, .deadline_ns = 99999999,
+        .frame_key = 7, .dependency_count = 0, .reserved = 0, .dependencies = 0 };
+    var job = std.mem.zeroes(c.R4GfxJob); job.generation = 79;
+    const original = job;
+    try t.expectEqual(c.status_unsupported, api.image_present(&handle, &request, &job));
+    try t.expectEqualDeep(original, job);
+    Model.operations = 61;
+    var info: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &info));
+    try t.expect(info.gpu_operations & c.device_gpu_present != 0 and device.queue.timeline == timeline);
+    request.reserved = 1;
+    try t.expectEqual(c.status_invalid, api.image_present(&handle, &request, &job));
+    try t.expectEqualDeep(original, job);
+    request.reserved = 0;
+    try t.expectEqual(c.status_ok, api.image_present(&handle, &request, &job));
+    try t.expect(Model.maps == 0 and Model.job_request.operation == a.gfx_queue_operation_present and
+        Model.job_request.target.id == 0 and Model.job_request.source_offset == 0 and Model.job_request.target_offset == 0 and
+        Model.job_request.byte_length == 16 and Model.job_request.row_count == 4 and Model.job_request.source_pitch == 64 and Model.job_request.target_pitch == 0);
+    request.frame_key = 8;
+    try t.expect(Model.job_request.frame_key == 7);
+    var dependency: c.R4GfxCopyFence = undefined;
+    try t.expectEqual(c.status_ok, api.job_fence(&handle, &job, &dependency));
+    request.dependency_count = 1; request.dependencies = @intFromPtr(&dependency);
+    var denied = original;
+    try t.expectEqual(c.status_busy, api.image_present(&handle, &request, &denied));
+    try t.expectEqualDeep(original, denied);
+    try t.expect(Model.dependency_seen);
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &image));
+    try t.expectEqual(c.status_ok, api.job_cancel(&handle, &job));
+    try t.expectEqual(c.status_busy, api.job_release(&handle, &job));
+    try t.expect(Model.referenceCount() == 1 and Model.maps == 0);
+    Model.status.flags = 0;
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expect(Model.referenceCount() == 0);
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &desc, &image));
+    request.source = image; request.dependency_count = 0; request.dependencies = 0;
+    try t.expectEqual(c.status_ok, api.image_present(&handle, &request, &job));
+    // Transport receipt only. The driver model tests CE and visible flip.
+    Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_complete; Model.status.flags = 0;
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expectEqual(c.status_ok, api.device_info(&handle, &info));
+    try t.expect(info.gpu_copy_bytes == 64 and info.cpu_read_bytes == 0 and info.cpu_write_bytes == 0);
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &image));
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
 }

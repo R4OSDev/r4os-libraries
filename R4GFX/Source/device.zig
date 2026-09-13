@@ -225,6 +225,7 @@ pub const Device = struct {
                     if (features.features & nv.feature_copy_layout != 0) gpu_operations |= c.device_gpu_copy_layout;
                 }
                 if (snapshot.operations & 16 != 0) gpu_operations |= c.device_gpu_render;
+                if (snapshot.operations & 32 != 0) gpu_operations |= c.device_gpu_present;
                 break;
             }
         }
@@ -359,6 +360,11 @@ pub fn prepareImage(handle: *const c.R4GfxDevice, request: *const c.R4GfxImagePr
     const device = get(handle, false) catch |err| return code(err);
     separateInput(handle, output) catch |err| return code(err);
     return @import("device_image_prepare.zig").prepare(device,handle,request,output) catch |err| code(err);
+}
+pub fn presentImage(handle: *const c.R4GfxDevice, request: *const c.R4GfxImagePresentRequest, output: *c.R4GfxJob) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    separateInput(handle, output) catch |err| return code(err);
+    return @import("device_image_present.zig").submit(device, request, output) catch |err| code(err);
 }
 pub fn submitCopy(handle: *const c.R4GfxDevice, request: *const c.R4GfxCopyRequest, output: *c.R4GfxJob) callconv(.c) i32 {
     const device = get(handle, false) catch |err| return code(err);

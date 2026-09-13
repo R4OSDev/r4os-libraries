@@ -230,13 +230,22 @@ comptime {
     if (@offsetOf(implementation.R4GfxPreparedImage, "job") != 40 or @offsetOf(binding.R4GfxPreparedImage, "job") != 40) @compileError("R4GfxPreparedImage.job offset drift");
     if (@offsetOf(implementation.R4GfxPreparedImage, "flags") != 72 or @offsetOf(binding.R4GfxPreparedImage, "flags") != 72) @compileError("R4GfxPreparedImage.flags offset drift");
     if (@offsetOf(implementation.R4GfxPreparedImage, "dependency_count") != 76 or @offsetOf(binding.R4GfxPreparedImage, "dependency_count") != 76) @compileError("R4GfxPreparedImage.dependency_count offset drift");
+    if (@sizeOf(implementation.R4GfxImagePresentRequest) != 72 or @sizeOf(binding.R4GfxImagePresentRequest) != 72) @compileError("R4GfxImagePresentRequest size drift");
+    if (@offsetOf(implementation.R4GfxImagePresentRequest, "version") != 0 or @offsetOf(binding.R4GfxImagePresentRequest, "version") != 0) @compileError("R4GfxImagePresentRequest.version offset drift");
+    if (@offsetOf(implementation.R4GfxImagePresentRequest, "size") != 4 or @offsetOf(binding.R4GfxImagePresentRequest, "size") != 4) @compileError("R4GfxImagePresentRequest.size offset drift");
+    if (@offsetOf(implementation.R4GfxImagePresentRequest, "source") != 8 or @offsetOf(binding.R4GfxImagePresentRequest, "source") != 8) @compileError("R4GfxImagePresentRequest.source offset drift");
+    if (@offsetOf(implementation.R4GfxImagePresentRequest, "deadline_ns") != 40 or @offsetOf(binding.R4GfxImagePresentRequest, "deadline_ns") != 40) @compileError("R4GfxImagePresentRequest.deadline_ns offset drift");
+    if (@offsetOf(implementation.R4GfxImagePresentRequest, "frame_key") != 48 or @offsetOf(binding.R4GfxImagePresentRequest, "frame_key") != 48) @compileError("R4GfxImagePresentRequest.frame_key offset drift");
+    if (@offsetOf(implementation.R4GfxImagePresentRequest, "dependency_count") != 56 or @offsetOf(binding.R4GfxImagePresentRequest, "dependency_count") != 56) @compileError("R4GfxImagePresentRequest.dependency_count offset drift");
+    if (@offsetOf(implementation.R4GfxImagePresentRequest, "reserved") != 60 or @offsetOf(binding.R4GfxImagePresentRequest, "reserved") != 60) @compileError("R4GfxImagePresentRequest.reserved offset drift");
+    if (@offsetOf(implementation.R4GfxImagePresentRequest, "dependencies") != 64 or @offsetOf(binding.R4GfxImagePresentRequest, "dependencies") != 64) @compileError("R4GfxImagePresentRequest.dependencies offset drift");
     if (@sizeOf(implementation.ApiV1) != 48 or @sizeOf(binding.ApiV1) != 48) @compileError("ApiV1 size drift");
     if (@offsetOf(implementation.ApiV1, "linear_layout") != 32 or @offsetOf(binding.ApiV1, "linear_layout") != 32) @compileError("ApiV1.linear_layout slot drift");
     if (@offsetOf(implementation.ApiV1, "fill_rect") != 40 or @offsetOf(binding.ApiV1, "fill_rect") != 40) @compileError("ApiV1.fill_rect slot drift");
     if (@sizeOf(implementation.RenderV1) != 48 or @sizeOf(binding.RenderV1) != 48) @compileError("RenderV1 size drift");
     if (@offsetOf(implementation.RenderV1, "capabilities") != 32 or @offsetOf(binding.RenderV1, "capabilities") != 32) @compileError("RenderV1.capabilities slot drift");
     if (@offsetOf(implementation.RenderV1, "execute_cpu") != 40 or @offsetOf(binding.RenderV1, "execute_cpu") != 40) @compileError("RenderV1.execute_cpu slot drift");
-    if (@sizeOf(implementation.DeviceV1) != 176 or @sizeOf(binding.DeviceV1) != 176) @compileError("DeviceV1 size drift");
+    if (@sizeOf(implementation.DeviceV1) != 184 or @sizeOf(binding.DeviceV1) != 184) @compileError("DeviceV1 size drift");
     if (@offsetOf(implementation.DeviceV1, "storage_size") != 32 or @offsetOf(binding.DeviceV1, "storage_size") != 32) @compileError("DeviceV1.storage_size slot drift");
     if (@offsetOf(implementation.DeviceV1, "device_open") != 40 or @offsetOf(binding.DeviceV1, "device_open") != 40) @compileError("DeviceV1.device_open slot drift");
     if (@offsetOf(implementation.DeviceV1, "device_close") != 48 or @offsetOf(binding.DeviceV1, "device_close") != 48) @compileError("DeviceV1.device_close slot drift");
@@ -255,6 +264,7 @@ comptime {
     if (@offsetOf(implementation.DeviceV1, "job_fence") != 152 or @offsetOf(binding.DeviceV1, "job_fence") != 152) @compileError("DeviceV1.job_fence slot drift");
     if (@offsetOf(implementation.DeviceV1, "render_submit") != 160 or @offsetOf(binding.DeviceV1, "render_submit") != 160) @compileError("DeviceV1.render_submit slot drift");
     if (@offsetOf(implementation.DeviceV1, "image_prepare") != 168 or @offsetOf(binding.DeviceV1, "image_prepare") != 168) @compileError("DeviceV1.image_prepare slot drift");
+    if (@offsetOf(implementation.DeviceV1, "image_present") != 176 or @offsetOf(binding.DeviceV1, "image_present") != 176) @compileError("DeviceV1.image_present slot drift");
 }
 
 test "generated implementation and binding views are identical" {
