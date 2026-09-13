@@ -48,5 +48,33 @@ The optional [host compiler](Tools/Compiler/README.md) builds pinned Mesa
 26.2.2 NIR/NAK and reproducibly generates SM86 rectangle, texture, solid and
 sRGB-transfer shaders. Its source lock, small standalone build patch and
 readable shader sources are separate from the runtime library. It performs
-no GPU access; runtime shader/cache integration and native Windows build
-verification remain in progress under 0.79.34/0.79.19.
+no GPU access. `EmitRuntime.ps1` verifies its recorded outputs and generates
+the fixed programs under `Source/Generated/Shaders`; normal module builds
+embed those programs without invoking the compiler.
+
+`SHADER_V1` revision 1 is a separate 56-byte table for fixed-program metadata
+and executable byte caches. The five SM86/AMPERE_B programs include their
+original 128-byte NVIDIA headers and 1904 total machine-code bytes. A cache
+binds the current driver build, GPU identity, graphics class, RM/command/
+shader/resource ABI, formats, compiler identity and complete pipeline-state
+digest. Callers obtain the key from their actual driver/renderer. A matching
+key is not evidence that the device has been qualified.
+
+The version-1 cache is at most 1152 bytes: a 384-byte prefix followed by code.
+Its little-endian prefix contains the version/length/profile, compiler ID,
+120-byte key, metadata, NVIDIA header and SHA-256 over all other bytes. Reading
+requires exact key, compiler, metadata, header, code and checksum matches;
+incompatible or damaged data returns `status_cache_miss` without changing the
+output. Unsupported current hardware/ABI returns `status_unsupported`.
+Writes also preserve output and count on rejection. Buffers and output/key
+structures must not overlap. The view borrows byte-aligned ranges in the
+caller's immutable input until it is copied or uploaded; R4NV retains nothing.
+
+The cache contains no GPU addresses. The renderer must still validate or
+recreate resident shader/pipeline resources after a device/reset generation
+change. Native allocation, descriptors, pipeline submission, dynamic R4OS
+compilation and native Windows verification remain work in 0.79.19/0.79.34.
+The existing provider case checks all fixed programs, every byte/truncation
+of the largest cache, identity changes, recomputed corrupt headers and rejected
+output preservation. DISPLAYD /BUFFERS exercises this table through the real
+module loader with a synthetic device key; it performs no NVIDIA rendering.

@@ -92,5 +92,23 @@ no host C-structure layout is serialized. Compilation fails on spills, local
 scratch or call-stack allocation in these bounded profiles. Generated NAK
 assembly is diagnostic text, not external `nvdisasm` output.
 
-Runtime loading, driver/GPU/ABI/format cache pairing, descriptor binding and
-actual NVIDIA rendering are subsequent integration work in 0.79.34/0.79.19.
+## Runtime materialization
+
+After a successful reproducible build, run on either host:
+
+```powershell
+pwsh -NoProfile -File Repositories/Libraries/R4NV/Tools/Compiler/EmitRuntime.ps1
+```
+
+`-CompilerOutputDirectory` optionally selects a different verified output set.
+The emitter checks the current recipe inputs and all recorded code, metadata,
+NIR and assembly hashes before replacing generated runtime files. It also
+validates the five profiles, target and bounded metadata. Modified headers
+are rejected even when the machine-code file itself is unchanged.
+
+The checked-in `Source/Generated/Shaders` files contain only the five programs,
+metadata and provenance. R4NV's separate `SHADER_V1` table exposes a bounded,
+driver/GPU/compiler/ABI/format/pipeline-state-bound byte cache. The regular
+R4NV build consumes these files without running Mesa or a host compiler.
+Native GPU allocations, descriptors, rendering and the dynamic R4OS compiler
+port remain integration work in 0.79.34/0.79.19.

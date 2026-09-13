@@ -64,3 +64,9 @@ The R4NV fixed-shader descriptions and host orchestration are original
 Apache-2.0 R4OS code. This host compiler package is separate from R4NV.R4L
 and is not installed in system images. The runtime library has not acquired
 a dependency on Linux, Rust std or the host Mesa binary.
+
+`R4NV/Source/Generated/Shaders` contains compiled output of those original
+R4OS shader descriptions, their NVIDIA headers and a provenance manifest.
+The runtime embeds these five fixed programs; it does not embed the NAK/NIR
+compiler implementation. The manifest identifies the compiler recipe and
+each original machine-code, metadata, NIR and assembly artifact.

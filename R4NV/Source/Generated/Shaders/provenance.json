@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "compiler_id": "d6d35a2fc32843a3bfd76ce162cf6986943fcc63ddc563e0ac5ecb3fe971a01a",
+  "compiler_inputs": [
+    {
+      "path": "Sources.lock.json",
+      "sha256": "20e5cc2ee378d5141a33ca772ab34adf69722860f20a99180b9bed11cbc3bd3a"
+    },
+    {
+      "path": "MesaStandalone.patch",
+      "sha256": "2e3c65ad5e8b8e1509543f96c912e695b03d9c9ec03534fbe81feda2ad3611cd"
+    },
+    {
+      "path": "Build.ps1",
+      "sha256": "72ade7f7f572b976c5b360d27a219154ab59c4267a4a2539783f3339fe73e0ef"
+    },
+    {
+      "path": "Source/meson.build",
+      "sha256": "0b48cc781b90a839958a2d51872fbe5443a18ce0de6dcb5d8f6e639758aacc7b"
+    },
+    {
+      "path": "Source/r4nak.c",
+      "sha256": "6893ca74cb953cff54c1dbd13792f20c120e00bbcc364d49d2dfe72cde0c2ea8"
+    },
+    {
+      "path": "Source/shaders.c",
+      "sha256": "b131b6ccb6459b7ea00ed615d49b04d778a83729d5ca0092380d69d685169dcb"
+    },
+    {
+      "path": "Source/shaders.h",
+      "sha256": "a1a90cc9cdcf1977716bcca0aa9ef551fb289b6aefbcf334a183df148822d6f8"
+    }
+  ],
+  "emitter_sha256": "c2c811e92bce01a9ba80877597f4abb0fc563957bd9d97b5923fcf89f1e86da7",
+  "profiles": [
+    {
+      "profile": 1,
+      "name": "rectangle_vertex",
+      "sha256": "1efe5eb9bf14ca597f48dda6460b2e09e7a2c335e7c25671cdf5eb63ed6437c9",
+      "metadata_sha256": "283462ab144801f77209d1f6dd9f2bd86927a5e8e83ceeddafe482d31de0566a",
+      "assembly_sha256": "fe2bbd555c162342c00707faeedeec6674dd06f3a0d0f6896f82f5ba56754dcd",
+      "nir_sha256": "7a6c22612688b85e0e0562d97b577dd7274229ad215bec5ed45ab35f2fb65efd",
+      "code_bytes": 112,
+      "gprs": 24,
+      "instructions": 7
+    },
+    {
+      "profile": 2,
+      "name": "texture_fragment",
+      "sha256": "1d73ecc476b302f84bb1bb2fb3baeeb1b1e973ca38af20b968a229dfda32d705",
+      "metadata_sha256": "1d4550b4a6504877a218f67ca8a6ed9c114e7210f994c401761cd1cf721bf761",
+      "assembly_sha256": "966b49955f84d9cc586673703717f0c0ebae3b7d3f998e166f1230553c456df2",
+      "nir_sha256": "e1027e55cb3d70f675c8a03c4a6e387bbb091912f6c80d6d2a539e5c23875748",
+      "code_bytes": 192,
+      "gprs": 24,
+      "instructions": 12
+    },
+    {
+      "profile": 3,
+      "name": "srgb_decode_fragment",
+      "sha256": "e98b34a5d07c8b33f5d7cf77eb0db2ff7d61457a70bf575e8e33079e92d17f16",
+      "metadata_sha256": "a69038b4c8ead11e1454f15c852c7dfd4623c3f4393b30ee240d878300ac0470",
+      "assembly_sha256": "f3a00de058c6c1bdca821bb47d97ab6ed849099beea36895687cd81a22912ca7",
+      "nir_sha256": "395c285b2b55b47175f44b5b13224d5d935c3cbfb5c9a0e09c00405de765609c",
+      "code_bytes": 752,
+      "gprs": 24,
+      "instructions": 47
+    },
+    {
+      "profile": 4,
+      "name": "srgb_encode_fragment",
+      "sha256": "5aeb24a5558164ae2a1df0147c595af6b8d482f41fefb59664292a0a2f72bdf5",
+      "metadata_sha256": "2356bc7748ece0236d22b81e349d8e20a0797f06da0d074545c17fdc16f000eb",
+      "assembly_sha256": "565fa302b26d19b7ecb766f3d9aa7bff72c0bdd14a926d72039ae327380b9681",
+      "nir_sha256": "9aeb0039e735c5c039e42a9e64f9b474bc60eebac49c0cb16634533a5d8bbd10",
+      "code_bytes": 768,
+      "gprs": 24,
+      "instructions": 48
+    },
+    {
+      "profile": 5,
+      "name": "solid_fragment",
+      "sha256": "94811e8c07f6e09dcba8c3c0cce8aacedbab7293b76542935ecbf150abd39984",
+      "metadata_sha256": "85c85a57cb46e1aa3310826405ba9081360d1ac7c1f75b704eed1d827b176aab",
+      "assembly_sha256": "6e531492d7b2c79af194bc4fbbca2c32a62284e3d7ba2307948d6acec56694bf",
+      "nir_sha256": "770bf534ff49e73a8d56f633a2058bfc2482faec234db114ce830d8c681bd536",
+      "code_bytes": 80,
+      "gprs": 24,
+      "instructions": 5
+    }
+  ],
+  "generated_zig_sha256": "8d49860c9960de541f1fb1d2dd348fd65b2dcd62ed8fef7c6fffc877a4b1a347"
+}

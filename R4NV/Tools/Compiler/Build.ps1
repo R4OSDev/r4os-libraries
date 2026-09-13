@@ -196,7 +196,9 @@ try {
                 Remove-Item -LiteralPath ($repeat+$ext)
             }
         }
-        [ordered]@{profile=$profile.id;name=$profile.name;sha256=$binaryHash;code_bytes=$info.code_bytes;gprs=$info.gprs;instructions=$info.instructions}
+        [ordered]@{profile=$profile.id;name=$profile.name;sha256=$binaryHash;
+            metadata_sha256=(Hash ($prefix+'.json'));assembly_sha256=(Hash ($prefix+'.asm.txt'));nir_sha256=(Hash ($prefix+'.nir.txt'));
+            code_bytes=$info.code_bytes;gprs=$info.gprs;instructions=$info.instructions}
     })
     $inputs = @(foreach ($file in @('Sources.lock.json', 'MesaStandalone.patch', 'Build.ps1',
                                   'Source/meson.build', 'Source/r4nak.c', 'Source/shaders.c', 'Source/shaders.h')) {

@@ -2,12 +2,16 @@ const std = @import("std");
 const r4os = @import("r4os");
 const c = @import("r4l_contract");
 const copy = @import("copy.zig");
+const shaders = @import("shader_cache.zig");
 
 export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}
 
 pub const r4nv_negotiate_impl = @import("backend.zig").r4nv_negotiate_impl;
 pub const r4nv_encode_copy_impl = @import("backend.zig").r4nv_encode_copy_impl;
 pub const r4nv_encode_copy_layout_impl = @import("backend.zig").r4nv_encode_copy_layout_impl;
+pub const r4nv_shader_info_impl = shaders.r4nv_shader_info_impl;
+pub const r4nv_shader_cache_write_impl = shaders.r4nv_shader_cache_write_impl;
+pub const r4nv_shader_cache_read_impl = shaders.r4nv_shader_cache_read_impl;
 
 pub export var r4nv_backend_v1: c.BackendV1 align(8) linksection(".data.r4l_exports") = .{
     .header = c.backend_v1_header,
@@ -15,12 +19,18 @@ pub export var r4nv_backend_v1: c.BackendV1 align(8) linksection(".data.r4l_expo
     .encode_copy = r4nv_encode_copy_impl,
     .encode_copy_layout = r4nv_encode_copy_layout_impl,
 };
+pub export var r4nv_shader_v1: c.ShaderV1 align(8) linksection(".data.r4l_exports") = .{
+    .header = c.shader_v1_header,
+    .shader_info = r4nv_shader_info_impl,
+    .shader_cache_write = r4nv_shader_cache_write_impl,
+    .shader_cache_read = r4nv_shader_cache_read_impl,
+};
 pub export var r4nv_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
     .magic = r4os.abi.r4l_abi_magic, .abi_version = r4os.abi.r4l_abi_version,
     .size = r4os.abi.r4l_query_struct_size, .group = 0, .kernel_bridge = 0, .reserved = 0,
 };
 
-test "backend handshake and ABI encoding preserve 64-bit operands and rejected outputs" {
+test "backend and shader ABI preserve operands, executable identity and rejected outputs" {
     const t = std.testing;
     var profile: c.R4NvDeviceProfile = .{ .version = 1, .size = @sizeOf(c.R4NvDeviceProfile),
         .vendor_id = 0x10de, .copy_class = 0xc6b5, .rm_release = c.rm_release, .command_abi = c.command_abi,
@@ -80,4 +90,5 @@ test "backend handshake and ABI encoding preserve 64-bit operands and rejected o
     layout.source_block.x = 120;
     try t.expectEqual(c.status_invalid, r4nv_backend_v1.encode_copy_layout(&layout, &tiled, tiled.len, &written));
     try t.expectEqualSlices(u32, &tile_before, &tiled);
+    try @import("shader_cache_checks.zig").run(&r4nv_shader_v1);
 }

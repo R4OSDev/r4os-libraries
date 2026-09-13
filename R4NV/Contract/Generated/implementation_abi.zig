@@ -71,6 +71,55 @@ pub const R4NvCopyLayout = extern struct {
     source_block: R4NvCopyBlock,
     target_block: R4NvCopyBlock,
 };
+
+pub const R4NvDigest = extern struct {
+    word0: u64,
+    word1: u64,
+    word2: u64,
+    word3: u64,
+};
+
+pub const R4NvShaderKey = extern struct {
+    version: u32,
+    size: u32,
+    vendor_id: u32,
+    device_id: u32,
+    graphics_class: u32,
+    shader_model: u32,
+    rm_release: u32,
+    command_abi: u32,
+    shader_abi: u32,
+    resource_abi: u32,
+    input_format: u32,
+    output_format: u32,
+    driver_build: u64,
+    device_uuid: R4NvDigest,
+    pipeline_state: R4NvDigest,
+};
+
+pub const R4NvShaderInfo = extern struct {
+    version: u32,
+    size: u32,
+    profile: u32,
+    stage: u32,
+    shader_model: u32,
+    registers: u32,
+    code_bytes: u32,
+    instructions: u32,
+    scratch_bytes: u32,
+    stack_bytes: u32,
+    header_bytes: u32,
+    resource_abi: u32,
+    max_warps_per_sm: u32,
+    reserved: u32,
+    compiler_id: R4NvDigest,
+};
+
+pub const R4NvShaderView = extern struct {
+    info: R4NvShaderInfo,
+    header_address: u64,
+    code_address: u64,
+};
 pub const command_abi: u32 = 1;
 pub const rm_release: u32 = 570144;
 pub const feature_copy_linear: u32 = 1;
@@ -79,9 +128,21 @@ pub const max_command_words: u32 = 19;
 pub const status_ok: i32 = 0;
 pub const feature_copy_layout: u32 = 4;
 pub const max_layout_command_words: u32 = 37;
+pub const shader_abi: u32 = 1;
+pub const shader_resource_abi: u32 = 1;
+pub const shader_model_sm86: u32 = 86;
+pub const shader_graphics_class_ampere_b: u32 = 51095;
+pub const shader_cache_header_bytes: u32 = 384;
+pub const shader_cache_max_bytes: u32 = 1152;
+pub const shader_profile_rectangle_vertex: u32 = 1;
+pub const shader_profile_texture_fragment: u32 = 2;
+pub const shader_profile_srgb_decode_fragment: u32 = 3;
+pub const shader_profile_srgb_encode_fragment: u32 = 4;
+pub const shader_profile_solid_fragment: u32 = 5;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_capacity: i32 = -3;
+pub const status_cache_miss: i32 = -4;
 
 pub const backend_v1_export_name = "BACKEND_V1";
 pub const backend_v1_revision: u16 = 2;
@@ -103,4 +164,26 @@ pub const BackendV1 = extern struct {
     negotiate: BackendV1NegotiateFn,
     encode_copy: BackendV1EncodeCopyFn,
     encode_copy_layout: BackendV1EncodeCopyLayoutFn,
+};
+
+pub const shader_v1_export_name = "SHADER_V1";
+pub const shader_v1_revision: u16 = 1;
+pub const shader_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 56,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x52344e5653484452,
+    .interface_id_hi = 0x52344f5330373934,
+};
+pub const ShaderV1ShaderInfoFn = *const fn (profile: u32, output: *R4NvShaderInfo) callconv(.c) i32;
+pub const ShaderV1ShaderCacheWriteFn = *const fn (profile: u32, key: *const R4NvShaderKey, bytes: [*]u8, capacity: u32, written: *u32) callconv(.c) i32;
+pub const ShaderV1ShaderCacheReadFn = *const fn (key: *const R4NvShaderKey, bytes: [*]const u8, length: u32, output: *R4NvShaderView) callconv(.c) i32;
+pub const ShaderV1 = extern struct {
+    header: InterfaceHeader,
+    shader_info: ShaderV1ShaderInfoFn,
+    shader_cache_write: ShaderV1ShaderCacheWriteFn,
+    shader_cache_read: ShaderV1ShaderCacheReadFn,
 };

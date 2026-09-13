@@ -128,6 +128,96 @@ _Static_assert(offsetof(R4NvCopyLayout, copy) == 0u, "R4NvCopyLayout.copy offset
 _Static_assert(offsetof(R4NvCopyLayout, source_block) == 64u, "R4NvCopyLayout.source_block offset mismatch");
 _Static_assert(offsetof(R4NvCopyLayout, target_block) == 88u, "R4NvCopyLayout.target_block offset mismatch");
 
+typedef struct R4NvDigest {
+    uint64_t word0;
+    uint64_t word1;
+    uint64_t word2;
+    uint64_t word3;
+} R4NvDigest;
+_Static_assert(sizeof(R4NvDigest) == 32u, "R4NvDigest size mismatch");
+_Static_assert(offsetof(R4NvDigest, word0) == 0u, "R4NvDigest.word0 offset mismatch");
+_Static_assert(offsetof(R4NvDigest, word1) == 8u, "R4NvDigest.word1 offset mismatch");
+_Static_assert(offsetof(R4NvDigest, word2) == 16u, "R4NvDigest.word2 offset mismatch");
+_Static_assert(offsetof(R4NvDigest, word3) == 24u, "R4NvDigest.word3 offset mismatch");
+
+typedef struct R4NvShaderKey {
+    uint32_t version;
+    uint32_t size;
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t graphics_class;
+    uint32_t shader_model;
+    uint32_t rm_release;
+    uint32_t command_abi;
+    uint32_t shader_abi;
+    uint32_t resource_abi;
+    uint32_t input_format;
+    uint32_t output_format;
+    uint64_t driver_build;
+    R4NvDigest device_uuid;
+    R4NvDigest pipeline_state;
+} R4NvShaderKey;
+_Static_assert(sizeof(R4NvShaderKey) == 120u, "R4NvShaderKey size mismatch");
+_Static_assert(offsetof(R4NvShaderKey, version) == 0u, "R4NvShaderKey.version offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, size) == 4u, "R4NvShaderKey.size offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, vendor_id) == 8u, "R4NvShaderKey.vendor_id offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, device_id) == 12u, "R4NvShaderKey.device_id offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, graphics_class) == 16u, "R4NvShaderKey.graphics_class offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, shader_model) == 20u, "R4NvShaderKey.shader_model offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, rm_release) == 24u, "R4NvShaderKey.rm_release offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, command_abi) == 28u, "R4NvShaderKey.command_abi offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, shader_abi) == 32u, "R4NvShaderKey.shader_abi offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, resource_abi) == 36u, "R4NvShaderKey.resource_abi offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, input_format) == 40u, "R4NvShaderKey.input_format offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, output_format) == 44u, "R4NvShaderKey.output_format offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, driver_build) == 48u, "R4NvShaderKey.driver_build offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, device_uuid) == 56u, "R4NvShaderKey.device_uuid offset mismatch");
+_Static_assert(offsetof(R4NvShaderKey, pipeline_state) == 88u, "R4NvShaderKey.pipeline_state offset mismatch");
+
+typedef struct R4NvShaderInfo {
+    uint32_t version;
+    uint32_t size;
+    uint32_t profile;
+    uint32_t stage;
+    uint32_t shader_model;
+    uint32_t registers;
+    uint32_t code_bytes;
+    uint32_t instructions;
+    uint32_t scratch_bytes;
+    uint32_t stack_bytes;
+    uint32_t header_bytes;
+    uint32_t resource_abi;
+    uint32_t max_warps_per_sm;
+    uint32_t reserved;
+    R4NvDigest compiler_id;
+} R4NvShaderInfo;
+_Static_assert(sizeof(R4NvShaderInfo) == 88u, "R4NvShaderInfo size mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, version) == 0u, "R4NvShaderInfo.version offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, size) == 4u, "R4NvShaderInfo.size offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, profile) == 8u, "R4NvShaderInfo.profile offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, stage) == 12u, "R4NvShaderInfo.stage offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, shader_model) == 16u, "R4NvShaderInfo.shader_model offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, registers) == 20u, "R4NvShaderInfo.registers offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, code_bytes) == 24u, "R4NvShaderInfo.code_bytes offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, instructions) == 28u, "R4NvShaderInfo.instructions offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, scratch_bytes) == 32u, "R4NvShaderInfo.scratch_bytes offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, stack_bytes) == 36u, "R4NvShaderInfo.stack_bytes offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, header_bytes) == 40u, "R4NvShaderInfo.header_bytes offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, resource_abi) == 44u, "R4NvShaderInfo.resource_abi offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, max_warps_per_sm) == 48u, "R4NvShaderInfo.max_warps_per_sm offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, reserved) == 52u, "R4NvShaderInfo.reserved offset mismatch");
+_Static_assert(offsetof(R4NvShaderInfo, compiler_id) == 56u, "R4NvShaderInfo.compiler_id offset mismatch");
+
+typedef struct R4NvShaderView {
+    R4NvShaderInfo info;
+    uint64_t header_address;
+    uint64_t code_address;
+} R4NvShaderView;
+_Static_assert(sizeof(R4NvShaderView) == 104u, "R4NvShaderView size mismatch");
+_Static_assert(offsetof(R4NvShaderView, info) == 0u, "R4NvShaderView.info offset mismatch");
+_Static_assert(offsetof(R4NvShaderView, header_address) == 88u, "R4NvShaderView.header_address offset mismatch");
+_Static_assert(offsetof(R4NvShaderView, code_address) == 96u, "R4NvShaderView.code_address offset mismatch");
+
 #define R4NV_COMMAND_ABI ((uint32_t)1)
 #define R4NV_RM_RELEASE ((uint32_t)570144)
 #define R4NV_FEATURE_COPY_LINEAR ((uint32_t)1)
@@ -136,9 +226,21 @@ _Static_assert(offsetof(R4NvCopyLayout, target_block) == 88u, "R4NvCopyLayout.ta
 #define R4NV_STATUS_OK ((int32_t)0)
 #define R4NV_FEATURE_COPY_LAYOUT ((uint32_t)4)
 #define R4NV_MAX_LAYOUT_COMMAND_WORDS ((uint32_t)37)
+#define R4NV_SHADER_ABI ((uint32_t)1)
+#define R4NV_SHADER_RESOURCE_ABI ((uint32_t)1)
+#define R4NV_SHADER_MODEL_SM86 ((uint32_t)86)
+#define R4NV_SHADER_GRAPHICS_CLASS_AMPERE_B ((uint32_t)51095)
+#define R4NV_SHADER_CACHE_HEADER_BYTES ((uint32_t)384)
+#define R4NV_SHADER_CACHE_MAX_BYTES ((uint32_t)1152)
+#define R4NV_SHADER_PROFILE_RECTANGLE_VERTEX ((uint32_t)1)
+#define R4NV_SHADER_PROFILE_TEXTURE_FRAGMENT ((uint32_t)2)
+#define R4NV_SHADER_PROFILE_SRGB_DECODE_FRAGMENT ((uint32_t)3)
+#define R4NV_SHADER_PROFILE_SRGB_ENCODE_FRAGMENT ((uint32_t)4)
+#define R4NV_SHADER_PROFILE_SOLID_FRAGMENT ((uint32_t)5)
 #define R4NV_STATUS_INVALID ((int32_t)-1)
 #define R4NV_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4NV_STATUS_CAPACITY ((int32_t)-3)
+#define R4NV_STATUS_CACHE_MISS ((int32_t)-4)
 
 #define R4NV_BACKEND_V1_EXPORT_NAME "BACKEND_V1"
 #define R4NV_BACKEND_V1_ABI_MAJOR 1u
@@ -190,6 +292,58 @@ static inline int32_t r4nv_encode_copy(R4NvBackendV1Client *client, const R4NvCo
 static inline int32_t r4nv_encode_copy_layout(R4NvBackendV1Client *client, const R4NvCopyLayout * request, uint32_t * commands, uint32_t capacity, uint32_t * written) {
     R4NvBackendV1EncodeCopyLayoutFn function = (R4NvBackendV1EncodeCopyLayoutFn)r4l_slot_address(client->header, 48u);
     return function(request, commands, capacity, written);
+}
+
+#define R4NV_SHADER_V1_EXPORT_NAME "SHADER_V1"
+#define R4NV_SHADER_V1_ABI_MAJOR 1u
+#define R4NV_SHADER_V1_REVISION 1u
+#define R4NV_SHADER_V1_INTERFACE_ID_LO 0x52344e5653484452ull
+#define R4NV_SHADER_V1_INTERFACE_ID_HI 0x52344f5330373934ull
+#define R4NV_SHADER_V1_TABLE_SIZE 56u
+#define R4NV_SHADER_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4NV_SHADER_V1_TABLE_SIZE, R4NV_SHADER_V1_ABI_MAJOR, R4NV_SHADER_V1_REVISION, R4NV_SHADER_V1_INTERFACE_ID_LO, R4NV_SHADER_V1_INTERFACE_ID_HI }
+typedef int32_t (*R4NvShaderV1ShaderInfoFn)(uint32_t profile, R4NvShaderInfo * output);
+typedef int32_t (*R4NvShaderV1ShaderCacheWriteFn)(uint32_t profile, const R4NvShaderKey * key, uint8_t * bytes, uint32_t capacity, uint32_t * written);
+typedef int32_t (*R4NvShaderV1ShaderCacheReadFn)(const R4NvShaderKey * key, const uint8_t * bytes, uint32_t length, R4NvShaderView * output);
+typedef struct R4NvShaderV1 {
+    R4LInterfaceHeader header;
+    R4NvShaderV1ShaderInfoFn shader_info;
+    R4NvShaderV1ShaderCacheWriteFn shader_cache_write;
+    R4NvShaderV1ShaderCacheReadFn shader_cache_read;
+} R4NvShaderV1;
+_Static_assert(sizeof(R4NvShaderV1) == 56u, "R4NvShaderV1 size mismatch");
+_Static_assert(offsetof(R4NvShaderV1, shader_info) == 32u, "R4NvShaderV1.shader_info offset mismatch");
+_Static_assert(offsetof(R4NvShaderV1, shader_cache_write) == 40u, "R4NvShaderV1.shader_cache_write offset mismatch");
+_Static_assert(offsetof(R4NvShaderV1, shader_cache_read) == 48u, "R4NvShaderV1.shader_cache_read offset mismatch");
+typedef struct R4NvShaderV1Client { const R4LInterfaceHeader *header; } R4NvShaderV1Client;
+
+static inline int32_t r4nv_shader_v1_init(const R4XStartContext *ctx, R4NvShaderV1Client *out_client) {
+    if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4NV", "SHADER_V1");
+    const R4LInterfaceExpectation expected = { 0x52344e5653484452ull, 0x52344f5330373934ull, 1u, 1u, 56u, 0u, 0u };
+    const R4LInterfaceHeader *header = 0;
+    int32_t status = r4l_validate_import(item, &expected, &header);
+    if (status != R4L_BINDING_OK) return status;
+    if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    out_client->header = header;
+    return R4L_BINDING_OK;
+}
+
+static inline int32_t r4nv_shader_info(R4NvShaderV1Client *client, uint32_t profile, R4NvShaderInfo * output) {
+    R4NvShaderV1ShaderInfoFn function = (R4NvShaderV1ShaderInfoFn)r4l_slot_address(client->header, 32u);
+    return function(profile, output);
+}
+
+static inline int32_t r4nv_shader_cache_write(R4NvShaderV1Client *client, uint32_t profile, const R4NvShaderKey * key, uint8_t * bytes, uint32_t capacity, uint32_t * written) {
+    R4NvShaderV1ShaderCacheWriteFn function = (R4NvShaderV1ShaderCacheWriteFn)r4l_slot_address(client->header, 40u);
+    return function(profile, key, bytes, capacity, written);
+}
+
+static inline int32_t r4nv_shader_cache_read(R4NvShaderV1Client *client, const R4NvShaderKey * key, const uint8_t * bytes, uint32_t length, R4NvShaderView * output) {
+    R4NvShaderV1ShaderCacheReadFn function = (R4NvShaderV1ShaderCacheReadFn)r4l_slot_address(client->header, 48u);
+    return function(key, bytes, length, output);
 }
 
 #endif
