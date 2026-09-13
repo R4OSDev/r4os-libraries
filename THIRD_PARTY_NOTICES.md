@@ -43,3 +43,24 @@ libdisplay-info cta.c; its source hash is also recorded in that provenance.
 ## R4NV command encoding
 
 R4NV/Source/copy.zig contains the existing NVIDIA 570.144 and Nouveau-based CE encoding implementation, now shared with NVIDIA.R4D. Full NVIDIA and Red Hat MIT notices are preserved in the source and R4NV/ThirdParty/Nvidia/LICENSES.txt. No firmware is embedded in R4NV.R4L. The existing distributed NVIDIA-GSP-RUNTIME-LICENSE.txt contains these notices.
+
+## R4NV host shader compiler
+
+`R4NV/Tools/Compiler` builds Mesa 26.2.2 NIR/NAK from its checksum-pinned
+original source archive. `MesaStandalone.patch` changes build selection and
+the hardware-test binding boundary; the shader compiler implementation keeps
+its original per-file notices and licenses. The selected NIR/NAK code is
+predominantly MIT; Mesa utility files retain their individual terms. The full
+archive and its license directory remain in the host package under `Legal`.
+
+The pinned Rust build dependencies are paste 1.0.14, rustc-hash 2.1.1,
+syn 2.0.87, quote 1.0.35, proc-macro2 1.0.86 and unicode-ident 1.0.12.
+Their original archives, including their MIT/Apache and Unicode data notices
+as applicable, are also included under `Legal/Sources`. Rust 1.85.1 runtime
+notices come from the installed matching toolchain and are copied in full.
+Exact URLs and source hashes are in `R4NV/Tools/Compiler/Sources.lock.json`.
+
+The R4NV fixed-shader descriptions and host orchestration are original
+Apache-2.0 R4OS code. This host compiler package is separate from R4NV.R4L
+and is not installed in system images. The runtime library has not acquired
+a dependency on Linux, Rust std or the host Mesa binary.

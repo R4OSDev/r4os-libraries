@@ -43,3 +43,10 @@ entries with independent original-header vectors. The 312-byte test-only fixture
 is reproducible from Original-Layout.c and its pinned source archive under
 ExFiles/Reference/GFX/Nvidia/0.79.18/copy-20260913. No fixture or host tiling emulator
 is executed in R4NV.R4L. Physical GPU qualification remains in OssiGPU.txt /18.
+
+The optional [host compiler](Tools/Compiler/README.md) builds pinned Mesa
+26.2.2 NIR/NAK and reproducibly generates SM86 rectangle, texture, solid and
+sRGB-transfer shaders. Its source lock, small standalone build patch and
+readable shader sources are separate from the runtime library. It performs
+no GPU access; runtime shader/cache integration and native Windows build
+verification remain in progress under 0.79.34/0.79.19.
