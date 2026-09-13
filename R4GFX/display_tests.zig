@@ -97,6 +97,52 @@ test "extension checksums and malformed lengths cannot leak partial audio or tim
     try edid.parse(&bytes, &result);
     try t.expect(result.warnings & edid.Warning.extra != 0);
     try t.expect(!result.hdmi and result.audio_count == 0);
+    try t.expectError(error.Incomplete, edid.eld.encode(&result, @splat(0)));
+}
+
+test "complete CTA audio becomes bounded ELD without widening receiver PCM capabilities" {
+    var bytes = qemu[0..256].*;
+    @memset(bytes[128..], 0);
+    const block = bytes[128..];
+    block[0] = 2; block[1] = 3; block[2] = 18; block[3] = 0x40;
+    // HDMI VSDB and a compressed-only SAD. Basic Audio still explicitly
+    // guarantees 32/44.1/48-kHz stereo S16; ELD must carry that guarantee.
+    @memcpy(block[4..14], &[_]u8{ 0x69, 3, 12, 0, 0x10, 0, 0x80, 30, 0x80, 0 });
+    block[2] = 19;
+    block[14] = 7; // Audio latency, complete advertised latency pair.
+    @memcpy(block[15..19], &[_]u8{0x23, 0x15, 0x54, 0x32});
+    block[4] = 0x6a;
+    fix(block);
+    var report: edid.Report = .{};
+    try edid.parse(&bytes, &report);
+    try t.expect(report.complete() and report.hdmi and report.audio_infoframes and report.audio_latency == 7);
+    const port = [8]u8{0x10, 0, 0, 0, 0, 0, 0, 0};
+    const encoded = try edid.eld.encode(&report, port);
+    try t.expect(encoded.stereo_48k_s16 and encoded.max_frequency == 7);
+    try t.expect(encoded.bytes[0] == 16 and encoded.bytes[5] == 0x22 and encoded.bytes[6] == 7);
+    try t.expectEqualSlices(u8, &port, encoded.bytes[8..16]);
+    const name_len = encoded.bytes[4] & 31;
+    try t.expectEqualSlices(u8, &.{0x15, 0x54, 0x32, 0x09, 0x07, 0x01}, encoded.bytes[20 + name_len ..][0..6]);
+    try t.expect(encoded.baselineBytes() <= 80);
+    for (encoded.bytes[26 + name_len ..]) |byte| try t.expectEqual(@as(u8, 0), byte);
+    // Explicit SADs remain distinct. 16-bit at 44.1 kHz plus 24-bit at
+    // 48 kHz cannot be merged into 48-kHz S16 support.
+    report.basic_audio = false;
+    report.audio_count = 2;
+    report.audio[0] = .{ .format = 1, .channels = 2, .rates = 2, .detail = 1 };
+    report.audio[1] = .{ .format = 1, .channels = 8, .rates = 4, .detail = 4 };
+    try t.expect(!(try edid.eld.encode(&report, port)).stereo_48k_s16);
+    report.audio[1].detail = 1;
+    try t.expect((try edid.eld.encode(&report, port)).stereo_48k_s16);
+    report.audio_count = report.audio.len + 1;
+    try t.expectError(error.Invalid, edid.eld.encode(&report, port));
+    try edid.parse(ossipc, &report);
+    try t.expectError(error.Incomplete, edid.eld.encode(&report, port));
+    // An extension without data blocks still carries its Basic Audio flag.
+    @memset(block, 0); block[0] = 2; block[1] = 3; block[3] = 0x40; fix(block);
+    try edid.parse(&bytes, &report);
+    try t.expect(report.complete() and report.basic_audio and report.cta_revision == 3);
+    try t.expectError(error.Unsupported, edid.eld.encode(&report, port)); // no HDMI declaration
 }
 test "bounded parser rejects truncated base and preserves output on fatal errors" {
     var sentinel = edid.Report{ .serial = 0xcafe1234 };

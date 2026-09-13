@@ -2,6 +2,7 @@
 // Protocol facts: locally pinned libdisplay-info interfaces and fixtures.
 const std = @import("std");
 pub const timing = @import("timing.zig");
+pub const eld = @import("eld.zig");
 const cta = @import("cta_timings.zig");
 pub const max_blocks = 32;
 pub const max_modes = 128;
@@ -29,6 +30,9 @@ pub const Report = struct {
     valid_extensions: u8 = 0,
     warnings: u32 = 0,
     basic_audio: bool = false,
+    cta_revision: u8 = 0,
+    audio_infoframes: bool = false,
+    audio_latency: u8 = 0,
     hdmi: bool = false,
     max_tmds_hz: u64 = 0,
     scdc: bool = false,
@@ -220,11 +224,12 @@ fn addVic(raw: u8, flags: u32, result: *Report) Error!bool {
 fn parseCta(block: []const u8, result: *Report) Error!bool {
     if (block[1] == 0 or block[1] > 3) return false;
     const end: usize = block[2];
-    if (end == 0) return zero(block[4..127]);
-    if (end < 4 or end > 127) return false;
+    if (end != 0 and (end < 4 or end > 127)) return false;
+    result.cta_revision = @max(result.cta_revision, block[1]);
     if (block[3] & 0x40 != 0) result.basic_audio = true;
     if (block[3] & 0x20 != 0) result.colors |= 2;
     if (block[3] & 0x10 != 0) result.colors |= 4;
+    if (end == 0) return zero(block[4..127]);
     var video: [123]u8 = .{0} ** 123;
     var video_count: usize = 0;
     var pos: usize = 4;
@@ -261,7 +266,14 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
                 if (oui == 0x000c03) {
                     if (len < 5) return false;
                     result.hdmi = true;
+                    if (len >= 6) result.audio_infoframes = result.audio_infoframes or data[5] & 0x80 != 0;
                     if (len >= 7) result.max_tmds_hz = @max(result.max_tmds_hz, @as(u64, data[6]) * 5_000_000);
+                    if (len >= 8) {
+                        const latency = data[7] & 0x80 != 0;
+                        const interlaced_latency = data[7] & 0x40 != 0;
+                        if ((interlaced_latency and !latency) or (latency and len < 10) or (interlaced_latency and len < 12)) return false;
+                        if (latency) result.audio_latency = @max(result.audio_latency, data[9]);
+                    }
                 } else if (oui == 0xc45dd8) {
                     if (len < 7 or data[3] != 1) return false;
                     result.hdmi = true;
