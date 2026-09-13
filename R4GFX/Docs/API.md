@@ -42,9 +42,9 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
 
 - ELF-Symbol: `r4gfx_device_v1`
 - ABI-Major: 1
-- Revision: 1
+- Revision: 2
 - Interface-ID: `0x52344f5330373931:0x5234474658444556`
-- Tabellengroesse: 144 Byte
+- Tabellengroesse: 160 Byte
 
 - Slot 0, Offset 32: `storage_size` - Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
@@ -74,6 +74,10 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
 - Slot 13, Offset 136: `job_release` - Releases a retired fence and its resource references; returns busy while physical use remains.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
+- Slot 14, Offset 144: `copy_submit_ex` - Submits checked rows or linear bytes with exact upstream fences, preserving resources through physical completion. Different strides and native layouts use the common negotiated transport; unsupported opaque layouts never fall back to CPU address guessing.
+  Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
+- Slot 15, Offset 152: `job_fence` - Exports the exact canonical fence for dependencies without waiting. Job and backing remain owned by their original receipts; exporting neither completes nor releases work.
+  Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
 
 Typen
 -----
@@ -97,6 +101,8 @@ Typen
 - `R4GfxCopyRequest`: 96 Byte, Alignment 8. Asynchronous whole-range BO copy on the selected common queue. Borrowed CPU pointers are never submitted as GPU addresses. Serial queue ordering applies; explicit deadline uses the platform monotonic clock.
 - `R4GfxJob`: 32 Byte, Alignment 8. Device-local copy-job identity. A terminal logical result is independent of physical resource retirement. Release requires actual resources_released.
 - `R4GfxJobInfo`: 56 Byte, Alignment 8. Canonical queue phase/result/flags, including device_active/resources_held, and original fence identity. Backend reports where the job ran; a software completion is not a GPU completion.
+- `R4GfxCopyFence`: 40 Byte, Alignment 8. Exact common GfxFence wire identity. Export adds no reference: keep the job until a dependency has been admitted. Canonical admission retains its own dependency; copying numbers alone never proves completion.
+- `R4GfxCopyRequestEx`: 136 Byte, Alignment 8. Version1 exact-size input. Zero rows is a linear copy and requires zero pitches; otherwise copy.byte_length is bytes per row. Up to eight borrowed R4GfxCopyFence dependencies, zero address for zero count. The complete descriptor and identities are captured before admission; no pointer survives the call.
 
 Besitzregeln
 ------------

@@ -56,34 +56,53 @@ pub const R4NvDriverProfile = extern struct {
     reserved0: u32,
     reserved1: u32,
 };
+
+pub const R4NvCopyBlock = extern struct {
+    enabled: u32,
+    width: u32,
+    height: u32,
+    x: u32,
+    y: u32,
+    log2_gobs: u32,
+};
+
+pub const R4NvCopyLayout = extern struct {
+    copy: R4NvCopy,
+    source_block: R4NvCopyBlock,
+    target_block: R4NvCopyBlock,
+};
 pub const command_abi: u32 = 1;
 pub const rm_release: u32 = 570144;
 pub const feature_copy_linear: u32 = 1;
 pub const feature_copy_rows: u32 = 2;
 pub const max_command_words: u32 = 19;
 pub const status_ok: i32 = 0;
+pub const feature_copy_layout: u32 = 4;
+pub const max_layout_command_words: u32 = 37;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_capacity: i32 = -3;
 
 pub const backend_v1_export_name = "BACKEND_V1";
-pub const backend_v1_revision: u16 = 1;
+pub const backend_v1_revision: u16 = 2;
 pub const backend_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 48,
+    .size = 56,
     .abi_major = 1,
-    .abi_minor = 1,
+    .abi_minor = 2,
     .interface_id_lo = 0x52344e5642454e44,
     .interface_id_hi = 0x52344f5330373931,
 };
 pub const BackendV1NegotiateFn = *const fn (profile: *const R4NvDeviceProfile, output: *R4NvFeatures) callconv(.c) i32;
 pub const BackendV1EncodeCopyFn = *const fn (request: *const R4NvCopy, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
+pub const BackendV1EncodeCopyLayoutFn = *const fn (request: *const R4NvCopyLayout, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
 pub const BackendV1 = extern struct {
     header: InterfaceHeader,
     negotiate: BackendV1NegotiateFn,
     encode_copy: BackendV1EncodeCopyFn,
+    encode_copy_layout: BackendV1EncodeCopyLayoutFn,
 };
 
 pub const BackendV1Client = struct {
@@ -95,12 +114,13 @@ pub const BackendV1Client = struct {
             .interface_id_lo = 0x52344e5642454e44,
             .interface_id_hi = 0x52344f5330373931,
             .abi_major = 1,
-            .min_revision = 1,
-            .required_size = 48,
+            .min_revision = 2,
+            .required_size = 56,
             .known_required_flags = 0,
         });
         if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 40) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 48) == null) return error.MissingSlot;
         return .{ .header = header };
     }
 
@@ -111,6 +131,11 @@ pub const BackendV1Client = struct {
 
     pub fn encode_copy(self: *const BackendV1Client, request: *const R4NvCopy, commands: [*]u32, capacity: u32, written: *u32) i32 {
         const function = r4os.runtime_r4l.functionAt(BackendV1EncodeCopyFn, self.header, 40) orelse unreachable;
+        return function(request, commands, capacity, written);
+    }
+
+    pub fn encode_copy_layout(self: *const BackendV1Client, request: *const R4NvCopyLayout, commands: [*]u32, capacity: u32, written: *u32) i32 {
+        const function = r4os.runtime_r4l.functionAt(BackendV1EncodeCopyLayoutFn, self.header, 48) orelse unreachable;
         return function(request, commands, capacity, written);
     }
 };

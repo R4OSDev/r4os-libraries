@@ -13,7 +13,7 @@
       "zig_type": "BackendV1",
       "c_type": "R4NvBackendV1",
       "abi_major": 1,
-      "revision": 1,
+      "revision": 2,
       "interface_id_lo": 5923445542285037124,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -142,6 +142,82 @@
             "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
           },
           "description": "Encodes virtual CE copies and system-scope semaphore release. Validation precedes every output write."
+        },
+        {
+          "name": "encode_copy_layout",
+          "c_name": "r4nv_encode_copy_layout",
+          "symbol": "r4nv_encode_copy_layout_impl",
+          "slot": 2,
+          "since_revision": 2,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4NvCopyLayout",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "commands",
+              "type": {
+                "name": "u32",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "capacity",
+              "description": "commands"
+            },
+            {
+              "name": "capacity",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "capacity"
+            },
+            {
+              "name": "written",
+              "type": {
+                "name": "u32",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "written"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4NV_STATUS",
+            "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
+          },
+          "description": "Encodes pitch/blocklinear conversion through C6B5/C7B5, bounded by max_layout_command_words. Original encode_copy and its limits remain available. No retained state or device access."
         }
       ],
       "description": "Versioned, allocation-free NVIDIA encoding backend."
@@ -619,6 +695,121 @@
         }
       ],
       "description": "Immutable driver protocol payload in GfxBackendProfile.data. Version 1, size 32, vendor 0x10de and actual allocated copy-engine class; reserved fields zero. Identity/revision are BACKEND_V1. Kernel-assigned adapter and generations come from the accompanying binding, never these bytes."
+    },
+    {
+      "name": "R4NvCopyBlock",
+      "size": 24,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "enabled",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "enabled"
+        },
+        {
+          "name": "width",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width"
+        },
+        {
+          "name": "height",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "x",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "x"
+        },
+        {
+          "name": "y",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "y"
+        },
+        {
+          "name": "log2_gobs",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "log2_gobs"
+        }
+      ],
+      "description": "Optional 2D blocklinear plane. enabled is zero or one; all other fields zero when disabled. Width/pitch and x are bytes with remapping disabled; height/y are rows. 512-byte GOBs, one GOB wide, log2_gobs 0..5, depth one, no compression."
+    },
+    {
+      "name": "R4NvCopyLayout",
+      "size": 112,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "copy",
+          "offset": 0,
+          "type": {
+            "name": "R4NvCopy",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "copy"
+        },
+        {
+          "name": "source_block",
+          "offset": 64,
+          "type": {
+            "name": "R4NvCopyBlock",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_block"
+        },
+        {
+          "name": "target_block",
+          "offset": 88,
+          "type": {
+            "name": "R4NvCopyBlock",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_block"
+        }
+      ],
+      "description": "Independent copy-layout request; original R4NvCopy remains unchanged. Block operands are plane-base addresses aligned to 512; pitched operands already include logical x/y offsets. Both full plane spans and all transfer bounds must fit; aliases are rejected before command writes."
     }
   ],
   "constants": [
@@ -663,6 +854,20 @@
       "type": "i32",
       "value": 0,
       "description": "status_ok"
+    },
+    {
+      "zig_name": "feature_copy_layout",
+      "c_name": "R4NV_FEATURE_COPY_LAYOUT",
+      "type": "u32",
+      "value": 4,
+      "description": "feature_copy_layout"
+    },
+    {
+      "zig_name": "max_layout_command_words",
+      "c_name": "R4NV_MAX_LAYOUT_COMMAND_WORDS",
+      "type": "u32",
+      "value": 37,
+      "description": "max_layout_command_words"
     }
   ],
   "errors": [

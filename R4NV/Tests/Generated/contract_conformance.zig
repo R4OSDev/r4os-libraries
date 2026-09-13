@@ -48,9 +48,21 @@ comptime {
     if (@offsetOf(implementation.R4NvDriverProfile, "command_abi") != 20 or @offsetOf(binding.R4NvDriverProfile, "command_abi") != 20) @compileError("R4NvDriverProfile.command_abi offset drift");
     if (@offsetOf(implementation.R4NvDriverProfile, "reserved0") != 24 or @offsetOf(binding.R4NvDriverProfile, "reserved0") != 24) @compileError("R4NvDriverProfile.reserved0 offset drift");
     if (@offsetOf(implementation.R4NvDriverProfile, "reserved1") != 28 or @offsetOf(binding.R4NvDriverProfile, "reserved1") != 28) @compileError("R4NvDriverProfile.reserved1 offset drift");
-    if (@sizeOf(implementation.BackendV1) != 48 or @sizeOf(binding.BackendV1) != 48) @compileError("BackendV1 size drift");
+    if (@sizeOf(implementation.R4NvCopyBlock) != 24 or @sizeOf(binding.R4NvCopyBlock) != 24) @compileError("R4NvCopyBlock size drift");
+    if (@offsetOf(implementation.R4NvCopyBlock, "enabled") != 0 or @offsetOf(binding.R4NvCopyBlock, "enabled") != 0) @compileError("R4NvCopyBlock.enabled offset drift");
+    if (@offsetOf(implementation.R4NvCopyBlock, "width") != 4 or @offsetOf(binding.R4NvCopyBlock, "width") != 4) @compileError("R4NvCopyBlock.width offset drift");
+    if (@offsetOf(implementation.R4NvCopyBlock, "height") != 8 or @offsetOf(binding.R4NvCopyBlock, "height") != 8) @compileError("R4NvCopyBlock.height offset drift");
+    if (@offsetOf(implementation.R4NvCopyBlock, "x") != 12 or @offsetOf(binding.R4NvCopyBlock, "x") != 12) @compileError("R4NvCopyBlock.x offset drift");
+    if (@offsetOf(implementation.R4NvCopyBlock, "y") != 16 or @offsetOf(binding.R4NvCopyBlock, "y") != 16) @compileError("R4NvCopyBlock.y offset drift");
+    if (@offsetOf(implementation.R4NvCopyBlock, "log2_gobs") != 20 or @offsetOf(binding.R4NvCopyBlock, "log2_gobs") != 20) @compileError("R4NvCopyBlock.log2_gobs offset drift");
+    if (@sizeOf(implementation.R4NvCopyLayout) != 112 or @sizeOf(binding.R4NvCopyLayout) != 112) @compileError("R4NvCopyLayout size drift");
+    if (@offsetOf(implementation.R4NvCopyLayout, "copy") != 0 or @offsetOf(binding.R4NvCopyLayout, "copy") != 0) @compileError("R4NvCopyLayout.copy offset drift");
+    if (@offsetOf(implementation.R4NvCopyLayout, "source_block") != 64 or @offsetOf(binding.R4NvCopyLayout, "source_block") != 64) @compileError("R4NvCopyLayout.source_block offset drift");
+    if (@offsetOf(implementation.R4NvCopyLayout, "target_block") != 88 or @offsetOf(binding.R4NvCopyLayout, "target_block") != 88) @compileError("R4NvCopyLayout.target_block offset drift");
+    if (@sizeOf(implementation.BackendV1) != 56 or @sizeOf(binding.BackendV1) != 56) @compileError("BackendV1 size drift");
     if (@offsetOf(implementation.BackendV1, "negotiate") != 32 or @offsetOf(binding.BackendV1, "negotiate") != 32) @compileError("BackendV1.negotiate slot drift");
     if (@offsetOf(implementation.BackendV1, "encode_copy") != 40 or @offsetOf(binding.BackendV1, "encode_copy") != 40) @compileError("BackendV1.encode_copy slot drift");
+    if (@offsetOf(implementation.BackendV1, "encode_copy_layout") != 48 or @offsetOf(binding.BackendV1, "encode_copy_layout") != 48) @compileError("BackendV1.encode_copy_layout slot drift");
 }
 
 test "generated implementation and binding views are identical" {

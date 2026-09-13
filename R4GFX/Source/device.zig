@@ -88,6 +88,8 @@ pub const Device = struct {
     job_serial: u64 = 0,
     selected: a.GfxBackendInfo = .{ .binding = .{ .device_generation = 1, .reset_generation = 1 } },
     queue: a.GfxQueueHandle = .{},
+    software_queue: a.GfxQueueHandle = .{},
+    gpu_operations: u32 = 0,
     retired_queues: [c.device_job_capacity]a.GfxQueueHandle = @splat(.{}),
     counters: c.R4GfxDeviceInfo = std.mem.zeroes(c.R4GfxDeviceInfo),
     resources: [c.device_resource_capacity]Resource = @splat(.{}),
@@ -135,21 +137,24 @@ pub const Device = struct {
         return okay;
     }
     fn closeQueue(self: *Device) Error!void {
-        if (self.queue.timeline == 0) return;
-        for (&self.jobs) |*item| if (item.serial != 0 and item.fence.timeline == self.queue.timeline) {
+        return self.retireQueue(&self.queue);
+    }
+    fn retireQueue(self: *Device, queue: *a.GfxQueueHandle) Error!void {
+        if (queue.timeline == 0) return;
+        for (&self.jobs) |*item| if (item.serial != 0 and item.fence.timeline == queue.timeline) {
             // Common close drops client fence references. Keep this queue open
             // until all exact job receipts have been observed and released.
             for (&self.retired_queues) |*retired| if (retired.timeline == 0) {
-                retired.* = self.queue;
-                self.queue = .{};
+                retired.* = queue.*;
+                queue.* = .{};
                 return;
             };
             return error.Limit;
         };
         const queue_api = self.queues();
-        const rc = queue_api.close(&self.queue);
+        const rc = queue_api.close(queue);
         if (rc != a.gfx_queue_error_stale) try platform(rc);
-        self.queue = .{};
+        queue.* = .{};
     }
     pub fn drainQueues(self: *Device) bool {
         const queue_api = self.queues();
@@ -172,8 +177,16 @@ pub const Device = struct {
         try platform(queue_api.open(&.{ .adapter_id = value.adapter_id, .device_generation = value.device_generation,
             .reset_generation = value.reset_generation, .milestone = value.milestone, .capacity = c.device_job_capacity }, &self.queue));
     }
+    pub fn softwareQueue(self: *Device) Error!*const a.GfxQueueHandle {
+        if (self.software_queue.timeline == 0) {
+            const queue_api = self.queues();
+            try platform(queue_api.open(&.{ .capacity = c.device_job_capacity }, &self.software_queue));
+        }
+        return &self.software_queue;
+    }
     pub fn selectBackend(self: *Device) Error!void {
         var candidate: a.GfxBackendInfo = .{ .binding = .{ .device_generation = 1, .reset_generation = 1 } };
+        var gpu_operations: u32 = 0;
         const backend_client: ?nv.BackendV1Client = if (self.flags & c.device_software_only != 0) null else nv.BackendV1Client.init(self.bundle.raw) catch null;
         if (backend_client) |client| {
             const queue_api = self.queues();
@@ -182,11 +195,11 @@ pub const Device = struct {
                 if (queue_api.backendInfo(@intCast(index), &snapshot) != a.gfx_queue_ok) continue;
                 const profile = snapshot.profile;
                 const binding = snapshot.binding;
-                if (snapshot.version != 1 or snapshot.size < @sizeOf(a.GfxBackendInfo) or binding.version != 1 or binding.size < @sizeOf(a.GfxBackendBinding) or
+                if (snapshot.version != 1 or snapshot.size < @offsetOf(a.GfxBackendInfo, "operations") or binding.version != 1 or binding.size < @sizeOf(a.GfxBackendBinding) or
                     binding.adapter_id == 0 or binding.device_generation == 0 or binding.reset_generation == 0 or binding.milestone != a.gfx_queue_milestone_device_execution or
                     (self.preferred_adapter != 0 and binding.adapter_id != self.preferred_adapter) or
                     profile.version != 1 or profile.size < @sizeOf(a.GfxBackendProfile) or profile.interface_id_lo != nv.backend_v1_header.interface_id_lo or
-                    profile.interface_id_hi != nv.backend_v1_header.interface_id_hi or profile.revision != nv.backend_v1_revision or profile.data_bytes != @sizeOf(nv.R4NvDriverProfile)) continue;
+                    profile.interface_id_hi != nv.backend_v1_header.interface_id_hi or profile.revision != 1 or profile.data_bytes != @sizeOf(nv.R4NvDriverProfile)) continue;
                 const details = std.mem.bytesToValue(nv.R4NvDriverProfile, profile.data[0..@sizeOf(nv.R4NvDriverProfile)]);
                 if (details.version != 1 or details.size != @sizeOf(nv.R4NvDriverProfile) or details.reserved0 != 0 or details.reserved1 != 0) continue;
                 var features: nv.R4NvFeatures = undefined;
@@ -194,10 +207,20 @@ pub const Device = struct {
                     .copy_class = details.copy_class, .rm_release = details.rm_release, .command_abi = details.command_abi,
                     .adapter_id = binding.adapter_id, .flags = 0, .device_generation = binding.device_generation, .reset_generation = binding.reset_generation }, &features) != nv.status_ok or
                     features.version != 1 or features.size != @sizeOf(nv.R4NvFeatures) or features.features & nv.feature_copy_linear == 0 or features.reserved != 0) continue;
+                // Queue instances and driver-owned memory have independent
+                // generations. Older kernels supplied only the queue epoch.
+                if (snapshot.size < @sizeOf(a.GfxBackendInfo)) snapshot.memory_generation = binding.device_generation;
+                if (snapshot.memory_generation == 0) continue;
                 candidate = snapshot;
+                gpu_operations = c.device_gpu_copy;
+                if (snapshot.size >= @offsetOf(a.GfxBackendInfo, "memory_generation") and snapshot.operations & 8 != 0 and features.features & nv.feature_copy_rows != 0) {
+                    gpu_operations |= c.device_gpu_copy_rows;
+                    if (features.features & nv.feature_copy_layout != 0) gpu_operations |= c.device_gpu_copy_layout;
+                }
                 break;
             }
         }
+        self.gpu_operations = gpu_operations;
         if (std.meta.eql(self.selected, candidate)) return;
         const previous = self.selected.binding;
         _ = self.drainQueues();
@@ -207,10 +230,11 @@ pub const Device = struct {
         // gives software fallback; no cached profile alone authorizes work.
         if (candidate.binding.adapter_id != 0) self.ensureQueue() catch {
             self.selected = .{ .binding = .{ .device_generation = 1, .reset_generation = 1 } };
+            self.gpu_operations = 0;
         };
         const current = self.selected.binding;
         for (&self.resources) |*item| if (item.serial != 0 and item.descriptor.location == a.gfx_buffer_location_device_local) {
-            if (item.descriptor.adapter_id != current.adapter_id or item.descriptor.device_generation != current.device_generation or
+            if (item.descriptor.adapter_id != current.adapter_id or item.descriptor.device_generation != self.selected.memory_generation or
                 (item.descriptor.adapter_id == previous.adapter_id and previous.reset_generation != current.reset_generation)) item.invalidated = true;
         };
         self.counters.backend_changes +|= 1;
@@ -222,7 +246,7 @@ pub const Device = struct {
         value.device_generation = self.selected.binding.device_generation; value.reset_generation = self.selected.binding.reset_generation;
         value.formats = c.render_format_xrgb8888 | c.render_format_argb8888 | c.render_format_r8;
         value.operations = c.render_operation_fill | c.render_operation_blit | c.render_operation_over; value.samplers = 3;
-        value.gpu_operations = if (value.backend == c.render_backend_nvidia) c.device_gpu_copy else 0;
+        value.gpu_operations = self.gpu_operations;
         value.resource_capacity = self.resources.len; value.job_capacity = self.jobs.len;
         return value;
     }
@@ -317,6 +341,21 @@ pub fn submitCopy(handle: *const c.R4GfxDevice, request: *const c.R4GfxCopyReque
     separateInput(handle, output) catch |err| return code(err);
     return @import("device_jobs.zig").submit(device, request, output) catch |err| code(err);
 }
+pub fn submitCopyEx(handle: *const c.R4GfxDevice, request: *const c.R4GfxCopyRequestEx, output: *c.R4GfxJob) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    separateInput(handle, output) catch |err| return code(err);
+    return @import("device_jobs.zig").submitEx(device, request, output) catch |err| code(err);
+}
+pub fn jobFence(handle: *const c.R4GfxDevice, job: *const c.R4GfxJob, output: *c.R4GfxCopyFence) callconv(.c) i32 {
+    const device = get(handle, true) catch |err| return code(err);
+    separateInput(handle, output) catch |err| return code(err);
+    separateInput(job, output) catch |err| return code(err);
+    _ = pointer(c.R4GfxJob, @intFromPtr(job)) catch |err| return code(err);
+    outputSafe(c.R4GfxCopyFence, output, device) catch |err| return code(err);
+    const item = device.job(job.*) catch |err| return code(err);
+    output.* = @bitCast(item.fence);
+    return c.status_ok;
+}
 pub fn jobInfo(handle: *const c.R4GfxDevice, job: *const c.R4GfxJob, output: *c.R4GfxJobInfo) callconv(.c) i32 {
     const device = get(handle, true) catch |err| return code(err);
     separateInput(handle, output) catch |err| return code(err);
@@ -334,6 +373,7 @@ pub fn close(handle: *const c.R4GfxDevice) callconv(.c) i32 {
     const device = get(handle, true) catch |err| return code(err);
     device.closing = true;
     device.closeQueue() catch |err| return code(err);
+    device.retireQueue(&device.software_queue) catch |err| return code(err);
     var busy = false;
     for (&device.jobs, 0..) |*item, index| if (item.serial != 0) {
         const job: c.R4GfxJob = .{ .slot = @intCast(index + 1), .reserved = 0, .generation = item.serial, .device_generation = device.generation, .device_address = device.self_address };

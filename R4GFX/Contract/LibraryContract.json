@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 1,
+      "revision": 2,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -993,6 +993,130 @@
             "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
           },
           "description": "Releases a retired fence and its resource references; returns busy while physical use remains."
+        },
+        {
+          "name": "copy_submit_ex",
+          "c_name": "r4gfx_copy_submit_ex",
+          "symbol": "r4gfx_copy_submit_ex_impl",
+          "slot": 14,
+          "since_revision": 2,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxCopyRequestEx",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Submits checked rows or linear bytes with exact upstream fences, preserving resources through physical completion. Different strides and native layouts use the common negotiated transport; unsupported opaque layouts never fall back to CPU address guessing."
+        },
+        {
+          "name": "job_fence",
+          "c_name": "r4gfx_job_fence",
+          "symbol": "r4gfx_job_fence_impl",
+          "slot": 15,
+          "since_revision": 2,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "job",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "job"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxCopyFence",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Exports the exact canonical fence for dependencies without waiting. Job and backing remain owned by their original receipts; exporting neither completes nor releases work."
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
@@ -2701,6 +2825,176 @@
         }
       ],
       "description": "Canonical queue phase/result/flags, including device_active/resources_held, and original fence identity. Backend reports where the job ran; a software completion is not a GPU completion."
+    },
+    {
+      "name": "R4GfxCopyFence",
+      "size": 40,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "slot",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "slot"
+        },
+        {
+          "name": "adapter_id",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "adapter_id"
+        },
+        {
+          "name": "timeline",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "timeline"
+        },
+        {
+          "name": "point",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "point"
+        },
+        {
+          "name": "device_generation",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_generation"
+        },
+        {
+          "name": "reset_generation",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reset_generation"
+        }
+      ],
+      "description": "Exact common GfxFence wire identity. Export adds no reference: keep the job until a dependency has been admitted. Canonical admission retains its own dependency; copying numbers alone never proves completion."
+    },
+    {
+      "name": "R4GfxCopyRequestEx",
+      "size": 136,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "copy",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxCopyRequest",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "copy"
+        },
+        {
+          "name": "row_count",
+          "offset": 104,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "row_count"
+        },
+        {
+          "name": "dependency_count",
+          "offset": 108,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dependency_count"
+        },
+        {
+          "name": "source_pitch",
+          "offset": 112,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_pitch"
+        },
+        {
+          "name": "target_pitch",
+          "offset": 120,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_pitch"
+        },
+        {
+          "name": "dependencies",
+          "offset": 128,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dependencies"
+        }
+      ],
+      "description": "Version1 exact-size input. Zero rows is a linear copy and requires zero pitches; otherwise copy.byte_length is bytes per row. Up to eight borrowed R4GfxCopyFence dependencies, zero address for zero count. The complete descriptor and identities are captured before admission; no pointer survives the call."
     }
   ],
   "constants": [
@@ -2948,6 +3242,27 @@
       "type": "u32",
       "value": 2147483648,
       "description": "ResourceInfo-only flag: native device/reset generation lost; read/copy/render are stale, explicit release remains valid."
+    },
+    {
+      "zig_name": "device_gpu_copy_rows",
+      "c_name": "R4GFX_DEVICE_GPU_COPY_ROWS",
+      "type": "u32",
+      "value": 2,
+      "description": "device_gpu_copy_rows"
+    },
+    {
+      "zig_name": "device_gpu_copy_layout",
+      "c_name": "R4GFX_DEVICE_GPU_COPY_LAYOUT",
+      "type": "u32",
+      "value": 4,
+      "description": "device_gpu_copy_layout"
+    },
+    {
+      "zig_name": "copy_max_dependencies",
+      "c_name": "R4GFX_COPY_MAX_DEPENDENCIES",
+      "type": "u32",
+      "value": 8,
+      "description": "copy_max_dependencies"
     }
   ],
   "errors": [

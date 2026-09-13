@@ -14,7 +14,8 @@ pub fn validateImage(image: c.R4GfxCpuImage, borrowed: bool) d.Error!void {
     _ = std.math.add(u64, image.cpu_address, image.byte_length) catch return error.Overflow;
 }
 fn descriptorImage(descriptor: a.GfxBufferDescriptor) d.Error!c.R4GfxCpuImage {
-    if (descriptor.version != 1 or descriptor.size < @sizeOf(a.GfxBufferDescriptor) or descriptor.modifier != 0 or
+    if (descriptor.version != 1 or descriptor.size < @sizeOf(a.GfxBufferDescriptor) or
+        (descriptor.modifier != 0 and descriptor.location != a.gfx_buffer_location_device_local) or
         descriptor.plane_count != 1 or descriptor.plane_offsets[0] != 0 or descriptor.reserved0 != 0) return error.Unsupported;
     for (1..4) |i| if (descriptor.plane_offsets[i] != 0 or descriptor.plane_pitches[i] != 0) return error.Unsupported;
     const image: c.R4GfxCpuImage = .{ .cpu_address = 0, .byte_length = descriptor.byte_length, .pitch = descriptor.plane_pitches[0],
@@ -115,7 +116,7 @@ pub fn create(device: *d.Device, input: *const c.R4GfxResourceDesc, output: *c.R
             item.backing.flags & ~a.gfx_buffer_reference_immutable != 0 or (item.flags & c.image_target != 0 and item.backing.flags & a.gfx_buffer_reference_immutable != 0)) return error.Unsupported;
         try d.platform(memory.describe(&item.backing.reference, &item.descriptor));
         if (item.descriptor.location == a.gfx_buffer_location_device_local and
-            (item.descriptor.adapter_id != device.selected.binding.adapter_id or item.descriptor.device_generation != device.selected.binding.device_generation)) return error.Stale;
+            (item.descriptor.adapter_id != device.selected.binding.adapter_id or item.descriptor.device_generation != device.selected.memory_generation)) return error.Stale;
         item.image = try descriptorImage(item.descriptor);
         if (request.source_kind != c.source_create_system) {
             device.counters.imports +|= 1;

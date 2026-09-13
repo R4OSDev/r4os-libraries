@@ -25,15 +25,19 @@ const Model = struct {
     var status: a.GfxFenceStatus = .{};
     var job_live = false;
     var job_request: a.GfxSubmission = .{};
+    var operations: u64 = 7;
+    var dependency_seen = false;
     var binding: a.GfxBackendBinding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
     var nv_table: nv.BackendV1 = .{ .header = nv.backend_v1_header,
-        .negotiate = @ptrCast(&nv_provider.r4nv_negotiate_impl), .encode_copy = @ptrCast(&nv_provider.r4nv_encode_copy_impl) };
+        .negotiate = @ptrCast(&nv_provider.r4nv_negotiate_impl), .encode_copy = @ptrCast(&nv_provider.r4nv_encode_copy_impl),
+        .encode_copy_layout = @ptrCast(&nv_provider.r4nv_encode_copy_layout_impl) };
 
     fn reset() void {
         objects = @splat(.{}); references = @splat(.{}); queues = @splat(.{});
         serial = 0x100000000; exports = 0; maps = 0; fail_unmap = false; premature_closes = 0; inventory_reads = 0; job_live = false;
         binding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
         nv_table.header = nv.backend_v1_header;
+        operations = 7; dependency_seen = false;
     }
     fn ref(handle: a.GfxBufferHandle) *Ref {
         std.debug.assert(handle.id != 0 and handle.id <= references.len and handle.reserved0 == 0);
@@ -92,7 +96,7 @@ const Model = struct {
     fn backendInfo(index: u32, out: *a.GfxBackendInfo) callconv(.c) i32 {
         inventory_reads += 1;
         if (index != 1) return 0;
-        out.* = .{ .binding = binding, .profile = .{ .interface_id_lo = nv.backend_v1_header.interface_id_lo,
+        out.* = .{ .binding = binding, .operations = operations, .memory_generation = 73, .profile = .{ .interface_id_lo = nv.backend_v1_header.interface_id_lo,
             .interface_id_hi = nv.backend_v1_header.interface_id_hi, .revision = 1, .data_bytes = 32 } };
         const details: nv.R4NvDriverProfile = .{ .version = 1, .size = 32, .vendor_id = 0x10de, .copy_class = 0xc6b5,
             .rm_release = nv.rm_release, .command_abi = nv.command_abi, .reserved0 = 0, .reserved1 = 0 };
@@ -111,7 +115,12 @@ const Model = struct {
         return a.gfx_queue_error_stale;
     }
     fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
-        std.debug.assert(!job_live and input.operation == a.gfx_queue_operation_copy and input.dependency_count == 0 and input.byte_length == 16);
+        std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows) and input.dependency_count <= 1);
+        if (input.dependency_count == 1) {
+            std.debug.assert(job_live and std.meta.eql(input.dependencies[0], status.fence));
+            dependency_seen = true;
+        }
+        if (job_live) return a.gfx_queue_error_busy;
         const found = for (&queues) |*entry| { if (entry.handle.timeline == queue.timeline) break entry; } else unreachable;
         status = .{ .fence = .{ .slot = 1, .timeline = queue.timeline, .point = 0x400000017, .adapter_id = found.config.adapter_id,
             .device_generation = found.config.device_generation, .reset_generation = found.config.reset_generation },
@@ -133,7 +142,12 @@ const Model = struct {
     fn complete() void {
         const source = ref(job_request.source); const target = ref(job_request.target);
         std.debug.assert(!source.mapped and !target.mapped);
-        @memcpy(objects[target.object.?].bytes[job_request.target_offset..][0..16], objects[source.object.?].bytes[job_request.source_offset..][0..16]);
+        const count = if (job_request.row_count == 0) 1 else job_request.row_count;
+        for (0..count) |row| {
+            const src = job_request.source_offset + row * job_request.source_pitch;
+            const dst = job_request.target_offset + row * job_request.target_pitch;
+            @memcpy(objects[target.object.?].bytes[dst..][0..job_request.byte_length], objects[source.object.?].bytes[src..][0..job_request.byte_length]);
+        }
         status.phase = a.gfx_queue_phase_terminal; status.result = a.gfx_queue_result_complete; status.flags = 0;
     }
     fn referenceCount() usize { var count: usize = 0; for (&references) |*value| if (value.object != null) { count += 1; }; return count; }
@@ -161,7 +175,7 @@ pub fn check() !void {
     var imports = [_]a.R4XStartImport{
         .{ .group_id = @intFromEnum(a.R4LGroup.r4sys), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&sys) },
         .{ .group_id = @intFromEnum(a.R4LGroup.r4draw), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&draw) },
-        .{ .module_name = @intFromPtr("R4NV"), .symbol_name = @intFromPtr("BACKEND_V1"), .min_version = 1 },
+        .{ .module_name = @intFromPtr("R4NV"), .symbol_name = @intFromPtr("BACKEND_V1"), .min_version = nv.backend_v1_revision },
     };
     const raw: a.R4XStartContext = .{ .flags = a.r4xstart_flag_imports_valid, .imports = @intFromPtr(&imports), .import_count = imports.len, .instance_id = 7 };
     var config: c.R4GfxDeviceConfig = .{ .version = 1, .size = @sizeOf(c.R4GfxDeviceConfig), .storage_address = @intFromPtr(storage),
@@ -210,7 +224,7 @@ pub fn check() !void {
     try t.expectEqual(c.status_stale, api.device_info(&old, &state));
     try t.expectEqual(c.status_ok, api.device_close(&other));
     // A mismatched optional R4NV interface preserves the same software device.
-    imports[2].table = @intFromPtr(&Model.nv_table); imports[2].resolved_version = 1;
+    imports[2].table = @intFromPtr(&Model.nv_table); imports[2].resolved_version = nv.backend_v1_revision;
     Model.nv_table.header.abi_major = 2;
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expect(state.backend == c.render_backend_software);
@@ -244,6 +258,8 @@ pub fn check() !void {
     var native_desc = descriptor(c.resource_image); native_desc.flags = c.image_target;
     native_desc.source_kind = c.source_import_buffer; native_desc.source_address = @intFromPtr(&native_reference.reference);
     var native: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_stale, api.resource_create(&handle, &native_desc, &native));
+    Model.objects[2].descriptor.device_generation = 73; // Advertised memory epoch, not queue identity.
     try t.expectEqual(c.status_ok, api.resource_create(&handle, &native_desc, &native));
     try t.expectEqual(@as(i32, 1), Model.release(&native_reference.reference));
     @memset(&Model.objects[0].bytes, 0x31);
@@ -277,6 +293,36 @@ pub fn check() !void {
     // Cancellation is logical. Close must not lose its still-active fence.
     try t.expectEqual(c.status_ok, api.resource_create(&handle, &system, &source));
     try t.expectEqual(c.status_ok, api.resource_create(&handle, &system, &target));
+    var row_copy = std.mem.zeroes(c.R4GfxCopyRequestEx);
+    row_copy.version = 1; row_copy.size = @sizeOf(c.R4GfxCopyRequestEx);
+    row_copy.copy = .{ .source = source, .target = target, .source_offset = 4, .target_offset = 8, .byte_length = 4, .deadline_ns = 99999999 };
+    row_copy.row_count = 3; row_copy.source_pitch = 16; row_copy.target_pitch = 16;
+    @memset(&Model.objects[0].bytes, 0x37);
+    try t.expectEqual(c.status_ok, api.copy_submit_ex(&handle, &row_copy, &job));
+    try t.expectEqual(c.status_ok, api.job_info(&handle, &job, &receipt));
+    try t.expectEqual(c.render_backend_software, receipt.backend); // Old native profile lacks row transport.
+    var dependency: c.R4GfxCopyFence = undefined;
+    try t.expectEqual(c.status_ok, api.job_fence(&handle, &job, &dependency));
+    try t.expectEqualDeep(Model.status.fence, @as(a.GfxFence, @bitCast(dependency)));
+    row_copy.dependency_count = 1; row_copy.dependencies = @intFromPtr(&dependency);
+    try t.expectEqual(c.status_busy, api.copy_submit_ex(&handle, &row_copy, &rejected_job));
+    try t.expect(Model.dependency_seen); // Exact identity forwarded; kernel owner case proves admission/order.
+    Model.complete();
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expectEqual(c.status_ok, api.device_info(&handle, &state));
+    try t.expect(state.gpu_copy_bytes == 16 and state.cpu_read_bytes == 12 and state.cpu_write_bytes == 12);
+    for (0..3) |row| try t.expectEqualSlices(u8, &.{0x37,0x37,0x37,0x37}, Model.objects[1].bytes[8 + row * 16 ..][0..4]);
+    Model.operations = 15;
+    row_copy.dependency_count = 0; row_copy.dependencies = 0;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(@as(u32, 7), state.gpu_operations);
+    try t.expectEqual(c.status_ok, api.copy_submit_ex(&handle, &row_copy, &job));
+    try t.expectEqual(c.status_ok, api.job_info(&handle, &job, &receipt));
+    try t.expectEqual(c.render_backend_nvidia, receipt.backend);
+    Model.complete();
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expectEqual(c.status_ok, api.device_info(&handle, &state));
+    try t.expect(state.gpu_copy_bytes == 28 and state.cpu_read_bytes == 12 and state.cpu_write_bytes == 12);
     var cancelled_copy = copy; cancelled_copy.source = source; cancelled_copy.target = target;
     try t.expectEqual(c.status_ok, api.copy_submit(&handle, &cancelled_copy, &job));
     try t.expectEqual(c.status_busy, api.device_close(&handle));

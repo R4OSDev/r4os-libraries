@@ -102,45 +102,77 @@ _Static_assert(offsetof(R4NvDriverProfile, command_abi) == 20u, "R4NvDriverProfi
 _Static_assert(offsetof(R4NvDriverProfile, reserved0) == 24u, "R4NvDriverProfile.reserved0 offset mismatch");
 _Static_assert(offsetof(R4NvDriverProfile, reserved1) == 28u, "R4NvDriverProfile.reserved1 offset mismatch");
 
+typedef struct R4NvCopyBlock {
+    uint32_t enabled;
+    uint32_t width;
+    uint32_t height;
+    uint32_t x;
+    uint32_t y;
+    uint32_t log2_gobs;
+} R4NvCopyBlock;
+_Static_assert(sizeof(R4NvCopyBlock) == 24u, "R4NvCopyBlock size mismatch");
+_Static_assert(offsetof(R4NvCopyBlock, enabled) == 0u, "R4NvCopyBlock.enabled offset mismatch");
+_Static_assert(offsetof(R4NvCopyBlock, width) == 4u, "R4NvCopyBlock.width offset mismatch");
+_Static_assert(offsetof(R4NvCopyBlock, height) == 8u, "R4NvCopyBlock.height offset mismatch");
+_Static_assert(offsetof(R4NvCopyBlock, x) == 12u, "R4NvCopyBlock.x offset mismatch");
+_Static_assert(offsetof(R4NvCopyBlock, y) == 16u, "R4NvCopyBlock.y offset mismatch");
+_Static_assert(offsetof(R4NvCopyBlock, log2_gobs) == 20u, "R4NvCopyBlock.log2_gobs offset mismatch");
+
+typedef struct R4NvCopyLayout {
+    R4NvCopy copy;
+    R4NvCopyBlock source_block;
+    R4NvCopyBlock target_block;
+} R4NvCopyLayout;
+_Static_assert(sizeof(R4NvCopyLayout) == 112u, "R4NvCopyLayout size mismatch");
+_Static_assert(offsetof(R4NvCopyLayout, copy) == 0u, "R4NvCopyLayout.copy offset mismatch");
+_Static_assert(offsetof(R4NvCopyLayout, source_block) == 64u, "R4NvCopyLayout.source_block offset mismatch");
+_Static_assert(offsetof(R4NvCopyLayout, target_block) == 88u, "R4NvCopyLayout.target_block offset mismatch");
+
 #define R4NV_COMMAND_ABI ((uint32_t)1)
 #define R4NV_RM_RELEASE ((uint32_t)570144)
 #define R4NV_FEATURE_COPY_LINEAR ((uint32_t)1)
 #define R4NV_FEATURE_COPY_ROWS ((uint32_t)2)
 #define R4NV_MAX_COMMAND_WORDS ((uint32_t)19)
 #define R4NV_STATUS_OK ((int32_t)0)
+#define R4NV_FEATURE_COPY_LAYOUT ((uint32_t)4)
+#define R4NV_MAX_LAYOUT_COMMAND_WORDS ((uint32_t)37)
 #define R4NV_STATUS_INVALID ((int32_t)-1)
 #define R4NV_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4NV_STATUS_CAPACITY ((int32_t)-3)
 
 #define R4NV_BACKEND_V1_EXPORT_NAME "BACKEND_V1"
 #define R4NV_BACKEND_V1_ABI_MAJOR 1u
-#define R4NV_BACKEND_V1_REVISION 1u
+#define R4NV_BACKEND_V1_REVISION 2u
 #define R4NV_BACKEND_V1_INTERFACE_ID_LO 0x52344e5642454e44ull
 #define R4NV_BACKEND_V1_INTERFACE_ID_HI 0x52344f5330373931ull
-#define R4NV_BACKEND_V1_TABLE_SIZE 48u
+#define R4NV_BACKEND_V1_TABLE_SIZE 56u
 #define R4NV_BACKEND_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4NV_BACKEND_V1_TABLE_SIZE, R4NV_BACKEND_V1_ABI_MAJOR, R4NV_BACKEND_V1_REVISION, R4NV_BACKEND_V1_INTERFACE_ID_LO, R4NV_BACKEND_V1_INTERFACE_ID_HI }
 typedef int32_t (*R4NvBackendV1NegotiateFn)(const R4NvDeviceProfile * profile, R4NvFeatures * output);
 typedef int32_t (*R4NvBackendV1EncodeCopyFn)(const R4NvCopy * request, uint32_t * commands, uint32_t capacity, uint32_t * written);
+typedef int32_t (*R4NvBackendV1EncodeCopyLayoutFn)(const R4NvCopyLayout * request, uint32_t * commands, uint32_t capacity, uint32_t * written);
 typedef struct R4NvBackendV1 {
     R4LInterfaceHeader header;
     R4NvBackendV1NegotiateFn negotiate;
     R4NvBackendV1EncodeCopyFn encode_copy;
+    R4NvBackendV1EncodeCopyLayoutFn encode_copy_layout;
 } R4NvBackendV1;
-_Static_assert(sizeof(R4NvBackendV1) == 48u, "R4NvBackendV1 size mismatch");
+_Static_assert(sizeof(R4NvBackendV1) == 56u, "R4NvBackendV1 size mismatch");
 _Static_assert(offsetof(R4NvBackendV1, negotiate) == 32u, "R4NvBackendV1.negotiate offset mismatch");
 _Static_assert(offsetof(R4NvBackendV1, encode_copy) == 40u, "R4NvBackendV1.encode_copy offset mismatch");
+_Static_assert(offsetof(R4NvBackendV1, encode_copy_layout) == 48u, "R4NvBackendV1.encode_copy_layout offset mismatch");
 typedef struct R4NvBackendV1Client { const R4LInterfaceHeader *header; } R4NvBackendV1Client;
 
 static inline int32_t r4nv_backend_v1_init(const R4XStartContext *ctx, R4NvBackendV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4NV", "BACKEND_V1");
-    const R4LInterfaceExpectation expected = { 0x52344e5642454e44ull, 0x52344f5330373931ull, 1u, 1u, 48u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x52344e5642454e44ull, 0x52344f5330373931ull, 1u, 2u, 56u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
     if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -152,6 +184,11 @@ static inline int32_t r4nv_negotiate(R4NvBackendV1Client *client, const R4NvDevi
 
 static inline int32_t r4nv_encode_copy(R4NvBackendV1Client *client, const R4NvCopy * request, uint32_t * commands, uint32_t capacity, uint32_t * written) {
     R4NvBackendV1EncodeCopyFn function = (R4NvBackendV1EncodeCopyFn)r4l_slot_address(client->header, 40u);
+    return function(request, commands, capacity, written);
+}
+
+static inline int32_t r4nv_encode_copy_layout(R4NvBackendV1Client *client, const R4NvCopyLayout * request, uint32_t * commands, uint32_t capacity, uint32_t * written) {
+    R4NvBackendV1EncodeCopyLayoutFn function = (R4NvBackendV1EncodeCopyLayoutFn)r4l_slot_address(client->header, 48u);
     return function(request, commands, capacity, written);
 }
 

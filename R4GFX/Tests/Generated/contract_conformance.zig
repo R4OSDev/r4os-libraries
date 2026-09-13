@@ -164,13 +164,29 @@ comptime {
     if (@offsetOf(implementation.R4GfxJobInfo, "point") != 32 or @offsetOf(binding.R4GfxJobInfo, "point") != 32) @compileError("R4GfxJobInfo.point offset drift");
     if (@offsetOf(implementation.R4GfxJobInfo, "device_generation") != 40 or @offsetOf(binding.R4GfxJobInfo, "device_generation") != 40) @compileError("R4GfxJobInfo.device_generation offset drift");
     if (@offsetOf(implementation.R4GfxJobInfo, "reset_generation") != 48 or @offsetOf(binding.R4GfxJobInfo, "reset_generation") != 48) @compileError("R4GfxJobInfo.reset_generation offset drift");
+    if (@sizeOf(implementation.R4GfxCopyFence) != 40 or @sizeOf(binding.R4GfxCopyFence) != 40) @compileError("R4GfxCopyFence size drift");
+    if (@offsetOf(implementation.R4GfxCopyFence, "slot") != 0 or @offsetOf(binding.R4GfxCopyFence, "slot") != 0) @compileError("R4GfxCopyFence.slot offset drift");
+    if (@offsetOf(implementation.R4GfxCopyFence, "adapter_id") != 4 or @offsetOf(binding.R4GfxCopyFence, "adapter_id") != 4) @compileError("R4GfxCopyFence.adapter_id offset drift");
+    if (@offsetOf(implementation.R4GfxCopyFence, "timeline") != 8 or @offsetOf(binding.R4GfxCopyFence, "timeline") != 8) @compileError("R4GfxCopyFence.timeline offset drift");
+    if (@offsetOf(implementation.R4GfxCopyFence, "point") != 16 or @offsetOf(binding.R4GfxCopyFence, "point") != 16) @compileError("R4GfxCopyFence.point offset drift");
+    if (@offsetOf(implementation.R4GfxCopyFence, "device_generation") != 24 or @offsetOf(binding.R4GfxCopyFence, "device_generation") != 24) @compileError("R4GfxCopyFence.device_generation offset drift");
+    if (@offsetOf(implementation.R4GfxCopyFence, "reset_generation") != 32 or @offsetOf(binding.R4GfxCopyFence, "reset_generation") != 32) @compileError("R4GfxCopyFence.reset_generation offset drift");
+    if (@sizeOf(implementation.R4GfxCopyRequestEx) != 136 or @sizeOf(binding.R4GfxCopyRequestEx) != 136) @compileError("R4GfxCopyRequestEx size drift");
+    if (@offsetOf(implementation.R4GfxCopyRequestEx, "version") != 0 or @offsetOf(binding.R4GfxCopyRequestEx, "version") != 0) @compileError("R4GfxCopyRequestEx.version offset drift");
+    if (@offsetOf(implementation.R4GfxCopyRequestEx, "size") != 4 or @offsetOf(binding.R4GfxCopyRequestEx, "size") != 4) @compileError("R4GfxCopyRequestEx.size offset drift");
+    if (@offsetOf(implementation.R4GfxCopyRequestEx, "copy") != 8 or @offsetOf(binding.R4GfxCopyRequestEx, "copy") != 8) @compileError("R4GfxCopyRequestEx.copy offset drift");
+    if (@offsetOf(implementation.R4GfxCopyRequestEx, "row_count") != 104 or @offsetOf(binding.R4GfxCopyRequestEx, "row_count") != 104) @compileError("R4GfxCopyRequestEx.row_count offset drift");
+    if (@offsetOf(implementation.R4GfxCopyRequestEx, "dependency_count") != 108 or @offsetOf(binding.R4GfxCopyRequestEx, "dependency_count") != 108) @compileError("R4GfxCopyRequestEx.dependency_count offset drift");
+    if (@offsetOf(implementation.R4GfxCopyRequestEx, "source_pitch") != 112 or @offsetOf(binding.R4GfxCopyRequestEx, "source_pitch") != 112) @compileError("R4GfxCopyRequestEx.source_pitch offset drift");
+    if (@offsetOf(implementation.R4GfxCopyRequestEx, "target_pitch") != 120 or @offsetOf(binding.R4GfxCopyRequestEx, "target_pitch") != 120) @compileError("R4GfxCopyRequestEx.target_pitch offset drift");
+    if (@offsetOf(implementation.R4GfxCopyRequestEx, "dependencies") != 128 or @offsetOf(binding.R4GfxCopyRequestEx, "dependencies") != 128) @compileError("R4GfxCopyRequestEx.dependencies offset drift");
     if (@sizeOf(implementation.ApiV1) != 48 or @sizeOf(binding.ApiV1) != 48) @compileError("ApiV1 size drift");
     if (@offsetOf(implementation.ApiV1, "linear_layout") != 32 or @offsetOf(binding.ApiV1, "linear_layout") != 32) @compileError("ApiV1.linear_layout slot drift");
     if (@offsetOf(implementation.ApiV1, "fill_rect") != 40 or @offsetOf(binding.ApiV1, "fill_rect") != 40) @compileError("ApiV1.fill_rect slot drift");
     if (@sizeOf(implementation.RenderV1) != 48 or @sizeOf(binding.RenderV1) != 48) @compileError("RenderV1 size drift");
     if (@offsetOf(implementation.RenderV1, "capabilities") != 32 or @offsetOf(binding.RenderV1, "capabilities") != 32) @compileError("RenderV1.capabilities slot drift");
     if (@offsetOf(implementation.RenderV1, "execute_cpu") != 40 or @offsetOf(binding.RenderV1, "execute_cpu") != 40) @compileError("RenderV1.execute_cpu slot drift");
-    if (@sizeOf(implementation.DeviceV1) != 144 or @sizeOf(binding.DeviceV1) != 144) @compileError("DeviceV1 size drift");
+    if (@sizeOf(implementation.DeviceV1) != 160 or @sizeOf(binding.DeviceV1) != 160) @compileError("DeviceV1 size drift");
     if (@offsetOf(implementation.DeviceV1, "storage_size") != 32 or @offsetOf(binding.DeviceV1, "storage_size") != 32) @compileError("DeviceV1.storage_size slot drift");
     if (@offsetOf(implementation.DeviceV1, "device_open") != 40 or @offsetOf(binding.DeviceV1, "device_open") != 40) @compileError("DeviceV1.device_open slot drift");
     if (@offsetOf(implementation.DeviceV1, "device_close") != 48 or @offsetOf(binding.DeviceV1, "device_close") != 48) @compileError("DeviceV1.device_close slot drift");
@@ -185,6 +201,8 @@ comptime {
     if (@offsetOf(implementation.DeviceV1, "job_info") != 120 or @offsetOf(binding.DeviceV1, "job_info") != 120) @compileError("DeviceV1.job_info slot drift");
     if (@offsetOf(implementation.DeviceV1, "job_cancel") != 128 or @offsetOf(binding.DeviceV1, "job_cancel") != 128) @compileError("DeviceV1.job_cancel slot drift");
     if (@offsetOf(implementation.DeviceV1, "job_release") != 136 or @offsetOf(binding.DeviceV1, "job_release") != 136) @compileError("DeviceV1.job_release slot drift");
+    if (@offsetOf(implementation.DeviceV1, "copy_submit_ex") != 144 or @offsetOf(binding.DeviceV1, "copy_submit_ex") != 144) @compileError("DeviceV1.copy_submit_ex slot drift");
+    if (@offsetOf(implementation.DeviceV1, "job_fence") != 152 or @offsetOf(binding.DeviceV1, "job_fence") != 152) @compileError("DeviceV1.job_fence slot drift");
 }
 
 test "generated implementation and binding views are identical" {

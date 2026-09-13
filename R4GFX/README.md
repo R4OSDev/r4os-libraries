@@ -14,19 +14,19 @@ and C/Zig conformance cases. No guest or benchmark runs automatically.
 
 ## Runtime interfaces
 
-`module.R4MF` is authoritative. Module 0.1.2 exports three independent tables:
+`module.R4MF` is authoritative. Module 0.1.3 exports three independent tables:
 
 | Import | Behavior |
 | --- | --- |
 | `R4GFX:API_V1:1` | Checked linear layouts and rectangle fill; original table and payloads unchanged. |
 | `R4GFX:RENDER_V1:1` | Capability query and ordered, bounded CPU 2D batches. |
-| `R4GFX:DEVICE_V1:1` | Caller-owned devices, images/targets, samplers, pipelines, raster imports and canonical copy receipts. |
+| `R4GFX:DEVICE_V1:2` | Caller-owned devices, images/targets, samplers, pipelines, raster imports and canonical copy receipts. |
 
 Bindings and API documentation are generated from `Contract/LibraryContract.json`.
 Use `ApiV1Client.init` or `RenderV1Client.init` with the app start context. The
 generated clients check interface identity, revision, size and required slots.
 RENDER_V1 reports software rendering. DEVICE_V1 selects a compatible native copy
-backend when the caller also imports `R4NV:BACKEND_V1:1:1`; a missing or incompatible
+backend when the caller also imports `R4NV:BACKEND_V1:2:1`; a missing or incompatible
 R4NV keeps software rendering and copying available.
 
 ## Device resources
@@ -76,8 +76,31 @@ close while retaining storage. Opaque device-local images are not CPU shadows.
 The Desktop batches fills through DEVICE_V1, flushes before other scene operations
 and retains imported shared rasters with its active/staging frame leases. Its borrowed
 scene target is released at each scene boundary. R4DRAW still handles presentation.
-DISPLAYD `/BUFFERS` includes a 64-byte canonical copy and exact 16-pixel readback through
+DISPLAYD `/BUFFERS` includes two dependent row copies and exact 16-pixel readback through
 this interface, in addition to the original RENDER_V1 scene.
+
+## Asynchronous copies
+
+DEVICE_V1 revision 2 appends `copy_submit_ex` and `job_fence` to the original
+table. Pass bytes per row, nonzero row count and the two pitches for geometric
+copies; zero rows and zero pitches retain linear-byte semantics. Image-plane
+pitches must match the canonical descriptor. Offsets are logical plane offsets,
+including for opaque native images. Up to eight exact common fences can be
+passed as dependencies. Submit the dependent work before releasing its upstream
+job. The kernel retains admitted dependencies independently; exporting a fence
+does not transfer ownership or complete the job. Query/release only after the
+reported physical boundary; cancellation alone does not release resources.
+
+R4NV revision 2 and the common backend operation mask negotiate linear, pitched
+and blocklinear CE copies independently of software rendering. Unsupported row
+copies between system BOs can use a cached software queue. Opaque/device-local
+copies require a compatible native backend and never guess CPU addresses.
+Queue device/reset generations and the driver's memory generation are distinct;
+native imports must match the current memory epoch and are invalidated on reset.
+System resources survive this change. Copy costs count transferred row bytes,
+excluding pitch gaps. DISPLAYD /BUFFERS demonstrates two dependent 24-byte copies
+with pitches 16/24/32 and a checked readback. Software evidence and physical
+follow-up: `Docs/Drivers/GrafikCopy07918.txt` and `ExFiles/Reports/OssiGPU.txt` /18.
 
 ## CPU batch ownership
 
