@@ -84,9 +84,14 @@ Profiles 1 and 2–4 share their UV/tint interface. Profile 6 pairs with 5,
 so the fixed pipeline does not require disabling out-of-range attribute
 exceptions for unused vertex outputs.
 
-Nearest/bilinear filtering is sampler state. The texture handle is a combined
-TIC/TSC word in constant buffer 1 at byte 0. NAK's internal graphics constants
-use buffer 0: sample locations at byte 0, masks at byte 16 and an optional
+Nearest/bilinear filtering is sampler state. Resource ABI2 holds a combined
+TIC/TSC word in constant buffer 1 at byte 0 and normalized minU/minV/maxU/maxV
+source-texel-center bounds at bytes 16..31. Texture shaders clamp interpolated
+UVs to those bounds before sampling, including bilinear crops and one-texel
+views. ABI1 cache keys cannot select these programs. The driver builds the
+bounds from the retained source image and canonical rectangle; no cropped
+texture copy is required. NAK's internal graphics constants use buffer 0:
+sample locations at byte 0, masks at byte 16 and an optional
 printf pointer at byte 48. These single-sample profiles read none of those
 internal constants and contain no printf. Both sRGB conversions preserve
 zero-alpha pixels without division by zero; their texture/render views must
@@ -115,5 +120,7 @@ The checked-in `Source/Generated/Shaders` files contain only the six programs,
 metadata and provenance. R4NV's separate `SHADER_V1` table exposes a bounded,
 driver/GPU/compiler/ABI/format/pipeline-state-bound byte cache. The regular
 R4NV build consumes these files without running Mesa or a host compiler.
-Native GPU allocations, descriptors, rendering and the dynamic R4OS compiler
-port remain integration work in 0.79.34/0.79.19.
+Native allocations and the asynchronous render queue consume the fixed
+profiles. The 0.79.19 texture checkpoint includes CPU/f64 reference images
+and a separate f32 method/descriptor model. Real SM86 pixel execution and
+the dynamic R4OS compiler port remain separate work in 0.79.19/0.79.34.

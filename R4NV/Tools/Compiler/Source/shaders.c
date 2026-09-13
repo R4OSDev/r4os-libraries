@@ -5,10 +5,11 @@
 #include "nak.h"
 #include "nir_builder.h"
 
-/* R4NV graphics constant-buffer ABI 1. CBuf 0 reserves bytes 0..63:
+/* R4NV graphics constant-buffer ABI 2. CBuf 0 reserves bytes 0..63:
  * 0..7 sample locations (u4/u4), 16..31 sample masks (u16),
  * 48..55 an optional printf address. These single-sample fixed shaders
- * do not issue printf or sample-table loads. CBuf 1 holds their texture. */
+ * do not issue printf or sample-table loads. CBuf 1 holds the texture
+ * handle at 0 and a float4 of source texel-center bounds at 16. */
 const struct nak_constant_offset_info nak_const_offsets_base = {
    .sample_info_cb = 0, .sample_locations_offset = 0,
    .sample_masks_offset = 16, .printf_cb = 0, .printf_buffer_offset = 48,
@@ -97,13 +98,23 @@ r4nv_build_shader(enum r4nv_shader_profile profile,
          nir_def *handle = nir_ldc_nv(&b, 1, 32, nir_imm_int(&b, 1),
                                       nir_imm_int(&b, 0), .align_mul = 4,
                                       .align_offset = 0);
+         /* The sampler clamps to the whole image. Clamp interpolated UVs to
+          * this source view's texel centers first, so bilinear filtering
+          * cannot bleed adjacent pixels into a cropped view. This needs no
+          * temporary texture, CPU image scaling or extra image copy. */
+         nir_def *bounds = nir_ldc_nv(&b, 4, 32, nir_imm_int(&b, 1),
+                                      nir_imm_int(&b, 16), .align_mul = 16,
+                                      .align_offset = 0);
+         nir_def *coord = nir_fmin(&b, nir_fmax(&b, nir_load_var(&b, uv),
+                                               nir_channels(&b, bounds, 3)),
+                                       nir_channels(&b, bounds, 12));
          nir_tex_instr *tex = nir_tex_instr_create(b.shader, 3);
          tex->op = nir_texop_tex;
          tex->sampler_dim = GLSL_SAMPLER_DIM_2D;
          tex->dest_type = nir_type_float32;
          tex->coord_components = 2;
          tex->src[0] = (nir_tex_src) { .src_type = nir_tex_src_coord,
-                                     .src = nir_src_for_ssa(nir_load_var(&b, uv)) };
+                                     .src = nir_src_for_ssa(coord) };
          tex->src[1] = (nir_tex_src) { .src_type = nir_tex_src_texture_handle,
                                      .src = nir_src_for_ssa(handle) };
          tex->src[2] = (nir_tex_src) { .src_type = nir_tex_src_sampler_handle,

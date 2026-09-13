@@ -6,7 +6,7 @@ const t = std.testing;
 
 pub fn run(api: *const c.ShaderV1) !void {
     var key: c.R4NvShaderKey = .{ .version = 1, .size = @sizeOf(c.R4NvShaderKey), .vendor_id = 0x10de, .device_id = 0x2484,
-        .graphics_class = 0xc797, .shader_model = 86, .rm_release = 570144, .command_abi = 1, .shader_abi = 1, .resource_abi = 1,
+        .graphics_class = 0xc797, .shader_model = 86, .rm_release = 570144, .command_abi = 1, .shader_abi = 1, .resource_abi = 2,
         .input_format = 875713089, .output_format = 875713112, .driver_build = 0x100000002,
         .device_uuid = .{ .word0 = 0x100000003, .word1 = 4, .word2 = 5, .word3 = 6 },
         .pipeline_state = .{ .word0 = 0x200000007, .word1 = 8, .word2 = 9, .word3 = 10 } };
@@ -14,14 +14,14 @@ pub fn run(api: *const c.ShaderV1) !void {
     // Independent outputs of the pinned Mesa26.2.2 NAK host checkpoint.
     const hashes = [_][]const u8{
         "1efe5eb9bf14ca597f48dda6460b2e09e7a2c335e7c25671cdf5eb63ed6437c9",
-        "1d73ecc476b302f84bb1bb2fb3baeeb1b1e973ca38af20b968a229dfda32d705",
-        "e98b34a5d07c8b33f5d7cf77eb0db2ff7d61457a70bf575e8e33079e92d17f16",
-        "5aeb24a5558164ae2a1df0147c595af6b8d482f41fefb59664292a0a2f72bdf5",
+        "7c95046e5e8df993fd29bc4a0ed453bfa95863fc0643ac51c3f7166352a9ca1d",
+        "96e9319486f7503fa1448fdf2b4ab97545acd19a0954a097c2aa451145fb0f76",
+        "a27451b864b05ab0b32d16083965674ef4dc2175a6e459fd22055b63dd0b8173",
         "94811e8c07f6e09dcba8c3c0cce8aacedbab7293b76542935ecbf150abd39984",
         "356c276ffdc82e9cc63e49fb5a79b7602ff82d4981804689f7ec8f8c042ccc04",
     };
-    const sizes = [_]u32{ 112, 192, 752, 768, 80, 80 };
-    const instructions = [_]u32{ 7, 12, 47, 48, 5, 5 };
+    const sizes = [_]u32{ 112, 256, 816, 832, 80, 80 };
+    const instructions = [_]u32{ 7, 16, 51, 52, 5, 5 };
     var storage: [c.shader_cache_max_bytes + 8]u8 align(8) = @splat(0xa5);
     const bytes = storage[1 .. 1 + c.shader_cache_max_bytes]; // ABI promises byte alignment.
     var view: c.R4NvShaderView = std.mem.zeroes(c.R4NvShaderView);
@@ -83,6 +83,12 @@ pub fn run(api: *const c.ShaderV1) !void {
         try t.expectEqual(c.status_unsupported, api.shader_cache_write(4, &key, bytes.ptr, bytes.len, &written));
         key = original_key;
     }
+    // ABI1 lacks source-rectangle bounds. Its cache keys must not select
+    // these shaders even though public table/payload sizes are unchanged.
+    key.resource_abi = 1;
+    try t.expectEqual(c.status_unsupported, api.shader_cache_read(&key, bytes.ptr, written, &view));
+    try t.expectEqual(c.status_unsupported, api.shader_cache_write(4, &key, bytes.ptr, bytes.len, &written));
+    key = original_key;
     key.device_uuid = std.mem.zeroes(c.R4NvDigest);
     try t.expectEqual(c.status_invalid, api.shader_cache_read(&key, bytes.ptr, written, &view));
     key = original_key;

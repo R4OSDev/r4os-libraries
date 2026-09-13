@@ -18,6 +18,7 @@ fn state(program: *const render.Program, method: u32) !u32 {
     return found orelse error.MissingState;
 }
 pub fn check() !void {
+    try render.reference_model.check();
     var binding: render.Binding = .{
         .draw = .{
             .target = .{ .address = 0x100000, .bytes = 65536, .width = 128, .height = 128, .pitch = 512, .format = .argb8888, .layout = .linear },

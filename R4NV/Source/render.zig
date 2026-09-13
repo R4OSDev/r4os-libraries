@@ -143,6 +143,7 @@ pub const Rect = struct {
 };
 pub const Blend = enum { replace, over };
 pub const Transfer = enum { identity, decode_srgb, encode_srgb };
+pub const reference_model = if (@import("builtin").is_test) @import("render_reference.zig") else struct {};
 pub const Draw = struct {
     target: image.Image,
     source: ?image.Image = null,
@@ -171,11 +172,6 @@ pub const Draw = struct {
             // The resource layer may arrange a bounded CE scratch copy first.
             if (Range.overlaps(.{ .address = source.address, .bytes = source.bytes }, .{ .address = self.target.address, .bytes = self.target.bytes })) return error.Unsupported;
             if ((source.format == .r8) != (self.target.format == .r8) or self.color != 0) return error.Unsupported;
-            // Hardware CLAMP_TO_EDGE applies to the image, not a source
-            // rectangle inside it. Such bilinear views need an isolated image
-            // or a shader with explicit subrectangle clamps.
-            if (self.filter == .bilinear and (self.source_rect.x != 0 or self.source_rect.y != 0 or
-                self.source_rect.width != source.width or self.source_rect.height != source.height)) return error.Unsupported;
         } else if (self.transfer != .identity) return error.Unsupported;
         if (self.target.format == .r8 and (self.blend != .replace or self.transfer != .identity)) return error.Unsupported;
         if (self.source == null and self.target.format == .argb8888) {
@@ -239,6 +235,14 @@ pub fn packetUpload(draw: Draw, out: []u8) Error!void {
         @memcpy(out[256..288], std.mem.asBytes(&tsc));
         // TIC[0] | (TSC[0] << 20), one descriptor of each in this packet.
         std.mem.writeInt(u32, out[512..516], 0, .little);
+        // CBuf1 ABI2: clamp UVs to the selected source's first/last texel
+        // centers. Filtering a subrectangle never requires a copied image.
+        const extent: [2]f32 = .{ @floatFromInt(source.width), @floatFromInt(source.height) };
+        const origin: [2]f32 = .{ @floatFromInt(draw.source_rect.x), @floatFromInt(draw.source_rect.y) };
+        const bounds: [4]f32 = .{ (origin[0] + 0.5) / extent[0], (origin[1] + 0.5) / extent[1],
+            (origin[0] + @as(f32, @floatFromInt(draw.source_rect.width)) - 0.5) / extent[0],
+            (origin[1] + @as(f32, @floatFromInt(draw.source_rect.height)) - 0.5) / extent[1] };
+        @memcpy(out[528..544], std.mem.asBytes(&bounds));
     }
     const factor: f32 = @as(f32, @floatFromInt(draw.opacity)) / 255.0;
     var tint: [4]f32 = @splat(factor);

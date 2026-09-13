@@ -1,0 +1,171 @@
+// Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
+//! Host-only semantic execution of the bounded rectangle profile. Reads the
+//! actual method stream, descriptors and uploaded constants/vertices. This
+//! models f32 sampling/shader behavior; it is not an SM86 ISA emulator or a
+//! claim of hardware execution. Frozen CPU/f64 images are the separate oracle.
+const std = @import("std");
+const r = @import("render.zig");
+const hw = @import("Generated/Render/c797.zig");
+const shaders = @import("Generated/Shaders/shaders.zig");
+pub const cases = @import("render_reference_cases.zig");
+const t = std.testing;
+fn word(data: []const u8, at: usize) u32 { return std.mem.readInt(u32,data[at..][0..4],.little); }
+fn scalar(data: []const u8, at: usize) f32 { return @bitCast(word(data,at)); }
+pub fn method(data: []const u8, address: u32) !u32 {
+    var at: usize = 0; var value: ?u32 = null;
+    while (at < data.len) {
+        if (at+4 > data.len) return error.Method;
+        const header = word(data,at); const count = (header>>16)&0x1fff;
+        if (header&0xe0000000 != 0x20000000 or count == 0 or at+(count+1)*4 > data.len) return error.Method;
+        const start = (header&0x1fff)*4;
+        for (0..count) |i| if (start+i*4 == address) { value = word(data,at+(i+1)*4); };
+        at += (count+1)*4;
+    }
+    return value orelse error.Method;
+}
+fn wideMethod(data: []const u8, address: u32) !u64 { return (@as(u64,try method(data,address))<<32)|try method(data,address+4); }
+pub const Surface = struct {
+    address: u64, width: u32, height: u32, pitch: u32, format: r.image.Format, bytes: []u8,
+    pub fn from(image: r.image.Image, bytes: []u8) Surface {
+        return .{ .address = image.address, .width = image.width, .height = image.height, .pitch = image.pitch, .format = image.format, .bytes = bytes };
+    }
+    fn load(s: Surface, x: u32, y: u32) [4]f32 {
+        if (s.format == .r8) return .{ @as(f32,@floatFromInt(s.bytes[y*s.pitch+x]))/255,0,0,1 };
+        const value = word(s.bytes,y*s.pitch+x*4);
+        var color: [4]f32 = undefined;
+        for ([_]u5{16,8,0,24},0..) |shift,i| color[i] = @as(f32,@floatFromInt((value>>shift)&255))/255;
+        if (s.format == .xrgb8888) color[3] = 1;
+        return color;
+    }
+    fn store(s: Surface, x: u32, y: u32, color: [4]f32) !void {
+        var value: u32 = 0;
+        for ([_]u5{16,8,0,24},0..) |shift,i| {
+            if (!std.math.isFinite(color[i])) return error.NonFinite;
+            value |= @as(u32,@intFromFloat(@round(std.math.clamp(color[i],0,1)*255)))<<shift;
+        }
+        if (s.format == .r8) s.bytes[y*s.pitch+x] = @truncate(value>>16)
+        else std.mem.writeInt(u32,s.bytes[y*s.pitch+x*4..][0..4],if (s.format == .xrgb8888) value&0xffffff else value,.little);
+    }
+};
+fn sample(s: Surface, uv: [2]f32, linear: bool) [4]f32 {
+    const width: f32 = @floatFromInt(s.width); const height: f32 = @floatFromInt(s.height);
+    if (!linear) return s.load(@intFromFloat(std.math.clamp(@floor(uv[0]*width),0,width-1)),@intFromFloat(std.math.clamp(@floor(uv[1]*height),0,height-1)));
+    const x = uv[0]*width-0.5; const y = uv[1]*height-0.5;
+    const fx = @floor(x); const fy = @floor(y); const wx = x-fx; const wy = y-fy;
+    const x0: u32 = @intFromFloat(std.math.clamp(fx,0,width-1)); const x1: u32 = @intFromFloat(std.math.clamp(fx+1,0,width-1));
+    const y0: u32 = @intFromFloat(std.math.clamp(fy,0,height-1)); const y1: u32 = @intFromFloat(std.math.clamp(fy+1,0,height-1));
+    const a = s.load(x0,y0); const b = s.load(x1,y0); const c = s.load(x0,y1); const d = s.load(x1,y1);
+    var color: [4]f32 = undefined;
+    for (0..4) |i| color[i] = (a[i]*(1-wx)+b[i]*wx)*(1-wy)+(c[i]*(1-wx)+d[i]*wx)*wy;
+    return color;
+}
+fn transfer(color: [4]f32, encode: bool) [4]f32 {
+    var out = color;
+    for (0..3) |i| {
+        const v = std.math.clamp(color[i]/(if (color[3] > 0) color[3] else 1),0,1);
+        const result = if (encode) (if (v <= 0.0031308) 12.92*v else 1.055*std.math.pow(f32,v,1.0/2.4)-0.055)
+            else (if (v <= 0.04045) v/12.92 else std.math.pow(f32,(v+0.055)/1.055,2.4));
+        out[i] = result*color[3];
+    }
+    return out;
+}
+pub fn execute(methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface) !void {
+    if (packet.len != 1024 or target.bytes.len < @as(u64,target.pitch)*target.height) return error.Surface;
+    try t.expectEqual(@as(u32,0xc797),try method(methods,hw.SET_OBJECT));
+    try t.expectEqual(target.address,try wideMethod(methods,hw.SET_COLOR_TARGET_A));
+    try t.expectEqual(target.pitch,try method(methods,hw.SET_COLOR_TARGET_A+8));
+    try t.expectEqual(target.height,try method(methods,hw.SET_COLOR_TARGET_A+12));
+    try t.expectEqual(@as(u32,switch (target.format) { .argb8888 => 0xcf, .xrgb8888 => 0xe6, .r8 => 0xf3 }),try method(methods,hw.SET_COLOR_TARGET_A+16));
+    try t.expectEqual(@as(u32,0x1000),try method(methods,hw.SET_COLOR_TARGET_A+20)); // Linear reference views only.
+    try t.expectEqual(packet_address+768,try wideMethod(methods,hw.SET_VERTEX_STREAM_A_FORMAT+4));
+    try t.expectEqual(@as(u32,40),try method(methods,hw.SET_VERTEX_STREAM_A_FORMAT)&0xfff);
+    try t.expectEqual(@as(u32,4),try method(methods,hw.DRAW_VERTEX_ARRAY_BEGIN_END_A+4));
+    var profile: ?u32 = null;
+    var offset: u64 = 0;
+    const fragment = try wideMethod(methods,hw.SET_PIPELINE_PROGRAM_ADDRESS_A+5*64);
+    for (shaders.programs) |shader| {
+        if (fragment == program_address+offset) profile = shader.profile;
+        offset += std.mem.alignForward(u64,128+shader.code.len,128);
+    }
+    const id = profile orelse return error.Shader;
+    if ((source == null and id != 5) or (source != null and (id < 2 or id > 4))) return error.Shader;
+    var linear = false;
+    if (source) |src| {
+        if (src.bytes.len < @as(u64,src.pitch)*src.height) return error.Surface;
+        try t.expectEqual(packet_address,try wideMethod(methods,hw.SET_TEX_HEADER_POOL_A));
+        try t.expectEqual(packet_address+256,try wideMethod(methods,hw.SET_TEX_SAMPLER_POOL_A));
+        try t.expectEqual(packet_address+512,try wideMethod(methods,hw.SET_CONSTANT_BUFFER_SELECTOR_A+4));
+        try t.expectEqual(@as(u32,0x11),try method(methods,hw.BIND_GROUP_CONSTANT_BUFFER+128));
+        try t.expectEqual(@as(u32,0),word(packet,512));
+        try t.expectEqual(src.address,@as(u64,word(packet,4))|(@as(u64,word(packet,8)&0xffff)<<32));
+        try t.expectEqual(@as(u32,2),(word(packet,8)>>21)&7);
+        try t.expectEqual(src.pitch,(word(packet,12)&0xffff)<<5);
+        try t.expectEqual(src.width,(word(packet,16)&0xffff)+1);
+        try t.expectEqual(src.height,(word(packet,20)&0xffff)+1);
+        try t.expectEqual(@as(u32,switch (src.format) { .argb8888 => 0x54e24908, .xrgb8888 => 0x74e24908, .r8 => 0x7010011d }),word(packet,0));
+        try t.expectEqual(@as(u32,0x24092),word(packet,256));
+        const filter = word(packet,260);
+        if (filter != 0x91 and filter != 0xa2) return error.Sampler;
+        linear = filter == 0xa2;
+    }
+    const over = try method(methods,hw.SET_BLEND) == 1;
+    try t.expectEqual(@as(u32,0x4001),try method(methods,hw.SET_BLEND_PER_TARGET_SEPARATE_FOR_ALPHA+8));
+    try t.expectEqual(@as(u32,if (over) 0x4303 else 0x4000),try method(methods,hw.SET_BLEND_PER_TARGET_SEPARATE_FOR_ALPHA+12));
+    const sx: f32 = @bitCast(try method(methods,hw.SET_VIEWPORT_SCALE_X));
+    const sy: f32 = @bitCast(try method(methods,hw.SET_VIEWPORT_SCALE_X+4));
+    const ox: f32 = @bitCast(try method(methods,hw.SET_VIEWPORT_SCALE_X+12));
+    const oy: f32 = @bitCast(try method(methods,hw.SET_VIEWPORT_SCALE_X+16));
+    const x0 = scalar(packet,768)*sx+ox; const y0 = scalar(packet,772)*sy+oy;
+    const x3 = scalar(packet,888)*sx+ox; const y3 = scalar(packet,892)*sy+oy;
+    if (x3 <= x0 or y3 <= y0) return error.Vertex;
+    const horizontal = try method(methods,hw.SET_SCISSOR_ENABLE+4);
+    const vertical = try method(methods,hw.SET_SCISSOR_ENABLE+8);
+    try t.expectEqual(@as(u32,1),try method(methods,hw.SET_SCISSOR_ENABLE));
+    for (0..target.height) |y| for (0..target.width) |x| {
+        const px = @as(f32,@floatFromInt(x))+0.5; const py = @as(f32,@floatFromInt(y))+0.5;
+        if (x < horizontal&0xffff or x >= horizontal>>16 or y < vertical&0xffff or y >= vertical>>16 or px < x0 or px >= x3 or py < y0 or py >= y3) continue;
+        var color: [4]f32 = @splat(1);
+        if (source) |src| {
+            const u = scalar(packet,784)+(px-x0)/(x3-x0)*(scalar(packet,904)-scalar(packet,784));
+            const v = scalar(packet,788)+(py-y0)/(y3-y0)*(scalar(packet,908)-scalar(packet,788));
+            color = sample(src,.{std.math.clamp(u,scalar(packet,528),scalar(packet,536)),std.math.clamp(v,scalar(packet,532),scalar(packet,540))},linear);
+            if (id == 3) color = transfer(color,false);
+        }
+        for (0..4) |i| color[i] *= scalar(packet,792+i*4);
+        if (id == 4) color = transfer(color,true);
+        if (over) {
+            const background = target.load(@intCast(x),@intCast(y)); const inverse = 1-color[3];
+            for (0..4) |i| color[i] += background[i]*inverse;
+        }
+        try target.store(@intCast(x),@intCast(y),color);
+    };
+}
+pub fn compare(scene_index: usize, pixels: []const u8) !u8 {
+    const scene = cases.scenes[scene_index];
+    const expected = @embedFile("Fixtures/render-pixels.bin")[scene_index*cases.target_bytes..][0..cases.target_bytes];
+    var maximum: u8 = 0;
+    for (expected,pixels,0..) |want,actual,i| {
+        const y = i/128; const byte_x = i%128; const bpp: usize = if (scene.format == .r8) 1 else 4;
+        const drawn = byte_x < 32*bpp and scene.inside(@intCast(byte_x/bpp),@intCast(y));
+        const difference = @max(want,actual)-@min(want,actual);
+        if (difference > (if (drawn) scene.tolerance else @as(u8,0))) {
+            std.debug.print("render {s}: byte {d} expected {d} actual {d} tolerance {d}\n",.{scene.name,i,want,actual,if (drawn) scene.tolerance else @as(u8,0)});
+            return error.ReferenceMismatch;
+        }
+        maximum = @max(maximum,difference);
+    }
+    return maximum;
+}
+pub fn check() !void {
+    for (cases.scenes,0..) |scene,i| {
+        const draw = scene.draw();
+        var source: [cases.source_bytes]u8 = undefined; var pixels: [cases.target_bytes]u8 = undefined;
+        cases.initialize(scene,&source,&pixels);
+        const binding: r.Binding = .{ .draw = draw, .programs = .{ .address = 0x300000, .bytes = r.shader_bytes }, .packet = .{ .address = 0x400000, .bytes = r.packet_bytes } };
+        var program: r.Program = .{}; var packet: [r.packet_bytes]u8 = undefined;
+        try r.packetUpload(draw,&packet); try r.encode(binding,&program);
+        try execute(std.mem.sliceAsBytes(program.slice()),&packet,binding.programs.address,binding.packet.address,Surface.from(draw.target,&pixels),if (draw.source) |src| Surface.from(src,&source) else null);
+        const maximum = try compare(i,&pixels);
+        std.debug.print("render reference {s}: max={d}/{d} LSB\n",.{scene.name,maximum,scene.tolerance});
+    }
+}
