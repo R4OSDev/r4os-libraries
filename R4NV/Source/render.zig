@@ -1,0 +1,336 @@
+// DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/headers/nvidia/classes/clb097tex.h
+// DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/headers/nvidia/classes/cl9097tex.h
+// /*
+//  * SPDX-FileCopyrightText: Copyright (c) 2001-2010 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+//  * SPDX-License-Identifier: MIT
+//  *
+//  * Permission is hereby granted, free of charge, to any person obtaining a
+//  * copy of this software and associated documentation files (the "Software"),
+//  * to deal in the Software without restriction, including without limitation
+//  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+//  * and/or sell copies of the Software, and to permit persons to whom the
+//  * Software is furnished to do so, subject to the following conditions:
+//  *
+//  * The above copyright notice and this permission notice shall be included in
+//  * all copies or substantial portions of the Software.
+//  *
+//  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+//  * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+//  * DEALINGS IN THE SOFTWARE.
+//  */
+// 
+// ExFiles/Reference/GFX/Nvidia/OpenKernelModules-570.144/src/common/sdk/nvidia/inc/class/clc797.h
+// DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/headers/nvidia/classes/clc797.h
+// DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/headers/nvidia/classes/clc597.h
+// /*******************************************************************************
+//     Copyright (c) 2020, NVIDIA CORPORATION. All rights reserved.
+// 
+//     Permission is hereby granted, free of charge, to any person obtaining a
+//     copy of this software and associated documentation files (the "Software"),
+//     to deal in the Software without restriction, including without limitation
+//     the rights to use, copy, modify, merge, publish, distribute, sublicense,
+//     and/or sell copies of the Software, and to permit persons to whom the
+//     Software is furnished to do so, subject to the following conditions:
+// 
+//     The above copyright notice and this permission notice shall be included in
+//     all copies or substantial portions of the Software.
+// 
+//     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+//     THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+//     DEALINGS IN THE SOFTWARE.
+// 
+// *******************************************************************************/
+// 
+// DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/vulkan/nvk_cmd_draw.c
+// DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/vulkan/nvk_shader.c
+// DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/vulkan/nvk_sampler.c
+// Copyright © 2022 Collabora Ltd. and Red Hat Inc.
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
+// 
+// 
+// DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/nil/descriptor.rs
+// Copyright © 2024 Collabora, Ltd.
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
+// 
+// 
+// DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/nil/nil_formats.csv
+// Copyright 2024 Collabora Ltd.
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
+//! Bounded C797 rectangle profile. The driver resolves and holds every range;
+//! applications never supply methods, shader addresses or completion words.
+const std = @import("std");
+pub const image = @import("render_image.zig");
+const hw = @import("Generated/Render/c797.zig");
+const shaders = @import("Generated/Shaders/shaders.zig");
+pub const Error = image.Error || error{Empty};
+pub const packet_bytes = 1024;
+pub const shader_bytes = shaderOffset(shaders.programs.len);
+pub const max_words = 768;
+pub const Range = struct {
+    address: u64,
+    bytes: u64,
+    pub fn validate(self: Range, alignment: u64, minimum: u64) Error!void {
+        if (self.address == 0 or self.address & (alignment - 1) != 0 or self.address >= (1 << 40) or
+            self.bytes < minimum or self.bytes > (1 << 40) - self.address) return error.Bounds;
+    }
+    pub fn overlaps(a: Range, b: Range) bool {
+        return a.address < b.address +| b.bytes and b.address < a.address +| a.bytes;
+    }
+};
+pub const Rect = struct {
+    x: i32, y: i32, width: u32, height: u32,
+    fn valid(self: Rect) bool {
+        return self.x >= -32768 and self.y >= -32768 and self.width > 0 and self.height > 0 and
+            self.width <= 32768 and self.height <= 32768 and
+            @as(i64, self.x) + self.width <= 32768 and @as(i64, self.y) + self.height <= 32768;
+    }
+};
+pub const Blend = enum { replace, over };
+pub const Transfer = enum { identity, decode_srgb, encode_srgb };
+pub const Draw = struct {
+    target: image.Image,
+    source: ?image.Image = null,
+    destination: Rect,
+    source_rect: Rect = .{ .x = 0, .y = 0, .width = 1, .height = 1 },
+    scissor: Rect,
+    filter: image.Filter = .nearest,
+    blend: Blend = .replace,
+    transfer: Transfer = .identity,
+    color: u32 = 0,
+    opacity: u8 = 255,
+
+    pub fn profile(self: Draw) u32 {
+        if (self.source == null) return 5;
+        return switch (self.transfer) { .identity => 2, .decode_srgb => 3, .encode_srgb => 4 };
+    }
+    pub fn validate(self: Draw) Error!void {
+        _ = try image.target(self.target);
+        if (!self.destination.valid() or !self.scissor.valid()) return error.Bounds;
+        if (self.source) |source| {
+            _ = try image.texture(source);
+            if (!self.source_rect.valid() or self.source_rect.x < 0 or self.source_rect.y < 0 or
+                @as(u64, @intCast(self.source_rect.x)) + self.source_rect.width > source.width or
+                @as(u64, @intCast(self.source_rect.y)) + self.source_rect.height > source.height) return error.Bounds;
+            // Read/write aliasing cannot be made safe by a cache invalidate.
+            // The resource layer may arrange a bounded CE scratch copy first.
+            if (Range.overlaps(.{ .address = source.address, .bytes = source.bytes }, .{ .address = self.target.address, .bytes = self.target.bytes })) return error.Unsupported;
+            if ((source.format == .r8) != (self.target.format == .r8) or self.color != 0) return error.Unsupported;
+            // Hardware CLAMP_TO_EDGE applies to the image, not a source
+            // rectangle inside it. Such bilinear views need an isolated image
+            // or a shader with explicit subrectangle clamps.
+            if (self.filter == .bilinear and (self.source_rect.x != 0 or self.source_rect.y != 0 or
+                self.source_rect.width != source.width or self.source_rect.height != source.height)) return error.Unsupported;
+        } else if (self.transfer != .identity) return error.Unsupported;
+        if (self.target.format == .r8 and (self.blend != .replace or self.transfer != .identity)) return error.Unsupported;
+        if (self.source == null and self.target.format == .argb8888) {
+            const alpha = self.color >> 24;
+            if ((self.color & 255) > alpha or ((self.color >> 8) & 255) > alpha or ((self.color >> 16) & 255) > alpha) return error.Bounds;
+        }
+        _ = try self.clip();
+    }
+    pub fn clip(self: Draw) Error![4]u32 {
+        const left = @max(0, @max(self.destination.x, self.scissor.x));
+        const top = @max(0, @max(self.destination.y, self.scissor.y));
+        const right = @min(@as(i64, self.target.width), @min(@as(i64, self.destination.x) + self.destination.width, @as(i64, self.scissor.x) + self.scissor.width));
+        const bottom = @min(@as(i64, self.target.height), @min(@as(i64, self.destination.y) + self.destination.height, @as(i64, self.scissor.y) + self.scissor.height));
+        if (right <= left or bottom <= top) return error.Empty;
+        return .{@intCast(left), @intCast(top), @intCast(right), @intCast(bottom)};
+    }
+};
+pub const Binding = struct {
+    draw: Draw,
+    programs: Range,
+    packet: Range,
+    pub fn validate(self: Binding) Error!void {
+        try self.draw.validate();
+        try self.programs.validate(128, shader_bytes);
+        try self.packet.validate(256, packet_bytes);
+        const target: Range = .{ .address = self.draw.target.address, .bytes = self.draw.target.bytes };
+        if (Range.overlaps(self.programs, self.packet) or Range.overlaps(self.programs, target) or Range.overlaps(self.packet, target)) return error.Unsupported;
+        if (self.draw.source) |src| {
+            const source: Range = .{ .address = src.address, .bytes = src.bytes };
+            if (Range.overlaps(self.programs, source) or Range.overlaps(self.packet, source)) return error.Unsupported;
+        }
+    }
+};
+pub fn shaderOffset(index: usize) u32 {
+    var offset: u32 = 0;
+    for (shaders.programs[0..index]) |program| offset += std.mem.alignForward(u32, 128 + @as(u32, @intCast(program.code.len)), 128);
+    return offset;
+}
+/// Once per device generation, into a driver-owned upload allocation.
+pub fn shaderUpload(out: []u8) Error!void {
+    if (out.len != shader_bytes) return error.Bounds;
+    @memset(out, 0);
+    for (shaders.programs, 0..) |program, index| {
+        const offset = shaderOffset(index);
+        @memcpy(out[offset..][0..128], std.mem.asBytes(&program.header));
+        @memcpy(out[offset + 128..][0..program.code.len], program.code);
+    }
+}
+pub const Vertex = extern struct { position: [4]f32, uv: [2]f32, tint: [4]f32 };
+comptime { if (@sizeOf(Vertex) != 40) @compileError("rectangle vertex stride"); }
+/// Fixed small upload: TIC, TSC, CBuf1 and four vertices. Image pixels are
+/// never mapped, scaled or copied by this encoder.
+pub fn packetUpload(draw: Draw, out: []u8) Error!void {
+    try draw.validate();
+    if (out.len != packet_bytes) return error.Bounds;
+    @memset(out, 0);
+    if (draw.source) |source| {
+        const tic = try image.texture(source);
+        const tsc = image.sampler(draw.filter);
+        @memcpy(out[0..32], std.mem.asBytes(&tic));
+        @memcpy(out[256..288], std.mem.asBytes(&tsc));
+        // TIC[0] | (TSC[0] << 20), one descriptor of each in this packet.
+        std.mem.writeInt(u32, out[512..516], 0, .little);
+    }
+    const factor: f32 = @as(f32, @floatFromInt(draw.opacity)) / 255.0;
+    var tint: [4]f32 = @splat(factor);
+    if (draw.source == null) {
+        if (draw.target.format == .r8) {
+            tint = .{ @as(f32, @floatFromInt(draw.color & 255)) / 255.0 * factor, 0, 0, factor };
+        } else {
+            for ([_]u5{16,8,0,24}, 0..) |shift, i|
+                tint[i] = @as(f32, @floatFromInt((draw.color >> shift) & 255)) / 255.0 * factor;
+            if (draw.target.format == .xrgb8888) tint[3] = factor;
+        }
+    }
+    const width: f32 = @floatFromInt(draw.target.width);
+    const height: f32 = @floatFromInt(draw.target.height);
+    for (0..4) |index| {
+        const x: f32 = @floatFromInt(@as(i64, draw.destination.x) + (if (index & 1 != 0) @as(i64, draw.destination.width) else 0));
+        const y: f32 = @floatFromInt(@as(i64, draw.destination.y) + (if (index & 2 != 0) @as(i64, draw.destination.height) else 0));
+        var vertex: Vertex = .{ .position = .{ x / width * 2.0 - 1.0, y / height * 2.0 - 1.0, 0, 1 }, .uv = .{0,0}, .tint = tint };
+        if (draw.source) |source| {
+            vertex.uv[0] = @as(f32, @floatFromInt(@as(i64, draw.source_rect.x) + (if (index & 1 != 0) @as(i64, draw.source_rect.width) else 0))) / @as(f32, @floatFromInt(source.width));
+            vertex.uv[1] = @as(f32, @floatFromInt(@as(i64, draw.source_rect.y) + (if (index & 2 != 0) @as(i64, draw.source_rect.height) else 0))) / @as(f32, @floatFromInt(source.height));
+        }
+        @memcpy(out[768 + index * 40..][0..40], std.mem.asBytes(&vertex));
+    }
+}
+pub const Program = struct {
+    data: [max_words]u32 = undefined,
+    count: usize = 0,
+    pub fn slice(self: *const Program) []const u32 { return self.data[0..self.count]; }
+    fn words(self: *Program, method: u32, values: []const u32) Error!void {
+        if (values.len == 0 or self.count + values.len + 1 > self.data.len or method & 3 != 0 or method > 0x7ffc) return error.Bounds;
+        self.data[self.count] = 0x20000000 | (@as(u32, @intCast(values.len)) << 16) | (method >> 2);
+        @memcpy(self.data[self.count+1..][0..values.len], values);
+        self.count += values.len + 1;
+    }
+    fn one(self: *Program, method: u32, value: u32) Error!void { try self.words(method, &.{value}); }
+};
+fn bindShader(out: *Program, programs: Range, index: usize) Error!void {
+    const shader = shaders.programs[index];
+    const pipeline: u32 = if (shader.stage == 0) 1 else 5;
+    const stride = pipeline * 64;
+    const address = programs.address + shaderOffset(index);
+    try out.one(hw.SET_PIPELINE_SHADER + stride, 1 | (pipeline << 4));
+    try out.words(hw.SET_PIPELINE_PROGRAM_ADDRESS_A + stride, &.{@intCast(address >> 32), @truncate(address), @intCast((128 + shader.code.len + 255) / 256)});
+    try out.words(hw.SET_PIPELINE_REGISTER_COUNT + stride, &.{shader.gprs, shader.stage});
+}
+pub fn encode(binding: Binding, out: *Program) Error!void {
+    try binding.validate();
+    out.count = 0;
+    const draw = binding.draw;
+    const target = try image.target(draw.target);
+    const clip = try draw.clip();
+    // CE upload must already have a real completion. WFI precedes reuse of
+    // descriptor/constant/vertex state; invalidation makes those writes visible.
+    try out.one(hw.SET_OBJECT, 0xc797);
+    try out.one(hw.WAIT_FOR_IDLE, 0);
+    try out.one(hw.INVALIDATE_SHADER_CACHES, 0x1011);
+    try out.one(hw.INVALIDATE_TEXTURE_DATA_CACHE, 0);
+    try out.one(hw.INVALIDATE_TEXTURE_HEADER_CACHE, 0);
+    try out.one(hw.INVALIDATE_SAMPLER_CACHE, 0);
+    for (hw.initial) |pair| try out.one(pair[0], pair[1]);
+    // All shader stages and vertex attributes outside this fixed ABI are off.
+    for (0..6) |stage| if (stage != 1 and stage != 5) { try out.one(hw.SET_PIPELINE_SHADER + @as(u32,@intCast(stage)) * 64, @as(u32,@intCast(stage)) << 4); };
+    for (0..32) |attribute| {
+        const value = switch (attribute) { 0 => hw.vertex_vec4, 1 => if (draw.source != null) hw.vertex_vec2 | (16 << 7) else hw.vertex_inactive, 2 => hw.vertex_vec4 | (24 << 7), else => hw.vertex_inactive };
+        try out.one(hw.SET_VERTEX_ATTRIBUTE_A + @as(u32,@intCast(attribute)) * 4, value);
+        if (attribute != 0) try out.one(hw.SET_VERTEX_STREAM_A_FORMAT + @as(u32,@intCast(attribute)) * 16, 0);
+    }
+    try out.words(hw.SET_COLOR_TARGET_A, &target.words);
+    const half_width = @as(f32,@floatFromInt(draw.target.width)) / 2.0;
+    const half_height = @as(f32,@floatFromInt(draw.target.height)) / 2.0;
+    try out.words(hw.SET_VIEWPORT_SCALE_X, &.{@bitCast(half_width), @bitCast(half_height), @bitCast(@as(f32,0.5)), @bitCast(half_width), @bitCast(half_height), @bitCast(@as(f32,0.5))});
+    try out.words(hw.SET_VIEWPORT_CLIP_HORIZONTAL, &.{draw.target.width << 16, draw.target.height << 16, 0, @bitCast(@as(f32,1))});
+    try out.words(hw.SET_SCISSOR_ENABLE, &.{1, clip[0] | (clip[2] << 16), clip[1] | (clip[3] << 16)});
+    try out.one(hw.SET_CT_WRITE, if (draw.target.format == .r8) hw.color_write_r else hw.color_write_rgba);
+    try out.one(hw.SET_BLEND, @intFromBool(draw.blend == .over));
+    try out.words(hw.SET_BLEND_PER_TARGET_SEPARATE_FOR_ALPHA, &.{1, hw.blend_add, hw.blend_one, if (draw.blend == .over) hw.blend_inverse_alpha else hw.blend_zero, hw.blend_add, hw.blend_one, if (draw.blend == .over) hw.blend_inverse_alpha else hw.blend_zero});
+    try bindShader(out, binding.programs, if (draw.source == null) 5 else 0);
+    try bindShader(out, binding.programs, draw.profile()-1);
+    const vertices = binding.packet.address + 768;
+    try out.words(hw.SET_VERTEX_STREAM_A_FORMAT, &.{hw.vertex_stride, @intCast(vertices >> 32), @truncate(vertices), 1});
+    try out.words(hw.SET_VERTEX_STREAM_SIZE_A, &.{0, 160});
+    try out.one(hw.SET_VERTEX_STREAM_INSTANCE_A, 0);
+    if (draw.source != null) {
+        const sampler_address = binding.packet.address + 256;
+        const constants = binding.packet.address + 512;
+        try out.words(hw.SET_TEX_HEADER_POOL_A, &.{@intCast(binding.packet.address >> 32), @truncate(binding.packet.address), 0});
+        try out.words(hw.SET_TEX_SAMPLER_POOL_A, &.{@intCast(sampler_address >> 32), @truncate(sampler_address), 0});
+        try out.words(hw.SET_CONSTANT_BUFFER_SELECTOR_A, &.{256, @intCast(constants >> 32), @truncate(constants)});
+        try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 | (1 << 4));
+    } else try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 << 4);
+    try out.words(hw.SET_DRAW_CONTROL_A, &.{hw.draw_control, 1});
+    try out.words(hw.DRAW_VERTEX_ARRAY_BEGIN_END_A, &.{0, 4});
+    // The driver's private GR semaphore release follows this body.
+}

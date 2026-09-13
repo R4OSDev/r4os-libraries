@@ -69,4 +69,4 @@ foreach ($program in $programs) {
     emitter_sha256=(Hash $PSCommandPath);profiles=@($programs | ForEach-Object { $_.proof });
     generated_zig_sha256=(Hash (Join-Path $target 'shaders.zig'))} | ConvertTo-Json -Depth 20 |
     Set-Content -LiteralPath (Join-Path $target 'provenance.json') -Encoding utf8NoBOM
-Write-Output "Five verified fixed shaders materialized in $target"
+Write-Output "$($programs.Count) verified fixed shaders materialized in $target"

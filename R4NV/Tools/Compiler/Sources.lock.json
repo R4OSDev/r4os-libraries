@@ -32,6 +32,7 @@
     {"id": 2, "name": "texture_fragment", "stage": 4},
     {"id": 3, "name": "srgb_decode_fragment", "stage": 4},
     {"id": 4, "name": "srgb_encode_fragment", "stage": 4},
-    {"id": 5, "name": "solid_fragment", "stage": 4}
+    {"id": 5, "name": "solid_fragment", "stage": 4},
+    {"id": 6, "name": "solid_vertex", "stage": 0}
   ]
 }

@@ -23,13 +23,13 @@ int main(int argc, char **argv)
    if (argc != 6) {
       fprintf(stderr, "Usage: r4nak PROFILE CODE.bin INFO.json ASSEMBLY.txt INPUT-NIR.txt\n"
                       "Profiles: 1=rectangle vertex, 2=texture, 3=sRGB decode, "
-                      "4=sRGB encode, 5=solid. Target: SM86 only.\n");
+                      "4=sRGB encode, 5=solid fragment, 6=solid vertex. Target: SM86 only.\n");
       return 2;
    }
    char *end;
    errno = 0;
    unsigned long profile = strtoul(argv[1], &end, 10);
-   if (errno || *end || profile < R4NV_RECT_VERTEX || profile > R4NV_SOLID_FRAGMENT)
+   if (errno || *end || profile < R4NV_RECT_VERTEX || profile > R4NV_SOLID_VERTEX)
       return 2;
    const struct nv_device_info dev = {
       .type = NV_DEVICE_TYPE_DIS, .sm = 86, .max_warps_per_mp = 48,
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
    nak_preprocess_nir(nir, nak);
    const struct nak_fs_key key = {0};
    bin = nak_compile_shader(nir, true, nak, 0,
-                           profile == R4NV_RECT_VERTEX ? NULL : &key, false);
+                           (profile == R4NV_RECT_VERTEX || profile == R4NV_SOLID_VERTEX) ? NULL : &key, false);
    if (!bin || !bin->code_size || (bin->code_size % 16) ||
        bin->info.sm != 86 || bin->info.slm_size || bin->info.crs_size ||
        bin->info.num_spills_to_mem || bin->info.num_fills_from_mem)

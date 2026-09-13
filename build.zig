@@ -8,6 +8,7 @@ pub const addR4fontHostDecoder = r4font_build.addHostDecoder;
 /// bleibt in ihrer eigenen Einheit baubar und getestet.
 pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4nv_copy", b.path("R4NV/Source/copy.zig"));
+    b.addNamedLazyPath("r4nv_render", b.path("R4NV/Source/render.zig"));
     b.addNamedLazyPath("r4nv_zig_binding", b.path("R4NV/Bindings/Zig/r4nv.zig"));
     b.addNamedLazyPath("r4nv_c_include", b.path("R4NV/Bindings/C"));
     b.addNamedLazyPath("r4gfx_zig_binding", b.path("R4GFX/Bindings/Zig/r4gfx_abi.zig"));

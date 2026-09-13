@@ -237,6 +237,7 @@ _Static_assert(offsetof(R4NvShaderView, code_address) == 96u, "R4NvShaderView.co
 #define R4NV_SHADER_PROFILE_SRGB_DECODE_FRAGMENT ((uint32_t)3)
 #define R4NV_SHADER_PROFILE_SRGB_ENCODE_FRAGMENT ((uint32_t)4)
 #define R4NV_SHADER_PROFILE_SOLID_FRAGMENT ((uint32_t)5)
+#define R4NV_SHADER_PROFILE_SOLID_VERTEX ((uint32_t)6)
 #define R4NV_STATUS_INVALID ((int32_t)-1)
 #define R4NV_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4NV_STATUS_CAPACITY ((int32_t)-3)

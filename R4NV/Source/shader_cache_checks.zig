@@ -18,9 +18,10 @@ pub fn run(api: *const c.ShaderV1) !void {
         "e98b34a5d07c8b33f5d7cf77eb0db2ff7d61457a70bf575e8e33079e92d17f16",
         "5aeb24a5558164ae2a1df0147c595af6b8d482f41fefb59664292a0a2f72bdf5",
         "94811e8c07f6e09dcba8c3c0cce8aacedbab7293b76542935ecbf150abd39984",
+        "356c276ffdc82e9cc63e49fb5a79b7602ff82d4981804689f7ec8f8c042ccc04",
     };
-    const sizes = [_]u32{ 112, 192, 752, 768, 80 };
-    const instructions = [_]u32{ 7, 12, 47, 48, 5 };
+    const sizes = [_]u32{ 112, 192, 752, 768, 80, 80 };
+    const instructions = [_]u32{ 7, 12, 47, 48, 5, 5 };
     var storage: [c.shader_cache_max_bytes + 8]u8 align(8) = @splat(0xa5);
     const bytes = storage[1 .. 1 + c.shader_cache_max_bytes]; // ABI promises byte alignment.
     var view: c.R4NvShaderView = std.mem.zeroes(c.R4NvShaderView);
@@ -30,7 +31,7 @@ pub fn run(api: *const c.ShaderV1) !void {
         const profile: u32 = @intCast(id);
         try t.expectEqual(c.status_ok, api.shader_info(profile, &info));
         try t.expect(info.code_bytes == size and info.instructions == count and info.registers == 24 and info.max_warps_per_sm == 48 and
-            info.stage == @as(u32, if (id == 1) 0 else 4) and info.scratch_bytes == 0 and info.stack_bytes == 0 and info.header_bytes == 128);
+            info.stage == @as(u32, if (id == 1 or id == 6) 0 else 4) and info.scratch_bytes == 0 and info.stack_bytes == 0 and info.header_bytes == 128);
         try t.expectEqual(c.status_ok, api.shader_cache_write(profile, &key, bytes.ptr, bytes.len, &written));
         try t.expect(written == 384 + size);
         try t.expectEqual(c.status_ok, api.shader_cache_read(&key, bytes.ptr, written, &view));
@@ -44,7 +45,7 @@ pub fn run(api: *const c.ShaderV1) !void {
     }
     try t.expect(storage[0] == 0xa5 and storage[storage.len - 1] == 0xa5);
     const accepted_info = info;
-    try t.expectEqual(c.status_unsupported, api.shader_info(6, &info));
+    try t.expectEqual(c.status_unsupported, api.shader_info(7, &info));
     try t.expectEqualDeep(accepted_info, info);
     try t.expectEqual(c.status_ok, api.shader_cache_write(4, &key, bytes.ptr, bytes.len, &written));
     const good = storage;
@@ -88,7 +89,7 @@ pub fn run(api: *const c.ShaderV1) !void {
     try t.expectEqualDeep(accepted_view, view);
     written = 99;
     try t.expectEqual(c.status_capacity, api.shader_cache_write(4, &key, bytes.ptr, bytes.len - 1, &written));
-    try t.expectEqual(c.status_unsupported, api.shader_cache_write(6, &key, bytes.ptr, bytes.len, &written));
+    try t.expectEqual(c.status_unsupported, api.shader_cache_write(7, &key, bytes.ptr, bytes.len, &written));
     try t.expectEqual(c.status_invalid, api.shader_cache_write(4, &key, bytes.ptr, bytes.len, &key.version));
     try t.expectEqual(c.status_invalid, api.shader_cache_write(4, &key, bytes.ptr, bytes.len, @ptrCast(@alignCast(&storage[4]))));
     try t.expectEqual(c.status_invalid, api.shader_cache_write(4, &key, @ptrCast(&key), bytes.len, &written));

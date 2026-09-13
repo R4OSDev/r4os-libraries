@@ -32,7 +32,7 @@ Independent fixed-shader metadata and executable byte-cache boundary. BACKEND_V1
 - Interface-ID: `0x52344f5330373934:0x52344e5653484452`
 - Tabellengroesse: 56 Byte
 
-- Slot 0, Offset 32: `shader_info` - Returns metadata for one of the five pinned fixed shaders without publishing rendering capability.
+- Slot 0, Offset 32: `shader_info` - Returns metadata for a pinned fixed shader, including the matched solid vertex/fragment pair, without publishing rendering capability.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Bounded pure operation over caller-owned storage. No allocation, I/O, GPU access, retained pointer or compilation. Rejection preserves all outputs..
 - Slot 1, Offset 40: `shader_cache_write` - Writes the checked key, compiler identity, original NVIDIA header and machine code with an integrity digest. No compiler work or hardware submission. Output bytes, written count and key must not overlap.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Bounded pure operation over caller-owned storage. No allocation, I/O, GPU access, retained pointer or compilation. Rejection preserves all outputs..

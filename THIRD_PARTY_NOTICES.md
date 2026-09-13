@@ -70,3 +70,14 @@ R4OS shader descriptions, their NVIDIA headers and a provenance manifest.
 The runtime embeds these five fixed programs; it does not embed the NAK/NIR
 compiler implementation. The manifest identifies the compiler recipe and
 each original machine-code, metadata, NIR and assembly artifact.
+
+## R4NV C797 rendering
+
+`render_image.zig`, `render.zig` and `Generated/Render` derive image/state
+fields from the pinned Mesa26.2.2 NVIDIA class headers and MIT NIL/NVK
+sources, with NVIDIA570.144 `nvmisc.h` used by the host reference generator.
+Full NVIDIA, Collabora and Red Hat notices remain in the derived sources,
+`R4NV/ThirdParty/Nvidia/LICENSES.txt` and the distributed NVIDIA GSP runtime
+license. The reference archive is `Nvidia/0.79.19/render-state-20260913`.
+The six fixed shaders remain compiled original R4OS descriptions; the sixth
+adds the matching solid vertex stage. No host compiler is linked into R4OS.

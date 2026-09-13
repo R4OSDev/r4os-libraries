@@ -57,9 +57,9 @@ nir_shader *
 r4nv_build_shader(enum r4nv_shader_profile profile,
                   const nir_shader_compiler_options *options)
 {
-   if (profile < R4NV_RECT_VERTEX || profile > R4NV_SOLID_FRAGMENT)
+   if (profile < R4NV_RECT_VERTEX || profile > R4NV_SOLID_VERTEX)
       return NULL;
-   bool vertex = profile == R4NV_RECT_VERTEX;
+   bool vertex = profile == R4NV_RECT_VERTEX || profile == R4NV_SOLID_VERTEX;
    nir_builder b = nir_builder_init_simple_shader(
       vertex ? MESA_SHADER_VERTEX : MESA_SHADER_FRAGMENT, options,
       "R4NV rectangle profile %u", profile);
@@ -78,7 +78,11 @@ r4nv_build_shader(enum r4nv_shader_profile profile,
       nir_variable *out_tint = varying(&b, nir_var_shader_out, glsl_vec4_type(),
                                       "premultiplied_tint", VARYING_SLOT_VAR1);
       nir_store_var(&b, out_position, nir_load_var(&b, position), 0xf);
-      nir_store_var(&b, out_uv, nir_load_var(&b, uv), 3);
+      /* Pair the solid VS with its actual FS input mask. Unconsumed UV
+       * stores can hit an unallocated attribute on NVIDIA; no global SM
+       * exception-mask override is needed for these statically linked pairs. */
+      if (profile == R4NV_RECT_VERTEX)
+         nir_store_var(&b, out_uv, nir_load_var(&b, uv), 3);
       nir_store_var(&b, out_tint, nir_load_var(&b, tint), 0xf);
    } else {
       nir_variable *tint = varying(&b, nir_var_shader_in, glsl_vec4_type(),

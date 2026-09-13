@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "generator": "Temp/gfx-render-state-20260913/RenderStateReference.c",
+  "output_sha256": "ca3672bb8ab87fd1800114e92294de8ba37dbe6046dc4f5adfa5418f28938dc0",
+  "sources": [
+    {
+      "path": "ExFiles/Reference/GFX/Nvidia/OpenKernelModules-570.144/src/common/sdk/nvidia/inc/nvmisc.h",
+      "sha256": "707e5a739d9b8781c05003188d6e64888303c84039e4f2ecc0810b8411669248"
+    },
+    {
+      "path": "DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/headers/nvidia/classes/clc797.h",
+      "sha256": "868a0ce5794a9a4a2118022bfac817a0c84ba53dbc80c05337e087a3176a3e80"
+    },
+    {
+      "path": "DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/headers/nvidia/classes/clc597.h",
+      "sha256": "4b47ff263696df6377c693088353a5bff366a8e11d5c8cac1825c2333d8ce39d"
+    },
+    {
+      "path": "DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/vulkan/nvk_cmd_draw.c",
+      "sha256": "8e9c97b91a13156dc4ac74b3ecb252d064b8cbde8c7ef31d46433a0814861c5d"
+    },
+    {
+      "path": "DevKit/Toolchains/MesaNAK/26.2.2-2e3c65ad5e8b8e15/Source/src/nouveau/vulkan/nvk_shader.c",
+      "sha256": "a54b58b697f6ed1b00a8d445a6f1bb428c2c4e034a37811bae16df0fa1540c77"
+    }
+  ]
+}

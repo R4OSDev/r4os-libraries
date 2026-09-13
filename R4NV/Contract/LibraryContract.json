@@ -281,7 +281,7 @@
             "error_domain": "R4NV_STATUS",
             "ownership": "Bounded pure operation over caller-owned storage. No allocation, I/O, GPU access, retained pointer or compilation. Rejection preserves all outputs."
           },
-          "description": "Returns metadata for one of the five pinned fixed shaders without publishing rendering capability."
+          "description": "Returns metadata for a pinned fixed shader, including the matched solid vertex/fragment pair, without publishing rendering capability."
         },
         {
           "name": "shader_cache_write",
@@ -1613,6 +1613,13 @@
       "type": "u32",
       "value": 5,
       "description": "shader_profile_solid_fragment"
+    },
+    {
+      "zig_name": "shader_profile_solid_vertex",
+      "c_name": "R4NV_SHADER_PROFILE_SOLID_VERTEX",
+      "type": "u32",
+      "value": 6,
+      "description": "Solid rectangle vertex shader with position/tint outputs matching the solid fragment shader."
     }
   ],
   "errors": [

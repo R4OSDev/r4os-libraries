@@ -32,6 +32,7 @@ pub export var r4nv_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exp
 
 test "backend and shader ABI preserve operands, executable identity and rejected outputs" {
     const t = std.testing;
+    try @import("render_image_test.zig").check();
     var profile: c.R4NvDeviceProfile = .{ .version = 1, .size = @sizeOf(c.R4NvDeviceProfile),
         .vendor_id = 0x10de, .copy_class = 0xc6b5, .rm_release = c.rm_release, .command_abi = c.command_abi,
         .adapter_id = 3, .flags = 0, .device_generation = 0x100000007, .reset_generation = 0x200000008 };

@@ -139,6 +139,7 @@ pub const shader_profile_texture_fragment: u32 = 2;
 pub const shader_profile_srgb_decode_fragment: u32 = 3;
 pub const shader_profile_srgb_encode_fragment: u32 = 4;
 pub const shader_profile_solid_fragment: u32 = 5;
+pub const shader_profile_solid_vertex: u32 = 6;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_capacity: i32 = -3;

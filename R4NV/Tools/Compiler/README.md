@@ -1,6 +1,6 @@
 ﻿# R4NAK host compiler
 
-This tool builds the pinned Mesa 26.2.2 NIR/NAK compiler and translates five
+This tool builds the pinned Mesa 26.2.2 NIR/NAK compiler and translates six
 documented R4NV shader profiles for SM86. It produces actual machine code,
 the NVIDIA shader header, input NIR and readable NAK assembly. It does not
 open a GPU or implement an R4OS runtime compiler.
@@ -78,6 +78,11 @@ models require explicit additional profiles and verification.
 | 3 | sRGB decode fragment | Unpremultiplies, converts sRGB to linear light, premultiplies and applies the tint. |
 | 4 | sRGB encode fragment | Applies a linear-light tint, unpremultiplies, converts to sRGB and premultiplies. |
 | 5 | Solid fragment | Writes the interpolated premultiplied tint. |
+| 6 | Solid vertex | Uses attributes 0 and 2; writes position/tint without unused UV outputs. Pair with profile 5. |
+
+Profiles 1 and 2–4 share their UV/tint interface. Profile 6 pairs with 5,
+so the fixed pipeline does not require disabling out-of-range attribute
+exceptions for unused vertex outputs.
 
 Nearest/bilinear filtering is sampler state. The texture handle is a combined
 TIC/TSC word in constant buffer 1 at byte 0. NAK's internal graphics constants
@@ -103,10 +108,10 @@ pwsh -NoProfile -File Repositories/Libraries/R4NV/Tools/Compiler/EmitRuntime.ps1
 `-CompilerOutputDirectory` optionally selects a different verified output set.
 The emitter checks the current recipe inputs and all recorded code, metadata,
 NIR and assembly hashes before replacing generated runtime files. It also
-validates the five profiles, target and bounded metadata. Modified headers
+validates the six profiles, target and bounded metadata. Modified headers
 are rejected even when the machine-code file itself is unchanged.
 
-The checked-in `Source/Generated/Shaders` files contain only the five programs,
+The checked-in `Source/Generated/Shaders` files contain only the six programs,
 metadata and provenance. R4NV's separate `SHADER_V1` table exposes a bounded,
 driver/GPU/compiler/ABI/format/pipeline-state-bound byte cache. The regular
 R4NV build consumes these files without running Mesa or a host compiler.

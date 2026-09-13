@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "compiler_id": "d6d35a2fc32843a3bfd76ce162cf6986943fcc63ddc563e0ac5ecb3fe971a01a",
+  "compiler_id": "4ab6b37bf2337c8e993be069e2f923f3e63cca9e7938c0497d7d2cfcfbe5fc9c",
   "compiler_inputs": [
     {
       "path": "Sources.lock.json",
-      "sha256": "20e5cc2ee378d5141a33ca772ab34adf69722860f20a99180b9bed11cbc3bd3a"
+      "sha256": "82f52c529b1369a381ce1ed3394b873a6f5ee4b43ee8c35e87b39ee2a64ce324"
     },
     {
       "path": "MesaStandalone.patch",
@@ -20,18 +20,18 @@
     },
     {
       "path": "Source/r4nak.c",
-      "sha256": "6893ca74cb953cff54c1dbd13792f20c120e00bbcc364d49d2dfe72cde0c2ea8"
+      "sha256": "e0b24491a306ff84a1ba951dca443e3b99c7b1a431c73b8f6bdb05717f80f9f6"
     },
     {
       "path": "Source/shaders.c",
-      "sha256": "b131b6ccb6459b7ea00ed615d49b04d778a83729d5ca0092380d69d685169dcb"
+      "sha256": "f2193d90ba77d37a94861b7043d2249bc5ae0381b5e1bd7a2ed3db467c5b50d7"
     },
     {
       "path": "Source/shaders.h",
-      "sha256": "a1a90cc9cdcf1977716bcca0aa9ef551fb289b6aefbcf334a183df148822d6f8"
+      "sha256": "558a09e04ec9d655a043a7df24ae595efc76d0e5ee4914054ca866837f3fd4d3"
     }
   ],
-  "emitter_sha256": "c2c811e92bce01a9ba80877597f4abb0fc563957bd9d97b5923fcf89f1e86da7",
+  "emitter_sha256": "1462a52266376b26b6686f8125548e59ac6da5e6da289c0216812428f98ce8b5",
   "profiles": [
     {
       "profile": 1,
@@ -87,7 +87,18 @@
       "code_bytes": 80,
       "gprs": 24,
       "instructions": 5
+    },
+    {
+      "profile": 6,
+      "name": "solid_vertex",
+      "sha256": "356c276ffdc82e9cc63e49fb5a79b7602ff82d4981804689f7ec8f8c042ccc04",
+      "metadata_sha256": "7e4025683b310f60fe521e1cbaf5c4385011482c80b941c534dde0d9d0d89511",
+      "assembly_sha256": "e20c1708a6b0ca556729056315eebbf48911d5ea04b2d7c3049001c235376eb4",
+      "nir_sha256": "9cc89047f02433156b317949a8b08bc13422b6c62f25f9a7c52777f33ff8ff15",
+      "code_bytes": 80,
+      "gprs": 24,
+      "instructions": 5
     }
   ],
-  "generated_zig_sha256": "8d49860c9960de541f1fb1d2dd348fd65b2dcd62ed8fef7c6fffc877a4b1a347"
+  "generated_zig_sha256": "85b90276e50de601edc46f050b659d0cbeca2c56e670c82a7b58dd74ef9d85c9"
 }
