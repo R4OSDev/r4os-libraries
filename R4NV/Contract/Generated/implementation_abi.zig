@@ -120,6 +120,44 @@ pub const R4NvShaderView = extern struct {
     header_address: u64,
     code_address: u64,
 };
+
+pub const R4NvImageView = extern struct {
+    version: u32,
+    size: u32,
+    width: u32,
+    height: u32,
+    format: u32,
+    location: u32,
+    modifier: u64,
+    byte_length: u64,
+    pitch: u64,
+    alignment: u64,
+    usage: u32,
+    reserved: u32,
+};
+
+pub const R4NvImageRequest = extern struct {
+    view: R4NvImageView,
+    uses: u32,
+    preference: u32,
+    flags: u32,
+    reserved: u32,
+};
+
+pub const R4NvImagePlan = extern struct {
+    version: u32,
+    size: u32,
+    action: u32,
+    layout: u32,
+    reasons: u32,
+    supported_uses: u32,
+    modifier: u64,
+    pitch: u64,
+    byte_length: u64,
+    allocation_bytes: u64,
+    log2_gobs: u32,
+    reserved: u32,
+};
 pub const command_abi: u32 = 1;
 pub const rm_release: u32 = 570144;
 pub const feature_copy_linear: u32 = 1;
@@ -140,31 +178,49 @@ pub const shader_profile_srgb_decode_fragment: u32 = 3;
 pub const shader_profile_srgb_encode_fragment: u32 = 4;
 pub const shader_profile_solid_fragment: u32 = 5;
 pub const shader_profile_solid_vertex: u32 = 6;
+pub const feature_image_layout: u32 = 8;
+pub const image_use_texture: u32 = 1;
+pub const image_use_render_target: u32 = 2;
+pub const image_use_scanout: u32 = 4;
+pub const image_prefer_compatible: u32 = 0;
+pub const image_prefer_linear: u32 = 1;
+pub const image_prefer_blocklinear: u32 = 2;
+pub const image_force_copy: u32 = 1;
+pub const image_action_reuse: u32 = 0;
+pub const image_action_convert: u32 = 1;
+pub const image_reason_location: u32 = 1;
+pub const image_reason_pitch: u32 = 2;
+pub const image_reason_modifier: u32 = 4;
+pub const image_reason_usage: u32 = 8;
+pub const image_reason_forced: u32 = 16;
+pub const image_reason_preference: u32 = 32;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_capacity: i32 = -3;
 pub const status_cache_miss: i32 = -4;
 
 pub const backend_v1_export_name = "BACKEND_V1";
-pub const backend_v1_revision: u16 = 2;
+pub const backend_v1_revision: u16 = 3;
 pub const backend_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 56,
+    .size = 64,
     .abi_major = 1,
-    .abi_minor = 2,
+    .abi_minor = 3,
     .interface_id_lo = 0x52344e5642454e44,
     .interface_id_hi = 0x52344f5330373931,
 };
 pub const BackendV1NegotiateFn = *const fn (profile: *const R4NvDeviceProfile, output: *R4NvFeatures) callconv(.c) i32;
 pub const BackendV1EncodeCopyFn = *const fn (request: *const R4NvCopy, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
 pub const BackendV1EncodeCopyLayoutFn = *const fn (request: *const R4NvCopyLayout, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
+pub const BackendV1ImageLayoutFn = *const fn (profile: *const R4NvDeviceProfile, request: *const R4NvImageRequest, output: *R4NvImagePlan) callconv(.c) i32;
 pub const BackendV1 = extern struct {
     header: InterfaceHeader,
     negotiate: BackendV1NegotiateFn,
     encode_copy: BackendV1EncodeCopyFn,
     encode_copy_layout: BackendV1EncodeCopyLayoutFn,
+    image_layout: BackendV1ImageLayoutFn,
 };
 
 pub const shader_v1_export_name = "SHADER_V1";

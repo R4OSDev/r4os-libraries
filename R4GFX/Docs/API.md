@@ -42,9 +42,9 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
 
 - ELF-Symbol: `r4gfx_device_v1`
 - ABI-Major: 1
-- Revision: 4
+- Revision: 5
 - Interface-ID: `0x52344f5330373931:0x5234474658444556`
-- Tabellengroesse: 168 Byte
+- Tabellengroesse: 176 Byte
 
 - Slot 0, Offset 32: `storage_size` - Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
@@ -80,6 +80,8 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
 - Slot 16, Offset 160: `render_submit` - Submit immutable logical draw state to a ready native backend without pixel maps or synchronous GPU waits. Returns the common job/fence; unsupported leaves output unchanged for explicit software fallback.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Source and target resources retained until physical retirement and job_release; sampler/pipeline are copied immutable values..
+- Slot 17, Offset 168: `image_prepare` - Reuse a compatible image or explicitly allocate and asynchronously copy/convert its layout within a byte budget. No image scaling or hidden per-draw preparation. Unknown modifiers cannot be interpreted as linear; scanout preparation does not activate an output.
+  Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Preparation may wait for native allocation, outside frame submission. Retained resource and copy job/fence use the existing lifecycle. Output/ready fence bytes remain unchanged on failure; failed cleanup stays tracked by the device..
 
 Typen
 -----
@@ -108,6 +110,8 @@ Typen
 - `R4GfxNativeImage`: 32 Byte, Alignment 8. Copied native image allocation intent for source_create_native. source_address points to this payload; source_generation and ResourceDesc.image remain zero. The selected native adapter and memory generation bind allocation. Returned resource information exposes the actual pitch and byte length.
 - `R4GfxSignedRect`: 16 Byte, Alignment 4. Signed source, destination or clipping rectangle for asynchronous rendering.
 - `R4GfxRenderRequest`: 216 Byte, Alignment 8. Copied asynchronous native draw. Resolves logical resources to the common queue and returns the existing job/fence identity; never maps or scales image pixels. Requires device_gpu_render; unsupported adapters retain the existing software render API. Resources stay held until job_release after physical retirement.
+- `R4GfxImagePrepareRequest`: 96 Byte, Alignment 8. Prepare outside the frame path: texture1/render2/scanout4; preference0=compatible,1=linear,2=blocklinear,flags1=force copy. Byte budget bounds additional image allocation; zero permits reuse only. Up to8 input fences and caller-owned output-ready fence storage. Reuse forwards dependencies; conversion returns its single dependent copy fence. Ready storage must not alias request/result/device; input/output fence arrays may overlap. No input pointer retained.
+- `R4GfxPreparedImage`: 80 Byte, Alignment 8. Caller owns one returned image reference and, for conversion, its asynchronous copy job. Flags1=copy pending,2=software image,4=reused. dependency_count fences were written to the caller ready array; pass them to a subsequent draw. Successful prepare is not copy completion. Release the job only after physical retirement, and release the image reference independently.
 
 Besitzregeln
 ------------

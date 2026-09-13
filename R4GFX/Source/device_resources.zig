@@ -24,6 +24,12 @@ fn descriptorImage(descriptor: a.GfxBufferDescriptor) d.Error!c.R4GfxCpuImage {
     return image;
 }
 pub fn create(device: *d.Device, input: *const c.R4GfxResourceDesc, output: *c.R4GfxResource) d.Error!i32 {
+    return createWithUsage(device,input,output,28);
+}
+/// Internal image preparation can request a separate scanout allocation.
+/// The existing public native-image request retains its offscreen usage28.
+pub fn createWithUsage(device: *d.Device, input: *const c.R4GfxResourceDesc, output: *c.R4GfxResource, native_usage: u32) d.Error!i32 {
+    if (native_usage != 28 and native_usage != 60) return error.Invalid;
     _ = try d.pointer(c.R4GfxResourceDesc, @intFromPtr(input));
     try d.outputSafe(c.R4GfxResource, output, device);
     if (d.overlaps(@intFromPtr(input), @sizeOf(c.R4GfxResourceDesc), @intFromPtr(output), @sizeOf(c.R4GfxResource))) return error.Alias;
@@ -115,7 +121,7 @@ pub fn create(device: *d.Device, input: *const c.R4GfxResourceDesc, output: *c.R
                 const allocation: a.GfxNativeAllocation = .{ .adapter_id = device.selected.binding.adapter_id,
                     .memory_generation = device.selected.memory_generation, .deadline_ns = native.deadline_ns, .kind = 1,
                     .width = native.width, .height = native.height, .format = native.format, .layout = native.layout,
-                    .usage = a.gfx_buffer_usage_transfer_source | a.gfx_buffer_usage_transfer_target | a.gfx_buffer_usage_render };
+                    .usage = native_usage };
                 try d.platform(memory.nativeStart(&allocation, &status));
                 item.allocation_request = status.request;
                 try d.platform(memory.nativeWait(&item.allocation_request, std.math.maxInt(u64), &status));

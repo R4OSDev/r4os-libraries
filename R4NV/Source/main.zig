@@ -9,6 +9,7 @@ export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}
 pub const r4nv_negotiate_impl = @import("backend.zig").r4nv_negotiate_impl;
 pub const r4nv_encode_copy_impl = @import("backend.zig").r4nv_encode_copy_impl;
 pub const r4nv_encode_copy_layout_impl = @import("backend.zig").r4nv_encode_copy_layout_impl;
+pub const r4nv_image_layout_impl = @import("image_layout.zig").r4nv_image_layout_impl;
 pub const r4nv_shader_info_impl = shaders.r4nv_shader_info_impl;
 pub const r4nv_shader_cache_write_impl = shaders.r4nv_shader_cache_write_impl;
 pub const r4nv_shader_cache_read_impl = shaders.r4nv_shader_cache_read_impl;
@@ -18,6 +19,7 @@ pub export var r4nv_backend_v1: c.BackendV1 align(8) linksection(".data.r4l_expo
     .negotiate = r4nv_negotiate_impl,
     .encode_copy = r4nv_encode_copy_impl,
     .encode_copy_layout = r4nv_encode_copy_layout_impl,
+    .image_layout = r4nv_image_layout_impl,
 };
 pub export var r4nv_shader_v1: c.ShaderV1 align(8) linksection(".data.r4l_exports") = .{
     .header = c.shader_v1_header,
@@ -32,13 +34,14 @@ pub export var r4nv_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exp
 
 test "backend and shader ABI preserve operands, executable identity and rejected outputs" {
     const t = std.testing;
+    try @import("image_layout_checks.zig").run(&r4nv_backend_v1);
     try @import("render_image_test.zig").check();
     var profile: c.R4NvDeviceProfile = .{ .version = 1, .size = @sizeOf(c.R4NvDeviceProfile),
         .vendor_id = 0x10de, .copy_class = 0xc6b5, .rm_release = c.rm_release, .command_abi = c.command_abi,
         .adapter_id = 3, .flags = 0, .device_generation = 0x100000007, .reset_generation = 0x200000008 };
     var features = std.mem.zeroes(c.R4NvFeatures);
     try t.expectEqual(c.status_ok, r4nv_backend_v1.negotiate(&profile, &features));
-    try t.expect(features.features == 7 and features.gpu_address_bits == 49 and features.max_copy_bytes == 0xffffffff and features.max_command_words == copy.max_words);
+    try t.expect(features.features == 15 and features.gpu_address_bits == 49 and features.max_copy_bytes == 0xffffffff and features.max_command_words == copy.max_words);
     const accepted = features;
     profile.command_abi += 1;
     try t.expectEqual(c.status_unsupported, r4nv_backend_v1.negotiate(&profile, &features));

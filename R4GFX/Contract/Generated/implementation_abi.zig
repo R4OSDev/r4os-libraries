@@ -257,6 +257,31 @@ pub const R4GfxRenderRequest = extern struct {
     deadline_ns: u64,
     dependencies: u64,
 };
+
+pub const R4GfxImagePrepareRequest = extern struct {
+    version: u32,
+    size: u32,
+    source: R4GfxResource,
+    uses: u32,
+    preference: u32,
+    flags: u32,
+    dependency_count: u32,
+    deadline_ns: u64,
+    byte_budget: u64,
+    dependencies: u64,
+    ready_dependencies: u64,
+    ready_capacity: u32,
+    reserved: u32,
+};
+
+pub const R4GfxPreparedImage = extern struct {
+    version: u32,
+    size: u32,
+    image: R4GfxResource,
+    job: R4GfxJob,
+    flags: u32,
+    dependency_count: u32,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -300,6 +325,16 @@ pub const device_gpu_render: u32 = 8;
 pub const render_transfer_identity: u32 = 0;
 pub const render_transfer_srgb_decode: u32 = 1;
 pub const render_transfer_srgb_encode: u32 = 2;
+pub const prepare_use_texture: u32 = 1;
+pub const prepare_use_render_target: u32 = 2;
+pub const prepare_use_scanout: u32 = 4;
+pub const prepare_layout_compatible: u32 = 0;
+pub const prepare_layout_linear: u32 = 1;
+pub const prepare_layout_blocklinear: u32 = 2;
+pub const prepare_force_copy: u32 = 1;
+pub const prepared_copy_pending: u32 = 1;
+pub const prepared_software: u32 = 2;
+pub const prepared_reused: u32 = 4;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -350,14 +385,14 @@ pub const RenderV1 = extern struct {
 };
 
 pub const device_v1_export_name = "DEVICE_V1";
-pub const device_v1_revision: u16 = 4;
+pub const device_v1_revision: u16 = 5;
 pub const device_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 168,
+    .size = 176,
     .abi_major = 1,
-    .abi_minor = 4,
+    .abi_minor = 5,
     .interface_id_lo = 0x5234474658444556,
     .interface_id_hi = 0x52344f5330373931,
 };
@@ -378,6 +413,7 @@ pub const DeviceV1JobReleaseFn = *const fn (device: *const R4GfxDevice, job: *co
 pub const DeviceV1CopySubmitExFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxCopyRequestEx, output: *R4GfxJob) callconv(.c) i32;
 pub const DeviceV1JobFenceFn = *const fn (device: *const R4GfxDevice, job: *const R4GfxJob, output: *R4GfxCopyFence) callconv(.c) i32;
 pub const DeviceV1RenderSubmitFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderRequest, output: *R4GfxJob) callconv(.c) i32;
+pub const DeviceV1ImagePrepareFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxImagePrepareRequest, output: *R4GfxPreparedImage) callconv(.c) i32;
 pub const DeviceV1 = extern struct {
     header: InterfaceHeader,
     storage_size: DeviceV1StorageSizeFn,
@@ -397,4 +433,5 @@ pub const DeviceV1 = extern struct {
     copy_submit_ex: DeviceV1CopySubmitExFn,
     job_fence: DeviceV1JobFenceFn,
     render_submit: DeviceV1RenderSubmitFn,
+    image_prepare: DeviceV1ImagePrepareFn,
 };

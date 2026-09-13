@@ -10,9 +10,9 @@ Versioned, allocation-free NVIDIA encoding backend.
 
 - ELF-Symbol: `r4nv_backend_v1`
 - ABI-Major: 1
-- Revision: 2
+- Revision: 3
 - Interface-ID: `0x52344f5330373931:0x52344e5642454e44`
-- Tabellengroesse: 56 Byte
+- Tabellengroesse: 64 Byte
 
 - Slot 0, Offset 32: `negotiate` - Validates a driver-supplied profile; reported features describe encoding support, not physical qualification.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Pure encoding into caller-owned output. No allocation, hardware access or retained pointers..
@@ -20,6 +20,8 @@ Versioned, allocation-free NVIDIA encoding backend.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Pure encoding into caller-owned output. No allocation, hardware access or retained pointers..
 - Slot 2, Offset 48: `encode_copy_layout` - Encodes pitch/blocklinear conversion through C6B5/C7B5, bounded by max_layout_command_words. Original encode_copy and its limits remain available. No retained state or device access.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Pure encoding into caller-owned output. No allocation, hardware access or retained pointers..
+- Slot 3, Offset 56: `image_layout` - Checks known C797/SM86 image layouts against texture/render/scanout use. Suggests an explicit compatible CE conversion for known readable views; never guesses an unknown modifier.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Pure metadata negotiation; no allocation, maps, hardware access or retained pointers..
 
 SHADER_V1
 ---------
@@ -52,6 +54,9 @@ Typen
 - `R4NvShaderKey`: 120 Byte, Alignment 8. Version1 exact-size key from the actual driver/renderer. Nonzero artifact-version token, device identity, input/output format and complete pipeline-state digest. Only SM86/AMPERE_B is supported. Keys contain no GPU addresses or live resource handles; GPU allocations still require current-generation binding by the renderer.
 - `R4NvShaderInfo`: 88 Byte, Alignment 8. Fixed shader metadata and source/toolchain identity. Stage0 is vertex; stage4 is fragment. Header is128 little-endian bytes; code is SM86 machine code. Encoding support is not GPU qualification.
 - `R4NvShaderView`: 104 Byte, Alignment 8. Borrowed byte ranges inside the caller-owned immutable cache input. Keep that storage alive until the renderer has copied/uploaded both ranges. Addresses have byte alignment and must not be cast to aligned u32 pointers without checking. No pointer is retained by the library.
+- `R4NvImageView`: 64 Byte, Alignment 8. Single-plane image metadata, no CPU/GPU address. Location0=system,1=device-local; modifier0=linear. Runtime must authenticate ownership/generations and physical mapping.
+- `R4NvImageRequest`: 80 Byte, Alignment 8. Prepare an image for texture1/render-target2/scanout4. Preference0=preserve suitable layout,1=linear,2=blocklinear; flags1 forces a separate copy. Render+scanout requires the later inactive-image lease and is unsupported here.
+- `R4NvImagePlan`: 64 Byte, Alignment 8. Action0=reuse,1=convert through CE; layout0=linear,1=blocklinear. Unknown/undecodable modifiers fail without a plan. Proposed bytes include the pinned native64KB allocation granule; no allocation or GPU qualification occurs here.
 
 Besitzregeln
 ------------

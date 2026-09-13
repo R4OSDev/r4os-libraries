@@ -218,6 +218,76 @@ _Static_assert(offsetof(R4NvShaderView, info) == 0u, "R4NvShaderView.info offset
 _Static_assert(offsetof(R4NvShaderView, header_address) == 88u, "R4NvShaderView.header_address offset mismatch");
 _Static_assert(offsetof(R4NvShaderView, code_address) == 96u, "R4NvShaderView.code_address offset mismatch");
 
+typedef struct R4NvImageView {
+    uint32_t version;
+    uint32_t size;
+    uint32_t width;
+    uint32_t height;
+    uint32_t format;
+    uint32_t location;
+    uint64_t modifier;
+    uint64_t byte_length;
+    uint64_t pitch;
+    uint64_t alignment;
+    uint32_t usage;
+    uint32_t reserved;
+} R4NvImageView;
+_Static_assert(sizeof(R4NvImageView) == 64u, "R4NvImageView size mismatch");
+_Static_assert(offsetof(R4NvImageView, version) == 0u, "R4NvImageView.version offset mismatch");
+_Static_assert(offsetof(R4NvImageView, size) == 4u, "R4NvImageView.size offset mismatch");
+_Static_assert(offsetof(R4NvImageView, width) == 8u, "R4NvImageView.width offset mismatch");
+_Static_assert(offsetof(R4NvImageView, height) == 12u, "R4NvImageView.height offset mismatch");
+_Static_assert(offsetof(R4NvImageView, format) == 16u, "R4NvImageView.format offset mismatch");
+_Static_assert(offsetof(R4NvImageView, location) == 20u, "R4NvImageView.location offset mismatch");
+_Static_assert(offsetof(R4NvImageView, modifier) == 24u, "R4NvImageView.modifier offset mismatch");
+_Static_assert(offsetof(R4NvImageView, byte_length) == 32u, "R4NvImageView.byte_length offset mismatch");
+_Static_assert(offsetof(R4NvImageView, pitch) == 40u, "R4NvImageView.pitch offset mismatch");
+_Static_assert(offsetof(R4NvImageView, alignment) == 48u, "R4NvImageView.alignment offset mismatch");
+_Static_assert(offsetof(R4NvImageView, usage) == 56u, "R4NvImageView.usage offset mismatch");
+_Static_assert(offsetof(R4NvImageView, reserved) == 60u, "R4NvImageView.reserved offset mismatch");
+
+typedef struct R4NvImageRequest {
+    R4NvImageView view;
+    uint32_t uses;
+    uint32_t preference;
+    uint32_t flags;
+    uint32_t reserved;
+} R4NvImageRequest;
+_Static_assert(sizeof(R4NvImageRequest) == 80u, "R4NvImageRequest size mismatch");
+_Static_assert(offsetof(R4NvImageRequest, view) == 0u, "R4NvImageRequest.view offset mismatch");
+_Static_assert(offsetof(R4NvImageRequest, uses) == 64u, "R4NvImageRequest.uses offset mismatch");
+_Static_assert(offsetof(R4NvImageRequest, preference) == 68u, "R4NvImageRequest.preference offset mismatch");
+_Static_assert(offsetof(R4NvImageRequest, flags) == 72u, "R4NvImageRequest.flags offset mismatch");
+_Static_assert(offsetof(R4NvImageRequest, reserved) == 76u, "R4NvImageRequest.reserved offset mismatch");
+
+typedef struct R4NvImagePlan {
+    uint32_t version;
+    uint32_t size;
+    uint32_t action;
+    uint32_t layout;
+    uint32_t reasons;
+    uint32_t supported_uses;
+    uint64_t modifier;
+    uint64_t pitch;
+    uint64_t byte_length;
+    uint64_t allocation_bytes;
+    uint32_t log2_gobs;
+    uint32_t reserved;
+} R4NvImagePlan;
+_Static_assert(sizeof(R4NvImagePlan) == 64u, "R4NvImagePlan size mismatch");
+_Static_assert(offsetof(R4NvImagePlan, version) == 0u, "R4NvImagePlan.version offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, size) == 4u, "R4NvImagePlan.size offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, action) == 8u, "R4NvImagePlan.action offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, layout) == 12u, "R4NvImagePlan.layout offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, reasons) == 16u, "R4NvImagePlan.reasons offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, supported_uses) == 20u, "R4NvImagePlan.supported_uses offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, modifier) == 24u, "R4NvImagePlan.modifier offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, pitch) == 32u, "R4NvImagePlan.pitch offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, byte_length) == 40u, "R4NvImagePlan.byte_length offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, allocation_bytes) == 48u, "R4NvImagePlan.allocation_bytes offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, log2_gobs) == 56u, "R4NvImagePlan.log2_gobs offset mismatch");
+_Static_assert(offsetof(R4NvImagePlan, reserved) == 60u, "R4NvImagePlan.reserved offset mismatch");
+
 #define R4NV_COMMAND_ABI ((uint32_t)1)
 #define R4NV_RM_RELEASE ((uint32_t)570144)
 #define R4NV_FEATURE_COPY_LINEAR ((uint32_t)1)
@@ -238,6 +308,22 @@ _Static_assert(offsetof(R4NvShaderView, code_address) == 96u, "R4NvShaderView.co
 #define R4NV_SHADER_PROFILE_SRGB_ENCODE_FRAGMENT ((uint32_t)4)
 #define R4NV_SHADER_PROFILE_SOLID_FRAGMENT ((uint32_t)5)
 #define R4NV_SHADER_PROFILE_SOLID_VERTEX ((uint32_t)6)
+#define R4NV_FEATURE_IMAGE_LAYOUT ((uint32_t)8)
+#define R4NV_IMAGE_USE_TEXTURE ((uint32_t)1)
+#define R4NV_IMAGE_USE_RENDER_TARGET ((uint32_t)2)
+#define R4NV_IMAGE_USE_SCANOUT ((uint32_t)4)
+#define R4NV_IMAGE_PREFER_COMPATIBLE ((uint32_t)0)
+#define R4NV_IMAGE_PREFER_LINEAR ((uint32_t)1)
+#define R4NV_IMAGE_PREFER_BLOCKLINEAR ((uint32_t)2)
+#define R4NV_IMAGE_FORCE_COPY ((uint32_t)1)
+#define R4NV_IMAGE_ACTION_REUSE ((uint32_t)0)
+#define R4NV_IMAGE_ACTION_CONVERT ((uint32_t)1)
+#define R4NV_IMAGE_REASON_LOCATION ((uint32_t)1)
+#define R4NV_IMAGE_REASON_PITCH ((uint32_t)2)
+#define R4NV_IMAGE_REASON_MODIFIER ((uint32_t)4)
+#define R4NV_IMAGE_REASON_USAGE ((uint32_t)8)
+#define R4NV_IMAGE_REASON_FORCED ((uint32_t)16)
+#define R4NV_IMAGE_REASON_PREFERENCE ((uint32_t)32)
 #define R4NV_STATUS_INVALID ((int32_t)-1)
 #define R4NV_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4NV_STATUS_CAPACITY ((int32_t)-3)
@@ -245,37 +331,41 @@ _Static_assert(offsetof(R4NvShaderView, code_address) == 96u, "R4NvShaderView.co
 
 #define R4NV_BACKEND_V1_EXPORT_NAME "BACKEND_V1"
 #define R4NV_BACKEND_V1_ABI_MAJOR 1u
-#define R4NV_BACKEND_V1_REVISION 2u
+#define R4NV_BACKEND_V1_REVISION 3u
 #define R4NV_BACKEND_V1_INTERFACE_ID_LO 0x52344e5642454e44ull
 #define R4NV_BACKEND_V1_INTERFACE_ID_HI 0x52344f5330373931ull
-#define R4NV_BACKEND_V1_TABLE_SIZE 56u
+#define R4NV_BACKEND_V1_TABLE_SIZE 64u
 #define R4NV_BACKEND_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4NV_BACKEND_V1_TABLE_SIZE, R4NV_BACKEND_V1_ABI_MAJOR, R4NV_BACKEND_V1_REVISION, R4NV_BACKEND_V1_INTERFACE_ID_LO, R4NV_BACKEND_V1_INTERFACE_ID_HI }
 typedef int32_t (*R4NvBackendV1NegotiateFn)(const R4NvDeviceProfile * profile, R4NvFeatures * output);
 typedef int32_t (*R4NvBackendV1EncodeCopyFn)(const R4NvCopy * request, uint32_t * commands, uint32_t capacity, uint32_t * written);
 typedef int32_t (*R4NvBackendV1EncodeCopyLayoutFn)(const R4NvCopyLayout * request, uint32_t * commands, uint32_t capacity, uint32_t * written);
+typedef int32_t (*R4NvBackendV1ImageLayoutFn)(const R4NvDeviceProfile * profile, const R4NvImageRequest * request, R4NvImagePlan * output);
 typedef struct R4NvBackendV1 {
     R4LInterfaceHeader header;
     R4NvBackendV1NegotiateFn negotiate;
     R4NvBackendV1EncodeCopyFn encode_copy;
     R4NvBackendV1EncodeCopyLayoutFn encode_copy_layout;
+    R4NvBackendV1ImageLayoutFn image_layout;
 } R4NvBackendV1;
-_Static_assert(sizeof(R4NvBackendV1) == 56u, "R4NvBackendV1 size mismatch");
+_Static_assert(sizeof(R4NvBackendV1) == 64u, "R4NvBackendV1 size mismatch");
 _Static_assert(offsetof(R4NvBackendV1, negotiate) == 32u, "R4NvBackendV1.negotiate offset mismatch");
 _Static_assert(offsetof(R4NvBackendV1, encode_copy) == 40u, "R4NvBackendV1.encode_copy offset mismatch");
 _Static_assert(offsetof(R4NvBackendV1, encode_copy_layout) == 48u, "R4NvBackendV1.encode_copy_layout offset mismatch");
+_Static_assert(offsetof(R4NvBackendV1, image_layout) == 56u, "R4NvBackendV1.image_layout offset mismatch");
 typedef struct R4NvBackendV1Client { const R4LInterfaceHeader *header; } R4NvBackendV1Client;
 
 static inline int32_t r4nv_backend_v1_init(const R4XStartContext *ctx, R4NvBackendV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4NV", "BACKEND_V1");
-    const R4LInterfaceExpectation expected = { 0x52344e5642454e44ull, 0x52344f5330373931ull, 1u, 2u, 56u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x52344e5642454e44ull, 0x52344f5330373931ull, 1u, 3u, 64u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
     if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 56u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -293,6 +383,11 @@ static inline int32_t r4nv_encode_copy(R4NvBackendV1Client *client, const R4NvCo
 static inline int32_t r4nv_encode_copy_layout(R4NvBackendV1Client *client, const R4NvCopyLayout * request, uint32_t * commands, uint32_t capacity, uint32_t * written) {
     R4NvBackendV1EncodeCopyLayoutFn function = (R4NvBackendV1EncodeCopyLayoutFn)r4l_slot_address(client->header, 48u);
     return function(request, commands, capacity, written);
+}
+
+static inline int32_t r4nv_image_layout(R4NvBackendV1Client *client, const R4NvDeviceProfile * profile, const R4NvImageRequest * request, R4NvImagePlan * output) {
+    R4NvBackendV1ImageLayoutFn function = (R4NvBackendV1ImageLayoutFn)r4l_slot_address(client->header, 56u);
+    return function(profile, request, output);
 }
 
 #define R4NV_SHADER_V1_EXPORT_NAME "SHADER_V1"

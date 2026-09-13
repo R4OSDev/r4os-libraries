@@ -1,5 +1,6 @@
 const std = @import("std");
 const c = @import("r4l_contract");
+pub const r4nv_image_layout_impl = @import("image_layout.zig").r4nv_image_layout_impl;
 const copy = @import("copy.zig");
 
 pub fn r4nv_negotiate_impl(profile: *const c.R4NvDeviceProfile, output: *c.R4NvFeatures) callconv(.c) i32 {
@@ -10,7 +11,7 @@ pub fn r4nv_negotiate_impl(profile: *const c.R4NvDeviceProfile, output: *c.R4NvF
     if (profile.vendor_id != 0x10de or profile.rm_release != c.rm_release or profile.command_abi != c.command_abi or
         (profile.copy_class != 0xc6b5 and profile.copy_class != 0xc7b5)) return c.status_unsupported;
     output.* = .{ .version = 1, .size = @sizeOf(c.R4NvFeatures), .command_abi = c.command_abi,
-        .features = c.feature_copy_linear | c.feature_copy_rows | c.feature_copy_layout, .copy_class = profile.copy_class,
+        .features = c.feature_copy_linear | c.feature_copy_rows | c.feature_copy_layout | c.feature_image_layout, .copy_class = profile.copy_class,
         .gpu_address_bits = 49, .max_command_words = c.max_layout_command_words, .reserved = 0,
         .max_copy_bytes = std.math.maxInt(u32), .max_rows = std.math.maxInt(u32) };
     return c.status_ok;

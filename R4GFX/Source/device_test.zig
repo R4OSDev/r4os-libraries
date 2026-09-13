@@ -10,7 +10,7 @@ const d = @import("device.zig");
 const c = d.c;
 const api = &@import("main.zig").r4gfx_device_v1;
 const Model = struct {
-    const Object = struct { bytes: [64]u8 = @splat(0), descriptor: a.GfxBufferDescriptor = .{}, live: bool = false };
+    const Object = struct { bytes: [65536]u8 = @splat(0), descriptor: a.GfxBufferDescriptor = .{}, live: bool = false };
     const Ref = struct { object: ?usize = null, generation: u64 = 0, mapped: bool = false };
     const Queue = struct { handle: a.GfxQueueHandle = .{}, config: a.GfxQueueConfig = .{} };
     var objects: [4]Object = @splat(.{});
@@ -30,10 +30,13 @@ const Model = struct {
     var native_request: a.GfxNativeAllocation = .{};
     var native_handle: a.GfxBufferHandle = .{};
     var native_result: i32 = 1;
+    var native_starts: usize = 0;
+    var bad_native_layout = false;
     var binding: a.GfxBackendBinding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
     var nv_table: nv.BackendV1 = .{ .header = nv.backend_v1_header,
         .negotiate = @ptrCast(&nv_provider.r4nv_negotiate_impl), .encode_copy = @ptrCast(&nv_provider.r4nv_encode_copy_impl),
-        .encode_copy_layout = @ptrCast(&nv_provider.r4nv_encode_copy_layout_impl) };
+        .encode_copy_layout = @ptrCast(&nv_provider.r4nv_encode_copy_layout_impl),
+        .image_layout = @ptrCast(&nv_provider.r4nv_image_layout_impl) };
 
     fn reset() void {
         objects = @splat(.{}); references = @splat(.{}); queues = @splat(.{});
@@ -42,6 +45,7 @@ const Model = struct {
         nv_table.header = nv.backend_v1_header;
         operations = 7; dependency_seen = false;
         native_request = .{}; native_handle = .{}; native_result = 1;
+        native_starts = 0; bad_native_layout = false;
     }
     fn ref(handle: a.GfxBufferHandle) *Ref {
         std.debug.assert(handle.id != 0 and handle.id <= references.len and handle.reserved0 == 0);
@@ -74,6 +78,7 @@ const Model = struct {
     fn nativeStart(input: *const a.GfxNativeAllocation, out: *a.GfxNativeStatus) callconv(.c) i32 {
         std.debug.assert(native_handle.id == 0 and input.adapter_id == binding.adapter_id and input.memory_generation == 73 and input.kind == 1);
         serial += 1;
+        native_starts += 1;
         native_request = input.*; native_handle = .{ .id = 1, .generation = serial };
         out.* = .{ .request = native_handle, .deadline_ns = input.deadline_ns };
         return 1;
@@ -84,8 +89,13 @@ const Model = struct {
     }
     fn nativeReceive(input: *const a.GfxBufferHandle, out: *a.GfxBufferReference) callconv(.c) i32 {
         std.debug.assert(std.meta.eql(input.*, native_handle) and native_result == 1);
-        const rc = create(&.{ .byte_length = 64, .width = native_request.width, .height = native_request.height, .format = native_request.format,
-            .plane_count = 1, .plane_pitches = .{16, 0, 0, 0}, .usage = native_request.usage, .location = 1,
+        // This bounded fixture uses4x4 images with the actual native storage
+        // geometry. A tiled view is one GOB; the image allocation is64KB.
+        std.debug.assert(native_request.width == 4 and native_request.height == 4 and native_request.layout <= 1);
+        const modifier: u64 = if (bad_native_layout) 1 else if (native_request.layout == 1) 0x0300000000606010 else 0;
+        const rc = create(&.{ .byte_length = 65536, .alignment = 65536, .modifier = modifier,
+            .width = native_request.width, .height = native_request.height, .format = native_request.format,
+            .plane_count = 1, .plane_pitches = .{if (native_request.layout == 1) 64 else 256, 0, 0, 0}, .usage = native_request.usage, .location = 1,
             .adapter_id = binding.adapter_id, .device_generation = 73, .driver_owner = 79 }, out);
         if (rc == 1) native_handle = .{};
         return rc;
@@ -168,6 +178,9 @@ const Model = struct {
     fn complete() void {
         const source = ref(job_request.source); const target = ref(job_request.target);
         std.debug.assert(!source.mapped and !target.mapped);
+        // Tiled execution belongs to NVIDIA's CE model; this generic fixture
+        // must never turn an opaque layout into a linear byte copy.
+        std.debug.assert(objects[source.object.?].descriptor.modifier == 0 and objects[target.object.?].descriptor.modifier == 0);
         const count = if (job_request.row_count == 0) 1 else job_request.row_count;
         for (0..count) |row| {
             const src = job_request.source_offset + row * job_request.source_pitch;
@@ -271,7 +284,7 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.resource_create(&handle, &create_native, &allocated));
     var allocated_info: c.R4GfxResourceInfo = undefined;
     try t.expectEqual(c.status_ok, api.resource_info(&handle, &allocated, &allocated_info));
-    try t.expect(allocated_info.image.pitch == 16 and allocated_info.image.byte_length == 64 and Model.native_handle.id == 0);
+    try t.expect(allocated_info.image.pitch == 256 and allocated_info.image.byte_length == 65536 and Model.native_handle.id == 0);
     try t.expectEqual(c.status_ok, api.resource_release(&handle, &allocated));
     const untouched = allocated;
     Model.native_result = a.gfx_buffer_error_oom;
@@ -387,6 +400,132 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
     try checkNativeRender(&config);
+    try checkImagePreparation(&config);
+    try checkTiledPreparation(&config);
+}
+
+fn checkTiledPreparation(config: *const c.R4GfxDeviceConfig) !void {
+    for ([_]u32{c.prepare_use_texture,c.prepare_use_scanout}) |uses| {
+        Model.reset(); Model.operations = 29;
+        var handle: c.R4GfxDevice = undefined;
+        try t.expectEqual(c.status_ok,api.device_open(config,&handle));
+        const device = try d.get(&handle,false);
+        var desc = descriptor(c.resource_image); desc.source_kind = c.source_create_system;
+        desc.image = .{ .cpu_address = 0, .byte_length = 64, .pitch = 16, .width = 4, .height = 4, .format = c.format_argb8888, .reserved = 0 };
+        var source: c.R4GfxResource = undefined;
+        try t.expectEqual(c.status_ok,api.resource_create(&handle,&desc,&source));
+        var ready: [1]c.R4GfxCopyFence = undefined;
+        var request: c.R4GfxImagePrepareRequest = .{ .version = 1, .size = @sizeOf(c.R4GfxImagePrepareRequest),
+            .source = source, .uses = uses, .preference = c.prepare_layout_compatible, .flags = 0,
+            .deadline_ns = 99999999, .byte_budget = 65536, .dependency_count = 0, .dependencies = 0,
+            .ready_dependencies = @intFromPtr(&ready), .ready_capacity = 1, .reserved = 0 };
+        var result: c.R4GfxPreparedImage = undefined;
+        const source_resource = try device.resource(source,true);
+        source_resource.descriptor.modifier = 1;
+        try t.expectEqual(c.status_unsupported,api.image_prepare(&handle,&request,&result));
+        try t.expect(Model.native_starts == 0 and Model.referenceCount() == 1);
+        source_resource.descriptor.modifier = 0;
+        try t.expectEqual(c.status_ok,api.image_prepare(&handle,&request,&result));
+        try t.expect(result.flags == c.prepared_copy_pending and Model.maps == 0 and Model.native_request.layout == 1 and
+            Model.native_request.usage == @as(u32,if (uses == c.prepare_use_scanout) 60 else 28) and
+            Model.job_request.source_pitch == 16 and Model.job_request.target_pitch == 64 and Model.job_request.byte_length == 16);
+        // A second conversion forwards readiness to submission. This one-job
+        // fixture rejects it as busy; the new target must be cleaned while
+        // the first image/job and caller output remain intact.
+        request.dependencies = @intFromPtr(&ready); request.dependency_count = 1;
+        const untouched = result;
+        try t.expectEqual(c.status_busy,api.image_prepare(&handle,&request,&result));
+        try t.expectEqualDeep(untouched,result);
+        try t.expect(Model.dependency_seen and Model.native_starts == 2 and Model.referenceCount() == 2);
+        // Do not fabricate tiled pixel completion in this generic fixture.
+        // NVIDIA's separate CE/GR owner case executes and checks those bytes.
+        Model.status.phase = a.gfx_queue_phase_terminal; Model.status.flags = 0; Model.status.result = a.gfx_queue_result_failed;
+        try t.expectEqual(c.status_ok,api.job_release(&handle,&result.job));
+        try t.expectEqual(c.status_ok,api.resource_release(&handle,&result.image));
+        try t.expectEqual(c.status_ok,api.resource_release(&handle,&source));
+        try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
+        try t.expectEqual(c.status_ok,api.device_close(&handle));
+    }
+}
+
+fn checkImagePreparation(base_config: *const c.R4GfxDeviceConfig) !void {
+    for ([_]bool{false,true}) |software| {
+        Model.reset(); Model.operations = 29;
+        var config = base_config.*; config.flags = if (software) c.device_software_only else 0;
+        var handle: c.R4GfxDevice = undefined;
+        try t.expectEqual(c.status_ok,api.device_open(&config,&handle));
+        const device = try d.get(&handle,false);
+        var source_desc = descriptor(c.resource_image);
+        source_desc.source_kind = c.source_create_system;
+        source_desc.image = .{ .cpu_address = 0, .byte_length = 64, .pitch = 16, .width = 4, .height = 4, .format = c.format_argb8888, .reserved = 0 };
+        var source: c.R4GfxResource = undefined;
+        try t.expectEqual(c.status_ok,api.resource_create(&handle,&source_desc,&source));
+        const source_resource = try device.resource(source,true);
+        @memset(Model.objects[Model.ref(source_resource.backing.reference).object.?].bytes[0..64],0x53);
+        var ready: [1]c.R4GfxCopyFence = .{std.mem.zeroes(c.R4GfxCopyFence)}; ready[0].timeline = 79;
+        const untouched_ready = ready;
+        var output: c.R4GfxPreparedImage = std.mem.zeroes(c.R4GfxPreparedImage); output.flags = 79;
+        const untouched = output;
+        var request: c.R4GfxImagePrepareRequest = .{ .version = 1, .size = @sizeOf(c.R4GfxImagePrepareRequest),
+            .source = source, .uses = c.prepare_use_texture, .preference = c.prepare_layout_linear, .flags = c.prepare_force_copy,
+            .deadline_ns = 99999999, .byte_budget = 0, .dependencies = 0, .dependency_count = 0,
+            .ready_dependencies = @intFromPtr(&ready), .ready_capacity = 1, .reserved = 0 };
+        // A budget/capacity rejection precedes both allocation and output.
+        try t.expectEqual(c.status_limit,api.image_prepare(&handle,&request,&output));
+        try t.expectEqualDeep(untouched,output); try t.expectEqualDeep(untouched_ready,ready);
+        try t.expect(Model.native_starts == 0 and Model.referenceCount() == 1 and !Model.job_live);
+        request.byte_budget = if (software) 4096 else 65536;
+        request.ready_capacity = 0; request.ready_dependencies = 0;
+        try t.expectEqual(c.status_limit,api.image_prepare(&handle,&request,&output));
+        request.ready_capacity = 1; request.ready_dependencies = @intFromPtr(&output);
+        try t.expectEqual(c.status_alias,api.image_prepare(&handle,&request,&output));
+        request.ready_dependencies = @intFromPtr(&ready);
+        if (!software) {
+            Model.bad_native_layout = true;
+            try t.expectEqual(c.status_unsupported,api.image_prepare(&handle,&request,&output));
+            try t.expect(Model.referenceCount() == 1 and Model.native_handle.id == 0 and !Model.job_live);
+            try t.expectEqualDeep(untouched,output); try t.expectEqualDeep(untouched_ready,ready);
+            Model.bad_native_layout = false;
+        }
+        try t.expectEqual(c.status_ok,api.image_prepare(&handle,&request,&output));
+        const copy = output;
+        try t.expect(copy.flags == c.prepared_copy_pending|@as(u32,if (software) c.prepared_software else 0) and copy.job.slot != 0 and copy.dependency_count == 1);
+        try t.expectEqualDeep(@as(c.R4GfxCopyFence,@bitCast(Model.status.fence)),ready[0]);
+        try t.expect(Model.maps == 0 and Model.job_request.operation == a.gfx_queue_operation_copy_rows and
+            Model.job_request.byte_length == 16 and Model.job_request.row_count == 4 and Model.job_request.source_pitch == 16 and
+            Model.job_request.target_pitch == @as(u64,if (software) 16 else 256));
+        if (!software) try t.expect(Model.native_request.layout == 0 and Model.native_request.usage == 28);
+        try t.expectEqual(c.status_ok,api.resource_release(&handle,&source));
+        try t.expectEqual(c.status_busy,api.job_release(&handle,&copy.job));
+        try t.expect(Model.referenceCount() == 2);
+        Model.complete();
+        const target_resource = try device.resource(copy.image,true);
+        const target_data = &Model.objects[Model.ref(target_resource.backing.reference).object.?].bytes;
+        for (0..4) |y| for (target_data[y*target_resource.image.pitch..][0..16]) |value| try t.expectEqual(@as(u8,0x53),value);
+        var info: c.R4GfxDeviceInfo = undefined;
+        var job_info: c.R4GfxJobInfo = undefined;
+        try t.expectEqual(c.status_ok,api.job_info(&handle,&copy.job,&job_info));
+        try t.expectEqual(c.status_ok,api.device_info(&handle,&info));
+        try t.expect(info.gpu_copy_bytes == @as(u64,if (software) 0 else 64) and info.cpu_read_bytes == @as(u64,if (software) 64 else 0) and info.cpu_write_bytes == info.cpu_read_bytes);
+        // Reuse retains the image and forwards its still-owned predecessor
+        // fence, even when input and output readiness arrays are identical.
+        request.source = copy.image; request.flags = 0; request.byte_budget = 0;
+        request.dependencies = @intFromPtr(&ready); request.dependency_count = 1;
+        const prior = ready;
+        const allocations = Model.native_starts;
+        try t.expectEqual(c.status_ok,api.image_prepare(&handle,&request,&output));
+        try t.expect(output.flags == c.prepared_reused|@as(u32,if (software) c.prepared_software else 0) and output.job.slot == 0 and output.dependency_count == 1);
+        try t.expectEqualDeep(copy.image,output.image); try t.expectEqualDeep(prior,ready);
+        try t.expect(target_resource.public_refs == 2 and Model.native_starts == allocations);
+        // The last public references can close while the copy receipt still
+        // owns both BOs; job_release performs the final physical retirement.
+        try t.expectEqual(c.status_ok,api.resource_release(&handle,&copy.image));
+        try t.expectEqual(c.status_ok,api.resource_release(&handle,&output.image));
+        try t.expect(Model.referenceCount() == 2);
+        try t.expectEqual(c.status_ok,api.job_release(&handle,&copy.job));
+        try t.expect(Model.referenceCount() == 0);
+        try t.expectEqual(c.status_ok,api.device_close(&handle));
+    }
 }
 
 fn checkNativeRender(config: *const c.R4GfxDeviceConfig) !void {

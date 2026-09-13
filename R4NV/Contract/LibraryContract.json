@@ -13,7 +13,7 @@
       "zig_type": "BackendV1",
       "c_type": "R4NvBackendV1",
       "abi_major": 1,
-      "revision": 2,
+      "revision": 3,
       "interface_id_lo": 5923445542285037124,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -218,6 +218,68 @@
             "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
           },
           "description": "Encodes pitch/blocklinear conversion through C6B5/C7B5, bounded by max_layout_command_words. Original encode_copy and its limits remain available. No retained state or device access."
+        },
+        {
+          "name": "image_layout",
+          "c_name": "r4nv_image_layout",
+          "symbol": "r4nv_image_layout_impl",
+          "slot": 3,
+          "since_revision": 3,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "profile",
+              "type": {
+                "name": "R4NvDeviceProfile",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "profile"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4NvImageRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4NvImagePlan",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4NV_STATUS",
+            "ownership": "Pure metadata negotiation; no allocation, maps, hardware access or retained pointers."
+          },
+          "description": "Checks known C797/SM86 image layouts against texture/render/scanout use. Suggests an explicit compatible CE conversion for known readable views; never guesses an unknown modifier."
         }
       ],
       "description": "Versioned, allocation-free NVIDIA encoding backend."
@@ -1478,6 +1540,349 @@
         }
       ],
       "description": "Borrowed byte ranges inside the caller-owned immutable cache input. Keep that storage alive until the renderer has copied/uploaded both ranges. Addresses have byte alignment and must not be cast to aligned u32 pointers without checking. No pointer is retained by the library."
+    },
+    {
+      "name": "R4NvImageView",
+      "size": 64,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "width",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width"
+        },
+        {
+          "name": "height",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "format",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "format"
+        },
+        {
+          "name": "location",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "location"
+        },
+        {
+          "name": "modifier",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "modifier"
+        },
+        {
+          "name": "byte_length",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte_length"
+        },
+        {
+          "name": "pitch",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pitch"
+        },
+        {
+          "name": "alignment",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "alignment"
+        },
+        {
+          "name": "usage",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "usage"
+        },
+        {
+          "name": "reserved",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Single-plane image metadata, no CPU/GPU address. Location0=system,1=device-local; modifier0=linear. Runtime must authenticate ownership/generations and physical mapping."
+    },
+    {
+      "name": "R4NvImageRequest",
+      "size": 80,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "view",
+          "offset": 0,
+          "type": {
+            "name": "R4NvImageView",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "view"
+        },
+        {
+          "name": "uses",
+          "offset": 64,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "uses"
+        },
+        {
+          "name": "preference",
+          "offset": 68,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "preference"
+        },
+        {
+          "name": "flags",
+          "offset": 72,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "reserved",
+          "offset": 76,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Prepare an image for texture1/render-target2/scanout4. Preference0=preserve suitable layout,1=linear,2=blocklinear; flags1 forces a separate copy. Render+scanout requires the later inactive-image lease and is unsupported here."
+    },
+    {
+      "name": "R4NvImagePlan",
+      "size": 64,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "action",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "action"
+        },
+        {
+          "name": "layout",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "layout"
+        },
+        {
+          "name": "reasons",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reasons"
+        },
+        {
+          "name": "supported_uses",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "supported_uses"
+        },
+        {
+          "name": "modifier",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "modifier"
+        },
+        {
+          "name": "pitch",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pitch"
+        },
+        {
+          "name": "byte_length",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte_length"
+        },
+        {
+          "name": "allocation_bytes",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "allocation_bytes"
+        },
+        {
+          "name": "log2_gobs",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "log2_gobs"
+        },
+        {
+          "name": "reserved",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Action0=reuse,1=convert through CE; layout0=linear,1=blocklinear. Unknown/undecodable modifiers fail without a plan. Proposed bytes include the pinned native64KB allocation granule; no allocation or GPU qualification occurs here."
     }
   ],
   "constants": [
@@ -1620,6 +2025,118 @@
       "type": "u32",
       "value": 6,
       "description": "Solid rectangle vertex shader with position/tint outputs matching the solid fragment shader."
+    },
+    {
+      "zig_name": "feature_image_layout",
+      "c_name": "R4NV_FEATURE_IMAGE_LAYOUT",
+      "type": "u32",
+      "value": 8,
+      "description": "feature_image_layout"
+    },
+    {
+      "zig_name": "image_use_texture",
+      "c_name": "R4NV_IMAGE_USE_TEXTURE",
+      "type": "u32",
+      "value": 1,
+      "description": "image_use_texture"
+    },
+    {
+      "zig_name": "image_use_render_target",
+      "c_name": "R4NV_IMAGE_USE_RENDER_TARGET",
+      "type": "u32",
+      "value": 2,
+      "description": "image_use_render_target"
+    },
+    {
+      "zig_name": "image_use_scanout",
+      "c_name": "R4NV_IMAGE_USE_SCANOUT",
+      "type": "u32",
+      "value": 4,
+      "description": "image_use_scanout"
+    },
+    {
+      "zig_name": "image_prefer_compatible",
+      "c_name": "R4NV_IMAGE_PREFER_COMPATIBLE",
+      "type": "u32",
+      "value": 0,
+      "description": "image_prefer_compatible"
+    },
+    {
+      "zig_name": "image_prefer_linear",
+      "c_name": "R4NV_IMAGE_PREFER_LINEAR",
+      "type": "u32",
+      "value": 1,
+      "description": "image_prefer_linear"
+    },
+    {
+      "zig_name": "image_prefer_blocklinear",
+      "c_name": "R4NV_IMAGE_PREFER_BLOCKLINEAR",
+      "type": "u32",
+      "value": 2,
+      "description": "image_prefer_blocklinear"
+    },
+    {
+      "zig_name": "image_force_copy",
+      "c_name": "R4NV_IMAGE_FORCE_COPY",
+      "type": "u32",
+      "value": 1,
+      "description": "image_force_copy"
+    },
+    {
+      "zig_name": "image_action_reuse",
+      "c_name": "R4NV_IMAGE_ACTION_REUSE",
+      "type": "u32",
+      "value": 0,
+      "description": "image_action_reuse"
+    },
+    {
+      "zig_name": "image_action_convert",
+      "c_name": "R4NV_IMAGE_ACTION_CONVERT",
+      "type": "u32",
+      "value": 1,
+      "description": "image_action_convert"
+    },
+    {
+      "zig_name": "image_reason_location",
+      "c_name": "R4NV_IMAGE_REASON_LOCATION",
+      "type": "u32",
+      "value": 1,
+      "description": "image_reason_location"
+    },
+    {
+      "zig_name": "image_reason_pitch",
+      "c_name": "R4NV_IMAGE_REASON_PITCH",
+      "type": "u32",
+      "value": 2,
+      "description": "image_reason_pitch"
+    },
+    {
+      "zig_name": "image_reason_modifier",
+      "c_name": "R4NV_IMAGE_REASON_MODIFIER",
+      "type": "u32",
+      "value": 4,
+      "description": "image_reason_modifier"
+    },
+    {
+      "zig_name": "image_reason_usage",
+      "c_name": "R4NV_IMAGE_REASON_USAGE",
+      "type": "u32",
+      "value": 8,
+      "description": "image_reason_usage"
+    },
+    {
+      "zig_name": "image_reason_forced",
+      "c_name": "R4NV_IMAGE_REASON_FORCED",
+      "type": "u32",
+      "value": 16,
+      "description": "image_reason_forced"
+    },
+    {
+      "zig_name": "image_reason_preference",
+      "c_name": "R4NV_IMAGE_REASON_PREFERENCE",
+      "type": "u32",
+      "value": 32,
+      "description": "image_reason_preference"
     }
   ],
   "errors": [

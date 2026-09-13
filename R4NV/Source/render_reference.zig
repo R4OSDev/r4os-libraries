@@ -1,3 +1,20 @@
+// GOB sector layout reference: Mesa nil/tiling.rs and nil/copy.rs.
+// Copyright (c) 2024 Valve Corp. and Collabora, Ltd.
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 //! Host-only semantic execution of the bounded rectangle profile. Reads the
 //! actual method stream, descriptors and uploaded constants/vertices. This
@@ -26,12 +43,24 @@ pub fn method(data: []const u8, address: u32) !u32 {
 fn wideMethod(data: []const u8, address: u32) !u64 { return (@as(u64,try method(data,address))<<32)|try method(data,address+4); }
 pub const Surface = struct {
     address: u64, width: u32, height: u32, pitch: u32, format: r.image.Format, bytes: []u8,
+    layout: r.image.Layout = .linear, log2_gobs: u8 = 0,
     pub fn from(image: r.image.Image, bytes: []u8) Surface {
-        return .{ .address = image.address, .width = image.width, .height = image.height, .pitch = image.pitch, .format = image.format, .bytes = bytes };
+        return .{ .address = image.address, .width = image.width, .height = image.height, .pitch = image.pitch, .format = image.format, .bytes = bytes,
+            .layout = image.layout, .log2_gobs = image.log2_gobs };
+    }
+    fn byteOffset(s: Surface, x: u32, y: u32) usize {
+        if (s.layout == .linear) return @as(usize,y)*s.pitch+x;
+        // TuringColor2D byte order: GOB rows, tile columns, then the six
+        // intra-GOB fields in address order. The CE fixture uses a separate
+        // sector lookup; the renderer never calls this host interpreter.
+        const height = @as(usize,8)<<@intCast(s.log2_gobs);
+        const column: usize = x; const row: usize = y;
+        return (row/height)*s.pitch*height+(column/64)*512*(@as(usize,1)<<@intCast(s.log2_gobs)) +
+            ((row%height)/8)*512+((column%64)/32)*256+((row%8)/4)*128+((column%32)/16)*64+((row%4)/2)*32+(row%2)*16+column%16;
     }
     fn load(s: Surface, x: u32, y: u32) [4]f32 {
-        if (s.format == .r8) return .{ @as(f32,@floatFromInt(s.bytes[y*s.pitch+x]))/255,0,0,1 };
-        const value = word(s.bytes,y*s.pitch+x*4);
+        if (s.format == .r8) return .{ @as(f32,@floatFromInt(s.bytes[s.byteOffset(x,y)]))/255,0,0,1 };
+        const value = word(s.bytes,s.byteOffset(x*4,y));
         var color: [4]f32 = undefined;
         for ([_]u5{16,8,0,24},0..) |shift,i| color[i] = @as(f32,@floatFromInt((value>>shift)&255))/255;
         if (s.format == .xrgb8888) color[3] = 1;
@@ -98,8 +127,12 @@ pub fn execute(methods: []const u8, packet: []const u8, program_address: u64, pa
         try t.expectEqual(@as(u32,0x11),try method(methods,hw.BIND_GROUP_CONSTANT_BUFFER+128));
         try t.expectEqual(@as(u32,0),word(packet,512));
         try t.expectEqual(src.address,@as(u64,word(packet,4))|(@as(u64,word(packet,8)&0xffff)<<32));
-        try t.expectEqual(@as(u32,2),(word(packet,8)>>21)&7);
-        try t.expectEqual(src.pitch,(word(packet,12)&0xffff)<<5);
+        try t.expectEqual(@as(u32,if (src.layout == .linear) 2 else 3),(word(packet,8)>>21)&7);
+        if (src.layout == .linear) try t.expectEqual(src.pitch,(word(packet,12)&0xffff)<<5)
+        else {
+            try t.expectEqual(@as(u32,src.log2_gobs)<<3,word(packet,12)&0xffff);
+            try t.expect(src.pitch == std.mem.alignForward(u32,src.width*(if (src.format == .r8) @as(u32,1) else 4),64));
+        }
         try t.expectEqual(src.width,(word(packet,16)&0xffff)+1);
         try t.expectEqual(src.height,(word(packet,20)&0xffff)+1);
         try t.expectEqual(@as(u32,switch (src.format) { .argb8888 => 0x54e24908, .xrgb8888 => 0x74e24908, .r8 => 0x7010011d }),word(packet,0));

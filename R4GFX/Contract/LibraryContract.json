@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 4,
+      "revision": 5,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -1179,6 +1179,68 @@
             "ownership": "Source and target resources retained until physical retirement and job_release; sampler/pipeline are copied immutable values."
           },
           "description": "Submit immutable logical draw state to a ready native backend without pixel maps or synchronous GPU waits. Returns the common job/fence; unsupported leaves output unchanged for explicit software fallback."
+        },
+        {
+          "name": "image_prepare",
+          "c_name": "r4gfx_image_prepare",
+          "symbol": "r4gfx_image_prepare_impl",
+          "slot": 17,
+          "since_revision": 5,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxImagePrepareRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxPreparedImage",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Preparation may wait for native allocation, outside frame submission. Retained resource and copy job/fence use the existing lifecycle. Output/ready fence bytes remain unchanged on failure; failed cleanup stays tracked by the device."
+          },
+          "description": "Reuse a compatible image or explicitly allocate and asynchronously copy/convert its layout within a byte budget. No image scaling or hidden per-draw preparation. Unknown modifiers cannot be interpreted as linear; scanout preparation does not activate an output."
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
@@ -3367,6 +3429,231 @@
         }
       ],
       "description": "Copied asynchronous native draw. Resolves logical resources to the common queue and returns the existing job/fence identity; never maps or scales image pixels. Requires device_gpu_render; unsupported adapters retain the existing software render API. Resources stay held until job_release after physical retirement."
+    },
+    {
+      "name": "R4GfxImagePrepareRequest",
+      "size": 96,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "source",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source"
+        },
+        {
+          "name": "uses",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "uses"
+        },
+        {
+          "name": "preference",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "preference"
+        },
+        {
+          "name": "flags",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "dependency_count",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dependency_count"
+        },
+        {
+          "name": "deadline_ns",
+          "offset": 56,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "deadline_ns"
+        },
+        {
+          "name": "byte_budget",
+          "offset": 64,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte_budget"
+        },
+        {
+          "name": "dependencies",
+          "offset": 72,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dependencies"
+        },
+        {
+          "name": "ready_dependencies",
+          "offset": 80,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "ready_dependencies"
+        },
+        {
+          "name": "ready_capacity",
+          "offset": 88,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "ready_capacity"
+        },
+        {
+          "name": "reserved",
+          "offset": 92,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Prepare outside the frame path: texture1/render2/scanout4; preference0=compatible,1=linear,2=blocklinear,flags1=force copy. Byte budget bounds additional image allocation; zero permits reuse only. Up to8 input fences and caller-owned output-ready fence storage. Reuse forwards dependencies; conversion returns its single dependent copy fence. Ready storage must not alias request/result/device; input/output fence arrays may overlap. No input pointer retained."
+    },
+    {
+      "name": "R4GfxPreparedImage",
+      "size": 80,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "image",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "image"
+        },
+        {
+          "name": "job",
+          "offset": 40,
+          "type": {
+            "name": "R4GfxJob",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "job"
+        },
+        {
+          "name": "flags",
+          "offset": 72,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "dependency_count",
+          "offset": 76,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dependency_count"
+        }
+      ],
+      "description": "Caller owns one returned image reference and, for conversion, its asynchronous copy job. Flags1=copy pending,2=software image,4=reused. dependency_count fences were written to the caller ready array; pass them to a subsequent draw. Successful prepare is not copy completion. Release the job only after physical retirement, and release the image reference independently."
     }
   ],
   "constants": [
@@ -3670,6 +3957,76 @@
       "type": "u32",
       "value": 2,
       "description": "Encode sRGB while preserving premultiplication."
+    },
+    {
+      "zig_name": "prepare_use_texture",
+      "c_name": "R4GFX_PREPARE_USE_TEXTURE",
+      "type": "u32",
+      "value": 1,
+      "description": "prepare_use_texture"
+    },
+    {
+      "zig_name": "prepare_use_render_target",
+      "c_name": "R4GFX_PREPARE_USE_RENDER_TARGET",
+      "type": "u32",
+      "value": 2,
+      "description": "prepare_use_render_target"
+    },
+    {
+      "zig_name": "prepare_use_scanout",
+      "c_name": "R4GFX_PREPARE_USE_SCANOUT",
+      "type": "u32",
+      "value": 4,
+      "description": "prepare_use_scanout"
+    },
+    {
+      "zig_name": "prepare_layout_compatible",
+      "c_name": "R4GFX_PREPARE_LAYOUT_COMPATIBLE",
+      "type": "u32",
+      "value": 0,
+      "description": "prepare_layout_compatible"
+    },
+    {
+      "zig_name": "prepare_layout_linear",
+      "c_name": "R4GFX_PREPARE_LAYOUT_LINEAR",
+      "type": "u32",
+      "value": 1,
+      "description": "prepare_layout_linear"
+    },
+    {
+      "zig_name": "prepare_layout_blocklinear",
+      "c_name": "R4GFX_PREPARE_LAYOUT_BLOCKLINEAR",
+      "type": "u32",
+      "value": 2,
+      "description": "prepare_layout_blocklinear"
+    },
+    {
+      "zig_name": "prepare_force_copy",
+      "c_name": "R4GFX_PREPARE_FORCE_COPY",
+      "type": "u32",
+      "value": 1,
+      "description": "prepare_force_copy"
+    },
+    {
+      "zig_name": "prepared_copy_pending",
+      "c_name": "R4GFX_PREPARED_COPY_PENDING",
+      "type": "u32",
+      "value": 1,
+      "description": "prepared_copy_pending"
+    },
+    {
+      "zig_name": "prepared_software",
+      "c_name": "R4GFX_PREPARED_SOFTWARE",
+      "type": "u32",
+      "value": 2,
+      "description": "prepared_software"
+    },
+    {
+      "zig_name": "prepared_reused",
+      "c_name": "R4GFX_PREPARED_REUSED",
+      "type": "u32",
+      "value": 4,
+      "description": "prepared_reused"
     }
   ],
   "errors": [

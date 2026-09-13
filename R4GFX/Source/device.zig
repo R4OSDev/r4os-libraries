@@ -355,6 +355,11 @@ pub fn submitRender(handle: *const c.R4GfxDevice, request: *const c.R4GfxRenderR
     separateInput(handle, output) catch |err| return code(err);
     return @import("device_native_render.zig").submit(device, request, output) catch |err| code(err);
 }
+pub fn prepareImage(handle: *const c.R4GfxDevice, request: *const c.R4GfxImagePrepareRequest, output: *c.R4GfxPreparedImage) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    separateInput(handle, output) catch |err| return code(err);
+    return @import("device_image_prepare.zig").prepare(device,handle,request,output) catch |err| code(err);
+}
 pub fn submitCopy(handle: *const c.R4GfxDevice, request: *const c.R4GfxCopyRequest, output: *c.R4GfxJob) callconv(.c) i32 {
     const device = get(handle, false) catch |err| return code(err);
     separateInput(handle, output) catch |err| return code(err);

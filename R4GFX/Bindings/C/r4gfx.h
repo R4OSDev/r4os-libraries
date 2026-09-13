@@ -464,6 +464,52 @@ _Static_assert(offsetof(R4GfxRenderRequest, dependency_count) == 196u, "R4GfxRen
 _Static_assert(offsetof(R4GfxRenderRequest, deadline_ns) == 200u, "R4GfxRenderRequest.deadline_ns offset mismatch");
 _Static_assert(offsetof(R4GfxRenderRequest, dependencies) == 208u, "R4GfxRenderRequest.dependencies offset mismatch");
 
+typedef struct R4GfxImagePrepareRequest {
+    uint32_t version;
+    uint32_t size;
+    R4GfxResource source;
+    uint32_t uses;
+    uint32_t preference;
+    uint32_t flags;
+    uint32_t dependency_count;
+    uint64_t deadline_ns;
+    uint64_t byte_budget;
+    uint64_t dependencies;
+    uint64_t ready_dependencies;
+    uint32_t ready_capacity;
+    uint32_t reserved;
+} R4GfxImagePrepareRequest;
+_Static_assert(sizeof(R4GfxImagePrepareRequest) == 96u, "R4GfxImagePrepareRequest size mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, version) == 0u, "R4GfxImagePrepareRequest.version offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, size) == 4u, "R4GfxImagePrepareRequest.size offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, source) == 8u, "R4GfxImagePrepareRequest.source offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, uses) == 40u, "R4GfxImagePrepareRequest.uses offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, preference) == 44u, "R4GfxImagePrepareRequest.preference offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, flags) == 48u, "R4GfxImagePrepareRequest.flags offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, dependency_count) == 52u, "R4GfxImagePrepareRequest.dependency_count offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, deadline_ns) == 56u, "R4GfxImagePrepareRequest.deadline_ns offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, byte_budget) == 64u, "R4GfxImagePrepareRequest.byte_budget offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, dependencies) == 72u, "R4GfxImagePrepareRequest.dependencies offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, ready_dependencies) == 80u, "R4GfxImagePrepareRequest.ready_dependencies offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, ready_capacity) == 88u, "R4GfxImagePrepareRequest.ready_capacity offset mismatch");
+_Static_assert(offsetof(R4GfxImagePrepareRequest, reserved) == 92u, "R4GfxImagePrepareRequest.reserved offset mismatch");
+
+typedef struct R4GfxPreparedImage {
+    uint32_t version;
+    uint32_t size;
+    R4GfxResource image;
+    R4GfxJob job;
+    uint32_t flags;
+    uint32_t dependency_count;
+} R4GfxPreparedImage;
+_Static_assert(sizeof(R4GfxPreparedImage) == 80u, "R4GfxPreparedImage size mismatch");
+_Static_assert(offsetof(R4GfxPreparedImage, version) == 0u, "R4GfxPreparedImage.version offset mismatch");
+_Static_assert(offsetof(R4GfxPreparedImage, size) == 4u, "R4GfxPreparedImage.size offset mismatch");
+_Static_assert(offsetof(R4GfxPreparedImage, image) == 8u, "R4GfxPreparedImage.image offset mismatch");
+_Static_assert(offsetof(R4GfxPreparedImage, job) == 40u, "R4GfxPreparedImage.job offset mismatch");
+_Static_assert(offsetof(R4GfxPreparedImage, flags) == 72u, "R4GfxPreparedImage.flags offset mismatch");
+_Static_assert(offsetof(R4GfxPreparedImage, dependency_count) == 76u, "R4GfxPreparedImage.dependency_count offset mismatch");
+
 #define R4GFX_STATUS_OK ((int32_t)0)
 #define R4GFX_FORMAT_XRGB8888 ((uint32_t)875713112)
 #define R4GFX_FORMAT_ARGB8888 ((uint32_t)875713089)
@@ -507,6 +553,16 @@ _Static_assert(offsetof(R4GfxRenderRequest, dependencies) == 208u, "R4GfxRenderR
 #define R4GFX_RENDER_TRANSFER_IDENTITY ((uint32_t)0)
 #define R4GFX_RENDER_TRANSFER_SRGB_DECODE ((uint32_t)1)
 #define R4GFX_RENDER_TRANSFER_SRGB_ENCODE ((uint32_t)2)
+#define R4GFX_PREPARE_USE_TEXTURE ((uint32_t)1)
+#define R4GFX_PREPARE_USE_RENDER_TARGET ((uint32_t)2)
+#define R4GFX_PREPARE_USE_SCANOUT ((uint32_t)4)
+#define R4GFX_PREPARE_LAYOUT_COMPATIBLE ((uint32_t)0)
+#define R4GFX_PREPARE_LAYOUT_LINEAR ((uint32_t)1)
+#define R4GFX_PREPARE_LAYOUT_BLOCKLINEAR ((uint32_t)2)
+#define R4GFX_PREPARE_FORCE_COPY ((uint32_t)1)
+#define R4GFX_PREPARED_COPY_PENDING ((uint32_t)1)
+#define R4GFX_PREPARED_SOFTWARE ((uint32_t)2)
+#define R4GFX_PREPARED_REUSED ((uint32_t)4)
 #define R4GFX_STATUS_INVALID ((int32_t)-1)
 #define R4GFX_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4GFX_STATUS_OVERFLOW ((int32_t)-3)
@@ -604,10 +660,10 @@ static inline int32_t r4gfx_render_execute_cpu(R4GfxRenderV1Client *client, cons
 
 #define R4GFX_DEVICE_V1_EXPORT_NAME "DEVICE_V1"
 #define R4GFX_DEVICE_V1_ABI_MAJOR 1u
-#define R4GFX_DEVICE_V1_REVISION 4u
+#define R4GFX_DEVICE_V1_REVISION 5u
 #define R4GFX_DEVICE_V1_INTERFACE_ID_LO 0x5234474658444556ull
 #define R4GFX_DEVICE_V1_INTERFACE_ID_HI 0x52344f5330373931ull
-#define R4GFX_DEVICE_V1_TABLE_SIZE 168u
+#define R4GFX_DEVICE_V1_TABLE_SIZE 176u
 #define R4GFX_DEVICE_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4GFX_DEVICE_V1_TABLE_SIZE, R4GFX_DEVICE_V1_ABI_MAJOR, R4GFX_DEVICE_V1_REVISION, R4GFX_DEVICE_V1_INTERFACE_ID_LO, R4GFX_DEVICE_V1_INTERFACE_ID_HI }
 typedef uint64_t (*R4GfxDeviceV1StorageSizeFn)(void);
 typedef int32_t (*R4GfxDeviceV1DeviceOpenFn)(const R4GfxDeviceConfig * config, R4GfxDevice * output);
@@ -626,6 +682,7 @@ typedef int32_t (*R4GfxDeviceV1JobReleaseFn)(const R4GfxDevice * device, const R
 typedef int32_t (*R4GfxDeviceV1CopySubmitExFn)(const R4GfxDevice * device, const R4GfxCopyRequestEx * request, R4GfxJob * output);
 typedef int32_t (*R4GfxDeviceV1JobFenceFn)(const R4GfxDevice * device, const R4GfxJob * job, R4GfxCopyFence * output);
 typedef int32_t (*R4GfxDeviceV1RenderSubmitFn)(const R4GfxDevice * device, const R4GfxRenderRequest * request, R4GfxJob * output);
+typedef int32_t (*R4GfxDeviceV1ImagePrepareFn)(const R4GfxDevice * device, const R4GfxImagePrepareRequest * request, R4GfxPreparedImage * output);
 typedef struct R4GfxDeviceV1 {
     R4LInterfaceHeader header;
     R4GfxDeviceV1StorageSizeFn storage_size;
@@ -645,8 +702,9 @@ typedef struct R4GfxDeviceV1 {
     R4GfxDeviceV1CopySubmitExFn copy_submit_ex;
     R4GfxDeviceV1JobFenceFn job_fence;
     R4GfxDeviceV1RenderSubmitFn render_submit;
+    R4GfxDeviceV1ImagePrepareFn image_prepare;
 } R4GfxDeviceV1;
-_Static_assert(sizeof(R4GfxDeviceV1) == 168u, "R4GfxDeviceV1 size mismatch");
+_Static_assert(sizeof(R4GfxDeviceV1) == 176u, "R4GfxDeviceV1 size mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, storage_size) == 32u, "R4GfxDeviceV1.storage_size offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_open) == 40u, "R4GfxDeviceV1.device_open offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_close) == 48u, "R4GfxDeviceV1.device_close offset mismatch");
@@ -664,13 +722,14 @@ _Static_assert(offsetof(R4GfxDeviceV1, job_release) == 136u, "R4GfxDeviceV1.job_
 _Static_assert(offsetof(R4GfxDeviceV1, copy_submit_ex) == 144u, "R4GfxDeviceV1.copy_submit_ex offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, job_fence) == 152u, "R4GfxDeviceV1.job_fence offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, render_submit) == 160u, "R4GfxDeviceV1.render_submit offset mismatch");
+_Static_assert(offsetof(R4GfxDeviceV1, image_prepare) == 168u, "R4GfxDeviceV1.image_prepare offset mismatch");
 typedef struct R4GfxDeviceV1Client { const R4LInterfaceHeader *header; } R4GfxDeviceV1Client;
 
 static inline int32_t r4gfx_device_v1_init(const R4XStartContext *ctx, R4GfxDeviceV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "DEVICE_V1");
-    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 4u, 168u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 5u, 176u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
@@ -691,6 +750,7 @@ static inline int32_t r4gfx_device_v1_init(const R4XStartContext *ctx, R4GfxDevi
     if (r4l_slot_address(header, 144u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 152u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 160u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 168u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -777,6 +837,11 @@ static inline int32_t r4gfx_job_fence(R4GfxDeviceV1Client *client, const R4GfxDe
 
 static inline int32_t r4gfx_device_render_submit(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxRenderRequest * request, R4GfxJob * output) {
     R4GfxDeviceV1RenderSubmitFn function = (R4GfxDeviceV1RenderSubmitFn)r4l_slot_address(client->header, 160u);
+    return function(device, request, output);
+}
+
+static inline int32_t r4gfx_image_prepare(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxImagePrepareRequest * request, R4GfxPreparedImage * output) {
+    R4GfxDeviceV1ImagePrepareFn function = (R4GfxDeviceV1ImagePrepareFn)r4l_slot_address(client->header, 168u);
     return function(device, request, output);
 }
 
