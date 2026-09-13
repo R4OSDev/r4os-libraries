@@ -42,9 +42,9 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
 
 - ELF-Symbol: `r4gfx_device_v1`
 - ABI-Major: 1
-- Revision: 3
+- Revision: 4
 - Interface-ID: `0x52344f5330373931:0x5234474658444556`
-- Tabellengroesse: 160 Byte
+- Tabellengroesse: 168 Byte
 
 - Slot 0, Offset 32: `storage_size` - Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
@@ -78,6 +78,8 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
 - Slot 15, Offset 152: `job_fence` - Exports the exact canonical fence for dependencies without waiting. Job and backing remain owned by their original receipts; exporting neither completes nor releases work.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
+- Slot 16, Offset 160: `render_submit` - Submit immutable logical draw state to a ready native backend without pixel maps or synchronous GPU waits. Returns the common job/fence; unsupported leaves output unchanged for explicit software fallback.
+  Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Source and target resources retained until physical retirement and job_release; sampler/pipeline are copied immutable values..
 
 Typen
 -----
@@ -104,6 +106,8 @@ Typen
 - `R4GfxCopyFence`: 40 Byte, Alignment 8. Exact common GfxFence wire identity. Export adds no reference: keep the job until a dependency has been admitted. Canonical admission retains its own dependency; copying numbers alone never proves completion.
 - `R4GfxCopyRequestEx`: 136 Byte, Alignment 8. Version1 exact-size input. Zero rows is a linear copy and requires zero pitches; otherwise copy.byte_length is bytes per row. Up to eight borrowed R4GfxCopyFence dependencies, zero address for zero count. The complete descriptor and identities are captured before admission; no pointer survives the call.
 - `R4GfxNativeImage`: 32 Byte, Alignment 8. Copied native image allocation intent for source_create_native. source_address points to this payload; source_generation and ResourceDesc.image remain zero. The selected native adapter and memory generation bind allocation. Returned resource information exposes the actual pitch and byte length.
+- `R4GfxSignedRect`: 16 Byte, Alignment 4. Signed source, destination or clipping rectangle for asynchronous rendering.
+- `R4GfxRenderRequest`: 216 Byte, Alignment 8. Copied asynchronous native draw. Resolves logical resources to the common queue and returns the existing job/fence identity; never maps or scales image pixels. Requires device_gpu_render; unsupported adapters retain the existing software render API. Resources stay held until job_release after physical retirement.
 
 Besitzregeln
 ------------

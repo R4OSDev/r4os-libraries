@@ -81,7 +81,10 @@ fn query(device: *d.Device, item: *d.Job) d.Error!a.GfxFenceStatus {
     try d.platform(queues.query(&item.fence, &status));
     if (!std.meta.eql(item.fence, status.fence)) return error.Stale;
     if (!item.counted and status.phase == a.gfx_queue_phase_terminal and status.result == a.gfx_queue_result_complete and status.flags & a.gfx_queue_flag_device_active == 0) {
-        if (item.backend == c.render_backend_nvidia) device.counters.gpu_copy_bytes +|= item.bytes else {
+        if (item.render) {
+            // A draw is neither a copy nor CPU traffic. Future render counters
+            // must derive from its completed render receipt, not byte_length.
+        } else if (item.backend == c.render_backend_nvidia) device.counters.gpu_copy_bytes +|= item.bytes else {
             device.counters.cpu_read_bytes +|= item.bytes;
             device.counters.cpu_write_bytes +|= item.bytes;
         }
@@ -115,11 +118,13 @@ pub fn release(device: *d.Device, handle: *const c.R4GfxJob) d.Error!i32 {
     if (value.phase != a.gfx_queue_phase_terminal or value.flags & (a.gfx_queue_flag_device_active | a.gfx_queue_flag_resources_held) != 0) return error.Busy;
     const queues = device.queues();
     try d.platform(queues.release(&item.fence));
-    const source = try device.resource(item.source, false);
-    const target = try device.resource(item.target, false);
-    std.debug.assert(source.job_refs != 0 and target.job_refs != 0);
-    source.job_refs -= 1; target.job_refs -= 1;
-    _ = device.cleanResource(source); _ = device.cleanResource(target);
+    for ([_]c.R4GfxResource{item.source, item.target}) |resource| {
+        if (resource.slot == 0) continue;
+        const held = try device.resource(resource, false);
+        std.debug.assert(held.job_refs != 0);
+        held.job_refs -= 1;
+        _ = device.cleanResource(held);
+    }
     item.* = .{};
     _ = device.drainQueues();
     return c.status_ok;

@@ -232,6 +232,31 @@ pub const R4GfxNativeImage = extern struct {
     format: u32,
     layout: u32,
 };
+
+pub const R4GfxSignedRect = extern struct {
+    x: i32,
+    y: i32,
+    width: u32,
+    height: u32,
+};
+
+pub const R4GfxRenderRequest = extern struct {
+    version: u32,
+    size: u32,
+    target: R4GfxResource,
+    source: R4GfxResource,
+    sampler: R4GfxResource,
+    pipeline: R4GfxResource,
+    source_rect: R4GfxSignedRect,
+    target_rect: R4GfxSignedRect,
+    scissor: R4GfxSignedRect,
+    color: u32,
+    opacity: u32,
+    transfer: u32,
+    dependency_count: u32,
+    deadline_ns: u64,
+    dependencies: u64,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -271,6 +296,10 @@ pub const device_gpu_copy_rows: u32 = 2;
 pub const device_gpu_copy_layout: u32 = 4;
 pub const copy_max_dependencies: u32 = 8;
 pub const source_create_native: u32 = 4;
+pub const device_gpu_render: u32 = 8;
+pub const render_transfer_identity: u32 = 0;
+pub const render_transfer_srgb_decode: u32 = 1;
+pub const render_transfer_srgb_encode: u32 = 2;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -321,14 +350,14 @@ pub const RenderV1 = extern struct {
 };
 
 pub const device_v1_export_name = "DEVICE_V1";
-pub const device_v1_revision: u16 = 3;
+pub const device_v1_revision: u16 = 4;
 pub const device_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 160,
+    .size = 168,
     .abi_major = 1,
-    .abi_minor = 3,
+    .abi_minor = 4,
     .interface_id_lo = 0x5234474658444556,
     .interface_id_hi = 0x52344f5330373931,
 };
@@ -348,6 +377,7 @@ pub const DeviceV1JobCancelFn = *const fn (device: *const R4GfxDevice, job: *con
 pub const DeviceV1JobReleaseFn = *const fn (device: *const R4GfxDevice, job: *const R4GfxJob) callconv(.c) i32;
 pub const DeviceV1CopySubmitExFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxCopyRequestEx, output: *R4GfxJob) callconv(.c) i32;
 pub const DeviceV1JobFenceFn = *const fn (device: *const R4GfxDevice, job: *const R4GfxJob, output: *R4GfxCopyFence) callconv(.c) i32;
+pub const DeviceV1RenderSubmitFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderRequest, output: *R4GfxJob) callconv(.c) i32;
 pub const DeviceV1 = extern struct {
     header: InterfaceHeader,
     storage_size: DeviceV1StorageSizeFn,
@@ -366,4 +396,5 @@ pub const DeviceV1 = extern struct {
     job_release: DeviceV1JobReleaseFn,
     copy_submit_ex: DeviceV1CopySubmitExFn,
     job_fence: DeviceV1JobFenceFn,
+    render_submit: DeviceV1RenderSubmitFn,
 };

@@ -76,6 +76,7 @@ pub const Job = struct {
     backend: u32 = 0,
     bytes: u64 = 0,
     counted: bool = false,
+    render: bool = false,
 };
 pub const Device = struct {
     // These two fields persist through close so reopening cannot revive handles.
@@ -223,11 +224,18 @@ pub const Device = struct {
                     gpu_operations |= c.device_gpu_copy_rows;
                     if (features.features & nv.feature_copy_layout != 0) gpu_operations |= c.device_gpu_copy_layout;
                 }
+                if (snapshot.operations & 16 != 0) gpu_operations |= c.device_gpu_render;
                 break;
             }
         }
         self.gpu_operations = gpu_operations;
         if (std.meta.eql(self.selected, candidate)) return;
+        if (std.meta.eql(self.selected.binding, candidate.binding) and self.selected.memory_generation == candidate.memory_generation) {
+            // An engine becoming ready changes capabilities, not queue or
+            // allocation identity. Existing dependent jobs keep their timeline.
+            self.selected = candidate;
+            return;
+        }
         const previous = self.selected.binding;
         _ = self.drainQueues();
         try self.closeQueue();
@@ -341,6 +349,11 @@ pub fn render(handle: *const c.R4GfxDevice, batch: *const c.R4GfxRenderBatch, ou
     const device = get(handle, false) catch |err| return code(err);
     separateInput(handle, output) catch |err| return code(err);
     return @import("device_render.zig").execute(device, batch, output) catch |err| code(err);
+}
+pub fn submitRender(handle: *const c.R4GfxDevice, request: *const c.R4GfxRenderRequest, output: *c.R4GfxJob) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    separateInput(handle, output) catch |err| return code(err);
+    return @import("device_native_render.zig").submit(device, request, output) catch |err| code(err);
 }
 pub fn submitCopy(handle: *const c.R4GfxDevice, request: *const c.R4GfxCopyRequest, output: *c.R4GfxJob) callconv(.c) i32 {
     const device = get(handle, false) catch |err| return code(err);

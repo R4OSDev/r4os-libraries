@@ -81,6 +81,7 @@ pub export var r4gfx_device_v1: c.DeviceV1 align(8) linksection(".data.r4l_expor
     .job_release = device.releaseJob,
     .copy_submit_ex = device.submitCopyEx,
     .job_fence = device.jobFence,
+    .render_submit = device.submitRender,
 };
 pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
     .magic = r4os.abi.r4l_abi_magic,

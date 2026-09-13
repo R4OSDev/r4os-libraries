@@ -418,6 +418,52 @@ _Static_assert(offsetof(R4GfxNativeImage, height) == 20u, "R4GfxNativeImage.heig
 _Static_assert(offsetof(R4GfxNativeImage, format) == 24u, "R4GfxNativeImage.format offset mismatch");
 _Static_assert(offsetof(R4GfxNativeImage, layout) == 28u, "R4GfxNativeImage.layout offset mismatch");
 
+typedef struct R4GfxSignedRect {
+    int32_t x;
+    int32_t y;
+    uint32_t width;
+    uint32_t height;
+} R4GfxSignedRect;
+_Static_assert(sizeof(R4GfxSignedRect) == 16u, "R4GfxSignedRect size mismatch");
+_Static_assert(offsetof(R4GfxSignedRect, x) == 0u, "R4GfxSignedRect.x offset mismatch");
+_Static_assert(offsetof(R4GfxSignedRect, y) == 4u, "R4GfxSignedRect.y offset mismatch");
+_Static_assert(offsetof(R4GfxSignedRect, width) == 8u, "R4GfxSignedRect.width offset mismatch");
+_Static_assert(offsetof(R4GfxSignedRect, height) == 12u, "R4GfxSignedRect.height offset mismatch");
+
+typedef struct R4GfxRenderRequest {
+    uint32_t version;
+    uint32_t size;
+    R4GfxResource target;
+    R4GfxResource source;
+    R4GfxResource sampler;
+    R4GfxResource pipeline;
+    R4GfxSignedRect source_rect;
+    R4GfxSignedRect target_rect;
+    R4GfxSignedRect scissor;
+    uint32_t color;
+    uint32_t opacity;
+    uint32_t transfer;
+    uint32_t dependency_count;
+    uint64_t deadline_ns;
+    uint64_t dependencies;
+} R4GfxRenderRequest;
+_Static_assert(sizeof(R4GfxRenderRequest) == 216u, "R4GfxRenderRequest size mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, version) == 0u, "R4GfxRenderRequest.version offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, size) == 4u, "R4GfxRenderRequest.size offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, target) == 8u, "R4GfxRenderRequest.target offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, source) == 40u, "R4GfxRenderRequest.source offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, sampler) == 72u, "R4GfxRenderRequest.sampler offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, pipeline) == 104u, "R4GfxRenderRequest.pipeline offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, source_rect) == 136u, "R4GfxRenderRequest.source_rect offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, target_rect) == 152u, "R4GfxRenderRequest.target_rect offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, scissor) == 168u, "R4GfxRenderRequest.scissor offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, color) == 184u, "R4GfxRenderRequest.color offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, opacity) == 188u, "R4GfxRenderRequest.opacity offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, transfer) == 192u, "R4GfxRenderRequest.transfer offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, dependency_count) == 196u, "R4GfxRenderRequest.dependency_count offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, deadline_ns) == 200u, "R4GfxRenderRequest.deadline_ns offset mismatch");
+_Static_assert(offsetof(R4GfxRenderRequest, dependencies) == 208u, "R4GfxRenderRequest.dependencies offset mismatch");
+
 #define R4GFX_STATUS_OK ((int32_t)0)
 #define R4GFX_FORMAT_XRGB8888 ((uint32_t)875713112)
 #define R4GFX_FORMAT_ARGB8888 ((uint32_t)875713089)
@@ -457,6 +503,10 @@ _Static_assert(offsetof(R4GfxNativeImage, layout) == 28u, "R4GfxNativeImage.layo
 #define R4GFX_DEVICE_GPU_COPY_LAYOUT ((uint32_t)4)
 #define R4GFX_COPY_MAX_DEPENDENCIES ((uint32_t)8)
 #define R4GFX_SOURCE_CREATE_NATIVE ((uint32_t)4)
+#define R4GFX_DEVICE_GPU_RENDER ((uint32_t)8)
+#define R4GFX_RENDER_TRANSFER_IDENTITY ((uint32_t)0)
+#define R4GFX_RENDER_TRANSFER_SRGB_DECODE ((uint32_t)1)
+#define R4GFX_RENDER_TRANSFER_SRGB_ENCODE ((uint32_t)2)
 #define R4GFX_STATUS_INVALID ((int32_t)-1)
 #define R4GFX_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4GFX_STATUS_OVERFLOW ((int32_t)-3)
@@ -554,10 +604,10 @@ static inline int32_t r4gfx_render_execute_cpu(R4GfxRenderV1Client *client, cons
 
 #define R4GFX_DEVICE_V1_EXPORT_NAME "DEVICE_V1"
 #define R4GFX_DEVICE_V1_ABI_MAJOR 1u
-#define R4GFX_DEVICE_V1_REVISION 3u
+#define R4GFX_DEVICE_V1_REVISION 4u
 #define R4GFX_DEVICE_V1_INTERFACE_ID_LO 0x5234474658444556ull
 #define R4GFX_DEVICE_V1_INTERFACE_ID_HI 0x52344f5330373931ull
-#define R4GFX_DEVICE_V1_TABLE_SIZE 160u
+#define R4GFX_DEVICE_V1_TABLE_SIZE 168u
 #define R4GFX_DEVICE_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4GFX_DEVICE_V1_TABLE_SIZE, R4GFX_DEVICE_V1_ABI_MAJOR, R4GFX_DEVICE_V1_REVISION, R4GFX_DEVICE_V1_INTERFACE_ID_LO, R4GFX_DEVICE_V1_INTERFACE_ID_HI }
 typedef uint64_t (*R4GfxDeviceV1StorageSizeFn)(void);
 typedef int32_t (*R4GfxDeviceV1DeviceOpenFn)(const R4GfxDeviceConfig * config, R4GfxDevice * output);
@@ -575,6 +625,7 @@ typedef int32_t (*R4GfxDeviceV1JobCancelFn)(const R4GfxDevice * device, const R4
 typedef int32_t (*R4GfxDeviceV1JobReleaseFn)(const R4GfxDevice * device, const R4GfxJob * job);
 typedef int32_t (*R4GfxDeviceV1CopySubmitExFn)(const R4GfxDevice * device, const R4GfxCopyRequestEx * request, R4GfxJob * output);
 typedef int32_t (*R4GfxDeviceV1JobFenceFn)(const R4GfxDevice * device, const R4GfxJob * job, R4GfxCopyFence * output);
+typedef int32_t (*R4GfxDeviceV1RenderSubmitFn)(const R4GfxDevice * device, const R4GfxRenderRequest * request, R4GfxJob * output);
 typedef struct R4GfxDeviceV1 {
     R4LInterfaceHeader header;
     R4GfxDeviceV1StorageSizeFn storage_size;
@@ -593,8 +644,9 @@ typedef struct R4GfxDeviceV1 {
     R4GfxDeviceV1JobReleaseFn job_release;
     R4GfxDeviceV1CopySubmitExFn copy_submit_ex;
     R4GfxDeviceV1JobFenceFn job_fence;
+    R4GfxDeviceV1RenderSubmitFn render_submit;
 } R4GfxDeviceV1;
-_Static_assert(sizeof(R4GfxDeviceV1) == 160u, "R4GfxDeviceV1 size mismatch");
+_Static_assert(sizeof(R4GfxDeviceV1) == 168u, "R4GfxDeviceV1 size mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, storage_size) == 32u, "R4GfxDeviceV1.storage_size offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_open) == 40u, "R4GfxDeviceV1.device_open offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_close) == 48u, "R4GfxDeviceV1.device_close offset mismatch");
@@ -611,13 +663,14 @@ _Static_assert(offsetof(R4GfxDeviceV1, job_cancel) == 128u, "R4GfxDeviceV1.job_c
 _Static_assert(offsetof(R4GfxDeviceV1, job_release) == 136u, "R4GfxDeviceV1.job_release offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, copy_submit_ex) == 144u, "R4GfxDeviceV1.copy_submit_ex offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, job_fence) == 152u, "R4GfxDeviceV1.job_fence offset mismatch");
+_Static_assert(offsetof(R4GfxDeviceV1, render_submit) == 160u, "R4GfxDeviceV1.render_submit offset mismatch");
 typedef struct R4GfxDeviceV1Client { const R4LInterfaceHeader *header; } R4GfxDeviceV1Client;
 
 static inline int32_t r4gfx_device_v1_init(const R4XStartContext *ctx, R4GfxDeviceV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "DEVICE_V1");
-    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 3u, 160u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 4u, 168u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
@@ -637,6 +690,7 @@ static inline int32_t r4gfx_device_v1_init(const R4XStartContext *ctx, R4GfxDevi
     if (r4l_slot_address(header, 136u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 144u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 152u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 160u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -719,6 +773,11 @@ static inline int32_t r4gfx_copy_submit_ex(R4GfxDeviceV1Client *client, const R4
 static inline int32_t r4gfx_job_fence(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxJob * job, R4GfxCopyFence * output) {
     R4GfxDeviceV1JobFenceFn function = (R4GfxDeviceV1JobFenceFn)r4l_slot_address(client->header, 152u);
     return function(device, job, output);
+}
+
+static inline int32_t r4gfx_device_render_submit(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxRenderRequest * request, R4GfxJob * output) {
+    R4GfxDeviceV1RenderSubmitFn function = (R4GfxDeviceV1RenderSubmitFn)r4l_slot_address(client->header, 160u);
+    return function(device, request, output);
 }
 
 #endif

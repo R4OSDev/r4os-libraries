@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 3,
+      "revision": 4,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -1117,6 +1117,68 @@
             "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
           },
           "description": "Exports the exact canonical fence for dependencies without waiting. Job and backing remain owned by their original receipts; exporting neither completes nor releases work."
+        },
+        {
+          "name": "render_submit",
+          "c_name": "r4gfx_device_render_submit",
+          "symbol": "r4gfx_device_render_submit_impl",
+          "slot": 16,
+          "since_revision": 4,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxRenderRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Source and target resources retained until physical retirement and job_release; sampler/pipeline are copied immutable values."
+          },
+          "description": "Submit immutable logical draw state to a ready native backend without pixel maps or synchronous GPU waits. Returns the common job/fence; unsupported leaves output unchanged for explicit software fallback."
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
@@ -3080,6 +3142,231 @@
         }
       ],
       "description": "Copied native image allocation intent for source_create_native. source_address points to this payload; source_generation and ResourceDesc.image remain zero. The selected native adapter and memory generation bind allocation. Returned resource information exposes the actual pitch and byte length."
+    },
+    {
+      "name": "R4GfxSignedRect",
+      "size": 16,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "x",
+          "offset": 0,
+          "type": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Signed pixel origin."
+        },
+        {
+          "name": "y",
+          "offset": 4,
+          "type": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Signed pixel origin."
+        },
+        {
+          "name": "width",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Pixel extent."
+        },
+        {
+          "name": "height",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Pixel extent."
+        }
+      ],
+      "description": "Signed source, destination or clipping rectangle for asynchronous rendering."
+    },
+    {
+      "name": "R4GfxRenderRequest",
+      "size": 216,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Version1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly216 bytes."
+        },
+        {
+          "name": "target",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Target image resource."
+        },
+        {
+          "name": "source",
+          "offset": 40,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Source image, zero for fill."
+        },
+        {
+          "name": "sampler",
+          "offset": 72,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Sampler resource, zero for fill."
+        },
+        {
+          "name": "pipeline",
+          "offset": 104,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Existing fill/blit/over pipeline."
+        },
+        {
+          "name": "source_rect",
+          "offset": 136,
+          "type": {
+            "name": "R4GfxSignedRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Sampled source rectangle, zero for fill."
+        },
+        {
+          "name": "target_rect",
+          "offset": 152,
+          "type": {
+            "name": "R4GfxSignedRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Destination rectangle before clipping."
+        },
+        {
+          "name": "scissor",
+          "offset": 168,
+          "type": {
+            "name": "R4GfxSignedRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Destination scissor."
+        },
+        {
+          "name": "color",
+          "offset": 184,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Premultiplied fill BGRA/R8; zero for sampling."
+        },
+        {
+          "name": "opacity",
+          "offset": 188,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Opacity0..255."
+        },
+        {
+          "name": "transfer",
+          "offset": 192,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Identity0, sRGB decode1 or encode2; fill requires identity."
+        },
+        {
+          "name": "dependency_count",
+          "offset": 196,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "At most copy_max_dependencies prior exact fences."
+        },
+        {
+          "name": "deadline_ns",
+          "offset": 200,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Finite absolute monotonic deadline."
+        },
+        {
+          "name": "dependencies",
+          "offset": 208,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Call-borrowed R4GfxCopyFence array; zero when count is zero."
+        }
+      ],
+      "description": "Copied asynchronous native draw. Resolves logical resources to the common queue and returns the existing job/fence identity; never maps or scales image pixels. Requires device_gpu_render; unsupported adapters retain the existing software render API. Resources stay held until job_release after physical retirement."
     }
   ],
   "constants": [
@@ -3355,6 +3642,34 @@
       "type": "u32",
       "value": 4,
       "description": "Explicit native image creation using source_address -> R4GfxNativeImage. Requires a selected native backend; system/borrowed resources remain unchanged."
+    },
+    {
+      "zig_name": "device_gpu_render",
+      "c_name": "R4GFX_DEVICE_GPU_RENDER",
+      "type": "u32",
+      "value": 8,
+      "description": "Native asynchronous rendering is ready."
+    },
+    {
+      "zig_name": "render_transfer_identity",
+      "c_name": "R4GFX_RENDER_TRANSFER_IDENTITY",
+      "type": "u32",
+      "value": 0,
+      "description": "No transfer conversion."
+    },
+    {
+      "zig_name": "render_transfer_srgb_decode",
+      "c_name": "R4GFX_RENDER_TRANSFER_SRGB_DECODE",
+      "type": "u32",
+      "value": 1,
+      "description": "Decode sRGB while preserving premultiplication."
+    },
+    {
+      "zig_name": "render_transfer_srgb_encode",
+      "c_name": "R4GFX_RENDER_TRANSFER_SRGB_ENCODE",
+      "type": "u32",
+      "value": 2,
+      "description": "Encode sRGB while preserving premultiplication."
     }
   ],
   "errors": [
