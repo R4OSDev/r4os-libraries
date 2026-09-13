@@ -42,7 +42,7 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
 
 - ELF-Symbol: `r4gfx_device_v1`
 - ABI-Major: 1
-- Revision: 2
+- Revision: 3
 - Interface-ID: `0x52344f5330373931:0x5234474658444556`
 - Tabellengroesse: 160 Byte
 
@@ -56,7 +56,7 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
 - Slot 4, Offset 64: `device_refresh` - Revalidates the live backend binding, discards stale GPU state and preserves source resources.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
-- Slot 5, Offset 72: `resource_create` - Creates an image/sampler/pipeline resource. Repeated immutable source generations retain the existing import.
+- Slot 5, Offset 72: `resource_create` - Creates an image/sampler/pipeline resource. Repeated immutable source generations retain the existing import. Native creation may wait on the existing kernel allocation request outside frame execution. Failure leaves caller output unchanged; pending close failures remain tracked until device cleanup.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
 - Slot 6, Offset 80: `resource_retain` - Adds one logical resource reference without copying pixels or reimporting a BO.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
@@ -93,7 +93,7 @@ Typen
 - `R4GfxDeviceConfig`: 40 Byte, Alignment 8. Version 1; storage_size bytes aligned to 8, borrowed R4XStartContext for this caller. Preferred adapter zero selects automatically. software_only prevents native selection. Storage and outputs must not overlap input/start metadata.
 - `R4GfxDeviceInfo`: 120 Byte, Alignment 8. Software render capabilities and separately negotiated native copy capabilities. Counters are actual work; direct imports do not count as uploads. Refresh changes GPU identity only, preserving portable sources.
 - `R4GfxResource`: 32 Byte, Alignment 8. Opaque, nonwrapping resource identity local to one device storage generation. Retain/release are explicit; jobs hold independent internal references.
-- `R4GfxResourceDesc`: 88 Byte, Alignment 8. Image, immutable sampler or 2D pipeline. Image source is a new system BO, pointer to canonical GfxBufferHandle, pointer to GuiSharedRasterLease, or explicitly borrowed CPU image. Image target flag permits writes; immutable rasters cannot be targets. Import forms derive image geometry from the canonical BO. Borrowed CPU bytes remain valid while any reference/job exists. Unused fields are zero.
+- `R4GfxResourceDesc`: 88 Byte, Alignment 8. Image, immutable sampler or 2D pipeline. Image source is a new system BO, pointer to canonical GfxBufferHandle, pointer to GuiSharedRasterLease, or explicitly borrowed CPU image. Image target flag permits writes; immutable rasters cannot be targets. Import forms derive image geometry from the canonical BO. Borrowed CPU bytes remain valid while any reference/job exists. Unused fields are zero. Native source4 instead points to R4GfxNativeImage with explicit deadline and requested layout; unused CPU image/source-generation fields stay zero.
 - `R4GfxResourceInfo`: 112 Byte, Alignment 8. Source provenance and current logical reference count. Image addresses are exposed only for explicitly borrowed CPU sources; BO CPU mapping remains internal and transient.
 - `R4GfxDraw`: 168 Byte, Alignment 8. Ordered 2D operation through immutable pipeline and sampler resources. Fill uses zero source/sampler/source_rect/opacity. Blit uses opacity 255; over uses premultiplied alpha.
 - `R4GfxRenderBatch`: 24 Byte, Alignment 8. Borrowed array of R4GfxDraw. Reuses RENDER_V1 limits and all-before-write validation. No service IPC per draw; unavailable native operations use the shared CPU renderer.
@@ -103,6 +103,7 @@ Typen
 - `R4GfxJobInfo`: 56 Byte, Alignment 8. Canonical queue phase/result/flags, including device_active/resources_held, and original fence identity. Backend reports where the job ran; a software completion is not a GPU completion.
 - `R4GfxCopyFence`: 40 Byte, Alignment 8. Exact common GfxFence wire identity. Export adds no reference: keep the job until a dependency has been admitted. Canonical admission retains its own dependency; copying numbers alone never proves completion.
 - `R4GfxCopyRequestEx`: 136 Byte, Alignment 8. Version1 exact-size input. Zero rows is a linear copy and requires zero pitches; otherwise copy.byte_length is bytes per row. Up to eight borrowed R4GfxCopyFence dependencies, zero address for zero count. The complete descriptor and identities are captured before admission; no pointer survives the call.
+- `R4GfxNativeImage`: 32 Byte, Alignment 8. Copied native image allocation intent for source_create_native. source_address points to this payload; source_generation and ResourceDesc.image remain zero. The selected native adapter and memory generation bind allocation. Returned resource information exposes the actual pitch and byte length.
 
 Besitzregeln
 ------------

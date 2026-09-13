@@ -29,6 +29,7 @@ pub fn platform(rc: i32) Error!void {
         a.gfx_buffer_error_overflow => error.Overflow,
         a.gfx_buffer_error_oom, a.gfx_buffer_error_capacity, a.gfx_buffer_error_budget => error.Limit,
         a.err_no_fn, a.err_no_group, a.gfx_buffer_error_unavailable => error.Unavailable,
+        a.gfx_queue_error_wait_timeout, a.gfx_queue_error_wait_cancelled => error.Unavailable,
         else => error.Invalid,
     };
 }
@@ -50,6 +51,7 @@ fn separateInput(input: anytype, output: anytype) Error!void {
         @intFromPtr(output), @sizeOf(@typeInfo(@TypeOf(output)).pointer.child))) return error.Alias;
 }
 pub const Resource = struct {
+    allocation_request: a.GfxBufferHandle = .{},
     serial: u64 = 0,
     kind: u32 = 0,
     flags: u32 = 0,
@@ -127,6 +129,10 @@ pub const Device = struct {
             item.map = .{};
         }
         if (item.public_refs != 0 or item.job_refs != 0) return true;
+        if (item.allocation_request.id != 0) {
+            if (memory.nativeClose(&item.allocation_request) != a.gfx_buffer_result_ok) return false;
+            item.allocation_request = .{};
+        }
         if (item.backing.reference.id != 0 and memory.release(&item.backing.reference) != a.gfx_buffer_result_ok) return false;
         item.* = .{};
         return true;

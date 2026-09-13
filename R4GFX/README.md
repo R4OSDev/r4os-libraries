@@ -14,13 +14,13 @@ and C/Zig conformance cases. No guest or benchmark runs automatically.
 
 ## Runtime interfaces
 
-`module.R4MF` is authoritative. Module 0.1.3 exports three independent tables:
+`module.R4MF` is authoritative. Module 0.1.4 exports three independent tables:
 
 | Import | Behavior |
 | --- | --- |
 | `R4GFX:API_V1:1` | Checked linear layouts and rectangle fill; original table and payloads unchanged. |
 | `R4GFX:RENDER_V1:1` | Capability query and ordered, bounded CPU 2D batches. |
-| `R4GFX:DEVICE_V1:2` | Caller-owned devices, images/targets, samplers, pipelines, raster imports and canonical copy receipts. |
+| `R4GFX:DEVICE_V1:3` | Caller-owned devices, images/targets, samplers, pipelines, raster imports and canonical copy receipts. |
 
 Bindings and API documentation are generated from `Contract/LibraryContract.json`.
 Use `ApiV1Client.init` or `RenderV1Client.init` with the app start context. The
@@ -43,6 +43,15 @@ storage with an explicit source generation. Images also act as render targets wh
 `image_target` is set and writable access is allowed. Samplers and operation
 pipelines are immutable resources. Retain/release is explicit; a job independently
 holds its source and target until its exact receipt is physically retired.
+
+For explicit native offscreen allocation, set `source_create_native` and point
+`source_address` to `R4GfxNativeImage` (version1, size32, finite absolute
+`deadline_ns`, width/height/format and layout0 linear or1 native tiled).
+Leave `image` and `source_generation` zero. A selected native backend is required.
+Creation waits on the common request outside frame execution; the returned BO
+supplies actual pitch/extent. Closing the app or timing out does not free active
+driver work. The driver uses a separate finite RM budget; native backing is not
+CPU mapped. Public scanout creation and GPU rendering remain separate work.
 
 Overlapping leases for the same immutable shared-raster generation reuse one BO
 import. No upload or raster conversion occurs. Imported BO descriptors supply their

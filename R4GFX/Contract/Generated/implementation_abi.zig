@@ -222,6 +222,16 @@ pub const R4GfxCopyRequestEx = extern struct {
     target_pitch: u64,
     dependencies: u64,
 };
+
+pub const R4GfxNativeImage = extern struct {
+    version: u32,
+    size: u32,
+    deadline_ns: u64,
+    width: u32,
+    height: u32,
+    format: u32,
+    layout: u32,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -260,6 +270,7 @@ pub const resource_invalidated: u32 = 2147483648;
 pub const device_gpu_copy_rows: u32 = 2;
 pub const device_gpu_copy_layout: u32 = 4;
 pub const copy_max_dependencies: u32 = 8;
+pub const source_create_native: u32 = 4;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -310,14 +321,14 @@ pub const RenderV1 = extern struct {
 };
 
 pub const device_v1_export_name = "DEVICE_V1";
-pub const device_v1_revision: u16 = 2;
+pub const device_v1_revision: u16 = 3;
 pub const device_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
     .size = 160,
     .abi_major = 1,
-    .abi_minor = 2,
+    .abi_minor = 3,
     .interface_id_lo = 0x5234474658444556,
     .interface_id_hi = 0x52344f5330373931,
 };

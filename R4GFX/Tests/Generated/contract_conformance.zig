@@ -180,6 +180,14 @@ comptime {
     if (@offsetOf(implementation.R4GfxCopyRequestEx, "source_pitch") != 112 or @offsetOf(binding.R4GfxCopyRequestEx, "source_pitch") != 112) @compileError("R4GfxCopyRequestEx.source_pitch offset drift");
     if (@offsetOf(implementation.R4GfxCopyRequestEx, "target_pitch") != 120 or @offsetOf(binding.R4GfxCopyRequestEx, "target_pitch") != 120) @compileError("R4GfxCopyRequestEx.target_pitch offset drift");
     if (@offsetOf(implementation.R4GfxCopyRequestEx, "dependencies") != 128 or @offsetOf(binding.R4GfxCopyRequestEx, "dependencies") != 128) @compileError("R4GfxCopyRequestEx.dependencies offset drift");
+    if (@sizeOf(implementation.R4GfxNativeImage) != 32 or @sizeOf(binding.R4GfxNativeImage) != 32) @compileError("R4GfxNativeImage size drift");
+    if (@offsetOf(implementation.R4GfxNativeImage, "version") != 0 or @offsetOf(binding.R4GfxNativeImage, "version") != 0) @compileError("R4GfxNativeImage.version offset drift");
+    if (@offsetOf(implementation.R4GfxNativeImage, "size") != 4 or @offsetOf(binding.R4GfxNativeImage, "size") != 4) @compileError("R4GfxNativeImage.size offset drift");
+    if (@offsetOf(implementation.R4GfxNativeImage, "deadline_ns") != 8 or @offsetOf(binding.R4GfxNativeImage, "deadline_ns") != 8) @compileError("R4GfxNativeImage.deadline_ns offset drift");
+    if (@offsetOf(implementation.R4GfxNativeImage, "width") != 16 or @offsetOf(binding.R4GfxNativeImage, "width") != 16) @compileError("R4GfxNativeImage.width offset drift");
+    if (@offsetOf(implementation.R4GfxNativeImage, "height") != 20 or @offsetOf(binding.R4GfxNativeImage, "height") != 20) @compileError("R4GfxNativeImage.height offset drift");
+    if (@offsetOf(implementation.R4GfxNativeImage, "format") != 24 or @offsetOf(binding.R4GfxNativeImage, "format") != 24) @compileError("R4GfxNativeImage.format offset drift");
+    if (@offsetOf(implementation.R4GfxNativeImage, "layout") != 28 or @offsetOf(binding.R4GfxNativeImage, "layout") != 28) @compileError("R4GfxNativeImage.layout offset drift");
     if (@sizeOf(implementation.ApiV1) != 48 or @sizeOf(binding.ApiV1) != 48) @compileError("ApiV1 size drift");
     if (@offsetOf(implementation.ApiV1, "linear_layout") != 32 or @offsetOf(binding.ApiV1, "linear_layout") != 32) @compileError("ApiV1.linear_layout slot drift");
     if (@offsetOf(implementation.ApiV1, "fill_rect") != 40 or @offsetOf(binding.ApiV1, "fill_rect") != 40) @compileError("ApiV1.fill_rect slot drift");

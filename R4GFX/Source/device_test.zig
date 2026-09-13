@@ -27,6 +27,9 @@ const Model = struct {
     var job_request: a.GfxSubmission = .{};
     var operations: u64 = 7;
     var dependency_seen = false;
+    var native_request: a.GfxNativeAllocation = .{};
+    var native_handle: a.GfxBufferHandle = .{};
+    var native_result: i32 = 1;
     var binding: a.GfxBackendBinding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
     var nv_table: nv.BackendV1 = .{ .header = nv.backend_v1_header,
         .negotiate = @ptrCast(&nv_provider.r4nv_negotiate_impl), .encode_copy = @ptrCast(&nv_provider.r4nv_encode_copy_impl),
@@ -38,6 +41,7 @@ const Model = struct {
         binding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
         nv_table.header = nv.backend_v1_header;
         operations = 7; dependency_seen = false;
+        native_request = .{}; native_handle = .{}; native_result = 1;
     }
     fn ref(handle: a.GfxBufferHandle) *Ref {
         std.debug.assert(handle.id != 0 and handle.id <= references.len and handle.reserved0 == 0);
@@ -66,6 +70,28 @@ const Model = struct {
     }
     fn describe(input: *const a.GfxBufferHandle, out: *a.GfxBufferDescriptor) callconv(.c) i32 {
         out.* = objects[ref(input.*).object.?].descriptor; return 1;
+    }
+    fn nativeStart(input: *const a.GfxNativeAllocation, out: *a.GfxNativeStatus) callconv(.c) i32 {
+        std.debug.assert(native_handle.id == 0 and input.adapter_id == binding.adapter_id and input.memory_generation == 73 and input.kind == 1);
+        serial += 1;
+        native_request = input.*; native_handle = .{ .id = 1, .generation = serial };
+        out.* = .{ .request = native_handle, .deadline_ns = input.deadline_ns };
+        return 1;
+    }
+    fn nativeWait(input: *const a.GfxBufferHandle, ticks: u64, out: *a.GfxNativeStatus) callconv(.c) i32 {
+        std.debug.assert(std.meta.eql(input.*, native_handle) and ticks == std.math.maxInt(u64));
+        out.* = .{ .request = native_handle, .phase = 2, .result = native_result }; return 1;
+    }
+    fn nativeReceive(input: *const a.GfxBufferHandle, out: *a.GfxBufferReference) callconv(.c) i32 {
+        std.debug.assert(std.meta.eql(input.*, native_handle) and native_result == 1);
+        const rc = create(&.{ .byte_length = 64, .width = native_request.width, .height = native_request.height, .format = native_request.format,
+            .plane_count = 1, .plane_pitches = .{16, 0, 0, 0}, .usage = native_request.usage, .location = 1,
+            .adapter_id = binding.adapter_id, .device_generation = 73, .driver_owner = 79 }, out);
+        if (rc == 1) native_handle = .{};
+        return rc;
+    }
+    fn nativeClose(input: *const a.GfxBufferHandle) callconv(.c) i32 {
+        std.debug.assert(std.meta.eql(input.*, native_handle)); native_handle = .{}; return 1;
     }
     fn import(input: *const a.GfxBufferHandle, out: *a.GfxBufferReference) callconv(.c) i32 { return lend(ref(input.*).object.?, out, false); }
     fn release(input: *const a.GfxBufferHandle) callconv(.c) i32 {
@@ -168,6 +194,8 @@ pub fn check() !void {
     const other_storage = try t.allocator.create(d.Device); defer t.allocator.destroy(other_storage); other_storage.* = .{};
     const sys: a.R4XStartR4Sys = .{};
     var draw: a.R4XStartR4Draw = .{ .gfx_buffer_create = @intFromPtr(&Model.create), .gfx_buffer_describe = @intFromPtr(&Model.describe),
+        .gfx_native_start = @intFromPtr(&Model.nativeStart), .gfx_native_wait = @intFromPtr(&Model.nativeWait),
+        .gfx_native_receive = @intFromPtr(&Model.nativeReceive), .gfx_native_close = @intFromPtr(&Model.nativeClose),
         .gfx_buffer_import = @intFromPtr(&Model.import), .gfx_buffer_release = @intFromPtr(&Model.release), .gfx_buffer_map = @intFromPtr(&Model.map),
         .gfx_buffer_unmap = @intFromPtr(&Model.unmap), .gfx_buffer_export_raster = @intFromPtr(&Model.exportRaster), .gfx_queue_backend_info = @intFromPtr(&Model.backendInfo),
         .gfx_queue_open = @intFromPtr(&Model.open), .gfx_queue_close = @intFromPtr(&Model.close), .gfx_queue_submit = @intFromPtr(&Model.submit),
@@ -235,6 +263,22 @@ pub fn check() !void {
     draw.size = @sizeOf(a.R4XStartR4Draw);
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expect(state.backend == c.render_backend_nvidia and state.gpu_operations == c.device_gpu_copy and state.reset_generation == Model.binding.reset_generation);
+    const native_image: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999, .width = 4, .height = 4,
+        .format = c.format_xrgb8888, .layout = 0 };
+    var create_native = descriptor(c.resource_image); create_native.source_kind = c.source_create_native;
+    create_native.source_address = @intFromPtr(&native_image); create_native.flags = c.image_target;
+    var allocated: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &create_native, &allocated));
+    var allocated_info: c.R4GfxResourceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.resource_info(&handle, &allocated, &allocated_info));
+    try t.expect(allocated_info.image.pitch == 16 and allocated_info.image.byte_length == 64 and Model.native_handle.id == 0);
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &allocated));
+    const untouched = allocated;
+    Model.native_result = a.gfx_buffer_error_oom;
+    try t.expectEqual(c.status_limit, api.resource_create(&handle, &create_native, &allocated));
+    try t.expectEqualDeep(untouched, allocated);
+    try t.expect(Model.native_handle.id == 0);
+    Model.native_result = 1;
     // Canonical shared raster generation is exported once and never uploaded.
     const lease: a.GuiSharedRasterLease = .{ .handle = .{ .id = 0x100000011, .generation = 0x200000011 }, .raster_generation = 7, .lease_token = 9 };
     var shared_desc = descriptor(c.resource_image); shared_desc.source_kind = c.source_shared_raster; shared_desc.source_address = @intFromPtr(&lease);

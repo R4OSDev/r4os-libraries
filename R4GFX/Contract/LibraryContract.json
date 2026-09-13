@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 2,
+      "revision": 3,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -548,7 +548,7 @@
             "error_domain": "R4GFX_STATUS",
             "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
           },
-          "description": "Creates an image/sampler/pipeline resource. Repeated immutable source generations retain the existing import."
+          "description": "Creates an image/sampler/pipeline resource. Repeated immutable source generations retain the existing import. Native creation may wait on the existing kernel allocation request outside frame execution. Failure leaves caller output unchanged; pending close failures remain tracked until device cleanup."
         },
         {
           "name": "resource_retain",
@@ -2262,7 +2262,7 @@
           "description": "image"
         }
       ],
-      "description": "Image, immutable sampler or 2D pipeline. Image source is a new system BO, pointer to canonical GfxBufferHandle, pointer to GuiSharedRasterLease, or explicitly borrowed CPU image. Image target flag permits writes; immutable rasters cannot be targets. Import forms derive image geometry from the canonical BO. Borrowed CPU bytes remain valid while any reference/job exists. Unused fields are zero."
+      "description": "Image, immutable sampler or 2D pipeline. Image source is a new system BO, pointer to canonical GfxBufferHandle, pointer to GuiSharedRasterLease, or explicitly borrowed CPU image. Image target flag permits writes; immutable rasters cannot be targets. Import forms derive image geometry from the canonical BO. Borrowed CPU bytes remain valid while any reference/job exists. Unused fields are zero. Native source4 instead points to R4GfxNativeImage with explicit deadline and requested layout; unused CPU image/source-generation fields stay zero."
     },
     {
       "name": "R4GfxResourceInfo",
@@ -2995,6 +2995,91 @@
         }
       ],
       "description": "Version1 exact-size input. Zero rows is a linear copy and requires zero pitches; otherwise copy.byte_length is bytes per row. Up to eight borrowed R4GfxCopyFence dependencies, zero address for zero count. The complete descriptor and identities are captured before admission; no pointer survives the call."
+    },
+    {
+      "name": "R4GfxNativeImage",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Version 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 32 bytes."
+        },
+        {
+          "name": "deadline_ns",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Finite absolute monotonic allocation deadline; expiry does not imply physical cleanup."
+        },
+        {
+          "name": "width",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Image width."
+        },
+        {
+          "name": "height",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Image height."
+        },
+        {
+          "name": "format",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Canonical XRGB8888, ARGB8888 or R8 format."
+        },
+        {
+          "name": "layout",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0 linear; 1 native tiled. No application pitch or GPU address."
+        }
+      ],
+      "description": "Copied native image allocation intent for source_create_native. source_address points to this payload; source_generation and ResourceDesc.image remain zero. The selected native adapter and memory generation bind allocation. Returned resource information exposes the actual pitch and byte length."
     }
   ],
   "constants": [
@@ -3263,6 +3348,13 @@
       "type": "u32",
       "value": 8,
       "description": "copy_max_dependencies"
+    },
+    {
+      "zig_name": "source_create_native",
+      "c_name": "R4GFX_SOURCE_CREATE_NATIVE",
+      "type": "u32",
+      "value": 4,
+      "description": "Explicit native image creation using source_address -> R4GfxNativeImage. Requires a selected native backend; system/borrowed resources remain unchanged."
     }
   ],
   "errors": [
