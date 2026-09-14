@@ -173,3 +173,14 @@ color changes use the shared timed mode controller and COLORS.R4S schema2.
 JPEG/BMP/PNG characterization is supplied by R4IMG. Detailed interface
 layouts: [Docs/API.md](Docs/API.md); workspace architecture and evidence:
 Docs/Desktop/GrafikFarbe07925.txt and GrafikFarbe07925.json.
+
+
+## Variable refresh
+
+The compiled Display helpers provide validated EDID/DisplayID/HDMI-Forum
+VRR ranges, mode/source admission, policy, bounded real-frame observations,
+per-monitor REFRESH.R4S preferences and the presenter intent lease client.
+DEVICE_V1 swapchains remove fixed-phase scheduling only after the common
+output API confirms active VRR. Native scheduling still owns actual deadlines
+and buffer completion; LFC is not advertised. Workspace architecture and
+software evidence: Docs/Desktop/GrafikVRR07926.txt and GrafikVRR07926.json.

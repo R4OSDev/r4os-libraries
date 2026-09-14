@@ -19,6 +19,7 @@ pub const Output = struct {
     direct: bool = false,
     overlay: bool = false,
     occluded: bool = false,
+    adaptive: bool = false,
     // Monotonic CPU observation of a known scanout phase. GPU timestamps
     // from a different clock domain must never be placed here.
     phase_ns: u64 = 0,
@@ -62,7 +63,8 @@ pub const Chain = struct {
     pub fn configure(self: *Chain, config: Config, output: Output) Error!void {
         if (config.count < 2 or config.count > capacity or output.generation == 0 or output.width == 0 or output.height == 0 or
             output.policies & ~@as(u32, 7) != 0 or output.policies & 1 == 0 or
-            (output.phase_ns == 0) != (output.interval_ns == 0) or output.interval_ns > std.time.ns_per_s) return error.Invalid;
+            (output.phase_ns == 0) != (output.interval_ns == 0) or output.interval_ns > std.time.ns_per_s or
+            (output.adaptive and (!output.synchronized or output.interval_ns != 0))) return error.Invalid;
         if (output.policies & (@as(u32, 1) << @intCast(@intFromEnum(config.policy))) == 0 or
             (config.require_vsync and (!output.synchronized or config.policy == .immediate))) return error.Unsupported;
         for (&self.frames) |*value| if (value.phase != .free) return error.Busy;
@@ -198,6 +200,7 @@ pub const Chain = struct {
         if (output.policies & (@as(u32, 1) << @intCast(@intFromEnum(self.config.policy))) == 0 or
             (self.config.require_vsync and !output.synchronized)) { self.change(.suboptimal); return; }
         if (output.occluded) self.change(.occluded) else if (self.life == .occluded) self.life = .active;
+        if (self.output.adaptive != output.adaptive or self.output.interval_ns != output.interval_ns) self.next_start_ns = 0;
         self.output = output;
     }
 };

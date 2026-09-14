@@ -108,14 +108,22 @@ fn describeOutput(device: *d.Device, head: u32) d.Error!Description {
         target.display_generation != value.display_generation or target.device_generation != value.backend.device_generation)) return error.Stale;
     return .{ .info = value, .target = target };
 }
-fn projection(value: a.DisplayPresentationInfo) s.Output {
+fn projection(device: *d.Device, value: a.DisplayPresentationInfo, target: a.GfxOutputTarget) s.Output {
+    var adaptive_info: a.GfxOutputRefresh = .{};
+    const adaptive = target.connector_id != 0 and value.flags & a.display_presentation_info_synchronized != 0 and
+        device.base().gfxOutputRefresh(&target, &adaptive_info) == a.gfx_output_ok and std.meta.eql(adaptive_info.target, target) and
+        adaptive_info.capabilities.flags & a.gfx_refresh_cap_capable != 0 and adaptive_info.status.phase == a.gfx_refresh_phase_active and
+        adaptive_info.status.core_point != 0 and adaptive_info.status.receipt != 0;
     return .{ .generation = value.display_generation, .width = value.width, .height = value.height, .policies = value.policies,
         .synchronized = value.flags & a.display_presentation_info_synchronized != 0,
         .visibility = value.flags & a.display_presentation_info_visibility != 0,
         .direct = value.flags & a.display_presentation_info_direct != 0, .overlay = value.flags & a.display_presentation_info_overlay != 0,
         .occluded = value.flags & a.display_presentation_info_occluded != 0,
-        .phase_ns = if (value.interval_ns != 0) value.observed_ns else 0,
-        .interval_ns = if (value.observed_ns != 0) value.interval_ns else 0 };
+        // Under confirmed VRR, completed rendering determines submission.
+        // The native worker enforces its real observed min/max deadlines.
+        .adaptive = adaptive,
+        .phase_ns = if (!adaptive and value.interval_ns != 0) value.observed_ns else 0,
+        .interval_ns = if (!adaptive and value.observed_ns != 0) value.interval_ns else 0 };
 }
 pub fn presentationInfo(handle: *const c.R4GfxDevice, head: u32, output: *c.R4GfxPresentationInfo) callconv(.c) i32 {
     const device = d.get(handle, false) catch |err| return d.code(err);
@@ -147,7 +155,7 @@ fn pool(device: *d.Device, request: *const c.R4GfxSwapchainDesc) d.Error!Pool {
     var result: Pool = .{ .config = .{ .count = desc.count, .policy = @enumFromInt(desc.policy), .require_vsync = desc.flags & c.present_require_vsync != 0 },
         .info = info, .target = described.target };
     var validation: s.Chain = .{};
-    validation.configure(result.config, projection(info)) catch |err| return stateError(err);
+    validation.configure(result.config, projection(device, info, described.target)) catch |err| return stateError(err);
     @memcpy(result.images[0..desc.count], @as([*]const c.R4GfxResource, @ptrFromInt(desc.images))[0..desc.count]);
     for (result.images[0..desc.count], 0..) |value, index| {
         const image = try device.resource(value, true);
@@ -198,7 +206,7 @@ fn openImpl(handle: *const c.R4GfxDevice, request: *const c.R4GfxSwapchainDesc, 
     const index = for (&device.chains, 0..) |*slot, i| { if (slot.closed) break i; } else return error.Limit;
     const serial = std.math.add(u64, device.chain_serial, 1) catch return error.Limit;
     var state: s.Chain = .{};
-    state.configure(value.config, projection(value.info)) catch |err| return stateError(err);
+    state.configure(value.config, projection(device, value.info, value.target)) catch |err| return stateError(err);
     retainPool(device, value);
     device.chains[index] = .{ .serial = serial, .closed = false, .state = state, .info = value.info, .target = value.target, .images = value.images, .path = value.info.path };
     device.chain_serial = serial;
@@ -222,7 +230,7 @@ fn refresh(device: *d.Device, slot: *Slot) d.Error!void {
         const resource = device.resource(handle, false) catch { slot.state.change(.lost); return; };
         if (resource.invalidated) { slot.state.change(.lost); return; }
     }
-    slot.state.refresh(projection(info)) catch |err| return stateError(err);
+    slot.state.refresh(projection(device, info, described.target)) catch |err| return stateError(err);
     slot.info = info;
 }
 pub fn acquire(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, input_ns: u64, output: *c.R4GfxSwapchainFrame) callconv(.c) i32 {
@@ -416,7 +424,7 @@ fn resizeImpl(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, requ
     const value = try pool(device, request);
     slot.state.change(.suboptimal);
     var candidate = slot.state;
-    candidate.configure(value.config, projection(value.info)) catch |err| return stateError(err);
+    candidate.configure(value.config, projection(device, value.info, value.target)) catch |err| return stateError(err);
     // Validate every old ownership record before either pool is mutated.
     for (slot.images[0..slot.state.config.count]) |image| if ((try device.resource(image, false)).public_refs == 0) return error.Stale;
     if (slot.queue.timeline != 0) { try d.platform(device.queues().close(&slot.queue)); slot.queue = .{}; }

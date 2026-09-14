@@ -16,17 +16,22 @@ fn contains(report: *const edid.Report, width: u32, height: u32) bool {
 }
 fn checkColorMetadata() !void {
     var bytes = qemu[0..256].*;
-    bytes[23] = 120; bytes[24] |= 4;
-    bytes[25] = 0x1b; bytes[26] = 0xe4;
+    bytes[23] = 120;
+    bytes[24] |= 4;
+    bytes[25] = 0x1b;
+    bytes[26] = 0xe4;
     @memcpy(bytes[27..35], &[_]u8{ 1, 2, 3, 4, 5, 6, 7, 8 });
-    bytes[126] = 1; fix(bytes[0..128]);
-    const block = bytes[128..]; @memset(block, 0);
-    block[0] = 2; block[1] = 3; block[2] = 26;
+    bytes[126] = 1;
+    fix(bytes[0..128]);
+    const block = bytes[128..];
+    @memset(block, 0);
+    block[0] = 2;
+    block[1] = 3;
+    block[2] = 26;
     @memcpy(block[4..26], &[_]u8{
-        0x67, 3, 12, 0, 0x10, 0, 0xb8, 120,
-        0xe6, 6, 13, 1, 96, 64, 128,
-        0xe2, 0, 0xc0,
-        0xe3, 5, 0xe0, 0,
+        0x67, 3,    12,   0, 0x10, 0,  0xb8, 120,
+        0xe6, 6,    13,   1, 96,   64, 128,  0xe2,
+        0,    0xc0, 0xe3, 5, 0xe0, 0,
     });
     fix(block);
     var report: edid.Report = .{};
@@ -45,13 +50,21 @@ fn checkColorMetadata() !void {
             0 => block[12] = 0xe2, // Missing required descriptor byte.
             1 => block[16] = 0, // Minimum without maximum luminance.
             2 => block[17] = 97, // Frame average exceeds content maximum.
-            3 => { block[2] = 30; @memcpy(block[26..30], &[_]u8{ 0xe3, 6, 5, 1 }); }, // Conflicting duplicate.
+            3 => {
+                block[2] = 30;
+                @memcpy(block[26..30], &[_]u8{ 0xe3, 6, 5, 1 });
+            }, // Conflicting duplicate.
             else => unreachable,
         }
-        fix(block); try edid.parse(&bytes, &report);
+        fix(block);
+        try edid.parse(&bytes, &report);
         try t.expect(!report.complete() and !report.hdr_present and report.hdmi_deep_color == 0 and !report.rgb_quantization_selectable);
     }
-    bytes = valid; block[16] = 0; block[17] = 0; block[18] = 0; fix(block);
+    bytes = valid;
+    block[16] = 0;
+    block[17] = 0;
+    block[18] = 0;
+    fix(block);
     try edid.parse(&bytes, &report);
     try t.expect(report.complete() and report.hdr_present and report.hdr_luminance_count == 3);
     try t.expectEqualSlices(u8, &.{ 0, 0, 0 }, &report.hdr_luminance); // Unknown is preserved.
@@ -61,8 +74,7 @@ fn checkColorSignal(input: edid.Report) !void {
     var receiver = input;
     receiver.bits_per_color = 10;
     const metadata: color.Metadata = .{ .max_mastering = 1000, .min_mastering = 50, .max_cll = 1000, .max_fall = 400 };
-    var signal: color.Signal = .{ .format = .xr30, .transfer = .pq, .primaries = .bt2020, .range = .full,
-        .bpc = 10, .reference_white = 2_030_000, .peak = 4_000_000, .metadata = metadata };
+    var signal: color.Signal = .{ .format = .xr30, .transfer = .pq, .primaries = .bt2020, .range = .full, .bpc = 10, .reference_white = 2_030_000, .peak = 4_000_000, .metadata = metadata };
     var source: color.Source = .{ .formats = 3, .bpc = 3, .primaries = 3, .ranges = 3, .eotf = 13, .static_metadata = true, .dp_vsc = true };
     var pipeline: color.Pipeline = .{ .linear_composition = true, .output_transform = true, .opaque_output = true };
     const hdmi: color.Link = .{ .hdmi = .{ .max_tmds_hz = 600_000_000, .scdc = true } };
@@ -87,7 +99,8 @@ fn checkColorSignal(input: edid.Report) !void {
     pipeline.output_transform = true;
     source.formats = 1; // Native8-bit implementation cannot borrow the sink's10-bit claim.
     try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16));
-    source.formats = 3; source.static_metadata = false;
+    source.formats = 3;
+    source.static_metadata = false;
     try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16));
     source.static_metadata = true;
     receiver.colorimetry = 0;
@@ -104,38 +117,35 @@ fn checkColorSignal(input: edid.Report) !void {
     source.dp_vsc = false;
     try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, dp, 148_500_000, 16));
     source.dp_vsc = true;
-    try t.expectError(error.Bandwidth, color.admit(&receiver, signal, source, pipeline,
-        .{ .displayport = .{ .payload_bits_per_second = 4_455_000_000, .vsc = true, .hdr_sdp = true } }, 148_500_000, 16));
+    try t.expectError(error.Bandwidth, color.admit(&receiver, signal, source, pipeline, .{ .displayport = .{ .payload_bits_per_second = 4_455_000_000, .vsc = true, .hdr_sdp = true } }, 148_500_000, 16));
     signal.transfer = .hlg;
     const hlg = try color.admit(&receiver, signal, source, pipeline, dp, 148_500_000, 16);
     try t.expect(hlg.metadata[6] == 3);
-    signal = .{ .format = .xr24, .transfer = .srgb, .primaries = .bt709, .range = .full, .bpc = 8,
-        .reference_white = 1_000_000, .peak = 1_000_000 };
+    signal = .{ .format = .xr24, .transfer = .srgb, .primaries = .bt709, .range = .full, .bpc = 8, .reference_white = 1_000_000, .peak = 1_000_000 };
     receiver.rgb_quantization_selectable = false;
     try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16));
     const sdr = try color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 0);
     try t.expect(sdr.clear_hdr and sdr.metadata_bytes == 0 and sdr.bpp == 24);
     const a = @import("r4os").abi;
-    var published: a.GfxOutputColorState = .{ .flags = 7, .format = a.gfx_buffer_format_xrgb8888,
-        .bpc = 8, .primaries = 1, .transfer = 1, .range = 1, .reference_white = 1_000_000, .peak = 1_000_000,
-        .formats = 1, .depths = 1, .color_spaces = 1, .ranges = 1, .transfers = 1, .max_tmds_clock_hz = 600_000_000 };
+    var published: a.GfxOutputColorState = .{ .flags = 7, .format = a.gfx_buffer_format_xrgb8888, .bpc = 8, .primaries = 1, .transfer = 1, .range = 1, .reference_white = 1_000_000, .peak = 1_000_000, .formats = 1, .depths = 1, .color_spaces = 1, .ranges = 1, .transfers = 1, .max_tmds_clock_hz = 600_000_000 };
     const confirmed = try color.Source.fromPublished(published, .hdmi);
     try t.expect(!confirmed.static_metadata and !confirmed.dp_vsc and confirmed.eotf == 1);
-    _ = try color.admit(&receiver, try color.publishedSignal(published, null), confirmed, pipeline,
-        try color.publishedLink(published, .hdmi), 148_500_000, 0);
+    _ = try color.admit(&receiver, try color.publishedSignal(published, null), confirmed, pipeline, try color.publishedLink(published, .hdmi), 148_500_000, 0);
     published.flags &= ~@as(u32, 2);
     try t.expectError(error.Incomplete, color.publishedSignal(published, null));
     try t.expectError(error.Incomplete, color.publishedLink(published, .hdmi));
-    published.flags = 7; published.formats = 4;
+    published.flags = 7;
+    published.formats = 4;
     try t.expectError(error.Invalid, color.Source.fromPublished(published, .hdmi));
     published.formats = 1;
-    try t.expectError(error.Bandwidth, color.admit(&receiver, try color.publishedSignal(published, null), confirmed, pipeline,
-        try color.publishedLink(published, .displayport), 148_500_000, 0));
+    try t.expectError(error.Bandwidth, color.admit(&receiver, try color.publishedSignal(published, null), confirmed, pipeline, try color.publishedLink(published, .displayport), 148_500_000, 0));
     signal.range = .limited;
     _ = try color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16);
-    var bad = metadata; bad.max_cll = 100;
+    var bad = metadata;
+    bad.max_cll = 100;
     try t.expectError(error.Invalid, color.hdmiMetadata(.pq, bad));
-    bad = metadata; bad.primaries[0] = 65535;
+    bad = metadata;
+    bad.primaries[0] = 65535;
     try t.expectError(error.Invalid, color.dpMetadata(.hlg, bad));
 }
 test "licensed receiver fixtures and actual OssiPC base preserve missing extension uncertainty" {
@@ -153,9 +163,16 @@ test "licensed receiver fixtures and actual OssiPC base preserve missing extensi
     try t.expect(contains(&result, 1280, 800));
     try @import("Tests/Display/topology_check.zig").check(&result);
     var base = qemu[0..128].*;
-    base[35] = 0x80; base[36] = 0; base[37] = 0; base[126] = 0;
+    base[35] = 0x80;
+    base[36] = 0;
+    base[37] = 0;
+    base[126] = 0;
+    @memset(base[90..108], 0);
+    base[93] = 0x10; // Replace the fixture's original range descriptor.
     @memset(base[108..126], 0);
-    base[111] = 0xfd; base[112] = 0x0a; // legal EDID 1.4 maximum-rate offsets
+    base[111] = 0xfd;
+    base[112] = 0x0a; // legal EDID 1.4 maximum-rate offsets
+    @memcpy(base[113..118], &[_]u8{ 24, 100, 15, 120, 60 });
     base[19] = 4;
     fix(&base);
     try edid.parse(&base, &result);
@@ -164,7 +181,8 @@ test "licensed receiver fixtures and actual OssiPC base preserve missing extensi
         if (mode.width == 720 and mode.height == 400 and mode.millihz() == 70_000 and !mode.valid()) nominal = true;
     }
     try t.expect(nominal and result.complete());
-    base[112] = 1; fix(&base);
+    base[112] = 1;
+    fix(&base);
     try t.expectError(error.InvalidBase, edid.parse(&base, &result));
     try edid.parse(television, &result);
     // Upstream's .ref diagnoses a 420 bitmap index 24 with only 19 SVDs.
@@ -188,6 +206,7 @@ test "licensed receiver fixtures and actual OssiPC base preserve missing extensi
 }
 test "extension checksums and malformed lengths cannot leak partial audio or timing claims" {
     try checkColorMetadata();
+    try @import("Tests/Display/vrr_check.zig").check();
     var bytes = television[0..256].*;
     var result: edid.Report = .{};
     bytes[140] ^= 1;
@@ -206,14 +225,24 @@ test "extension checksums and malformed lengths cannot leak partial audio or tim
         bytes = qemu[0..256].*;
         @memset(bytes[128..], 0);
         const block = bytes[128..];
-        block[0] = 2; block[1] = 3; block[2] = 12;
-        block[4] = 0x67; block[5] = 0xd8; block[6] = 0x5d; block[7] = 0xc4;
-        block[8] = 1; block[9] = 120; block[10] = flags;
+        block[0] = 2;
+        block[1] = 3;
+        block[2] = 12;
+        block[4] = 0x67;
+        block[5] = 0xd8;
+        block[6] = 0x5d;
+        block[7] = 0xc4;
+        block[8] = 1;
+        block[9] = 120;
+        block[10] = flags;
         fix(block);
         try edid.parse(&bytes, &result);
         try t.expect(result.complete() and result.hdmi and result.max_tmds_hz == 600_000_000);
         try t.expect(result.scdc == (flags & 128 != 0) and result.scrambling_low_rates == (flags & 8 != 0));
-        block[2] = 14; block[12] = 0x63; block[13] = 1; fix(block);
+        block[2] = 14;
+        block[12] = 0x63;
+        block[13] = 1;
+        fix(block);
         try edid.parse(&bytes, &result);
         try t.expect(result.warnings & edid.Warning.malformed != 0 and !result.scdc and !result.scrambling_low_rates and !result.hdmi);
     }
@@ -230,25 +259,28 @@ test "complete CTA audio becomes bounded ELD without widening receiver PCM capab
     var bytes = qemu[0..256].*;
     @memset(bytes[128..], 0);
     const block = bytes[128..];
-    block[0] = 2; block[1] = 3; block[2] = 18; block[3] = 0x40;
+    block[0] = 2;
+    block[1] = 3;
+    block[2] = 18;
+    block[3] = 0x40;
     // HDMI VSDB and a compressed-only SAD. Basic Audio still explicitly
     // guarantees 32/44.1/48-kHz stereo S16; ELD must carry that guarantee.
     @memcpy(block[4..14], &[_]u8{ 0x69, 3, 12, 0, 0x10, 0, 0x80, 30, 0x80, 0 });
     block[2] = 19;
     block[14] = 7; // Audio latency, complete advertised latency pair.
-    @memcpy(block[15..19], &[_]u8{0x23, 0x15, 0x54, 0x32});
+    @memcpy(block[15..19], &[_]u8{ 0x23, 0x15, 0x54, 0x32 });
     block[4] = 0x6a;
     fix(block);
     var report: edid.Report = .{};
     try edid.parse(&bytes, &report);
     try t.expect(report.complete() and report.hdmi and report.audio_infoframes and report.audio_latency == 7);
-    const port = [8]u8{0x10, 0, 0, 0, 0, 0, 0, 0};
+    const port = [8]u8{ 0x10, 0, 0, 0, 0, 0, 0, 0 };
     const encoded = try edid.eld.encode(&report, port);
     try t.expect(encoded.stereo_48k_s16 and encoded.max_frequency == 7);
     try t.expect(encoded.bytes[0] == 16 and encoded.bytes[5] == 0x22 and encoded.bytes[6] == 7);
     try t.expectEqualSlices(u8, &port, encoded.bytes[8..16]);
     const name_len = encoded.bytes[4] & 31;
-    try t.expectEqualSlices(u8, &.{0x15, 0x54, 0x32, 0x09, 0x07, 0x01}, encoded.bytes[20 + name_len ..][0..6]);
+    try t.expectEqualSlices(u8, &.{ 0x15, 0x54, 0x32, 0x09, 0x07, 0x01 }, encoded.bytes[20 + name_len ..][0..6]);
     try t.expect(encoded.baselineBytes() <= 80);
     for (encoded.bytes[26 + name_len ..]) |byte| try t.expectEqual(@as(u8, 0), byte);
     // Explicit SADs remain distinct. 16-bit at 44.1 kHz plus 24-bit at
@@ -265,7 +297,11 @@ test "complete CTA audio becomes bounded ELD without widening receiver PCM capab
     try edid.parse(ossipc, &report);
     try t.expectError(error.Incomplete, edid.eld.encode(&report, port));
     // An extension without data blocks still carries its Basic Audio flag.
-    @memset(block, 0); block[0] = 2; block[1] = 3; block[3] = 0x40; fix(block);
+    @memset(block, 0);
+    block[0] = 2;
+    block[1] = 3;
+    block[3] = 0x40;
+    fix(block);
     try edid.parse(&bytes, &report);
     try t.expect(report.complete() and report.basic_audio and report.cta_revision == 3);
     try t.expectError(error.Unsupported, edid.eld.encode(&report, port)); // no HDMI declaration
@@ -291,7 +327,10 @@ test "bounded parser rejects truncated base and preserves output on fatal errors
             bytes = qemu[0..256].*;
             bytes[index] = value;
             fix(bytes[128..]);
-            edid.parse(&bytes, &sentinel) catch |err| switch (err) { error.Capacity => {}, else => return err };
+            edid.parse(&bytes, &sentinel) catch |err| switch (err) {
+                error.Capacity => {},
+                else => return err,
+            };
         }
     }
 }
@@ -299,24 +338,36 @@ test "DisplayID v2 detailed timing validates its inner checksum and block bounds
     var bytes = qemu[0..256].*;
     @memset(bytes[128..], 0);
     const block = bytes[128..];
-    block[0] = 0x70; block[1] = 0x20; block[2] = 23; block[3] = 2;
-    block[5] = 0x22; block[6] = 0; block[7] = 20;
+    block[0] = 0x70;
+    block[1] = 0x20;
+    block[2] = 23;
+    block[3] = 2;
+    block[5] = 0x22;
+    block[6] = 0;
+    block[7] = 20;
     const data = block[8..28];
     // Type VII: 148500 kHz - 1; 1920x1080, total 2200x1125.
     const clock: u32 = 148499;
-    data[0] = @truncate(clock); data[1] = @truncate(clock >> 8); data[2] = @truncate(clock >> 16); data[3] = 128;
+    data[0] = @truncate(clock);
+    data[1] = @truncate(clock >> 8);
+    data[2] = @truncate(clock >> 16);
+    data[3] = 128;
     for ([_]u16{ 1919, 279, 87, 43, 1079, 44, 3, 4 }, 0..) |value, i| {
-        data[4 + 2 * i] = @truncate(value); data[5 + 2 * i] = @truncate(value >> 8);
+        data[4 + 2 * i] = @truncate(value);
+        data[5 + 2 * i] = @truncate(value >> 8);
     }
-    fix(block[1..29]); fix(block);
+    fix(block[1..29]);
+    fix(block);
     var report: edid.Report = .{};
     try edid.parse(&bytes, &report);
     try t.expect(report.complete());
     try t.expect(contains(&report, 1920, 1080));
-    block[20] ^= 1; fix(block);
+    block[20] ^= 1;
+    fix(block);
     try edid.parse(&bytes, &report);
     try t.expect(report.warnings & edid.Warning.malformed != 0);
-    block[2] = 123; fix(block);
+    block[2] = 123;
+    fix(block);
     try edid.parse(&bytes, &report);
     try t.expect(report.warnings & edid.Warning.malformed != 0);
 }
@@ -324,17 +375,25 @@ test "CTA 420-only timing never becomes an ordinary RGB mode by accident" {
     var bytes = qemu[0..256].*;
     @memset(bytes[128..], 0);
     const block = bytes[128..];
-    block[0] = 2; block[1] = 3; block[2] = 7;
-    block[4] = 0xe2; block[5] = 0x0e; block[6] = 97;
+    block[0] = 2;
+    block[1] = 3;
+    block[2] = 7;
+    block[4] = 0xe2;
+    block[5] = 0x0e;
+    block[6] = 97;
     fix(block);
     var report: edid.Report = .{};
     try edid.parse(&bytes, &report);
     var found = false;
     for (report.modes[0..report.mode_count]) |mode| if (mode.vic == 97) {
-        try t.expect(mode.flags & edid.timing.y420_only != 0); found = true;
+        try t.expect(mode.flags & edid.timing.y420_only != 0);
+        found = true;
     };
     try t.expect(found);
-    block[2] = 9; block[7] = 0x41; block[8] = 97; fix(block);
+    block[2] = 9;
+    block[7] = 0x41;
+    block[8] = 97;
+    fix(block);
     try edid.parse(&bytes, &report);
     for (report.modes[0..report.mode_count]) |mode| if (mode.vic == 97) try t.expect(mode.flags & edid.timing.y420_only == 0);
 }

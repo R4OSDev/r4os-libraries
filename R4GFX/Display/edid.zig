@@ -3,6 +3,8 @@
 const std = @import("std");
 pub const timing = @import("timing.zig");
 pub const color = @import("color_signal.zig");
+pub const refresh = @import("refresh_range.zig");
+pub const vrr = @import("vrr.zig");
 pub const eld = @import("eld.zig");
 const cta = @import("cta_timings.zig");
 pub const max_blocks = 32;
@@ -30,6 +32,7 @@ pub const Report = struct {
     chromaticity: [8]u16 = @splat(0),
     gamma_hundredths: u16 = 0,
     srgb_default: bool = false,
+    refresh: refresh.Facts = .{},
     // RGB, YCbCr444, YCbCr422, YCbCr420. Sink facts, not source capabilities.
     colors: u8 = 1,
     declared_extensions: u8 = 0,
@@ -107,10 +110,14 @@ fn detailed(bytes: []const u8) ?timing.Timing {
     const interlace = bytes[17] & 0x80 != 0;
     const scale: u32 = if (interlace) 2 else 1;
     var mode = timing.Timing{
-        .width = width, .height = height * scale,
-        .h_total = width + hb, .h_start = width + hf, .h_end = width + hf + hs,
+        .width = width,
+        .height = height * scale,
+        .h_total = width + hb,
+        .h_start = width + hf,
+        .h_end = width + hf + hs,
         .v_total = (height + vb) * scale + @intFromBool(interlace),
-        .v_start = (height + vf) * scale, .v_end = (height + vf + vs) * scale,
+        .v_start = (height + vf) * scale,
+        .v_end = (height + vf + vs) * scale,
         .clock_hz = @as(u64, le16(bytes)) * 10000,
         .flags = if (interlace) timing.interlaced else 0,
     };
@@ -133,8 +140,7 @@ pub fn parse(bytes: []const u8, output: *Report) Error!void {
     if (bytes.len > max_blocks * 128) return error.TooLarge;
     if (!std.mem.eql(u8, bytes[0..8], &.{ 0, 255, 255, 255, 255, 255, 255, 0 }) or
         !checksum(bytes[0..128]) or bytes[18] != 1 or bytes[19] > 4) return error.InvalidBase;
-    var result = Report{ .product = @intCast(le16(bytes[10..])), .serial = le24(bytes[12..]) | (@as(u32, bytes[15]) << 24),
-        .digital = bytes[20] & 0x80 != 0, .declared_extensions = bytes[126] };
+    var result = Report{ .product = @intCast(le16(bytes[10..])), .serial = le24(bytes[12..]) | (@as(u32, bytes[15]) << 24), .digital = bytes[20] & 0x80 != 0, .declared_extensions = bytes[126] };
     const vendor = (@as(u16, bytes[8]) << 8) | bytes[9];
     for (0..3) |i| {
         const letter = (vendor >> @as(u4, @intCast((2 - i) * 5))) & 31;
@@ -150,6 +156,7 @@ pub fn parse(bytes: []const u8, output: *Report) Error!void {
     }
     result.gamma_hundredths = if (bytes[23] == 255) 0 else @as(u16, bytes[23]) + 100;
     result.srgb_default = bytes[24] & 4 != 0;
+    result.refresh.continuous_frequency = bytes[19] >= 4 and bytes[24] & 1 != 0;
     for (0..8) |i| {
         const low = (bytes[25 + i / 4] >> @as(u3, @intCast(6 - 2 * (i % 4)))) & 3;
         result.chromaticity[i] = (@as(u16, bytes[27 + i]) << 2) | low;
@@ -169,13 +176,24 @@ pub fn parse(bytes: []const u8, output: *Report) Error!void {
                 result.name[n] = ch;
             }
         } else if (descriptor[3] == 0xfd) {
-            // EDID 1.4 range descriptors use byte 4 for rate offsets. These
-            // are not reserved descriptor padding. Preserve the descriptor
-            // as unimplemented metadata; never invent a CVT/GTF timing.
+            // EDID 1.4 rate offsets are metadata, not descriptor padding.
+            // Preserve exact limits; never synthesize a CVT/GTF timing here.
             const offsets = descriptor[4];
             if ((bytes[19] < 4 and offsets != 0) or offsets & 0xf0 != 0 or
                 offsets & 3 == 1 or (offsets >> 2) & 3 == 1) return error.InvalidBase;
-            result.warnings |= Warning.unknown;
+            const limits: refresh.EdidLimits = .{
+                .refresh = .{
+                    .min_millihz = (@as(u32, descriptor[5]) + (if (offsets & 1 != 0) @as(u32, 255) else 0)) * 1000,
+                    .max_millihz = (@as(u32, descriptor[6]) + (if (offsets & 2 != 0) @as(u32, 255) else 0)) * 1000,
+                },
+                .min_horizontal_hz = (@as(u32, descriptor[7]) + (if (offsets & 4 != 0) @as(u32, 255) else 0)) * 1000,
+                .max_horizontal_hz = (@as(u32, descriptor[8]) + (if (offsets & 8 != 0) @as(u32, 255) else 0)) * 1000,
+                .max_pixel_clock_hz = @as(u64, descriptor[9]) * 10_000_000,
+            };
+            if (!limits.refresh.valid() or limits.min_horizontal_hz == 0 or limits.max_horizontal_hz < limits.min_horizontal_hz) return error.InvalidBase;
+            if (result.refresh.edid) |prior| if (!std.meta.eql(prior, limits)) return error.InvalidBase;
+            result.refresh.edid = limits;
+            if (descriptor[10] != 1) result.warnings |= Warning.unknown; // Timing formula unimplemented.
         } else if (descriptor[3] != 0x10 and descriptor[3] != 0xff and descriptor[3] != 0xfe) {
             result.warnings |= Warning.unknown;
         }
@@ -184,15 +202,15 @@ pub fn parse(bytes: []const u8, output: *Report) Error!void {
     // Without a negotiated DMT lookup they cannot supply hardware sync/PLL
     // registers. Keep them visible as nominal facts, like standard pairs.
     const established = [_][3]u32{
-        .{720,400,70}, .{720,400,88}, .{640,480,60}, .{640,480,67},
-        .{640,480,72}, .{640,480,75}, .{800,600,56}, .{800,600,60},
-        .{800,600,72}, .{800,600,75}, .{832,624,75}, .{1024,768,87},
-        .{1024,768,60}, .{1024,768,70}, .{1024,768,75}, .{1280,1024,75}, .{1152,870,75},
+        .{ 720, 400, 70 },  .{ 720, 400, 88 },  .{ 640, 480, 60 },  .{ 640, 480, 67 },
+        .{ 640, 480, 72 },  .{ 640, 480, 75 },  .{ 800, 600, 56 },  .{ 800, 600, 60 },
+        .{ 800, 600, 72 },  .{ 800, 600, 75 },  .{ 832, 624, 75 },  .{ 1024, 768, 87 },
+        .{ 1024, 768, 60 }, .{ 1024, 768, 70 }, .{ 1024, 768, 75 }, .{ 1280, 1024, 75 },
+        .{ 1152, 870, 75 },
     };
     for (established, 0..) |value, i| {
         if (bytes[35 + i / 8] & (@as(u8, 0x80) >> @as(u3, @intCast(i % 8))) == 0) continue;
-        try result.add(.{ .width = value[0], .height = value[1], .nominal_millihz = value[2] * 1000,
-            .flags = timing.incomplete | (if (i == 11) timing.interlaced else @as(u32, 0)) });
+        try result.add(.{ .width = value[0], .height = value[1], .nominal_millihz = value[2] * 1000, .flags = timing.incomplete | (if (i == 11) timing.interlaced else @as(u32, 0)) });
         result.warnings |= Warning.timing_incomplete;
     }
     if (bytes[37] & 0x7f != 0) result.warnings |= Warning.unknown;
@@ -202,11 +220,17 @@ pub fn parse(bytes: []const u8, output: *Report) Error!void {
         const first = bytes[38 + i * 2];
         const second = bytes[39 + i * 2];
         if (first == 1 and second == 1) continue;
-        if (first <= 1) { result.warnings |= Warning.malformed; continue; }
+        if (first <= 1) {
+            result.warnings |= Warning.malformed;
+            continue;
+        }
         const width = (@as(u32, first) + 31) * 8;
         const height = switch (second >> 6) {
             0 => if (bytes[19] < 3) width else width * 10 / 16,
-            1 => width * 3 / 4, 2 => width * 4 / 5, 3 => width * 9 / 16, else => unreachable,
+            1 => width * 3 / 4,
+            2 => width * 4 / 5,
+            3 => width * 9 / 16,
+            else => unreachable,
         };
         try result.add(.{ .width = width, .height = height, .nominal_millihz = (@as(u32, second & 63) + 60) * 1000, .flags = timing.incomplete });
         result.warnings |= Warning.timing_incomplete;
@@ -216,14 +240,23 @@ pub fn parse(bytes: []const u8, output: *Report) Error!void {
     if (present > result.declared_extensions) result.warnings |= Warning.extra;
     for (0..@min(present, result.declared_extensions)) |i| {
         const block = bytes[(i + 1) * 128 ..][0..128];
-        if (!checksum(block)) { result.warnings |= Warning.checksum; continue; }
+        if (!checksum(block)) {
+            result.warnings |= Warning.checksum;
+            continue;
+        }
         var candidate = result;
         const valid = switch (block[0]) {
             0x02 => try parseCta(block, &candidate),
             0x70 => try parseDisplayId(block, &candidate),
-            else => blk: { candidate.warnings |= Warning.unknown; break :blk true; },
+            else => blk: {
+                candidate.warnings |= Warning.unknown;
+                break :blk true;
+            },
         };
-        if (!valid) { result.warnings |= Warning.malformed; continue; }
+        if (!valid) {
+            result.warnings |= Warning.malformed;
+            continue;
+        }
         if (block[0] == 0x70 and @as(usize, block[4]) > @min(present, result.declared_extensions) - i - 1)
             candidate.warnings |= Warning.missing;
         candidate.valid_extensions += 1;
@@ -265,7 +298,10 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
         const data = block[pos..][0..len];
         pos += len;
         switch (tag) {
-            0 => { if (!zero(data) or !zero(block[pos..end])) return false; break; },
+            0 => {
+                if (!zero(data) or !zero(block[pos..end])) return false;
+                break;
+            },
             1 => {
                 if (len == 0 or len % 3 != 0) return false;
                 var a: usize = 0;
@@ -303,15 +339,13 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
                         if (latency) result.audio_latency = @max(result.audio_latency, data[9]);
                     }
                 } else if (oui == 0xc45dd8) {
-                    if (len < 7 or data[3] != 1) return false;
-                    result.hdmi = true;
-                    result.max_tmds_hz = @max(result.max_tmds_hz, @as(u64, data[4]) * 5_000_000);
-                    result.scdc = result.scdc or data[5] & 0x80 != 0;
-                    result.scrambling_low_rates = result.scrambling_low_rates or data[5] & 8 != 0;
-                    result.hdmi_deep_color_420 |= data[6] & 7;
+                    if (!hdmiForum(data, result)) return false;
                 } else result.warnings |= Warning.unknown;
             },
-            4 => { if (len != 3) return false; result.speakers |= le24(data); },
+            4 => {
+                if (len != 3) return false;
+                result.speakers |= le24(data);
+            },
             7 => {
                 if (len == 0) return false;
                 switch (data[0]) {
@@ -322,19 +356,24 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
                         result.rgb_quantization_selectable = data[1] & 64 != 0;
                         result.ycc_quantization_selectable = data[1] & 128 != 0;
                     },
-                    5 => { if (len != 3) return false; result.colorimetry |= @intCast(le16(data[1..])); },
+                    5 => {
+                        if (len != 3) return false;
+                        result.colorimetry |= @intCast(le16(data[1..]));
+                    },
                     6 => {
                         if (len < 3 or len > 6) return false;
                         var luminance: [3]u8 = @splat(0);
-                        @memcpy(luminance[0..len - 3], data[3..]);
+                        @memcpy(luminance[0 .. len - 3], data[3..]);
                         if ((luminance[2] != 0 and luminance[0] == 0) or
                             (luminance[0] != 0 and luminance[1] > luminance[0])) return false;
                         if (result.hdr_present and (result.hdr_eotf != data[1] & 15 or result.hdr_static != data[2] & 1 or
                             result.hdr_luminance_count != len - 3 or !std.mem.eql(u8, &result.hdr_luminance, &luminance))) return false;
                         if (data[1] & 0xf0 != 0 or data[2] & 0xfe != 0) result.warnings |= Warning.unknown;
                         result.hdr_present = true;
-                        result.hdr_eotf = data[1] & 15; result.hdr_static = data[2] & 1;
-                        result.hdr_luminance = luminance; result.hdr_luminance_count = @intCast(len - 3);
+                        result.hdr_eotf = data[1] & 15;
+                        result.hdr_static = data[2] & 1;
+                        result.hdr_luminance = luminance;
+                        result.hdr_luminance_count = @intCast(len - 3);
                     },
                     0x0e => {
                         if (len < 2) return false;
@@ -342,6 +381,9 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
                         result.colors |= 8;
                     },
                     0x0f => {}, // Applied in a second bounded pass, after all SVDs.
+                    0x79 => {
+                        if (len < 3 or data[1] != 0 or data[2] != 0 or !hdmiForum(data, result)) return false;
+                    },
                     else => result.warnings |= Warning.unknown,
                 }
             },
@@ -362,7 +404,9 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
             const enabled = len == 1 or (i / 8 < len - 1 and data[1 + i / 8] & (@as(u8, 1) << @as(u3, @intCast(i % 8))) != 0);
             if (!enabled) continue;
             if (i >= video_count) return false;
-            for (result.modes[0..result.mode_count]) |*mode| if (mode.vic == video[i]) { mode.flags |= timing.y420_allowed; };
+            for (result.modes[0..result.mode_count]) |*mode| if (mode.vic == video[i]) {
+                mode.flags |= timing.y420_allowed;
+            };
         }
     }
     pos = end;
@@ -380,6 +424,24 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
         detailed_count += 1;
     }
     return zero(block[pos..127]);
+}
+
+fn hdmiForum(data: []const u8, result: *Report) bool {
+    if (data.len < 7 or data[3] != 1 or data.len == 9) return false;
+    var info: refresh.Hdmi = .{};
+    if (data.len >= 8) info.flags = data[7];
+    if (data.len >= 10) {
+        info.refresh = .{ .min_millihz = @as(u32, data[8] & 63) * 1000, .max_millihz = ((@as(u32, data[8] >> 6) << 8) | data[9]) * 1000 };
+        if ((info.refresh.min_millihz != 0 or info.refresh.max_millihz != 0) and !info.refresh.valid()) return false;
+    }
+    if (result.refresh.hdmi) |prior| if (!std.meta.eql(prior, info)) return false;
+    result.refresh.hdmi = info;
+    result.hdmi = true;
+    result.max_tmds_hz = @max(result.max_tmds_hz, @as(u64, data[4]) * 5_000_000);
+    result.scdc = result.scdc or data[5] & 0x80 != 0;
+    result.scrambling_low_rates = result.scrambling_low_rates or data[5] & 8 != 0;
+    result.hdmi_deep_color_420 |= data[6] & 7;
+    return true;
 }
 
 fn parseDisplayId(block: []const u8, result: *Report) Error!bool {
@@ -405,10 +467,7 @@ fn parseDisplayId(block: []const u8, result: *Report) Error!bool {
                 const height = le16(data[12..]) + 1;
                 const hs = width + le16(data[8..]) % 32768 + 1;
                 const vs = height + le16(data[16..]) % 32768 + 1;
-                var mode = timing.Timing{ .width = width, .height = height,
-                    .clock_hz = (@as(u64, le24(data)) + 1) * (if (version == 1) @as(u64, 10000) else 1000),
-                    .h_total = width + le16(data[6..]) + 1, .v_total = height + le16(data[14..]) + 1,
-                    .h_start = hs, .h_end = hs + le16(data[10..]) + 1, .v_start = vs, .v_end = vs + le16(data[18..]) + 1 };
+                var mode = timing.Timing{ .width = width, .height = height, .clock_hz = (@as(u64, le24(data)) + 1) * (if (version == 1) @as(u64, 10000) else 1000), .h_total = width + le16(data[6..]) + 1, .v_total = height + le16(data[14..]) + 1, .h_start = hs, .h_end = hs + le16(data[10..]) + 1, .v_start = vs, .v_end = vs + le16(data[18..]) + 1 };
                 if (data[3] & 128 != 0) mode.flags |= timing.preferred;
                 if (data[3] & 16 != 0) mode.flags |= timing.interlaced | timing.incomplete;
                 if (data[3] & 0x60 != 0) mode.flags |= timing.incomplete;
@@ -416,6 +475,37 @@ fn parseDisplayId(block: []const u8, result: *Report) Error!bool {
                 if (data[17] & 128 != 0) mode.flags |= timing.v_positive;
                 if (!mode.valid()) return false;
                 try result.add(mode);
+            }
+        } else if (version == 2 and tag == 0x25) {
+            if (revision > 1 or len != 9) return false;
+            const data = block[pos..][0..len];
+            if (data[8] & (if (revision == 0) @as(u8, 0x7f) else 0x7c) != 0) return false;
+            const limits: refresh.DynamicLimits = .{
+                .refresh = .{ .min_millihz = @as(u32, data[6]) * 1000, .max_millihz = (@as(u32, data[7]) | (@as(u32, data[8] & 3) << 8)) * 1000 },
+                .min_pixel_clock_hz = (@as(u64, le24(data)) + 1) * 1000,
+                .max_pixel_clock_hz = (@as(u64, le24(data[3..])) + 1) * 1000,
+                .seamless = data[8] & 128 != 0,
+            };
+            if (!limits.refresh.valid() or limits.min_pixel_clock_hz > limits.max_pixel_clock_hz) return false;
+            if (result.refresh.dynamic) |prior| if (!std.meta.eql(prior, limits)) return false;
+            result.refresh.dynamic = limits;
+        } else if (version == 2 and tag == 0x2b) {
+            if (revision != 0 or len == 0 or len % 6 != 0) return false;
+            var offset: usize = 0;
+            while (offset < len) : (offset += 6) {
+                const data = block[pos + offset ..][0..6];
+                if (data[0] & 0xc0 != 0 or (data[0] >> 2) & 3 > 1 or data[4] & 0xfc != 0) return false;
+                const value: refresh.Adaptive = .{
+                    .refresh = .{ .min_millihz = @as(u32, data[2]) * 1000, .max_millihz = ((@as(u32, data[3]) | (@as(u32, data[4] & 3) << 8)) + 1) * 1000 },
+                    .native = data[0] & 1 != 0,
+                    .adaptive_vtotal = data[0] & 4 != 0,
+                    .seamless = data[0] & 16 == 0,
+                    .increase_without_jitter = data[0] & 2 != 0,
+                    .decrease_without_jitter = data[0] & 32 != 0,
+                    .max_increase_us = @as(u32, data[1]) * 250,
+                    .max_decrease_us = @as(u32, data[5]) * 250,
+                };
+                if (!value.refresh.valid() or !result.refresh.addAdaptive(value)) return false;
             }
         } else result.warnings |= Warning.unknown;
         pos += len;

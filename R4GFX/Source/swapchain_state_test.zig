@@ -93,4 +93,27 @@ pub fn check() !void {
     try t.expectEqual(s.Result.copied, (try chain.frame(cpu)).result);
     try t.expectEqual(@as(u64, 0), (try chain.frame(cpu)).times.visible_ns);
     try chain.release(cpu);
+    // A confirmed adaptive transition removes the old fixed-period render
+    // deadline, without inventing scanout visibility or releasing images.
+    try chain.configure(.{ .require_vsync = true }, direct);
+    const adaptive_front = try chain.acquire(201, 0);
+    try chain.present(adaptive_front, 202, .composition, false);
+    try chain.submitted(adaptive_front, 203);
+    chain.next_start_ns = 300;
+    var adaptive = direct; adaptive.adaptive = true; adaptive.phase_ns = 0; adaptive.interval_ns = 0;
+    try chain.refresh(adaptive);
+    const adaptive_back = try chain.acquire(204, 0);
+    try t.expect((try chain.frame(adaptive_front)).consumer_held and (try chain.frame(adaptive_front)).times.visible_ns == 0);
+    try chain.present(adaptive_back, 205, .composition, false);
+    try t.expect(chain.candidate() == null);
+    try chain.retired(adaptive_front, 206, true);
+    try chain.visible(adaptive_front, 207);
+    try chain.release(adaptive_front);
+    try chain.submitted(adaptive_back, 208);
+    try t.expect((try chain.frame(adaptive_back)).times.selected_ns == 0 and chain.next_start_ns == 0);
+    try chain.retired(adaptive_back, 209, true);
+    try chain.visible(adaptive_back, 210);
+    try chain.release(adaptive_back);
+    try chain.refresh(direct);
+    try t.expect(!chain.output.adaptive and chain.output.interval_ns == 16);
 }
