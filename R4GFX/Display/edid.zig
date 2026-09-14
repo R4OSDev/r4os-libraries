@@ -2,6 +2,7 @@
 // Protocol facts: locally pinned libdisplay-info interfaces and fixtures.
 const std = @import("std");
 pub const timing = @import("timing.zig");
+pub const color = @import("color_signal.zig");
 pub const eld = @import("eld.zig");
 const cta = @import("cta_timings.zig");
 pub const max_blocks = 32;
@@ -24,6 +25,11 @@ pub const Report = struct {
     name: [13]u8 = .{0} ** 13,
     digital: bool = false,
     bits_per_color: u8 = 0,
+    // EDID coordinates are exact10-bit fractions of1024, ordered Rxy,
+    // Gxy, Bxy, Wxy. Zero/degenerate values remain unspecified facts.
+    chromaticity: [8]u16 = @splat(0),
+    gamma_hundredths: u16 = 0,
+    srgb_default: bool = false,
     // RGB, YCbCr444, YCbCr422, YCbCr420. Sink facts, not source capabilities.
     colors: u8 = 1,
     declared_extensions: u8 = 0,
@@ -37,9 +43,21 @@ pub const Report = struct {
     max_tmds_hz: u64 = 0,
     scdc: bool = false,
     scrambling_low_rates: bool = false,
+    // HDMI DC30/DC36/DC48, independent of the base EDID input depth.
+    hdmi_deep_color: u8 = 0,
+    hdmi_deep_color_y444: bool = false,
+    hdmi_deep_color_420: u8 = 0,
+    video_capability: ?u8 = null,
+    rgb_quantization_selectable: bool = false,
+    ycc_quantization_selectable: bool = false,
     colorimetry: u16 = 0,
     hdr_eotf: u8 = 0,
     hdr_static: u8 = 0,
+    hdr_present: bool = false,
+    // Optional max, frame-average and min luminance codes; zero means
+    // unspecified. Keep signal codes intact rather than inventing defaults.
+    hdr_luminance: [3]u8 = @splat(0),
+    hdr_luminance_count: u8 = 0,
     speakers: u32 = 0,
     modes: [max_modes]timing.Timing = .{timing.Timing{}} ** max_modes,
     mode_count: usize = 0,
@@ -129,6 +147,12 @@ pub fn parse(bytes: []const u8, output: *Report) Error!void {
         result.bits_per_color = if (depth == 0) 0 else 4 + depth * 2;
         if (bytes[24] & 8 != 0) result.colors |= 2;
         if (bytes[24] & 16 != 0) result.colors |= 4;
+    }
+    result.gamma_hundredths = if (bytes[23] == 255) 0 else @as(u16, bytes[23]) + 100;
+    result.srgb_default = bytes[24] & 4 != 0;
+    for (0..8) |i| {
+        const low = (bytes[25 + i / 4] >> @as(u3, @intCast(6 - 2 * (i % 4)))) & 3;
+        result.chromaticity[i] = (@as(u16, bytes[27 + i]) << 2) | low;
     }
     for (0..4) |i| {
         const descriptor = bytes[54 + i * 18 ..][0..18];
@@ -266,7 +290,11 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
                 if (oui == 0x000c03) {
                     if (len < 5) return false;
                     result.hdmi = true;
-                    if (len >= 6) result.audio_infoframes = result.audio_infoframes or data[5] & 0x80 != 0;
+                    if (len >= 6) {
+                        result.audio_infoframes = result.audio_infoframes or data[5] & 0x80 != 0;
+                        result.hdmi_deep_color |= (data[5] >> 4) & 7;
+                        result.hdmi_deep_color_y444 = result.hdmi_deep_color_y444 or data[5] & 8 != 0;
+                    }
                     if (len >= 7) result.max_tmds_hz = @max(result.max_tmds_hz, @as(u64, data[6]) * 5_000_000);
                     if (len >= 8) {
                         const latency = data[7] & 0x80 != 0;
@@ -280,15 +308,34 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
                     result.max_tmds_hz = @max(result.max_tmds_hz, @as(u64, data[4]) * 5_000_000);
                     result.scdc = result.scdc or data[5] & 0x80 != 0;
                     result.scrambling_low_rates = result.scrambling_low_rates or data[5] & 8 != 0;
+                    result.hdmi_deep_color_420 |= data[6] & 7;
                 } else result.warnings |= Warning.unknown;
             },
             4 => { if (len != 3) return false; result.speakers |= le24(data); },
             7 => {
                 if (len == 0) return false;
                 switch (data[0]) {
-                    0 => { if (len != 2) return false; },
+                    0 => {
+                        if (len != 2) return false;
+                        if (result.video_capability) |previous| if (previous != data[1]) return false;
+                        result.video_capability = data[1];
+                        result.rgb_quantization_selectable = data[1] & 64 != 0;
+                        result.ycc_quantization_selectable = data[1] & 128 != 0;
+                    },
                     5 => { if (len != 3) return false; result.colorimetry |= @intCast(le16(data[1..])); },
-                    6 => { if (len < 3 or len > 6) return false; result.hdr_eotf |= data[1] & 15; result.hdr_static |= data[2] & 1; },
+                    6 => {
+                        if (len < 3 or len > 6) return false;
+                        var luminance: [3]u8 = @splat(0);
+                        @memcpy(luminance[0..len - 3], data[3..]);
+                        if ((luminance[2] != 0 and luminance[0] == 0) or
+                            (luminance[0] != 0 and luminance[1] > luminance[0])) return false;
+                        if (result.hdr_present and (result.hdr_eotf != data[1] & 15 or result.hdr_static != data[2] & 1 or
+                            result.hdr_luminance_count != len - 3 or !std.mem.eql(u8, &result.hdr_luminance, &luminance))) return false;
+                        if (data[1] & 0xf0 != 0 or data[2] & 0xfe != 0) result.warnings |= Warning.unknown;
+                        result.hdr_present = true;
+                        result.hdr_eotf = data[1] & 15; result.hdr_static = data[2] & 1;
+                        result.hdr_luminance = luminance; result.hdr_luminance_count = @intCast(len - 3);
+                    },
                     0x0e => {
                         if (len < 2) return false;
                         for (data[1..]) |raw| if (!try addVic(raw, timing.y420_only | timing.y420_allowed, result)) return false;

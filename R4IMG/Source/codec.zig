@@ -1,5 +1,7 @@
 const std = @import("std");
 const svg = @import("svg.zig");
+pub const color_metadata = @import("color_metadata.zig");
+pub const raster_color = @import("raster_color.zig");
 
 pub const max_dimension: u32 = 4096;
 pub const max_pixels: usize = 4096 * 2160;
@@ -58,6 +60,50 @@ extern fn r4img_stbi_decode(
 ) callconv(.c) c_int;
 extern fn r4img_stbi_arena_peak() callconv(.c) usize;
 extern fn r4img_stbi_arena_failed() callconv(.c) c_int;
+extern fn r4img_stbi_decode16(bytes: [*]const u8, length: usize, scratch: [*]u8, scratch_length: usize, pixels: [*]u16, pixel_capacity: usize, width: *c_int, height: *c_int, channels: *c_int) callconv(.c) c_int;
+
+pub const Image16 = struct { info: Info, metadata: color_metadata.Info, rgba: []u16 };
+pub fn pngScratchBytes16(info: Info, encoded_length: usize) Error!usize {
+    if (info.format != .png or encoded_length > color_metadata.max_encoded_bytes) return error.UnsupportedFormat;
+    const count = try info.pixelCount();
+    const pixel_bytes = std.math.mul(usize, count, 24) catch return error.TooLarge;
+    const encoded_bytes = std.math.mul(usize, encoded_length, 2) catch return error.TooLarge;
+    const bytes = std.math.add(usize, pixel_bytes, encoded_bytes) catch return error.TooLarge;
+    const total = std.math.add(usize, bytes, 65536) catch return error.TooLarge;
+    if (total > max_scratch_bytes) return error.TooLarge;
+    return total;
+}
+pub fn pngDecode16(bytes: []const u8, pixels: []u16, scratch: []u8) Error!Image16 {
+    const metadata = color_metadata.png(bytes) catch |err| return metadataError(err);
+    const info = try r4imgProbe(bytes, "image/png");
+    const count = try info.pixelCount();
+    if (pixels.len < count * 4) return error.PixelBufferTooSmall;
+    const required = try pngScratchBytes16(info, bytes.len);
+    if (scratch.len < required) return error.ScratchBufferTooSmall;
+    const output = std.mem.sliceAsBytes(pixels[0 .. count * 4]);
+    if (spansOverlap(bytes, output) or spansOverlap(bytes, scratch) or spansOverlap(output, scratch)) return error.InvalidImage;
+    var width: c_int = 0;
+    var height: c_int = 0;
+    var channels: c_int = 0;
+    if (r4img_stbi_decode16(bytes.ptr, bytes.len, scratch.ptr, scratch.len, pixels.ptr, pixels.len / 4, &width, &height, &channels) == 0) return error.DecodeFailed;
+    if (width != info.width or height != info.height) return error.InvalidImage;
+    return .{ .info = info, .metadata = metadata, .rgba = pixels[0 .. count * 4] };
+}
+fn metadataError(err: color_metadata.Error) Error {
+    return switch (err) {
+        error.InvalidImage => error.InvalidImage,
+        error.UnsupportedFeature => error.UnsupportedFeature,
+        error.TooLarge => error.TooLarge,
+        error.PixelBufferTooSmall => error.PixelBufferTooSmall,
+    };
+}
+fn spansOverlap(first: []const u8, second: []const u8) bool {
+    const a = @intFromPtr(first.ptr);
+    const b = @intFromPtr(second.ptr);
+    const end = std.math.add(usize, a, first.len) catch return true;
+    const limit = std.math.add(usize, b, second.len) catch return true;
+    return first.len != 0 and second.len != 0 and a < limit and b < end;
+}
 
 pub const DecoderDiagnostic = struct {
     scratch_peak: usize,

@@ -44,7 +44,8 @@ fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, outpu
     if (direct and device.gpu_operations & c.device_gpu_direct == 0) return error.Unsupported;
     const source = try device.resource(request.source, true);
     if (source.invalidated) return error.Stale;
-    if (source.kind != c.resource_image or source.backing.reference.id == 0 or source.descriptor.format != a.gfx_buffer_format_xrgb8888 or
+    if (source.kind != c.resource_image or source.backing.reference.id == 0 or
+        (source.descriptor.format != a.gfx_buffer_format_xrgb8888 and source.descriptor.format != a.gfx_buffer_format_xrgb2101010) or
         (route == null and source.descriptor.location != a.gfx_buffer_location_device_local))
         return error.Unsupported;
     if (route) |selected| {
@@ -54,6 +55,7 @@ fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, outpu
     }
     if (direct and (source.descriptor.usage & a.gfx_buffer_usage_scanout == 0 or source.descriptor.modifier != 0 or
         source.descriptor.plane_count != 1 or source.descriptor.plane_offsets[0] != 0 or source.descriptor.plane_pitches[0] & 63 != 0)) return error.Unsupported;
+    try @import("device_output_color.zig").validate(device, source, if (route) |selected| selected.target else null);
     const index = for (&device.jobs, 0..) |*item, i| { if (item.serial == 0) break i; } else return error.Limit;
     const serial = std.math.add(u64, device.job_serial, 1) catch return error.Limit;
     if (source.job_refs == std.math.maxInt(u32)) return error.Limit;

@@ -31,6 +31,66 @@ pub const R4ImgDecoderDiagnostic = extern struct {
     allocation_failed: u32,
     reserved: u32,
 };
+
+pub const R4ImgPngColor = extern struct {
+    version: u32,
+    size: u32,
+    kind: u32,
+    flags: u32,
+    bit_depth: u32,
+    color_type: u32,
+    cicp_primaries: u32,
+    cicp_transfer: u32,
+    cicp_matrix: u32,
+    cicp_full_range: u32,
+    intent: u32,
+    gamma: u32,
+    white_x: u32,
+    white_y: u32,
+    red_x: u32,
+    red_y: u32,
+    green_x: u32,
+    green_y: u32,
+    blue_x: u32,
+    blue_y: u32,
+    mastering_red_x: u32,
+    mastering_red_y: u32,
+    mastering_green_x: u32,
+    mastering_green_y: u32,
+    mastering_blue_x: u32,
+    mastering_blue_y: u32,
+    mastering_white_x: u32,
+    mastering_white_y: u32,
+    mastering_maximum: u32,
+    mastering_minimum: u32,
+    content_maximum: u32,
+    content_average: u32,
+};
+
+pub const R4ImgRasterColor = extern struct {
+    version: u32,
+    size: u32,
+    format: u32,
+    kind: u32,
+    color_model: u32,
+    flags: u32,
+    intent: u32,
+    reserved: u32,
+    red_x: i32,
+    red_y: i32,
+    red_z: i32,
+    green_x: i32,
+    green_y: i32,
+    green_z: i32,
+    blue_x: i32,
+    blue_y: i32,
+    blue_z: i32,
+    gamma_red: u32,
+    gamma_green: u32,
+    gamma_blue: u32,
+    profile_bytes: u32,
+    reserved1: u32,
+};
 pub const status_ok: i32 = 0;
 pub const format_png: u32 = 0;
 pub const format_jpeg: u32 = 1;
@@ -43,6 +103,30 @@ pub const max_dimension: u32 = 4096;
 pub const max_pixels: u64 = 8847360;
 pub const max_scratch_bytes: u64 = 234881024;
 pub const max_svg_source_bytes: u64 = 262144;
+pub const png_color_unspecified: u32 = 0;
+pub const png_color_cicp: u32 = 1;
+pub const png_color_icc: u32 = 2;
+pub const png_color_srgb: u32 = 3;
+pub const png_color_gamma_chroma: u32 = 4;
+pub const png_color_unknown: u32 = 5;
+pub const png_has_cicp: u32 = 1;
+pub const png_has_icc: u32 = 2;
+pub const png_has_srgb: u32 = 4;
+pub const png_has_gamma: u32 = 8;
+pub const png_has_chroma: u32 = 16;
+pub const png_has_mastering: u32 = 32;
+pub const png_has_content_light: u32 = 64;
+pub const max_color_encoded_bytes: u32 = 134217728;
+pub const max_color_profile_bytes: u32 = 4194304;
+pub const raster_color_unspecified: u32 = 0;
+pub const raster_color_srgb: u32 = 1;
+pub const raster_color_icc: u32 = 2;
+pub const raster_color_calibrated: u32 = 3;
+pub const raster_color_unknown: u32 = 4;
+pub const raster_color_linked: u32 = 5;
+pub const raster_model_rgb: u32 = 1;
+pub const raster_model_gray: u32 = 2;
+pub const raster_model_cmyk: u32 = 3;
 pub const status_empty: i32 = -1;
 pub const status_unsupported_format: i32 = -2;
 pub const status_invalid_image: i32 = -3;
@@ -80,4 +164,48 @@ pub const ApiV1 = extern struct {
     decode_svg_at: ApiV1DecodeSvgAtFn,
     scale_composite: ApiV1ScaleCompositeFn,
     decoder_diagnostic: ApiV1DecoderDiagnosticFn,
+};
+
+pub const png_v1_export_name = "PNG_V1";
+pub const png_v1_revision: u16 = 1;
+pub const png_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 64,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x52494d47504e4731,
+    .interface_id_hi = 0x52434f4c4f525031,
+};
+pub const PngV1PngColorInfoFn = *const fn (encoded: [*]const u8, encoded_length: u64, output: *R4ImgPngColor) callconv(.c) i32;
+pub const PngV1PngIccProfileFn = *const fn (encoded: [*]const u8, encoded_length: u64, profile: [*]u8, profile_capacity: u64, output_bytes: *u64) callconv(.c) i32;
+pub const PngV1PngScratchBytes16Fn = *const fn (info: *const R4ImgInfo, encoded_length: u64, output_bytes: *u64) callconv(.c) i32;
+pub const PngV1PngDecode16Fn = *const fn (encoded: [*]const u8, encoded_length: u64, channels: [*]u16, channel_capacity: u64, scratch: [*]u8, scratch_length: u64, output_info: *R4ImgInfo, output_color: *R4ImgPngColor, output_pixel_count: *u64) callconv(.c) i32;
+pub const PngV1 = extern struct {
+    header: InterfaceHeader,
+    png_color_info: PngV1PngColorInfoFn,
+    png_icc_profile: PngV1PngIccProfileFn,
+    png_scratch_bytes16: PngV1PngScratchBytes16Fn,
+    png_decode16: PngV1PngDecode16Fn,
+};
+
+pub const raster_v1_export_name = "RASTER_V1";
+pub const raster_v1_revision: u16 = 1;
+pub const raster_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 48,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x5241535445523031,
+    .interface_id_hi = 0x5234494d47434f31,
+};
+pub const RasterV1RasterColorInfoFn = *const fn (encoded: [*]const u8, encoded_length: u64, output: *R4ImgRasterColor) callconv(.c) i32;
+pub const RasterV1RasterIccProfileFn = *const fn (encoded: [*]const u8, encoded_length: u64, profile: [*]u8, profile_capacity: u64, output_bytes: *u64) callconv(.c) i32;
+pub const RasterV1 = extern struct {
+    header: InterfaceHeader,
+    raster_color_info: RasterV1RasterColorInfoFn,
+    raster_icc_profile: RasterV1RasterIccProfileFn,
 };

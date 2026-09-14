@@ -194,3 +194,22 @@ int r4img_stbi_decode(
     }
     return 1;
 }
+
+/* Caller-serialized, same bounded arena as the established8-bit decoder.
+ * Preserve all16 source bits;8-bit channels expand exactly by257. Alpha is
+ * straight, full-range and linear. No transfer or color-profile conversion. */
+int r4img_stbi_decode16(const unsigned char *bytes, size_t length,
+    unsigned char *scratch, size_t scratch_length, uint16_t *pixels,
+    size_t pixel_capacity, int *width, int *height, int *channels)
+{
+    stbi_us *rgba;
+    size_t count;
+    if (!bytes || !length || length > 0x7fffffffu || !scratch || !pixels) return 0;
+    r4img_arena_reset(scratch, scratch_length);
+    rgba = stbi_load_16_from_memory(bytes, (int)length, width, height, channels, STBI_rgb_alpha);
+    if (!rgba || *width <= 0 || *height <= 0) return 0;
+    count = (size_t)*width * (size_t)*height;
+    if (count / (size_t)*width != (size_t)*height || count > pixel_capacity) return 0;
+    r4img_memcpy(pixels, rgba, count * 4u * sizeof(uint16_t));
+    return 1;
+}

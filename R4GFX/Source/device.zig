@@ -6,6 +6,8 @@ const r4os = @import("r4os");
 const a = r4os.abi;
 pub const c = @import("r4l_contract");
 pub const swapchain = @import("device_swapchain.zig");
+pub const color_api = @import("color_api.zig");
+pub const color_resource = @import("color_resource.zig");
 const nv = @import("r4nv_binding");
 const live_magic: u64 = 0x5234474658444556;
 const closed_magic: u64 = 0x5234474658434c53;
@@ -66,6 +68,7 @@ pub const Resource = struct {
     sampler: u32 = 0,
     operation: u32 = 0,
     image: c.R4GfxCpuImage = empty_image,
+    color: ?c.R4GfxColorDescription = null,
     backing: a.GfxBufferReference = .{},
     descriptor: a.GfxBufferDescriptor = .{},
     map: a.GfxBufferMap = .{},
@@ -232,6 +235,7 @@ pub const Device = struct {
                 if (snapshot.operations & 16 != 0) gpu_operations |= c.device_gpu_render;
                 if (snapshot.operations & 64 != 0) gpu_operations |= c.device_gpu_render_list;
                 if (snapshot.operations & 256 != 0) gpu_operations |= c.device_gpu_grid;
+                if (snapshot.operations & 512 != 0) gpu_operations |= c.device_gpu_color;
                 if (snapshot.operations & 32 != 0) gpu_operations |= c.device_gpu_present;
                 if (snapshot.operations & 128 != 0) gpu_operations |= c.device_gpu_direct;
                 break;
@@ -373,6 +377,11 @@ pub fn submitRenderList(handle: *const c.R4GfxDevice, request: *const c.R4GfxRen
     const device = get(handle, false) catch |err| return code(err);
     separateInput(handle, output) catch |err| return code(err);
     return @import("device_native_render.zig").submitList(device, request, output) catch |err| code(err);
+}
+pub fn submitColorRender(handle: *const c.R4GfxDevice, request: *const c.R4GfxRenderListRequest, flags: u32, output: *c.R4GfxJob) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    separateInput(handle, output) catch |err| return code(err);
+    return @import("device_native_render.zig").submitColorList(device, request, flags, output) catch |err| code(err);
 }
 pub fn prepareImage(handle: *const c.R4GfxDevice, request: *const c.R4GfxImagePrepareRequest, output: *c.R4GfxPreparedImage) callconv(.c) i32 {
     const device = get(handle, false) catch |err| return code(err);

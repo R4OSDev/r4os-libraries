@@ -119,7 +119,7 @@ pub const image = @import("render_image.zig");
 const hw = @import("Generated/Render/c797.zig");
 const shaders = @import("Generated/Shaders/shaders.zig");
 pub const Error = image.Error || error{Empty};
-pub const packet_bytes = 1024;
+pub const packet_bytes = 1280;
 pub const batch_capacity = 16;
 pub const packet_capacity_bytes = packet_bytes * batch_capacity;
 pub const shader_bytes = shaderOffset(shaders.programs.len);
@@ -145,7 +145,8 @@ pub const Rect = struct {
     }
 };
 pub const Blend = enum { replace, over };
-pub const Transfer = enum { identity, decode_srgb, encode_srgb };
+pub const Transfer = enum { identity, decode_srgb, encode_srgb, color };
+pub const ColorProgram = @import("render_color.zig").Program;
 pub const reference_model = if (@import("builtin").is_test) @import("render_reference.zig") else struct {};
 pub const Draw = struct {
     target: image.Image,
@@ -156,15 +157,24 @@ pub const Draw = struct {
     filter: image.Filter = .nearest,
     blend: Blend = .replace,
     transfer: Transfer = .identity,
+    color_program: ?ColorProgram = null,
     color: u32 = 0,
     opacity: u8 = 255,
     grid: @import("render_grid.zig").Grid = .{},
 
     pub fn profile(self: Draw) u32 {
         if (self.source == null) return 5;
-        return switch (self.transfer) { .identity => 2, .decode_srgb => 3, .encode_srgb => 4 };
+        return switch (self.transfer) { .identity => 2, .decode_srgb => 3, .encode_srgb => 4, .color => 7 };
     }
     pub fn validate(self: Draw) Error!void {
+        if ((self.transfer == .color) != (self.color_program != null)) return error.Unsupported;
+        if (self.color_program) |program| {
+            try program.validate();
+            if (self.source == null or self.filter != .nearest or self.grid.enabled != 0) return error.Unsupported;
+            if (self.blend == .over and (program.words[0] & 1 != 0 or program.words[2] != 2 or program.words[4] != 4 or
+                self.target.format != .abgr16161616f)) return error.Unsupported;
+            if (self.target.format == .abgr16161616f and program.words[0] & 2 != 0) return error.Unsupported;
+        }
         _ = try image.target(self.target);
         if (!self.destination.valid() or !self.scissor.valid()) return error.Bounds;
         if (self.source) |source| {
@@ -178,7 +188,7 @@ pub const Draw = struct {
             if ((source.format == .r8) != (self.target.format == .r8) or self.color != 0) return error.Unsupported;
         } else if (self.transfer != .identity) return error.Unsupported;
         if (self.target.format == .r8 and (self.blend != .replace or self.transfer != .identity)) return error.Unsupported;
-        if (self.source == null and self.target.format == .argb8888) {
+        if (self.source == null and self.target.format.hasAlpha()) {
             const alpha = self.color >> 24;
             if ((self.color & 255) > alpha or ((self.color >> 8) & 255) > alpha or ((self.color >> 16) & 255) > alpha) return error.Bounds;
         }
@@ -225,7 +235,8 @@ pub const Binding = struct {
 };
 pub fn compatible(first: Draw, next: Draw) bool {
     return std.meta.eql(first.target, next.target) and std.meta.eql(first.source, next.source) and
-        first.filter == next.filter and first.blend == next.blend and first.transfer == next.transfer;
+        first.filter == next.filter and first.blend == next.blend and first.transfer == next.transfer and
+        std.meta.eql(first.color_program, next.color_program);
 }
 pub fn shaderOffset(index: usize) u32 {
     var offset: u32 = 0;
@@ -250,6 +261,7 @@ pub fn packetUpload(draw: Draw, out: []u8) Error!void {
     try draw.validate();
     if (out.len != packet_bytes) return error.Bounds;
     @memset(out, 0);
+    if (draw.color_program) |program| @memcpy(out[1024..1280], std.mem.asBytes(&program));
     if (draw.source) |source| {
         const tic = try image.texture(source);
         const tsc = image.sampler(draw.filter);
@@ -278,7 +290,7 @@ pub fn packetUpload(draw: Draw, out: []u8) Error!void {
         } else {
             for ([_]u5{16,8,0,24}, 0..) |shift, i|
                 tint[i] = @as(f32, @floatFromInt((draw.color >> shift) & 255)) / 255.0 * factor;
-            if (draw.target.format == .xrgb8888) tint[3] = factor;
+            if (!draw.target.format.hasAlpha()) tint[3] = factor;
         }
     }
     const width: f32 = @floatFromInt(draw.target.width);
@@ -374,6 +386,11 @@ fn encodeDraw(draw: Draw, packet: u64, out: *Program) Error!void {
         try out.words(hw.SET_CONSTANT_BUFFER_SELECTOR_A, &.{256, @intCast(constants >> 32), @truncate(constants)});
         try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 | (1 << 4));
     } else try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 << 4);
+    if (draw.color_program != null) {
+        const constants = packet + 1024;
+        try out.words(hw.SET_CONSTANT_BUFFER_SELECTOR_A, &.{256, @intCast(constants >> 32), @truncate(constants)});
+        try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 | (2 << 4));
+    }
     try out.words(hw.SET_DRAW_CONTROL_A, &.{hw.draw_control, 1});
     try out.words(hw.DRAW_VERTEX_ARRAY_BEGIN_END_A, &.{0, 4});
 }

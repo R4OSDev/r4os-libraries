@@ -29,7 +29,7 @@ int main(int argc, char **argv)
    char *end;
    errno = 0;
    unsigned long profile = strtoul(argv[1], &end, 10);
-   if (errno || *end || profile < R4NV_RECT_VERTEX || profile > R4NV_SOLID_VERTEX)
+   if (errno || *end || profile < R4NV_RECT_VERTEX || profile > R4NV_COLOR_FRAGMENT)
       return 2;
    const struct nv_device_info dev = {
       .type = NV_DEVICE_TYPE_DIS, .sm = 86, .max_warps_per_mp = 48,

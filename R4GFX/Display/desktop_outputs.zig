@@ -4,6 +4,10 @@ const std = @import("std");
 const a = @import("r4os").abi;
 pub const topology = @import("topology.zig");
 pub const preferences = @import("preferences.zig");
+pub const color_preferences = @import("color_preferences.zig");
+pub const profiles = @import("display_profile.zig");
+pub const color = @import("color_signal.zig");
+pub const color_control = @import("color_control.zig");
 pub const control = @import("control.zig");
 pub const modes = @import("mode_control.zig");
 const edid = @import("edid.zig");
@@ -11,6 +15,7 @@ pub const Entry = struct {
     info: a.GfxOutputInfo = .{},
     target: a.GfxOutputTarget = .{},
     presentation: a.DisplayPresentationInfo = .{},
+    color: ?a.GfxOutputColorState = null,
     key: topology.Key = .{},
     name: [14]u8 = @splat(0),
     pub fn active(self: *const Entry) bool { return self.target.connector_id != 0; }
@@ -43,29 +48,19 @@ pub const Snapshot = struct {
             if (outputs.info(@intCast(i), &value.info) != a.gfx_output_ok or value.info.topology_revision != before.revision) return error.Stale;
             if (value.info.flags & a.gfx_output_flag_connected == 0 or value.info.flags & a.gfx_output_flag_receiver_only != 0) continue;
             if (result.count == result.entries.len) return error.Capacity;
+            var encoding: a.GfxOutputColorState = .{};
+            const color_rc = outputs.color(&value.info.identity, &encoding);
+            if (color_rc == a.gfx_output_ok) {
+                if (encoding.revision != before.revision or !std.meta.eql(encoding.identity, value.info.identity)) return error.Stale;
+                value.color = encoding;
+            } else if (color_rc != a.err_no_fn and color_rc != a.gfx_output_error_unsupported) return error.Stale;
             // Driver adapter IDs encode the stable PCI location. Connection
             // and device generations deliberately do not enter saved keys.
             value.key = .{ .adapter = value.info.identity.adapter_id, .connector = value.info.identity.connector_id };
-            if (value.info.edid_bytes != 0 and value.info.edid_bytes <= edid.max_blocks * 128 and value.info.edid_bytes % 128 == 0) {
-                var bytes: [edid.max_blocks * 128]u8 = undefined;
-                var complete = true;
-                for (0..value.info.edid_bytes / 128) |block_index| {
-                    var block: a.GfxEdidBlock = .{};
-                    if (outputs.edid(&value.info.identity, @intCast(block_index), &block) != a.gfx_output_ok or
-                        !std.meta.eql(block.identity, value.info.identity) or block.byte_count != 128 or block.block_index != block_index) {
-                        complete = false; break;
-                    }
-                    @memcpy(bytes[block_index * 128..][0..128], &block.data);
-                }
-                if (complete) {
-                    var report: edid.Report = .{};
-                    edid.parse(bytes[0..value.info.edid_bytes], &report) catch { complete = false; };
-                    if (complete and report.complete()) {
-                        @memcpy(value.name[0..13], &report.name);
-                        value.key = topology.Key.fromReport(value.key.adapter, value.key.connector, &report) catch value.key;
-                    }
-                }
-            }
+            if (readReceiver(draw, &value.info)) |report| {
+                @memcpy(value.name[0..13], &report.name);
+                value.key = topology.Key.fromReport(value.key.adapter, value.key.connector, &report) catch value.key;
+            } else |_| {}
             if (value.info.flags & a.gfx_output_flag_active != 0) for (0..topology.capacity) |head| {
                 var target: a.GfxOutputTarget = .{};
                 if (draw.displayOutputTarget(value.info.identity.adapter_id, @intCast(head), &target) != a.gfx_output_ok or
@@ -84,3 +79,21 @@ pub const Snapshot = struct {
         return result;
     }
 };
+
+pub fn readReceiver(draw: anytype, info: *const a.GfxOutputInfo) !edid.Report {
+    if (info.edid_bytes == 0 or info.edid_bytes > edid.max_blocks * 128 or info.edid_bytes % 128 != 0) return error.Unavailable;
+    var bytes: [edid.max_blocks * 128]u8 = undefined;
+    const outputs = draw.outputs();
+    for (0..info.edid_bytes / 128) |index| {
+        var block: a.GfxEdidBlock = .{};
+        if (outputs.edid(&info.identity, @intCast(index), &block) != a.gfx_output_ok or
+            !std.meta.eql(block.identity, info.identity) or block.byte_count != 128 or block.block_index != index) return error.Stale;
+        @memcpy(bytes[index * 128..][0..128], &block.data);
+    }
+    var after: a.GfxDisplayRevision = .{};
+    if (outputs.revision(&after) != a.gfx_output_ok or after.revision != info.topology_revision) return error.Stale;
+    var report: edid.Report = .{};
+    try edid.parse(bytes[0..info.edid_bytes], &report);
+    if (!report.complete()) return error.Incomplete;
+    return report;
+}

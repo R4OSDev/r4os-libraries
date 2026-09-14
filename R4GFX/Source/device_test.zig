@@ -27,6 +27,7 @@ const Model = struct {
     var job_request: a.GfxSubmission = .{};
     var job_list: a.GfxRenderList = .{};
     var job_grid_list: a.GfxRenderGridList = .{};
+    var job_color_list: a.GfxRenderColorList = .{};
     var operations: u64 = 7;
     var dependency_seen = false;
     var native_request: a.GfxNativeAllocation = .{};
@@ -45,6 +46,11 @@ const Model = struct {
     const Output = struct { target: a.GfxOutputTarget = .{}, info: a.DisplayPresentationInfo = .{},
         status: a.GfxFenceStatus = .{}, request: a.GfxSubmission = .{}, live: bool = false, connected: bool = true };
     var outputs: [2]Output = @splat(.{});
+    var output_color: a.GfxOutputColorState = .{};
+    fn outputColor(identity: *const a.GfxOutputId, out: *a.GfxOutputColorState) callconv(.c) i32 {
+        if (!std.meta.eql(identity.*, output_color.identity)) return a.gfx_output_error_stale;
+        out.* = output_color; return a.gfx_output_ok;
+    }
     var binding: a.GfxBackendBinding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
     var nv_table: nv.BackendV1 = .{ .header = nv.backend_v1_header,
         .negotiate = @ptrCast(&nv_provider.r4nv_negotiate_impl), .encode_copy = @ptrCast(&nv_provider.r4nv_encode_copy_impl),
@@ -56,7 +62,7 @@ const Model = struct {
         serial = 0x100000000; exports = 0; maps = 0; fail_unmap = false; premature_closes = 0; inventory_reads = 0; job_live = false;
         binding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
         nv_table.header = nv.backend_v1_header;
-        operations = 7; dependency_seen = false; job_list = .{}; job_grid_list = .{};
+        operations = 7; dependency_seen = false; job_list = .{}; job_grid_list = .{}; job_color_list = .{};
         native_request = .{}; native_handle = .{}; native_result = 1;
         native_starts = 0; bad_native_layout = false;
         clock = 100; submit_serial = 0x400000017; feedback = null; shown = @splat(0xabcdef); present_calls = 0; fail_present = false;
@@ -186,7 +192,7 @@ const Model = struct {
     }
     fn map(input: *const a.GfxBufferHandle, access: u32, offset: u64, bytes: u64, out: *a.GfxBufferMap) callconv(.c) i32 {
         const value = ref(input.*);
-        std.debug.assert(!value.mapped and access <= 1 and offset == 0 and bytes == 64);
+        std.debug.assert(!value.mapped and access <= 1 and offset == 0 and bytes == objects[value.object.?].descriptor.byte_length);
         value.mapped = true; maps += 1;
         out.* = .{ .lease = input.*, .cpu_address = @intFromPtr(&objects[value.object.?].bytes), .byte_length = bytes };
         return 1;
@@ -228,7 +234,7 @@ const Model = struct {
     fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
         std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows or
             input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_render_list or input.operation == a.gfx_queue_operation_present or
-            input.operation == a.gfx_queue_operation_direct_present or input.operation == a.gfx_queue_operation_render_grid_list) and input.dependency_count <= 1);
+            input.operation == a.gfx_queue_operation_direct_present or input.operation == a.gfx_queue_operation_render_grid_list or input.operation == a.gfx_queue_operation_render_color_list) and input.dependency_count <= 1);
         if (input.dependency_count == 1) {
             std.debug.assert(job_live and std.meta.eql(input.dependencies[0], status.fence));
             dependency_seen = true;
@@ -251,6 +257,12 @@ const Model = struct {
         std.debug.assert(input.operation == a.gfx_queue_operation_render_grid_list and list.count > 0 and list.count <= 16);
         const rc = submit(queue, input, out);
         if (rc == a.gfx_queue_ok) job_grid_list = list.*;
+        return rc;
+    }
+    fn submitColorList(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, list: *const a.GfxRenderColorList, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        std.debug.assert(input.operation == a.gfx_queue_operation_render_color_list and list.count > 0 and list.count <= 16);
+        const rc = submit(queue, input, out);
+        if (rc == a.gfx_queue_ok) job_color_list = list.*;
         return rc;
     }
     fn query(input: *const a.GfxFence, out: *a.GfxFenceStatus) callconv(.c) i32 {
@@ -316,6 +328,7 @@ pub fn check() !void {
         .gfx_queue_open = @intFromPtr(&Model.open), .gfx_queue_close = @intFromPtr(&Model.close), .gfx_queue_submit = @intFromPtr(&Model.submit),
         .gfx_queue_submit_render_list = @intFromPtr(&Model.submitList),
         .gfx_queue_submit_render_grid_list = @intFromPtr(&Model.submitGridList),
+        .gfx_queue_submit_render_color_list = @intFromPtr(&Model.submitColorList),
         .display_presentation_info = @intFromPtr(&Model.presentInfo), .display_presentation_feedback = @intFromPtr(&Model.presentFeedback),
         .display_present_regions = @intFromPtr(&Model.presentPixels),
         .gfx_fence_query = @intFromPtr(&Model.query), .gfx_fence_cancel = @intFromPtr(&Model.cancel), .gfx_fence_release = @intFromPtr(&Model.drop) };
@@ -332,6 +345,7 @@ pub fn check() !void {
     var state: c.R4GfxDeviceInfo = undefined;
     try t.expectEqual(c.status_ok, api.device_info(&handle, &state));
     try t.expect(state.backend == c.render_backend_software and state.gpu_operations == 0 and Model.inventory_reads == 0);
+    try checkColorResources(&handle);
     var alias_bytes: [@sizeOf(c.R4GfxDeviceInfo)]u8 align(8) = @splat(0);
     @memcpy(alias_bytes[0..@sizeOf(c.R4GfxDevice)], std.mem.asBytes(&handle));
     try t.expectEqual(c.status_alias, api.device_info(@ptrCast(&alias_bytes), @ptrCast(&alias_bytes)));
@@ -506,6 +520,7 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
     try checkNativeRender(&config);
+    try checkNativeColor(&config);
     try checkNativeGrid(&config);
     try checkNativePresent(&config);
     try checkImagePreparation(&config);
@@ -515,6 +530,85 @@ pub fn check() !void {
     draw.display_output_presentation_info = @intFromPtr(&Model.outputInfo);
     draw.gfx_queue_submit_output = @intFromPtr(&Model.submitOutput);
     try checkOutputSwapchains(config);
+}
+
+fn checkColorResources(handle: *const c.R4GfxDevice) !void {
+    const original_maps = Model.maps;
+    defer Model.maps = original_maps;
+    const colors = &@import("main.zig").r4gfx_color_v1;
+    const desc: c.R4GfxColorDescription = .{ .version = 1, .size = @sizeOf(c.R4GfxColorDescription),
+        .primaries = c.color_primaries_srgb, .transfer = c.color_transfer_srgb, .range = c.color_range_full,
+        .alpha = c.color_alpha_opaque, .precision = c.color_precision_unorm8, .flags = 0,
+        .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 };
+    var pixels: [64]u8 align(8) = @splat(0xff);
+    var source_desc: c.R4GfxColorResourceDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxColorResourceDesc), .resource = cpuImage(&pixels), .description = desc };
+    var source: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, colors.color_resource_create(handle, &source_desc, &source));
+    defer _ = api.resource_release(handle, &source);
+    var linear = desc;
+    linear.transfer = c.color_transfer_linear; linear.precision = c.color_precision_float16; linear.alpha = c.color_alpha_optical;
+    var target_desc: c.R4GfxColorResourceDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxColorResourceDesc), .resource = descriptor(c.resource_image), .description = linear };
+    target_desc.resource.flags = c.image_target; target_desc.resource.source_kind = c.source_create_system;
+    target_desc.resource.image = .{ .cpu_address = 0, .byte_length = 128, .pitch = 32, .width = 4, .height = 4, .format = c.format_abgr16161616f, .reserved = 0 };
+    var target: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_unsupported, api.resource_create(handle, &target_desc.resource, &target));
+    try t.expectEqual(c.status_ok, colors.color_resource_create(handle, &target_desc, &target));
+    defer _ = api.resource_release(handle, &target);
+    var metadata: c.R4GfxColorDescription = undefined;
+    try t.expectEqual(c.status_ok, colors.color_resource_info(handle, &target, &metadata));
+    try t.expectEqualDeep(linear, metadata);
+    const request: c.R4GfxColorTransform = .{ .version = 1, .size = @sizeOf(c.R4GfxColorTransform),
+        .source_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 }, .target_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 },
+        .sampler = c.render_sampler_nearest, .operation = c.render_operation_blit, .opacity = 65535, .flags = 0, .pixel_budget = 16 };
+    var stats: c.R4GfxCpuStats = undefined;
+    const maps = Model.maps;
+    try t.expectEqual(c.status_alias, colors.color_resource_transform(handle, &source, &target, &request, @ptrCast(&pixels)));
+    try t.expectEqual(c.status_ok, colors.color_resource_transform(handle, &source, &target, &request, &stats));
+    try t.expect(stats.pixels == 16 and stats.write_bytes == 128 and Model.maps == maps + 1);
+    const device = try d.get(handle, false);
+    const target_item = try device.resource(target, true);
+    const object = Model.references[target_item.backing.reference.id - 1].object.?;
+    for (0..16) |i| try t.expectEqualSlices(u8, &.{ 0, 0x3c, 0, 0x3c, 0, 0x3c, 0, 0x3c }, Model.objects[object].bytes[i * 8..][0..8]);
+    // Same pixels with a distinct color description cannot reuse one logical
+    // resource, nor overwrite the first resource's immutable interpretation.
+    source_desc.description.transfer = c.color_transfer_linear;
+    var alternate: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, colors.color_resource_create(handle, &source_desc, &alternate));
+    defer _ = api.resource_release(handle, &alternate);
+    try t.expect(!std.meta.eql(source, alternate));
+    try t.expectEqual(c.status_ok, colors.color_resource_info(handle, &source, &metadata));
+    try t.expectEqualDeep(desc, metadata);
+    const guard = @import("color_resource.zig").nativeTransition;
+    const from = try device.resource(source, true);
+    try guard(from, target_item, c.render_transfer_srgb_decode, c.render_operation_over, 0);
+    try t.expectError(error.Unsupported, guard(from, target_item, c.render_transfer_identity, c.render_operation_over, 0));
+    try t.expectError(error.Unsupported, guard(target_item, from, c.render_transfer_srgb_encode, c.render_operation_over, 0));
+    Model.fail_unmap = true;
+    try t.expectEqual(c.status_busy, colors.color_resource_transform(handle, &source, &target, &request, &stats));
+    try t.expect(target_item.map.lease.id != 0);
+    Model.fail_unmap = false;
+    try t.expect(device.cleanResources());
+    // A named read-only view retains the BO after the writer resource is
+    // released, while forbidding an incompatible reinterpretation.
+    var parent: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, colors.color_resource_create(handle, &target_desc, &parent));
+    var view_desc = target_desc;
+    view_desc.resource = descriptor(c.resource_image);
+    view_desc.resource.source_kind = c.source_color_view;
+    view_desc.resource.source_address = @intFromPtr(&parent);
+    var view: c.R4GfxResource = undefined;
+    view_desc.description.peak *= 2;
+    try t.expectEqual(c.status_unsupported, colors.color_resource_create(handle, &view_desc, &view));
+    view_desc.description = linear;
+    try t.expectEqual(c.status_ok, colors.color_resource_create(handle, &view_desc, &view));
+    defer _ = api.resource_release(handle, &view);
+    const parent_item = try device.resource(parent, true);
+    const view_item = try device.resource(view, true);
+    try t.expectEqualDeep(parent_item.backing.buffer, view_item.backing.buffer);
+    try t.expect(!std.meta.eql(parent_item.backing.reference, view_item.backing.reference) and view_item.flags == 0);
+    try t.expectEqual(c.status_ok, api.resource_release(handle, &parent));
+    try t.expectEqual(c.status_ok, colors.color_resource_info(handle, &view, &metadata));
+    try t.expectEqualDeep(linear, metadata);
 }
 
 fn checkOutputSwapchains(input: c.R4GfxDeviceConfig) !void {
@@ -1028,6 +1122,89 @@ fn checkNativeGrid(config: *const c.R4GfxDeviceConfig) !void {
     try t.expect(Model.referenceCount() == 0 and Model.maps == 0);
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.premature_closes == 0);
+}
+
+fn checkNativeColor(config: *const c.R4GfxDeviceConfig) !void {
+    const colors = &@import("main.zig").r4gfx_color_v1;
+    Model.reset(); Model.operations = 93;
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    var native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999,
+        .width = 4, .height = 4, .format = c.format_abgr16161616f, .layout = 0 };
+    var image_desc: c.R4GfxColorResourceDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxColorResourceDesc),
+        .resource = descriptor(c.resource_image), .description = .{ .version = 1, .size = @sizeOf(c.R4GfxColorDescription),
+            .primaries = c.color_primaries_srgb, .transfer = c.color_transfer_linear, .range = c.color_range_full,
+            .alpha = c.color_alpha_optical, .precision = c.color_precision_float16, .flags = 0,
+            .reference_white = 1000000, .peak = 10000000, .black = 0, .reserved = 0 } };
+    image_desc.resource.flags = c.image_target; image_desc.resource.source_kind = c.source_create_native;
+    image_desc.resource.source_address = @intFromPtr(&native);
+    var source: c.R4GfxResource = undefined; var target: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, colors.color_resource_create(&handle, &image_desc, &source));
+    native.format = c.format_xrgb2101010;
+    image_desc.description.primaries = c.color_primaries_bt2020; image_desc.description.transfer = c.color_transfer_pq;
+    image_desc.description.range = c.color_range_limited; image_desc.description.alpha = c.color_alpha_opaque;
+    image_desc.description.precision = c.color_precision_unorm10; image_desc.description.reference_white = 2030000;
+    try t.expectEqual(c.status_ok, colors.color_resource_create(&handle, &image_desc, &target));
+    var pipeline_desc = descriptor(c.resource_pipeline); pipeline_desc.operation = c.render_operation_blit;
+    var sampler_desc = descriptor(c.resource_sampler); sampler_desc.sampler = c.render_sampler_nearest;
+    var pipeline: c.R4GfxResource = undefined; var sampler: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &pipeline_desc, &pipeline));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &sampler_desc, &sampler));
+    var command = std.mem.zeroes(c.R4GfxRenderRequest);
+    command.version = 1; command.size = @sizeOf(c.R4GfxRenderRequest); command.deadline_ns = native.deadline_ns;
+    command.source = source; command.target = target; command.pipeline = pipeline; command.sampler = sampler; command.opacity = 255;
+    command.source_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 }; command.target_rect = command.source_rect; command.scissor = command.source_rect;
+    var commands = [_]c.R4GfxRenderRequest{command,command}; commands[1].opacity = 127;
+    const list: c.R4GfxRenderListRequest = .{ .version = 1, .size = @sizeOf(c.R4GfxRenderListRequest), .commands = @intFromPtr(&commands), .count = 2, .reserved = 0 };
+    const flags = c.color_transform_output | c.color_transform_relative_white | c.color_transform_dither;
+    var job = std.mem.zeroes(c.R4GfxJob); job.generation = 79; const untouched = job;
+    try t.expectEqual(c.status_unsupported, colors.color_render_submit(&handle, &list, flags, &job));
+    try t.expectEqualDeep(untouched,job);
+    Model.operations |= 512;
+    var info: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok,api.device_refresh(&handle,&info));
+    try t.expect(info.gpu_operations & c.device_gpu_color != 0);
+    commands[1].transfer = c.render_transfer_srgb_encode;
+    try t.expectEqual(c.status_invalid,colors.color_render_submit(&handle,&list,flags,&job));
+    try t.expect(!Model.job_live and Model.maps == 0); try t.expectEqualDeep(untouched,job);
+    commands[1].transfer = c.render_transfer_identity;
+    try t.expectEqual(c.status_ok,colors.color_render_submit(&handle,&list,flags,&job));
+    const copied = Model.job_color_list;
+    // Identical XR30 storage is insufficient: PQ/HLG, primaries, range and
+    // luminance must match the actual output before any present submission.
+    const device = try d.get(&handle, false);
+    const draw = @constCast(device.bundle.draw.?);
+    draw.gfx_output_color = @intFromPtr(&Model.outputColor);
+    defer draw.gfx_output_color = 0;
+    const output_target: a.GfxOutputTarget = .{ .adapter_id = Model.binding.adapter_id, .connector_id = 4,
+        .device_generation = Model.binding.device_generation, .connection_generation = 9, .display_generation = 1, .head_id = 2 };
+    Model.output_color = .{ .identity = .{ .adapter_id = output_target.adapter_id, .connector_id = 4,
+        .device_generation = output_target.device_generation, .connection_generation = 9 }, .flags = 7, .revision = 1,
+        .format = c.format_xrgb2101010, .bpc = 10, .primaries = 3, .transfer = 3, .range = 2, .reference_white = 2030000, .peak = 10000000 };
+    const retained_image = try device.resource(target, true);
+    const output_color = @import("device_output_color.zig");
+    try output_color.validate(device, retained_image, output_target);
+    Model.output_color.transfer = 4;
+    try t.expectError(error.Unsupported, output_color.validate(device, retained_image, output_target));
+    Model.output_color.transfer = 3; Model.output_color.range = 1;
+    try t.expectError(error.Unsupported, output_color.validate(device, retained_image, output_target));
+    Model.output_color.range = 2; Model.output_color.identity.connection_generation += 1;
+    try t.expectError(error.Stale, output_color.validate(device, retained_image, output_target));
+    try t.expect(copied.count == 2 and copied.commands[1].opacity == 127 and copied.commands[0].transfer == a.gfx_render_transfer_color);
+    try t.expectEqualSlices(u32,&.{3,2,3,4,1},copied.program.words[0..5]);
+    try t.expectApproxEqAbs(@as(f32,2.03),@as(f32,@bitCast(copied.program.words[44])),0.000001);
+    try t.expectApproxEqAbs(@as(f32,64.0/1023.0),@as(f32,@bitCast(copied.program.words[43])),0.000001);
+    commands[1].opacity = 0;
+    try t.expectEqualDeep(copied,Model.job_color_list);
+    try t.expectEqual(c.status_ok,api.job_cancel(&handle,&job));
+    try t.expectEqual(c.status_ok,api.resource_release(&handle,&source));
+    try t.expectEqual(c.status_ok,api.resource_release(&handle,&target));
+    try t.expectEqual(c.status_busy,api.job_release(&handle,&job));
+    try t.expect(Model.referenceCount() == 2 and Model.maps == 0);
+    Model.status.flags = 0;
+    try t.expectEqual(c.status_ok,api.job_release(&handle,&job));
+    try t.expectEqual(c.status_ok,api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
 }
 
 fn checkNativePresent(config: *const c.R4GfxDeviceConfig) !void {

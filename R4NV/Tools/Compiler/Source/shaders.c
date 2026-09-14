@@ -4,8 +4,9 @@
 #include "shaders.h"
 #include "nak.h"
 #include "nir_builder.h"
+#include "color_shader.h"
 
-/* R4NV graphics constant-buffer ABI 3. CBuf 0 reserves bytes 0..63:
+/* R4NV graphics constant-buffer ABI 4. CBuf 0 reserves bytes 0..63:
  * 0..7 sample locations (u4/u4), 16..31 sample masks (u16),
  * 48..55 an optional printf address. These single-sample fixed shaders
  * do not issue printf or sample-table loads. CBuf 1 holds the texture
@@ -103,7 +104,7 @@ nir_shader *
 r4nv_build_shader(enum r4nv_shader_profile profile,
                   const nir_shader_compiler_options *options)
 {
-   if (profile < R4NV_RECT_VERTEX || profile > R4NV_SOLID_VERTEX)
+   if (profile < R4NV_RECT_VERTEX || profile > R4NV_COLOR_FRAGMENT)
       return NULL;
    bool vertex = profile == R4NV_RECT_VERTEX || profile == R4NV_SOLID_VERTEX;
    nir_builder b = nir_builder_init_simple_shader(
@@ -172,7 +173,7 @@ r4nv_build_shader(enum r4nv_shader_profile profile,
          nir_def *sample = &tex->def;
          if (profile == R4NV_SRGB_DECODE_FRAGMENT)
             sample = srgb_convert(&b, sample, false);
-         color = nir_fmul(&b, sample, color);
+         color = profile == R4NV_COLOR_FRAGMENT ? r4nv_color_transform(&b, sample, nir_channel(&b, color, 3)) : nir_fmul(&b, sample, color);
          if (profile == R4NV_SRGB_ENCODE_FRAGMENT)
             color = srgb_convert(&b, color, true);
       }

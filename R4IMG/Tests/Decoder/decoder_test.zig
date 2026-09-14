@@ -31,6 +31,7 @@ fn decodeFixture(bytes: []const u8, content_type: []const u8) !r4img.Image {
 }
 
 test "PNG RGBA fixture decodes with intrinsic dimensions and alpha" {
+    try @import("color_metadata_test.zig").check();
     const image = try decodeFixture(rgba_png, "image/png;charset=binary");
     defer std.testing.allocator.free(image.pixels);
     try std.testing.expectEqual(@as(u32, 10), image.info.width);
@@ -49,6 +50,7 @@ test "PNG RGBA fixture decodes with intrinsic dimensions and alpha" {
 }
 
 test "baseline and progressive JPEG fixtures decode through the same bounded path" {
+    try @import("raster_color_test.zig").check();
     const baseline = try decodeFixture(baseline_jpeg, "image/jpeg");
     defer std.testing.allocator.free(baseline.pixels);
     try std.testing.expectEqual(r4img.Format.jpeg, baseline.info.format);

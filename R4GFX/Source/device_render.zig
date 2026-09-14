@@ -12,6 +12,9 @@ const empty_rect = std.mem.zeroes(c.R4GfxRect);
 fn imageIndex(device: *d.Device, handle: c.R4GfxResource, count: *u32, write: bool) d.Error!u32 {
     const item = try device.resource(handle, true);
     if (item.invalidated) return error.Stale;
+    // The legacy integer renderer operates on encoded8-bit channels. Named
+    // images use COLOR_V1, which blends and interpolates in linear light.
+    if (item.color != null) return error.Unsupported;
     if (item.kind != c.resource_image or (write and item.flags & c.image_target == 0)) return error.Invalid;
     for (device.image_slots[0..count.*], 0..) |slot, i| {
         const prior = &device.resources[slot];

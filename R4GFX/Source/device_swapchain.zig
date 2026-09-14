@@ -102,7 +102,7 @@ fn describeOutput(device: *d.Device, head: u32) d.Error!Description {
         value.display_generation == 0 or value.sequence == 0 or value.width == 0 or value.height == 0 or
         value.flags & ~@as(u32, 511) != 0 or value.policies & ~@as(u32, 7) != 0 or value.policies & 1 == 0 or
         value.buffer_count < 2 or value.buffer_count > 3 or value.plane_count == 0 or value.plane_count > 8 or
-        value.format != c.format_xrgb8888 or value.reserved0 != 0 or value.path > 3 or
+        (value.format != c.format_xrgb8888 and value.format != c.format_xrgb2101010) or value.reserved0 != 0 or value.path > 3 or
         value.interval_ns > std.time.ns_per_s or (value.observed_sequence == 0) != (value.observed_ns == 0)) return error.Invalid;
     if (target.connector_id != 0 and (target.adapter_id != value.backend.adapter_id or target.head_id != head or
         target.display_generation != value.display_generation or target.device_generation != value.backend.device_generation)) return error.Stale;
@@ -153,8 +153,10 @@ fn pool(device: *d.Device, request: *const c.R4GfxSwapchainDesc) d.Error!Pool {
         const image = try device.resource(value, true);
         if (image.invalidated) return error.Stale;
         if (image.kind != c.resource_image or image.flags & c.image_target == 0 or image.image.width != info.width or
-            image.image.height != info.height or image.image.format != c.format_xrgb8888 or image.public_refs == std.math.maxInt(u32)) return error.Unsupported;
+            image.image.height != info.height or image.image.format != info.format or image.public_refs == std.math.maxInt(u32)) return error.Unsupported;
         const native = info.flags & a.display_presentation_info_native != 0;
+        if (native) try @import("device_output_color.zig").validate(device, image, described.target)
+        else if (!@import("device_output_color.zig").canonical(image)) return error.Unsupported;
         if (native) {
             if (image.backing.reference.id == 0 or image.descriptor.usage & a.gfx_buffer_usage_transfer_source == 0) return error.Unsupported;
             if (image.descriptor.location == a.gfx_buffer_location_device_local) {
@@ -457,9 +459,9 @@ fn planImpl(handle: *const c.R4GfxDevice, request: *const c.R4GfxPresentationPla
     const value = try input(c.R4GfxPresentationPlan, device, request);
     if (value.version != 1 or value.size != @sizeOf(c.R4GfxPresentationPlan) or value.flags & ~@as(u32, 63) != 0 or
         value.intent > 2 or value.reserved != 0) return error.Invalid;
-    const info = try describe(device, value.head_id);
+    const described = try describeOutput(device, value.head_id);
     const source = try device.resource(value.source, true);
-    output.* = try decision(device, info, source, value);
+    output.* = try decision(device, described.info, source, value, described.target);
     return c.status_ok;
 }
 fn presentPath(device: *d.Device, slot: *Slot, image: c.R4GfxResource, intent: u32, blockers: u32) d.Error!s.Path {
@@ -467,10 +469,10 @@ fn presentPath(device: *d.Device, slot: *Slot, image: c.R4GfxResource, intent: u
     const full: c.R4GfxRect = .{ .x = 0, .y = 0, .width = source.image.width, .height = source.image.height };
     const result = try decision(device, slot.info, source, .{ .version = 1, .size = @sizeOf(c.R4GfxPresentationPlan),
         .head_id = slot.info.head_id, .flags = (3 & ~blockers) | (blockers & 60), .source = image,
-        .source_rect = full, .target_rect = full, .color_space = 0, .transform = 0, .intent = intent, .reserved = 0 });
+        .source_rect = full, .target_rect = full, .color_space = 0, .transform = 0, .intent = intent, .reserved = 0 }, slot.target);
     return @enumFromInt(result.path);
 }
-fn decision(device: *d.Device, info: a.DisplayPresentationInfo, source: *d.Resource, value: c.R4GfxPresentationPlan) d.Error!c.R4GfxPresentationDecision {
+fn decision(device: *d.Device, info: a.DisplayPresentationInfo, source: *d.Resource, value: c.R4GfxPresentationPlan, target: a.GfxOutputTarget) d.Error!c.R4GfxPresentationDecision {
     if (source.invalidated) return error.Stale;
     if (source.kind != c.resource_image or value.source_rect.width == 0 or value.source_rect.height == 0 or
         value.source_rect.x > source.image.width or value.source_rect.y > source.image.height or
@@ -481,6 +483,11 @@ fn decision(device: *d.Device, info: a.DisplayPresentationInfo, source: *d.Resou
         .path = if (info.flags & a.display_presentation_info_native != 0) c.present_path_composition else c.present_path_software,
         .reasons = 0, .display_generation = info.display_generation };
     if (value.intent != 0) {
+        if (info.flags & a.display_presentation_info_native != 0) {
+            @import("device_output_color.zig").validate(device, source, target) catch |err| {
+                if (err == error.Unsupported) { result.reasons |= 8; } else return err;
+            };
+        } else if (!@import("device_output_color.zig").canonical(source)) result.reasons |= 8;
         const overlay = value.intent == 2;
         // Plane geometry is checked below, but DEVICE_V1 currently has no
         // queued overlay submission. A capability bit alone cannot select it.
@@ -488,7 +495,7 @@ fn decision(device: *d.Device, info: a.DisplayPresentationInfo, source: *d.Resou
         if (info.flags & (if (overlay) a.display_presentation_info_overlay else a.display_presentation_info_direct) == 0 or
             info.flags & (a.display_presentation_info_lost | a.display_presentation_info_occluded) != 0 or
             (!overlay and device.gpu_operations & c.device_gpu_direct == 0)) result.reasons |= 256;
-        if ((source.image.format != c.format_xrgb8888 and (!overlay or source.image.format != c.format_argb8888)) or value.flags & 1 == 0) result.reasons |= 1;
+        if ((source.image.format != info.format and (!overlay or source.image.format != c.format_argb8888)) or value.flags & 1 == 0) result.reasons |= 1;
         const desc = source.descriptor;
         if (source.backing.reference.id == 0 or desc.location != a.gfx_buffer_location_device_local or desc.modifier != 0 or
             desc.plane_count != 1 or desc.plane_offsets[0] != 0 or desc.plane_pitches[0] & 63 != 0 or

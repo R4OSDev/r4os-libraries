@@ -1,6 +1,7 @@
 // Compiled receiver-data helper; the R4GFX R4L table remains independent.
 const r4os = @import("r4os");
 pub const edid = @import("r4gfx_edid");
+pub const color = edid.color;
 const a = r4os.abi;
 pub const Error = edid.Error || error{ Invalid, Unavailable, Stale, ReadFailed };
 

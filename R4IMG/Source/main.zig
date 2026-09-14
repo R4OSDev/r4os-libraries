@@ -2,6 +2,7 @@ const std = @import("std");
 const r4os = @import("r4os");
 const contract = @import("r4l_contract");
 const codec = @import("codec.zig");
+const color_api = @import("color_api.zig");
 
 export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}
 
@@ -220,6 +221,18 @@ pub export var r4img_api_v1: contract.ApiV1 align(8) linksection(".data.r4l_expo
     .decode_svg_at = r4img_decode_svg_at_impl,
     .scale_composite = r4img_scale_composite_impl,
     .decoder_diagnostic = r4img_decoder_diagnostic_impl,
+};
+pub export var r4img_png_v1: contract.PngV1 align(8) linksection(".data.r4l_exports") = .{
+    .header = contract.png_v1_header,
+    .png_color_info = color_api.info,
+    .png_icc_profile = color_api.profile,
+    .png_scratch_bytes16 = color_api.scratchBytes,
+    .png_decode16 = color_api.decode,
+};
+pub export var r4img_raster_v1: contract.RasterV1 align(8) linksection(".data.r4l_exports") = .{
+    .header = contract.raster_v1_header,
+    .raster_color_info = color_api.rasterInfo,
+    .raster_icc_profile = color_api.rasterProfile,
 };
 
 pub export var r4img_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{

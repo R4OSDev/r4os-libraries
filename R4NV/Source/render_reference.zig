@@ -41,6 +41,22 @@ pub fn method(data: []const u8, address: u32) !u32 {
     return value orelse error.Method;
 }
 fn wideMethod(data: []const u8, address: u32) !u64 { return (@as(u64,try method(data,address))<<32)|try method(data,address+4); }
+fn boundConstants(data: []const u8, slot: u32) !u64 {
+    var at: usize = 0; var result: ?u64 = null;
+    while (at < data.len) {
+        if (at + 4 > data.len) return error.Method;
+        const header = word(data,at); const count = (header>>16)&0x1fff;
+        if (header&0xe0000000 != 0x20000000 or count == 0 or at+(count+1)*4 > data.len) return error.Method;
+        const start = (header&0x1fff)*4;
+        const end = at+(count+1)*4;
+        for (0..count) |i| if (start+i*4 == hw.BIND_GROUP_CONSTANT_BUFFER+128) {
+            const value = word(data,at+(i+1)*4);
+            if (value >> 4 == slot) result = if (value & 1 == 0) null else try wideMethod(data[0..end],hw.SET_CONSTANT_BUFFER_SELECTOR_A+4);
+        };
+        at = end;
+    }
+    return result orelse error.Method;
+}
 pub const Surface = struct {
     address: u64, width: u32, height: u32, pitch: u32, format: r.image.Format, bytes: []u8,
     layout: r.image.Layout = .linear, log2_gobs: u8 = 0,
@@ -60,13 +76,39 @@ pub const Surface = struct {
     }
     fn load(s: Surface, x: u32, y: u32) [4]f32 {
         if (s.format == .r8) return .{ @as(f32,@floatFromInt(s.bytes[s.byteOffset(x,y)]))/255,0,0,1 };
+        if (s.format == .abgr16161616f) {
+            var rgba: [4]f32 = undefined;
+            for (&rgba, 0..) |*value, i| value.* = @as(f16, @bitCast(std.mem.readInt(u16, s.bytes[s.byteOffset(x * 8 + @as(u32, @intCast(i)) * 2, y)..][0..2], .little)));
+            return rgba;
+        }
         const value = word(s.bytes,s.byteOffset(x*4,y));
+        if (s.format == .xrgb2101010 or s.format == .argb2101010) return .{
+            @as(f32, @floatFromInt((value >> 20) & 1023)) / 1023, @as(f32, @floatFromInt((value >> 10) & 1023)) / 1023,
+            @as(f32, @floatFromInt(value & 1023)) / 1023, if (s.format == .argb2101010) @as(f32, @floatFromInt(value >> 30)) / 3 else 1,
+        };
         var color: [4]f32 = undefined;
         for ([_]u5{16,8,0,24},0..) |shift,i| color[i] = @as(f32,@floatFromInt((value>>shift)&255))/255;
         if (s.format == .xrgb8888) color[3] = 1;
         return color;
     }
     fn store(s: Surface, x: u32, y: u32, color: [4]f32) !void {
+        if (s.format == .abgr16161616f) {
+            for (color, 0..) |v, i| {
+                if (!std.math.isFinite(v)) return error.NonFinite;
+                const half: f16 = @floatCast(std.math.clamp(v, @as(f32, if (i == 3) 0 else -65504), @as(f32, if (i == 3) 1 else 65504)));
+                std.mem.writeInt(u16, s.bytes[s.byteOffset(x * 8 + @as(u32, @intCast(i)) * 2, y)..][0..2], @bitCast(half), .little);
+            }
+            return;
+        }
+        if (s.format == .xrgb2101010 or s.format == .argb2101010) {
+            var encoded: u32 = 0;
+            for ([_]u5{ 20, 10, 0, 30 }, 0..) |shift, i| {
+                if (!std.math.isFinite(color[i])) return error.NonFinite;
+                if (i != 3 or s.format == .argb2101010) encoded |= @as(u32, @intFromFloat(@round(std.math.clamp(color[i], 0, 1) * @as(f32, if (i == 3) 3 else 1023)))) << shift;
+            }
+            std.mem.writeInt(u32, s.bytes[s.byteOffset(x * 4, y)..][0..4], encoded, .little);
+            return;
+        }
         var value: u32 = 0;
         for ([_]u5{16,8,0,24},0..) |shift,i| {
             if (!std.math.isFinite(color[i])) return error.NonFinite;
@@ -88,7 +130,7 @@ fn sample(s: Surface, uv: [2]f32, linear: bool) [4]f32 {
     for (0..4) |i| color[i] = (a[i]*(1-wx)+b[i]*wx)*(1-wy)+(c[i]*(1-wx)+d[i]*wx)*wy;
     return color;
 }
-fn transfer(color: [4]f32, encode: bool) [4]f32 {
+pub fn transfer(color: [4]f32, encode: bool) [4]f32 {
     var out = color;
     for (0..3) |i| {
         const v = std.math.clamp(color[i]/(if (color[3] > 0) color[3] else 1),0,1);
@@ -99,6 +141,12 @@ fn transfer(color: [4]f32, encode: bool) [4]f32 {
     return out;
 }
 pub fn execute(methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface) !void {
+    return executeColor(methods,packet,program_address,packet_address,target,source,null);
+}
+// The consumer supplies an independent numerical oracle for its named-color
+// case. This remains a host method/descriptor model, not an SM ISA emulator.
+pub const ColorOracle = *const fn (r.ColorProgram, [4]f32, f32, u32, u32) anyerror![4]f32;
+pub fn executeColor(methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface, color_oracle: ?ColorOracle) !void {
     if (packet.len == 0 or packet.len > r.packet_capacity_bytes or packet.len % r.packet_bytes != 0) return error.Surface;
     var at: usize = 0; var draws: usize = 0;
     while (at < methods.len) {
@@ -114,19 +162,20 @@ pub fn execute(methods: []const u8, packet: []const u8, program_address: u64, pa
             const offset = vertices - packet_address - 768;
             if (offset % r.packet_bytes != 0 or offset > packet.len - r.packet_bytes) return error.Surface;
             try executeDraw(methods[0..at], packet[@intCast(offset)..][0..r.packet_bytes], program_address,
-                packet_address + offset, target, source);
+                packet_address + offset, target, source, color_oracle);
             draws += 1;
         }
     }
     if (draws == 0) return error.Method;
 }
-fn executeDraw(methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface) !void {
-    if (packet.len != 1024 or target.bytes.len < @as(u64,target.pitch)*target.height) return error.Surface;
+fn executeDraw(methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface, color_oracle: ?ColorOracle) !void {
+    if (packet.len != r.packet_bytes or target.bytes.len < @as(u64,target.pitch)*target.height) return error.Surface;
     try t.expectEqual(@as(u32,0xc797),try method(methods,hw.SET_OBJECT));
     try t.expectEqual(target.address,try wideMethod(methods,hw.SET_COLOR_TARGET_A));
     try t.expectEqual(target.pitch,try method(methods,hw.SET_COLOR_TARGET_A+8));
     try t.expectEqual(target.height,try method(methods,hw.SET_COLOR_TARGET_A+12));
-    try t.expectEqual(@as(u32,switch (target.format) { .argb8888 => 0xcf, .xrgb8888 => 0xe6, .r8 => 0xf3 }),try method(methods,hw.SET_COLOR_TARGET_A+16));
+    try t.expectEqual(@as(u32,switch (target.format) { .argb8888 => 0xcf, .xrgb8888 => 0xe6, .r8 => 0xf3,
+        .xrgb2101010, .argb2101010 => 0xdf, .abgr16161616f => 0xca }),try method(methods,hw.SET_COLOR_TARGET_A+16));
     try t.expectEqual(@as(u32,0x1000),try method(methods,hw.SET_COLOR_TARGET_A+20)); // Linear reference views only.
     try t.expectEqual(packet_address+768,try wideMethod(methods,hw.SET_VERTEX_STREAM_A_FORMAT+4));
     try t.expectEqual(@as(u32,40),try method(methods,hw.SET_VERTEX_STREAM_A_FORMAT)&0xfff);
@@ -139,25 +188,26 @@ fn executeDraw(methods: []const u8, packet: []const u8, program_address: u64, pa
         offset += std.mem.alignForward(u64,128+shader.code.len,128);
     }
     const id = profile orelse return error.Shader;
-    if ((source == null and id != 5) or (source != null and (id < 2 or id > 4))) return error.Shader;
+    if ((source == null and id != 5) or (source != null and (id < 2 or (id > 4 and id != 7))) or (id == 7 and color_oracle == null)) return error.Shader;
     var linear = false;
     if (source) |src| {
         if (src.bytes.len < @as(u64,src.pitch)*src.height) return error.Surface;
         try t.expectEqual(packet_address,try wideMethod(methods,hw.SET_TEX_HEADER_POOL_A));
         try t.expectEqual(packet_address+256,try wideMethod(methods,hw.SET_TEX_SAMPLER_POOL_A));
-        try t.expectEqual(packet_address+512,try wideMethod(methods,hw.SET_CONSTANT_BUFFER_SELECTOR_A+4));
-        try t.expectEqual(@as(u32,0x11),try method(methods,hw.BIND_GROUP_CONSTANT_BUFFER+128));
+        try t.expectEqual(packet_address+512,try boundConstants(methods,1));
+        if (id == 7) try t.expectEqual(packet_address+1024,try boundConstants(methods,2));
         try t.expectEqual(@as(u32,0),word(packet,512));
         try t.expectEqual(src.address,@as(u64,word(packet,4))|(@as(u64,word(packet,8)&0xffff)<<32));
         try t.expectEqual(@as(u32,if (src.layout == .linear) 2 else 3),(word(packet,8)>>21)&7);
         if (src.layout == .linear) try t.expectEqual(src.pitch,(word(packet,12)&0xffff)<<5)
         else {
             try t.expectEqual(@as(u32,src.log2_gobs)<<3,word(packet,12)&0xffff);
-            try t.expect(src.pitch == std.mem.alignForward(u32,src.width*(if (src.format == .r8) @as(u32,1) else 4),64));
+            try t.expect(src.pitch == std.mem.alignForward(u32,src.width*src.format.pixelBytes(),64));
         }
         try t.expectEqual(src.width,(word(packet,16)&0xffff)+1);
         try t.expectEqual(src.height,(word(packet,20)&0xffff)+1);
-        try t.expectEqual(@as(u32,switch (src.format) { .argb8888 => 0x54e24908, .xrgb8888 => 0x74e24908, .r8 => 0x7010011d }),word(packet,0));
+        try t.expectEqual(@as(u32,switch (src.format) { .argb8888 => 0x54e24908, .xrgb8888 => 0x74e24908, .r8 => 0x7010011d,
+            .xrgb2101010 => 0x74e24909, .argb2101010 => 0x54e24909, .abgr16161616f => 0x58d7ff83 }),word(packet,0));
         try t.expectEqual(@as(u32,0x24092),word(packet,256));
         const filter = word(packet,260);
         if (filter != 0x91 and filter != 0xa2) return error.Sampler;
@@ -205,7 +255,13 @@ fn executeDraw(methods: []const u8, packet: []const u8, program_address: u64, pa
             }
             if (id == 3) color = transfer(color,false);
         }
-        for (0..4) |i| color[i] *= scalar(packet,792+i*4);
+        if (id == 7) {
+            const program = std.mem.bytesToValue(r.ColorProgram,packet[1024..1280]);
+            try program.validate();
+            color = try color_oracle.?(program,color,scalar(packet,804),@intCast(x),@intCast(y));
+        } else {
+            for (0..4) |i| color[i] *= scalar(packet,792+i*4);
+        }
         if (id == 4) color = transfer(color,true);
         if (over) {
             const background = target.load(@intCast(x),@intCast(y)); const inverse = 1-color[3];
@@ -243,6 +299,37 @@ pub fn check() !void {
         std.debug.print("render reference {s}: max={d}/{d} LSB\n",.{scene.name,maximum,scene.tolerance});
     }
     try checkGrids();
+    try checkHighPrecision();
+}
+fn checkHighPrecision() !void {
+    // Follow an encoded native draw and its actual TIC/RT descriptors through
+    // the independent host interpreter. Extended and negative linear samples
+    // must survive FP16; the10-bit alpha and channel order remain distinct.
+    var source_bytes: [128]u8 = @splat(0xcd);
+    var target_bytes: [128]u8 = @splat(0xcc);
+    var draw: r.Draw = .{
+        .source = .{ .address = 0x200000, .bytes = 128, .width = 1, .height = 1, .pitch = 128, .format = .argb2101010, .layout = .linear },
+        .target = .{ .address = 0x100000, .bytes = 128, .width = 1, .height = 1, .pitch = 128, .format = .abgr16161616f, .layout = .linear },
+        .source_rect = .{ .x = 0, .y = 0, .width = 1, .height = 1 }, .destination = .{ .x = 0, .y = 0, .width = 1, .height = 1 },
+        .scissor = .{ .x = 0, .y = 0, .width = 1, .height = 1 },
+    };
+    std.mem.writeInt(u32, source_bytes[0..4], 0xbff80000, .little);
+    var packet: [r.packet_bytes]u8 = undefined;
+    var program: r.Program = .{};
+    const program_address = 0x300000; const packet_address = 0x400000;
+    try r.packetUpload(draw, &packet);
+    try r.encode(.{ .draw = draw, .programs = .{ .address = program_address, .bytes = r.shader_bytes }, .packet = .{ .address = packet_address, .bytes = r.packet_bytes } }, &program);
+    try execute(std.mem.sliceAsBytes(program.slice()), &packet, program_address, packet_address, Surface.from(draw.target, &target_bytes), Surface.from(draw.source.?, &source_bytes));
+    const actual = Surface.from(draw.target, &target_bytes).load(0, 0);
+    for ([_]f32{ 1, 512.0 / 1023.0, 0, 2.0 / 3.0 }, actual) |expected, value| try t.expectApproxEqAbs(expected, value, 0.0004);
+    try t.expectEqualSlices(u8, &(@as([120]u8, @splat(0xcc))), target_bytes[8..]);
+    draw.source.?.format = .abgr16161616f;
+    try Surface.from(draw.source.?, &source_bytes).store(0, 0, .{ -0.5, 2, 1.5, 0.5 });
+    try r.packetUpload(draw, &packet);
+    try r.encode(.{ .draw = draw, .programs = .{ .address = program_address, .bytes = r.shader_bytes }, .packet = .{ .address = packet_address, .bytes = r.packet_bytes } }, &program);
+    try execute(std.mem.sliceAsBytes(program.slice()), &packet, program_address, packet_address, Surface.from(draw.target, &target_bytes), Surface.from(draw.source.?, &source_bytes));
+    const extended = Surface.from(draw.target, &target_bytes).load(0, 0);
+    try t.expectEqualSlices(f32, &.{ -0.5, 2, 1.5, 0.5 }, &extended);
 }
 fn checkGrids() !void {
     var source: [4096]u8 = @splat(0);

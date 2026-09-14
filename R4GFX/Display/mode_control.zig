@@ -44,6 +44,8 @@ pub const Controller = struct {
     error_code: i32 = 0,
     buffer: a.GfxBufferReference = .{},
     mapping: a.GfxBufferMap = .{},
+    encoded_buffer: a.GfxBufferReference = .{},
+    encoded_mapping: a.GfxBufferMap = .{},
     close_requested: bool = false,
     selected_output: ?a.GfxOutputId = null,
 
@@ -82,7 +84,7 @@ pub const Controller = struct {
             var mode: a.GfxOutputMode = .{};
             const result = outputs.mode(&info.identity, @intCast(i), &mode);
             if (result != a.gfx_output_ok) { self.output = null; self.count = 0; self.error_code = result; return false; }
-            // This UI requests only the admitted progressive RGB8 SDR path.
+            // Both SDR and color transactions require a progressive RGB mode.
             if (mode.flags & (a.gfx_output_mode_geometry_only | a.gfx_output_mode_interlaced | a.gfx_output_mode_420_only) != 0 or
                 mode.width == 0 or mode.height == 0 or mode.pixel_clock_hz == 0) continue;
             self.modes[self.count] = mode;
@@ -103,6 +105,12 @@ pub const Controller = struct {
         if (direction < 0) self.selected = (self.selected + self.count - 1) % self.count else self.selected = (self.selected + 1) % self.count;
     }
     pub fn apply(self: *Controller, draw: anytype) bool {
+        return self.applyImpl(void, draw, {}, null);
+    }
+    pub fn applyColor(self: *Controller, comptime gfx: type, draw: anytype, colors: anytype, signal: a.GfxColorSignal) bool {
+        return self.applyImpl(gfx, draw, colors, signal);
+    }
+    fn applyImpl(self: *Controller, comptime gfx: type, draw: anytype, colors: anytype, signal: ?a.GfxColorSignal) bool {
         if (self.busy() or self.count == 0 or !self.cleanup(draw)) return false;
         self.error_code = 0;
         const info = self.output orelse return false;
@@ -120,6 +128,12 @@ pub const Controller = struct {
         if (rc != a.gfx_buffer_result_ok) { self.error_code = rc; return false; }
         const pixels: [*]u32 = @ptrFromInt(self.mapping.cpu_address);
         fillPattern(pixels[0..@intCast(bytes / 4)], mode.width, mode.height);
+        if (comptime gfx != void) {
+            self.encodePattern(gfx, draw, colors, signal.?, descriptor) catch |err| {
+                if (self.error_code == 0) self.error_code = if (err == error.Invalid) a.gfx_output_error_invalid else a.gfx_output_error_unsupported;
+                return false;
+            };
+        }
         rc = draw.gfxBufferUnmap(&self.mapping.lease);
         if (rc != a.gfx_buffer_result_ok) { self.error_code = rc; return false; }
         self.mapping = .{};
@@ -130,13 +144,51 @@ pub const Controller = struct {
             .buffer = self.buffer.reference };
         const outputs = draw.outputs();
         var checked: a.GfxAtomicResult = .{};
-        rc = outputs.testState(&request, &checked);
+        const color_request: a.GfxModeColorRequest = .{ .state = request, .signal = signal orelse .{}, .image = self.encoded_buffer.reference };
+        rc = if (comptime gfx != void) outputs.testColor(&color_request, &checked) else outputs.testState(&request, &checked);
         if (rc != a.gfx_output_ok) { self.error_code = rc; return false; }
         var accepted: a.GfxModeStatus = .{};
-        rc = outputs.submit(&request, confirmation_ms, &accepted);
+        rc = if (comptime gfx != void) outputs.submitColor(&color_request, confirmation_ms, &accepted) else outputs.submit(&request, confirmation_ms, &accepted);
         if (rc != a.gfx_output_ok) { self.error_code = rc; return false; }
         self.status = accepted; self.close_requested = false;
         return true;
+    }
+    fn encodePattern(self: *Controller, comptime gfx: type, draw: anytype, colors: anytype, signal: a.GfxColorSignal, source_desc: a.GfxBufferDescriptor) !void {
+        const encoding = try @import("color_signal.zig").requestedSignal(signal);
+        var description: gfx.R4GfxColorDescription = std.mem.zeroes(gfx.R4GfxColorDescription);
+        description.version = 1; description.size = @sizeOf(gfx.R4GfxColorDescription);
+        description.primaries = signal.primaries; description.transfer = signal.transfer;
+        description.range = signal.range; description.alpha = gfx.color_alpha_opaque;
+        description.precision = encoding.bpc; description.reference_white = signal.reference_white;
+        description.peak = signal.peak; description.black = signal.black;
+        if (colors.color_description_validate(&description) != gfx.status_ok) return error.Invalid;
+        var descriptor = source_desc;
+        descriptor.format = signal.format;
+        descriptor.usage = a.gfx_buffer_usage_cpu_write | a.gfx_buffer_usage_transfer_source;
+        var rc = draw.gfxBufferCreate(&descriptor, &self.encoded_buffer);
+        if (rc != a.gfx_buffer_result_ok) { self.error_code = rc; return error.Buffer; }
+        rc = draw.gfxBufferMap(&self.encoded_buffer.reference, a.gfx_buffer_map_write, 0, descriptor.byte_length, &self.encoded_mapping);
+        if (rc != a.gfx_buffer_result_ok) { self.error_code = rc; return error.Buffer; }
+        var source: gfx.R4GfxColorImage = std.mem.zeroes(gfx.R4GfxColorImage);
+        source.version = 1; source.size = @sizeOf(gfx.R4GfxColorImage);
+        source.image = .{ .cpu_address = self.mapping.cpu_address, .byte_length = descriptor.byte_length, .pitch = descriptor.plane_pitches[0],
+            .width = descriptor.width, .height = descriptor.height, .format = a.gfx_buffer_format_xrgb8888, .reserved = 0 };
+        source.description = description;
+        source.description.primaries = 1; source.description.transfer = 1; source.description.range = 1;
+        source.description.precision = 8; source.description.reference_white = 1_000_000; source.description.peak = 1_000_000; source.description.black = 0;
+        var target = source; target.image.cpu_address = self.encoded_mapping.cpu_address;
+        target.image.format = descriptor.format; target.description = description;
+        const rect: gfx.R4GfxRect = .{ .x = 0, .y = 0, .width = descriptor.width, .height = descriptor.height };
+        const transform: gfx.R4GfxColorTransform = .{ .version = 1, .size = @sizeOf(gfx.R4GfxColorTransform),
+            .source_rect = rect, .target_rect = rect, .sampler = gfx.render_sampler_nearest, .operation = gfx.render_operation_blit,
+            .opacity = 65535, .flags = gfx.color_transform_output | gfx.color_transform_relative_white | gfx.color_transform_dither,
+            .pixel_budget = @as(u64, descriptor.width) * descriptor.height };
+        var stats: gfx.R4GfxCpuStats = undefined;
+        rc = colors.color_image_transform(&source, &target, &transform, &stats);
+        if (rc != gfx.status_ok) { self.error_code = rc; return error.Color; }
+        rc = draw.gfxBufferUnmap(&self.encoded_mapping.lease);
+        if (rc != a.gfx_buffer_result_ok) { self.error_code = rc; return error.Buffer; }
+        self.encoded_mapping = .{};
     }
     pub fn poll(self: *Controller, draw: anytype) bool {
         if (!self.busy()) return false;
@@ -170,6 +222,16 @@ pub const Controller = struct {
         _ = self.cleanup(draw);
     }
     pub fn cleanup(self: *Controller, draw: anytype) bool {
+        if (self.encoded_mapping.lease.id != 0) {
+            const rc = draw.gfxBufferUnmap(&self.encoded_mapping.lease);
+            if (rc != a.gfx_buffer_result_ok) { self.error_code = rc; return false; }
+            self.encoded_mapping = .{};
+        }
+        if (self.encoded_buffer.reference.id != 0) {
+            const rc = draw.gfxBufferRelease(&self.encoded_buffer.reference);
+            if (rc != a.gfx_buffer_result_ok) { self.error_code = rc; return false; }
+            self.encoded_buffer = .{};
+        }
         if (self.mapping.lease.id != 0) {
             const rc = draw.gfxBufferUnmap(&self.mapping.lease);
             if (rc != a.gfx_buffer_result_ok) { self.error_code = rc; return false; }

@@ -4,6 +4,8 @@ const c = @import("r4l_contract");
 const render = @import("cpu_render.zig");
 const device = @import("device.zig");
 const swapchain = @import("device_swapchain.zig");
+const color_api = @import("color_api.zig");
+comptime { _ = @import("color_icc.zig"); }
 
 export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}
 
@@ -97,6 +99,7 @@ pub export var r4gfx_device_v1: c.DeviceV1 align(8) linksection(".data.r4l_expor
     .swapchain_close = swapchain.close,
     .presentation_plan = swapchain.plan,
 };
+pub export var r4gfx_color_v1: c.ColorV1 align(8) linksection(".data.r4l_exports") = color_api.table;
 pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
     .magic = r4os.abi.r4l_abi_magic,
     .abi_version = r4os.abi.r4l_abi_version,
@@ -106,6 +109,7 @@ pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_ex
     .reserved = 0,
 };
 test "layout overflow and rejected rectangles preserve bytes including padding" {
+    try @import("color_test.zig").check(&r4gfx_color_v1);
     try @import("device_test.zig").check();
     try @import("swapchain_state_test.zig").check();
     try @import("cpu_render_test.zig").check();

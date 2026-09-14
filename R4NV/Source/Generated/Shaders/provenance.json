@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "compiler_id": "12817ea17417bc6b013624d98335ccc55e237e405ec8dfa7855736518ff075c0",
+  "compiler_id": "3403c1fa1d19985db52c7ec1e86906ee398c0c454d19eff9dc3d72bd90589111",
   "compiler_inputs": [
     {
       "path": "Sources.lock.json",
-      "sha256": "465ebc41687996c1d40dff27df90e87cd3b7c586c62ef5fd34598ad31ef948a8"
+      "sha256": "a930ed54d2928bed840c79e73d6f433b34dd8d80b369251cea186d9ae67da363"
     },
     {
       "path": "MesaStandalone.patch",
@@ -12,7 +12,7 @@
     },
     {
       "path": "Build.ps1",
-      "sha256": "72ade7f7f572b976c5b360d27a219154ab59c4267a4a2539783f3339fe73e0ef"
+      "sha256": "d336e5131188bfd7c863617bddfa5415c4d95ccd8381d50e4246a20dbfbe1276"
     },
     {
       "path": "Source/meson.build",
@@ -20,15 +20,19 @@
     },
     {
       "path": "Source/r4nak.c",
-      "sha256": "e0b24491a306ff84a1ba951dca443e3b99c7b1a431c73b8f6bdb05717f80f9f6"
+      "sha256": "48e53c3bbf5f8ec1f9e1654460ca6eab8008e1b786f377559bb752815e460eb2"
     },
     {
       "path": "Source/shaders.c",
-      "sha256": "9dbc65cec2aa2ec707b73f596f80d1ca6558ffe8dfeae713d9f70dbafc2b5018"
+      "sha256": "56fd6f4185422086a603ba2176371853a06f91cde7e8e2eae3e83b5e9409bd96"
     },
     {
       "path": "Source/shaders.h",
-      "sha256": "558a09e04ec9d655a043a7df24ae595efc76d0e5ee4914054ca866837f3fd4d3"
+      "sha256": "1c035adc1b6b55d49107f049596db26979d172cc00e6df74ecc0c6d823a456eb"
+    },
+    {
+      "path": "Source/color_shader.h",
+      "sha256": "960c1ad4fa30681ddf0abbcfd770b228588972357665ab950875ba8219fe0a0a"
     }
   ],
   "emitter_sha256": "1462a52266376b26b6686f8125548e59ac6da5e6da289c0216812428f98ce8b5",
@@ -98,7 +102,18 @@
       "code_bytes": 80,
       "gprs": 24,
       "instructions": 5
+    },
+    {
+      "profile": 7,
+      "name": "color_fragment",
+      "sha256": "8cab96633b9c15083256aa57c7542af79e9861f6c2c449b737c617726a88efbb",
+      "metadata_sha256": "250824fa8058e424fd80648588660082179af1c1fba885df078d72cbe00da060",
+      "assembly_sha256": "aa2926ac8d4dbadc5f5bcd71343cc68d6c240d36ddfdc371f4c3053128ebe462",
+      "nir_sha256": "990f5c42480cb35359e9d1659f85342f7f16fb1f6de3722d9c3e22c34a258bc4",
+      "code_bytes": 8192,
+      "gprs": 24,
+      "instructions": 512
     }
   ],
-  "generated_zig_sha256": "01e3a3007c530c9f0a3c467bfd5356e0cff9bb7751da737408eb315e66422332"
+  "generated_zig_sha256": "4a7ba7095f9bdeb4ef7436a0b948767e20ca566666847490e525402487c4f97e"
 }

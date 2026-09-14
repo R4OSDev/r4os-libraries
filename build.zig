@@ -2,6 +2,7 @@ const std = @import("std");
 const r4font_build = @import("R4FONT/build.zig");
 
 pub const addR4fontHostDecoder = r4font_build.addHostDecoder;
+pub const addR4gfxHostColor = @import("R4GFX/color_build.zig").addAt;
 
 /// Das Rootpaket baut keine Runtime-Library. Es stellt ausschliesslich die
 /// versionierten Consumer-Bindings als benannte Paketpfade bereit; jede R4L

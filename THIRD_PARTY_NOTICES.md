@@ -11,6 +11,7 @@ R4OS material.
 | R4FONT | FreeType | 2.14.3 | FreeType License 1.0 | `R4FONT/ThirdParty/r4font/freetype/FTL.TXT` |
 | R4FONT | Google Brotli | 1.2.0 | MIT | `R4FONT/ThirdParty/r4font/brotli/LICENSE` |
 | R4FONT | zlib | 1.3.1 | zlib License | `R4FONT/ThirdParty/r4font/ZLIB-LICENSE` |
+| R4GFX | LittleCMS ICC core | 2.18 | MIT | `R4GFX/ThirdParty/LittleCMS/LICENSE` and `UPSTREAM.json` |
 
 Exact upstream commits, included paths, local patches, hashes, and verification
 commands are recorded in
@@ -27,6 +28,14 @@ notices are recorded in `R4FONT/Tests/Fixtures/FIXTURES.json` and
 files. Other listed fixtures are original or generated R4OS material.
 
 ## R4GFX receiver information
+
+R4GFX color management incorporates the LittleCMS ICC core. Its source files
+retain their original notices. The R4OS port supplies caller-owned memory,
+memory-only profile I/O, deterministic virtual-profile dates and native
+context locking; `R4GFX/ThirdParty/LittleCMS/UPSTREAM.json` identifies the
+original source archive and files. CGATS, PostScript utilities and the
+optional GPL plugins are excluded. The full MIT notice is installed as
+`LITTLECMS-LICENSE.txt`.
 
 The compiled EDID helper includes 154 CTA timing records derived from the
 MIT-licensed libdisplay-info table. Receiver tests include its unchanged

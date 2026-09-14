@@ -28,3 +28,12 @@ test gate:
 
 Tests cover the contract, provider, real decoder paths, runtime table, and an
 independent C consumer.
+
+Color-aware consumers additionally import PNG_V1 for PNG metadata, ICC
+extraction and full-precision RGBA16 samples, or RASTER_V1 for JPEG ICC/Exif
+and BMP V4/V5 characterization. The ColorDecoder(R4GFX) facade connects these
+metadata interfaces to the shared COLOR_V1 CMM without decoder-owned color
+math. Untagged sRGB is an explicit application policy; unknown/linked/CMYK
+source descriptions are never silently relabeled. API_V1 remains unchanged.
+See Docs/API.md for layouts and workspace Docs/Desktop/GrafikFarbe07925.txt
+for pipeline ownership, display profiles and output limitations.

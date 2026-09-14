@@ -1988,6 +1988,725 @@
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
+    },
+    {
+      "export_name": "COLOR_V1",
+      "symbol": "r4gfx_color_v1",
+      "zig_name": "color_v1",
+      "zig_type": "ColorV1",
+      "c_type": "R4GfxColorV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 1380928579,
+      "interface_id_hi": 827868743,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "color_description_validate",
+          "c_name": "r4gfx_color_description_validate",
+          "symbol": "r4gfx_color_description_validate_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "description",
+              "type": {
+                "name": "R4GfxColorDescription",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "description"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller retains separate storage and serializes each profile; independent profiles share no mutable transform or allocator. Input/output ranges must not overlap retained storage. No host file I/O."
+          },
+          "description": "Validate a named color description without changing outputs or enabling hardware."
+        },
+        {
+          "name": "color_profile_storage_size",
+          "c_name": "r4gfx_color_profile_storage_size",
+          "symbol": "r4gfx_color_profile_storage_size_impl",
+          "slot": 1,
+          "since_revision": 1,
+          "returns": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller retains separate storage and serializes each profile; independent profiles share no mutable transform or allocator. Input/output ranges must not overlap retained storage. No host file I/O."
+          },
+          "description": "Recommended caller capacity for one ICC transform; no allocation or global state."
+        },
+        {
+          "name": "color_profile_open",
+          "c_name": "r4gfx_color_profile_open",
+          "symbol": "r4gfx_color_profile_open_impl",
+          "slot": 2,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "config",
+              "type": {
+                "name": "R4GfxColorProfileConfig",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "config"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxColorProfile",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller retains separate storage and serializes each profile; independent profiles share no mutable transform or allocator. Input/output ranges must not overlap retained storage. No host file I/O."
+          },
+          "description": "Compile the complete ICC transform in bounded caller storage. No active profile handle is published on failure."
+        },
+        {
+          "name": "color_profile_info",
+          "c_name": "r4gfx_color_profile_info",
+          "symbol": "r4gfx_color_profile_info_impl",
+          "slot": 3,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "profile",
+              "type": {
+                "name": "R4GfxColorProfile",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "profile"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxColorProfileInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller retains separate storage and serializes each profile; independent profiles share no mutable transform or allocator. Input/output ranges must not overlap retained storage. No host file I/O."
+          },
+          "description": "Read the current generation and admitted profile policy."
+        },
+        {
+          "name": "color_profile_apply",
+          "c_name": "r4gfx_color_profile_apply",
+          "symbol": "r4gfx_color_profile_apply_impl",
+          "slot": 4,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "profile",
+              "type": {
+                "name": "R4GfxColorProfile",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "profile"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxColorProfileRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "request"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller retains separate storage and serializes each profile; independent profiles share no mutable transform or allocator. Input/output ranges must not overlap retained storage. No host file I/O."
+          },
+          "description": "Apply an admitted, retained RGB ICC transform to caller float triplets."
+        },
+        {
+          "name": "color_profile_close",
+          "c_name": "r4gfx_color_profile_close",
+          "symbol": "r4gfx_color_profile_close_impl",
+          "slot": 5,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "profile",
+              "type": {
+                "name": "R4GfxColorProfile",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "profile"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller retains separate storage and serializes each profile; independent profiles share no mutable transform or allocator. Input/output ranges must not overlap retained storage. No host file I/O."
+          },
+          "description": "Close the exact generation, remove its private ICC context and release caller storage for reuse. Repeated close succeeds; a replaced generation reports STALE."
+        },
+        {
+          "name": "color_image_transform",
+          "c_name": "r4gfx_color_image_transform",
+          "symbol": "r4gfx_color_image_transform_impl",
+          "slot": 6,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "source",
+              "type": {
+                "name": "R4GfxColorImage",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "source"
+            },
+            {
+              "name": "target",
+              "type": {
+                "name": "R4GfxColorImage",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "target"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxColorTransform",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxCpuStats",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes each retained profile and exclusively owns writable target storage. All descriptors, statistics and ICC state must be separate from writable pixels. Independent image/profile operations share no mutable state."
+          },
+          "description": "Convert, resample or composite explicit8/10-bit/FP16 RGB images with retained ICC profiles. No allocation, driver calls or per-pixel profile recompilation. Source interpolation and alpha blending occur in linear light; transfer/range/quantization occur when storing the target."
+        },
+        {
+          "name": "color_resource_create",
+          "c_name": "r4gfx_color_resource_create",
+          "symbol": "r4gfx_color_resource_create_impl",
+          "slot": 7,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "description",
+              "type": {
+                "name": "R4GfxColorResourceDesc",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "description"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes each graphics device and retains source/target resources through the operation. Independent devices share no mutable allocator or color state. CPU transforms require separately mappable images; native rendering uses ordinary retained queue jobs."
+          },
+          "description": "Create or import an image with immutable named color metadata through the normal graphics resource owner. No alternate BO allocator."
+        },
+        {
+          "name": "color_resource_info",
+          "c_name": "r4gfx_color_resource_info",
+          "symbol": "r4gfx_color_resource_info_impl",
+          "slot": 8,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "resource",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "resource"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxColorDescription",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes each graphics device and retains source/target resources through the operation. Independent devices share no mutable allocator or color state. CPU transforms require separately mappable images; native rendering uses ordinary retained queue jobs."
+          },
+          "description": "Read immutable color metadata. Untagged legacy images report UNSUPPORTED; format alone never invents HDR color meaning."
+        },
+        {
+          "name": "color_resource_transform",
+          "c_name": "r4gfx_color_resource_transform",
+          "symbol": "r4gfx_color_resource_transform_impl",
+          "slot": 9,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "source",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "source"
+            },
+            {
+              "name": "target",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "target"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxColorTransform",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxCpuStats",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes each graphics device and retains source/target resources through the operation. Independent devices share no mutable allocator or color state. CPU transforms require separately mappable images; native rendering uses ordinary retained queue jobs."
+          },
+          "description": "Execute the same linear CPU color pipeline on retained system/borrowed graphics resources. Map each distinct resource once, respect pending GPU ownership, retain failed unmaps for later cleanup. Native-only images report unsupported; this operation does not silently read VRAM. On failure discard the offscreen result."
+        },
+        {
+          "name": "color_profile_generate",
+          "c_name": "r4gfx_color_profile_generate",
+          "symbol": "r4gfx_color_profile_generate_impl",
+          "slot": 10,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "definition",
+              "type": {
+                "name": "R4GfxColorProfileDefinition",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "definition"
+            },
+            {
+              "name": "scratch_address",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "scratch_address"
+            },
+            {
+              "name": "scratch_bytes",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "scratch_bytes"
+            },
+            {
+              "name": "output_address",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "output_address"
+            },
+            {
+              "name": "output_capacity",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "output_capacity"
+            },
+            {
+              "name": "output_bytes",
+              "type": {
+                "name": "u64",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output_bytes"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "All storage belongs to caller and is used only during this call. Generated bytes are independent of scratch and may be passed to color_profile_open."
+          },
+          "description": "Generate a deterministic ICC profile in caller memory through the same userland ICC engine used for display transforms. No host file access. Use16-aligned exclusive scratch of at least1KB and at most64MB (2MB normally suffices), output capacity132..4MB (4KB suffices for these matrix/curve profiles). All writable storage, definition and size output must be separate. Scratch is temporary and may not contain retained profiles. Output/count publish only on success; no color assumption is made for unspecified image metadata."
+        },
+        {
+          "name": "color_render_submit",
+          "c_name": "r4gfx_color_render_submit",
+          "symbol": "r4gfx_color_render_submit_impl",
+          "slot": 11,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxRenderListRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "flags",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "color_transform_output, color_transform_relative_white and color_transform_dither, applied once to the completed source. OVER only targets linear optical-premultiplied FP16 and cannot tone-map the destination."
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error."
+          },
+          "description": "Submit1..16 compatible draws using explicit retained resource colors and a fixed native color program. Requires device_gpu_color, a nearest sampler and request.transfer=identity. R4GFX derives matrices, transfer/range, white scaling and optional tone/gamut/dither; the queue retains copied coefficients and BOs until real execution. Untagged/ICC resources are rejected by this named-color shader. CPU ICC processing remains available through COLOR_V1. Failure admits no prefix and does not write output."
+        }
+      ],
+      "description": "Userland color descriptions and retained, bounded RGB ICC transformations. Native output capability and physical color acceptance are separate."
     }
   ],
   "types": [
@@ -5855,6 +6574,848 @@
         }
       ],
       "description": "Copied arrays of1..16 R4GfxRenderRequest and R4GfxLogicalGrid records. Same batching/resource/dependency rules as render_submit_list. All inputs validate before native submission; requires device_gpu_grid. No CPU pixel mapping or scaling."
+    },
+    {
+      "name": "R4GfxColorDescription",
+      "size": 48,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "primaries",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "primaries"
+        },
+        {
+          "name": "transfer",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "transfer"
+        },
+        {
+          "name": "range",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "range"
+        },
+        {
+          "name": "alpha",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "alpha"
+        },
+        {
+          "name": "precision",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "precision"
+        },
+        {
+          "name": "flags",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "reference_white",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Reference white in0.0001 cd/m2; explicit presentation policy."
+        },
+        {
+          "name": "peak",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Declared content/output peak in0.0001 cd/m2; at most10000 cd/m2."
+        },
+        {
+          "name": "black",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Black luminance in0.0001 cd/m2. HLG supports black lift; other named transfers require0."
+        },
+        {
+          "name": "reserved",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Explicit immutable RGB encoding. Version1/size48; flags/reserved0. Alpha stays linear and full range. Electrical premultiplication occurs after transfer encoding; optical premultiplication before encoding. Float16 is full-range linear. PQ is absolute; a reference-white value never rescales its EOTF. These facts do not establish native output capability. ICC primaries4 and transfer5 must appear together, with full range, equal peak/reference white and no optical premultiplication. Their retained profile is the authoritative complete RGB characterization; named transfer math cannot substitute for it. Float16 permits linear or ICC storage. An input GRAY ICC profile uses equal replicated RGB channels; unequal input channels are rejected. Output profiles remain RGB. Range2 derives legal endpoints from storage precision; range3/4/5 explicitly uses8/10/16-bit signal endpoints after storage promotion. These ranges do not imply native output capability."
+    },
+    {
+      "name": "R4GfxColorProfile",
+      "size": 16,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "address",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "address"
+        },
+        {
+          "name": "generation",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "generation"
+        }
+      ],
+      "description": "Caller-owned profile state handle. Retain its storage until close; copying a handle does not retain a second profile. Close/open never revives a previous generation."
+    },
+    {
+      "name": "R4GfxColorProfileConfig",
+      "size": 56,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "storage_address",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "storage_address"
+        },
+        {
+          "name": "storage_bytes",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "storage_bytes"
+        },
+        {
+          "name": "profile_address",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "profile_address"
+        },
+        {
+          "name": "profile_bytes",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "profile_bytes"
+        },
+        {
+          "name": "direction",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "direction"
+        },
+        {
+          "name": "intent",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "intent"
+        },
+        {
+          "name": "flags",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "reserved",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Version1/size56. Storage is16-byte aligned, first16 bytes initially zero, and retained through close. profile_storage_size recommends capacity; smaller buffers can fail with LIMIT. The complete ICC bytes are copied on open. Input direction accepts RGB input/display/color-space profiles; output requires an RGB display profile. Explicit intents0..3 use ICC tag precedence, including the standard A2B0/B2A0 fallback when the requested intent has no dedicated LUT. Flags select black-point compensation and output VCGT calibration. The CMM builds the actual admitted transform; LUT profiles are not approximated by matrix/TRC profiles."
+    },
+    {
+      "name": "R4GfxColorProfileInfo",
+      "size": 40,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "storage_bytes",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "storage_bytes"
+        },
+        {
+          "name": "used_bytes",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "used_bytes"
+        },
+        {
+          "name": "direction",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "direction"
+        },
+        {
+          "name": "intent",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "intent"
+        },
+        {
+          "name": "flags",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "error_code",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "error_code"
+        }
+      ],
+      "description": "Current private ICC context capacity/use and admitted direction, intent and calibration flags. Last numeric LittleCMS error is diagnostic; hardware capability is separate."
+    },
+    {
+      "name": "R4GfxColorProfileRequest",
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "source_address",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_address"
+        },
+        {
+          "name": "target_address",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_address"
+        },
+        {
+          "name": "pixel_count",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pixel_count"
+        },
+        {
+          "name": "reserved",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Nonoverlapping,4-byte aligned arrays of packed three-f32 triplets. Source/destination storage must be retained for this call. Input profiles convert encoded RGB to relative XYZ(D50); output profiles perform the reverse and optionally apply VCGT once. Alpha, physical luminance and composition remain with the R4GFX color pipeline. Nonfinite source samples and malformed ranges fail before output writes. At most16777216 pixels; reserved0."
+    },
+    {
+      "name": "R4GfxColorImage",
+      "size": 112,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "image",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxCpuImage",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "image"
+        },
+        {
+          "name": "description",
+          "offset": 48,
+          "type": {
+            "name": "R4GfxColorDescription",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "description"
+        },
+        {
+          "name": "profile",
+          "offset": 96,
+          "type": {
+            "name": "R4GfxColorProfile",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "profile"
+        }
+      ],
+      "description": "Version1/size112. Explicit CPU storage and immutable color description. A zero profile is required for named encodings; ICC primaries/transfer require a live profile of the appropriate direction, retained and serialized through the call. No hidden sRGB assumption for HDR or ICC data. AB48 CPU images hold little-endian RGBA16 unorm, precision17. Convert to a named native format before uploading."
+    },
+    {
+      "name": "R4GfxColorTransform",
+      "size": 64,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "source_rect",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_rect"
+        },
+        {
+          "name": "target_rect",
+          "offset": 24,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_rect"
+        },
+        {
+          "name": "sampler",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "sampler"
+        },
+        {
+          "name": "operation",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "operation"
+        },
+        {
+          "name": "opacity",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "opacity"
+        },
+        {
+          "name": "flags",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "pixel_budget",
+          "offset": 56,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pixel_budget"
+        }
+      ],
+      "description": "Version1/size64. Nearest/bilinear sampling and BLIT/OVER operate in premultiplied display-linear BT.2020 cd/m2. Opacity0..65535 is linear. Flags: output mapping applies the documented rational luminance shoulder and neutral-axis gamut compression; relative white scales source paper white to target; dither is spatially anchored in target coordinates. ICC output requires output mapping and BLIT; perform composition in a linear intermediate first. Bounded by render_max_pixels. Input/target pixel storage cannot overlap. Validation errors preserve target bytes; a runtime ICC/nonfinite failure invalidates the offscreen result, which the caller must discard."
+    },
+    {
+      "name": "R4GfxColorResourceDesc",
+      "size": 144,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "resource",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxResourceDesc",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "resource"
+        },
+        {
+          "name": "description",
+          "offset": 96,
+          "type": {
+            "name": "R4GfxColorDescription",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "description"
+        }
+      ],
+      "description": "Version1/size144; nested resource descriptor retains its unchanged version1/size88. Named RGB description is copied and immutable for the resource lifetime, including prepared/relocated views. ICC images are transformed to a named working space before GPU resource creation; a raw ICC pointer is never retained by a queue job. High-precision storage requires explicit color metadata. This does not establish scanout or HDR capability."
+    },
+    {
+      "name": "R4GfxColorProfileDefinition",
+      "size": 64,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "color_model",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "color_model"
+        },
+        {
+          "name": "curve",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "curve"
+        },
+        {
+          "name": "white_x",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "white_x"
+        },
+        {
+          "name": "white_y",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "white_y"
+        },
+        {
+          "name": "red_x",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "red_x"
+        },
+        {
+          "name": "red_y",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "red_y"
+        },
+        {
+          "name": "green_x",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "green_x"
+        },
+        {
+          "name": "green_y",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "green_y"
+        },
+        {
+          "name": "blue_x",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "blue_x"
+        },
+        {
+          "name": "blue_y",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "blue_y"
+        },
+        {
+          "name": "gamma_red",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "gamma_red"
+        },
+        {
+          "name": "gamma_green",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "gamma_green"
+        },
+        {
+          "name": "gamma_blue",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "gamma_blue"
+        },
+        {
+          "name": "reserved",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Version1/size64; reserved0. Explicit RGB(model1) or grayscale(model2) characterization. xy chromaticities and decoding gamma exponents use1/100000. Curve1 is pure power, curve2 is exact sRGB. Gamma must be0.01..100 even for unused channels; choose1 for sRGB. Gray uses the white point and first curve, produces a GRAY ICC profile, and accepts only equal RGB channels in the image/API storage. Generated RGB profiles can characterize inputs or displays; no measurement/calibration is claimed."
     }
   ],
   "constants": [
@@ -6438,6 +7999,307 @@
       "type": "u32",
       "value": 128,
       "description": "Native draw lists implement exact logical-grid nearest sampling on the GPU; current per-output admission remains required."
+    },
+    {
+      "zig_name": "color_primaries_srgb",
+      "c_name": "R4GFX_COLOR_PRIMARIES_SRGB",
+      "type": "u32",
+      "value": 1,
+      "description": "color_primaries_srgb"
+    },
+    {
+      "zig_name": "color_primaries_display_p3",
+      "c_name": "R4GFX_COLOR_PRIMARIES_DISPLAY_P3",
+      "type": "u32",
+      "value": 2,
+      "description": "color_primaries_display_p3"
+    },
+    {
+      "zig_name": "color_primaries_bt2020",
+      "c_name": "R4GFX_COLOR_PRIMARIES_BT2020",
+      "type": "u32",
+      "value": 3,
+      "description": "color_primaries_bt2020"
+    },
+    {
+      "zig_name": "color_transfer_srgb",
+      "c_name": "R4GFX_COLOR_TRANSFER_SRGB",
+      "type": "u32",
+      "value": 1,
+      "description": "color_transfer_srgb"
+    },
+    {
+      "zig_name": "color_transfer_linear",
+      "c_name": "R4GFX_COLOR_TRANSFER_LINEAR",
+      "type": "u32",
+      "value": 2,
+      "description": "color_transfer_linear"
+    },
+    {
+      "zig_name": "color_transfer_pq",
+      "c_name": "R4GFX_COLOR_TRANSFER_PQ",
+      "type": "u32",
+      "value": 3,
+      "description": "color_transfer_pq"
+    },
+    {
+      "zig_name": "color_transfer_hlg",
+      "c_name": "R4GFX_COLOR_TRANSFER_HLG",
+      "type": "u32",
+      "value": 4,
+      "description": "color_transfer_hlg"
+    },
+    {
+      "zig_name": "color_range_full",
+      "c_name": "R4GFX_COLOR_RANGE_FULL",
+      "type": "u32",
+      "value": 1,
+      "description": "color_range_full"
+    },
+    {
+      "zig_name": "color_range_limited",
+      "c_name": "R4GFX_COLOR_RANGE_LIMITED",
+      "type": "u32",
+      "value": 2,
+      "description": "color_range_limited"
+    },
+    {
+      "zig_name": "color_alpha_opaque",
+      "c_name": "R4GFX_COLOR_ALPHA_OPAQUE",
+      "type": "u32",
+      "value": 1,
+      "description": "color_alpha_opaque"
+    },
+    {
+      "zig_name": "color_alpha_straight",
+      "c_name": "R4GFX_COLOR_ALPHA_STRAIGHT",
+      "type": "u32",
+      "value": 2,
+      "description": "color_alpha_straight"
+    },
+    {
+      "zig_name": "color_alpha_electrical",
+      "c_name": "R4GFX_COLOR_ALPHA_ELECTRICAL",
+      "type": "u32",
+      "value": 3,
+      "description": "color_alpha_electrical"
+    },
+    {
+      "zig_name": "color_alpha_optical",
+      "c_name": "R4GFX_COLOR_ALPHA_OPTICAL",
+      "type": "u32",
+      "value": 4,
+      "description": "color_alpha_optical"
+    },
+    {
+      "zig_name": "color_precision_unorm8",
+      "c_name": "R4GFX_COLOR_PRECISION_UNORM8",
+      "type": "u32",
+      "value": 8,
+      "description": "color_precision_unorm8"
+    },
+    {
+      "zig_name": "color_precision_unorm10",
+      "c_name": "R4GFX_COLOR_PRECISION_UNORM10",
+      "type": "u32",
+      "value": 10,
+      "description": "color_precision_unorm10"
+    },
+    {
+      "zig_name": "color_precision_float16",
+      "c_name": "R4GFX_COLOR_PRECISION_FLOAT16",
+      "type": "u32",
+      "value": 16,
+      "description": "color_precision_float16"
+    },
+    {
+      "zig_name": "color_profile_input",
+      "c_name": "R4GFX_COLOR_PROFILE_INPUT",
+      "type": "u32",
+      "value": 0,
+      "description": "color_profile_input"
+    },
+    {
+      "zig_name": "color_profile_output",
+      "c_name": "R4GFX_COLOR_PROFILE_OUTPUT",
+      "type": "u32",
+      "value": 1,
+      "description": "color_profile_output"
+    },
+    {
+      "zig_name": "color_intent_perceptual",
+      "c_name": "R4GFX_COLOR_INTENT_PERCEPTUAL",
+      "type": "u32",
+      "value": 0,
+      "description": "color_intent_perceptual"
+    },
+    {
+      "zig_name": "color_intent_relative",
+      "c_name": "R4GFX_COLOR_INTENT_RELATIVE",
+      "type": "u32",
+      "value": 1,
+      "description": "color_intent_relative"
+    },
+    {
+      "zig_name": "color_intent_saturation",
+      "c_name": "R4GFX_COLOR_INTENT_SATURATION",
+      "type": "u32",
+      "value": 2,
+      "description": "color_intent_saturation"
+    },
+    {
+      "zig_name": "color_intent_absolute",
+      "c_name": "R4GFX_COLOR_INTENT_ABSOLUTE",
+      "type": "u32",
+      "value": 3,
+      "description": "color_intent_absolute"
+    },
+    {
+      "zig_name": "color_profile_black_compensation",
+      "c_name": "R4GFX_COLOR_PROFILE_BLACK_COMPENSATION",
+      "type": "u32",
+      "value": 1,
+      "description": "color_profile_black_compensation"
+    },
+    {
+      "zig_name": "color_profile_calibration",
+      "c_name": "R4GFX_COLOR_PROFILE_CALIBRATION",
+      "type": "u32",
+      "value": 2,
+      "description": "color_profile_calibration"
+    },
+    {
+      "zig_name": "color_primaries_icc",
+      "c_name": "R4GFX_COLOR_PRIMARIES_ICC",
+      "type": "u32",
+      "value": 4,
+      "description": "color_primaries_icc"
+    },
+    {
+      "zig_name": "color_transfer_icc",
+      "c_name": "R4GFX_COLOR_TRANSFER_ICC",
+      "type": "u32",
+      "value": 5,
+      "description": "color_transfer_icc"
+    },
+    {
+      "zig_name": "color_transform_output",
+      "c_name": "R4GFX_COLOR_TRANSFORM_OUTPUT",
+      "type": "u32",
+      "value": 1,
+      "description": "color_transform_output"
+    },
+    {
+      "zig_name": "color_transform_relative_white",
+      "c_name": "R4GFX_COLOR_TRANSFORM_RELATIVE_WHITE",
+      "type": "u32",
+      "value": 2,
+      "description": "color_transform_relative_white"
+    },
+    {
+      "zig_name": "color_transform_dither",
+      "c_name": "R4GFX_COLOR_TRANSFORM_DITHER",
+      "type": "u32",
+      "value": 4,
+      "description": "color_transform_dither"
+    },
+    {
+      "zig_name": "format_xrgb2101010",
+      "c_name": "R4GFX_FORMAT_XRGB2101010",
+      "type": "u32",
+      "value": 808669784,
+      "description": "format_xrgb2101010"
+    },
+    {
+      "zig_name": "format_argb2101010",
+      "c_name": "R4GFX_FORMAT_ARGB2101010",
+      "type": "u32",
+      "value": 808669761,
+      "description": "format_argb2101010"
+    },
+    {
+      "zig_name": "format_abgr16161616f",
+      "c_name": "R4GFX_FORMAT_ABGR16161616F",
+      "type": "u32",
+      "value": 1211384385,
+      "description": "format_abgr16161616f"
+    },
+    {
+      "zig_name": "color_precision_unorm16",
+      "c_name": "R4GFX_COLOR_PRECISION_UNORM16",
+      "type": "u32",
+      "value": 17,
+      "description": "CPU RGBA16 unorm storage preserves decoded PNG precision before color conversion; it is not an admitted native resource or scanout format."
+    },
+    {
+      "zig_name": "format_abgr16161616",
+      "c_name": "R4GFX_FORMAT_ABGR16161616",
+      "type": "u32",
+      "value": 942948929,
+      "description": "CPU RGBA16 unorm storage preserves decoded PNG precision before color conversion; it is not an admitted native resource or scanout format."
+    },
+    {
+      "zig_name": "color_model_rgb",
+      "c_name": "R4GFX_COLOR_MODEL_RGB",
+      "type": "u32",
+      "value": 1,
+      "description": "color_model_rgb"
+    },
+    {
+      "zig_name": "color_model_gray",
+      "c_name": "R4GFX_COLOR_MODEL_GRAY",
+      "type": "u32",
+      "value": 2,
+      "description": "color_model_gray"
+    },
+    {
+      "zig_name": "color_curve_power",
+      "c_name": "R4GFX_COLOR_CURVE_POWER",
+      "type": "u32",
+      "value": 1,
+      "description": "color_curve_power"
+    },
+    {
+      "zig_name": "color_curve_srgb",
+      "c_name": "R4GFX_COLOR_CURVE_SRGB",
+      "type": "u32",
+      "value": 2,
+      "description": "color_curve_srgb"
+    },
+    {
+      "zig_name": "color_range_limited8",
+      "c_name": "R4GFX_COLOR_RANGE_LIMITED8",
+      "type": "u32",
+      "value": 3,
+      "description": "Normalized limited signal range with explicit original8/10/16-bit code endpoints. Allows promoted storage without changing signal black/white. Alpha remains full range."
+    },
+    {
+      "zig_name": "color_range_limited10",
+      "c_name": "R4GFX_COLOR_RANGE_LIMITED10",
+      "type": "u32",
+      "value": 4,
+      "description": "Normalized limited signal range with explicit original8/10/16-bit code endpoints. Allows promoted storage without changing signal black/white. Alpha remains full range."
+    },
+    {
+      "zig_name": "color_range_limited16",
+      "c_name": "R4GFX_COLOR_RANGE_LIMITED16",
+      "type": "u32",
+      "value": 5,
+      "description": "Normalized limited signal range with explicit original8/10/16-bit code endpoints. Allows promoted storage without changing signal black/white. Alpha remains full range."
+    },
+    {
+      "zig_name": "source_color_view",
+      "c_name": "R4GFX_SOURCE_COLOR_VIEW",
+      "type": "u32",
+      "value": 6,
+      "description": "COLOR_V1 only: read-only named view of an existing BO-backed R4GfxResource at source_address. Image and source_generation must be zero. A separate BO reference retains storage; an existing color description cannot be reinterpreted. No allocation, copying or metadata mutation of the source occurs. Caller orders producer jobs before consuming the view."
+    },
+    {
+      "zig_name": "device_gpu_color",
+      "c_name": "R4GFX_DEVICE_GPU_COLOR",
+      "type": "u32",
+      "value": 256,
+      "description": "Backend implements the bounded named-color render program and completion lifetime. Offscreen capability alone never grants HDR display admission."
     }
   ],
   "errors": [

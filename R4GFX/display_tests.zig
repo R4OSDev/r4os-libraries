@@ -14,6 +14,130 @@ fn contains(report: *const edid.Report, width: u32, height: u32) bool {
     for (report.modes[0..report.mode_count]) |mode| if (mode.width == width and mode.height == height and mode.valid()) return true;
     return false;
 }
+fn checkColorMetadata() !void {
+    var bytes = qemu[0..256].*;
+    bytes[23] = 120; bytes[24] |= 4;
+    bytes[25] = 0x1b; bytes[26] = 0xe4;
+    @memcpy(bytes[27..35], &[_]u8{ 1, 2, 3, 4, 5, 6, 7, 8 });
+    bytes[126] = 1; fix(bytes[0..128]);
+    const block = bytes[128..]; @memset(block, 0);
+    block[0] = 2; block[1] = 3; block[2] = 26;
+    @memcpy(block[4..26], &[_]u8{
+        0x67, 3, 12, 0, 0x10, 0, 0xb8, 120,
+        0xe6, 6, 13, 1, 96, 64, 128,
+        0xe2, 0, 0xc0,
+        0xe3, 5, 0xe0, 0,
+    });
+    fix(block);
+    var report: edid.Report = .{};
+    try edid.parse(&bytes, &report);
+    try t.expect(report.complete() and report.srgb_default and report.gamma_hundredths == 220);
+    try t.expectEqualSlices(u16, &.{ 4, 9, 14, 19, 23, 26, 29, 32 }, &report.chromaticity);
+    try t.expect(report.hdmi_deep_color == 3 and report.hdmi_deep_color_y444 and report.hdmi_deep_color_420 == 0);
+    try t.expect(report.rgb_quantization_selectable and report.ycc_quantization_selectable);
+    try t.expect(report.hdr_present and report.hdr_eotf == 13 and report.hdr_static == 1 and report.hdr_luminance_count == 3);
+    try t.expectEqualSlices(u8, &.{ 96, 64, 128 }, &report.hdr_luminance);
+    try checkColorSignal(report);
+    const valid = bytes;
+    for (0..4) |failure| {
+        bytes = valid;
+        switch (failure) {
+            0 => block[12] = 0xe2, // Missing required descriptor byte.
+            1 => block[16] = 0, // Minimum without maximum luminance.
+            2 => block[17] = 97, // Frame average exceeds content maximum.
+            3 => { block[2] = 30; @memcpy(block[26..30], &[_]u8{ 0xe3, 6, 5, 1 }); }, // Conflicting duplicate.
+            else => unreachable,
+        }
+        fix(block); try edid.parse(&bytes, &report);
+        try t.expect(!report.complete() and !report.hdr_present and report.hdmi_deep_color == 0 and !report.rgb_quantization_selectable);
+    }
+    bytes = valid; block[16] = 0; block[17] = 0; block[18] = 0; fix(block);
+    try edid.parse(&bytes, &report);
+    try t.expect(report.complete() and report.hdr_present and report.hdr_luminance_count == 3);
+    try t.expectEqualSlices(u8, &.{ 0, 0, 0 }, &report.hdr_luminance); // Unknown is preserved.
+}
+fn checkColorSignal(input: edid.Report) !void {
+    const color = @import("Display/color_signal.zig");
+    var receiver = input;
+    receiver.bits_per_color = 10;
+    const metadata: color.Metadata = .{ .max_mastering = 1000, .min_mastering = 50, .max_cll = 1000, .max_fall = 400 };
+    var signal: color.Signal = .{ .format = .xr30, .transfer = .pq, .primaries = .bt2020, .range = .full,
+        .bpc = 10, .reference_white = 2_030_000, .peak = 4_000_000, .metadata = metadata };
+    var source: color.Source = .{ .formats = 3, .bpc = 3, .primaries = 3, .ranges = 3, .eotf = 13, .static_metadata = true, .dp_vsc = true };
+    var pipeline: color.Pipeline = .{ .linear_composition = true, .output_transform = true, .opaque_output = true };
+    const hdmi: color.Link = .{ .hdmi = .{ .max_tmds_hz = 600_000_000, .scdc = true } };
+    const native = try color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16);
+    try t.expect(native.bpp == 30 and native.tmds_hz == 185_625_000 and !native.clear_hdr and native.metadata_bytes == 30);
+    // Independent CTA wire bytes, including checksum and unequal units of
+    // maximum1000nits and minimum0.005nits. Unknown xy stays zero.
+    try t.expectEqualSlices(u8, &.{ 0x87, 1, 26, 0xc3, 2, 0 }, native.metadata[0..6]);
+    for (native.metadata[6..22]) |byte| try t.expect(byte == 0);
+    try t.expectEqualSlices(u8, &.{ 0xe8, 3, 50, 0, 0xe8, 3, 0x90, 1 }, native.metadata[22..30]);
+    const light = color.luminance(receiver.hdr_luminance);
+    try t.expectEqual(@as(f64, 400), light.maximum.?);
+    try t.expectEqual(@as(f64, 200), light.frame_average.?);
+    try t.expectApproxEqAbs(@as(f64, 1.007858516), light.minimum.?, 0.00000001);
+    try t.expectEqualDeep(color.Luminance{}, color.luminance(.{ 0, 0, 0 }));
+    try t.expectError(error.Bandwidth, color.admit(&receiver, signal, source, pipeline, hdmi, 594_000_000, 97));
+    try t.expectError(error.Bandwidth, color.admit(&receiver, signal, source, pipeline, hdmi, 297_000_000, 95));
+    receiver.scdc = true;
+    _ = try color.admit(&receiver, signal, source, pipeline, hdmi, 297_000_000, 95);
+    pipeline.output_transform = false;
+    try t.expectError(error.Incomplete, color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16));
+    pipeline.output_transform = true;
+    source.formats = 1; // Native8-bit implementation cannot borrow the sink's10-bit claim.
+    try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16));
+    source.formats = 3; source.static_metadata = false;
+    try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16));
+    source.static_metadata = true;
+    receiver.colorimetry = 0;
+    try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16));
+    receiver.colorimetry = input.colorimetry;
+    signal.metadata = null;
+    try t.expectError(error.Incomplete, color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16));
+    signal.metadata = metadata;
+    const dp: color.Link = .{ .displayport = .{ .payload_bits_per_second = 17_280_000_000, .vsc = true, .hdr_sdp = true } };
+    const packet = try color.admit(&receiver, signal, source, pipeline, dp, 148_500_000, 16);
+    try t.expect(packet.metadata_bytes == 36 and packet.tmds_hz == 0);
+    try t.expectEqualSlices(u8, &.{ 0, 0x87, 29, 0x4c, 1, 26 }, packet.metadata[0..6]);
+    try t.expectEqualSlices(u8, native.metadata[4..30], packet.metadata[6..32]);
+    source.dp_vsc = false;
+    try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, dp, 148_500_000, 16));
+    source.dp_vsc = true;
+    try t.expectError(error.Bandwidth, color.admit(&receiver, signal, source, pipeline,
+        .{ .displayport = .{ .payload_bits_per_second = 4_455_000_000, .vsc = true, .hdr_sdp = true } }, 148_500_000, 16));
+    signal.transfer = .hlg;
+    const hlg = try color.admit(&receiver, signal, source, pipeline, dp, 148_500_000, 16);
+    try t.expect(hlg.metadata[6] == 3);
+    signal = .{ .format = .xr24, .transfer = .srgb, .primaries = .bt709, .range = .full, .bpc = 8,
+        .reference_white = 1_000_000, .peak = 1_000_000 };
+    receiver.rgb_quantization_selectable = false;
+    try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16));
+    const sdr = try color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 0);
+    try t.expect(sdr.clear_hdr and sdr.metadata_bytes == 0 and sdr.bpp == 24);
+    const a = @import("r4os").abi;
+    var published: a.GfxOutputColorState = .{ .flags = 7, .format = a.gfx_buffer_format_xrgb8888,
+        .bpc = 8, .primaries = 1, .transfer = 1, .range = 1, .reference_white = 1_000_000, .peak = 1_000_000,
+        .formats = 1, .depths = 1, .color_spaces = 1, .ranges = 1, .transfers = 1, .max_tmds_clock_hz = 600_000_000 };
+    const confirmed = try color.Source.fromPublished(published, .hdmi);
+    try t.expect(!confirmed.static_metadata and !confirmed.dp_vsc and confirmed.eotf == 1);
+    _ = try color.admit(&receiver, try color.publishedSignal(published, null), confirmed, pipeline,
+        try color.publishedLink(published, .hdmi), 148_500_000, 0);
+    published.flags &= ~@as(u32, 2);
+    try t.expectError(error.Incomplete, color.publishedSignal(published, null));
+    try t.expectError(error.Incomplete, color.publishedLink(published, .hdmi));
+    published.flags = 7; published.formats = 4;
+    try t.expectError(error.Invalid, color.Source.fromPublished(published, .hdmi));
+    published.formats = 1;
+    try t.expectError(error.Bandwidth, color.admit(&receiver, try color.publishedSignal(published, null), confirmed, pipeline,
+        try color.publishedLink(published, .displayport), 148_500_000, 0));
+    signal.range = .limited;
+    _ = try color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16);
+    var bad = metadata; bad.max_cll = 100;
+    try t.expectError(error.Invalid, color.hdmiMetadata(.pq, bad));
+    bad = metadata; bad.primaries[0] = 65535;
+    try t.expectError(error.Invalid, color.dpMetadata(.hlg, bad));
+}
 test "licensed receiver fixtures and actual OssiPC base preserve missing extension uncertainty" {
     var result: edid.Report = .{};
     try edid.parse(ossipc, &result);
@@ -63,6 +187,7 @@ test "licensed receiver fixtures and actual OssiPC base preserve missing extensi
     try t.expect(contains(&result, 6016, 3384));
 }
 test "extension checksums and malformed lengths cannot leak partial audio or timing claims" {
+    try checkColorMetadata();
     var bytes = television[0..256].*;
     var result: edid.Report = .{};
     bytes[140] ^= 1;

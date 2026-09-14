@@ -160,3 +160,16 @@ Native shader rendering and complete GPU Desktop composition belong to 0.79.19/2
 A passing CPU scene does not qualify NVIDIA hardware. Software evidence lives in
 `Docs/Drivers/GrafikRender07917.txt`; physical follow-up remains in
 `ExFiles/Reports/OssiGPU.txt`, section 0.79.17.
+
+## Explicit color pipeline
+
+COLOR_V1 adds named color resources, source/output descriptions, ICC profile
+arenas and generation, linear FP16 composition and SDR/PQ/HLG conversion.
+Native color lists use the existing DEVICE_V1 queue/fence lifetime and
+R4NV resource ABI4. Present and swapchains require descriptions matching the
+acknowledged output. General ICC/VCGT display profiles currently use the
+canonical SDR CPU path; hardware LUT/CTM capabilities remain zero. Display
+color changes use the shared timed mode controller and COLORS.R4S schema2.
+JPEG/BMP/PNG characterization is supplied by R4IMG. Detailed interface
+layouts: [Docs/API.md](Docs/API.md); workspace architecture and evidence:
+Docs/Desktop/GrafikFarbe07925.txt and GrafikFarbe07925.json.

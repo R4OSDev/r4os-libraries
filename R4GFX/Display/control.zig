@@ -66,6 +66,7 @@ pub const Client = struct {
     state: a.DisplayControlStatus = .{},
     next_request: u64 = 1,
     pending: ?a.DisplayControlRequest = null,
+    pending_color: ?a.DisplayColorSelection = null,
     last_error: i32 = 0,
     pub fn init(sys: *const r4os.r4sys.Context, instance: u64) ?Client {
         if (instance == 0 or instance > std.math.maxInt(u32)) return null;
@@ -73,7 +74,7 @@ pub const Client = struct {
         if (sys.programOpenHandle(@intCast(instance), &value.owner) != a.program_handle_ok) return null;
         return value;
     }
-    fn call(self: *Client, sys: *const r4os.r4sys.Context, op: u16, payload: *const a.DisplayControlRequest) bool {
+    fn call(self: *Client, sys: *const r4os.r4sys.Context, op: u16, payload: anytype) bool {
         var endpoint: a.ServiceInfo = .{};
         var rc = sys.serviceOpen(a.window_service_name, &endpoint);
         if (rc != a.service_api_result_ok or endpoint.handle == 0) { self.last_error = if (rc != 0) rc else -3; return false; }
@@ -81,6 +82,13 @@ pub const Client = struct {
         var header: a.ServiceMessageHeader = .{};
         var response: a.DisplayControlStatus = .{};
         rc = sys.serviceCall(endpoint.handle, op, std.mem.asBytes(payload), &header, std.mem.asBytes(&response), sys.ticksFromMilliseconds(250));
+        if (rc >= 0 and header.status != a.service_api_result_ok) {
+            self.last_error = header.status;
+            if (op == a.display_control_op_color_request and header.status == a.service_api_result_bad_op) {
+                self.pending = null; self.pending_color = null;
+            }
+            return false;
+        }
         if (rc != @sizeOf(a.DisplayControlStatus) or header.status != a.service_api_result_ok or
             response.magic != a.display_control_status_magic or response.version != 1 or response.size != @sizeOf(a.DisplayControlStatus) or
             response.phase > 6 or response.flags & ~@as(u32, 3) != 0 or response.layout.count > topology.capacity) {
@@ -89,12 +97,13 @@ pub const Client = struct {
         self.state = response; self.last_error = response.result;
         if (self.pending) |pending| {
             if (response.desktop_epoch != pending.desktop_epoch or
-                (response.request_id == pending.request_id and std.meta.eql(response.owner, self.owner))) self.pending = null;
+                (response.request_id == pending.request_id and std.meta.eql(response.owner, self.owner))) { self.pending = null; self.pending_color = null; }
         }
         return true;
     }
     pub fn poll(self: *Client, sys: *const r4os.r4sys.Context) bool {
-        return self.call(sys, a.display_control_op_query, &.{ .owner = self.owner });
+        const payload: a.DisplayControlRequest = .{ .owner = self.owner };
+        return self.call(sys, a.display_control_op_query, &payload);
     }
     pub fn request(self: *Client, sys: *const r4os.r4sys.Context, action: u32, layout: ?*const topology.Layout) bool {
         if (self.pending != null or self.next_request == std.math.maxInt(u64)) return false;
@@ -105,15 +114,27 @@ pub const Client = struct {
         self.next_request += 1;
         // Keep the exact request after a transport timeout: it may already
         // have reached Desktop. A fresh request must not repeat its effects.
-        self.pending = request_value;
+        self.pending = request_value; self.pending_color = null;
         if (!self.call(sys, a.display_control_op_request, &request_value)) return false;
         if (self.state.result != 0) { self.pending = null; return false; }
         return true;
     }
+    pub fn requestColor(self: *Client, sys: *const r4os.r4sys.Context, selection: a.DisplayColorSelection) bool {
+        if (self.pending != null or self.next_request == std.math.maxInt(u64)) return false;
+        const request_value: a.DisplayColorRequest = .{ .base = .{ .owner = self.owner, .desktop_epoch = self.state.desktop_epoch,
+            .request_id = self.next_request, .base_revision = self.state.revision, .action = 4, .layout = self.state.layout }, .color = selection };
+        self.next_request += 1; self.pending = request_value.base; self.pending_color = selection;
+        if (!self.call(sys, a.display_control_op_color_request, &request_value)) return false;
+        if (self.state.result != 0) { self.pending = null; self.pending_color = null; return false; }
+        return true;
+    }
     pub fn retry(self: *Client, sys: *const r4os.r4sys.Context) bool {
         const pending = self.pending orelse return self.poll(sys);
-        if (!self.call(sys, a.display_control_op_request, &pending)) return false;
-        if (self.state.result != 0) self.pending = null;
+        const success = if (self.pending_color) |color|
+            self.call(sys, a.display_control_op_color_request, &a.DisplayColorRequest{ .base = pending, .color = color })
+            else self.call(sys, a.display_control_op_request, &pending);
+        if (!success) return false;
+        if (self.state.result != 0) { self.pending = null; self.pending_color = null; }
         return self.state.result == 0;
     }
     pub fn close(self: *Client, sys: *const r4os.r4sys.Context) void {

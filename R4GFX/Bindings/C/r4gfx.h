@@ -808,6 +808,182 @@ _Static_assert(offsetof(R4GfxRenderGridListRequest, grids) == 16u, "R4GfxRenderG
 _Static_assert(offsetof(R4GfxRenderGridListRequest, count) == 24u, "R4GfxRenderGridListRequest.count offset mismatch");
 _Static_assert(offsetof(R4GfxRenderGridListRequest, reserved) == 28u, "R4GfxRenderGridListRequest.reserved offset mismatch");
 
+typedef struct R4GfxColorDescription {
+    uint32_t version;
+    uint32_t size;
+    uint32_t primaries;
+    uint32_t transfer;
+    uint32_t range;
+    uint32_t alpha;
+    uint32_t precision;
+    uint32_t flags;
+    uint32_t reference_white;
+    uint32_t peak;
+    uint32_t black;
+    uint32_t reserved;
+} R4GfxColorDescription;
+_Static_assert(sizeof(R4GfxColorDescription) == 48u, "R4GfxColorDescription size mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, version) == 0u, "R4GfxColorDescription.version offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, size) == 4u, "R4GfxColorDescription.size offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, primaries) == 8u, "R4GfxColorDescription.primaries offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, transfer) == 12u, "R4GfxColorDescription.transfer offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, range) == 16u, "R4GfxColorDescription.range offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, alpha) == 20u, "R4GfxColorDescription.alpha offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, precision) == 24u, "R4GfxColorDescription.precision offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, flags) == 28u, "R4GfxColorDescription.flags offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, reference_white) == 32u, "R4GfxColorDescription.reference_white offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, peak) == 36u, "R4GfxColorDescription.peak offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, black) == 40u, "R4GfxColorDescription.black offset mismatch");
+_Static_assert(offsetof(R4GfxColorDescription, reserved) == 44u, "R4GfxColorDescription.reserved offset mismatch");
+
+typedef struct R4GfxColorProfile {
+    uint64_t address;
+    uint64_t generation;
+} R4GfxColorProfile;
+_Static_assert(sizeof(R4GfxColorProfile) == 16u, "R4GfxColorProfile size mismatch");
+_Static_assert(offsetof(R4GfxColorProfile, address) == 0u, "R4GfxColorProfile.address offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfile, generation) == 8u, "R4GfxColorProfile.generation offset mismatch");
+
+typedef struct R4GfxColorProfileConfig {
+    uint32_t version;
+    uint32_t size;
+    uint64_t storage_address;
+    uint64_t storage_bytes;
+    uint64_t profile_address;
+    uint64_t profile_bytes;
+    uint32_t direction;
+    uint32_t intent;
+    uint32_t flags;
+    uint32_t reserved;
+} R4GfxColorProfileConfig;
+_Static_assert(sizeof(R4GfxColorProfileConfig) == 56u, "R4GfxColorProfileConfig size mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, version) == 0u, "R4GfxColorProfileConfig.version offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, size) == 4u, "R4GfxColorProfileConfig.size offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, storage_address) == 8u, "R4GfxColorProfileConfig.storage_address offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, storage_bytes) == 16u, "R4GfxColorProfileConfig.storage_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, profile_address) == 24u, "R4GfxColorProfileConfig.profile_address offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, profile_bytes) == 32u, "R4GfxColorProfileConfig.profile_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, direction) == 40u, "R4GfxColorProfileConfig.direction offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, intent) == 44u, "R4GfxColorProfileConfig.intent offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, flags) == 48u, "R4GfxColorProfileConfig.flags offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileConfig, reserved) == 52u, "R4GfxColorProfileConfig.reserved offset mismatch");
+
+typedef struct R4GfxColorProfileInfo {
+    uint32_t version;
+    uint32_t size;
+    uint64_t storage_bytes;
+    uint64_t used_bytes;
+    uint32_t direction;
+    uint32_t intent;
+    uint32_t flags;
+    uint32_t error_code;
+} R4GfxColorProfileInfo;
+_Static_assert(sizeof(R4GfxColorProfileInfo) == 40u, "R4GfxColorProfileInfo size mismatch");
+_Static_assert(offsetof(R4GfxColorProfileInfo, version) == 0u, "R4GfxColorProfileInfo.version offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileInfo, size) == 4u, "R4GfxColorProfileInfo.size offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileInfo, storage_bytes) == 8u, "R4GfxColorProfileInfo.storage_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileInfo, used_bytes) == 16u, "R4GfxColorProfileInfo.used_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileInfo, direction) == 24u, "R4GfxColorProfileInfo.direction offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileInfo, intent) == 28u, "R4GfxColorProfileInfo.intent offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileInfo, flags) == 32u, "R4GfxColorProfileInfo.flags offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileInfo, error_code) == 36u, "R4GfxColorProfileInfo.error_code offset mismatch");
+
+typedef struct R4GfxColorProfileRequest {
+    uint64_t source_address;
+    uint64_t target_address;
+    uint32_t pixel_count;
+    uint32_t reserved;
+} R4GfxColorProfileRequest;
+_Static_assert(sizeof(R4GfxColorProfileRequest) == 24u, "R4GfxColorProfileRequest size mismatch");
+_Static_assert(offsetof(R4GfxColorProfileRequest, source_address) == 0u, "R4GfxColorProfileRequest.source_address offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileRequest, target_address) == 8u, "R4GfxColorProfileRequest.target_address offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileRequest, pixel_count) == 16u, "R4GfxColorProfileRequest.pixel_count offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileRequest, reserved) == 20u, "R4GfxColorProfileRequest.reserved offset mismatch");
+
+typedef struct R4GfxColorImage {
+    uint32_t version;
+    uint32_t size;
+    R4GfxCpuImage image;
+    R4GfxColorDescription description;
+    R4GfxColorProfile profile;
+} R4GfxColorImage;
+_Static_assert(sizeof(R4GfxColorImage) == 112u, "R4GfxColorImage size mismatch");
+_Static_assert(offsetof(R4GfxColorImage, version) == 0u, "R4GfxColorImage.version offset mismatch");
+_Static_assert(offsetof(R4GfxColorImage, size) == 4u, "R4GfxColorImage.size offset mismatch");
+_Static_assert(offsetof(R4GfxColorImage, image) == 8u, "R4GfxColorImage.image offset mismatch");
+_Static_assert(offsetof(R4GfxColorImage, description) == 48u, "R4GfxColorImage.description offset mismatch");
+_Static_assert(offsetof(R4GfxColorImage, profile) == 96u, "R4GfxColorImage.profile offset mismatch");
+
+typedef struct R4GfxColorTransform {
+    uint32_t version;
+    uint32_t size;
+    R4GfxRect source_rect;
+    R4GfxRect target_rect;
+    uint32_t sampler;
+    uint32_t operation;
+    uint32_t opacity;
+    uint32_t flags;
+    uint64_t pixel_budget;
+} R4GfxColorTransform;
+_Static_assert(sizeof(R4GfxColorTransform) == 64u, "R4GfxColorTransform size mismatch");
+_Static_assert(offsetof(R4GfxColorTransform, version) == 0u, "R4GfxColorTransform.version offset mismatch");
+_Static_assert(offsetof(R4GfxColorTransform, size) == 4u, "R4GfxColorTransform.size offset mismatch");
+_Static_assert(offsetof(R4GfxColorTransform, source_rect) == 8u, "R4GfxColorTransform.source_rect offset mismatch");
+_Static_assert(offsetof(R4GfxColorTransform, target_rect) == 24u, "R4GfxColorTransform.target_rect offset mismatch");
+_Static_assert(offsetof(R4GfxColorTransform, sampler) == 40u, "R4GfxColorTransform.sampler offset mismatch");
+_Static_assert(offsetof(R4GfxColorTransform, operation) == 44u, "R4GfxColorTransform.operation offset mismatch");
+_Static_assert(offsetof(R4GfxColorTransform, opacity) == 48u, "R4GfxColorTransform.opacity offset mismatch");
+_Static_assert(offsetof(R4GfxColorTransform, flags) == 52u, "R4GfxColorTransform.flags offset mismatch");
+_Static_assert(offsetof(R4GfxColorTransform, pixel_budget) == 56u, "R4GfxColorTransform.pixel_budget offset mismatch");
+
+typedef struct R4GfxColorResourceDesc {
+    uint32_t version;
+    uint32_t size;
+    R4GfxResourceDesc resource;
+    R4GfxColorDescription description;
+} R4GfxColorResourceDesc;
+_Static_assert(sizeof(R4GfxColorResourceDesc) == 144u, "R4GfxColorResourceDesc size mismatch");
+_Static_assert(offsetof(R4GfxColorResourceDesc, version) == 0u, "R4GfxColorResourceDesc.version offset mismatch");
+_Static_assert(offsetof(R4GfxColorResourceDesc, size) == 4u, "R4GfxColorResourceDesc.size offset mismatch");
+_Static_assert(offsetof(R4GfxColorResourceDesc, resource) == 8u, "R4GfxColorResourceDesc.resource offset mismatch");
+_Static_assert(offsetof(R4GfxColorResourceDesc, description) == 96u, "R4GfxColorResourceDesc.description offset mismatch");
+
+typedef struct R4GfxColorProfileDefinition {
+    uint32_t version;
+    uint32_t size;
+    uint32_t color_model;
+    uint32_t curve;
+    uint32_t white_x;
+    uint32_t white_y;
+    uint32_t red_x;
+    uint32_t red_y;
+    uint32_t green_x;
+    uint32_t green_y;
+    uint32_t blue_x;
+    uint32_t blue_y;
+    uint32_t gamma_red;
+    uint32_t gamma_green;
+    uint32_t gamma_blue;
+    uint32_t reserved;
+} R4GfxColorProfileDefinition;
+_Static_assert(sizeof(R4GfxColorProfileDefinition) == 64u, "R4GfxColorProfileDefinition size mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, version) == 0u, "R4GfxColorProfileDefinition.version offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, size) == 4u, "R4GfxColorProfileDefinition.size offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, color_model) == 8u, "R4GfxColorProfileDefinition.color_model offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, curve) == 12u, "R4GfxColorProfileDefinition.curve offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, white_x) == 16u, "R4GfxColorProfileDefinition.white_x offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, white_y) == 20u, "R4GfxColorProfileDefinition.white_y offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, red_x) == 24u, "R4GfxColorProfileDefinition.red_x offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, red_y) == 28u, "R4GfxColorProfileDefinition.red_y offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, green_x) == 32u, "R4GfxColorProfileDefinition.green_x offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, green_y) == 36u, "R4GfxColorProfileDefinition.green_y offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, blue_x) == 40u, "R4GfxColorProfileDefinition.blue_x offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, blue_y) == 44u, "R4GfxColorProfileDefinition.blue_y offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, gamma_red) == 48u, "R4GfxColorProfileDefinition.gamma_red offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, gamma_green) == 52u, "R4GfxColorProfileDefinition.gamma_green offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, gamma_blue) == 56u, "R4GfxColorProfileDefinition.gamma_blue offset mismatch");
+_Static_assert(offsetof(R4GfxColorProfileDefinition, reserved) == 60u, "R4GfxColorProfileDefinition.reserved offset mismatch");
+
 #define R4GFX_STATUS_OK ((int32_t)0)
 #define R4GFX_FORMAT_XRGB8888 ((uint32_t)875713112)
 #define R4GFX_FORMAT_ARGB8888 ((uint32_t)875713089)
@@ -891,6 +1067,49 @@ _Static_assert(offsetof(R4GfxRenderGridListRequest, reserved) == 28u, "R4GfxRend
 #define R4GFX_PRESENT_BLOCK_MENUS ((uint32_t)16)
 #define R4GFX_PRESENT_BLOCK_COMPOSITION ((uint32_t)32)
 #define R4GFX_DEVICE_GPU_GRID ((uint32_t)128)
+#define R4GFX_COLOR_PRIMARIES_SRGB ((uint32_t)1)
+#define R4GFX_COLOR_PRIMARIES_DISPLAY_P3 ((uint32_t)2)
+#define R4GFX_COLOR_PRIMARIES_BT2020 ((uint32_t)3)
+#define R4GFX_COLOR_TRANSFER_SRGB ((uint32_t)1)
+#define R4GFX_COLOR_TRANSFER_LINEAR ((uint32_t)2)
+#define R4GFX_COLOR_TRANSFER_PQ ((uint32_t)3)
+#define R4GFX_COLOR_TRANSFER_HLG ((uint32_t)4)
+#define R4GFX_COLOR_RANGE_FULL ((uint32_t)1)
+#define R4GFX_COLOR_RANGE_LIMITED ((uint32_t)2)
+#define R4GFX_COLOR_ALPHA_OPAQUE ((uint32_t)1)
+#define R4GFX_COLOR_ALPHA_STRAIGHT ((uint32_t)2)
+#define R4GFX_COLOR_ALPHA_ELECTRICAL ((uint32_t)3)
+#define R4GFX_COLOR_ALPHA_OPTICAL ((uint32_t)4)
+#define R4GFX_COLOR_PRECISION_UNORM8 ((uint32_t)8)
+#define R4GFX_COLOR_PRECISION_UNORM10 ((uint32_t)10)
+#define R4GFX_COLOR_PRECISION_FLOAT16 ((uint32_t)16)
+#define R4GFX_COLOR_PROFILE_INPUT ((uint32_t)0)
+#define R4GFX_COLOR_PROFILE_OUTPUT ((uint32_t)1)
+#define R4GFX_COLOR_INTENT_PERCEPTUAL ((uint32_t)0)
+#define R4GFX_COLOR_INTENT_RELATIVE ((uint32_t)1)
+#define R4GFX_COLOR_INTENT_SATURATION ((uint32_t)2)
+#define R4GFX_COLOR_INTENT_ABSOLUTE ((uint32_t)3)
+#define R4GFX_COLOR_PROFILE_BLACK_COMPENSATION ((uint32_t)1)
+#define R4GFX_COLOR_PROFILE_CALIBRATION ((uint32_t)2)
+#define R4GFX_COLOR_PRIMARIES_ICC ((uint32_t)4)
+#define R4GFX_COLOR_TRANSFER_ICC ((uint32_t)5)
+#define R4GFX_COLOR_TRANSFORM_OUTPUT ((uint32_t)1)
+#define R4GFX_COLOR_TRANSFORM_RELATIVE_WHITE ((uint32_t)2)
+#define R4GFX_COLOR_TRANSFORM_DITHER ((uint32_t)4)
+#define R4GFX_FORMAT_XRGB2101010 ((uint32_t)808669784)
+#define R4GFX_FORMAT_ARGB2101010 ((uint32_t)808669761)
+#define R4GFX_FORMAT_ABGR16161616F ((uint32_t)1211384385)
+#define R4GFX_COLOR_PRECISION_UNORM16 ((uint32_t)17)
+#define R4GFX_FORMAT_ABGR16161616 ((uint32_t)942948929)
+#define R4GFX_COLOR_MODEL_RGB ((uint32_t)1)
+#define R4GFX_COLOR_MODEL_GRAY ((uint32_t)2)
+#define R4GFX_COLOR_CURVE_POWER ((uint32_t)1)
+#define R4GFX_COLOR_CURVE_SRGB ((uint32_t)2)
+#define R4GFX_COLOR_RANGE_LIMITED8 ((uint32_t)3)
+#define R4GFX_COLOR_RANGE_LIMITED10 ((uint32_t)4)
+#define R4GFX_COLOR_RANGE_LIMITED16 ((uint32_t)5)
+#define R4GFX_SOURCE_COLOR_VIEW ((uint32_t)6)
+#define R4GFX_DEVICE_GPU_COLOR ((uint32_t)256)
 #define R4GFX_STATUS_INVALID ((int32_t)-1)
 #define R4GFX_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4GFX_STATUS_OVERFLOW ((int32_t)-3)
@@ -1282,6 +1501,139 @@ static inline int32_t r4gfx_presentation_plan(R4GfxDeviceV1Client *client, const
 static inline int32_t r4gfx_render_submit_grid_list(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxRenderGridListRequest * request, R4GfxJob * output) {
     R4GfxDeviceV1RenderSubmitGridListFn function = (R4GfxDeviceV1RenderSubmitGridListFn)r4l_slot_address(client->header, 264u);
     return function(device, request, output);
+}
+
+#define R4GFX_COLOR_V1_EXPORT_NAME "COLOR_V1"
+#define R4GFX_COLOR_V1_ABI_MAJOR 1u
+#define R4GFX_COLOR_V1_REVISION 1u
+#define R4GFX_COLOR_V1_INTERFACE_ID_LO 0x524f4c43ull
+#define R4GFX_COLOR_V1_INTERFACE_ID_HI 0x31584647ull
+#define R4GFX_COLOR_V1_TABLE_SIZE 128u
+#define R4GFX_COLOR_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4GFX_COLOR_V1_TABLE_SIZE, R4GFX_COLOR_V1_ABI_MAJOR, R4GFX_COLOR_V1_REVISION, R4GFX_COLOR_V1_INTERFACE_ID_LO, R4GFX_COLOR_V1_INTERFACE_ID_HI }
+typedef int32_t (*R4GfxColorV1ColorDescriptionValidateFn)(const R4GfxColorDescription * description);
+typedef uint64_t (*R4GfxColorV1ColorProfileStorageSizeFn)(void);
+typedef int32_t (*R4GfxColorV1ColorProfileOpenFn)(const R4GfxColorProfileConfig * config, R4GfxColorProfile * output);
+typedef int32_t (*R4GfxColorV1ColorProfileInfoFn)(const R4GfxColorProfile * profile, R4GfxColorProfileInfo * output);
+typedef int32_t (*R4GfxColorV1ColorProfileApplyFn)(const R4GfxColorProfile * profile, const R4GfxColorProfileRequest * request);
+typedef int32_t (*R4GfxColorV1ColorProfileCloseFn)(const R4GfxColorProfile * profile);
+typedef int32_t (*R4GfxColorV1ColorImageTransformFn)(const R4GfxColorImage * source, const R4GfxColorImage * target, const R4GfxColorTransform * request, R4GfxCpuStats * output);
+typedef int32_t (*R4GfxColorV1ColorResourceCreateFn)(const R4GfxDevice * device, const R4GfxColorResourceDesc * description, R4GfxResource * output);
+typedef int32_t (*R4GfxColorV1ColorResourceInfoFn)(const R4GfxDevice * device, const R4GfxResource * resource, R4GfxColorDescription * output);
+typedef int32_t (*R4GfxColorV1ColorResourceTransformFn)(const R4GfxDevice * device, const R4GfxResource * source, const R4GfxResource * target, const R4GfxColorTransform * request, R4GfxCpuStats * output);
+typedef int32_t (*R4GfxColorV1ColorProfileGenerateFn)(const R4GfxColorProfileDefinition * definition, uint64_t scratch_address, uint64_t scratch_bytes, uint64_t output_address, uint64_t output_capacity, uint64_t * output_bytes);
+typedef int32_t (*R4GfxColorV1ColorRenderSubmitFn)(const R4GfxDevice * device, const R4GfxRenderListRequest * request, uint32_t flags, R4GfxJob * output);
+typedef struct R4GfxColorV1 {
+    R4LInterfaceHeader header;
+    R4GfxColorV1ColorDescriptionValidateFn color_description_validate;
+    R4GfxColorV1ColorProfileStorageSizeFn color_profile_storage_size;
+    R4GfxColorV1ColorProfileOpenFn color_profile_open;
+    R4GfxColorV1ColorProfileInfoFn color_profile_info;
+    R4GfxColorV1ColorProfileApplyFn color_profile_apply;
+    R4GfxColorV1ColorProfileCloseFn color_profile_close;
+    R4GfxColorV1ColorImageTransformFn color_image_transform;
+    R4GfxColorV1ColorResourceCreateFn color_resource_create;
+    R4GfxColorV1ColorResourceInfoFn color_resource_info;
+    R4GfxColorV1ColorResourceTransformFn color_resource_transform;
+    R4GfxColorV1ColorProfileGenerateFn color_profile_generate;
+    R4GfxColorV1ColorRenderSubmitFn color_render_submit;
+} R4GfxColorV1;
+_Static_assert(sizeof(R4GfxColorV1) == 128u, "R4GfxColorV1 size mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_description_validate) == 32u, "R4GfxColorV1.color_description_validate offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_profile_storage_size) == 40u, "R4GfxColorV1.color_profile_storage_size offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_profile_open) == 48u, "R4GfxColorV1.color_profile_open offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_profile_info) == 56u, "R4GfxColorV1.color_profile_info offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_profile_apply) == 64u, "R4GfxColorV1.color_profile_apply offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_profile_close) == 72u, "R4GfxColorV1.color_profile_close offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_image_transform) == 80u, "R4GfxColorV1.color_image_transform offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_resource_create) == 88u, "R4GfxColorV1.color_resource_create offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_resource_info) == 96u, "R4GfxColorV1.color_resource_info offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_resource_transform) == 104u, "R4GfxColorV1.color_resource_transform offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_profile_generate) == 112u, "R4GfxColorV1.color_profile_generate offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_render_submit) == 120u, "R4GfxColorV1.color_render_submit offset mismatch");
+typedef struct R4GfxColorV1Client { const R4LInterfaceHeader *header; } R4GfxColorV1Client;
+
+static inline int32_t r4gfx_color_v1_init(const R4XStartContext *ctx, R4GfxColorV1Client *out_client) {
+    if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "COLOR_V1");
+    const R4LInterfaceExpectation expected = { 0x524f4c43ull, 0x31584647ull, 1u, 1u, 128u, 0u, 0u };
+    const R4LInterfaceHeader *header = 0;
+    int32_t status = r4l_validate_import(item, &expected, &header);
+    if (status != R4L_BINDING_OK) return status;
+    if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 56u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 64u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 72u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 80u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 88u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 96u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 104u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 112u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 120u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    out_client->header = header;
+    return R4L_BINDING_OK;
+}
+
+static inline int32_t r4gfx_color_description_validate(R4GfxColorV1Client *client, const R4GfxColorDescription * description) {
+    R4GfxColorV1ColorDescriptionValidateFn function = (R4GfxColorV1ColorDescriptionValidateFn)r4l_slot_address(client->header, 32u);
+    return function(description);
+}
+
+static inline uint64_t r4gfx_color_profile_storage_size(R4GfxColorV1Client *client) {
+    R4GfxColorV1ColorProfileStorageSizeFn function = (R4GfxColorV1ColorProfileStorageSizeFn)r4l_slot_address(client->header, 40u);
+    return function();
+}
+
+static inline int32_t r4gfx_color_profile_open(R4GfxColorV1Client *client, const R4GfxColorProfileConfig * config, R4GfxColorProfile * output) {
+    R4GfxColorV1ColorProfileOpenFn function = (R4GfxColorV1ColorProfileOpenFn)r4l_slot_address(client->header, 48u);
+    return function(config, output);
+}
+
+static inline int32_t r4gfx_color_profile_info(R4GfxColorV1Client *client, const R4GfxColorProfile * profile, R4GfxColorProfileInfo * output) {
+    R4GfxColorV1ColorProfileInfoFn function = (R4GfxColorV1ColorProfileInfoFn)r4l_slot_address(client->header, 56u);
+    return function(profile, output);
+}
+
+static inline int32_t r4gfx_color_profile_apply(R4GfxColorV1Client *client, const R4GfxColorProfile * profile, const R4GfxColorProfileRequest * request) {
+    R4GfxColorV1ColorProfileApplyFn function = (R4GfxColorV1ColorProfileApplyFn)r4l_slot_address(client->header, 64u);
+    return function(profile, request);
+}
+
+static inline int32_t r4gfx_color_profile_close(R4GfxColorV1Client *client, const R4GfxColorProfile * profile) {
+    R4GfxColorV1ColorProfileCloseFn function = (R4GfxColorV1ColorProfileCloseFn)r4l_slot_address(client->header, 72u);
+    return function(profile);
+}
+
+static inline int32_t r4gfx_color_image_transform(R4GfxColorV1Client *client, const R4GfxColorImage * source, const R4GfxColorImage * target, const R4GfxColorTransform * request, R4GfxCpuStats * output) {
+    R4GfxColorV1ColorImageTransformFn function = (R4GfxColorV1ColorImageTransformFn)r4l_slot_address(client->header, 80u);
+    return function(source, target, request, output);
+}
+
+static inline int32_t r4gfx_color_resource_create(R4GfxColorV1Client *client, const R4GfxDevice * device, const R4GfxColorResourceDesc * description, R4GfxResource * output) {
+    R4GfxColorV1ColorResourceCreateFn function = (R4GfxColorV1ColorResourceCreateFn)r4l_slot_address(client->header, 88u);
+    return function(device, description, output);
+}
+
+static inline int32_t r4gfx_color_resource_info(R4GfxColorV1Client *client, const R4GfxDevice * device, const R4GfxResource * resource, R4GfxColorDescription * output) {
+    R4GfxColorV1ColorResourceInfoFn function = (R4GfxColorV1ColorResourceInfoFn)r4l_slot_address(client->header, 96u);
+    return function(device, resource, output);
+}
+
+static inline int32_t r4gfx_color_resource_transform(R4GfxColorV1Client *client, const R4GfxDevice * device, const R4GfxResource * source, const R4GfxResource * target, const R4GfxColorTransform * request, R4GfxCpuStats * output) {
+    R4GfxColorV1ColorResourceTransformFn function = (R4GfxColorV1ColorResourceTransformFn)r4l_slot_address(client->header, 104u);
+    return function(device, source, target, request, output);
+}
+
+static inline int32_t r4gfx_color_profile_generate(R4GfxColorV1Client *client, const R4GfxColorProfileDefinition * definition, uint64_t scratch_address, uint64_t scratch_bytes, uint64_t output_address, uint64_t output_capacity, uint64_t * output_bytes) {
+    R4GfxColorV1ColorProfileGenerateFn function = (R4GfxColorV1ColorProfileGenerateFn)r4l_slot_address(client->header, 112u);
+    return function(definition, scratch_address, scratch_bytes, output_address, output_capacity, output_bytes);
+}
+
+static inline int32_t r4gfx_color_render_submit(R4GfxColorV1Client *client, const R4GfxDevice * device, const R4GfxRenderListRequest * request, uint32_t flags, R4GfxJob * output) {
+    R4GfxColorV1ColorRenderSubmitFn function = (R4GfxColorV1ColorRenderSubmitFn)r4l_slot_address(client->header, 120u);
+    return function(device, request, flags, output);
 }
 
 #endif

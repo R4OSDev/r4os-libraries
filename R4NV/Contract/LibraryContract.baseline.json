@@ -1953,8 +1953,8 @@
       "zig_name": "shader_resource_abi",
       "c_name": "R4NV_SHADER_RESOURCE_ABI",
       "type": "u32",
-      "value": 3,
-      "description": "Graphics constants ABI3: CBuf1 texture handle at byte0, normalized source bounds at bytes16..31, optional exact logical sampling grid at bytes32..95, atlas rectangle at bytes96..111 and image extents at bytes112..119. Older resource keys are unsupported; table and payload layouts remain unchanged."
+      "value": 4,
+      "description": "Graphics constants ABI4 preserves CBuf1 texture handle/bounds/logical grid and adds the fixed color fragment CBuf2 with256 bytes of userland-supplied matrices, transfer/range/white/tone coefficients. Earlier resource keys are unsupported; existing table and payload layouts remain unchanged."
     },
     {
       "zig_name": "shader_model_sm86",
@@ -1981,8 +1981,8 @@
       "zig_name": "shader_cache_max_bytes",
       "c_name": "R4NV_SHADER_CACHE_MAX_BYTES",
       "type": "u32",
-      "value": 2592,
-      "description": "Maximum fixed shader cache entry for resource ABI3, including the 384-byte cache prefix/header and 2208-byte largest program."
+      "value": 16384,
+      "description": "Maximum serialized fixed-shader cache entry:16KB, including the384-byte cache header. Caller supplies and retains the actual buffer capacity; short buffers are rejected before writes."
     },
     {
       "zig_name": "shader_profile_rectangle_vertex",
@@ -2137,6 +2137,13 @@
       "type": "u32",
       "value": 32,
       "description": "image_reason_preference"
+    },
+    {
+      "zig_name": "shader_profile_color_fragment",
+      "c_name": "R4NV_SHADER_PROFILE_COLOR_FRAGMENT",
+      "type": "u32",
+      "value": 7,
+      "description": "Fixed RGB color transform: sRGB/linear/PQ/HLG, two matrices, explicit range/alpha, white scaling, optional output tone/gamut mapping and ordered dither; CBuf2 ABI4."
     }
   ],
   "errors": [

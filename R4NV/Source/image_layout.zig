@@ -37,7 +37,8 @@ fn plan(request: c.R4NvImageRequest) Error!c.R4NvImagePlan {
         request.uses == 0 or request.uses&~@as(u32,7) != 0 or v.location > 1 or v.usage&~@as(u32,63) != 0 or
         v.width == 0 or v.height == 0 or v.width > 16384 or v.height > 16384 or
         v.alignment == 0 or !std.math.isPowerOfTwo(v.alignment)) return error.Invalid;
-    const bytes: u64 = switch (v.format) { 0x34325258,0x34325241 => 4, 0x20203852 => 1, else => return error.Unsupported };
+    const bytes: u64 = switch (v.format) { 0x34325258, 0x34325241, 0x30335258, 0x30335241 => 4,
+        0x48344241 => 8, 0x20203852 => 1, else => return error.Unsupported };
     const block = try decodeModifier(v.modifier);
     if (v.location == 0 and block != null) return error.Unsupported;
     const row = @as(u64,v.width)*bytes;
@@ -47,7 +48,7 @@ fn plan(request: c.R4NvImageRequest) Error!c.R4NvImagePlan {
     if (span > v.byte_length) return error.Invalid;
     if (block != null and v.pitch&63 != 0) return error.Invalid;
     if (request.uses&c.image_use_scanout != 0 and
-        (bytes == 1 or request.uses&c.image_use_render_target != 0)) return error.Unsupported;
+        ((v.format != 0x34325258 and v.format != 0x34325241) or request.uses&c.image_use_render_target != 0)) return error.Unsupported;
 
     var supported: u32 = 0;
     if (v.location == 1) {

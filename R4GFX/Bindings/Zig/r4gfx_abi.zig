@@ -444,6 +444,103 @@ pub const R4GfxRenderGridListRequest = extern struct {
     count: u32,
     reserved: u32,
 };
+
+pub const R4GfxColorDescription = extern struct {
+    version: u32,
+    size: u32,
+    primaries: u32,
+    transfer: u32,
+    range: u32,
+    alpha: u32,
+    precision: u32,
+    flags: u32,
+    reference_white: u32,
+    peak: u32,
+    black: u32,
+    reserved: u32,
+};
+
+pub const R4GfxColorProfile = extern struct {
+    address: u64,
+    generation: u64,
+};
+
+pub const R4GfxColorProfileConfig = extern struct {
+    version: u32,
+    size: u32,
+    storage_address: u64,
+    storage_bytes: u64,
+    profile_address: u64,
+    profile_bytes: u64,
+    direction: u32,
+    intent: u32,
+    flags: u32,
+    reserved: u32,
+};
+
+pub const R4GfxColorProfileInfo = extern struct {
+    version: u32,
+    size: u32,
+    storage_bytes: u64,
+    used_bytes: u64,
+    direction: u32,
+    intent: u32,
+    flags: u32,
+    error_code: u32,
+};
+
+pub const R4GfxColorProfileRequest = extern struct {
+    source_address: u64,
+    target_address: u64,
+    pixel_count: u32,
+    reserved: u32,
+};
+
+pub const R4GfxColorImage = extern struct {
+    version: u32,
+    size: u32,
+    image: R4GfxCpuImage,
+    description: R4GfxColorDescription,
+    profile: R4GfxColorProfile,
+};
+
+pub const R4GfxColorTransform = extern struct {
+    version: u32,
+    size: u32,
+    source_rect: R4GfxRect,
+    target_rect: R4GfxRect,
+    sampler: u32,
+    operation: u32,
+    opacity: u32,
+    flags: u32,
+    pixel_budget: u64,
+};
+
+pub const R4GfxColorResourceDesc = extern struct {
+    version: u32,
+    size: u32,
+    resource: R4GfxResourceDesc,
+    description: R4GfxColorDescription,
+};
+
+pub const R4GfxColorProfileDefinition = extern struct {
+    version: u32,
+    size: u32,
+    color_model: u32,
+    curve: u32,
+    white_x: u32,
+    white_y: u32,
+    red_x: u32,
+    red_y: u32,
+    green_x: u32,
+    green_y: u32,
+    blue_x: u32,
+    blue_y: u32,
+    gamma_red: u32,
+    gamma_green: u32,
+    gamma_blue: u32,
+    reserved: u32,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -527,6 +624,49 @@ pub const present_block_cursor: u32 = 8;
 pub const present_block_menus: u32 = 16;
 pub const present_block_composition: u32 = 32;
 pub const device_gpu_grid: u32 = 128;
+pub const color_primaries_srgb: u32 = 1;
+pub const color_primaries_display_p3: u32 = 2;
+pub const color_primaries_bt2020: u32 = 3;
+pub const color_transfer_srgb: u32 = 1;
+pub const color_transfer_linear: u32 = 2;
+pub const color_transfer_pq: u32 = 3;
+pub const color_transfer_hlg: u32 = 4;
+pub const color_range_full: u32 = 1;
+pub const color_range_limited: u32 = 2;
+pub const color_alpha_opaque: u32 = 1;
+pub const color_alpha_straight: u32 = 2;
+pub const color_alpha_electrical: u32 = 3;
+pub const color_alpha_optical: u32 = 4;
+pub const color_precision_unorm8: u32 = 8;
+pub const color_precision_unorm10: u32 = 10;
+pub const color_precision_float16: u32 = 16;
+pub const color_profile_input: u32 = 0;
+pub const color_profile_output: u32 = 1;
+pub const color_intent_perceptual: u32 = 0;
+pub const color_intent_relative: u32 = 1;
+pub const color_intent_saturation: u32 = 2;
+pub const color_intent_absolute: u32 = 3;
+pub const color_profile_black_compensation: u32 = 1;
+pub const color_profile_calibration: u32 = 2;
+pub const color_primaries_icc: u32 = 4;
+pub const color_transfer_icc: u32 = 5;
+pub const color_transform_output: u32 = 1;
+pub const color_transform_relative_white: u32 = 2;
+pub const color_transform_dither: u32 = 4;
+pub const format_xrgb2101010: u32 = 808669784;
+pub const format_argb2101010: u32 = 808669761;
+pub const format_abgr16161616f: u32 = 1211384385;
+pub const color_precision_unorm16: u32 = 17;
+pub const format_abgr16161616: u32 = 942948929;
+pub const color_model_rgb: u32 = 1;
+pub const color_model_gray: u32 = 2;
+pub const color_curve_power: u32 = 1;
+pub const color_curve_srgb: u32 = 2;
+pub const color_range_limited8: u32 = 3;
+pub const color_range_limited10: u32 = 4;
+pub const color_range_limited16: u32 = 5;
+pub const source_color_view: u32 = 6;
+pub const device_gpu_color: u32 = 256;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -653,6 +793,46 @@ pub const DeviceV1 = extern struct {
     swapchain_close: DeviceV1SwapchainCloseFn,
     presentation_plan: DeviceV1PresentationPlanFn,
     render_submit_grid_list: DeviceV1RenderSubmitGridListFn,
+};
+
+pub const color_v1_export_name = "COLOR_V1";
+pub const color_v1_revision: u16 = 1;
+pub const color_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 128,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x524f4c43,
+    .interface_id_hi = 0x31584647,
+};
+pub const ColorV1ColorDescriptionValidateFn = *const fn (description: *const R4GfxColorDescription) callconv(.c) i32;
+pub const ColorV1ColorProfileStorageSizeFn = *const fn () callconv(.c) u64;
+pub const ColorV1ColorProfileOpenFn = *const fn (config: *const R4GfxColorProfileConfig, output: *R4GfxColorProfile) callconv(.c) i32;
+pub const ColorV1ColorProfileInfoFn = *const fn (profile: *const R4GfxColorProfile, output: *R4GfxColorProfileInfo) callconv(.c) i32;
+pub const ColorV1ColorProfileApplyFn = *const fn (profile: *const R4GfxColorProfile, request: *const R4GfxColorProfileRequest) callconv(.c) i32;
+pub const ColorV1ColorProfileCloseFn = *const fn (profile: *const R4GfxColorProfile) callconv(.c) i32;
+pub const ColorV1ColorImageTransformFn = *const fn (source: *const R4GfxColorImage, target: *const R4GfxColorImage, request: *const R4GfxColorTransform, output: *R4GfxCpuStats) callconv(.c) i32;
+pub const ColorV1ColorResourceCreateFn = *const fn (device: *const R4GfxDevice, description: *const R4GfxColorResourceDesc, output: *R4GfxResource) callconv(.c) i32;
+pub const ColorV1ColorResourceInfoFn = *const fn (device: *const R4GfxDevice, resource: *const R4GfxResource, output: *R4GfxColorDescription) callconv(.c) i32;
+pub const ColorV1ColorResourceTransformFn = *const fn (device: *const R4GfxDevice, source: *const R4GfxResource, target: *const R4GfxResource, request: *const R4GfxColorTransform, output: *R4GfxCpuStats) callconv(.c) i32;
+pub const ColorV1ColorProfileGenerateFn = *const fn (definition: *const R4GfxColorProfileDefinition, scratch_address: u64, scratch_bytes: u64, output_address: u64, output_capacity: u64, output_bytes: *u64) callconv(.c) i32;
+pub const ColorV1ColorRenderSubmitFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderListRequest, flags: u32, output: *R4GfxJob) callconv(.c) i32;
+pub const ColorV1 = extern struct {
+    header: InterfaceHeader,
+    color_description_validate: ColorV1ColorDescriptionValidateFn,
+    color_profile_storage_size: ColorV1ColorProfileStorageSizeFn,
+    color_profile_open: ColorV1ColorProfileOpenFn,
+    color_profile_info: ColorV1ColorProfileInfoFn,
+    color_profile_apply: ColorV1ColorProfileApplyFn,
+    color_profile_close: ColorV1ColorProfileCloseFn,
+    color_image_transform: ColorV1ColorImageTransformFn,
+    color_resource_create: ColorV1ColorResourceCreateFn,
+    color_resource_info: ColorV1ColorResourceInfoFn,
+    color_resource_transform: ColorV1ColorResourceTransformFn,
+    color_profile_generate: ColorV1ColorProfileGenerateFn,
+    color_render_submit: ColorV1ColorRenderSubmitFn,
 };
 
 pub const ApiV1Client = struct {
@@ -907,5 +1087,94 @@ pub const DeviceV1Client = struct {
     pub fn render_submit_grid_list(self: *const DeviceV1Client, device: *const R4GfxDevice, request: *const R4GfxRenderGridListRequest, output: *R4GfxJob) i32 {
         const function = r4os.runtime_r4l.functionAt(DeviceV1RenderSubmitGridListFn, self.header, 264) orelse unreachable;
         return function(device, request, output);
+    }
+};
+
+pub const ColorV1Client = struct {
+    header: *const InterfaceHeader,
+
+    pub fn init(raw: *const r4os.abi.R4XStartContext) !ColorV1Client {
+        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, color_v1_export_name) orelse return error.MissingImport;
+        const header = try r4os.runtime_r4l.validateImport(item, .{
+            .interface_id_lo = 0x524f4c43,
+            .interface_id_hi = 0x31584647,
+            .abi_major = 1,
+            .min_revision = 1,
+            .required_size = 128,
+            .known_required_flags = 0,
+        });
+        if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 40) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 48) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 56) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 64) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 72) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 80) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 88) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 96) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 104) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 112) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 120) == null) return error.MissingSlot;
+        return .{ .header = header };
+    }
+
+    pub fn color_description_validate(self: *const ColorV1Client, description: *const R4GfxColorDescription) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorDescriptionValidateFn, self.header, 32) orelse unreachable;
+        return function(description);
+    }
+
+    pub fn color_profile_storage_size(self: *const ColorV1Client) u64 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorProfileStorageSizeFn, self.header, 40) orelse unreachable;
+        return function();
+    }
+
+    pub fn color_profile_open(self: *const ColorV1Client, config: *const R4GfxColorProfileConfig, output: *R4GfxColorProfile) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorProfileOpenFn, self.header, 48) orelse unreachable;
+        return function(config, output);
+    }
+
+    pub fn color_profile_info(self: *const ColorV1Client, profile: *const R4GfxColorProfile, output: *R4GfxColorProfileInfo) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorProfileInfoFn, self.header, 56) orelse unreachable;
+        return function(profile, output);
+    }
+
+    pub fn color_profile_apply(self: *const ColorV1Client, profile: *const R4GfxColorProfile, request: *const R4GfxColorProfileRequest) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorProfileApplyFn, self.header, 64) orelse unreachable;
+        return function(profile, request);
+    }
+
+    pub fn color_profile_close(self: *const ColorV1Client, profile: *const R4GfxColorProfile) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorProfileCloseFn, self.header, 72) orelse unreachable;
+        return function(profile);
+    }
+
+    pub fn color_image_transform(self: *const ColorV1Client, source: *const R4GfxColorImage, target: *const R4GfxColorImage, request: *const R4GfxColorTransform, output: *R4GfxCpuStats) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorImageTransformFn, self.header, 80) orelse unreachable;
+        return function(source, target, request, output);
+    }
+
+    pub fn color_resource_create(self: *const ColorV1Client, device: *const R4GfxDevice, description: *const R4GfxColorResourceDesc, output: *R4GfxResource) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorResourceCreateFn, self.header, 88) orelse unreachable;
+        return function(device, description, output);
+    }
+
+    pub fn color_resource_info(self: *const ColorV1Client, device: *const R4GfxDevice, resource: *const R4GfxResource, output: *R4GfxColorDescription) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorResourceInfoFn, self.header, 96) orelse unreachable;
+        return function(device, resource, output);
+    }
+
+    pub fn color_resource_transform(self: *const ColorV1Client, device: *const R4GfxDevice, source: *const R4GfxResource, target: *const R4GfxResource, request: *const R4GfxColorTransform, output: *R4GfxCpuStats) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorResourceTransformFn, self.header, 104) orelse unreachable;
+        return function(device, source, target, request, output);
+    }
+
+    pub fn color_profile_generate(self: *const ColorV1Client, definition: *const R4GfxColorProfileDefinition, scratch_address: u64, scratch_bytes: u64, output_address: u64, output_capacity: u64, output_bytes: *u64) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorProfileGenerateFn, self.header, 112) orelse unreachable;
+        return function(definition, scratch_address, scratch_bytes, output_address, output_capacity, output_bytes);
+    }
+
+    pub fn color_render_submit(self: *const ColorV1Client, device: *const R4GfxDevice, request: *const R4GfxRenderListRequest, flags: u32, output: *R4GfxJob) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorRenderSubmitFn, self.header, 120) orelse unreachable;
+        return function(device, request, flags, output);
     }
 };

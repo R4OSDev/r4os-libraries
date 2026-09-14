@@ -31,7 +31,52 @@ pub fn check(report: *const @import("../../Display/edid.zig").Report) !void {
     const encoded = try saved.encode(&text);
     const parsed = try preferences.Config.parse(encoded);
     try t.expectEqualDeep(saved, parsed);
+    const colors = @import("../../Display/color_preferences.zig");
+    var choice: colors.Choice = .{ .key = key, .intent = 1, .flags = 3 };
+    try choice.setPath("C:\\Color Profiles\\Display, calibrated.icc");
+    const first_color = try (colors.Config{}).remember(choice);
+    var second_color = choice; second_color.key = second;
+    try second_color.setPath("");
+    const saved_colors = try first_color.remember(second_color);
+    var color_bytes: [colors.max_bytes]u8 = undefined;
+    const color_text = try saved_colors.encode(&color_bytes);
+    try t.expectEqualDeep(saved_colors, try colors.Config.parse(color_text));
+    try t.expect(!saved_colors.find(second).?.enabled());
+    var changed_receiver = key; changed_receiver.receiver[0] ^= 1;
+    try t.expect(saved_colors.find(changed_receiver) == null);
+    var invalid_color = choice; invalid_color.key.receiver = @splat(0);
+    try t.expectError(error.UnknownReceiver, first_color.remember(invalid_color));
+    invalid_color = choice; invalid_color.flags = 4;
+    try t.expectError(error.Invalid, first_color.remember(invalid_color));
+    try t.expectError(error.Invalid, choice.setPath("relative.icc"));
+    try t.expectError(error.Invalid, choice.setPath("C:\\display.icc\nDISPLAY=forged"));
+    try t.expectError(error.Format, colors.Config.parse("R4S_FORMAT=1\nSCHEMA=GFX_COLOR_3\n"));
+    // Disable one monitor without discarding an absent monitor's profile.
+    try choice.setPath("");
+    const disabled_color = try saved_colors.remember(choice);
+    try t.expect(disabled_color.count == 2 and !disabled_color.find(key).?.enabled());
+    var duplicate: [colors.max_bytes]u8 = undefined;
+    const row = std.mem.indexOf(u8, color_text, "DISPLAY=").?;
+    const line_end = std.mem.indexOfScalarPos(u8, color_text, row, '\n').? + 1;
+    @memcpy(duplicate[0..color_text.len], color_text);
+    @memcpy(duplicate[color_text.len..][0..line_end - row], color_text[row..line_end]);
+    try t.expectError(error.Duplicate, colors.Config.parse(duplicate[0..color_text.len + line_end - row]));
     const catalog = @import("../../Display/desktop_outputs.zig");
+    var hdr = second_color;
+    hdr.signal = .{ .format = @import("r4os").abi.gfx_buffer_format_xrgb2101010, .bpc = 10, .primaries = 3, .transfer = 3, .range = 2,
+        .pipeline = 7, .reference_white = 2_030_000, .peak = 10_000_000, .metadata_valid = 1,
+        .metadata = .{ .max_mastering = 1000, .min_mastering = 50, .max_cll = 1000, .max_fall = 400 } };
+    const hdr_config = try saved_colors.remember(hdr);
+    try t.expectEqualDeep(hdr_config, try colors.Config.parse(try hdr_config.encode(&duplicate)));
+    var bad_hdr = hdr; bad_hdr.signal.pipeline = 3;
+    try t.expectError(error.Invalid, hdr_config.remember(bad_hdr));
+    bad_hdr = hdr; try bad_hdr.setPath("C:\\display.icc");
+    try t.expectError(error.Invalid, hdr_config.remember(bad_hdr));
+    const old_text = try std.fmt.bufPrint(&duplicate, "R4S_FORMAT=1\nSCHEMA=GFX_COLOR_1\nDISPLAY={x},{d},{s},1,1,C:\\Old, profile.icc\n",
+        .{ key.adapter, key.connector, std.fmt.bytesToHex(key.receiver, .lower) });
+    const old_color = (try colors.Config.parse(old_text)).find(key).?;
+    try t.expectEqualDeep(colors.sdr, old_color.signal);
+    try t.expectEqualStrings("C:\\Old, profile.icc", std.mem.span(old_color.profilePath()));
     var first: catalog.Snapshot = .{ .count = 1, .revision = 9 };
     first.entries[0].key = key;
     var next = first;
@@ -44,6 +89,14 @@ pub fn check(report: *const @import("../../Display/edid.zig").Report) !void {
     var restoration: catalog.modes.Restoration = .{};
     var identity: @import("r4os").abi.GfxOutputId = .{ .adapter_id = 17, .connector_id = 4,
         .device_generation = 3, .connection_generation = 7 };
+    var color_restoration: catalog.color_control.Restoration = .{};
+    try t.expect(!color_restoration.seen(hdr, identity));
+    color_restoration.record(hdr, identity);
+    try t.expect(color_restoration.seen(hdr, identity));
+    bad_hdr = hdr; bad_hdr.signal.peak = 20_000_000;
+    try t.expect(!color_restoration.seen(bad_hdr, identity));
+    var reconnected = identity; reconnected.connection_generation += 1;
+    try t.expect(!color_restoration.seen(hdr, reconnected));
     try t.expect(!restoration.seen(outputs[0], identity));
     restoration.record(outputs[0], identity);
     try t.expect(restoration.seen(outputs[0], identity));

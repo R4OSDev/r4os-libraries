@@ -45,7 +45,7 @@ fn negotiation(device: *d.Device, source: *d.Resource, request: c.R4GfxImagePrep
         .adapter_id = binding.adapter_id, .device_generation = binding.device_generation, .reset_generation = binding.reset_generation },&input,&result);
     if (status != nv.status_ok) return if (status == nv.status_unsupported) error.Unsupported else error.Invalid;
     if (result.version != 1 or result.size != @sizeOf(nv.R4NvImagePlan) or result.reserved != 0 or result.action > 1 or
-        result.layout > 1 or result.pitch < source.image.width*(if (source.image.format == c.format_r8) @as(u64,1) else 4) or
+        result.layout > 1 or result.pitch < source.image.width*(try resources.pixelBytes(source.image.format)) or
         result.byte_length == 0 or result.allocation_bytes < result.byte_length or
         result.supported_uses&request.uses != request.uses or (result.layout == 0) != (result.modifier == 0)) return error.Invalid;
     if (result.action == nv.image_action_reuse and (force or result.modifier != descriptor.modifier or
@@ -118,7 +118,7 @@ pub fn prepare(device: *d.Device, public_handle: *const c.R4GfxDevice, input: *c
                 .width = source_image.width, .height = source_image.height, .format = source_image.format, .layout = plan.native.?.layout };
             descriptor.source_address = @intFromPtr(&native);
         }
-        _ = try resources.createWithUsage(device,&descriptor,&result.image,usage);
+        _ = try resources.createColoredWithUsage(device,&descriptor,&result.image,usage,source.color);
         const target = device.resource(result.image,true) catch unreachable;
         errdefer {
             target.public_refs -= 1;
@@ -133,7 +133,7 @@ pub fn prepare(device: *d.Device, public_handle: *const c.R4GfxDevice, input: *c
         }
         const copy: c.R4GfxCopyRequestEx = .{ .version = 1, .size = @sizeOf(c.R4GfxCopyRequestEx),
             .copy = .{ .source = request.source, .target = result.image, .source_offset = 0, .target_offset = 0,
-                .byte_length = @as(u64,source_image.width)*(if (source_image.format == c.format_r8) @as(u64,1) else 4), .deadline_ns = request.deadline_ns },
+                .byte_length = @as(u64,source_image.width)*(try resources.pixelBytes(source_image.format)), .deadline_ns = request.deadline_ns },
             .row_count = source_image.height, .source_pitch = source_image.pitch, .target_pitch = target.image.pitch,
             .dependency_count = request.dependency_count, .dependencies = if (request.dependency_count != 0) @intFromPtr(&dependencies) else 0 };
         _ = try jobs.submitEx(device,&copy,&result.job);

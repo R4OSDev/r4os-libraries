@@ -16,11 +16,14 @@ pub fn build(b: *std.Build) void {
     provider.addImport("r4os", host);
     provider.addImport("r4l_contract", implementation);
     provider.addImport("r4nv_binding", nv);
+    const profile_fixtures = b.createModule(.{ .root_source_file = b.path("Tests/Color/fixtures.zig"), .target = b.graph.host });
+    provider.addImport("profile_fixtures", profile_fixtures);
     const nv_implementation = b.createModule(.{ .root_source_file = nv_package.namedLazyPath("implementation"), .target = b.graph.host });
     nv_implementation.addImport("r4os", host);
     const nv_backend = b.createModule(.{ .root_source_file = nv_package.namedLazyPath("backend"), .target = b.graph.host });
     nv_backend.addImport("r4l_contract", nv_implementation);
     provider.addImport("r4nv_backend", nv_backend);
+    @import("color_build.zig").add(b, provider);
     const conformance = b.createModule(.{ .root_source_file = b.path("Tests/Generated/contract_conformance.zig"), .target = b.graph.host });
     conformance.addImport("implementation", implementation);
     conformance.addImport("binding", binding);

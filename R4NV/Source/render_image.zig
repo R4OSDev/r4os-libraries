@@ -116,7 +116,12 @@
 //! allocations; application handles are resolved by the runtime before here.
 const std = @import("std");
 pub const Error = error{ Bounds, Unsupported };
-pub const Format = enum(u32) { xrgb8888 = 0x34325258, argb8888 = 0x34325241, r8 = 0x20203852 };
+pub const Format = enum(u32) {
+    xrgb8888 = 0x34325258, argb8888 = 0x34325241, r8 = 0x20203852,
+    xrgb2101010 = 0x30335258, argb2101010 = 0x30335241, abgr16161616f = 0x48344241,
+    pub fn pixelBytes(self: Format) u32 { return switch (self) { .r8 => 1, .abgr16161616f => 8, else => 4 }; }
+    pub fn hasAlpha(self: Format) bool { return self == .argb8888 or self == .argb2101010 or self == .abgr16161616f; }
+};
 pub const Layout = enum { linear, blocklinear };
 pub const Filter = enum { nearest, bilinear };
 pub const Image = struct {
@@ -129,7 +134,7 @@ pub const Image = struct {
     layout: Layout,
     log2_gobs: u8 = 0,
 
-    pub fn pixelBytes(self: Image) u32 { return if (self.format == .r8) 1 else 4; }
+    pub fn pixelBytes(self: Image) u32 { return self.format.pixelBytes(); }
     pub fn validate(self: Image) Error!void {
         if (self.width == 0 or self.height == 0 or self.width > 16384 or self.height > 16384 or self.log2_gobs > 5) return error.Bounds;
         const row: u64 = @as(u64, self.width) * self.pixelBytes();
@@ -160,7 +165,8 @@ pub fn target(image: Image) Error!Target {
     return .{ .words = .{
         @intCast(image.address >> 32), @truncate(image.address),
         if (tiled) image.pitch / image.pixelBytes() else image.pitch, image.height,
-        switch (image.format) { .xrgb8888 => 0xe6, .argb8888 => 0xcf, .r8 => 0xf3 },
+        switch (image.format) { .xrgb8888 => 0xe6, .argb8888 => 0xcf, .r8 => 0xf3,
+            .xrgb2101010, .argb2101010 => 0xdf, .abgr16161616f => 0xca },
         if (tiled) @as(u32, image.log2_gobs) << 4 else @as(u32, 1) << 12,
         1, if (tiled) @intCast(size / 4) else 0, 0,
     } };
@@ -170,10 +176,15 @@ pub fn texture(image: Image) Error![8]u32 {
     const tiled = image.layout == .blocklinear;
     var out: [8]u32 = @splat(0);
     const rgba = image.format != .r8;
-    const component_types: u32 = if (rgba) (2 << 7) | (2 << 10) | (2 << 13) | (2 << 16) else 2 << 7;
-    const swizzle: u32 = if (rgba) (4 << 19) | (3 << 22) | (2 << 25) | ((if (image.format == .argb8888) @as(u32, 5) else 7) << 28)
+    const floating = image.format == .abgr16161616f;
+    const kind: u32 = if (floating) 7 else 2;
+    const component_types: u32 = if (rgba) (kind << 7) | (kind << 10) | (kind << 13) | (kind << 16) else 2 << 7;
+    const swizzle: u32 = if (rgba) ((if (floating) @as(u32, 2) else 4) << 19) | (3 << 22) |
+        ((if (floating) @as(u32, 4) else 2) << 25) | ((if (image.format.hasAlpha()) @as(u32, 5) else 7) << 28)
         else (2 << 19) | (7 << 28); // R001, matching the scalar R8 format.
-    out[0] = (if (rgba) @as(u32, 8) else 0x1d) | component_types | swizzle;
+    const components: u32 = switch (image.format) { .r8 => 0x1d, .xrgb8888, .argb8888 => 8,
+        .xrgb2101010, .argb2101010 => 9, .abgr16161616f => 3 };
+    out[0] = components | component_types | swizzle;
     out[1] = @truncate(image.address);
     out[2] = @as(u32, @intCast(image.address >> 32)) | ((if (tiled) @as(u32, 3) else 2) << 21);
     out[3] = (if (tiled) @as(u32, image.log2_gobs) << 3 else image.pitch >> 5) | (1 << 16) | (1 << 17) | (1 << 18);

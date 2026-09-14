@@ -8,6 +8,7 @@ const baseline_jpeg = @embedFile("Decoder/Fixtures/baseline.jpg");
 const basic_svg = @embedFile("Decoder/Fixtures/basic.svg");
 const module_name: [:0]const u8 = "R4IMG";
 const api_name: [:0]const u8 = "API_V1";
+const png_name: [:0]const u8 = "PNG_V1";
 
 fn makeContext(imports: []const r4os.abi.R4XStartImport) r4os.abi.R4XStartContext {
     return .{
@@ -17,8 +18,8 @@ fn makeContext(imports: []const r4os.abi.R4XStartImport) r4os.abi.R4XStartContex
     };
 }
 
-fn makeApi() !struct { raw: r4os.abi.R4XStartContext, imports: [1]r4os.abi.R4XStartImport } {
-    var imports = [1]r4os.abi.R4XStartImport{.{
+fn makeApi() !struct { raw: r4os.abi.R4XStartContext, imports: [2]r4os.abi.R4XStartImport } {
+    var imports = [2]r4os.abi.R4XStartImport{ .{
         .group_id = 0,
         .min_version = 1,
         .resolved_version = 1,
@@ -26,7 +27,7 @@ fn makeApi() !struct { raw: r4os.abi.R4XStartContext, imports: [1]r4os.abi.R4XSt
         .module_name = @intFromPtr(module_name.ptr),
         .symbol_name = @intFromPtr(api_name.ptr),
         .table = @intFromPtr(&project.r4img_api_v1),
-    }};
+    }, .{ .group_id = 0, .min_version = 1, .resolved_version = 1, .flags = 0, .module_name = @intFromPtr(module_name.ptr), .symbol_name = @intFromPtr(png_name.ptr), .table = @intFromPtr(&project.r4img_png_v1) } };
     return .{ .raw = makeContext(&imports), .imports = imports };
 }
 
@@ -56,6 +57,26 @@ test "productive PNG JPEG and BMP decode cross the loaded API_V1 table" {
     const image = try api.decode(rgba_png, "image/png", pixels, scratch);
     try std.testing.expectEqual(@as(usize, 100), image.pixels.len);
     try std.testing.expectEqual(@as(u32, 0xFF0000FF), image.pixels[0]);
+
+    // Color-aware clients import PNG_V1 explicitly; ordinary clients retain
+    // their unchanged API_V1 table and manifest requirement.
+    const png = r4img.PngContext.init(&fixture.raw) orelse return error.MissingPngBinding;
+    const color = try png.pngColor(rgba_png);
+    try std.testing.expectEqual(@as(u32, 1), color.version);
+    try std.testing.expectEqual(@as(u32, 8), color.bit_depth);
+    const precise = try std.testing.allocator.alloc(u16, pixels.len * 4);
+    defer std.testing.allocator.free(precise);
+    const precise_scratch = try std.testing.allocator.alloc(u8, try png.pngScratchBytes16(info, rgba_png.len));
+    defer std.testing.allocator.free(precise_scratch);
+    const precise_image = try png.pngDecode16(rgba_png, precise, precise_scratch);
+    try std.testing.expectEqualSlices(u16, &.{ 0, 0, 65535, 65535 }, precise_image.rgba[0..4]);
+    try std.testing.expectEqual(color, precise_image.color);
+    var rejected_info: r4img.abi.R4ImgInfo = .{ .format = 42, .width = 42, .height = 42, .channels = 42 };
+    var rejected_count: u64 = 42;
+    // The metadata record may not alias the writable pixel arena.
+    try std.testing.expectEqual(r4img.abi.status_invalid_argument, project.r4img_png_v1.png_decode16(rgba_png.ptr, rgba_png.len, precise.ptr, precise.len, precise_scratch.ptr, precise_scratch.len, @ptrCast(&rejected_info), @ptrCast(@alignCast(precise.ptr)), &rejected_count));
+    try std.testing.expectEqual(@as(u32, 42), rejected_info.width);
+    try std.testing.expectEqual(@as(u64, 42), rejected_count);
 
     const jpeg_info = try api.probe(baseline_jpeg, "image/jpeg");
     try std.testing.expectEqual(r4img.Format.jpeg, jpeg_info.format);

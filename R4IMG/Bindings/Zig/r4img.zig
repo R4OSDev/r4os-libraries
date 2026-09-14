@@ -4,6 +4,11 @@ pub const abi = @import("r4img_abi.zig");
 
 pub const name = abi.module_name;
 pub const import_api_v1 = "R4IMG:API_V1:1";
+pub const import_png_v1 = "R4IMG:PNG_V1:1";
+pub const import_raster_v1 = "R4IMG:RASTER_V1:1";
+/// Shared image/color orchestration. Pass the imported R4GFX binding type;
+/// neither decoder ABI nor codec implementation acquires a color dependency.
+pub const ColorDecoder = @import("color.zig").Decoder;
 pub const max_dimension: u32 = abi.max_dimension;
 pub const max_pixels: usize = @intCast(abi.max_pixels);
 pub const max_scratch_bytes: usize = @intCast(abi.max_scratch_bytes);
@@ -70,6 +75,26 @@ pub const Image = struct {
     info: Info,
     pixels: []u32,
 };
+pub const PngColor = abi.R4ImgPngColor;
+pub const RasterColor = abi.R4ImgRasterColor;
+pub const RasterContext = struct {
+    client: abi.RasterV1Client,
+    pub fn init(raw: *const r4os.abi.R4XStartContext) ?RasterContext {
+        return .{ .client = abi.RasterV1Client.init(raw) catch return null };
+    }
+    pub fn color(self: *const RasterContext, bytes: []const u8) Error!RasterColor {
+        var output: RasterColor = undefined;
+        try errorForStatus(self.client.raster_color_info(bytes.ptr, bytes.len, &output));
+        return output;
+    }
+    pub fn iccProfile(self: *const RasterContext, bytes: []const u8, output: []u8) Error![]u8 {
+        var count: u64 = 0;
+        try errorForStatus(self.client.raster_icc_profile(bytes.ptr, bytes.len, output.ptr, output.len, &count));
+        if (count > output.len) return error.TooLarge;
+        return output[0..@intCast(count)];
+    }
+};
+pub const Image16 = struct { info: Info, color: PngColor, rgba: []u16 };
 
 pub const DecoderDiagnostic = struct {
     scratch_peak: usize,
@@ -269,3 +294,36 @@ test "facade keeps public metadata and ABI layouts stable" {
     try std.testing.expectEqual(@as(usize, 16), @sizeOf(abi.R4ImgInfo));
     try std.testing.expectEqual(@as(usize, 56), @sizeOf(abi.R4ImgSvgOptions));
 }
+
+pub const PngContext = struct {
+    client: abi.PngV1Client,
+    pub fn init(raw: *const r4os.abi.R4XStartContext) ?PngContext {
+        return .{ .client = abi.PngV1Client.init(raw) catch return null };
+    }
+    pub fn pngColor(self: *const PngContext, bytes: []const u8) Error!PngColor {
+        var output: PngColor = undefined;
+        try errorForStatus(self.client.png_color_info(bytes.ptr, bytes.len, &output));
+        return output;
+    }
+    pub fn pngIccProfile(self: *const PngContext, bytes: []const u8, output: []u8) Error![]u8 {
+        var count: u64 = 0;
+        try errorForStatus(self.client.png_icc_profile(bytes.ptr, bytes.len, output.ptr, output.len, &count));
+        if (count > output.len) return error.InvalidImage;
+        return output[0..@intCast(count)];
+    }
+    pub fn pngScratchBytes16(self: *const PngContext, info: Info, encoded_bytes: usize) Error!usize {
+        const input = infoToAbi(info);
+        var output: u64 = 0;
+        try errorForStatus(self.client.png_scratch_bytes16(&input, encoded_bytes, &output));
+        return std.math.cast(usize, output) orelse error.TooLarge;
+    }
+    pub fn pngDecode16(self: *const PngContext, bytes: []const u8, rgba: []u16, scratch: []u8) Error!Image16 {
+        var output_info: abi.R4ImgInfo = undefined;
+        var output_color: PngColor = undefined;
+        var count: u64 = 0;
+        try errorForStatus(self.client.png_decode16(bytes.ptr, bytes.len, rgba.ptr, rgba.len, scratch.ptr, scratch.len, &output_info, &output_color, &count));
+        const decoded_info = try infoFromAbi(output_info);
+        if (count > rgba.len / 4 or count != try decoded_info.pixelCount()) return error.InvalidImage;
+        return .{ .info = decoded_info, .color = output_color, .rgba = rgba[0..@intCast(count * 4)] };
+    }
+};

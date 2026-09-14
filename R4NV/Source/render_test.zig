@@ -19,6 +19,7 @@ fn state(program: *const render.Program, method: u32) !u32 {
 }
 pub fn check() !void {
     try render.reference_model.check();
+    try checkColorPackets();
     var binding: render.Binding = .{
         .draw = .{
             .target = .{ .address = 0x100000, .bytes = 65536, .width = 128, .height = 128, .pitch = 512, .format = .argb8888, .layout = .linear },
@@ -74,7 +75,7 @@ pub fn check() !void {
     draws[15].target.address += 65536;
     try t.expectError(error.Unsupported, render.packetUploadList(&draws, &packets));
     try t.expectEqualSlices(u8, &unchanged, &packets);
-    std.debug.print("render list: 16 sampled draws; {d} words including one release; 16384 upload bytes\n", .{program.count + 11});
+    std.debug.print("render list: 16 sampled draws; {d} words including one release; {d} upload bytes\n", .{program.count + 11, packets.len});
     // Every fixed fragment profile binds its own immutable header/code pair.
     for ([_]render.Transfer{.identity,.decode_srgb,.encode_srgb}) |transfer| {
         binding.draw.transfer = transfer;
@@ -109,4 +110,40 @@ pub fn check() !void {
     binding.draw.target.address = 1<<40;
     _ = try render.image.texture(binding.draw.target);
     try t.expectError(error.Unsupported,render.encode(binding,&program));
+}
+
+fn checkColorPackets() !void {
+    var color: render.ColorProgram = .{};
+    color.words[0..5].* = .{ 3, 2, 3, 4, 1 };
+    for ([_]usize{32,80}) |base| for (0..3) |i| { color.words[(base + i * 20) / 4] = @bitCast(@as(f32,1)); };
+    const scalars = [_]f32{203,1000,1,0, 203,1000,1,0, 1,0,1,0, 1,1000,750,250, 1000,1.0/1023.0};
+    for (scalars, 32..) |value, i| color.words[i] = @bitCast(value);
+    const draw: render.Draw = .{
+        .target = .{ .address = 0x100000, .bytes = 65536, .width = 128, .height = 128, .pitch = 512, .format = .xrgb2101010, .layout = .linear },
+        .source = .{ .address = 0x200000, .bytes = 131072, .width = 128, .height = 128, .pitch = 1024, .format = .abgr16161616f, .layout = .linear },
+        .destination = .{ .x = 0, .y = 0, .width = 128, .height = 128 },
+        .source_rect = .{ .x = 0, .y = 0, .width = 128, .height = 128 },
+        .scissor = .{ .x = 0, .y = 0, .width = 128, .height = 128 }, .transfer = .color, .color_program = color,
+    };
+    var draws: [render.batch_capacity]render.Draw = @splat(draw);
+    var packets: [render.packet_capacity_bytes]u8 = undefined;
+    try render.packetUploadList(&draws, &packets);
+    for (0..draws.len) |i| try t.expectEqualSlices(u8, std.mem.asBytes(&color), packets[i*render.packet_bytes+1024..][0..256]);
+    var program: render.Program = .{};
+    const binding: render.Binding = .{ .draw = draws[0], .additional = draws[1..],
+        .programs = .{ .address = 0x300000, .bytes = render.shader_bytes }, .packet = .{ .address = 0x400000, .bytes = packets.len } };
+    try render.encode(binding, &program);
+    try t.expect(program.count + 11 <= 1024);
+    try t.expectEqual(@as(u32,0x21), try state(&program,hw.BIND_GROUP_CONSTANT_BUFFER+128));
+    try t.expectEqual(@as(u32,0x400000+15*render.packet_bytes+1024), try state(&program,hw.SET_CONSTANT_BUFFER_SELECTOR_A+8));
+    try t.expectEqual(@as(u32,0x300000+render.shaderOffset(6)), try state(&program,hw.SET_PIPELINE_PROGRAM_ADDRESS_A+5*64+4));
+    const untouched = packets;
+    draws[15].color_program.?.words[32] = @bitCast(std.math.nan(f32));
+    try t.expectError(error.Bounds, render.packetUploadList(&draws, &packets));
+    try t.expectEqualSlices(u8, &untouched, &packets);
+    draws[15] = draw; draws[15].filter = .bilinear;
+    try t.expectError(error.Unsupported, render.packetUploadList(&draws, &packets));
+    draws[15] = draw; draws[15].blend = .over;
+    try t.expectError(error.Unsupported, render.packetUploadList(&draws, &packets));
+    std.debug.print("render color: FP16 to XR30, copied CBuf2,16 draws fit4KB ring, invalid/torn programs rejected: OK\n", .{});
 }
