@@ -120,8 +120,11 @@ const hw = @import("Generated/Render/c797.zig");
 const shaders = @import("Generated/Shaders/shaders.zig");
 pub const Error = image.Error || error{Empty};
 pub const packet_bytes = 1024;
+pub const batch_capacity = 16;
+pub const packet_capacity_bytes = packet_bytes * batch_capacity;
 pub const shader_bytes = shaderOffset(shaders.programs.len);
-pub const max_words = 768;
+// The driver's graphics ring has one 4 KB slot, including its 11-word release.
+pub const max_words = 1024 - 11;
 pub const Range = struct {
     address: u64,
     bytes: u64,
@@ -191,12 +194,18 @@ pub const Draw = struct {
 };
 pub const Binding = struct {
     draw: Draw,
+    additional: []const Draw = &.{},
     programs: Range,
     packet: Range,
     pub fn validate(self: Binding) Error!void {
         try self.draw.validate();
+        if (self.additional.len >= batch_capacity) return error.Bounds;
+        for (self.additional) |draw| {
+            try draw.validate();
+            if (!compatible(self.draw, draw)) return error.Unsupported;
+        }
         try self.programs.validate(128, shader_bytes);
-        try self.packet.validate(256, packet_bytes);
+        try self.packet.validate(256, packet_bytes * (1 + self.additional.len));
         const target: Range = .{ .address = self.draw.target.address, .bytes = self.draw.target.bytes };
         if (Range.overlaps(self.programs, self.packet) or Range.overlaps(self.programs, target) or Range.overlaps(self.packet, target)) return error.Unsupported;
         if (self.draw.source) |src| {
@@ -204,7 +213,16 @@ pub const Binding = struct {
             if (Range.overlaps(self.programs, source) or Range.overlaps(self.packet, source)) return error.Unsupported;
         }
     }
+    pub fn matches(self: Binding, draws: []const Draw) bool {
+        if (draws.len != 1 + self.additional.len or !std.meta.eql(self.draw, draws[0])) return false;
+        for (self.additional, draws[1..]) |left, right| if (!std.meta.eql(left, right)) return false;
+        return true;
+    }
 };
+pub fn compatible(first: Draw, next: Draw) bool {
+    return std.meta.eql(first.target, next.target) and std.meta.eql(first.source, next.source) and
+        first.filter == next.filter and first.blend == next.blend and first.transfer == next.transfer;
+}
 pub fn shaderOffset(index: usize) u32 {
     var offset: u32 = 0;
     for (shaders.programs[0..index]) |program| offset += std.mem.alignForward(u32, 128 + @as(u32, @intCast(program.code.len)), 128);
@@ -268,6 +286,15 @@ pub fn packetUpload(draw: Draw, out: []u8) Error!void {
         @memcpy(out[768 + index * 40..][0..40], std.mem.asBytes(&vertex));
     }
 }
+pub fn packetUploadList(draws: []const Draw, out: []u8) Error!void {
+    if (draws.len == 0 or draws.len > batch_capacity or out.len != draws.len * packet_bytes) return error.Bounds;
+    // Reject the entire list before modifying any upload bytes.
+    for (draws) |draw| {
+        try draw.validate();
+        if (!compatible(draws[0], draw)) return error.Unsupported;
+    }
+    for (draws, 0..) |draw, index| try packetUpload(draw, out[index * packet_bytes..][0..packet_bytes]);
+}
 pub const Program = struct {
     data: [max_words]u32 = undefined,
     count: usize = 0,
@@ -294,7 +321,6 @@ pub fn encode(binding: Binding, out: *Program) Error!void {
     out.count = 0;
     const draw = binding.draw;
     const target = try image.target(draw.target);
-    const clip = try draw.clip();
     // CE upload must already have a real completion. WFI precedes reuse of
     // descriptor/constant/vertex state; invalidation makes those writes visible.
     try out.one(hw.SET_OBJECT, 0xc797);
@@ -316,25 +342,30 @@ pub fn encode(binding: Binding, out: *Program) Error!void {
     const half_height = @as(f32,@floatFromInt(draw.target.height)) / 2.0;
     try out.words(hw.SET_VIEWPORT_SCALE_X, &.{@bitCast(half_width), @bitCast(half_height), @bitCast(@as(f32,0.5)), @bitCast(half_width), @bitCast(half_height), @bitCast(@as(f32,0.5))});
     try out.words(hw.SET_VIEWPORT_CLIP_HORIZONTAL, &.{draw.target.width << 16, draw.target.height << 16, 0, @bitCast(@as(f32,1))});
-    try out.words(hw.SET_SCISSOR_ENABLE, &.{1, clip[0] | (clip[2] << 16), clip[1] | (clip[3] << 16)});
     try out.one(hw.SET_CT_WRITE, if (draw.target.format == .r8) hw.color_write_r else hw.color_write_rgba);
     try out.one(hw.SET_BLEND, @intFromBool(draw.blend == .over));
     try out.words(hw.SET_BLEND_PER_TARGET_SEPARATE_FOR_ALPHA, &.{1, hw.blend_add, hw.blend_one, if (draw.blend == .over) hw.blend_inverse_alpha else hw.blend_zero, hw.blend_add, hw.blend_one, if (draw.blend == .over) hw.blend_inverse_alpha else hw.blend_zero});
     try bindShader(out, binding.programs, if (draw.source == null) 5 else 0);
     try bindShader(out, binding.programs, draw.profile()-1);
-    const vertices = binding.packet.address + 768;
+    try encodeDraw(draw, binding.packet.address, out);
+    for (binding.additional, 1..) |next, index| try encodeDraw(next, binding.packet.address + index * packet_bytes, out);
+    // The driver's private GR semaphore release follows the entire list.
+}
+fn encodeDraw(draw: Draw, packet: u64, out: *Program) Error!void {
+    const clip = try draw.clip();
+    try out.words(hw.SET_SCISSOR_ENABLE, &.{1, clip[0] | (clip[2] << 16), clip[1] | (clip[3] << 16)});
+    const vertices = packet + 768;
     try out.words(hw.SET_VERTEX_STREAM_A_FORMAT, &.{hw.vertex_stride, @intCast(vertices >> 32), @truncate(vertices), 1});
     try out.words(hw.SET_VERTEX_STREAM_SIZE_A, &.{0, 160});
     try out.one(hw.SET_VERTEX_STREAM_INSTANCE_A, 0);
     if (draw.source != null) {
-        const sampler_address = binding.packet.address + 256;
-        const constants = binding.packet.address + 512;
-        try out.words(hw.SET_TEX_HEADER_POOL_A, &.{@intCast(binding.packet.address >> 32), @truncate(binding.packet.address), 0});
+        const sampler_address = packet + 256;
+        const constants = packet + 512;
+        try out.words(hw.SET_TEX_HEADER_POOL_A, &.{@intCast(packet >> 32), @truncate(packet), 0});
         try out.words(hw.SET_TEX_SAMPLER_POOL_A, &.{@intCast(sampler_address >> 32), @truncate(sampler_address), 0});
         try out.words(hw.SET_CONSTANT_BUFFER_SELECTOR_A, &.{256, @intCast(constants >> 32), @truncate(constants)});
         try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 | (1 << 4));
     } else try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 << 4);
     try out.words(hw.SET_DRAW_CONTROL_A, &.{hw.draw_control, 1});
     try out.words(hw.DRAW_VERTEX_ARRAY_BEGIN_END_A, &.{0, 4});
-    // The driver's private GR semaphore release follows this body.
 }

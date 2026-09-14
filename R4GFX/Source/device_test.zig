@@ -25,6 +25,7 @@ const Model = struct {
     var status: a.GfxFenceStatus = .{};
     var job_live = false;
     var job_request: a.GfxSubmission = .{};
+    var job_list: a.GfxRenderList = .{};
     var operations: u64 = 7;
     var dependency_seen = false;
     var native_request: a.GfxNativeAllocation = .{};
@@ -43,7 +44,7 @@ const Model = struct {
         serial = 0x100000000; exports = 0; maps = 0; fail_unmap = false; premature_closes = 0; inventory_reads = 0; job_live = false;
         binding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
         nv_table.header = nv.backend_v1_header;
-        operations = 7; dependency_seen = false;
+        operations = 7; dependency_seen = false; job_list = .{};
         native_request = .{}; native_handle = .{}; native_result = 1;
         native_starts = 0; bad_native_layout = false;
     }
@@ -152,7 +153,7 @@ const Model = struct {
     }
     fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
         std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows or
-            input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_present) and input.dependency_count <= 1);
+            input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_render_list or input.operation == a.gfx_queue_operation_present) and input.dependency_count <= 1);
         if (input.dependency_count == 1) {
             std.debug.assert(job_live and std.meta.eql(input.dependencies[0], status.fence));
             dependency_seen = true;
@@ -163,6 +164,12 @@ const Model = struct {
             .device_generation = found.config.device_generation, .reset_generation = found.config.reset_generation },
             .phase = a.gfx_queue_phase_running, .flags = a.gfx_queue_flag_device_active | a.gfx_queue_flag_resources_held, .milestone = found.config.milestone };
         job_request = input.*; job_live = true; out.* = status; return 1;
+    }
+    fn submitList(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, list: *const a.GfxRenderList, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        std.debug.assert(input.operation == a.gfx_queue_operation_render_list and list.count > 0 and list.count <= 16);
+        const rc = submit(queue, input, out);
+        if (rc == a.gfx_queue_ok) job_list = list.*;
+        return rc;
     }
     fn query(input: *const a.GfxFence, out: *a.GfxFenceStatus) callconv(.c) i32 {
         std.debug.assert(job_live and std.meta.eql(input.*, status.fence)); out.* = status; return 1;
@@ -213,6 +220,7 @@ pub fn check() !void {
         .gfx_buffer_import = @intFromPtr(&Model.import), .gfx_buffer_release = @intFromPtr(&Model.release), .gfx_buffer_map = @intFromPtr(&Model.map),
         .gfx_buffer_unmap = @intFromPtr(&Model.unmap), .gfx_buffer_export_raster = @intFromPtr(&Model.exportRaster), .gfx_queue_backend_info = @intFromPtr(&Model.backendInfo),
         .gfx_queue_open = @intFromPtr(&Model.open), .gfx_queue_close = @intFromPtr(&Model.close), .gfx_queue_submit = @intFromPtr(&Model.submit),
+        .gfx_queue_submit_render_list = @intFromPtr(&Model.submitList),
         .gfx_fence_query = @intFromPtr(&Model.query), .gfx_fence_cancel = @intFromPtr(&Model.cancel), .gfx_fence_release = @intFromPtr(&Model.drop) };
     var imports = [_]a.R4XStartImport{
         .{ .group_id = @intFromEnum(a.R4LGroup.r4sys), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&sys) },
@@ -585,7 +593,24 @@ fn checkNativeRender(config: *const c.R4GfxDeviceConfig) !void {
     request.color = 0; request.opacity = 127; request.transfer = c.render_transfer_srgb_decode;
     var invalid = request; invalid.source = target;
     try t.expectEqual(c.status_alias, api.render_submit(&handle, &invalid, &job));
-    try t.expectEqual(c.status_ok, api.render_submit(&handle, &request, &job));
+    var commands = [_]c.R4GfxRenderRequest{ request, request };
+    commands[1].opacity = 63;
+    var list: c.R4GfxRenderListRequest = .{ .version = 1, .size = @sizeOf(c.R4GfxRenderListRequest), .commands = @intFromPtr(&commands), .count = 2, .reserved = 0 };
+    const previous_job = job;
+    try t.expectEqual(c.status_unsupported, api.render_submit_list(&handle, &list, &job));
+    try t.expectEqualDeep(previous_job, job);
+    Model.operations = 93;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &info));
+    commands[1].target = source;
+    try t.expectEqual(c.status_invalid, api.render_submit_list(&handle, &list, &job));
+    try t.expect(!Model.job_live and Model.maps == 0); try t.expectEqualDeep(previous_job, job);
+    commands[1].target = target; list.count = 17;
+    try t.expectEqual(c.status_invalid, api.render_submit_list(&handle, &list, &job));
+    list.count = 2;
+    try t.expectEqual(c.status_ok, api.render_submit_list(&handle, &list, &job));
+    try t.expect(Model.job_request.operation == a.gfx_queue_operation_render_list and Model.job_list.count == 2 and Model.job_list.commands[1].opacity == 63);
+    commands[1].opacity = 0;
+    try t.expect(Model.job_list.commands[1].opacity == 63 and Model.maps == 0);
     try t.expect(Model.job_request.render.kind == a.gfx_render_kind_sample and Model.job_request.render.filter == 1 and
         Model.job_request.render.blend == 1 and Model.job_request.render.transfer == 1 and Model.job_request.render.opacity == 127);
     var dependency: c.R4GfxCopyFence = undefined;

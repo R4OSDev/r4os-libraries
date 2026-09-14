@@ -225,6 +225,7 @@ pub const Device = struct {
                     if (features.features & nv.feature_copy_layout != 0) gpu_operations |= c.device_gpu_copy_layout;
                 }
                 if (snapshot.operations & 16 != 0) gpu_operations |= c.device_gpu_render;
+                if (snapshot.operations & 64 != 0) gpu_operations |= c.device_gpu_render_list;
                 if (snapshot.operations & 32 != 0) gpu_operations |= c.device_gpu_present;
                 break;
             }
@@ -355,6 +356,11 @@ pub fn submitRender(handle: *const c.R4GfxDevice, request: *const c.R4GfxRenderR
     const device = get(handle, false) catch |err| return code(err);
     separateInput(handle, output) catch |err| return code(err);
     return @import("device_native_render.zig").submit(device, request, output) catch |err| code(err);
+}
+pub fn submitRenderList(handle: *const c.R4GfxDevice, request: *const c.R4GfxRenderListRequest, output: *c.R4GfxJob) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    separateInput(handle, output) catch |err| return code(err);
+    return @import("device_native_render.zig").submitList(device, request, output) catch |err| code(err);
 }
 pub fn prepareImage(handle: *const c.R4GfxDevice, request: *const c.R4GfxImagePrepareRequest, output: *c.R4GfxPreparedImage) callconv(.c) i32 {
     const device = get(handle, false) catch |err| return code(err);

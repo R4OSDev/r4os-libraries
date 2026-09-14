@@ -99,6 +99,28 @@ fn transfer(color: [4]f32, encode: bool) [4]f32 {
     return out;
 }
 pub fn execute(methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface) !void {
+    if (packet.len == 0 or packet.len > r.packet_capacity_bytes or packet.len % r.packet_bytes != 0) return error.Surface;
+    var at: usize = 0; var draws: usize = 0;
+    while (at < methods.len) {
+        if (at + 4 > methods.len) return error.Method;
+        const header = word(methods, at); const count = (header >> 16) & 0x1fff;
+        if (header & 0xe0000000 != 0x20000000 or count == 0 or at + (count + 1) * 4 > methods.len) return error.Method;
+        const start = (header & 0x1fff) * 4;
+        at += (count + 1) * 4;
+        if (start <= hw.DRAW_VERTEX_ARRAY_BEGIN_END_A + 4 and start + count * 4 > hw.DRAW_VERTEX_ARRAY_BEGIN_END_A + 4) {
+            if (draws == r.batch_capacity) return error.Method;
+            const vertices = try wideMethod(methods[0..at], hw.SET_VERTEX_STREAM_A_FORMAT + 4);
+            if (vertices < packet_address + 768) return error.Surface;
+            const offset = vertices - packet_address - 768;
+            if (offset % r.packet_bytes != 0 or offset > packet.len - r.packet_bytes) return error.Surface;
+            try executeDraw(methods[0..at], packet[@intCast(offset)..][0..r.packet_bytes], program_address,
+                packet_address + offset, target, source);
+            draws += 1;
+        }
+    }
+    if (draws == 0) return error.Method;
+}
+fn executeDraw(methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface) !void {
     if (packet.len != 1024 or target.bytes.len < @as(u64,target.pitch)*target.height) return error.Surface;
     try t.expectEqual(@as(u32,0xc797),try method(methods,hw.SET_OBJECT));
     try t.expectEqual(target.address,try wideMethod(methods,hw.SET_COLOR_TARGET_A));

@@ -293,6 +293,14 @@ pub const R4GfxImagePresentRequest = extern struct {
     reserved: u32,
     dependencies: u64,
 };
+
+pub const R4GfxRenderListRequest = extern struct {
+    version: u32,
+    size: u32,
+    commands: u64,
+    count: u32,
+    reserved: u32,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -347,6 +355,8 @@ pub const prepared_copy_pending: u32 = 1;
 pub const prepared_software: u32 = 2;
 pub const prepared_reused: u32 = 4;
 pub const device_gpu_present: u32 = 16;
+pub const device_gpu_render_list: u32 = 32;
+pub const render_list_capacity: u32 = 16;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -397,14 +407,14 @@ pub const RenderV1 = extern struct {
 };
 
 pub const device_v1_export_name = "DEVICE_V1";
-pub const device_v1_revision: u16 = 6;
+pub const device_v1_revision: u16 = 7;
 pub const device_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 184,
+    .size = 192,
     .abi_major = 1,
-    .abi_minor = 6,
+    .abi_minor = 7,
     .interface_id_lo = 0x5234474658444556,
     .interface_id_hi = 0x52344f5330373931,
 };
@@ -427,6 +437,7 @@ pub const DeviceV1JobFenceFn = *const fn (device: *const R4GfxDevice, job: *cons
 pub const DeviceV1RenderSubmitFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderRequest, output: *R4GfxJob) callconv(.c) i32;
 pub const DeviceV1ImagePrepareFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxImagePrepareRequest, output: *R4GfxPreparedImage) callconv(.c) i32;
 pub const DeviceV1ImagePresentFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxImagePresentRequest, output: *R4GfxJob) callconv(.c) i32;
+pub const DeviceV1RenderSubmitListFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderListRequest, output: *R4GfxJob) callconv(.c) i32;
 pub const DeviceV1 = extern struct {
     header: InterfaceHeader,
     storage_size: DeviceV1StorageSizeFn,
@@ -448,6 +459,7 @@ pub const DeviceV1 = extern struct {
     render_submit: DeviceV1RenderSubmitFn,
     image_prepare: DeviceV1ImagePrepareFn,
     image_present: DeviceV1ImagePresentFn,
+    render_submit_list: DeviceV1RenderSubmitListFn,
 };
 
 pub const ApiV1Client = struct {
@@ -517,8 +529,8 @@ pub const DeviceV1Client = struct {
             .interface_id_lo = 0x5234474658444556,
             .interface_id_hi = 0x52344f5330373931,
             .abi_major = 1,
-            .min_revision = 6,
-            .required_size = 184,
+            .min_revision = 7,
+            .required_size = 192,
             .known_required_flags = 0,
         });
         if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
@@ -540,6 +552,7 @@ pub const DeviceV1Client = struct {
         if (r4os.runtime_r4l.slotAddress(header, 160) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 168) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 176) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 184) == null) return error.MissingSlot;
         return .{ .header = header };
     }
 
@@ -635,6 +648,11 @@ pub const DeviceV1Client = struct {
 
     pub fn image_present(self: *const DeviceV1Client, device: *const R4GfxDevice, request: *const R4GfxImagePresentRequest, output: *R4GfxJob) i32 {
         const function = r4os.runtime_r4l.functionAt(DeviceV1ImagePresentFn, self.header, 176) orelse unreachable;
+        return function(device, request, output);
+    }
+
+    pub fn render_submit_list(self: *const DeviceV1Client, device: *const R4GfxDevice, request: *const R4GfxRenderListRequest, output: *R4GfxJob) i32 {
+        const function = r4os.runtime_r4l.functionAt(DeviceV1RenderSubmitListFn, self.header, 184) orelse unreachable;
         return function(device, request, output);
     }
 };

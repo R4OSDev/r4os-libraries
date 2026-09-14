@@ -42,9 +42,9 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
 
 - ELF-Symbol: `r4gfx_device_v1`
 - ABI-Major: 1
-- Revision: 6
+- Revision: 7
 - Interface-ID: `0x52344f5330373931:0x5234474658444556`
-- Tabellengroesse: 184 Byte
+- Tabellengroesse: 192 Byte
 
 - Slot 0, Offset 32: `storage_size` - Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
@@ -84,6 +84,8 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Preparation may wait for native allocation, outside frame submission. Retained resource and copy job/fence use the existing lifecycle. Output/ready fence bytes remain unchanged on failure; failed cleanup stays tracked by the device..
 - Slot 18, Offset 176: `image_present` - Submit an already rendered image through the shared active-output owner and queue. Device capability device_gpu_present is required; incompatible size, adapter or format is rejected. No scanout handle or NVIDIA detail crosses the library boundary.
   Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Copies request/dependencies and retains source through the existing job lifecycle. A Busy result has no output side effects; leave the previous complete image visible and retry from the event loop..
+- Slot 19, Offset 184: `render_submit_list` - Submit a bounded native draw list through the common queue. Capability device_gpu_render_list is required. No CPU image mapping, application device words, blocking wait or per-draw queue fence.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error..
 
 Typen
 -----
@@ -115,6 +117,7 @@ Typen
 - `R4GfxImagePrepareRequest`: 96 Byte, Alignment 8. Prepare outside the frame path: texture1/render2/scanout4; preference0=compatible,1=linear,2=blocklinear,flags1=force copy. Byte budget bounds additional image allocation; zero permits reuse only. Up to8 input fences and caller-owned output-ready fence storage. Reuse forwards dependencies; conversion returns its single dependent copy fence. Ready storage must not alias request/result/device; input/output fence arrays may overlap. No input pointer retained.
 - `R4GfxPreparedImage`: 80 Byte, Alignment 8. Caller owns one returned image reference and, for conversion, its asynchronous copy job. Flags1=copy pending,2=software image,4=reused. dependency_count fences were written to the caller ready array; pass them to a subsequent draw. Successful prepare is not copy completion. Release the job only after physical retirement, and release the image reference independently.
 - `R4GfxImagePresentRequest`: 72 Byte, Alignment 8. Present one complete native XRGB image to the active output at unchanged dimensions. frame_key is a nonzero producer generation; deadline_ns is a finite absolute deadline. At most8 copied dependencies; reserved is zero. Return is ordinary R4GfxJob ownership. Source stays retained until job_release after physical retirement. Completion means the device copied into private scanout storage; visible scanout remains the platform DisplayPresentationStats receipt. No CPU image mapping or blocking GPU wait.
+- `R4GfxRenderListRequest`: 24 Byte, Alignment 8. Copied array of 1..16 R4GfxRenderRequest records. All records share source, target, pipeline, sampler, transfer and deadline. Only the first record carries dependencies; rectangles, color and opacity may vary. One ordinary retained job covers the entire native list. All metadata validates before any submission; reserved is zero.
 
 Besitzregeln
 ------------

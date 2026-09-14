@@ -56,6 +56,25 @@ pub fn check() !void {
     try t.expectEqual(@as(u32,160), try state(&program,hw.SET_VERTEX_STREAM_SIZE_A+4));
     try t.expectEqual(@as(u32,0x11), try state(&program,hw.BIND_GROUP_CONSTANT_BUFFER+128));
     try t.expectEqual(@as(u32,4), try state(&program,hw.SET_PIPELINE_BINDING+5*64));
+    // Maximal sampled lists fit the existing 4 KB ring. Geometry and alpha
+    // have separate packets; immutable shader/target state is encoded once.
+    var draws: [render.batch_capacity]render.Draw = @splat(binding.draw);
+    for (&draws, 0..) |*draw, index| { draw.opacity = @intCast(index + 1); draw.scissor.x = @intCast(index); }
+    var packets: [render.packet_capacity_bytes]u8 = undefined;
+    var batch = binding; batch.draw = draws[0]; batch.additional = draws[1..]; batch.packet.bytes = packets.len;
+    try render.packetUploadList(&draws, &packets);
+    try render.encode(batch, &program);
+    try t.expect(program.count + 11 <= 1024);
+    try t.expectEqual(@as(u32,@intCast(binding.packet.address + 15 * render.packet_bytes + 768)), try state(&program, hw.SET_VERTEX_STREAM_A_FORMAT + 8));
+    for (draws, 0..) |draw, index| {
+        const vertex: render.Vertex = @bitCast(packets[index * render.packet_bytes + 768..][0..40].*);
+        try t.expectApproxEqAbs(@as(f32,@floatFromInt(draw.opacity)) / 255.0, vertex.tint[3], 0.000001);
+    }
+    const unchanged = packets;
+    draws[15].target.address += 65536;
+    try t.expectError(error.Unsupported, render.packetUploadList(&draws, &packets));
+    try t.expectEqualSlices(u8, &unchanged, &packets);
+    std.debug.print("render list: 16 sampled draws; {d} words including one release; 16384 upload bytes\n", .{program.count + 11});
     // Every fixed fragment profile binds its own immutable header/code pair.
     for ([_]render.Transfer{.identity,.decode_srgb,.encode_srgb}) |transfer| {
         binding.draw.transfer = transfer;

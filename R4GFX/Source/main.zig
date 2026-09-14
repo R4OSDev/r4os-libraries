@@ -84,6 +84,7 @@ pub export var r4gfx_device_v1: c.DeviceV1 align(8) linksection(".data.r4l_expor
     .render_submit = device.submitRender,
     .image_prepare = device.prepareImage,
     .image_present = device.presentImage,
+    .render_submit_list = device.submitRenderList,
 };
 pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
     .magic = r4os.abi.r4l_abi_magic,

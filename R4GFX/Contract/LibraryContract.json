@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 6,
+      "revision": 7,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -1303,6 +1303,68 @@
             "ownership": "Copies request/dependencies and retains source through the existing job lifecycle. A Busy result has no output side effects; leave the previous complete image visible and retry from the event loop."
           },
           "description": "Submit an already rendered image through the shared active-output owner and queue. Device capability device_gpu_present is required; incompatible size, adapter or format is rejected. No scanout handle or NVIDIA detail crosses the library boundary."
+        },
+        {
+          "name": "render_submit_list",
+          "c_name": "r4gfx_render_submit_list",
+          "symbol": "r4gfx_render_submit_list_impl",
+          "slot": 19,
+          "since_revision": 7,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxRenderListRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error."
+          },
+          "description": "Submit a bounded native draw list through the common queue. Capability device_gpu_render_list is required. No CPU image mapping, application device words, blocking wait or per-draw queue fence."
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
@@ -3812,6 +3874,69 @@
         }
       ],
       "description": "Present one complete native XRGB image to the active output at unchanged dimensions. frame_key is a nonzero producer generation; deadline_ns is a finite absolute deadline. At most8 copied dependencies; reserved is zero. Return is ordinary R4GfxJob ownership. Source stays retained until job_release after physical retirement. Completion means the device copied into private scanout storage; visible scanout remains the platform DisplayPresentationStats receipt. No CPU image mapping or blocking GPU wait."
+    },
+    {
+      "name": "R4GfxRenderListRequest",
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "commands",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "commands"
+        },
+        {
+          "name": "count",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "count"
+        },
+        {
+          "name": "reserved",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Copied array of 1..16 R4GfxRenderRequest records. All records share source, target, pipeline, sampler, transfer and deadline. Only the first record carries dependencies; rectangles, color and opacity may vary. One ordinary retained job covers the entire native list. All metadata validates before any submission; reserved is zero."
     }
   ],
   "constants": [
@@ -4192,6 +4317,20 @@
       "type": "u32",
       "value": 16,
       "description": "Asynchronous native image-to-output submission is supported; actual output admission may still return Busy, Unavailable or Unsupported."
+    },
+    {
+      "zig_name": "device_gpu_render_list",
+      "c_name": "R4GFX_DEVICE_GPU_RENDER_LIST",
+      "type": "u32",
+      "value": 32,
+      "description": "Native lists of up to16 draws with common resources and state share one queue fence."
+    },
+    {
+      "zig_name": "render_list_capacity",
+      "c_name": "R4GFX_RENDER_LIST_CAPACITY",
+      "type": "u32",
+      "value": 16,
+      "description": "Maximum draws in render_submit_list."
     }
   ],
   "errors": [
