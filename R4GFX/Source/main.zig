@@ -86,6 +86,7 @@ pub export var r4gfx_device_v1: c.DeviceV1 align(8) linksection(".data.r4l_expor
     .image_prepare = device.prepareImage,
     .image_present = device.presentImage,
     .render_submit_list = device.submitRenderList,
+    .render_submit_grid_list = device.submitRenderGridList,
     .presentation_info = swapchain.presentationInfo,
     .swapchain_open = swapchain.open,
     .swapchain_acquire = swapchain.acquire,

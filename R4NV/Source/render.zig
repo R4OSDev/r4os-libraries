@@ -158,6 +158,7 @@ pub const Draw = struct {
     transfer: Transfer = .identity,
     color: u32 = 0,
     opacity: u8 = 255,
+    grid: @import("render_grid.zig").Grid = .{},
 
     pub fn profile(self: Draw) u32 {
         if (self.source == null) return 5;
@@ -181,7 +182,10 @@ pub const Draw = struct {
             const alpha = self.color >> 24;
             if ((self.color & 255) > alpha or ((self.color >> 8) & 255) > alpha or ((self.color >> 16) & 255) > alpha) return error.Bounds;
         }
-        _ = try self.clip();
+        const clipped = try self.clip();
+        if (self.grid.enabled != 0 and (self.source == null or self.filter != .nearest or self.transfer != .identity)) return error.Unsupported;
+        try self.grid.validate(self.source_rect, Rect{ .x = @intCast(clipped[0]), .y = @intCast(clipped[1]),
+            .width = clipped[2] - clipped[0], .height = clipped[3] - clipped[1] });
     }
     pub fn clip(self: Draw) Error![4]u32 {
         const left = @max(0, @max(self.destination.x, self.scissor.x));
@@ -261,6 +265,10 @@ pub fn packetUpload(draw: Draw, out: []u8) Error!void {
             (origin[0] + @as(f32, @floatFromInt(draw.source_rect.width)) - 0.5) / extent[0],
             (origin[1] + @as(f32, @floatFromInt(draw.source_rect.height)) - 0.5) / extent[1] };
         @memcpy(out[528..544], std.mem.asBytes(&bounds));
+        @memcpy(out[544..608], std.mem.asBytes(&draw.grid));
+        const rectangle: [4]u32 = .{ @intCast(draw.source_rect.x), @intCast(draw.source_rect.y), draw.source_rect.width, draw.source_rect.height };
+        @memcpy(out[608..624], std.mem.asBytes(&rectangle));
+        @memcpy(out[624..632], std.mem.asBytes(&extent));
     }
     const factor: f32 = @as(f32, @floatFromInt(draw.opacity)) / 255.0;
     var tint: [4]f32 = @splat(factor);

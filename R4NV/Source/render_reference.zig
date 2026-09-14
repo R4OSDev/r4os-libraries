@@ -184,6 +184,25 @@ fn executeDraw(methods: []const u8, packet: []const u8, program_address: u64, pa
             const u = scalar(packet,784)+(px-x0)/(x3-x0)*(scalar(packet,904)-scalar(packet,784));
             const v = scalar(packet,788)+(py-y0)/(y3-y0)*(scalar(packet,908)-scalar(packet,788));
             color = sample(src,.{std.math.clamp(u,scalar(packet,528),scalar(packet,536)),std.math.clamp(v,scalar(packet,532),scalar(packet,540))},linear);
+            if (word(packet, 544) != 0) {
+                if (id != 2 or linear) return error.Sampler;
+                // Decode the actual uploaded CBuf, independently of Draw and
+                // its admission helper. These are the shader's integer stages.
+                const nx: i64 = @as(i64, @intCast(x)) + @as(i32, @bitCast(word(packet, 564)));
+                const ny: i64 = @as(i64, @intCast(y)) + @as(i32, @bitCast(word(packet, 568)));
+                const w: i64 = word(packet, 556); const h: i64 = word(packet, 560);
+                const oriented: [2]i64 = switch (word(packet, 548)) {
+                    0 => .{ nx, ny }, 1 => .{ h - 1 - ny, nx }, 2 => .{ w - 1 - nx, h - 1 - ny },
+                    3 => .{ ny, w - 1 - nx }, else => return error.Sampler,
+                };
+                const scale: i64 = word(packet, 552);
+                const lx = @divFloor((oriented[0] * 2 + 1) * 120, scale * 2) - @as(i32, @bitCast(word(packet, 576)));
+                const ly = @divFloor((oriented[1] * 2 + 1) * 120, scale * 2) - @as(i32, @bitCast(word(packet, 580)));
+                const tx = @divFloor(lx * word(packet, 592), word(packet, 584)) - word(packet, 600) + word(packet, 608);
+                const ty = @divFloor(ly * word(packet, 596), word(packet, 588)) - word(packet, 604) + word(packet, 612);
+                color = sample(src, .{ (@as(f32, @floatFromInt(tx)) + 0.5) / scalar(packet, 624),
+                    (@as(f32, @floatFromInt(ty)) + 0.5) / scalar(packet, 628) }, false);
+            }
             if (id == 3) color = transfer(color,false);
         }
         for (0..4) |i| color[i] *= scalar(packet,792+i*4);
@@ -223,4 +242,41 @@ pub fn check() !void {
         const maximum = try compare(i,&pixels);
         std.debug.print("render reference {s}: max={d}/{d} LSB\n",.{scene.name,maximum,scene.tolerance});
     }
+    try checkGrids();
+}
+fn checkGrids() !void {
+    var source: [4096]u8 = @splat(0);
+    for (0..16) |y| for (0..16) |x|
+        std.mem.writeInt(u32, source[y * 256 + x * 4..][0..4], @intCast(0x102030 + y * 0x10000 + x * 0x100), .little);
+    for ([_]u32{ 60, 120, 150, 180, 240 }) |scale| for (0..4) |rotation| {
+        const logical_width = (8 * 120 + scale - 1) / scale;
+        const logical_height = (6 * 120 + scale - 1) / scale;
+        const swapped = rotation == 1 or rotation == 3;
+        const draw: r.Draw = .{
+            .target = .{ .address = 0x100000, .bytes = 4096, .width = 8, .height = 6, .pitch = 256, .format = .xrgb8888, .layout = .linear },
+            .source = .{ .address = 0x200000, .bytes = 4096, .width = 16, .height = 16, .pitch = 256, .format = .xrgb8888, .layout = .linear },
+            .destination = .{ .x = 0, .y = 0, .width = 8, .height = 6 }, .scissor = .{ .x = 0, .y = 0, .width = 8, .height = 6 },
+            .source_rect = .{ .x = 0, .y = 0, .width = if (swapped) logical_height else logical_width, .height = if (swapped) logical_width else logical_height },
+            .grid = .{ .enabled = 1, .scale = scale, .rotation = @intCast(rotation), .pixel_width = 8, .pixel_height = 6,
+                .viewport_width = if (swapped) logical_height else logical_width, .viewport_height = if (swapped) logical_width else logical_height,
+                .guest_width = if (swapped) logical_height else logical_width, .guest_height = if (swapped) logical_width else logical_height },
+        };
+        const binding: r.Binding = .{ .draw = draw, .programs = .{ .address = 0x300000, .bytes = r.shader_bytes }, .packet = .{ .address = 0x400000, .bytes = r.packet_bytes } };
+        var program: r.Program = .{}; var packet: [r.packet_bytes]u8 = undefined; var pixels: [4096]u8 = @splat(0xcc);
+        try r.packetUpload(draw, &packet); try r.encode(binding, &program);
+        try execute(std.mem.sliceAsBytes(program.slice()), &packet, binding.programs.address, binding.packet.address,
+            Surface.from(draw.target, &pixels), Surface.from(draw.source.?, &source));
+        for (0..6) |y| for (0..8) |x| {
+            const unrotated: [2]usize = switch (rotation) { 0 => .{x,y}, 1 => .{5-y,x}, 2 => .{7-x,5-y}, 3 => .{y,7-x}, else => unreachable };
+            const sx = ((2 * unrotated[0] + 1) * 120) / (2 * scale);
+            const sy = ((2 * unrotated[1] + 1) * 120) / (2 * scale);
+            try t.expectEqual(word(&source, sy * 256 + sx * 4), word(&pixels, y * 256 + x * 4));
+        };
+        for (0..6) |row| for (pixels[row * 256 + 32..][0..224]) |byte| try t.expectEqual(@as(u8, 0xcc), byte);
+        var bad = draw; bad.grid.guest_width = 32769;
+        const previous = packet;
+        try t.expectError(error.Bounds, r.packetUpload(bad, &packet));
+        try t.expectEqualSlices(u8, &previous, &packet);
+    };
+    std.debug.print("render grid: actual descriptors, four rotations, 50/100/125/150/200 percent, integer texel centers: OK\n", .{});
 }

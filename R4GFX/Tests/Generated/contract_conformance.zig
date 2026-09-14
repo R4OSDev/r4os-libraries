@@ -342,13 +342,37 @@ comptime {
     if (@offsetOf(implementation.R4GfxPresentationDecision, "path") != 8 or @offsetOf(binding.R4GfxPresentationDecision, "path") != 8) @compileError("R4GfxPresentationDecision.path offset drift");
     if (@offsetOf(implementation.R4GfxPresentationDecision, "reasons") != 12 or @offsetOf(binding.R4GfxPresentationDecision, "reasons") != 12) @compileError("R4GfxPresentationDecision.reasons offset drift");
     if (@offsetOf(implementation.R4GfxPresentationDecision, "display_generation") != 16 or @offsetOf(binding.R4GfxPresentationDecision, "display_generation") != 16) @compileError("R4GfxPresentationDecision.display_generation offset drift");
+    if (@sizeOf(implementation.R4GfxLogicalGrid) != 64 or @sizeOf(binding.R4GfxLogicalGrid) != 64) @compileError("R4GfxLogicalGrid size drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "enabled") != 0 or @offsetOf(binding.R4GfxLogicalGrid, "enabled") != 0) @compileError("R4GfxLogicalGrid.enabled offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "rotation") != 4 or @offsetOf(binding.R4GfxLogicalGrid, "rotation") != 4) @compileError("R4GfxLogicalGrid.rotation offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "scale") != 8 or @offsetOf(binding.R4GfxLogicalGrid, "scale") != 8) @compileError("R4GfxLogicalGrid.scale offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "pixel_width") != 12 or @offsetOf(binding.R4GfxLogicalGrid, "pixel_width") != 12) @compileError("R4GfxLogicalGrid.pixel_width offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "pixel_height") != 16 or @offsetOf(binding.R4GfxLogicalGrid, "pixel_height") != 16) @compileError("R4GfxLogicalGrid.pixel_height offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "target_x") != 20 or @offsetOf(binding.R4GfxLogicalGrid, "target_x") != 20) @compileError("R4GfxLogicalGrid.target_x offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "target_y") != 24 or @offsetOf(binding.R4GfxLogicalGrid, "target_y") != 24) @compileError("R4GfxLogicalGrid.target_y offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "reserved") != 28 or @offsetOf(binding.R4GfxLogicalGrid, "reserved") != 28) @compileError("R4GfxLogicalGrid.reserved offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "viewport_x") != 32 or @offsetOf(binding.R4GfxLogicalGrid, "viewport_x") != 32) @compileError("R4GfxLogicalGrid.viewport_x offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "viewport_y") != 36 or @offsetOf(binding.R4GfxLogicalGrid, "viewport_y") != 36) @compileError("R4GfxLogicalGrid.viewport_y offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "viewport_width") != 40 or @offsetOf(binding.R4GfxLogicalGrid, "viewport_width") != 40) @compileError("R4GfxLogicalGrid.viewport_width offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "viewport_height") != 44 or @offsetOf(binding.R4GfxLogicalGrid, "viewport_height") != 44) @compileError("R4GfxLogicalGrid.viewport_height offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "guest_width") != 48 or @offsetOf(binding.R4GfxLogicalGrid, "guest_width") != 48) @compileError("R4GfxLogicalGrid.guest_width offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "guest_height") != 52 or @offsetOf(binding.R4GfxLogicalGrid, "guest_height") != 52) @compileError("R4GfxLogicalGrid.guest_height offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "source_x") != 56 or @offsetOf(binding.R4GfxLogicalGrid, "source_x") != 56) @compileError("R4GfxLogicalGrid.source_x offset drift");
+    if (@offsetOf(implementation.R4GfxLogicalGrid, "source_y") != 60 or @offsetOf(binding.R4GfxLogicalGrid, "source_y") != 60) @compileError("R4GfxLogicalGrid.source_y offset drift");
+    if (@sizeOf(implementation.R4GfxRenderGridListRequest) != 32 or @sizeOf(binding.R4GfxRenderGridListRequest) != 32) @compileError("R4GfxRenderGridListRequest size drift");
+    if (@offsetOf(implementation.R4GfxRenderGridListRequest, "version") != 0 or @offsetOf(binding.R4GfxRenderGridListRequest, "version") != 0) @compileError("R4GfxRenderGridListRequest.version offset drift");
+    if (@offsetOf(implementation.R4GfxRenderGridListRequest, "size") != 4 or @offsetOf(binding.R4GfxRenderGridListRequest, "size") != 4) @compileError("R4GfxRenderGridListRequest.size offset drift");
+    if (@offsetOf(implementation.R4GfxRenderGridListRequest, "commands") != 8 or @offsetOf(binding.R4GfxRenderGridListRequest, "commands") != 8) @compileError("R4GfxRenderGridListRequest.commands offset drift");
+    if (@offsetOf(implementation.R4GfxRenderGridListRequest, "grids") != 16 or @offsetOf(binding.R4GfxRenderGridListRequest, "grids") != 16) @compileError("R4GfxRenderGridListRequest.grids offset drift");
+    if (@offsetOf(implementation.R4GfxRenderGridListRequest, "count") != 24 or @offsetOf(binding.R4GfxRenderGridListRequest, "count") != 24) @compileError("R4GfxRenderGridListRequest.count offset drift");
+    if (@offsetOf(implementation.R4GfxRenderGridListRequest, "reserved") != 28 or @offsetOf(binding.R4GfxRenderGridListRequest, "reserved") != 28) @compileError("R4GfxRenderGridListRequest.reserved offset drift");
     if (@sizeOf(implementation.ApiV1) != 48 or @sizeOf(binding.ApiV1) != 48) @compileError("ApiV1 size drift");
     if (@offsetOf(implementation.ApiV1, "linear_layout") != 32 or @offsetOf(binding.ApiV1, "linear_layout") != 32) @compileError("ApiV1.linear_layout slot drift");
     if (@offsetOf(implementation.ApiV1, "fill_rect") != 40 or @offsetOf(binding.ApiV1, "fill_rect") != 40) @compileError("ApiV1.fill_rect slot drift");
     if (@sizeOf(implementation.RenderV1) != 48 or @sizeOf(binding.RenderV1) != 48) @compileError("RenderV1 size drift");
     if (@offsetOf(implementation.RenderV1, "capabilities") != 32 or @offsetOf(binding.RenderV1, "capabilities") != 32) @compileError("RenderV1.capabilities slot drift");
     if (@offsetOf(implementation.RenderV1, "execute_cpu") != 40 or @offsetOf(binding.RenderV1, "execute_cpu") != 40) @compileError("RenderV1.execute_cpu slot drift");
-    if (@sizeOf(implementation.DeviceV1) != 264 or @sizeOf(binding.DeviceV1) != 264) @compileError("DeviceV1 size drift");
+    if (@sizeOf(implementation.DeviceV1) != 272 or @sizeOf(binding.DeviceV1) != 272) @compileError("DeviceV1 size drift");
     if (@offsetOf(implementation.DeviceV1, "storage_size") != 32 or @offsetOf(binding.DeviceV1, "storage_size") != 32) @compileError("DeviceV1.storage_size slot drift");
     if (@offsetOf(implementation.DeviceV1, "device_open") != 40 or @offsetOf(binding.DeviceV1, "device_open") != 40) @compileError("DeviceV1.device_open slot drift");
     if (@offsetOf(implementation.DeviceV1, "device_close") != 48 or @offsetOf(binding.DeviceV1, "device_close") != 48) @compileError("DeviceV1.device_close slot drift");
@@ -378,6 +402,7 @@ comptime {
     if (@offsetOf(implementation.DeviceV1, "swapchain_resize") != 240 or @offsetOf(binding.DeviceV1, "swapchain_resize") != 240) @compileError("DeviceV1.swapchain_resize slot drift");
     if (@offsetOf(implementation.DeviceV1, "swapchain_close") != 248 or @offsetOf(binding.DeviceV1, "swapchain_close") != 248) @compileError("DeviceV1.swapchain_close slot drift");
     if (@offsetOf(implementation.DeviceV1, "presentation_plan") != 256 or @offsetOf(binding.DeviceV1, "presentation_plan") != 256) @compileError("DeviceV1.presentation_plan slot drift");
+    if (@offsetOf(implementation.DeviceV1, "render_submit_grid_list") != 264 or @offsetOf(binding.DeviceV1, "render_submit_grid_list") != 264) @compileError("DeviceV1.render_submit_grid_list slot drift");
 }
 
 test "generated implementation and binding views are identical" {

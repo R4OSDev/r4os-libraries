@@ -84,18 +84,27 @@ Profiles 1 and 2–4 share their UV/tint interface. Profile 6 pairs with 5,
 so the fixed pipeline does not require disabling out-of-range attribute
 exceptions for unused vertex outputs.
 
-Nearest/bilinear filtering is sampler state. Resource ABI2 holds a combined
-TIC/TSC word in constant buffer 1 at byte 0 and normalized minU/minV/maxU/maxV
-source-texel-center bounds at bytes 16..31. Texture shaders clamp interpolated
-UVs to those bounds before sampling, including bilinear crops and one-texel
-views. ABI1 cache keys cannot select these programs. The driver builds the
-bounds from the retained source image and canonical rectangle; no cropped
-texture copy is required. NAK's internal graphics constants use buffer 0:
-sample locations at byte 0, masks at byte 16 and an optional
-printf pointer at byte 48. These single-sample profiles read none of those
-internal constants and contain no printf. Both sRGB conversions preserve
-zero-alpha pixels without division by zero; their texture/render views must
-avoid a second automatic sRGB transfer.
+Nearest/bilinear filtering is sampler state. Resource ABI3 keeps the combined
+TIC/TSC word in constant buffer 1 at byte 0 and normalized source-texel-center
+bounds at bytes 16..31. All texture profiles clamp ordinary interpolated UVs
+to those bounds, including bilinear crops and one-texel views.
+
+Profile 2 additionally accepts an optional 64-byte logical sampling grid at
+bytes 32..95, an atlas rectangle at bytes 96..111 and image extents at bytes
+112..119. A zero grid selects the ordinary path. An enabled grid uses native
+pixel centers, inverse output rotation, scale in 120ths and two integer
+divisions to select exact logical cells and guest texels. Only the final texel
+center becomes a normalized float. The driver validates clipped corners and
+requires nearest filtering with identity transfer; pixels remain on the GPU.
+The reproducible SM86 grid fragment has 2208 code bytes; the largest complete
+cache entry is 2592 bytes. Earlier resource ABI keys cannot select these
+programs, while the public shader table and payload layouts remain unchanged.
+
+NAK's internal graphics constants use buffer 0: sample locations at byte 0,
+masks at byte 16 and an optional printf pointer at byte 48. These single-sample
+profiles read none of those internal constants and contain no printf. Both
+sRGB conversions preserve zero-alpha pixels without division by zero; their
+texture/render views must avoid a second automatic sRGB transfer.
 
 `Source/shaders.c` is the source of truth. Metadata uses explicit JSON fields;
 no host C-structure layout is serialized. Compilation fails on spills, local

@@ -756,6 +756,58 @@ _Static_assert(offsetof(R4GfxPresentationDecision, path) == 8u, "R4GfxPresentati
 _Static_assert(offsetof(R4GfxPresentationDecision, reasons) == 12u, "R4GfxPresentationDecision.reasons offset mismatch");
 _Static_assert(offsetof(R4GfxPresentationDecision, display_generation) == 16u, "R4GfxPresentationDecision.display_generation offset mismatch");
 
+typedef struct R4GfxLogicalGrid {
+    uint32_t enabled;
+    uint32_t rotation;
+    uint32_t scale;
+    uint32_t pixel_width;
+    uint32_t pixel_height;
+    int32_t target_x;
+    int32_t target_y;
+    uint32_t reserved;
+    int32_t viewport_x;
+    int32_t viewport_y;
+    uint32_t viewport_width;
+    uint32_t viewport_height;
+    uint32_t guest_width;
+    uint32_t guest_height;
+    uint32_t source_x;
+    uint32_t source_y;
+} R4GfxLogicalGrid;
+_Static_assert(sizeof(R4GfxLogicalGrid) == 64u, "R4GfxLogicalGrid size mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, enabled) == 0u, "R4GfxLogicalGrid.enabled offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, rotation) == 4u, "R4GfxLogicalGrid.rotation offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, scale) == 8u, "R4GfxLogicalGrid.scale offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, pixel_width) == 12u, "R4GfxLogicalGrid.pixel_width offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, pixel_height) == 16u, "R4GfxLogicalGrid.pixel_height offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, target_x) == 20u, "R4GfxLogicalGrid.target_x offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, target_y) == 24u, "R4GfxLogicalGrid.target_y offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, reserved) == 28u, "R4GfxLogicalGrid.reserved offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, viewport_x) == 32u, "R4GfxLogicalGrid.viewport_x offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, viewport_y) == 36u, "R4GfxLogicalGrid.viewport_y offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, viewport_width) == 40u, "R4GfxLogicalGrid.viewport_width offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, viewport_height) == 44u, "R4GfxLogicalGrid.viewport_height offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, guest_width) == 48u, "R4GfxLogicalGrid.guest_width offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, guest_height) == 52u, "R4GfxLogicalGrid.guest_height offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, source_x) == 56u, "R4GfxLogicalGrid.source_x offset mismatch");
+_Static_assert(offsetof(R4GfxLogicalGrid, source_y) == 60u, "R4GfxLogicalGrid.source_y offset mismatch");
+
+typedef struct R4GfxRenderGridListRequest {
+    uint32_t version;
+    uint32_t size;
+    uint64_t commands;
+    uint64_t grids;
+    uint32_t count;
+    uint32_t reserved;
+} R4GfxRenderGridListRequest;
+_Static_assert(sizeof(R4GfxRenderGridListRequest) == 32u, "R4GfxRenderGridListRequest size mismatch");
+_Static_assert(offsetof(R4GfxRenderGridListRequest, version) == 0u, "R4GfxRenderGridListRequest.version offset mismatch");
+_Static_assert(offsetof(R4GfxRenderGridListRequest, size) == 4u, "R4GfxRenderGridListRequest.size offset mismatch");
+_Static_assert(offsetof(R4GfxRenderGridListRequest, commands) == 8u, "R4GfxRenderGridListRequest.commands offset mismatch");
+_Static_assert(offsetof(R4GfxRenderGridListRequest, grids) == 16u, "R4GfxRenderGridListRequest.grids offset mismatch");
+_Static_assert(offsetof(R4GfxRenderGridListRequest, count) == 24u, "R4GfxRenderGridListRequest.count offset mismatch");
+_Static_assert(offsetof(R4GfxRenderGridListRequest, reserved) == 28u, "R4GfxRenderGridListRequest.reserved offset mismatch");
+
 #define R4GFX_STATUS_OK ((int32_t)0)
 #define R4GFX_FORMAT_XRGB8888 ((uint32_t)875713112)
 #define R4GFX_FORMAT_ARGB8888 ((uint32_t)875713089)
@@ -838,6 +890,7 @@ _Static_assert(offsetof(R4GfxPresentationDecision, display_generation) == 16u, "
 #define R4GFX_PRESENT_BLOCK_CURSOR ((uint32_t)8)
 #define R4GFX_PRESENT_BLOCK_MENUS ((uint32_t)16)
 #define R4GFX_PRESENT_BLOCK_COMPOSITION ((uint32_t)32)
+#define R4GFX_DEVICE_GPU_GRID ((uint32_t)128)
 #define R4GFX_STATUS_INVALID ((int32_t)-1)
 #define R4GFX_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4GFX_STATUS_OVERFLOW ((int32_t)-3)
@@ -938,10 +991,10 @@ static inline int32_t r4gfx_render_execute_cpu(R4GfxRenderV1Client *client, cons
 
 #define R4GFX_DEVICE_V1_EXPORT_NAME "DEVICE_V1"
 #define R4GFX_DEVICE_V1_ABI_MAJOR 1u
-#define R4GFX_DEVICE_V1_REVISION 8u
+#define R4GFX_DEVICE_V1_REVISION 9u
 #define R4GFX_DEVICE_V1_INTERFACE_ID_LO 0x5234474658444556ull
 #define R4GFX_DEVICE_V1_INTERFACE_ID_HI 0x52344f5330373931ull
-#define R4GFX_DEVICE_V1_TABLE_SIZE 264u
+#define R4GFX_DEVICE_V1_TABLE_SIZE 272u
 #define R4GFX_DEVICE_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4GFX_DEVICE_V1_TABLE_SIZE, R4GFX_DEVICE_V1_ABI_MAJOR, R4GFX_DEVICE_V1_REVISION, R4GFX_DEVICE_V1_INTERFACE_ID_LO, R4GFX_DEVICE_V1_INTERFACE_ID_HI }
 typedef uint64_t (*R4GfxDeviceV1StorageSizeFn)(void);
 typedef int32_t (*R4GfxDeviceV1DeviceOpenFn)(const R4GfxDeviceConfig * config, R4GfxDevice * output);
@@ -972,6 +1025,7 @@ typedef int32_t (*R4GfxDeviceV1SwapchainReleaseFn)(const R4GfxDevice * device, c
 typedef int32_t (*R4GfxDeviceV1SwapchainResizeFn)(const R4GfxDevice * device, const R4GfxSwapchain * chain, const R4GfxSwapchainDesc * request);
 typedef int32_t (*R4GfxDeviceV1SwapchainCloseFn)(const R4GfxDevice * device, const R4GfxSwapchain * chain);
 typedef int32_t (*R4GfxDeviceV1PresentationPlanFn)(const R4GfxDevice * device, const R4GfxPresentationPlan * request, R4GfxPresentationDecision * output);
+typedef int32_t (*R4GfxDeviceV1RenderSubmitGridListFn)(const R4GfxDevice * device, const R4GfxRenderGridListRequest * request, R4GfxJob * output);
 typedef struct R4GfxDeviceV1 {
     R4LInterfaceHeader header;
     R4GfxDeviceV1StorageSizeFn storage_size;
@@ -1003,8 +1057,9 @@ typedef struct R4GfxDeviceV1 {
     R4GfxDeviceV1SwapchainResizeFn swapchain_resize;
     R4GfxDeviceV1SwapchainCloseFn swapchain_close;
     R4GfxDeviceV1PresentationPlanFn presentation_plan;
+    R4GfxDeviceV1RenderSubmitGridListFn render_submit_grid_list;
 } R4GfxDeviceV1;
-_Static_assert(sizeof(R4GfxDeviceV1) == 264u, "R4GfxDeviceV1 size mismatch");
+_Static_assert(sizeof(R4GfxDeviceV1) == 272u, "R4GfxDeviceV1 size mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, storage_size) == 32u, "R4GfxDeviceV1.storage_size offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_open) == 40u, "R4GfxDeviceV1.device_open offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_close) == 48u, "R4GfxDeviceV1.device_close offset mismatch");
@@ -1034,13 +1089,14 @@ _Static_assert(offsetof(R4GfxDeviceV1, swapchain_release) == 232u, "R4GfxDeviceV
 _Static_assert(offsetof(R4GfxDeviceV1, swapchain_resize) == 240u, "R4GfxDeviceV1.swapchain_resize offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, swapchain_close) == 248u, "R4GfxDeviceV1.swapchain_close offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, presentation_plan) == 256u, "R4GfxDeviceV1.presentation_plan offset mismatch");
+_Static_assert(offsetof(R4GfxDeviceV1, render_submit_grid_list) == 264u, "R4GfxDeviceV1.render_submit_grid_list offset mismatch");
 typedef struct R4GfxDeviceV1Client { const R4LInterfaceHeader *header; } R4GfxDeviceV1Client;
 
 static inline int32_t r4gfx_device_v1_init(const R4XStartContext *ctx, R4GfxDeviceV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "DEVICE_V1");
-    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 8u, 264u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 9u, 272u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
@@ -1073,6 +1129,7 @@ static inline int32_t r4gfx_device_v1_init(const R4XStartContext *ctx, R4GfxDevi
     if (r4l_slot_address(header, 240u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 248u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 256u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 264u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -1219,6 +1276,11 @@ static inline int32_t r4gfx_swapchain_close(R4GfxDeviceV1Client *client, const R
 
 static inline int32_t r4gfx_presentation_plan(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxPresentationPlan * request, R4GfxPresentationDecision * output) {
     R4GfxDeviceV1PresentationPlanFn function = (R4GfxDeviceV1PresentationPlanFn)r4l_slot_address(client->header, 256u);
+    return function(device, request, output);
+}
+
+static inline int32_t r4gfx_render_submit_grid_list(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxRenderGridListRequest * request, R4GfxJob * output) {
+    R4GfxDeviceV1RenderSubmitGridListFn function = (R4GfxDeviceV1RenderSubmitGridListFn)r4l_slot_address(client->header, 264u);
     return function(device, request, output);
 }
 

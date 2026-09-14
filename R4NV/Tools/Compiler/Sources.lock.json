@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "compiler_abi": 1,
-  "graphics_constants_abi": 2,
+  "graphics_constants_abi": 3,
   "mesa": {
     "version": "26.2.2",
     "filename": "mesa-26.2.2.tar.xz",

@@ -27,6 +27,7 @@ test "licensed receiver fixtures and actual OssiPC base preserve missing extensi
     try edid.parse(qemu, &result);
     try t.expect(result.complete());
     try t.expect(contains(&result, 1280, 800));
+    try @import("Tests/Display/topology_check.zig").check(&result);
     var base = qemu[0..128].*;
     base[35] = 0x80; base[36] = 0; base[37] = 0; base[126] = 0;
     @memset(base[108..126], 0);

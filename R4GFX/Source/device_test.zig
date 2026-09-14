@@ -26,6 +26,7 @@ const Model = struct {
     var job_live = false;
     var job_request: a.GfxSubmission = .{};
     var job_list: a.GfxRenderList = .{};
+    var job_grid_list: a.GfxRenderGridList = .{};
     var operations: u64 = 7;
     var dependency_seen = false;
     var native_request: a.GfxNativeAllocation = .{};
@@ -41,6 +42,9 @@ const Model = struct {
     var present_calls: u64 = 0;
     var fail_present = false;
     var retire_requested = false;
+    const Output = struct { target: a.GfxOutputTarget = .{}, info: a.DisplayPresentationInfo = .{},
+        status: a.GfxFenceStatus = .{}, request: a.GfxSubmission = .{}, live: bool = false, connected: bool = true };
+    var outputs: [2]Output = @splat(.{});
     var binding: a.GfxBackendBinding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
     var nv_table: nv.BackendV1 = .{ .header = nv.backend_v1_header,
         .negotiate = @ptrCast(&nv_provider.r4nv_negotiate_impl), .encode_copy = @ptrCast(&nv_provider.r4nv_encode_copy_impl),
@@ -52,11 +56,12 @@ const Model = struct {
         serial = 0x100000000; exports = 0; maps = 0; fail_unmap = false; premature_closes = 0; inventory_reads = 0; job_live = false;
         binding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
         nv_table.header = nv.backend_v1_header;
-        operations = 7; dependency_seen = false; job_list = .{};
+        operations = 7; dependency_seen = false; job_list = .{}; job_grid_list = .{};
         native_request = .{}; native_handle = .{}; native_result = 1;
         native_starts = 0; bad_native_layout = false;
         clock = 100; submit_serial = 0x400000017; feedback = null; shown = @splat(0xabcdef); present_calls = 0; fail_present = false;
         retire_requested = false;
+        outputs = @splat(.{});
         presentation_info = .{ .flags = a.display_presentation_info_active, .head_id = 2, .display_generation = 1,
             .sequence = 1, .width = 4, .height = 4, .format = c.format_xrgb8888, .policies = 7, .buffer_count = 2, .plane_count = 1 };
     }
@@ -73,6 +78,32 @@ const Model = struct {
         if (head != value.head_id or source.adapter_id != value.backend.adapter_id or source.device_generation != value.backend.device_generation or
             source.reset_generation != value.backend.reset_generation or source.timeline != value.source_timeline or source.point != value.source_point) return a.gfx_output_error_unsupported;
         out.* = value; return a.gfx_output_ok;
+    }
+    fn outputTarget(adapter: u32, head: u32, out: *a.GfxOutputTarget) callconv(.c) i32 {
+        for (&outputs) |*output| if (output.connected and output.target.connector_id != 0 and output.target.adapter_id == adapter and output.target.head_id == head) {
+            out.* = output.target; return a.gfx_output_ok;
+        };
+        return a.gfx_output_error_unsupported;
+    }
+    fn outputInfo(target: *const a.GfxOutputTarget, out: *a.DisplayPresentationInfo) callconv(.c) i32 {
+        for (&outputs) |*output| if (output.connected and std.meta.eql(output.target, target.*)) {
+            out.* = output.info; return a.gfx_output_ok;
+        };
+        return a.gfx_output_error_stale;
+    }
+    fn submitOutput(handle: *const a.GfxQueueHandle, request: *const a.GfxSubmission, target: *const a.GfxOutputTarget, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        for (&outputs, 0..) |*output, index| if (output.connected and std.meta.eql(output.target, target.*)) {
+            if (output.live) return a.gfx_queue_error_busy;
+            const queue = for (&queues) |*candidate| { if (candidate.handle.timeline == handle.timeline) break candidate; } else unreachable;
+            std.debug.assert(queue.config.adapter_id == target.adapter_id and request.operation == a.gfx_queue_operation_present);
+            submit_serial += 1;
+            output.status = .{ .fence = .{ .slot = @intCast(index + 2), .timeline = handle.timeline, .point = submit_serial,
+                .adapter_id = queue.config.adapter_id, .device_generation = queue.config.device_generation, .reset_generation = queue.config.reset_generation },
+                .phase = a.gfx_queue_phase_running, .flags = a.gfx_queue_flag_device_active | a.gfx_queue_flag_resources_held,
+                .milestone = queue.config.milestone };
+            output.request = request.*; output.live = true; out.* = output.status; return a.gfx_queue_ok;
+        };
+        return a.gfx_queue_error_stale;
     }
     fn presentPixels(request: *const a.DisplayPresentRequest, pixels: [*]const u32, pixel_count: u32,
         regions: [*]const a.DisplayDamageRect, region_count: u32, out: *a.DisplayPresentResult) callconv(.c) i32
@@ -189,6 +220,7 @@ const Model = struct {
         return a.gfx_queue_error_capacity;
     }
     fn close(input: *const a.GfxQueueHandle) callconv(.c) i32 {
+        for (&outputs) |*output| if (output.live and output.status.fence.timeline == input.timeline) { premature_closes += 1; return a.gfx_queue_error_busy; };
         if (job_live and status.fence.timeline == input.timeline) { premature_closes += 1; return a.gfx_queue_error_busy; }
         for (&queues) |*queue| if (queue.handle.timeline == input.timeline) { queue.* = .{}; return 1; };
         return a.gfx_queue_error_stale;
@@ -196,7 +228,7 @@ const Model = struct {
     fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
         std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows or
             input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_render_list or input.operation == a.gfx_queue_operation_present or
-            input.operation == a.gfx_queue_operation_direct_present) and input.dependency_count <= 1);
+            input.operation == a.gfx_queue_operation_direct_present or input.operation == a.gfx_queue_operation_render_grid_list) and input.dependency_count <= 1);
         if (input.dependency_count == 1) {
             std.debug.assert(job_live and std.meta.eql(input.dependencies[0], status.fence));
             dependency_seen = true;
@@ -215,10 +247,21 @@ const Model = struct {
         if (rc == a.gfx_queue_ok) job_list = list.*;
         return rc;
     }
+    fn submitGridList(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, list: *const a.GfxRenderGridList, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        std.debug.assert(input.operation == a.gfx_queue_operation_render_grid_list and list.count > 0 and list.count <= 16);
+        const rc = submit(queue, input, out);
+        if (rc == a.gfx_queue_ok) job_grid_list = list.*;
+        return rc;
+    }
     fn query(input: *const a.GfxFence, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        for (&outputs) |*output| if (output.live and std.meta.eql(input.*, output.status.fence)) { out.* = output.status; return a.gfx_queue_ok; };
         std.debug.assert(job_live and std.meta.eql(input.*, status.fence)); out.* = status; return 1;
     }
     fn cancel(input: *const a.GfxFence) callconv(.c) i32 {
+        for (&outputs) |*output| if (output.live and std.meta.eql(input.*, output.status.fence)) {
+            if (output.status.phase == a.gfx_queue_phase_terminal) return a.gfx_queue_error_already_completed;
+            output.status.phase = a.gfx_queue_phase_terminal; output.status.result = a.gfx_queue_result_cancelled; return a.gfx_queue_ok;
+        };
         std.debug.assert(job_live and std.meta.eql(input.*, status.fence));
         if (job_request.operation == a.gfx_queue_operation_direct_present and status.phase == a.gfx_queue_phase_terminal and status.flags != 0) {
             retire_requested = true; return a.gfx_queue_ok;
@@ -227,6 +270,10 @@ const Model = struct {
         status.phase = a.gfx_queue_phase_terminal; status.result = a.gfx_queue_result_cancelled; return 1;
     }
     fn drop(input: *const a.GfxFence) callconv(.c) i32 {
+        for (&outputs) |*output| if (output.live and std.meta.eql(input.*, output.status.fence)) {
+            std.debug.assert(output.status.phase == a.gfx_queue_phase_terminal and output.status.flags == 0);
+            output.live = false; return a.gfx_queue_ok;
+        };
         std.debug.assert(job_live and std.meta.eql(input.*, status.fence) and status.phase == a.gfx_queue_phase_terminal and status.flags == 0);
         job_live = false; return 1;
     }
@@ -268,6 +315,7 @@ pub fn check() !void {
         .gfx_buffer_unmap = @intFromPtr(&Model.unmap), .gfx_buffer_export_raster = @intFromPtr(&Model.exportRaster), .gfx_queue_backend_info = @intFromPtr(&Model.backendInfo),
         .gfx_queue_open = @intFromPtr(&Model.open), .gfx_queue_close = @intFromPtr(&Model.close), .gfx_queue_submit = @intFromPtr(&Model.submit),
         .gfx_queue_submit_render_list = @intFromPtr(&Model.submitList),
+        .gfx_queue_submit_render_grid_list = @intFromPtr(&Model.submitGridList),
         .display_presentation_info = @intFromPtr(&Model.presentInfo), .display_presentation_feedback = @intFromPtr(&Model.presentFeedback),
         .display_present_regions = @intFromPtr(&Model.presentPixels),
         .gfx_fence_query = @intFromPtr(&Model.query), .gfx_fence_cancel = @intFromPtr(&Model.cancel), .gfx_fence_release = @intFromPtr(&Model.drop) };
@@ -458,10 +506,67 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
     try checkNativeRender(&config);
+    try checkNativeGrid(&config);
     try checkNativePresent(&config);
     try checkImagePreparation(&config);
     try checkTiledPreparation(&config);
     try checkSwapchains(&config);
+    draw.display_output_target = @intFromPtr(&Model.outputTarget);
+    draw.display_output_presentation_info = @intFromPtr(&Model.outputInfo);
+    draw.gfx_queue_submit_output = @intFromPtr(&Model.submitOutput);
+    try checkOutputSwapchains(config);
+}
+
+fn checkOutputSwapchains(input: c.R4GfxDeviceConfig) !void {
+    Model.reset();
+    var config = input;
+    config.preferred_adapter = Model.binding.adapter_id; config.flags = c.device_software_only;
+    for (&Model.outputs, 0..) |*output, i| {
+        output.target = .{ .adapter_id = Model.binding.adapter_id, .connector_id = @intCast(i + 2),
+            .device_generation = Model.binding.device_generation, .connection_generation = i + 10, .display_generation = i + 100, .head_id = @intCast(i + 2) };
+        output.info = .{ .backend = Model.binding, .flags = a.display_presentation_info_active | a.display_presentation_info_native,
+            .head_id = output.target.head_id, .display_generation = output.target.display_generation, .sequence = 1,
+            .width = 4, .height = 4, .format = c.format_xrgb8888, .policies = 7, .buffer_count = 2, .plane_count = 1,
+            .interval_ns = if (i == 0) 16_666_667 else 10_000_000 };
+    }
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(&config, &handle));
+    var images: [2][2]c.R4GfxResource = undefined;
+    var chains: [2]c.R4GfxSwapchain = undefined;
+    var frames: [2]c.R4GfxSwapchainFrame = undefined;
+    var statuses: [2]c.R4GfxSwapchainStatus = undefined;
+    var resource = descriptor(c.resource_image);
+    resource.source_kind = c.source_create_system; resource.flags = c.image_target;
+    resource.image = .{ .cpu_address = 0, .byte_length = 64, .pitch = 16, .width = 4, .height = 4, .format = c.format_xrgb8888, .reserved = 0 };
+    for (&images, 0..) |*pair, i| {
+        for (pair) |*image| try t.expectEqual(c.status_ok, api.resource_create(&handle, &resource, image));
+        const desc: c.R4GfxSwapchainDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxSwapchainDesc), .head_id = Model.outputs[i].target.head_id,
+            .policy = c.present_policy_fifo, .flags = 0, .count = 2, .display_generation = Model.outputs[i].target.display_generation, .images = @intFromPtr(pair) };
+        try t.expectEqual(c.status_ok, api.swapchain_open(&handle, &desc, &chains[i]));
+        try t.expectEqual(c.status_ok, api.swapchain_acquire(&handle, &chains[i], 0, &frames[i]));
+        try t.expectEqual(c.status_ok, api.swapchain_present(&handle, &chains[i], &presentRequest(frames[i])));
+        try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chains[i], &statuses[i]));
+    }
+    try t.expect(Model.outputs[0].live and Model.outputs[1].live and Model.present_calls == 0);
+    try t.expect(Model.outputs[0].status.fence.timeline != Model.outputs[1].status.fence.timeline);
+    const slow = Model.outputs[0].status;
+    Model.outputs[1].status.phase = a.gfx_queue_phase_terminal;
+    Model.outputs[1].status.result = a.gfx_queue_result_complete; Model.outputs[1].status.flags = 0;
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chains[1], &statuses[1]));
+    try t.expectEqual(c.status_ok, api.swapchain_release(&handle, &chains[1], &frames[1]));
+    try t.expectEqualDeep(slow, Model.outputs[0].status);
+    // One receiver vanishes while its GPU read still exists. It cannot be
+    // retired by the other output's receipt or redirect work to the primary.
+    Model.outputs[0].connected = false;
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chains[0], &statuses[0]));
+    try t.expectEqual(c.status_busy, api.swapchain_close(&handle, &chains[0]));
+    try t.expect(Model.outputs[0].live and Model.outputs[0].status.flags != 0);
+    Model.outputs[0].status.flags = 0;
+    try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chains[0]));
+    try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chains[1]));
+    for (&images) |*pair| for (pair) |*image| try t.expectEqual(c.status_ok, api.resource_release(&handle, image));
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0 and Model.present_calls == 0);
 }
 
 fn chainFrame(status: c.R4GfxSwapchainStatus, frame: c.R4GfxSwapchainFrame) c.R4GfxSwapchainFrameStatus {
@@ -859,6 +964,70 @@ fn checkNativeRender(config: *const c.R4GfxDeviceConfig) !void {
     try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
+}
+
+fn checkNativeGrid(config: *const c.R4GfxDeviceConfig) !void {
+    Model.reset(); Model.operations = 93;
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    const native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999,
+        .width = 4, .height = 4, .format = c.format_argb8888, .layout = 0 };
+    var image_desc = descriptor(c.resource_image);
+    image_desc.flags = c.image_target; image_desc.source_kind = c.source_create_native; image_desc.source_address = @intFromPtr(&native);
+    var source: c.R4GfxResource = undefined; var target: c.R4GfxResource = undefined;
+    var pipeline: c.R4GfxResource = undefined; var sampler: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &image_desc, &source));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &image_desc, &target));
+    var pipeline_desc = descriptor(c.resource_pipeline); pipeline_desc.operation = c.render_operation_over;
+    var sampler_desc = descriptor(c.resource_sampler); sampler_desc.sampler = c.render_sampler_nearest;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &pipeline_desc, &pipeline));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &sampler_desc, &sampler));
+    var command = std.mem.zeroes(c.R4GfxRenderRequest);
+    command.version = 1; command.size = @sizeOf(c.R4GfxRenderRequest); command.deadline_ns = native.deadline_ns;
+    command.source = source; command.target = target; command.pipeline = pipeline; command.sampler = sampler;
+    command.opacity = 255; command.source_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 };
+    command.target_rect = command.source_rect; command.scissor = command.source_rect;
+    var commands = [_]c.R4GfxRenderRequest{ command, command };
+    var grids: [2]c.R4GfxLogicalGrid = @splat(std.mem.zeroes(c.R4GfxLogicalGrid));
+    grids[0].enabled = 1; grids[0].rotation = 1; grids[0].scale = 180;
+    grids[0].pixel_width = 4; grids[0].pixel_height = 4;
+    grids[0].viewport_width = 4; grids[0].viewport_height = 4;
+    grids[0].guest_width = 4; grids[0].guest_height = 4;
+    grids[1] = grids[0]; grids[1].rotation = 3;
+    var list: c.R4GfxRenderGridListRequest = .{ .version = 1, .size = @sizeOf(c.R4GfxRenderGridListRequest),
+        .commands = @intFromPtr(&commands), .grids = @intFromPtr(&grids), .count = 2, .reserved = 0 };
+    var job = std.mem.zeroes(c.R4GfxJob); job.generation = 79;
+    const untouched = job;
+    try t.expectEqual(c.status_unsupported, api.render_submit_grid_list(&handle, &list, &job));
+    try t.expectEqualDeep(untouched, job);
+    Model.operations |= 256;
+    var info: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &info));
+    try t.expect(info.gpu_operations & c.device_gpu_grid != 0);
+    // Invalid second draw must leave no accepted prefix or retained job.
+    grids[1].scale = 0;
+    try t.expectEqual(c.status_invalid, api.render_submit_grid_list(&handle, &list, &job));
+    try t.expect(!Model.job_live and Model.referenceCount() == 2 and Model.maps == 0);
+    try t.expectEqualDeep(untouched, job);
+    grids[1].scale = 180;
+    const original_grids = grids;
+    try t.expectEqual(c.status_ok, api.render_submit_grid_list(&handle, &list, &job));
+    try t.expect(Model.job_request.operation == a.gfx_queue_operation_render_grid_list and Model.job_grid_list.count == 2);
+    try t.expectEqualDeep(@as(a.GfxSampleGrid, @bitCast(original_grids[1])), Model.job_grid_list.grids[1]);
+    grids[1].rotation = 0; commands[1].opacity = 0;
+    try t.expect(Model.job_grid_list.grids[1].rotation == 3 and Model.job_grid_list.commands[1].opacity == 255 and Model.maps == 0);
+    // Cancellation does not retire either BO until the driver relinquishes
+    // the copied work. This is transport evidence, not GPU execution.
+    try t.expectEqual(c.status_ok, api.job_cancel(&handle, &job));
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &source));
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &target));
+    try t.expectEqual(c.status_busy, api.job_release(&handle, &job));
+    try t.expect(Model.referenceCount() == 2);
+    Model.status.flags = 0;
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expect(Model.referenceCount() == 0 and Model.maps == 0);
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.premature_closes == 0);
 }
 
 fn checkNativePresent(config: *const c.R4GfxDeviceConfig) !void {

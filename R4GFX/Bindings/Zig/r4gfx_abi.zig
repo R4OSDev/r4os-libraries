@@ -416,6 +416,34 @@ pub const R4GfxPresentationDecision = extern struct {
     reasons: u32,
     display_generation: u64,
 };
+
+pub const R4GfxLogicalGrid = extern struct {
+    enabled: u32,
+    rotation: u32,
+    scale: u32,
+    pixel_width: u32,
+    pixel_height: u32,
+    target_x: i32,
+    target_y: i32,
+    reserved: u32,
+    viewport_x: i32,
+    viewport_y: i32,
+    viewport_width: u32,
+    viewport_height: u32,
+    guest_width: u32,
+    guest_height: u32,
+    source_x: u32,
+    source_y: u32,
+};
+
+pub const R4GfxRenderGridListRequest = extern struct {
+    version: u32,
+    size: u32,
+    commands: u64,
+    grids: u64,
+    count: u32,
+    reserved: u32,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -498,6 +526,7 @@ pub const present_block_readers: u32 = 4;
 pub const present_block_cursor: u32 = 8;
 pub const present_block_menus: u32 = 16;
 pub const present_block_composition: u32 = 32;
+pub const device_gpu_grid: u32 = 128;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -551,14 +580,14 @@ pub const RenderV1 = extern struct {
 };
 
 pub const device_v1_export_name = "DEVICE_V1";
-pub const device_v1_revision: u16 = 8;
+pub const device_v1_revision: u16 = 9;
 pub const device_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 264,
+    .size = 272,
     .abi_major = 1,
-    .abi_minor = 8,
+    .abi_minor = 9,
     .interface_id_lo = 0x5234474658444556,
     .interface_id_hi = 0x52344f5330373931,
 };
@@ -591,6 +620,7 @@ pub const DeviceV1SwapchainReleaseFn = *const fn (device: *const R4GfxDevice, ch
 pub const DeviceV1SwapchainResizeFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain, request: *const R4GfxSwapchainDesc) callconv(.c) i32;
 pub const DeviceV1SwapchainCloseFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain) callconv(.c) i32;
 pub const DeviceV1PresentationPlanFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxPresentationPlan, output: *R4GfxPresentationDecision) callconv(.c) i32;
+pub const DeviceV1RenderSubmitGridListFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderGridListRequest, output: *R4GfxJob) callconv(.c) i32;
 pub const DeviceV1 = extern struct {
     header: InterfaceHeader,
     storage_size: DeviceV1StorageSizeFn,
@@ -622,6 +652,7 @@ pub const DeviceV1 = extern struct {
     swapchain_resize: DeviceV1SwapchainResizeFn,
     swapchain_close: DeviceV1SwapchainCloseFn,
     presentation_plan: DeviceV1PresentationPlanFn,
+    render_submit_grid_list: DeviceV1RenderSubmitGridListFn,
 };
 
 pub const ApiV1Client = struct {
@@ -691,8 +722,8 @@ pub const DeviceV1Client = struct {
             .interface_id_lo = 0x5234474658444556,
             .interface_id_hi = 0x52344f5330373931,
             .abi_major = 1,
-            .min_revision = 8,
-            .required_size = 264,
+            .min_revision = 9,
+            .required_size = 272,
             .known_required_flags = 0,
         });
         if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
@@ -724,6 +755,7 @@ pub const DeviceV1Client = struct {
         if (r4os.runtime_r4l.slotAddress(header, 240) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 248) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 256) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 264) == null) return error.MissingSlot;
         return .{ .header = header };
     }
 
@@ -869,6 +901,11 @@ pub const DeviceV1Client = struct {
 
     pub fn presentation_plan(self: *const DeviceV1Client, device: *const R4GfxDevice, request: *const R4GfxPresentationPlan, output: *R4GfxPresentationDecision) i32 {
         const function = r4os.runtime_r4l.functionAt(DeviceV1PresentationPlanFn, self.header, 256) orelse unreachable;
+        return function(device, request, output);
+    }
+
+    pub fn render_submit_grid_list(self: *const DeviceV1Client, device: *const R4GfxDevice, request: *const R4GfxRenderGridListRequest, output: *R4GfxJob) i32 {
+        const function = r4os.runtime_r4l.functionAt(DeviceV1RenderSubmitGridListFn, self.header, 264) orelse unreachable;
         return function(device, request, output);
     }
 };

@@ -42,9 +42,9 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
 
 - ELF-Symbol: `r4gfx_device_v1`
 - ABI-Major: 1
-- Revision: 8
+- Revision: 9
 - Interface-ID: `0x52344f5330373931:0x5234474658444556`
-- Tabellengroesse: 264 Byte
+- Tabellengroesse: 272 Byte
 
 - Slot 0, Offset 32: `storage_size` - Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
@@ -104,6 +104,8 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
   Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
 - Slot 28, Offset 256: `presentation_plan` - Evaluate format/layout/geometry/color and concurrent consumers against current per-output capabilities.
   Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
+- Slot 29, Offset 264: `render_submit_grid_list` - Submit immutable draw/grid pairs through the common native queue. Exact rotation and rational scaling sample logical cells without CPU image reconstruction. No accepted prefix, per-draw fence or hardware command language.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error..
 
 Typen
 -----
@@ -145,6 +147,8 @@ Typen
 - `R4GfxSwapchainStatus`: 480 Byte, Alignment 8. Snapshot after one bounded nonblocking progress step. life0active/1occluded/2suboptimal/3lost/4closing. Explicit frame records avoid borrowed output arrays. next_start_ns may be combined with an ordinary event wait.
 - `R4GfxPresentationPlan`: 96 Byte, Alignment 8. Compositor eligibility request. flags: bit0 opaque,bit1 sole visible surface,bit2 other readers,bit3 software cursor,bit4 menus,bit5 force composition. Only identity color/transform and exact unscaled geometry can use direct/overlay in this contract.
 - `R4GfxPresentationDecision`: 24 Byte, Alignment 8. Selected path0 software copy/1 native composition-copy/2 direct/3 overlay. reasons bits: format1/layout2/geometry4/color8/readers16/cursor32/windows64/menus128/capability256/explicit512. Pure eligibility does not submit, allocate or claim visibility.
+- `R4GfxLogicalGrid`: 64 Byte, Alignment 4. Exact native-pixel-center to logical-cell and guest-edge sampling; binary layout matches GfxSampleGrid. The all-zero grid selects ordinary sampling. See copied render grid list semantics.
+- `R4GfxRenderGridListRequest`: 32 Byte, Alignment 8. Copied arrays of1..16 R4GfxRenderRequest and R4GfxLogicalGrid records. Same batching/resource/dependency rules as render_submit_list. All inputs validate before native submission; requires device_gpu_grid. No CPU pixel mapping or scaling.
 
 Besitzregeln
 ------------

@@ -5,11 +5,13 @@
 #include "nak.h"
 #include "nir_builder.h"
 
-/* R4NV graphics constant-buffer ABI 2. CBuf 0 reserves bytes 0..63:
+/* R4NV graphics constant-buffer ABI 3. CBuf 0 reserves bytes 0..63:
  * 0..7 sample locations (u4/u4), 16..31 sample masks (u16),
  * 48..55 an optional printf address. These single-sample fixed shaders
  * do not issue printf or sample-table loads. CBuf 1 holds the texture
- * handle at 0 and a float4 of source texel-center bounds at 16. */
+ * handle at 0, float4 source texel-center bounds at16, an optional64-byte
+ * logical sampling grid at32, source atlas rectangle at96 and extent at112.
+ * A zero grid preserves the earlier texture sampling path. */
 const struct nak_constant_offset_info nak_const_offsets_base = {
    .sample_info_cb = 0, .sample_locations_offset = 0,
    .sample_masks_offset = 16, .printf_cb = 0, .printf_buffer_offset = 48,
@@ -54,6 +56,49 @@ srgb_convert(nir_builder *b, nir_def *rgba, bool encode)
                      nir_channel(b, rgb, 2), a);
 }
 
+static nir_def *
+grid_constants(nir_builder *b, unsigned offset)
+{
+   return nir_ldc_nv(b, 4, 32, nir_imm_int(b, 1), nir_imm_int(b, offset),
+                     .align_mul = 16, .align_offset = 0);
+}
+
+static nir_def *
+grid_coordinates(nir_builder *b, nir_def *ordinary)
+{
+   nir_def *head = grid_constants(b, 32);
+   nir_push_if(b, nir_ine_imm(b, nir_channel(b, head, 0), 0));
+   nir_def *native = grid_constants(b, 48);
+   nir_def *viewport = grid_constants(b, 64);
+   nir_def *guest = grid_constants(b, 80);
+   nir_def *atlas = grid_constants(b, 96);
+   nir_def *extent = grid_constants(b, 112);
+   nir_def *pixel = nir_iadd(b,
+      nir_f2i32(b, nir_channels(b, nir_load_frag_coord(b), 3)),
+      nir_vec2(b, nir_channel(b, native, 1), nir_channel(b, native, 2)));
+   nir_def *x = nir_channel(b, pixel, 0), *y = nir_channel(b, pixel, 1);
+   nir_def *reverse_x = nir_isub(b, nir_iadd_imm(b, nir_channel(b, head, 3), -1), x);
+   nir_def *reverse_y = nir_isub(b, nir_iadd_imm(b, nir_channel(b, native, 0), -1), y);
+   nir_def *rotation = nir_channel(b, head, 1);
+   nir_def *oriented = nir_bcsel(b, nir_ieq_imm(b, rotation, 1), nir_vec2(b, reverse_y, x),
+      nir_bcsel(b, nir_ieq_imm(b, rotation, 2), nir_vec2(b, reverse_x, reverse_y),
+      nir_bcsel(b, nir_ieq_imm(b, rotation, 3), nir_vec2(b, y, reverse_x), pixel)));
+   /* All values are admitted positive and <=32768. Products fit u32.
+    * Integer division defines both sampling stages, including exact ties.
+    * Convert only the final integer texel center to normalized float UV. */
+   nir_def *logical = nir_udiv(b, nir_imul_imm(b, nir_iadd_imm(b, nir_imul_imm(b, oriented, 2), 1), 120),
+                                nir_imul_imm(b, nir_channel(b, head, 2), 2));
+   nir_def *relative = nir_isub(b, logical, nir_channels(b, viewport, 3));
+   nir_def *selected = nir_isub(b,
+      nir_udiv(b, nir_imul(b, relative, nir_channels(b, guest, 3)), nir_channels(b, viewport, 12)),
+      nir_channels(b, guest, 12));
+   nir_def *texel = nir_iadd(b, selected, nir_channels(b, atlas, 3));
+   nir_def *mapped = nir_fdiv(b, nir_fadd_imm(b, nir_u2f32(b, texel), 0.5), nir_channels(b, extent, 3));
+   nir_push_else(b, NULL);
+   nir_pop_if(b, NULL);
+   return nir_if_phi(b, mapped, ordinary);
+}
+
 nir_shader *
 r4nv_build_shader(enum r4nv_shader_profile profile,
                   const nir_shader_compiler_options *options)
@@ -64,6 +109,7 @@ r4nv_build_shader(enum r4nv_shader_profile profile,
    nir_builder b = nir_builder_init_simple_shader(
       vertex ? MESA_SHADER_VERTEX : MESA_SHADER_FRAGMENT, options,
       "R4NV rectangle profile %u", profile);
+   if (!vertex) b.shader->info.fs.origin_upper_left = true;
 
    if (vertex) {
       nir_variable *position = varying(&b, nir_var_shader_in, glsl_vec4_type(),
@@ -108,6 +154,8 @@ r4nv_build_shader(enum r4nv_shader_profile profile,
          nir_def *coord = nir_fmin(&b, nir_fmax(&b, nir_load_var(&b, uv),
                                                nir_channels(&b, bounds, 3)),
                                        nir_channels(&b, bounds, 12));
+         if (profile == R4NV_TEXTURE_FRAGMENT)
+            coord = grid_coordinates(&b, coord);
          nir_tex_instr *tex = nir_tex_instr_create(b.shader, 3);
          tex->op = nir_texop_tex;
          tex->sampler_dim = GLSL_SAMPLER_DIM_2D;

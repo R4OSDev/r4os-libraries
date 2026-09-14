@@ -26,6 +26,8 @@ pub const Slot = struct {
     closed: bool = true,
     state: s.Chain = .{},
     info: a.DisplayPresentationInfo = .{},
+    target: a.GfxOutputTarget = .{},
+    queue: a.GfxQueueHandle = .{},
     images: [s.capacity]c.R4GfxResource = @splat(empty_image),
     work: [s.capacity]Work = @splat(.{}),
     path: u32 = 0,
@@ -66,15 +68,45 @@ fn frameValue(slot: *const Slot, key: s.Token) c.R4GfxSwapchainFrame {
         .image = if (key.slot == 0) empty_image else slot.images[key.slot - 1] };
 }
 fn describe(device: *d.Device, head: u32) d.Error!a.DisplayPresentationInfo {
+    return (try describeOutput(device, head)).info;
+}
+const Description = struct { info: a.DisplayPresentationInfo, target: a.GfxOutputTarget = .{} };
+fn describeOutput(device: *d.Device, head: u32) d.Error!Description {
     var value: a.DisplayPresentationInfo = .{};
-    try d.platform(device.base().displayPresentationInfo(head, &value));
+    const base = device.base();
+    var target: a.GfxOutputTarget = .{};
+    if (device.preferred_adapter == 0) {
+        try d.platform(base.displayPresentationInfo(head, &value));
+        // The implicit primary CPU path remains usable through old R4DRAW
+        // tables and through the native bridge's CPU fallback.
+        if (value.flags & a.display_presentation_info_native != 0) {
+            const rc = base.displayOutputTarget(value.backend.adapter_id, head, &target);
+            if (rc != a.err_no_fn) {
+                try d.platform(rc);
+                try d.platform(base.displayOutputPresentationInfo(&target, &value));
+            } else target = .{};
+        }
+    } else {
+        // Explicit adapter selection never degrades into another primary.
+        const rc = base.displayOutputTarget(device.preferred_adapter, head, &target);
+        if (rc == a.err_no_fn) {
+            try d.platform(base.displayPresentationInfo(head, &value));
+            if (value.backend.adapter_id != device.preferred_adapter) return error.Unsupported;
+            target = .{};
+        } else {
+            try d.platform(rc);
+            try d.platform(base.displayOutputPresentationInfo(&target, &value));
+        }
+    }
     if (value.version != 1 or value.size < @sizeOf(a.DisplayPresentationInfo) or value.head_id != head or head >= 8 or
         value.display_generation == 0 or value.sequence == 0 or value.width == 0 or value.height == 0 or
-        value.flags & ~@as(u32, 255) != 0 or value.policies & ~@as(u32, 7) != 0 or value.policies & 1 == 0 or
+        value.flags & ~@as(u32, 511) != 0 or value.policies & ~@as(u32, 7) != 0 or value.policies & 1 == 0 or
         value.buffer_count < 2 or value.buffer_count > 3 or value.plane_count == 0 or value.plane_count > 8 or
         value.format != c.format_xrgb8888 or value.reserved0 != 0 or value.path > 3 or
         value.interval_ns > std.time.ns_per_s or (value.observed_sequence == 0) != (value.observed_ns == 0)) return error.Invalid;
-    return value;
+    if (target.connector_id != 0 and (target.adapter_id != value.backend.adapter_id or target.head_id != head or
+        target.display_generation != value.display_generation or target.device_generation != value.backend.device_generation)) return error.Stale;
+    return .{ .info = value, .target = target };
 }
 fn projection(value: a.DisplayPresentationInfo) s.Output {
     return .{ .generation = value.display_generation, .width = value.width, .height = value.height, .policies = value.policies,
@@ -98,7 +130,7 @@ pub fn presentationInfo(handle: *const c.R4GfxDevice, head: u32, output: *c.R4Gf
         .interval_ns = value.interval_ns, .observed_sequence = value.observed_sequence, .observed_ns = value.observed_ns, .reserved = 0 };
     return c.status_ok;
 }
-const Pool = struct { config: s.Config, info: a.DisplayPresentationInfo, images: [s.capacity]c.R4GfxResource = @splat(empty_image) };
+const Pool = struct { config: s.Config, info: a.DisplayPresentationInfo, target: a.GfxOutputTarget, images: [s.capacity]c.R4GfxResource = @splat(empty_image) };
 fn pool(device: *d.Device, request: *const c.R4GfxSwapchainDesc) d.Error!Pool {
     const desc = try input(c.R4GfxSwapchainDesc, device, request);
     if (desc.version != 1 or desc.size != @sizeOf(c.R4GfxSwapchainDesc) or desc.flags & ~c.present_require_vsync != 0 or
@@ -108,10 +140,12 @@ fn pool(device: *d.Device, request: *const c.R4GfxSwapchainDesc) d.Error!Pool {
     _ = std.math.add(u64, desc.images, bytes) catch return error.Overflow;
     if (d.overlaps(desc.images, bytes, @intFromPtr(device), @sizeOf(d.Device))) return error.Alias;
     try device.selectBackend();
-    const info = try describe(device, desc.head_id);
+    const described = try describeOutput(device, desc.head_id);
+    const info = described.info;
     if (info.flags & a.display_presentation_info_lost != 0) return error.Lost;
     if (info.display_generation != desc.display_generation) return error.Suboptimal;
-    var result: Pool = .{ .config = .{ .count = desc.count, .policy = @enumFromInt(desc.policy), .require_vsync = desc.flags & c.present_require_vsync != 0 }, .info = info };
+    var result: Pool = .{ .config = .{ .count = desc.count, .policy = @enumFromInt(desc.policy), .require_vsync = desc.flags & c.present_require_vsync != 0 },
+        .info = info, .target = described.target };
     var validation: s.Chain = .{};
     validation.configure(result.config, projection(info)) catch |err| return stateError(err);
     @memcpy(result.images[0..desc.count], @as([*]const c.R4GfxResource, @ptrFromInt(desc.images))[0..desc.count]);
@@ -122,8 +156,11 @@ fn pool(device: *d.Device, request: *const c.R4GfxSwapchainDesc) d.Error!Pool {
             image.image.height != info.height or image.image.format != c.format_xrgb8888 or image.public_refs == std.math.maxInt(u32)) return error.Unsupported;
         const native = info.flags & a.display_presentation_info_native != 0;
         if (native) {
-            if (device.gpu_operations & c.device_gpu_present == 0 or !std.meta.eql(info.backend, device.selected.binding) or
-                image.descriptor.location != a.gfx_buffer_location_device_local or image.backing.reference.id == 0) return error.Unsupported;
+            if (image.backing.reference.id == 0 or image.descriptor.usage & a.gfx_buffer_usage_transfer_source == 0) return error.Unsupported;
+            if (image.descriptor.location == a.gfx_buffer_location_device_local) {
+                if (device.gpu_operations & c.device_gpu_present == 0 or !std.meta.eql(info.backend, device.selected.binding)) return error.Unsupported;
+            } else if (described.target.connector_id == 0 or image.descriptor.location != a.gfx_buffer_location_system or image.descriptor.modifier != 0)
+                return error.Unsupported;
         } else if (image.descriptor.location != a.gfx_buffer_location_system or image.descriptor.modifier != 0 or
             image.image.pitch & 3 != 0 or image.image.byte_length / 4 > std.math.maxInt(u32)) return error.Unsupported;
         for (result.images[0..index]) |prior| {
@@ -161,7 +198,7 @@ fn openImpl(handle: *const c.R4GfxDevice, request: *const c.R4GfxSwapchainDesc, 
     var state: s.Chain = .{};
     state.configure(value.config, projection(value.info)) catch |err| return stateError(err);
     retainPool(device, value);
-    device.chains[index] = .{ .serial = serial, .closed = false, .state = state, .info = value.info, .images = value.images, .path = value.info.path };
+    device.chains[index] = .{ .serial = serial, .closed = false, .state = state, .info = value.info, .target = value.target, .images = value.images, .path = value.info.path };
     device.chain_serial = serial;
     output.* = .{ .slot = @intCast(index + 1), .reserved = 0, .generation = serial, .device_generation = device.generation, .device_address = device.self_address };
     return c.status_ok;
@@ -169,10 +206,12 @@ fn openImpl(handle: *const c.R4GfxDevice, request: *const c.R4GfxSwapchainDesc, 
 fn refresh(device: *d.Device, slot: *Slot) d.Error!void {
     if (slot.closed) return error.Stale;
     if (slot.state.life == .closing or slot.state.life == .lost) return;
-    const info = describe(device, slot.info.head_id) catch |err| {
+    const described = describeOutput(device, slot.info.head_id) catch |err| {
         if (err == error.Busy) return;
         slot.state.change(.lost); return;
     };
+    const info = described.info;
+    if (!std.meta.eql(described.target, slot.target)) { slot.state.change(.suboptimal); return; }
     if (info.flags & a.display_presentation_info_lost != 0) { slot.state.change(.lost); return; }
     if (!std.meta.eql(info.backend, slot.info.backend) or info.flags & a.display_presentation_info_native != slot.info.flags & a.display_presentation_info_native) {
         slot.state.change(.suboptimal); return;
@@ -264,7 +303,9 @@ fn progress(device: *d.Device, slot: *Slot) d.Error!void {
         }
         if (frame.phase == .submitted and (!frame.consumer_held or frame.path == .direct) and slot.state.output.visibility) {
             var visible: a.DisplayPresentationStats = .{};
-            if (device.base().displayPresentationFeedback(slot.info.head_id, &work.fence, &visible) == a.gfx_output_ok) {
+            const rc = if (slot.target.connector_id != 0) device.base().displayOutputPresentationFeedback(&slot.target, &work.fence, &visible)
+                else device.base().displayPresentationFeedback(slot.info.head_id, &work.fence, &visible);
+            if (rc == a.gfx_output_ok) {
                 if (visible.version != 1 or visible.size < @sizeOf(a.DisplayPresentationStats) or visible.head_id != slot.info.head_id or
                     visible.flags & a.display_presentation_flag_available == 0 or
                     !std.meta.eql(visible.backend, slot.info.backend) or visible.display_generation != slot.info.display_generation or
@@ -283,7 +324,16 @@ fn progress(device: *d.Device, slot: *Slot) d.Error!void {
         const request: c.R4GfxImagePresentRequest = .{ .version = 1, .size = @sizeOf(c.R4GfxImagePresentRequest),
             .source = slot.images[key.slot - 1], .frame_key = key.serial, .deadline_ns = work.deadline, .dependencies = 0, .dependency_count = 0, .reserved = 0 };
         var accepted: c.R4GfxJob = undefined;
-        _ = @import("device_image_present.zig").submitPath(device, &request, &accepted, path == .direct) catch |err| {
+        const presenter = @import("device_image_present.zig");
+        if (slot.target.connector_id != 0 and slot.queue.timeline == 0) {
+            const rc = device.queues().open(&.{ .adapter_id = slot.info.backend.adapter_id,
+                .device_generation = slot.info.backend.device_generation, .reset_generation = slot.info.backend.reset_generation,
+                .milestone = slot.info.backend.milestone, .capacity = s.capacity }, &slot.queue);
+            if (rc == a.gfx_queue_error_busy) return;
+            try d.platform(rc);
+        }
+        _ = (if (slot.target.connector_id != 0) presenter.submitOutput(device, &request, &accepted, path == .direct, slot.target, slot.queue)
+            else presenter.submitPath(device, &request, &accepted, path == .direct)) catch |err| {
             if (err == error.Busy) return;
             slot.state.abandon(key, .failed) catch unreachable; return;
         };
@@ -367,9 +417,10 @@ fn resizeImpl(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, requ
     candidate.configure(value.config, projection(value.info)) catch |err| return stateError(err);
     // Validate every old ownership record before either pool is mutated.
     for (slot.images[0..slot.state.config.count]) |image| if ((try device.resource(image, false)).public_refs == 0) return error.Stale;
+    if (slot.queue.timeline != 0) { try d.platform(device.queues().close(&slot.queue)); slot.queue = .{}; }
     retainPool(device, value);
     try releasePool(device, slot);
-    slot.state = candidate; slot.info = value.info; slot.images = value.images; slot.work = @splat(.{}); slot.path = value.info.path;
+    slot.state = candidate; slot.info = value.info; slot.target = value.target; slot.images = value.images; slot.work = @splat(.{}); slot.path = value.info.path;
     return c.status_ok;
 }
 pub fn close(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain) callconv(.c) i32 {
@@ -386,7 +437,9 @@ fn closeSlot(device: *d.Device, slot: *Slot) d.Error!i32 {
         slot.state.release(frame.token) catch |err| return stateError(err);
         slot.work[i] = .{};
     };
-    try releasePool(device, slot); slot.closed = true;
+    try releasePool(device, slot);
+    if (slot.queue.timeline != 0) { try d.platform(device.queues().close(&slot.queue)); slot.queue = .{}; }
+    slot.closed = true;
     return c.status_ok;
 }
 pub fn closeAll(device: *d.Device) bool {

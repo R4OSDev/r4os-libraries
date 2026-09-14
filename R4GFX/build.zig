@@ -30,6 +30,7 @@ pub fn build(b: *std.Build) void {
     conformance.addCSourceFile(.{ .file = b.path("Tests/Generated/contract_conformance.c"), .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" } });
     const step = b.step("test", "R4GFX layout, transactional software access and C/Zig ABI conformance");
     const display_tests = b.createModule(.{ .root_source_file = b.path("display_tests.zig"), .target = b.graph.host, .optimize = .ReleaseSafe });
+    display_tests.addImport("r4os", host);
     for ([_]*std.Build.Module{ provider, conformance, display_tests }) |module| {
         const run = b.addRunArtifact(b.addTest(.{ .root_module = module }));
         step.dependOn(&run.step);

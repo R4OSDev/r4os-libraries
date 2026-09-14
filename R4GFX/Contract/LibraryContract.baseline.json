@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 8,
+      "revision": 9,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -1923,6 +1923,68 @@
             "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
           },
           "description": "Evaluate format/layout/geometry/color and concurrent consumers against current per-output capabilities."
+        },
+        {
+          "name": "render_submit_grid_list",
+          "c_name": "r4gfx_render_submit_grid_list",
+          "symbol": "r4gfx_render_submit_grid_list_impl",
+          "slot": 29,
+          "since_revision": 9,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxRenderGridListRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error."
+          },
+          "description": "Submit immutable draw/grid pairs through the common native queue. Exact rotation and rational scaling sample logical cells without CPU image reconstruction. No accepted prefix, per-draw fence or hardware command language."
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
@@ -5535,6 +5597,264 @@
         }
       ],
       "description": "Selected path0 software copy/1 native composition-copy/2 direct/3 overlay. reasons bits: format1/layout2/geometry4/color8/readers16/cursor32/windows64/menus128/capability256/explicit512. Pure eligibility does not submit, allocate or claim visibility."
+    },
+    {
+      "name": "R4GfxLogicalGrid",
+      "size": 64,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "enabled",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "enabled"
+        },
+        {
+          "name": "rotation",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "rotation"
+        },
+        {
+          "name": "scale",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "scale"
+        },
+        {
+          "name": "pixel_width",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pixel_width"
+        },
+        {
+          "name": "pixel_height",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pixel_height"
+        },
+        {
+          "name": "target_x",
+          "offset": 20,
+          "type": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_x"
+        },
+        {
+          "name": "target_y",
+          "offset": 24,
+          "type": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_y"
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "viewport_x",
+          "offset": 32,
+          "type": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "viewport_x"
+        },
+        {
+          "name": "viewport_y",
+          "offset": 36,
+          "type": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "viewport_y"
+        },
+        {
+          "name": "viewport_width",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "viewport_width"
+        },
+        {
+          "name": "viewport_height",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "viewport_height"
+        },
+        {
+          "name": "guest_width",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "guest_width"
+        },
+        {
+          "name": "guest_height",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "guest_height"
+        },
+        {
+          "name": "source_x",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_x"
+        },
+        {
+          "name": "source_y",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_y"
+        }
+      ],
+      "description": "Exact native-pixel-center to logical-cell and guest-edge sampling; binary layout matches GfxSampleGrid. The all-zero grid selects ordinary sampling. See copied render grid list semantics."
+    },
+    {
+      "name": "R4GfxRenderGridListRequest",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "commands",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "commands"
+        },
+        {
+          "name": "grids",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "grids"
+        },
+        {
+          "name": "count",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "count"
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Copied arrays of1..16 R4GfxRenderRequest and R4GfxLogicalGrid records. Same batching/resource/dependency rules as render_submit_list. All inputs validate before native submission; requires device_gpu_grid. No CPU pixel mapping or scaling."
     }
   ],
   "constants": [
@@ -6111,6 +6431,13 @@
       "type": "u32",
       "value": 32,
       "description": "Explicit composition request."
+    },
+    {
+      "zig_name": "device_gpu_grid",
+      "c_name": "R4GFX_DEVICE_GPU_GRID",
+      "type": "u32",
+      "value": 128,
+      "description": "Native draw lists implement exact logical-grid nearest sampling on the GPU; current per-output admission remains required."
     }
   ],
   "errors": [

@@ -15,6 +15,8 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4gfx_queue", b.path("R4GFX/Bindings/Zig/queue.zig"));
     b.addNamedLazyPath("r4gfx_edid", b.path("R4GFX/Display/edid.zig"));
     b.addNamedLazyPath("r4gfx_outputs", b.path("R4GFX/Bindings/Zig/outputs.zig"));
+    b.addNamedLazyPath("r4gfx_topology", b.path("R4GFX/Display/topology.zig"));
+    b.addNamedLazyPath("r4gfx_desktop_outputs", b.path("R4GFX/Display/desktop_outputs.zig"));
     b.addNamedLazyPath("r4gfx_c_include", b.path("R4GFX/Bindings/C"));
     b.addNamedLazyPath("r4std_zig_binding", b.path("R4STD/Bindings/Zig/r4std.zig"));
     b.addNamedLazyPath("r4std_c_include", b.path("R4STD/Bindings/C"));

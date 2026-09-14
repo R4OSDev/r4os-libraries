@@ -1953,8 +1953,8 @@
       "zig_name": "shader_resource_abi",
       "c_name": "R4NV_SHADER_RESOURCE_ABI",
       "type": "u32",
-      "value": 2,
-      "description": "Graphics constants ABI2: CBuf1 texture handle at byte0 and normalized source-rectangle texel-center bounds at bytes16..31. Older shader-resource ABI keys are unsupported; interface layouts remain unchanged."
+      "value": 3,
+      "description": "Graphics constants ABI3: CBuf1 texture handle at byte0, normalized source bounds at bytes16..31, optional exact logical sampling grid at bytes32..95, atlas rectangle at bytes96..111 and image extents at bytes112..119. Older resource keys are unsupported; table and payload layouts remain unchanged."
     },
     {
       "zig_name": "shader_model_sm86",
@@ -1981,8 +1981,8 @@
       "zig_name": "shader_cache_max_bytes",
       "c_name": "R4NV_SHADER_CACHE_MAX_BYTES",
       "type": "u32",
-      "value": 1216,
-      "description": "Maximum fixed shader cache entry for resource ABI2, including the 384-byte cache prefix/header and 832-byte largest program."
+      "value": 2592,
+      "description": "Maximum fixed shader cache entry for resource ABI3, including the 384-byte cache prefix/header and 2208-byte largest program."
     },
     {
       "zig_name": "shader_profile_rectangle_vertex",

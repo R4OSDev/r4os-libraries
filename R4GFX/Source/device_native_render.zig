@@ -20,7 +20,7 @@ pub fn submit(device: *d.Device, input: *const c.R4GfxRenderRequest, output: *c.
     if (d.overlaps(@intFromPtr(input), @sizeOf(c.R4GfxRenderRequest), @intFromPtr(output), @sizeOf(c.R4GfxJob)) or
         d.overlaps(@intFromPtr(input), @sizeOf(c.R4GfxRenderRequest), @intFromPtr(device), @sizeOf(d.Device))) return error.Alias;
     const request = input.*;
-    return execute(device, &.{request}, false, output);
+    return execute(device, &.{request}, false, null, output);
 }
 pub fn submitList(device: *d.Device, input: *const c.R4GfxRenderListRequest, output: *c.R4GfxJob) d.Error!i32 {
     _ = try d.pointer(c.R4GfxRenderListRequest, @intFromPtr(input));
@@ -37,9 +37,31 @@ pub fn submitList(device: *d.Device, input: *const c.R4GfxRenderListRequest, out
         d.overlaps(request.commands, bytes, @intFromPtr(output), @sizeOf(c.R4GfxJob))) return error.Alias;
     var copied: [c.render_list_capacity]c.R4GfxRenderRequest = undefined;
     @memcpy(copied[0..request.count], @as([*]const c.R4GfxRenderRequest, @ptrFromInt(request.commands))[0..request.count]);
-    return execute(device, copied[0..request.count], true, output);
+    return execute(device, copied[0..request.count], true, null, output);
 }
-fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: bool, output: *c.R4GfxJob) d.Error!i32 {
+pub fn submitGridList(device: *d.Device, input: *const c.R4GfxRenderGridListRequest, output: *c.R4GfxJob) d.Error!i32 {
+    _ = try d.pointer(c.R4GfxRenderGridListRequest, @intFromPtr(input));
+    try d.outputSafe(c.R4GfxJob, output, device);
+    const request = input.*;
+    if (request.version != 1 or request.size != @sizeOf(c.R4GfxRenderGridListRequest) or request.reserved != 0 or
+        request.count == 0 or request.count > c.render_list_capacity) return error.Invalid;
+    _ = try d.pointer(c.R4GfxRenderRequest, request.commands);
+    _ = try d.pointer(c.R4GfxLogicalGrid, request.grids);
+    const spans = [_][2]u64{ .{ @intFromPtr(input), @sizeOf(c.R4GfxRenderGridListRequest) },
+        .{ request.commands, @as(u64, request.count) * @sizeOf(c.R4GfxRenderRequest) },
+        .{ request.grids, @as(u64, request.count) * @sizeOf(c.R4GfxLogicalGrid) } };
+    for (spans) |span| {
+        _ = std.math.add(u64, span[0], span[1]) catch return error.Overflow;
+        if (d.overlaps(span[0], span[1], @intFromPtr(device), @sizeOf(d.Device)) or
+            d.overlaps(span[0], span[1], @intFromPtr(output), @sizeOf(c.R4GfxJob))) return error.Alias;
+    }
+    var commands: [c.render_list_capacity]c.R4GfxRenderRequest = undefined;
+    var grids: [c.render_list_capacity]c.R4GfxLogicalGrid = undefined;
+    @memcpy(commands[0..request.count], @as([*]const c.R4GfxRenderRequest, @ptrFromInt(request.commands))[0..request.count]);
+    @memcpy(grids[0..request.count], @as([*]const c.R4GfxLogicalGrid, @ptrFromInt(request.grids))[0..request.count]);
+    return execute(device, commands[0..request.count], true, grids[0..request.count], output);
+}
+fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: bool, grids: ?[]const c.R4GfxLogicalGrid, output: *c.R4GfxJob) d.Error!i32 {
     const request = requests[0];
     if (request.version != 1 or request.size != @sizeOf(c.R4GfxRenderRequest) or request.opacity > 255 or
         request.transfer > c.render_transfer_srgb_encode or request.dependency_count > c.copy_max_dependencies or
@@ -57,6 +79,7 @@ fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: b
     try device.selectBackend();
     if (device.gpu_operations & c.device_gpu_render == 0) return error.Unsupported;
     if (batched and device.gpu_operations & c.device_gpu_render_list == 0) return error.Unsupported;
+    if (grids != null and device.gpu_operations & c.device_gpu_grid == 0) return error.Unsupported;
     const pipeline = try device.resource(request.pipeline, true);
     if (pipeline.kind != c.resource_pipeline) return error.Invalid;
     const fill = pipeline.operation == c.render_operation_fill;
@@ -81,6 +104,15 @@ fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: b
             !std.meta.eql(item.pipeline, request.pipeline) or !std.meta.eql(item.sampler, request.sampler) or
             (i != 0 and (item.dependency_count != 0 or item.dependencies != 0)) or
             (fill and !std.meta.eql(item.source_rect, empty_rect)) or (!fill and item.color != 0)) return error.Invalid;
+        if (grids) |values| {
+            const grid = values[i];
+            if (grid.enabled == 0) {
+                if (!std.meta.eql(grid, std.mem.zeroes(c.R4GfxLogicalGrid))) return error.Invalid;
+            } else if (grid.enabled != 1 or grid.reserved != 0 or grid.rotation > 3 or
+                grid.scale < 60 or grid.scale > 960 or grid.pixel_width == 0 or grid.pixel_height == 0 or
+                grid.viewport_width == 0 or grid.viewport_height == 0 or grid.guest_width == 0 or grid.guest_height == 0 or
+                fill or filter != c.render_sampler_nearest or item.transfer != c.render_transfer_identity) return error.Invalid;
+        }
         list.commands[i] = .{ .kind = if (fill) a.gfx_render_kind_fill else a.gfx_render_kind_sample,
             .blend = if (pipeline.operation == c.render_operation_over) a.gfx_render_blend_over else a.gfx_render_blend_replace,
             .filter = filter, .transfer = item.transfer, .color = item.color, .opacity = item.opacity,
@@ -97,7 +129,12 @@ fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: b
     @memcpy(submission.dependencies[0..request.dependency_count], dependencies[0..request.dependency_count]);
     const queues = device.queues();
     var status: a.GfxFenceStatus = .{};
-    try d.platform(if (batched) queues.submitRenderList(&device.queue, &submission, &list, &status) else queues.submit(&device.queue, &submission, &status));
+    if (grids) |values| {
+        var mapped: a.GfxRenderGridList = .{ .count = list.count, .commands = list.commands };
+        for (values, 0..) |grid, i| mapped.grids[i] = @bitCast(grid);
+        submission.operation = a.gfx_queue_operation_render_grid_list;
+        try d.platform(queues.submitRenderGridList(&device.queue, &submission, &mapped, &status));
+    } else try d.platform(if (batched) queues.submitRenderList(&device.queue, &submission, &list, &status) else queues.submit(&device.queue, &submission, &status));
     target.job_refs += 1;
     if (source) |value| value.job_refs += 1;
     device.jobs[index] = .{ .serial = serial, .source = request.source, .target = request.target,
