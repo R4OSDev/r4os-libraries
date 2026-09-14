@@ -6,6 +6,7 @@ const edid = @import("edid.zig");
 pub const max_bytes = 96;
 pub const max_sads = 15;
 pub const Error = error{ Incomplete, Unsupported, Invalid, Capacity };
+pub const Transport = enum(u8) { hdmi = 0, display_port = 1 };
 pub const Data = struct {
     bytes: [max_bytes]u8 = @splat(0),
     max_frequency: u8 = 0,
@@ -16,8 +17,11 @@ pub const Data = struct {
 /// The port identity is assigned by the display owner. It is opaque to the
 /// encoder and is copied without deriving it from a head index or HDA NID.
 pub fn encode(report: *const edid.Report, port_id: [8]u8) Error!Data {
+    return encodeTransport(report, port_id, .hdmi);
+}
+pub fn encodeTransport(report: *const edid.Report, port_id: [8]u8, transport: Transport) Error!Data {
     if (!report.complete()) return error.Incomplete;
-    if (!report.digital or !report.hdmi or report.cta_revision == 0) return error.Unsupported;
+    if (!report.digital or (transport == .hdmi and !report.hdmi) or report.cta_revision == 0) return error.Unsupported;
     if (report.cta_revision > 3 or report.audio_count > report.audio.len) return error.Invalid;
     var result: Data = .{};
     var sads: [max_sads]edid.Audio = @splat(.{});
@@ -57,8 +61,9 @@ pub fn encode(report: *const edid.Report, port_id: [8]u8) Error!Data {
     result.bytes[0] = 2 << 3;
     result.bytes[2] = @intCast((16 + name_len + count * 3 + 3) / 4);
     result.bytes[4] = report.cta_revision << 5 | @as(u8, @intCast(name_len));
-    result.bytes[5] = @as(u8, @intCast(count)) << 4 | @as(u8, @intFromBool(report.audio_infoframes)) << 1;
-    result.bytes[6] = report.audio_latency;
+    result.bytes[5] = @as(u8, @intCast(count)) << 4 | @intFromEnum(transport) << 2 |
+        @as(u8, @intFromBool(transport == .hdmi and report.audio_infoframes)) << 1;
+    result.bytes[6] = if (transport == .hdmi) report.audio_latency else 0;
     result.bytes[7] = @truncate(report.speakers);
     @memcpy(result.bytes[8..16], &port_id);
     std.mem.writeInt(u16, result.bytes[16..18], manufacturer, .little);

@@ -143,6 +143,9 @@ test "complete CTA audio becomes bounded ELD without widening receiver PCM capab
     try edid.parse(&bytes, &report);
     try t.expect(report.complete() and report.basic_audio and report.cta_revision == 3);
     try t.expectError(error.Unsupported, edid.eld.encode(&report, port)); // no HDMI declaration
+    const dp = try edid.eld.encodeTransport(&report, port, .display_port);
+    try t.expect(dp.stereo_48k_s16 and dp.bytes[5] & 15 == 4 and dp.bytes[6] == 0);
+    try t.expectEqualSlices(u8, &port, dp.bytes[8..16]);
 }
 test "bounded parser rejects truncated base and preserves output on fatal errors" {
     var sentinel = edid.Report{ .serial = 0xcafe1234 };
