@@ -301,6 +301,121 @@ pub const R4GfxRenderListRequest = extern struct {
     count: u32,
     reserved: u32,
 };
+
+pub const R4GfxPresentationInfo = extern struct {
+    version: u32,
+    size: u32,
+    flags: u32,
+    head_id: u32,
+    adapter_id: u32,
+    width: u32,
+    height: u32,
+    format: u32,
+    device_generation: u64,
+    reset_generation: u64,
+    display_generation: u64,
+    sequence: u64,
+    policies: u32,
+    buffer_count: u32,
+    plane_count: u32,
+    path: u32,
+    interval_ns: u64,
+    observed_sequence: u64,
+    observed_ns: u64,
+    reserved: u64,
+};
+
+pub const R4GfxSwapchain = extern struct {
+    slot: u32,
+    reserved: u32,
+    generation: u64,
+    device_generation: u64,
+    device_address: u64,
+};
+
+pub const R4GfxSwapchainDesc = extern struct {
+    version: u32,
+    size: u32,
+    head_id: u32,
+    policy: u32,
+    flags: u32,
+    count: u32,
+    display_generation: u64,
+    images: u64,
+};
+
+pub const R4GfxSwapchainFrame = extern struct {
+    slot: u32,
+    reserved: u32,
+    generation: u64,
+    serial: u64,
+    image: R4GfxResource,
+};
+
+pub const R4GfxSwapchainPresent = extern struct {
+    version: u32,
+    size: u32,
+    frame: R4GfxSwapchainFrame,
+    render_job: R4GfxJob,
+    deadline_ns: u64,
+    intent: u32,
+    blockers: u32,
+};
+
+pub const R4GfxSwapchainFrameStatus = extern struct {
+    frame: R4GfxSwapchainFrame,
+    phase: u32,
+    result: u32,
+    path: u32,
+    held_flags: u32,
+    input_ns: u64,
+    acquired_ns: u64,
+    queued_ns: u64,
+    render_end_ns: u64,
+    selected_ns: u64,
+    submitted_ns: u64,
+    copied_ns: u64,
+    visible_ns: u64,
+    released_ns: u64,
+};
+
+pub const R4GfxSwapchainStatus = extern struct {
+    version: u32,
+    size: u32,
+    life: u32,
+    policy: u32,
+    count: u32,
+    queued_count: u32,
+    held_count: u32,
+    path: u32,
+    generation: u64,
+    next_start_ns: u64,
+    frame0: R4GfxSwapchainFrameStatus,
+    frame1: R4GfxSwapchainFrameStatus,
+    frame2: R4GfxSwapchainFrameStatus,
+};
+
+pub const R4GfxPresentationPlan = extern struct {
+    version: u32,
+    size: u32,
+    head_id: u32,
+    flags: u32,
+    source: R4GfxResource,
+    source_rect: R4GfxRect,
+    target_rect: R4GfxRect,
+    color_space: u32,
+    transform: u32,
+    intent: u32,
+    reserved: u32,
+};
+
+pub const R4GfxPresentationDecision = extern struct {
+    version: u32,
+    size: u32,
+    path: u32,
+    reasons: u32,
+    display_generation: u64,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -357,6 +472,32 @@ pub const prepared_reused: u32 = 4;
 pub const device_gpu_present: u32 = 16;
 pub const device_gpu_render_list: u32 = 32;
 pub const render_list_capacity: u32 = 16;
+pub const swapchain_capacity: u32 = 4;
+pub const swapchain_image_capacity: u32 = 3;
+pub const present_policy_fifo: u32 = 0;
+pub const present_policy_latest_ready: u32 = 1;
+pub const present_policy_immediate: u32 = 2;
+pub const present_require_vsync: u32 = 1;
+pub const present_active: u32 = 1;
+pub const present_lost: u32 = 2;
+pub const present_occluded: u32 = 4;
+pub const present_synchronized: u32 = 8;
+pub const present_visibility: u32 = 16;
+pub const present_native: u32 = 32;
+pub const present_direct: u32 = 64;
+pub const present_overlay: u32 = 128;
+pub const present_path_software: u32 = 0;
+pub const present_path_composition: u32 = 1;
+pub const present_path_direct: u32 = 2;
+pub const present_path_overlay: u32 = 3;
+pub const source_create_native_scanout: u32 = 5;
+pub const device_gpu_direct: u32 = 64;
+pub const present_block_nonopaque: u32 = 1;
+pub const present_block_windows: u32 = 2;
+pub const present_block_readers: u32 = 4;
+pub const present_block_cursor: u32 = 8;
+pub const present_block_menus: u32 = 16;
+pub const present_block_composition: u32 = 32;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -365,6 +506,9 @@ pub const status_alias: i32 = -5;
 pub const status_busy: i32 = -6;
 pub const status_stale: i32 = -7;
 pub const status_unavailable: i32 = -8;
+pub const status_occluded: i32 = -9;
+pub const status_suboptimal: i32 = -10;
+pub const status_lost: i32 = -11;
 
 pub const api_v1_export_name = "API_V1";
 pub const api_v1_revision: u16 = 1;
@@ -407,14 +551,14 @@ pub const RenderV1 = extern struct {
 };
 
 pub const device_v1_export_name = "DEVICE_V1";
-pub const device_v1_revision: u16 = 7;
+pub const device_v1_revision: u16 = 8;
 pub const device_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 192,
+    .size = 264,
     .abi_major = 1,
-    .abi_minor = 7,
+    .abi_minor = 8,
     .interface_id_lo = 0x5234474658444556,
     .interface_id_hi = 0x52344f5330373931,
 };
@@ -438,6 +582,15 @@ pub const DeviceV1RenderSubmitFn = *const fn (device: *const R4GfxDevice, reques
 pub const DeviceV1ImagePrepareFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxImagePrepareRequest, output: *R4GfxPreparedImage) callconv(.c) i32;
 pub const DeviceV1ImagePresentFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxImagePresentRequest, output: *R4GfxJob) callconv(.c) i32;
 pub const DeviceV1RenderSubmitListFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderListRequest, output: *R4GfxJob) callconv(.c) i32;
+pub const DeviceV1PresentationInfoFn = *const fn (device: *const R4GfxDevice, head_id: u32, output: *R4GfxPresentationInfo) callconv(.c) i32;
+pub const DeviceV1SwapchainOpenFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxSwapchainDesc, output: *R4GfxSwapchain) callconv(.c) i32;
+pub const DeviceV1SwapchainAcquireFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain, input_ns: u64, output: *R4GfxSwapchainFrame) callconv(.c) i32;
+pub const DeviceV1SwapchainPresentFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain, request: *const R4GfxSwapchainPresent) callconv(.c) i32;
+pub const DeviceV1SwapchainPollFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain, output: *R4GfxSwapchainStatus) callconv(.c) i32;
+pub const DeviceV1SwapchainReleaseFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain, frame: *const R4GfxSwapchainFrame) callconv(.c) i32;
+pub const DeviceV1SwapchainResizeFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain, request: *const R4GfxSwapchainDesc) callconv(.c) i32;
+pub const DeviceV1SwapchainCloseFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain) callconv(.c) i32;
+pub const DeviceV1PresentationPlanFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxPresentationPlan, output: *R4GfxPresentationDecision) callconv(.c) i32;
 pub const DeviceV1 = extern struct {
     header: InterfaceHeader,
     storage_size: DeviceV1StorageSizeFn,
@@ -460,4 +613,13 @@ pub const DeviceV1 = extern struct {
     image_prepare: DeviceV1ImagePrepareFn,
     image_present: DeviceV1ImagePresentFn,
     render_submit_list: DeviceV1RenderSubmitListFn,
+    presentation_info: DeviceV1PresentationInfoFn,
+    swapchain_open: DeviceV1SwapchainOpenFn,
+    swapchain_acquire: DeviceV1SwapchainAcquireFn,
+    swapchain_present: DeviceV1SwapchainPresentFn,
+    swapchain_poll: DeviceV1SwapchainPollFn,
+    swapchain_release: DeviceV1SwapchainReleaseFn,
+    swapchain_resize: DeviceV1SwapchainResizeFn,
+    swapchain_close: DeviceV1SwapchainCloseFn,
+    presentation_plan: DeviceV1PresentationPlanFn,
 };

@@ -42,9 +42,9 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
 
 - ELF-Symbol: `r4gfx_device_v1`
 - ABI-Major: 1
-- Revision: 7
+- Revision: 8
 - Interface-ID: `0x52344f5330373931:0x5234474658444556`
-- Tabellengroesse: 192 Byte
+- Tabellengroesse: 264 Byte
 
 - Slot 0, Offset 32: `storage_size` - Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
@@ -86,6 +86,24 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
   Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Copies request/dependencies and retains source through the existing job lifecycle. A Busy result has no output side effects; leave the previous complete image visible and retry from the event loop..
 - Slot 19, Offset 184: `render_submit_list` - Submit a bounded native draw list through the common queue. Capability device_gpu_render_list is required. No CPU image mapping, application device words, blocking wait or per-draw queue fence.
   Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error..
+- Slot 20, Offset 192: `presentation_info` - Query the current output capabilities without mutating a chain.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
+- Slot 21, Offset 200: `swapchain_open` - Validate and retain the complete image pool atomically before publication.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
+- Slot 22, Offset 208: `swapchain_acquire` - Acquire a free image without waiting; Busy exposes bounded backpressure.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
+- Slot 23, Offset 216: `swapchain_present` - Queue an immutable frame and retain its optional producer job. Physical submission occurs in poll.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
+- Slot 24, Offset 224: `swapchain_poll` - Poll exact receipts and attempt at most one ready presentation; output includes every frame and pacing deadline.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
+- Slot 25, Offset 232: `swapchain_release` - Release one terminal or unused acquired image; any outstanding producer or consumer keeps it Busy.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
+- Slot 26, Offset 240: `swapchain_resize` - Drain obsolete frames through the same cleanup before atomically rebinding a complete pool; old frame tokens remain stale.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
+- Slot 27, Offset 248: `swapchain_close` - Idempotent logical close with bounded progress. Busy keeps storage and resource ownership alive until actual retirement.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
+- Slot 28, Offset 256: `presentation_plan` - Evaluate format/layout/geometry/color and concurrent consumers against current per-output capabilities.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
 
 Typen
 -----
@@ -118,6 +136,15 @@ Typen
 - `R4GfxPreparedImage`: 80 Byte, Alignment 8. Caller owns one returned image reference and, for conversion, its asynchronous copy job. Flags1=copy pending,2=software image,4=reused. dependency_count fences were written to the caller ready array; pass them to a subsequent draw. Successful prepare is not copy completion. Release the job only after physical retirement, and release the image reference independently.
 - `R4GfxImagePresentRequest`: 72 Byte, Alignment 8. Present one complete native XRGB image to the active output at unchanged dimensions. frame_key is a nonzero producer generation; deadline_ns is a finite absolute deadline. At most8 copied dependencies; reserved is zero. Return is ordinary R4GfxJob ownership. Source stays retained until job_release after physical retirement. Completion means the device copied into private scanout storage; visible scanout remains the platform DisplayPresentationStats receipt. No CPU image mapping or blocking GPU wait.
 - `R4GfxRenderListRequest`: 24 Byte, Alignment 8. Copied array of 1..16 R4GfxRenderRequest records. All records share source, target, pipeline, sampler, transfer and deadline. Only the first record carries dependencies; rectangles, color and opacity may vary. One ordinary retained job covers the entire native list. All metadata validates before any submission; reserved is zero.
+- `R4GfxPresentationInfo`: 112 Byte, Alignment 8. Per-head real presentation capabilities. Flags and policy bits match the documented R4GFX presentation constants; observations are monotonic CPU times, never GPU-clock conversions.
+- `R4GfxSwapchain`: 32 Byte, Alignment 8. Opaque chain identity tied to its exact device storage; resize changes frame generation while preserving this chain identity.
+- `R4GfxSwapchainDesc`: 40 Byte, Alignment 8. Copies and retains2..3 distinct R4GfxResource images from images. Head/output generation and all image geometry must match. flags bit0 requires hardware VSync. Existing image resources determine native or software presentation. No per-frame allocation.
+- `R4GfxSwapchainFrame`: 56 Byte, Alignment 8. Acquired image and exact frame identity. Caller may render only while acquired; Present transfers its lifetime to the chain. Release succeeds only after all render/consumer readers retire, or for an unused acquired image.
+- `R4GfxSwapchainPresent`: 112 Byte, Alignment 8. Queues one acquired image with an optional same-device render job; zero job means CPU rendering is already finished. The chain retains that job while pending. All frames have a finite deadline. intent0 composition/copy,1 preferred direct,2 preferred overlay; blockers describe competing consumers. Unsupported direct/overlay requests select composition/copy. Blockers: bit0 nonopaque,bit1 other windows,bit2 readers,bit3 software cursor,bit4 menus,bit5 force composition. Admission and actual dispatch recheck the selected native capability. A visible direct image remains consumer-held until its own fence physically retires; close requests restoration before releasing it.
+- `R4GfxSwapchainFrameStatus`: 144 Byte, Alignment 8. Bounded frame status. phase0free/1acquired/2queued/3submitted/4terminal; result0pending/1presented/2copied/3discarded/4failed/5lost. held_flags bit0 render,bit1 consumer. Times use monotonic nanoseconds; zero is unknown. selected_ns is a predicted scanout opportunity, not observed VBlank. copied/visible/released are distinct actual receipts.
+- `R4GfxSwapchainStatus`: 480 Byte, Alignment 8. Snapshot after one bounded nonblocking progress step. life0active/1occluded/2suboptimal/3lost/4closing. Explicit frame records avoid borrowed output arrays. next_start_ns may be combined with an ordinary event wait.
+- `R4GfxPresentationPlan`: 96 Byte, Alignment 8. Compositor eligibility request. flags: bit0 opaque,bit1 sole visible surface,bit2 other readers,bit3 software cursor,bit4 menus,bit5 force composition. Only identity color/transform and exact unscaled geometry can use direct/overlay in this contract.
+- `R4GfxPresentationDecision`: 24 Byte, Alignment 8. Selected path0 software copy/1 native composition-copy/2 direct/3 overlay. reasons bits: format1/layout2/geometry4/color8/readers16/cursor32/windows64/menus128/capability256/explicit512. Pure eligibility does not submit, allocate or claim visibility.
 
 Besitzregeln
 ------------

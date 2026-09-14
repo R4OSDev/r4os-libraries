@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 7,
+      "revision": 8,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -1365,6 +1365,564 @@
             "ownership": "Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error."
           },
           "description": "Submit a bounded native draw list through the common queue. Capability device_gpu_render_list is required. No CPU image mapping, application device words, blocking wait or per-draw queue fence."
+        },
+        {
+          "name": "presentation_info",
+          "c_name": "r4gfx_presentation_info",
+          "symbol": "r4gfx_presentation_info_impl",
+          "slot": 20,
+          "since_revision": 8,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "head_id",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "head_id"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxPresentationInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Query the current output capabilities without mutating a chain."
+        },
+        {
+          "name": "swapchain_open",
+          "c_name": "r4gfx_swapchain_open",
+          "symbol": "r4gfx_swapchain_open_impl",
+          "slot": 21,
+          "since_revision": 8,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxSwapchainDesc",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxSwapchain",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Validate and retain the complete image pool atomically before publication."
+        },
+        {
+          "name": "swapchain_acquire",
+          "c_name": "r4gfx_swapchain_acquire",
+          "symbol": "r4gfx_swapchain_acquire_impl",
+          "slot": 22,
+          "since_revision": 8,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "chain",
+              "type": {
+                "name": "R4GfxSwapchain",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "chain"
+            },
+            {
+              "name": "input_ns",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "input_ns"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxSwapchainFrame",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Acquire a free image without waiting; Busy exposes bounded backpressure."
+        },
+        {
+          "name": "swapchain_present",
+          "c_name": "r4gfx_swapchain_present",
+          "symbol": "r4gfx_swapchain_present_impl",
+          "slot": 23,
+          "since_revision": 8,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "chain",
+              "type": {
+                "name": "R4GfxSwapchain",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "chain"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxSwapchainPresent",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Queue an immutable frame and retain its optional producer job. Physical submission occurs in poll."
+        },
+        {
+          "name": "swapchain_poll",
+          "c_name": "r4gfx_swapchain_poll",
+          "symbol": "r4gfx_swapchain_poll_impl",
+          "slot": 24,
+          "since_revision": 8,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "chain",
+              "type": {
+                "name": "R4GfxSwapchain",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "chain"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxSwapchainStatus",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Poll exact receipts and attempt at most one ready presentation; output includes every frame and pacing deadline."
+        },
+        {
+          "name": "swapchain_release",
+          "c_name": "r4gfx_swapchain_release",
+          "symbol": "r4gfx_swapchain_release_impl",
+          "slot": 25,
+          "since_revision": 8,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "chain",
+              "type": {
+                "name": "R4GfxSwapchain",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "chain"
+            },
+            {
+              "name": "frame",
+              "type": {
+                "name": "R4GfxSwapchainFrame",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "frame"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Release one terminal or unused acquired image; any outstanding producer or consumer keeps it Busy."
+        },
+        {
+          "name": "swapchain_resize",
+          "c_name": "r4gfx_swapchain_resize",
+          "symbol": "r4gfx_swapchain_resize_impl",
+          "slot": 26,
+          "since_revision": 8,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "chain",
+              "type": {
+                "name": "R4GfxSwapchain",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "chain"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxSwapchainDesc",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Drain obsolete frames through the same cleanup before atomically rebinding a complete pool; old frame tokens remain stale."
+        },
+        {
+          "name": "swapchain_close",
+          "c_name": "r4gfx_swapchain_close",
+          "symbol": "r4gfx_swapchain_close_impl",
+          "slot": 27,
+          "since_revision": 8,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "chain",
+              "type": {
+                "name": "R4GfxSwapchain",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "chain"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Idempotent logical close with bounded progress. Busy keeps storage and resource ownership alive until actual retirement."
+        },
+        {
+          "name": "presentation_plan",
+          "c_name": "r4gfx_presentation_plan",
+          "symbol": "r4gfx_presentation_plan_impl",
+          "slot": 28,
+          "since_revision": 8,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxPresentationPlan",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxPresentationDecision",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Evaluate format/layout/geometry/color and concurrent consumers against current per-output capabilities."
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
@@ -3937,6 +4495,1046 @@
         }
       ],
       "description": "Copied array of 1..16 R4GfxRenderRequest records. All records share source, target, pipeline, sampler, transfer and deadline. Only the first record carries dependencies; rectangles, color and opacity may vary. One ordinary retained job covers the entire native list. All metadata validates before any submission; reserved is zero."
+    },
+    {
+      "name": "R4GfxPresentationInfo",
+      "size": 112,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "flags",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "head_id",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "head_id"
+        },
+        {
+          "name": "adapter_id",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "adapter_id"
+        },
+        {
+          "name": "width",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width"
+        },
+        {
+          "name": "height",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "format",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "format"
+        },
+        {
+          "name": "device_generation",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_generation"
+        },
+        {
+          "name": "reset_generation",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reset_generation"
+        },
+        {
+          "name": "display_generation",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "display_generation"
+        },
+        {
+          "name": "sequence",
+          "offset": 56,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "sequence"
+        },
+        {
+          "name": "policies",
+          "offset": 64,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "policies"
+        },
+        {
+          "name": "buffer_count",
+          "offset": 68,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "buffer_count"
+        },
+        {
+          "name": "plane_count",
+          "offset": 72,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "plane_count"
+        },
+        {
+          "name": "path",
+          "offset": 76,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "path"
+        },
+        {
+          "name": "interval_ns",
+          "offset": 80,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "interval_ns"
+        },
+        {
+          "name": "observed_sequence",
+          "offset": 88,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "observed_sequence"
+        },
+        {
+          "name": "observed_ns",
+          "offset": 96,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "observed_ns"
+        },
+        {
+          "name": "reserved",
+          "offset": 104,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Per-head real presentation capabilities. Flags and policy bits match the documented R4GFX presentation constants; observations are monotonic CPU times, never GPU-clock conversions."
+    },
+    {
+      "name": "R4GfxSwapchain",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "slot",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "slot"
+        },
+        {
+          "name": "reserved",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "generation",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "generation"
+        },
+        {
+          "name": "device_generation",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_generation"
+        },
+        {
+          "name": "device_address",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_address"
+        }
+      ],
+      "description": "Opaque chain identity tied to its exact device storage; resize changes frame generation while preserving this chain identity."
+    },
+    {
+      "name": "R4GfxSwapchainDesc",
+      "size": 40,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "head_id",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "head_id"
+        },
+        {
+          "name": "policy",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "policy"
+        },
+        {
+          "name": "flags",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "count",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "count"
+        },
+        {
+          "name": "display_generation",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "display_generation"
+        },
+        {
+          "name": "images",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "images"
+        }
+      ],
+      "description": "Copies and retains2..3 distinct R4GfxResource images from images. Head/output generation and all image geometry must match. flags bit0 requires hardware VSync. Existing image resources determine native or software presentation. No per-frame allocation."
+    },
+    {
+      "name": "R4GfxSwapchainFrame",
+      "size": 56,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "slot",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "slot"
+        },
+        {
+          "name": "reserved",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "generation",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "generation"
+        },
+        {
+          "name": "serial",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "serial"
+        },
+        {
+          "name": "image",
+          "offset": 24,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "image"
+        }
+      ],
+      "description": "Acquired image and exact frame identity. Caller may render only while acquired; Present transfers its lifetime to the chain. Release succeeds only after all render/consumer readers retire, or for an unused acquired image."
+    },
+    {
+      "name": "R4GfxSwapchainPresent",
+      "size": 112,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "frame",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxSwapchainFrame",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "frame"
+        },
+        {
+          "name": "render_job",
+          "offset": 64,
+          "type": {
+            "name": "R4GfxJob",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "render_job"
+        },
+        {
+          "name": "deadline_ns",
+          "offset": 96,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "deadline_ns"
+        },
+        {
+          "name": "intent",
+          "offset": 104,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "intent"
+        },
+        {
+          "name": "blockers",
+          "offset": 108,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "blockers"
+        }
+      ],
+      "description": "Queues one acquired image with an optional same-device render job; zero job means CPU rendering is already finished. The chain retains that job while pending. All frames have a finite deadline. intent0 composition/copy,1 preferred direct,2 preferred overlay; blockers describe competing consumers. Unsupported direct/overlay requests select composition/copy. Blockers: bit0 nonopaque,bit1 other windows,bit2 readers,bit3 software cursor,bit4 menus,bit5 force composition. Admission and actual dispatch recheck the selected native capability. A visible direct image remains consumer-held until its own fence physically retires; close requests restoration before releasing it."
+    },
+    {
+      "name": "R4GfxSwapchainFrameStatus",
+      "size": 144,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "frame",
+          "offset": 0,
+          "type": {
+            "name": "R4GfxSwapchainFrame",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "frame"
+        },
+        {
+          "name": "phase",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "phase"
+        },
+        {
+          "name": "result",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "result"
+        },
+        {
+          "name": "path",
+          "offset": 64,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "path"
+        },
+        {
+          "name": "held_flags",
+          "offset": 68,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "held_flags"
+        },
+        {
+          "name": "input_ns",
+          "offset": 72,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "input_ns"
+        },
+        {
+          "name": "acquired_ns",
+          "offset": 80,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "acquired_ns"
+        },
+        {
+          "name": "queued_ns",
+          "offset": 88,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "queued_ns"
+        },
+        {
+          "name": "render_end_ns",
+          "offset": 96,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "render_end_ns"
+        },
+        {
+          "name": "selected_ns",
+          "offset": 104,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "selected_ns"
+        },
+        {
+          "name": "submitted_ns",
+          "offset": 112,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "submitted_ns"
+        },
+        {
+          "name": "copied_ns",
+          "offset": 120,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "copied_ns"
+        },
+        {
+          "name": "visible_ns",
+          "offset": 128,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "visible_ns"
+        },
+        {
+          "name": "released_ns",
+          "offset": 136,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "released_ns"
+        }
+      ],
+      "description": "Bounded frame status. phase0free/1acquired/2queued/3submitted/4terminal; result0pending/1presented/2copied/3discarded/4failed/5lost. held_flags bit0 render,bit1 consumer. Times use monotonic nanoseconds; zero is unknown. selected_ns is a predicted scanout opportunity, not observed VBlank. copied/visible/released are distinct actual receipts."
+    },
+    {
+      "name": "R4GfxSwapchainStatus",
+      "size": 480,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "life",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "life"
+        },
+        {
+          "name": "policy",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "policy"
+        },
+        {
+          "name": "count",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "count"
+        },
+        {
+          "name": "queued_count",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "queued_count"
+        },
+        {
+          "name": "held_count",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "held_count"
+        },
+        {
+          "name": "path",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "path"
+        },
+        {
+          "name": "generation",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "generation"
+        },
+        {
+          "name": "next_start_ns",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "next_start_ns"
+        },
+        {
+          "name": "frame0",
+          "offset": 48,
+          "type": {
+            "name": "R4GfxSwapchainFrameStatus",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "frame0"
+        },
+        {
+          "name": "frame1",
+          "offset": 192,
+          "type": {
+            "name": "R4GfxSwapchainFrameStatus",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "frame1"
+        },
+        {
+          "name": "frame2",
+          "offset": 336,
+          "type": {
+            "name": "R4GfxSwapchainFrameStatus",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "frame2"
+        }
+      ],
+      "description": "Snapshot after one bounded nonblocking progress step. life0active/1occluded/2suboptimal/3lost/4closing. Explicit frame records avoid borrowed output arrays. next_start_ns may be combined with an ordinary event wait."
+    },
+    {
+      "name": "R4GfxPresentationPlan",
+      "size": 96,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "head_id",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "head_id"
+        },
+        {
+          "name": "flags",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "source",
+          "offset": 16,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source"
+        },
+        {
+          "name": "source_rect",
+          "offset": 48,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source_rect"
+        },
+        {
+          "name": "target_rect",
+          "offset": 64,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target_rect"
+        },
+        {
+          "name": "color_space",
+          "offset": 80,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "color_space"
+        },
+        {
+          "name": "transform",
+          "offset": 84,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "transform"
+        },
+        {
+          "name": "intent",
+          "offset": 88,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "intent"
+        },
+        {
+          "name": "reserved",
+          "offset": 92,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Compositor eligibility request. flags: bit0 opaque,bit1 sole visible surface,bit2 other readers,bit3 software cursor,bit4 menus,bit5 force composition. Only identity color/transform and exact unscaled geometry can use direct/overlay in this contract."
+    },
+    {
+      "name": "R4GfxPresentationDecision",
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "path",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "path"
+        },
+        {
+          "name": "reasons",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reasons"
+        },
+        {
+          "name": "display_generation",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "display_generation"
+        }
+      ],
+      "description": "Selected path0 software copy/1 native composition-copy/2 direct/3 overlay. reasons bits: format1/layout2/geometry4/color8/readers16/cursor32/windows64/menus128/capability256/explicit512. Pure eligibility does not submit, allocate or claim visibility."
     }
   ],
   "constants": [
@@ -4331,6 +5929,188 @@
       "type": "u32",
       "value": 16,
       "description": "Maximum draws in render_submit_list."
+    },
+    {
+      "zig_name": "swapchain_capacity",
+      "c_name": "R4GFX_SWAPCHAIN_CAPACITY",
+      "type": "u32",
+      "value": 4,
+      "description": "swapchain_capacity"
+    },
+    {
+      "zig_name": "swapchain_image_capacity",
+      "c_name": "R4GFX_SWAPCHAIN_IMAGE_CAPACITY",
+      "type": "u32",
+      "value": 3,
+      "description": "swapchain_image_capacity"
+    },
+    {
+      "zig_name": "present_policy_fifo",
+      "c_name": "R4GFX_PRESENT_POLICY_FIFO",
+      "type": "u32",
+      "value": 0,
+      "description": "present_policy_fifo"
+    },
+    {
+      "zig_name": "present_policy_latest_ready",
+      "c_name": "R4GFX_PRESENT_POLICY_LATEST_READY",
+      "type": "u32",
+      "value": 1,
+      "description": "present_policy_latest_ready"
+    },
+    {
+      "zig_name": "present_policy_immediate",
+      "c_name": "R4GFX_PRESENT_POLICY_IMMEDIATE",
+      "type": "u32",
+      "value": 2,
+      "description": "present_policy_immediate"
+    },
+    {
+      "zig_name": "present_require_vsync",
+      "c_name": "R4GFX_PRESENT_REQUIRE_VSYNC",
+      "type": "u32",
+      "value": 1,
+      "description": "present_require_vsync"
+    },
+    {
+      "zig_name": "present_active",
+      "c_name": "R4GFX_PRESENT_ACTIVE",
+      "type": "u32",
+      "value": 1,
+      "description": "present_active"
+    },
+    {
+      "zig_name": "present_lost",
+      "c_name": "R4GFX_PRESENT_LOST",
+      "type": "u32",
+      "value": 2,
+      "description": "present_lost"
+    },
+    {
+      "zig_name": "present_occluded",
+      "c_name": "R4GFX_PRESENT_OCCLUDED",
+      "type": "u32",
+      "value": 4,
+      "description": "present_occluded"
+    },
+    {
+      "zig_name": "present_synchronized",
+      "c_name": "R4GFX_PRESENT_SYNCHRONIZED",
+      "type": "u32",
+      "value": 8,
+      "description": "present_synchronized"
+    },
+    {
+      "zig_name": "present_visibility",
+      "c_name": "R4GFX_PRESENT_VISIBILITY",
+      "type": "u32",
+      "value": 16,
+      "description": "present_visibility"
+    },
+    {
+      "zig_name": "present_native",
+      "c_name": "R4GFX_PRESENT_NATIVE",
+      "type": "u32",
+      "value": 32,
+      "description": "present_native"
+    },
+    {
+      "zig_name": "present_direct",
+      "c_name": "R4GFX_PRESENT_DIRECT",
+      "type": "u32",
+      "value": 64,
+      "description": "present_direct"
+    },
+    {
+      "zig_name": "present_overlay",
+      "c_name": "R4GFX_PRESENT_OVERLAY",
+      "type": "u32",
+      "value": 128,
+      "description": "present_overlay"
+    },
+    {
+      "zig_name": "present_path_software",
+      "c_name": "R4GFX_PRESENT_PATH_SOFTWARE",
+      "type": "u32",
+      "value": 0,
+      "description": "present_path_software"
+    },
+    {
+      "zig_name": "present_path_composition",
+      "c_name": "R4GFX_PRESENT_PATH_COMPOSITION",
+      "type": "u32",
+      "value": 1,
+      "description": "present_path_composition"
+    },
+    {
+      "zig_name": "present_path_direct",
+      "c_name": "R4GFX_PRESENT_PATH_DIRECT",
+      "type": "u32",
+      "value": 2,
+      "description": "present_path_direct"
+    },
+    {
+      "zig_name": "present_path_overlay",
+      "c_name": "R4GFX_PRESENT_PATH_OVERLAY",
+      "type": "u32",
+      "value": 3,
+      "description": "present_path_overlay"
+    },
+    {
+      "zig_name": "source_create_native_scanout",
+      "c_name": "R4GFX_SOURCE_CREATE_NATIVE_SCANOUT",
+      "type": "u32",
+      "value": 5,
+      "description": "Explicit native linear XRGB allocation with render/transfer/scanout usage60. Uses the unchanged R4GfxNativeImage payload. The driver must verify contiguous display storage; rejection is returned without silently changing allocation kind."
+    },
+    {
+      "zig_name": "device_gpu_direct",
+      "c_name": "R4GFX_DEVICE_GPU_DIRECT",
+      "type": "u32",
+      "value": 64,
+      "description": "Native direct-image queue handoff and separate physical source retirement are implemented. Actual per-output capabilities and eligibility remain required."
+    },
+    {
+      "zig_name": "present_block_nonopaque",
+      "c_name": "R4GFX_PRESENT_BLOCK_NONOPAQUE",
+      "type": "u32",
+      "value": 1,
+      "description": "Direct admission blocker: source is not opaque."
+    },
+    {
+      "zig_name": "present_block_windows",
+      "c_name": "R4GFX_PRESENT_BLOCK_WINDOWS",
+      "type": "u32",
+      "value": 2,
+      "description": "Direct admission blocker: other visible windows need composition."
+    },
+    {
+      "zig_name": "present_block_readers",
+      "c_name": "R4GFX_PRESENT_BLOCK_READERS",
+      "type": "u32",
+      "value": 4,
+      "description": "Direct admission blocker: another consumer needs the composited image."
+    },
+    {
+      "zig_name": "present_block_cursor",
+      "c_name": "R4GFX_PRESENT_BLOCK_CURSOR",
+      "type": "u32",
+      "value": 8,
+      "description": "Direct admission blocker: software cursor."
+    },
+    {
+      "zig_name": "present_block_menus",
+      "c_name": "R4GFX_PRESENT_BLOCK_MENUS",
+      "type": "u32",
+      "value": 16,
+      "description": "Direct admission blocker: menus or transient UI."
+    },
+    {
+      "zig_name": "present_block_composition",
+      "c_name": "R4GFX_PRESENT_BLOCK_COMPOSITION",
+      "type": "u32",
+      "value": 32,
+      "description": "Explicit composition request."
     }
   ],
   "errors": [
@@ -4389,6 +6169,27 @@
       "type": "i32",
       "value": -8,
       "description": "status_unavailable"
+    },
+    {
+      "zig_name": "status_occluded",
+      "c_name": "R4GFX_STATUS_OCCLUDED",
+      "type": "i32",
+      "value": -9,
+      "description": "status_occluded"
+    },
+    {
+      "zig_name": "status_suboptimal",
+      "c_name": "R4GFX_STATUS_SUBOPTIMAL",
+      "type": "i32",
+      "value": -10,
+      "description": "status_suboptimal"
+    },
+    {
+      "zig_name": "status_lost",
+      "c_name": "R4GFX_STATUS_LOST",
+      "type": "i32",
+      "value": -11,
+      "description": "status_lost"
     }
   ],
   "ownership_rules": [

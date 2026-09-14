@@ -114,6 +114,7 @@ pub fn cancel(device: *d.Device, handle: *const c.R4GfxJob) d.Error!i32 {
 pub fn release(device: *d.Device, handle: *const c.R4GfxJob) d.Error!i32 {
     _ = try d.pointer(c.R4GfxJob, @intFromPtr(handle));
     const item = try device.job(handle.*);
+    if (item.chain_refs != 0) return error.Busy;
     const value = try query(device, item);
     if (value.phase != a.gfx_queue_phase_terminal or value.flags & (a.gfx_queue_flag_device_active | a.gfx_queue_flag_resources_held) != 0) return error.Busy;
     const queues = device.queues();

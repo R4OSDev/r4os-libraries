@@ -24,7 +24,8 @@ fn descriptorImage(descriptor: a.GfxBufferDescriptor) d.Error!c.R4GfxCpuImage {
     return image;
 }
 pub fn create(device: *d.Device, input: *const c.R4GfxResourceDesc, output: *c.R4GfxResource) d.Error!i32 {
-    return createWithUsage(device,input,output,28);
+    _ = try d.pointer(c.R4GfxResourceDesc, @intFromPtr(input));
+    return createWithUsage(device,input,output,if (input.source_kind == c.source_create_native_scanout) 60 else 28);
 }
 /// Internal image preparation can request a separate scanout allocation.
 /// The existing public native-image request retains its offscreen usage28.
@@ -54,13 +55,15 @@ pub fn createWithUsage(device: *d.Device, input: *const c.R4GfxResourceDesc, out
         c.resource_image => {
             if (request.flags & ~c.image_target != 0 or request.operation != 0 or request.sampler != 0) return error.Invalid;
             switch (request.source_kind) {
-                c.source_create_native => {
+                c.source_create_native, c.source_create_native_scanout => {
                     if (request.source_generation != 0 or !std.meta.eql(request.image, empty_image)) return error.Invalid;
                     native = (try d.pointer(c.R4GfxNativeImage, request.source_address)).*;
                     if (native.version != 1 or native.size != @sizeOf(c.R4GfxNativeImage) or native.deadline_ns == 0 or
                         native.deadline_ns == std.math.maxInt(u64) or native.width == 0 or native.height == 0) return error.Invalid;
                     if (native.layout > 1 or (native.format != c.format_xrgb8888 and native.format != c.format_argb8888 and native.format != c.format_r8)) return error.Unsupported;
                     if (device.selected.binding.adapter_id == 0) return error.Unsupported;
+                    if (request.source_kind == c.source_create_native_scanout and
+                        (native.format != c.format_xrgb8888 or native.layout != 0 or device.gpu_operations & c.device_gpu_direct == 0)) return error.Unsupported;
                 },
                 c.source_create_system, c.source_borrow_cpu => {
                     if (request.source_address != 0) return error.Invalid;
@@ -97,7 +100,7 @@ pub fn createWithUsage(device: *d.Device, input: *const c.R4GfxResourceDesc, out
             item.source_generation != candidate.source_generation or !std.meta.eql(item.source_key, candidate.source_key) or
             item.sampler != candidate.sampler or item.operation != candidate.operation) continue;
         if (candidate.kind == c.resource_image) {
-            if (candidate.source_kind == c.source_create_system or candidate.source_kind == c.source_create_native) continue;
+            if (candidate.source_kind == c.source_create_system or candidate.source_kind == c.source_create_native or candidate.source_kind == c.source_create_native_scanout) continue;
             if (candidate.source_kind == c.source_borrow_cpu and !std.meta.eql(item.image, candidate.image)) continue;
             if (candidate.source_kind == c.source_import_buffer) continue; // Mutable BO imports have no immutable generation guarantee.
         }
@@ -116,7 +119,7 @@ pub fn createWithUsage(device: *d.Device, input: *const c.R4GfxResourceDesc, out
     if (request.kind == c.resource_image and request.source_kind != c.source_borrow_cpu) {
         const memory = device.buffers();
         switch (request.source_kind) {
-            c.source_create_native => {
+            c.source_create_native, c.source_create_native_scanout => {
                 var status: a.GfxNativeStatus = .{};
                 const allocation: a.GfxNativeAllocation = .{ .adapter_id = device.selected.binding.adapter_id,
                     .memory_generation = device.selected.memory_generation, .deadline_ns = native.deadline_ns, .kind = 1,
@@ -146,7 +149,9 @@ pub fn createWithUsage(device: *d.Device, input: *const c.R4GfxResourceDesc, out
         if (item.descriptor.location == a.gfx_buffer_location_device_local and
             (item.descriptor.adapter_id != device.selected.binding.adapter_id or item.descriptor.device_generation != device.selected.memory_generation)) return error.Stale;
         item.image = try descriptorImage(item.descriptor);
-        if (request.source_kind != c.source_create_system and request.source_kind != c.source_create_native) {
+        if (request.source_kind == c.source_create_native_scanout and (item.descriptor.usage != 60 or item.descriptor.modifier != 0 or
+            item.descriptor.format != c.format_xrgb8888 or item.descriptor.location != a.gfx_buffer_location_device_local)) return error.Unsupported;
+        if (request.source_kind != c.source_create_system and request.source_kind != c.source_create_native and request.source_kind != c.source_create_native_scanout) {
             device.counters.imports +|= 1;
             device.counters.imported_bytes +|= item.image.byte_length;
         }

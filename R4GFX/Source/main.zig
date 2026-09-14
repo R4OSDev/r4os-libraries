@@ -3,6 +3,7 @@ const r4os = @import("r4os");
 const c = @import("r4l_contract");
 const render = @import("cpu_render.zig");
 const device = @import("device.zig");
+const swapchain = @import("device_swapchain.zig");
 
 export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}
 
@@ -85,6 +86,15 @@ pub export var r4gfx_device_v1: c.DeviceV1 align(8) linksection(".data.r4l_expor
     .image_prepare = device.prepareImage,
     .image_present = device.presentImage,
     .render_submit_list = device.submitRenderList,
+    .presentation_info = swapchain.presentationInfo,
+    .swapchain_open = swapchain.open,
+    .swapchain_acquire = swapchain.acquire,
+    .swapchain_present = swapchain.present,
+    .swapchain_poll = swapchain.poll,
+    .swapchain_release = swapchain.release,
+    .swapchain_resize = swapchain.resize,
+    .swapchain_close = swapchain.close,
+    .presentation_plan = swapchain.plan,
 };
 pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
     .magic = r4os.abi.r4l_abi_magic,
@@ -96,6 +106,7 @@ pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_ex
 };
 test "layout overflow and rejected rectangles preserve bytes including padding" {
     try @import("device_test.zig").check();
+    try @import("swapchain_state_test.zig").check();
     try @import("cpu_render_test.zig").check();
     const t = std.testing;
     var layout: c.R4GfxLinearLayout = undefined;

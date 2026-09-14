@@ -33,6 +33,14 @@ const Model = struct {
     var native_result: i32 = 1;
     var native_starts: usize = 0;
     var bad_native_layout = false;
+    var clock: u64 = 100;
+    var submit_serial: u64 = 0x400000017;
+    var presentation_info: a.DisplayPresentationInfo = .{};
+    var feedback: ?a.DisplayPresentationStats = null;
+    var shown: [16]u32 = @splat(0xabcdef);
+    var present_calls: u64 = 0;
+    var fail_present = false;
+    var retire_requested = false;
     var binding: a.GfxBackendBinding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
     var nv_table: nv.BackendV1 = .{ .header = nv.backend_v1_header,
         .negotiate = @ptrCast(&nv_provider.r4nv_negotiate_impl), .encode_copy = @ptrCast(&nv_provider.r4nv_encode_copy_impl),
@@ -47,6 +55,40 @@ const Model = struct {
         operations = 7; dependency_seen = false; job_list = .{};
         native_request = .{}; native_handle = .{}; native_result = 1;
         native_starts = 0; bad_native_layout = false;
+        clock = 100; submit_serial = 0x400000017; feedback = null; shown = @splat(0xabcdef); present_calls = 0; fail_present = false;
+        retire_requested = false;
+        presentation_info = .{ .flags = a.display_presentation_info_active, .head_id = 2, .display_generation = 1,
+            .sequence = 1, .width = 4, .height = 4, .format = c.format_xrgb8888, .policies = 7, .buffer_count = 2, .plane_count = 1 };
+    }
+    fn monotonic(out: *a.MonotonicClockInfo) callconv(.c) i32 {
+        clock += 10;
+        out.* = .{ .flags = a.monotonic_clock_flag_valid, .instant_ns = clock }; return 1;
+    }
+    fn presentInfo(head: u32, out: *a.DisplayPresentationInfo) callconv(.c) i32 {
+        if (head != presentation_info.head_id) return a.gfx_output_error_unsupported;
+        out.* = presentation_info; return a.gfx_output_ok;
+    }
+    fn presentFeedback(head: u32, source: *const a.GfxFence, out: *a.DisplayPresentationStats) callconv(.c) i32 {
+        const value = feedback orelse return a.gfx_output_error_unsupported;
+        if (head != value.head_id or source.adapter_id != value.backend.adapter_id or source.device_generation != value.backend.device_generation or
+            source.reset_generation != value.backend.reset_generation or source.timeline != value.source_timeline or source.point != value.source_point) return a.gfx_output_error_unsupported;
+        out.* = value; return a.gfx_output_ok;
+    }
+    fn presentPixels(request: *const a.DisplayPresentRequest, pixels: [*]const u32, pixel_count: u32,
+        regions: [*]const a.DisplayDamageRect, region_count: u32, out: *a.DisplayPresentResult) callconv(.c) i32
+    {
+        std.debug.assert(request.source_width == presentation_info.width and request.source_height == presentation_info.height and
+            region_count == 1 and regions[0].x == 0 and regions[0].y == 0 and regions[0].w == request.source_width and regions[0].h == request.source_height);
+        if (fail_present) return a.display_present_error_unavailable;
+        for (0..request.source_height) |y| for (0..request.source_width) |x| {
+            const index = y * request.source_stride_pixels + x;
+            std.debug.assert(index < pixel_count);
+            shown[y * request.source_width + x] = pixels[index];
+        };
+        present_calls += 1;
+        out.* = .{ .flags = a.display_present_result_success | a.display_present_result_completed,
+            .source_generation = request.source_generation, .fence = present_calls, .completed_fence = present_calls };
+        return 0;
     }
     fn ref(handle: a.GfxBufferHandle) *Ref {
         std.debug.assert(handle.id != 0 and handle.id <= references.len and handle.reserved0 == 0);
@@ -153,14 +195,16 @@ const Model = struct {
     }
     fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
         std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows or
-            input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_render_list or input.operation == a.gfx_queue_operation_present) and input.dependency_count <= 1);
+            input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_render_list or input.operation == a.gfx_queue_operation_present or
+            input.operation == a.gfx_queue_operation_direct_present) and input.dependency_count <= 1);
         if (input.dependency_count == 1) {
             std.debug.assert(job_live and std.meta.eql(input.dependencies[0], status.fence));
             dependency_seen = true;
         }
         if (job_live) return a.gfx_queue_error_busy;
         const found = for (&queues) |*entry| { if (entry.handle.timeline == queue.timeline) break entry; } else unreachable;
-        status = .{ .fence = .{ .slot = 1, .timeline = queue.timeline, .point = 0x400000017, .adapter_id = found.config.adapter_id,
+        submit_serial += 1;
+        status = .{ .fence = .{ .slot = 1, .timeline = queue.timeline, .point = submit_serial, .adapter_id = found.config.adapter_id,
             .device_generation = found.config.device_generation, .reset_generation = found.config.reset_generation },
             .phase = a.gfx_queue_phase_running, .flags = a.gfx_queue_flag_device_active | a.gfx_queue_flag_resources_held, .milestone = found.config.milestone };
         job_request = input.*; job_live = true; out.* = status; return 1;
@@ -176,6 +220,9 @@ const Model = struct {
     }
     fn cancel(input: *const a.GfxFence) callconv(.c) i32 {
         std.debug.assert(job_live and std.meta.eql(input.*, status.fence));
+        if (job_request.operation == a.gfx_queue_operation_direct_present and status.phase == a.gfx_queue_phase_terminal and status.flags != 0) {
+            retire_requested = true; return a.gfx_queue_ok;
+        }
         if (status.phase == a.gfx_queue_phase_terminal) return a.gfx_queue_error_already_completed;
         status.phase = a.gfx_queue_phase_terminal; status.result = a.gfx_queue_result_cancelled; return 1;
     }
@@ -213,7 +260,7 @@ pub fn check() !void {
     Model.reset();
     const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
     const other_storage = try t.allocator.create(d.Device); defer t.allocator.destroy(other_storage); other_storage.* = .{};
-    const sys: a.R4XStartR4Sys = .{};
+    const sys: a.R4XStartR4Sys = .{ .monotonic_clock = @intFromPtr(&Model.monotonic) };
     var draw: a.R4XStartR4Draw = .{ .gfx_buffer_create = @intFromPtr(&Model.create), .gfx_buffer_describe = @intFromPtr(&Model.describe),
         .gfx_native_start = @intFromPtr(&Model.nativeStart), .gfx_native_wait = @intFromPtr(&Model.nativeWait),
         .gfx_native_receive = @intFromPtr(&Model.nativeReceive), .gfx_native_close = @intFromPtr(&Model.nativeClose),
@@ -221,6 +268,8 @@ pub fn check() !void {
         .gfx_buffer_unmap = @intFromPtr(&Model.unmap), .gfx_buffer_export_raster = @intFromPtr(&Model.exportRaster), .gfx_queue_backend_info = @intFromPtr(&Model.backendInfo),
         .gfx_queue_open = @intFromPtr(&Model.open), .gfx_queue_close = @intFromPtr(&Model.close), .gfx_queue_submit = @intFromPtr(&Model.submit),
         .gfx_queue_submit_render_list = @intFromPtr(&Model.submitList),
+        .display_presentation_info = @intFromPtr(&Model.presentInfo), .display_presentation_feedback = @intFromPtr(&Model.presentFeedback),
+        .display_present_regions = @intFromPtr(&Model.presentPixels),
         .gfx_fence_query = @intFromPtr(&Model.query), .gfx_fence_cancel = @intFromPtr(&Model.cancel), .gfx_fence_release = @intFromPtr(&Model.drop) };
     var imports = [_]a.R4XStartImport{
         .{ .group_id = @intFromEnum(a.R4LGroup.r4sys), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&sys) },
@@ -412,9 +461,142 @@ pub fn check() !void {
     try checkNativePresent(&config);
     try checkImagePreparation(&config);
     try checkTiledPreparation(&config);
+    try checkSwapchains(&config);
+}
+
+fn chainFrame(status: c.R4GfxSwapchainStatus, frame: c.R4GfxSwapchainFrame) c.R4GfxSwapchainFrameStatus {
+    return switch (frame.slot) { 1 => status.frame0, 2 => status.frame1, 3 => status.frame2, else => unreachable };
+}
+fn presentRequest(frame: c.R4GfxSwapchainFrame) c.R4GfxSwapchainPresent {
+    return .{ .version = 1, .size = @sizeOf(c.R4GfxSwapchainPresent), .frame = frame, .render_job = std.mem.zeroes(c.R4GfxJob),
+        .deadline_ns = 100000, .intent = 0, .blockers = 0 };
+}
+fn checkSwapchains(config: *const c.R4GfxDeviceConfig) !void {
+    Model.reset();
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    var pixels: [4][64]u8 align(8) = @splat(@splat(0xa5));
+    var images: [2]c.R4GfxResource = undefined;
+    for (&images, 0..) |*image, i| try t.expectEqual(c.status_ok, api.resource_create(&handle, &cpuImage(&pixels[i]), image));
+    var desc: c.R4GfxSwapchainDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxSwapchainDesc), .head_id = 2,
+        .policy = c.present_policy_fifo, .flags = c.present_require_vsync, .count = 2, .display_generation = 1, .images = @intFromPtr(&images) };
+    var chain = std.mem.zeroes(c.R4GfxSwapchain); chain.generation = 77;
+    const untouched = chain;
+    try t.expectEqual(c.status_unsupported, api.swapchain_open(&handle, &desc, &chain));
+    try t.expectEqualDeep(untouched, chain);
+    desc.flags = 0;
+    const second = images[1]; images[1] = images[0];
+    try t.expectEqual(c.status_alias, api.swapchain_open(&handle, &desc, &chain));
+    try t.expectEqualDeep(untouched, chain);
+    images[1] = second;
+    try t.expectEqual(c.status_ok, api.swapchain_open(&handle, &desc, &chain));
+    var first: c.R4GfxSwapchainFrame = undefined; var next: c.R4GfxSwapchainFrame = undefined;
+    try t.expectEqual(c.status_ok, api.swapchain_acquire(&handle, &chain, 100, &first));
+    try t.expectEqual(c.status_ok, api.swapchain_acquire(&handle, &chain, 0, &next));
+    var denied = first;
+    try t.expectEqual(c.status_busy, api.swapchain_acquire(&handle, &chain, 0, &denied));
+    try t.expectEqualDeep(first, denied);
+    var fill_desc = descriptor(c.resource_pipeline); fill_desc.operation = c.render_operation_fill;
+    var pipeline: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &fill_desc, &pipeline));
+    var draw = std.mem.zeroes(c.R4GfxDraw);
+    draw.target = first.image; draw.pipeline = pipeline; draw.color = 0x123456;
+    draw.target_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 };
+    const batch: c.R4GfxRenderBatch = .{ .commands = @intFromPtr(&draw), .command_count = 1, .flags = 0, .pixel_budget = 16 };
+    var rendered: c.R4GfxRenderStats = undefined;
+    try t.expectEqual(c.status_ok, api.render(&handle, &batch, &rendered));
+    try t.expectEqual(c.status_ok, api.swapchain_present(&handle, &chain, &presentRequest(first)));
+    var status: c.R4GfxSwapchainStatus = undefined;
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expectEqualSlices(u32, &(@as([16]u32, @splat(0x123456))), &Model.shown);
+    const frame = chainFrame(status, first);
+    try t.expect(frame.phase == 4 and frame.result == 2 and frame.visible_ns == 0 and frame.copied_ns >= frame.submitted_ns and
+        frame.held_flags == 0 and status.held_count == 0 and frame.input_ns == 100);
+    try t.expectEqual(c.status_ok, api.swapchain_release(&handle, &chain, &first));
+    Model.fail_present = true;
+    try t.expectEqual(c.status_ok, api.swapchain_present(&handle, &chain, &presentRequest(next)));
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expect(chainFrame(status, next).result == 4 and Model.present_calls == 1);
+    try t.expectEqualSlices(u32, &(@as([16]u32, @splat(0x123456))), &Model.shown);
+    Model.fail_present = false;
+    Model.presentation_info.display_generation += 1; Model.presentation_info.width = 2;
+    desc.display_generation += 1;
+    for (&images, 0..) |*image, i| {
+        var resized = cpuImage(&pixels[i + 2]); resized.image.width = 2; resized.source_generation = 2;
+        try t.expectEqual(c.status_ok, api.resource_create(&handle, &resized, image));
+    }
+    try t.expectEqual(c.status_busy, api.swapchain_resize(&handle, &chain, &desc));
+    try t.expectEqual(c.status_ok, api.swapchain_release(&handle, &chain, &next));
+    try t.expectEqual(c.status_ok, api.swapchain_resize(&handle, &chain, &desc));
+    try t.expectEqual(c.status_stale, api.swapchain_release(&handle, &chain, &first));
+    Model.presentation_info.flags = a.display_presentation_info_occluded;
+    try t.expectEqual(c.status_occluded, api.swapchain_acquire(&handle, &chain, 0, &next));
+    Model.presentation_info.flags = a.display_presentation_info_active;
+    try t.expectEqual(c.status_ok, api.swapchain_acquire(&handle, &chain, 0, &next));
+    try t.expectEqual(c.status_ok, api.swapchain_present(&handle, &chain, &presentRequest(next)));
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expect(chainFrame(status, next).result == 2 and Model.present_calls == 2);
+    try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chain));
+    try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chain));
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+
+    // Actual provider jobs and exact delayed feedback, with native execution
+    // deliberately supplied by the existing queue transport fixture.
+    Model.reset(); Model.operations = 61;
+    Model.presentation_info.backend = Model.binding; Model.presentation_info.path = 1; Model.presentation_info.policies = 3;
+    Model.presentation_info.flags = a.display_presentation_info_active | a.display_presentation_info_native |
+        a.display_presentation_info_synchronized | a.display_presentation_info_visibility;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    const native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 100000, .width = 4, .height = 4, .format = c.format_xrgb8888, .layout = 0 };
+    var native_desc = descriptor(c.resource_image); native_desc.flags = c.image_target;
+    native_desc.source_kind = c.source_create_native; native_desc.source_address = @intFromPtr(&native);
+    for (&images) |*image| try t.expectEqual(c.status_ok, api.resource_create(&handle, &native_desc, image));
+    desc.display_generation = 1; desc.flags = c.present_require_vsync;
+    try t.expectEqual(c.status_ok, api.swapchain_open(&handle, &desc, &chain));
+    try t.expectEqual(c.status_ok, api.swapchain_acquire(&handle, &chain, 0, &first));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &fill_desc, &pipeline));
+    var native_draw = std.mem.zeroes(c.R4GfxRenderRequest);
+    native_draw.version = 1; native_draw.size = @sizeOf(c.R4GfxRenderRequest); native_draw.deadline_ns = 100000;
+    native_draw.target = first.image; native_draw.pipeline = pipeline; native_draw.opacity = 255;
+    native_draw.color = 0x123456; native_draw.target_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 }; native_draw.scissor = native_draw.target_rect;
+    var producer: c.R4GfxJob = undefined;
+    try t.expectEqual(c.status_ok, api.render_submit(&handle, &native_draw, &producer));
+    var queued = presentRequest(first); queued.render_job = producer;
+    try t.expectEqual(c.status_ok, api.swapchain_present(&handle, &chain, &queued));
+    try t.expectEqual(c.status_busy, api.job_release(&handle, &producer));
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expect(chainFrame(status, first).phase == 2 and status.held_count == 1);
+    Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_complete; Model.status.flags = 0;
+    Model.status.completed_ns = Model.clock;
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &producer));
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expect(Model.job_request.operation == a.gfx_queue_operation_present and Model.maps == 0);
+    const source_fence = Model.status.fence;
+    Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_complete;
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expectEqual(c.status_busy, api.swapchain_release(&handle, &chain, &first));
+    try t.expect(status.held_count == 1);
+    Model.status.flags = 0; Model.status.completed_ns = Model.clock;
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expect(status.held_count == 0 and chainFrame(status, first).phase == 3 and chainFrame(status, first).visible_ns == 0);
+    Model.feedback = .{ .flags = a.display_presentation_flag_available, .head_id = 2, .backend = Model.binding, .display_generation = 1,
+        .source_timeline = source_fence.timeline, .source_point = source_fence.point, .visible_ns = Model.clock + 1 };
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expect(chainFrame(status, first).result == 1 and chainFrame(status, first).visible_ns == Model.feedback.?.visible_ns);
+    try t.expectEqual(c.status_ok, api.swapchain_release(&handle, &chain, &first));
+    try t.expectEqual(c.status_ok, api.swapchain_acquire(&handle, &chain, 0, &next));
+    try t.expectEqual(c.status_ok, api.swapchain_present(&handle, &chain, &presentRequest(next)));
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expectEqual(c.status_busy, api.device_close(&handle));
+    try t.expect(Model.job_live and Model.referenceCount() == 2);
+    Model.status.flags = 0;
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and !Model.job_live and Model.premature_closes == 0);
 }
 
 fn checkTiledPreparation(config: *const c.R4GfxDeviceConfig) !void {
+    try checkDirectSwapchain(config);
     for ([_]u32{c.prepare_use_texture,c.prepare_use_scanout}) |uses| {
         Model.reset(); Model.operations = 29;
         var handle: c.R4GfxDevice = undefined;
@@ -456,6 +638,51 @@ fn checkTiledPreparation(config: *const c.R4GfxDeviceConfig) !void {
         try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
         try t.expectEqual(c.status_ok,api.device_close(&handle));
     }
+}
+
+fn checkDirectSwapchain(config: *const c.R4GfxDeviceConfig) !void {
+    Model.reset(); Model.operations = 253;
+    Model.presentation_info.backend = Model.binding; Model.presentation_info.path = 1; Model.presentation_info.policies = 3;
+    Model.presentation_info.flags = a.display_presentation_info_active | a.display_presentation_info_native |
+        a.display_presentation_info_synchronized | a.display_presentation_info_visibility | a.display_presentation_info_direct;
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    const native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 100000, .width = 4, .height = 4, .format = c.format_xrgb8888, .layout = 0 };
+    var resource = descriptor(c.resource_image); resource.flags = c.image_target;
+    resource.source_kind = c.source_create_native_scanout; resource.source_address = @intFromPtr(&native);
+    var images: [2]c.R4GfxResource = undefined;
+    for (&images) |*image| try t.expectEqual(c.status_ok, api.resource_create(&handle, &resource, image));
+    try t.expect(Model.native_request.usage == 60 and Model.native_request.layout == 0);
+    const desc: c.R4GfxSwapchainDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxSwapchainDesc), .head_id = 2,
+        .policy = c.present_policy_fifo, .flags = c.present_require_vsync, .count = 2, .display_generation = 1, .images = @intFromPtr(&images) };
+    var chain: c.R4GfxSwapchain = undefined; var frame: c.R4GfxSwapchainFrame = undefined;
+    var status: c.R4GfxSwapchainStatus = undefined;
+    try t.expectEqual(c.status_ok, api.swapchain_open(&handle, &desc, &chain));
+    try t.expectEqual(c.status_ok, api.swapchain_acquire(&handle, &chain, 0, &frame));
+    var present = presentRequest(frame); present.intent = 1;
+    try t.expectEqual(c.status_ok, api.swapchain_present(&handle, &chain, &present));
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expect(Model.job_request.operation == a.gfx_queue_operation_direct_present and Model.maps == 0);
+    Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_complete;
+    Model.status.completed_ns = Model.clock;
+    Model.feedback = .{ .flags = a.display_presentation_flag_available | a.display_presentation_flag_direct, .head_id = 2,
+        .backend = Model.binding, .display_generation = 1, .source_timeline = Model.status.fence.timeline,
+        .source_point = Model.status.fence.point, .visible_ns = Model.clock + 1 };
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    const visible = chainFrame(status, frame);
+    try t.expect(visible.result == 1 and visible.path == c.present_path_direct and visible.visible_ns != 0 and visible.released_ns == 0 and status.held_count == 1);
+    try t.expectEqual(c.status_busy, api.swapchain_release(&handle, &chain, &frame));
+    // An unchanged visible front must remain pinned even after its request
+    // deadline. Close requests retirement, preserving its completed receipt.
+    Model.clock = 100001;
+    try t.expectEqual(c.status_busy, api.swapchain_close(&handle, &chain));
+    try t.expect(Model.retire_requested and Model.job_live and Model.referenceCount() == 2 and Model.status.result == a.gfx_queue_result_complete);
+    Model.status.flags = 0;
+    try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
+    try t.expect(chainFrame(status, frame).released_ns > visible.visible_ns and status.held_count == 0);
+    try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chain));
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
 }
 
 fn checkImagePreparation(base_config: *const c.R4GfxDeviceConfig) !void {

@@ -5,10 +5,11 @@ const std = @import("std");
 const r4os = @import("r4os");
 const a = r4os.abi;
 pub const c = @import("r4l_contract");
+pub const swapchain = @import("device_swapchain.zig");
 const nv = @import("r4nv_binding");
 const live_magic: u64 = 0x5234474658444556;
 const closed_magic: u64 = 0x5234474658434c53;
-pub const Error = error{ Invalid, Unsupported, Overflow, Limit, Alias, Busy, Stale, Unavailable };
+pub const Error = error{ Invalid, Unsupported, Overflow, Limit, Alias, Busy, Stale, Unavailable, Occluded, Suboptimal, Lost };
 const empty_image = std.mem.zeroes(c.R4GfxCpuImage);
 const empty_resource = std.mem.zeroes(c.R4GfxResource);
 
@@ -18,6 +19,7 @@ pub fn code(err: Error) i32 {
         error.Overflow => c.status_overflow, error.Limit => c.status_limit,
         error.Alias => c.status_alias, error.Busy => c.status_busy,
         error.Stale => c.status_stale, error.Unavailable => c.status_unavailable,
+        error.Occluded => c.status_occluded, error.Suboptimal => c.status_suboptimal, error.Lost => c.status_lost,
     };
 }
 pub fn platform(rc: i32) Error!void {
@@ -77,6 +79,7 @@ pub const Job = struct {
     bytes: u64 = 0,
     counted: bool = false,
     render: bool = false,
+    chain_refs: u32 = 0,
 };
 pub const Device = struct {
     // These two fields persist through close so reopening cannot revive handles.
@@ -89,6 +92,7 @@ pub const Device = struct {
     flags: u32 = 0,
     resource_serial: u64 = 0,
     job_serial: u64 = 0,
+    chain_serial: u64 = 0,
     selected: a.GfxBackendInfo = .{ .binding = .{ .device_generation = 1, .reset_generation = 1 } },
     queue: a.GfxQueueHandle = .{},
     software_queue: a.GfxQueueHandle = .{},
@@ -97,6 +101,7 @@ pub const Device = struct {
     counters: c.R4GfxDeviceInfo = std.mem.zeroes(c.R4GfxDeviceInfo),
     resources: [c.device_resource_capacity]Resource = @splat(.{}),
     jobs: [c.device_job_capacity]Job = @splat(.{}),
+    chains: [c.swapchain_capacity]@import("device_swapchain.zig").Slot = @splat(.{}),
     // Per-device scratch avoids large render arrays on an application stack.
     images: [c.render_max_images]c.R4GfxCpuImage = undefined,
     image_slots: [c.render_max_images]u32 = undefined,
@@ -227,6 +232,7 @@ pub const Device = struct {
                 if (snapshot.operations & 16 != 0) gpu_operations |= c.device_gpu_render;
                 if (snapshot.operations & 64 != 0) gpu_operations |= c.device_gpu_render_list;
                 if (snapshot.operations & 32 != 0) gpu_operations |= c.device_gpu_present;
+                if (snapshot.operations & 128 != 0) gpu_operations |= c.device_gpu_direct;
                 break;
             }
         }
@@ -408,6 +414,7 @@ pub fn releaseJob(handle: *const c.R4GfxDevice, job: *const c.R4GfxJob) callconv
 pub fn close(handle: *const c.R4GfxDevice) callconv(.c) i32 {
     const device = get(handle, true) catch |err| return code(err);
     device.closing = true;
+    _ = @import("device_swapchain.zig").closeAll(device);
     device.closeQueue() catch |err| return code(err);
     device.retireQueue(&device.software_queue) catch |err| return code(err);
     var busy = false;
@@ -416,6 +423,7 @@ pub fn close(handle: *const c.R4GfxDevice) callconv(.c) i32 {
         _ = @import("device_jobs.zig").cancel(device, &job) catch c.status_busy;
         _ = @import("device_jobs.zig").release(device, &job) catch { busy = true; continue; };
     };
+    if (!@import("device_swapchain.zig").closeAll(device)) return c.status_busy;
     for (&device.resources) |*item| item.public_refs = 0;
     if (!device.cleanResources()) busy = true;
     if (!device.drainQueues()) busy = true;
