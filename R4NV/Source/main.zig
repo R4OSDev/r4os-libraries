@@ -33,6 +33,7 @@ pub export var r4nv_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exp
 };
 
 test "backend and shader ABI preserve operands, executable identity and rejected outputs" {
+    try @import("telemetry_checks.zig").run();
     const t = std.testing;
     try @import("image_layout_checks.zig").run(&r4nv_backend_v1);
     try @import("render_image_test.zig").check();

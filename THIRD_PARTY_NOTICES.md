@@ -90,3 +90,13 @@ Full NVIDIA, Collabora and Red Hat notices remain in the derived sources,
 license. The reference archive is `Nvidia/0.79.19/render-state-20260913`.
 The six fixed shaders remain compiled original R4OS descriptions; the sixth
 adds the matching solid vertex stage. No host compiler is linked into R4OS.
+
+
+## R4NV telemetry decoder (0.79.29)
+
+R4NV/Source/telemetry.zig derives the RUSD layout and fixed-point temperature
+units from MIT NVIDIA 570.144 cl00de.h and nvfixedtypes.h at commit
+8ec351aeb96a93a4bb69ccc12a542bf8a8df2b6f. Complete original notices remain in
+the source and R4NV/ThirdParty/Nvidia/LICENSES.txt, and in the distributed
+NVIDIA runtime license. The pure decoder is statically used by NVIDIA.R4D;
+it adds no firmware binary or external runtime dependency to R4NV.R4L.
