@@ -541,6 +541,25 @@ pub const R4GfxColorProfileDefinition = extern struct {
     gamma_blue: u32,
     reserved: u32,
 };
+
+pub const R4GfxMemoryInfo = extern struct {
+    version: u32,
+    size: u32,
+    phase: u32,
+    flags: u32,
+    adapter_id: u32,
+    resource_slot: u32,
+    memory_generation: u64,
+    resident_bytes: u64,
+    evicted_bytes: u64,
+    system_bytes: u64,
+    pinned_bytes: u64,
+    pending_bytes: u64,
+    reclaimable_bytes: u64,
+    evictions: u64,
+    restores: u64,
+    failures: u64,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -667,6 +686,16 @@ pub const color_range_limited10: u32 = 4;
 pub const color_range_limited16: u32 = 5;
 pub const source_color_view: u32 = 6;
 pub const device_gpu_color: u32 = 256;
+pub const memory_priority_normal: u32 = 128;
+pub const memory_priority_pinned: u32 = 4294967295;
+pub const memory_flag_restoring: u32 = 1;
+pub const memory_phase_idle: u32 = 0;
+pub const memory_phase_prepare: u32 = 1;
+pub const memory_phase_allocate: u32 = 2;
+pub const memory_phase_describe: u32 = 3;
+pub const memory_phase_submit: u32 = 4;
+pub const memory_phase_copy: u32 = 5;
+pub const memory_phase_retire: u32 = 6;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -720,14 +749,14 @@ pub const RenderV1 = extern struct {
 };
 
 pub const device_v1_export_name = "DEVICE_V1";
-pub const device_v1_revision: u16 = 9;
+pub const device_v1_revision: u16 = 10;
 pub const device_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 272,
+    .size = 304,
     .abi_major = 1,
-    .abi_minor = 9,
+    .abi_minor = 10,
     .interface_id_lo = 0x5234474658444556,
     .interface_id_hi = 0x52344f5330373931,
 };
@@ -761,6 +790,10 @@ pub const DeviceV1SwapchainResizeFn = *const fn (device: *const R4GfxDevice, cha
 pub const DeviceV1SwapchainCloseFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain) callconv(.c) i32;
 pub const DeviceV1PresentationPlanFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxPresentationPlan, output: *R4GfxPresentationDecision) callconv(.c) i32;
 pub const DeviceV1RenderSubmitGridListFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderGridListRequest, output: *R4GfxJob) callconv(.c) i32;
+pub const DeviceV1MemoryInfoFn = *const fn (device: *const R4GfxDevice, output: *R4GfxMemoryInfo) callconv(.c) i32;
+pub const DeviceV1MemoryTrimFn = *const fn (device: *const R4GfxDevice, deadline_ns: u64) callconv(.c) i32;
+pub const DeviceV1ResourceResidentFn = *const fn (device: *const R4GfxDevice, resource: *const R4GfxResource, deadline_ns: u64) callconv(.c) i32;
+pub const DeviceV1ResourcePriorityFn = *const fn (device: *const R4GfxDevice, resource: *const R4GfxResource, priority: u32) callconv(.c) i32;
 pub const DeviceV1 = extern struct {
     header: InterfaceHeader,
     storage_size: DeviceV1StorageSizeFn,
@@ -793,6 +826,10 @@ pub const DeviceV1 = extern struct {
     swapchain_close: DeviceV1SwapchainCloseFn,
     presentation_plan: DeviceV1PresentationPlanFn,
     render_submit_grid_list: DeviceV1RenderSubmitGridListFn,
+    memory_info: DeviceV1MemoryInfoFn,
+    memory_trim: DeviceV1MemoryTrimFn,
+    resource_resident: DeviceV1ResourceResidentFn,
+    resource_priority: DeviceV1ResourcePriorityFn,
 };
 
 pub const color_v1_export_name = "COLOR_V1";
@@ -902,8 +939,8 @@ pub const DeviceV1Client = struct {
             .interface_id_lo = 0x5234474658444556,
             .interface_id_hi = 0x52344f5330373931,
             .abi_major = 1,
-            .min_revision = 9,
-            .required_size = 272,
+            .min_revision = 10,
+            .required_size = 304,
             .known_required_flags = 0,
         });
         if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
@@ -936,6 +973,10 @@ pub const DeviceV1Client = struct {
         if (r4os.runtime_r4l.slotAddress(header, 248) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 256) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 264) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 272) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 280) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 288) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 296) == null) return error.MissingSlot;
         return .{ .header = header };
     }
 
@@ -1087,6 +1128,26 @@ pub const DeviceV1Client = struct {
     pub fn render_submit_grid_list(self: *const DeviceV1Client, device: *const R4GfxDevice, request: *const R4GfxRenderGridListRequest, output: *R4GfxJob) i32 {
         const function = r4os.runtime_r4l.functionAt(DeviceV1RenderSubmitGridListFn, self.header, 264) orelse unreachable;
         return function(device, request, output);
+    }
+
+    pub fn memory_info(self: *const DeviceV1Client, device: *const R4GfxDevice, output: *R4GfxMemoryInfo) i32 {
+        const function = r4os.runtime_r4l.functionAt(DeviceV1MemoryInfoFn, self.header, 272) orelse unreachable;
+        return function(device, output);
+    }
+
+    pub fn memory_trim(self: *const DeviceV1Client, device: *const R4GfxDevice, deadline_ns: u64) i32 {
+        const function = r4os.runtime_r4l.functionAt(DeviceV1MemoryTrimFn, self.header, 280) orelse unreachable;
+        return function(device, deadline_ns);
+    }
+
+    pub fn resource_resident(self: *const DeviceV1Client, device: *const R4GfxDevice, resource: *const R4GfxResource, deadline_ns: u64) i32 {
+        const function = r4os.runtime_r4l.functionAt(DeviceV1ResourceResidentFn, self.header, 288) orelse unreachable;
+        return function(device, resource, deadline_ns);
+    }
+
+    pub fn resource_priority(self: *const DeviceV1Client, device: *const R4GfxDevice, resource: *const R4GfxResource, priority: u32) i32 {
+        const function = r4os.runtime_r4l.functionAt(DeviceV1ResourcePriorityFn, self.header, 296) orelse unreachable;
+        return function(device, resource, priority);
     }
 };
 

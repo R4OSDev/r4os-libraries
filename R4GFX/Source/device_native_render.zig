@@ -140,6 +140,8 @@ fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: b
     const serial = std.math.add(u64, device.job_serial, 1) catch return error.Limit;
     if (target.job_refs == std.math.maxInt(u32) or (source != null and source.?.job_refs == std.math.maxInt(u32))) return error.Limit;
     if (!device.cleanResources()) return error.Busy;
+    try @import("device_residency.zig").ensure(device, target, request.deadline_ns);
+    if (source) |value| try @import("device_residency.zig").ensure(device, value, request.deadline_ns);
     try device.ensureQueue();
     var submission: a.GfxSubmission = .{ .operation = if (batched) a.gfx_queue_operation_render_list else a.gfx_queue_operation_render, .deadline_ns = request.deadline_ns,
         .target = target.backing.reference, .source = if (source) |value| value.backing.reference else .{},

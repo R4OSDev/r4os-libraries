@@ -1,7 +1,7 @@
 ﻿R4GFX Runtime-R4L API
 =====================
 
-Userland-Grafikbibliothek: gepruefte lineare Layouts und Softwarezugriff auf caller-eigene CPU-Maps des gemeinsamen BO-Vertrags.
+Userland graphics library with software/native rendering, explicit queue receipts, presentation, color management and fence-safe managed-image residency.
 
 API_V1
 ------
@@ -42,9 +42,9 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
 
 - ELF-Symbol: `r4gfx_device_v1`
 - ABI-Major: 1
-- Revision: 9
+- Revision: 10
 - Interface-ID: `0x52344f5330373931:0x5234474658444556`
-- Tabellengroesse: 272 Byte
+- Tabellengroesse: 304 Byte
 
 - Slot 0, Offset 32: `storage_size` - Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
@@ -106,6 +106,14 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
   Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
 - Slot 29, Offset 264: `render_submit_grid_list` - Submit immutable draw/grid pairs through the common native queue. Exact rotation and rational scaling sample logical cells without CPU image reconstruction. No accepted prefix, per-draw fence or hardware command language.
   Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error..
+- Slot 30, Offset 272: `memory_info` - Advances one already-started bounded residency transition and reports its actual retained owner state. No new eviction or restoration is started.
+  Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
+- Slot 31, Offset 280: `memory_trim` - Starts at most one idle managed-image readback, selecting lowest priority then least recent use. Returns OK when scheduled, BUSY while a transaction is already held, LIMIT when no victim is eligible. The finite deadline cancels logical work but never releases active copy endpoints.
+  Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
+- Slot 32, Offset 288: `resource_resident` - Requires an owned managed offscreen image. Returns OK once native contents are ready, BUSY while queued or restoring. Pending requests use descending resource priority then arrival order. New backing is published only after the exact upload receipt is physically retired; the public resource handle remains unchanged.
+  Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
+- Slot 33, Offset 296: `resource_priority` - Sets eviction and reconstruction preference for an owned managed image. Higher values preserve it longer and prioritize requested reconstruction; memory_priority_pinned excludes eviction. No memory is reserved per application.
+  Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
 
 COLOR_V1
 --------
@@ -194,6 +202,7 @@ Typen
 - `R4GfxColorTransform`: 64 Byte, Alignment 8. Version1/size64. Nearest/bilinear sampling and BLIT/OVER operate in premultiplied display-linear BT.2020 cd/m2. Opacity0..65535 is linear. Flags: output mapping applies the documented rational luminance shoulder and neutral-axis gamut compression; relative white scales source paper white to target; dither is spatially anchored in target coordinates. ICC output requires output mapping and BLIT; perform composition in a linear intermediate first. Bounded by render_max_pixels. Input/target pixel storage cannot overlap. Validation errors preserve target bytes; a runtime ICC/nonfinite failure invalidates the offscreen result, which the caller must discard.
 - `R4GfxColorResourceDesc`: 144 Byte, Alignment 8. Version1/size144; nested resource descriptor retains its unchanged version1/size88. Named RGB description is copied and immutable for the resource lifetime, including prepared/relocated views. ICC images are transformed to a named working space before GPU resource creation; a raw ICC pointer is never retained by a queue job. High-precision storage requires explicit color metadata. This does not establish scanout or HDR capability.
 - `R4GfxColorProfileDefinition`: 64 Byte, Alignment 4. Version1/size64; reserved0. Explicit RGB(model1) or grayscale(model2) characterization. xy chromaticities and decoding gamma exponents use1/100000. Curve1 is pure power, curve2 is exact sRGB. Gamma must be0.01..100 even for unused channels; choose1 for sRGB. Gray uses the white point and first curve, produces a GRAY ICC profile, and accepts only equal RGB channels in the image/API storage. Generated RGB profiles can characterize inputs or displays; no measurement/calibration is claimed.
+- `R4GfxMemoryInfo`: 104 Byte, Alignment 8. Device-owned residency accounting. Aliases are deduplicated. Pinned/reclaimable bytes are subsets; pending backing and global kernel charges may outlive logical replacement. No claim of actual GPU free space.
 
 Besitzregeln
 ------------

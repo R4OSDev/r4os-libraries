@@ -32,6 +32,28 @@ pub fn check() !void {
         .packet = .{ .address = 0x400000, .bytes = render.packet_bytes },
     };
     var packet: [render.packet_bytes]u8 = undefined;
+    // Disjoint scissor slices cover the original clipped draw exactly once,
+    // while UV interpolation and blend coordinates remain unchanged.
+    var visited: [128 * 128]bool = @splat(false);
+    var slice_offset: u64 = 0;
+    while (true) {
+        const part = try render.slice(binding.draw, slice_offset, 70);
+        try t.expect(part.next > slice_offset and part.next - slice_offset <= 70);
+        try t.expectEqualDeep(binding.draw.destination, part.draw.destination);
+        try t.expectEqualDeep(binding.draw.source_rect, part.draw.source_rect);
+        try t.expectEqualDeep(binding.draw.grid, part.draw.grid);
+        const clip = try part.draw.clip();
+        for (clip[1]..clip[3]) |y| for (clip[0]..clip[2]) |x| {
+            try t.expect(!visited[y * 128 + x]); visited[y * 128 + x] = true;
+        };
+        slice_offset = part.next;
+        if (part.next == part.total) break;
+    }
+    const original_clip = try binding.draw.clip();
+    for (0..128) |y| for (0..128) |x| {
+        try t.expectEqual(x >= original_clip[0] and x < original_clip[2] and y >= original_clip[1] and y < original_clip[3], visited[y * 128 + x]);
+    };
+    try t.expectError(error.Bounds, render.slice(binding.draw, slice_offset, 70));
     var program: render.Program = .{};
     var shader_data: [render.shader_bytes]u8 = undefined;
     try render.shaderUpload(&shader_data);

@@ -98,6 +98,10 @@ pub export var r4gfx_device_v1: c.DeviceV1 align(8) linksection(".data.r4l_expor
     .swapchain_resize = swapchain.resize,
     .swapchain_close = swapchain.close,
     .presentation_plan = swapchain.plan,
+    .memory_info = device.memoryInfo,
+    .memory_trim = device.memoryTrim,
+    .resource_resident = device.resourceResident,
+    .resource_priority = device.resourcePriority,
 };
 pub export var r4gfx_color_v1: c.ColorV1 align(8) linksection(".data.r4l_exports") = color_api.table;
 pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{

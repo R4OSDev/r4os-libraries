@@ -193,6 +193,37 @@ pub const Transfer = struct {
         return std.math.add(u64, std.math.mul(u64, rows.count - 1, pitch) catch return error.Bounds, self.bytes) catch error.Bounds;
     }
 };
+/// Logical bytes, independent of padding and block-linear allocation extents.
+pub fn logicalBytes(transfer: Transfer) Error!u64 {
+    _ = try transfer.span(false);
+    _ = try transfer.span(true);
+    return std.math.mul(u64, transfer.bytes, if (transfer.rows) |rows| rows.count else 1) catch error.Bounds;
+}
+pub const Slice = struct { transfer: Transfer, next: u64 };
+/// Split only after the preceding CE semaphore has completed. Block operands
+/// keep their allocation base and geometry; their pixel origin advances.
+pub fn slice(transfer: Transfer, offset: u64, limit: u64) Error!Slice {
+    const total = try logicalBytes(transfer);
+    if (limit == 0 or offset >= total) return error.Bounds;
+    var out = transfer;
+    if (transfer.rows) |rows| {
+        const row: u32 = @intCast(offset / transfer.bytes);
+        const column = offset % transfer.bytes;
+        const count: u32 = if (column == 0 and transfer.bytes <= limit)
+            @intCast(@min(rows.count - row, limit / transfer.bytes)) else 1;
+        out.bytes = @min(transfer.bytes - column, limit);
+        out.rows.?.count = count;
+        if (out.source_block) |*block| { block.x += @intCast(column); block.y += row; }
+        else out.source = std.math.add(u64, out.source, @as(u64, row) * rows.source_pitch + column) catch return error.Bounds;
+        if (out.target_block) |*block| { block.x += @intCast(column); block.y += row; }
+        else out.target = std.math.add(u64, out.target, @as(u64, row) * rows.target_pitch + column) catch return error.Bounds;
+        return .{ .transfer = out, .next = offset + out.bytes * count };
+    }
+    out.bytes = @min(total - offset, limit);
+    out.source = std.math.add(u64, out.source, offset) catch return error.Bounds;
+    out.target = std.math.add(u64, out.target, offset) catch return error.Bounds;
+    return .{ .transfer = out, .next = offset + out.bytes };
+}
 pub const Program = struct {
     data: [max_words]u32 = @splat(0),
     count: u8,

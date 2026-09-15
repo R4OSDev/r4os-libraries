@@ -206,6 +206,27 @@ pub const Draw = struct {
         return .{@intCast(left), @intCast(top), @intCast(right), @intCast(bottom)};
     }
 };
+pub const Slice = struct { draw: Draw, next: u64, total: u64 };
+/// Bound raster work without changing destination/source coordinates, sample
+/// grids or blending order. Only the scissor changes, so adjacent slices use
+/// the original interpolation and never shade a destination pixel twice.
+pub fn slice(draw: Draw, offset: u64, pixel_limit: u64) Error!Slice {
+    try draw.validate();
+    const clip = try draw.clip();
+    const width: u64 = clip[2] - clip[0];
+    const height: u64 = clip[3] - clip[1];
+    const total = width * height;
+    if (pixel_limit == 0 or offset >= total) return error.Bounds;
+    const row = offset / width;
+    const column = offset % width;
+    const columns = @min(width - column, pixel_limit);
+    const rows = if (column == 0 and width <= pixel_limit) @min(height - row, pixel_limit / width) else 1;
+    var out = draw;
+    out.scissor = .{ .x = @intCast(clip[0] + column), .y = @intCast(clip[1] + row),
+        .width = @intCast(columns), .height = @intCast(rows) };
+    try out.validate();
+    return .{ .draw = out, .next = offset + columns * rows, .total = total };
+}
 pub const Binding = struct {
     draw: Draw,
     additional: []const Draw = &.{},

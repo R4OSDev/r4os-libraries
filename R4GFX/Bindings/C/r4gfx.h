@@ -984,6 +984,42 @@ _Static_assert(offsetof(R4GfxColorProfileDefinition, gamma_green) == 52u, "R4Gfx
 _Static_assert(offsetof(R4GfxColorProfileDefinition, gamma_blue) == 56u, "R4GfxColorProfileDefinition.gamma_blue offset mismatch");
 _Static_assert(offsetof(R4GfxColorProfileDefinition, reserved) == 60u, "R4GfxColorProfileDefinition.reserved offset mismatch");
 
+typedef struct R4GfxMemoryInfo {
+    uint32_t version;
+    uint32_t size;
+    uint32_t phase;
+    uint32_t flags;
+    uint32_t adapter_id;
+    uint32_t resource_slot;
+    uint64_t memory_generation;
+    uint64_t resident_bytes;
+    uint64_t evicted_bytes;
+    uint64_t system_bytes;
+    uint64_t pinned_bytes;
+    uint64_t pending_bytes;
+    uint64_t reclaimable_bytes;
+    uint64_t evictions;
+    uint64_t restores;
+    uint64_t failures;
+} R4GfxMemoryInfo;
+_Static_assert(sizeof(R4GfxMemoryInfo) == 104u, "R4GfxMemoryInfo size mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, version) == 0u, "R4GfxMemoryInfo.version offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, size) == 4u, "R4GfxMemoryInfo.size offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, phase) == 8u, "R4GfxMemoryInfo.phase offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, flags) == 12u, "R4GfxMemoryInfo.flags offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, adapter_id) == 16u, "R4GfxMemoryInfo.adapter_id offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, resource_slot) == 20u, "R4GfxMemoryInfo.resource_slot offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, memory_generation) == 24u, "R4GfxMemoryInfo.memory_generation offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, resident_bytes) == 32u, "R4GfxMemoryInfo.resident_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, evicted_bytes) == 40u, "R4GfxMemoryInfo.evicted_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, system_bytes) == 48u, "R4GfxMemoryInfo.system_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, pinned_bytes) == 56u, "R4GfxMemoryInfo.pinned_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, pending_bytes) == 64u, "R4GfxMemoryInfo.pending_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, reclaimable_bytes) == 72u, "R4GfxMemoryInfo.reclaimable_bytes offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, evictions) == 80u, "R4GfxMemoryInfo.evictions offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, restores) == 88u, "R4GfxMemoryInfo.restores offset mismatch");
+_Static_assert(offsetof(R4GfxMemoryInfo, failures) == 96u, "R4GfxMemoryInfo.failures offset mismatch");
+
 #define R4GFX_STATUS_OK ((int32_t)0)
 #define R4GFX_FORMAT_XRGB8888 ((uint32_t)875713112)
 #define R4GFX_FORMAT_ARGB8888 ((uint32_t)875713089)
@@ -1110,6 +1146,16 @@ _Static_assert(offsetof(R4GfxColorProfileDefinition, reserved) == 60u, "R4GfxCol
 #define R4GFX_COLOR_RANGE_LIMITED16 ((uint32_t)5)
 #define R4GFX_SOURCE_COLOR_VIEW ((uint32_t)6)
 #define R4GFX_DEVICE_GPU_COLOR ((uint32_t)256)
+#define R4GFX_MEMORY_PRIORITY_NORMAL ((uint32_t)128)
+#define R4GFX_MEMORY_PRIORITY_PINNED ((uint32_t)4294967295)
+#define R4GFX_MEMORY_FLAG_RESTORING ((uint32_t)1)
+#define R4GFX_MEMORY_PHASE_IDLE ((uint32_t)0)
+#define R4GFX_MEMORY_PHASE_PREPARE ((uint32_t)1)
+#define R4GFX_MEMORY_PHASE_ALLOCATE ((uint32_t)2)
+#define R4GFX_MEMORY_PHASE_DESCRIBE ((uint32_t)3)
+#define R4GFX_MEMORY_PHASE_SUBMIT ((uint32_t)4)
+#define R4GFX_MEMORY_PHASE_COPY ((uint32_t)5)
+#define R4GFX_MEMORY_PHASE_RETIRE ((uint32_t)6)
 #define R4GFX_STATUS_INVALID ((int32_t)-1)
 #define R4GFX_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4GFX_STATUS_OVERFLOW ((int32_t)-3)
@@ -1210,10 +1256,10 @@ static inline int32_t r4gfx_render_execute_cpu(R4GfxRenderV1Client *client, cons
 
 #define R4GFX_DEVICE_V1_EXPORT_NAME "DEVICE_V1"
 #define R4GFX_DEVICE_V1_ABI_MAJOR 1u
-#define R4GFX_DEVICE_V1_REVISION 9u
+#define R4GFX_DEVICE_V1_REVISION 10u
 #define R4GFX_DEVICE_V1_INTERFACE_ID_LO 0x5234474658444556ull
 #define R4GFX_DEVICE_V1_INTERFACE_ID_HI 0x52344f5330373931ull
-#define R4GFX_DEVICE_V1_TABLE_SIZE 272u
+#define R4GFX_DEVICE_V1_TABLE_SIZE 304u
 #define R4GFX_DEVICE_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4GFX_DEVICE_V1_TABLE_SIZE, R4GFX_DEVICE_V1_ABI_MAJOR, R4GFX_DEVICE_V1_REVISION, R4GFX_DEVICE_V1_INTERFACE_ID_LO, R4GFX_DEVICE_V1_INTERFACE_ID_HI }
 typedef uint64_t (*R4GfxDeviceV1StorageSizeFn)(void);
 typedef int32_t (*R4GfxDeviceV1DeviceOpenFn)(const R4GfxDeviceConfig * config, R4GfxDevice * output);
@@ -1245,6 +1291,10 @@ typedef int32_t (*R4GfxDeviceV1SwapchainResizeFn)(const R4GfxDevice * device, co
 typedef int32_t (*R4GfxDeviceV1SwapchainCloseFn)(const R4GfxDevice * device, const R4GfxSwapchain * chain);
 typedef int32_t (*R4GfxDeviceV1PresentationPlanFn)(const R4GfxDevice * device, const R4GfxPresentationPlan * request, R4GfxPresentationDecision * output);
 typedef int32_t (*R4GfxDeviceV1RenderSubmitGridListFn)(const R4GfxDevice * device, const R4GfxRenderGridListRequest * request, R4GfxJob * output);
+typedef int32_t (*R4GfxDeviceV1MemoryInfoFn)(const R4GfxDevice * device, R4GfxMemoryInfo * output);
+typedef int32_t (*R4GfxDeviceV1MemoryTrimFn)(const R4GfxDevice * device, uint64_t deadline_ns);
+typedef int32_t (*R4GfxDeviceV1ResourceResidentFn)(const R4GfxDevice * device, const R4GfxResource * resource, uint64_t deadline_ns);
+typedef int32_t (*R4GfxDeviceV1ResourcePriorityFn)(const R4GfxDevice * device, const R4GfxResource * resource, uint32_t priority);
 typedef struct R4GfxDeviceV1 {
     R4LInterfaceHeader header;
     R4GfxDeviceV1StorageSizeFn storage_size;
@@ -1277,8 +1327,12 @@ typedef struct R4GfxDeviceV1 {
     R4GfxDeviceV1SwapchainCloseFn swapchain_close;
     R4GfxDeviceV1PresentationPlanFn presentation_plan;
     R4GfxDeviceV1RenderSubmitGridListFn render_submit_grid_list;
+    R4GfxDeviceV1MemoryInfoFn memory_info;
+    R4GfxDeviceV1MemoryTrimFn memory_trim;
+    R4GfxDeviceV1ResourceResidentFn resource_resident;
+    R4GfxDeviceV1ResourcePriorityFn resource_priority;
 } R4GfxDeviceV1;
-_Static_assert(sizeof(R4GfxDeviceV1) == 272u, "R4GfxDeviceV1 size mismatch");
+_Static_assert(sizeof(R4GfxDeviceV1) == 304u, "R4GfxDeviceV1 size mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, storage_size) == 32u, "R4GfxDeviceV1.storage_size offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_open) == 40u, "R4GfxDeviceV1.device_open offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_close) == 48u, "R4GfxDeviceV1.device_close offset mismatch");
@@ -1309,13 +1363,17 @@ _Static_assert(offsetof(R4GfxDeviceV1, swapchain_resize) == 240u, "R4GfxDeviceV1
 _Static_assert(offsetof(R4GfxDeviceV1, swapchain_close) == 248u, "R4GfxDeviceV1.swapchain_close offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, presentation_plan) == 256u, "R4GfxDeviceV1.presentation_plan offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, render_submit_grid_list) == 264u, "R4GfxDeviceV1.render_submit_grid_list offset mismatch");
+_Static_assert(offsetof(R4GfxDeviceV1, memory_info) == 272u, "R4GfxDeviceV1.memory_info offset mismatch");
+_Static_assert(offsetof(R4GfxDeviceV1, memory_trim) == 280u, "R4GfxDeviceV1.memory_trim offset mismatch");
+_Static_assert(offsetof(R4GfxDeviceV1, resource_resident) == 288u, "R4GfxDeviceV1.resource_resident offset mismatch");
+_Static_assert(offsetof(R4GfxDeviceV1, resource_priority) == 296u, "R4GfxDeviceV1.resource_priority offset mismatch");
 typedef struct R4GfxDeviceV1Client { const R4LInterfaceHeader *header; } R4GfxDeviceV1Client;
 
 static inline int32_t r4gfx_device_v1_init(const R4XStartContext *ctx, R4GfxDeviceV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "DEVICE_V1");
-    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 9u, 272u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 10u, 304u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
@@ -1349,6 +1407,10 @@ static inline int32_t r4gfx_device_v1_init(const R4XStartContext *ctx, R4GfxDevi
     if (r4l_slot_address(header, 248u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 256u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 264u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 272u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 280u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 288u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 296u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -1501,6 +1563,26 @@ static inline int32_t r4gfx_presentation_plan(R4GfxDeviceV1Client *client, const
 static inline int32_t r4gfx_render_submit_grid_list(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxRenderGridListRequest * request, R4GfxJob * output) {
     R4GfxDeviceV1RenderSubmitGridListFn function = (R4GfxDeviceV1RenderSubmitGridListFn)r4l_slot_address(client->header, 264u);
     return function(device, request, output);
+}
+
+static inline int32_t r4gfx_memory_info(R4GfxDeviceV1Client *client, const R4GfxDevice * device, R4GfxMemoryInfo * output) {
+    R4GfxDeviceV1MemoryInfoFn function = (R4GfxDeviceV1MemoryInfoFn)r4l_slot_address(client->header, 272u);
+    return function(device, output);
+}
+
+static inline int32_t r4gfx_memory_trim(R4GfxDeviceV1Client *client, const R4GfxDevice * device, uint64_t deadline_ns) {
+    R4GfxDeviceV1MemoryTrimFn function = (R4GfxDeviceV1MemoryTrimFn)r4l_slot_address(client->header, 280u);
+    return function(device, deadline_ns);
+}
+
+static inline int32_t r4gfx_resource_resident(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxResource * resource, uint64_t deadline_ns) {
+    R4GfxDeviceV1ResourceResidentFn function = (R4GfxDeviceV1ResourceResidentFn)r4l_slot_address(client->header, 288u);
+    return function(device, resource, deadline_ns);
+}
+
+static inline int32_t r4gfx_resource_priority(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxResource * resource, uint32_t priority) {
+    R4GfxDeviceV1ResourcePriorityFn function = (R4GfxDeviceV1ResourcePriorityFn)r4l_slot_address(client->header, 296u);
+    return function(device, resource, priority);
 }
 
 #define R4GFX_COLOR_V1_EXPORT_NAME "COLOR_V1"

@@ -65,6 +65,15 @@ pub const Resource = struct {
     public_refs: u32 = 0,
     job_refs: u32 = 0,
     invalidated: bool = false,
+    evicted: bool = false,
+    residency_busy: bool = false,
+    native_layout: u32 = 0,
+    native_bytes: u64 = 0,
+    priority: u32 = 128,
+    last_use: u64 = 0,
+    resident_deadline: u64 = 0,
+    resident_order: u64 = 0,
+    resident_result: ?Error = null,
     sampler: u32 = 0,
     operation: u32 = 0,
     image: c.R4GfxCpuImage = empty_image,
@@ -96,6 +105,13 @@ pub const Device = struct {
     resource_serial: u64 = 0,
     job_serial: u64 = 0,
     chain_serial: u64 = 0,
+    touch_serial: u64 = 0,
+    residency_work: ?@import("device_residency.zig").Work = null,
+    residency_evictions: u64 = 0,
+    residency_restores: u64 = 0,
+    residency_failures: u64 = 0,
+    residency_order: u64 = 0,
+    residency_pending: u32 = 0,
     selected: a.GfxBackendInfo = .{ .binding = .{ .device_generation = 1, .reset_generation = 1 } },
     queue: a.GfxQueueHandle = .{},
     software_queue: a.GfxQueueHandle = .{},
@@ -119,6 +135,8 @@ pub const Device = struct {
         if (handle.device_address != self.self_address or handle.device_generation != self.generation or handle.slot == 0 or handle.slot > self.resources.len) return error.Stale;
         const item = &self.resources[handle.slot - 1];
         if (item.serial == 0 or item.serial != handle.generation or item.kind != handle.kind or (public and item.public_refs == 0)) return error.Stale;
+        if (public and item.residency_busy) return error.Busy;
+        if (public) { self.touch_serial +|= 1; item.last_use = self.touch_serial; }
         return item;
     }
     pub fn resourceHandle(self: *const Device, index: usize) c.R4GfxResource {
@@ -143,6 +161,7 @@ pub const Device = struct {
             item.allocation_request = .{};
         }
         if (item.backing.reference.id != 0 and memory.release(&item.backing.reference) != a.gfx_buffer_result_ok) return false;
+        if (item.resident_deadline != 0) self.residency_pending -= 1;
         item.* = .{};
         return true;
     }
@@ -156,7 +175,9 @@ pub const Device = struct {
     }
     fn retireQueue(self: *Device, queue: *a.GfxQueueHandle) Error!void {
         if (queue.timeline == 0) return;
-        for (&self.jobs) |*item| if (item.serial != 0 and item.fence.timeline == queue.timeline) {
+        var held = @import("device_residency.zig").holdsQueue(self, queue.timeline);
+        for (&self.jobs) |*item| if (item.serial != 0 and item.fence.timeline == queue.timeline) { held = true; };
+        if (held) {
             // Common close drops client fence references. Keep this queue open
             // until all exact job receipts have been observed and released.
             for (&self.retired_queues) |*retired| if (retired.timeline == 0) {
@@ -165,7 +186,7 @@ pub const Device = struct {
                 return;
             };
             return error.Limit;
-        };
+        }
         const queue_api = self.queues();
         const rc = queue_api.close(queue);
         if (rc != a.gfx_queue_error_stale) try platform(rc);
@@ -176,6 +197,7 @@ pub const Device = struct {
         var okay = true;
         next: for (&self.retired_queues) |*retired| {
             if (retired.timeline == 0) continue;
+            if (@import("device_residency.zig").holdsQueue(self, retired.timeline)) { okay = false; continue; }
             for (&self.jobs) |*item| if (item.serial != 0 and item.fence.timeline == retired.timeline) {
                 okay = false;
                 continue :next;
@@ -283,6 +305,7 @@ pub fn get(handle: *const c.R4GfxDevice, closing: bool) Error!*Device {
     const device = try pointer(Device, handle.address);
     if (device.magic != live_magic or device.self_address != handle.address or device.generation != handle.generation) return error.Stale;
     if (!closing and device.closing) return error.Busy;
+    @import("device_residency.zig").step(device);
     return device;
 }
 pub fn storageSize() callconv(.c) u64 { return @sizeOf(Device); }
@@ -331,6 +354,43 @@ pub fn createResource(handle: *const c.R4GfxDevice, descriptor: *const c.R4GfxRe
     separateInput(handle, output) catch |err| return code(err);
     return @import("device_resources.zig").create(device, descriptor, output) catch |err| code(err);
 }
+pub fn memoryInfo(handle: *const c.R4GfxDevice, output: *c.R4GfxMemoryInfo) callconv(.c) i32 {
+    const device = get(handle, true) catch |err| return code(err);
+    separateInput(handle, output) catch |err| return code(err);
+    outputSafe(c.R4GfxMemoryInfo, output, device) catch |err| return code(err);
+    const value = @import("device_residency.zig").snapshot(device);
+    output.* = .{ .version = 1, .size = @sizeOf(c.R4GfxMemoryInfo), .phase = @intFromEnum(value.phase),
+        .flags = if (device.residency_work) |work| (if (work.restore) c.memory_flag_restoring else 0) else 0,
+        .adapter_id = device.selected.binding.adapter_id, .memory_generation = device.selected.memory_generation,
+        .resource_slot = if (device.residency_work) |work| @intCast(work.index + 1) else 0,
+        .resident_bytes = value.resident_bytes, .evicted_bytes = value.evicted_bytes, .system_bytes = value.system_bytes,
+        .pinned_bytes = value.pinned_bytes, .pending_bytes = value.pending_bytes, .reclaimable_bytes = value.reclaimable_bytes,
+        .evictions = device.residency_evictions, .restores = device.residency_restores, .failures = device.residency_failures };
+    return c.status_ok;
+}
+pub fn memoryTrim(handle: *const c.R4GfxDevice, deadline: u64) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    device.selectBackend() catch |err| return code(err);
+    @import("device_residency.zig").trim(device, deadline) catch |err| return code(err);
+    return c.status_ok;
+}
+pub fn resourceResident(handle: *const c.R4GfxDevice, resource: *const c.R4GfxResource, deadline: u64) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    _ = pointer(c.R4GfxResource, @intFromPtr(resource)) catch |err| return code(err);
+    device.selectBackend() catch |err| return code(err);
+    const item = device.resource(resource.*, true) catch |err| return code(err);
+    if (item.kind != c.resource_image or item.source_kind != c.source_create_native) return c.status_unsupported;
+    @import("device_residency.zig").ensure(device, item, deadline) catch |err| return code(err);
+    return c.status_ok;
+}
+pub fn resourcePriority(handle: *const c.R4GfxDevice, resource: *const c.R4GfxResource, priority: u32) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    _ = pointer(c.R4GfxResource, @intFromPtr(resource)) catch |err| return code(err);
+    const item = device.resource(resource.*, true) catch |err| return code(err);
+    if (item.kind != c.resource_image or item.source_kind != c.source_create_native) return c.status_unsupported;
+    item.priority = priority;
+    return c.status_ok;
+}
 pub fn retainResource(handle: *const c.R4GfxDevice, resource: *const c.R4GfxResource) callconv(.c) i32 {
     const device = get(handle, false) catch |err| return code(err);
     _ = pointer(c.R4GfxResource, @intFromPtr(resource)) catch |err| return code(err);
@@ -341,7 +401,8 @@ pub fn retainResource(handle: *const c.R4GfxDevice, resource: *const c.R4GfxReso
 pub fn releaseResource(handle: *const c.R4GfxDevice, resource: *const c.R4GfxResource) callconv(.c) i32 {
     const device = get(handle, true) catch |err| return code(err);
     _ = pointer(c.R4GfxResource, @intFromPtr(resource)) catch |err| return code(err);
-    const item = device.resource(resource.*, true) catch |err| return code(err);
+    const item = device.resource(resource.*, false) catch |err| return code(err);
+    if (item.public_refs == 0) return c.status_stale;
     item.public_refs -= 1;
     _ = device.cleanResource(item); // Logical release is committed; retained maps remain tracked.
     return c.status_ok;
@@ -433,6 +494,8 @@ pub fn close(handle: *const c.R4GfxDevice) callconv(.c) i32 {
     device.closeQueue() catch |err| return code(err);
     device.retireQueue(&device.software_queue) catch |err| return code(err);
     var busy = false;
+    @import("device_residency.zig").step(device);
+    if (device.residency_work != null) busy = true;
     for (&device.jobs, 0..) |*item, index| if (item.serial != 0) {
         const job: c.R4GfxJob = .{ .slot = @intCast(index + 1), .reserved = 0, .generation = item.serial, .device_generation = device.generation, .device_address = device.self_address };
         _ = @import("device_jobs.zig").cancel(device, &job) catch c.status_busy;

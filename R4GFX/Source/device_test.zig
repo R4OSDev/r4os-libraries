@@ -167,6 +167,10 @@ const Model = struct {
         std.debug.assert(std.meta.eql(input.*, native_handle) and ticks == std.math.maxInt(u64));
         out.* = .{ .request = native_handle, .phase = 2, .result = native_result }; return 1;
     }
+    fn nativeQuery(input: *const a.GfxBufferHandle, out: *a.GfxNativeStatus) callconv(.c) i32 {
+        std.debug.assert(std.meta.eql(input.*, native_handle));
+        out.* = .{ .request = native_handle, .phase = 2, .result = native_result }; return 1;
+    }
     fn nativeReceive(input: *const a.GfxBufferHandle, out: *a.GfxBufferReference) callconv(.c) i32 {
         std.debug.assert(std.meta.eql(input.*, native_handle) and native_result == 1);
         // This bounded fixture uses4x4 images with the actual native storage
@@ -321,7 +325,7 @@ pub fn check() !void {
     const other_storage = try t.allocator.create(d.Device); defer t.allocator.destroy(other_storage); other_storage.* = .{};
     const sys: a.R4XStartR4Sys = .{ .monotonic_clock = @intFromPtr(&Model.monotonic) };
     var draw: a.R4XStartR4Draw = .{ .gfx_buffer_create = @intFromPtr(&Model.create), .gfx_buffer_describe = @intFromPtr(&Model.describe),
-        .gfx_native_start = @intFromPtr(&Model.nativeStart), .gfx_native_wait = @intFromPtr(&Model.nativeWait),
+        .gfx_native_start = @intFromPtr(&Model.nativeStart), .gfx_native_wait = @intFromPtr(&Model.nativeWait), .gfx_native_query = @intFromPtr(&Model.nativeQuery),
         .gfx_native_receive = @intFromPtr(&Model.nativeReceive), .gfx_native_close = @intFromPtr(&Model.nativeClose),
         .gfx_buffer_import = @intFromPtr(&Model.import), .gfx_buffer_release = @intFromPtr(&Model.release), .gfx_buffer_map = @intFromPtr(&Model.map),
         .gfx_buffer_unmap = @intFromPtr(&Model.unmap), .gfx_buffer_export_raster = @intFromPtr(&Model.exportRaster), .gfx_queue_backend_info = @intFromPtr(&Model.backendInfo),
@@ -520,6 +524,7 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
     try checkNativeRender(&config);
+    try checkResidency(&config);
     try checkNativeColor(&config);
     try checkNativeGrid(&config);
     try checkNativePresent(&config);
@@ -530,6 +535,118 @@ pub fn check() !void {
     draw.display_output_presentation_info = @intFromPtr(&Model.outputInfo);
     draw.gfx_queue_submit_output = @intFromPtr(&Model.submitOutput);
     try checkOutputSwapchains(config);
+}
+
+fn checkResidency(config: *const c.R4GfxDeviceConfig) !void {
+    const residency = @import("device_residency.zig");
+    Model.reset(); Model.operations = 15;
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    const device = try d.get(&handle, false);
+    const native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999,
+        .width = 4, .height = 4, .format = c.format_xrgb8888, .layout = 0 };
+    var desc = descriptor(c.resource_image); desc.source_kind = c.source_create_native;
+    desc.source_address = @intFromPtr(&native); desc.flags = c.image_target;
+    var first: c.R4GfxResource = undefined; var pinned: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &desc, &first));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &desc, &pinned));
+    const item = try device.resource(first, true);
+    const protected = try device.resource(pinned, true);
+    try t.expectEqual(c.status_ok, api.resource_priority(&handle, &first, 3));
+    try t.expectEqual(c.status_ok, api.resource_priority(&handle, &pinned, c.memory_priority_pinned));
+    const original_buffer = item.backing.buffer;
+    const first_object = Model.ref(item.backing.reference).object.?;
+    for (0..4) |row| {
+        for (0..16) |column| Model.objects[first_object].bytes[row * item.image.pitch + column] = @intCast(row * 16 + column);
+    }
+    item.job_refs = 1;
+    try t.expectEqual(c.status_limit, api.memory_trim(&handle, native.deadline_ns));
+    item.job_refs = 0;
+    const reference = item.backing.reference;
+    var alias_desc = descriptor(c.resource_image); alias_desc.source_kind = c.source_import_buffer;
+    alias_desc.source_address = @intFromPtr(&reference);
+    var alias: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &alias_desc, &alias));
+    try t.expectEqual(c.status_limit, api.memory_trim(&handle, native.deadline_ns));
+    try t.expect(residency.snapshot(device).resident_bytes == 2 * 65536); // Shared BO counted once.
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &alias));
+    try t.expectEqual(c.status_ok, api.memory_trim(&handle, native.deadline_ns));
+    try t.expect(item.residency_busy and item.job_refs == 1 and device.residency_work.?.index == first.slot - 1);
+    try driveResidencyCopy(device);
+    // Logical completion alone does not permit replacement or backing release.
+    Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_complete;
+    residency.step(device);
+    try t.expect(item.residency_busy and !item.evicted and Model.referenceCount() == 3 and std.meta.eql(item.backing.buffer, original_buffer));
+    Model.complete(); residency.step(device); residency.step(device);
+    try t.expect(device.residency_work == null and item.evicted and !item.residency_busy and item.job_refs == 0 and
+        !std.meta.eql(item.backing.buffer, original_buffer) and std.meta.eql(device.resourceHandle(first.slot - 1), first));
+    const saved = Model.ref(item.backing.reference).object.?;
+    for (0..64) |index| try t.expect(Model.objects[saved].bytes[index] == index);
+    const snapshot = residency.snapshot(device);
+    try t.expect(snapshot.evicted_bytes == 65536 and snapshot.system_bytes == 64 and snapshot.pinned_bytes == 65536);
+    var memory_info: c.R4GfxMemoryInfo = undefined;
+    try t.expectEqual(c.status_ok, api.memory_info(&handle, &memory_info));
+    try t.expect(memory_info.version == 1 and memory_info.size == 104 and memory_info.phase == c.memory_phase_idle and
+        memory_info.evicted_bytes == 65536 and memory_info.evictions == 1 and memory_info.memory_generation == 73);
+    // Two requests wait behind an actual readback. The higher-priority image
+    // reconstructs first; equal-priority order is the retained request order.
+    try t.expectEqual(c.status_ok, api.resource_priority(&handle, &pinned, 200));
+    try t.expectEqual(c.status_ok, api.memory_trim(&handle, native.deadline_ns));
+    try driveResidencyCopy(device);
+    try t.expectEqual(c.status_busy, api.resource_resident(&handle, &first, native.deadline_ns));
+    try t.expect(device.residency_pending == 1);
+    Model.complete(); residency.step(device);
+    try t.expectEqual(c.status_busy, api.resource_resident(&handle, &pinned, native.deadline_ns));
+    try t.expect(device.residency_work.?.index == pinned.slot - 1 and device.residency_pending == 1);
+    try driveResidencyCopy(device);
+    Model.complete(); residency.step(device); residency.step(device);
+    residency.step(device); // Next pending image gets the available worker.
+    try t.expect(device.residency_work.?.index == first.slot - 1 and device.residency_pending == 0);
+    try driveResidencyCopy(device);
+    Model.complete(); residency.step(device); residency.step(device);
+    try t.expect(!item.evicted and !protected.evicted and device.residency_evictions == 2 and device.residency_restores == 2);
+    try t.expectEqual(c.status_ok, api.resource_priority(&handle, &pinned, c.memory_priority_pinned));
+    try t.expectEqual(c.status_ok, api.memory_trim(&handle, native.deadline_ns));
+    try driveResidencyCopy(device);
+    Model.complete(); residency.step(device); residency.step(device);
+    // RAM contents survive a backend reset. Only still-native resources lose
+    // their generation; reconstruction must bind the current backend anew.
+    Model.binding.reset_generation += 1;
+    var state: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expect(!item.invalidated and protected.invalidated);
+    try t.expectEqual(c.status_busy, api.resource_resident(&handle, &first, native.deadline_ns));
+    try driveResidencyCopy(device);
+    Model.complete(); residency.step(device); residency.step(device);
+    try t.expect(!item.evicted and !item.invalidated and device.residency_restores == 3 and device.residency_evictions == 3 and Model.referenceCount() == 2);
+    const restored = Model.ref(item.backing.reference).object.?;
+    for (0..4) |row| for (0..16) |column| try t.expect(Model.objects[restored].bytes[row * item.image.pitch + column] == row * 16 + column);
+    // Actual failed native allocation starts bounded reclamation; its failed
+    // request is closed and does not leak alongside the retained copy.
+    Model.native_result = a.gfx_buffer_error_budget;
+    var output = first;
+    try t.expectEqual(c.status_busy, api.resource_create(&handle, &desc, &output));
+    try t.expectEqualDeep(first, output);
+    try t.expect(Model.native_handle.id == 0 and device.residency_work != null);
+    Model.native_result = 1;
+    try driveResidencyCopy(device);
+    try t.expectEqual(c.status_busy, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 2 and Model.premature_closes == 0);
+    // App close cancels logically, but both copy endpoints stay held until
+    // the modeled engine has stopped. Then the ordinary owner releases all.
+    Model.status.flags = 0;
+    for (0..5) |_| {
+        if (api.device_close(&handle) == c.status_ok) break;
+    } else return error.TestUnexpectedResult;
+    try t.expect(Model.referenceCount() == 0 and !Model.job_live and Model.premature_closes == 0);
+}
+fn driveResidencyCopy(device: *d.Device) !void {
+    for (0..10) |_| {
+        const work = device.residency_work orelse return error.TestUnexpectedResult;
+        if (work.phase == .copy) { try t.expect(Model.job_live); return; }
+        @import("device_residency.zig").step(device);
+    }
+    return error.TestUnexpectedResult;
 }
 
 fn checkColorResources(handle: *const c.R4GfxDevice) !void {

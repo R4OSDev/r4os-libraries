@@ -4,7 +4,7 @@
   "zig_client": "R4Gfx",
   "c_prefix": "r4gfx",
   "c_header": "r4gfx.h",
-  "description": "Userland-Grafikbibliothek: gepruefte lineare Layouts und Softwarezugriff auf caller-eigene CPU-Maps des gemeinsamen BO-Vertrags.",
+  "description": "Userland graphics library with software/native rendering, explicit queue receipts, presentation, color management and fence-safe managed-image residency.",
   "interfaces": [
     {
       "export_name": "API_V1",
@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 9,
+      "revision": 10,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -1985,6 +1985,228 @@
             "ownership": "Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error."
           },
           "description": "Submit immutable draw/grid pairs through the common native queue. Exact rotation and rational scaling sample logical cells without CPU image reconstruction. No accepted prefix, per-draw fence or hardware command language."
+        },
+        {
+          "name": "memory_info",
+          "c_name": "r4gfx_memory_info",
+          "symbol": "r4gfx_memory_info_impl",
+          "slot": 30,
+          "since_revision": 10,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxMemoryInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Advances one already-started bounded residency transition and reports its actual retained owner state. No new eviction or restoration is started."
+        },
+        {
+          "name": "memory_trim",
+          "c_name": "r4gfx_memory_trim",
+          "symbol": "r4gfx_memory_trim_impl",
+          "slot": 31,
+          "since_revision": 10,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "deadline_ns",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Finite absolute monotonic deadline."
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Starts at most one idle managed-image readback, selecting lowest priority then least recent use. Returns OK when scheduled, BUSY while a transaction is already held, LIMIT when no victim is eligible. The finite deadline cancels logical work but never releases active copy endpoints."
+        },
+        {
+          "name": "resource_resident",
+          "c_name": "r4gfx_resource_resident",
+          "symbol": "r4gfx_resource_resident_impl",
+          "slot": 32,
+          "since_revision": 10,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "resource",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "resource"
+            },
+            {
+              "name": "deadline_ns",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Finite absolute monotonic deadline."
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Requires an owned managed offscreen image. Returns OK once native contents are ready, BUSY while queued or restoring. Pending requests use descending resource priority then arrival order. New backing is published only after the exact upload receipt is physically retired; the public resource handle remains unchanged."
+        },
+        {
+          "name": "resource_priority",
+          "c_name": "r4gfx_resource_priority",
+          "symbol": "r4gfx_resource_priority_impl",
+          "slot": 33,
+          "since_revision": 10,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "resource",
+              "type": {
+                "name": "R4GfxResource",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "resource"
+            },
+            {
+              "name": "priority",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "memory_priority_normal by default; memory_priority_pinned disables eviction."
+            }
+          ],
+          "operation": {
+            "blocking": "may_block",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
+          },
+          "description": "Sets eviction and reconstruction preference for an owned managed image. Higher values preserve it longer and prioritize requested reconstruction; memory_priority_pinned excludes eviction. No memory is reserved per application."
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."
@@ -7416,6 +7638,190 @@
         }
       ],
       "description": "Version1/size64; reserved0. Explicit RGB(model1) or grayscale(model2) characterization. xy chromaticities and decoding gamma exponents use1/100000. Curve1 is pure power, curve2 is exact sRGB. Gamma must be0.01..100 even for unused channels; choose1 for sRGB. Gray uses the white point and first curve, produces a GRAY ICC profile, and accepts only equal RGB channels in the image/API storage. Generated RGB profiles can characterize inputs or displays; no measurement/calibration is claimed."
+    },
+    {
+      "name": "R4GfxMemoryInfo",
+      "size": 104,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Version1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Complete104-byte snapshot."
+        },
+        {
+          "name": "phase",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "memory_phase_* of the single retained reconstruction/readback transaction."
+        },
+        {
+          "name": "flags",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "memory_flag_restoring for upload to a new native BO; zero during readback."
+        },
+        {
+          "name": "adapter_id",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Currently selected adapter; zero for software."
+        },
+        {
+          "name": "resource_slot",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Affected R4GFX resource slot; zero when idle."
+        },
+        {
+          "name": "memory_generation",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Selected exact provider memory generation."
+        },
+        {
+          "name": "resident_bytes",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Unique native BO bytes held by this device; not globally free VRAM."
+        },
+        {
+          "name": "evicted_bytes",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Original native allocation sizes of managed images currently backed by preserved RAM contents."
+        },
+        {
+          "name": "system_bytes",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Unique system BO bytes held by this device, including evicted image contents."
+        },
+        {
+          "name": "pinned_bytes",
+          "offset": 56,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Non-evictable subset of resident_bytes: active, scanout, aliases, imports or explicitly pinned."
+        },
+        {
+          "name": "pending_bytes",
+          "offset": 64,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Described second backing retained during a migration; overlapping purpose, not a free-space estimate."
+        },
+        {
+          "name": "reclaimable_bytes",
+          "offset": 72,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Idle managed native subset eligible for one bounded readback/retirement transaction."
+        },
+        {
+          "name": "evictions",
+          "offset": 80,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Completed logical image evictions; driver charges retire separately after their actual RM acknowledgements."
+        },
+        {
+          "name": "restores",
+          "offset": 88,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Completed reconstructions after exact copy-fence retirement, preserving the public R4GFX resource handle."
+        },
+        {
+          "name": "failures",
+          "offset": 96,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Failed/cancelled transactions whose temporary resources have reached safe cleanup."
+        }
+      ],
+      "description": "Device-owned residency accounting. Aliases are deduplicated. Pinned/reclaimable bytes are subsets; pending backing and global kernel charges may outlive logical replacement. No claim of actual GPU free space."
     }
   ],
   "constants": [
@@ -8300,6 +8706,76 @@
       "type": "u32",
       "value": 256,
       "description": "Backend implements the bounded named-color render program and completion lifetime. Offscreen capability alone never grants HDR display admission."
+    },
+    {
+      "zig_name": "memory_priority_normal",
+      "c_name": "R4GFX_MEMORY_PRIORITY_NORMAL",
+      "type": "u32",
+      "value": 128,
+      "description": "memory_priority_normal"
+    },
+    {
+      "zig_name": "memory_priority_pinned",
+      "c_name": "R4GFX_MEMORY_PRIORITY_PINNED",
+      "type": "u32",
+      "value": 4294967295,
+      "description": "memory_priority_pinned"
+    },
+    {
+      "zig_name": "memory_flag_restoring",
+      "c_name": "R4GFX_MEMORY_FLAG_RESTORING",
+      "type": "u32",
+      "value": 1,
+      "description": "memory_flag_restoring"
+    },
+    {
+      "zig_name": "memory_phase_idle",
+      "c_name": "R4GFX_MEMORY_PHASE_IDLE",
+      "type": "u32",
+      "value": 0,
+      "description": "memory_phase_idle"
+    },
+    {
+      "zig_name": "memory_phase_prepare",
+      "c_name": "R4GFX_MEMORY_PHASE_PREPARE",
+      "type": "u32",
+      "value": 1,
+      "description": "memory_phase_prepare"
+    },
+    {
+      "zig_name": "memory_phase_allocate",
+      "c_name": "R4GFX_MEMORY_PHASE_ALLOCATE",
+      "type": "u32",
+      "value": 2,
+      "description": "memory_phase_allocate"
+    },
+    {
+      "zig_name": "memory_phase_describe",
+      "c_name": "R4GFX_MEMORY_PHASE_DESCRIBE",
+      "type": "u32",
+      "value": 3,
+      "description": "memory_phase_describe"
+    },
+    {
+      "zig_name": "memory_phase_submit",
+      "c_name": "R4GFX_MEMORY_PHASE_SUBMIT",
+      "type": "u32",
+      "value": 4,
+      "description": "memory_phase_submit"
+    },
+    {
+      "zig_name": "memory_phase_copy",
+      "c_name": "R4GFX_MEMORY_PHASE_COPY",
+      "type": "u32",
+      "value": 5,
+      "description": "memory_phase_copy"
+    },
+    {
+      "zig_name": "memory_phase_retire",
+      "c_name": "R4GFX_MEMORY_PHASE_RETIRE",
+      "type": "u32",
+      "value": 6,
+      "description": "memory_phase_retire"
     }
   ],
   "errors": [

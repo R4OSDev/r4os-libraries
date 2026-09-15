@@ -27,7 +27,7 @@ pub fn validateImage(image: c.R4GfxCpuImage, borrowed: bool) d.Error!void {
     if (length > image.byte_length or (borrowed and image.cpu_address == 0) or (!borrowed and image.cpu_address != 0)) return error.Invalid;
     _ = std.math.add(u64, image.cpu_address, image.byte_length) catch return error.Overflow;
 }
-fn descriptorImage(descriptor: a.GfxBufferDescriptor) d.Error!c.R4GfxCpuImage {
+pub fn descriptorImage(descriptor: a.GfxBufferDescriptor) d.Error!c.R4GfxCpuImage {
     if (descriptor.version != 1 or descriptor.size < @sizeOf(a.GfxBufferDescriptor) or
         (descriptor.modifier != 0 and descriptor.location != a.gfx_buffer_location_device_local) or
         descriptor.plane_count != 1 or descriptor.plane_offsets[0] != 0 or descriptor.reserved0 != 0) return error.Unsupported;
@@ -79,6 +79,7 @@ pub fn createColoredWithUsage(device: *d.Device, input: *const c.R4GfxResourceDe
                     if (native.version != 1 or native.size != @sizeOf(c.R4GfxNativeImage) or native.deadline_ns == 0 or
                         native.deadline_ns == std.math.maxInt(u64) or native.width == 0 or native.height == 0) return error.Invalid;
                     if (native.layout > 1) return error.Unsupported;
+                    candidate.native_layout = native.layout;
                     try validateColor(native.format, color);
                     if (device.selected.binding.adapter_id == 0) return error.Unsupported;
                     if (request.source_kind == c.source_create_native_scanout and
@@ -158,6 +159,16 @@ pub fn createColoredWithUsage(device: *d.Device, input: *const c.R4GfxResourceDe
                 try d.platform(memory.nativeStart(&allocation, &status));
                 item.allocation_request = status.request;
                 try d.platform(memory.nativeWait(&item.allocation_request, std.math.maxInt(u64), &status));
+                if (status.result == a.gfx_buffer_error_budget or status.result == a.gfx_buffer_error_oom) {
+                    // Start at most one idle image readback. Admission still
+                    // retries against the real retained driver charge later.
+                    @import("device_residency.zig").trim(device, native.deadline_ns) catch |err| {
+                        if (err == error.Busy) return error.Busy;
+                        try d.platform(status.result);
+                        unreachable;
+                    };
+                    return error.Busy;
+                }
                 try d.platform(status.result);
                 try d.platform(memory.nativeReceive(&item.allocation_request, &item.backing));
                 item.allocation_request = .{};
