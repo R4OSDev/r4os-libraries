@@ -6,6 +6,7 @@ pub const color = @import("color_signal.zig");
 pub const refresh = @import("refresh_range.zig");
 pub const vrr = @import("vrr.zig");
 pub const eld = @import("eld.zig");
+pub const links = @import("links.zig");
 const cta = @import("cta_timings.zig");
 pub const max_blocks = 32;
 pub const max_modes = 128;
@@ -43,6 +44,7 @@ pub const Report = struct {
     audio_infoframes: bool = false,
     audio_latency: u8 = 0,
     hdmi: bool = false,
+    hdmi_links: ?links.Hdmi = null,
     max_tmds_hz: u64 = 0,
     scdc: bool = false,
     scrambling_low_rates: bool = false,
@@ -428,6 +430,9 @@ fn parseCta(block: []const u8, result: *Report) Error!bool {
 
 fn hdmiForum(data: []const u8, result: *Report) bool {
     if (data.len < 7 or data[3] != 1 or data.len == 9) return false;
+    const link_info = links.Hdmi.parse(data) catch return false;
+    if (result.hdmi_links) |prior| if (!std.meta.eql(prior, link_info)) return false;
+    result.hdmi_links = link_info;
     var info: refresh.Hdmi = .{};
     if (data.len >= 8) info.flags = data[7];
     if (data.len >= 10) {

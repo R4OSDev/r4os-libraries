@@ -47,7 +47,7 @@ pub fn validate(device: *d.Device, source: *const d.Resource, output: ?a.GfxOutp
         a.gfx_output_error_busy => return error.Busy,
         else => return error.Unavailable,
     }
-    if (state.version != 1 or state.size < @sizeOf(a.GfxOutputColorState) or state.flags & 7 != 7 or
+    if (state.version != 1 or state.size < 128 or state.flags & 7 != 7 or
         !std.meta.eql(state.identity, identity)) return error.Stale;
     if (source.image.format != state.format) return error.Unsupported;
     if (source.color) |description| {

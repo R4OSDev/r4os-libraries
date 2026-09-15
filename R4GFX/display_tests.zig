@@ -139,6 +139,52 @@ fn checkColorSignal(input: edid.Report) !void {
     try t.expectError(error.Invalid, color.Source.fromPublished(published, .hdmi));
     published.formats = 1;
     try t.expectError(error.Bandwidth, color.admit(&receiver, try color.publishedSignal(published, null), confirmed, pipeline, try color.publishedLink(published, .displayport), 148_500_000, 0));
+    {
+        var extended = published;
+        extended.formats = 3; extended.depths = 3; extended.flags |= 32 | 16 | 64;
+        extended.dp_payload_bits_per_second = 25_920_000_000;
+        extended.link_kind = a.gfx_output_link_dp_sst; extended.link_flags = 3;
+        extended.link_payload_bits_per_second = 25_142_400_000;
+        extended.compressed_bpp_x16 = 256; extended.dsc_depths = 3;
+        // Current DSC admits its own RGB8 signal. It cannot admit another
+        // color depth using the old PPS or replace fresh candidate admission.
+        _ = try color.admit(&receiver, signal, source, pipeline, try color.publishedLink(extended, .displayport), 1_188_000_000, 0);
+        try color.preview(&receiver, signal, extended, .displayport, pipeline, 1_188_000_000, 0, 3840, 4400);
+        extended.dsc_depths = 0;
+        try t.expectError(error.Bandwidth, color.preview(&receiver, signal, extended, .displayport, pipeline, 1_188_000_000, 0, 3840, 4400));
+        extended.dsc_depths = 3;
+        var ten = signal; ten.format = .xr30; ten.bpc = 10;
+        receiver.bits_per_color = 8; // DPCD DSC precision is independent of EDID base depth.
+        try t.expectError(error.Unsupported, color.admit(&receiver, ten, source, pipeline, try color.publishedLink(extended, .displayport), 1_188_000_000, 0));
+        try color.preview(&receiver, ten, extended, .displayport, pipeline, 1_188_000_000, 0, 3840, 4400);
+        extended.dsc_depths = 1;
+        try t.expectError(error.Unsupported, color.preview(&receiver, ten, extended, .displayport, pipeline, 1_188_000_000, 0, 3840, 4400));
+        extended.dsc_depths = 3; extended.size = 128;
+        try t.expectError(error.Bandwidth, color.preview(&receiver, signal, extended, .displayport, pipeline, 1_188_000_000, 0, 3840, 4400));
+        extended.size = 192; extended.link_kind = a.gfx_output_link_frl; extended.link_flags = 1;
+        extended.compressed_bpp_x16 = 0; extended.link_payload_bits_per_second = 42_666_666_666;
+        extended.h_active = 3840; extended.h_total = 4400; extended.max_frl_rate = 6;
+        receiver.scdc = true; receiver.hdmi_links = .{ .max_frl = .lanes4_12g };
+        _ = try color.admit(&receiver, ten, source, pipeline, try color.publishedLink(extended, .hdmi), 1_188_000_000, 0);
+        try color.preview(&receiver, ten, extended, .hdmi, pipeline, 1_188_000_000, 0, 3840, 4400);
+        receiver.hdmi_links.?.max_frl = .lanes4_8g;
+        try t.expectError(error.Bandwidth, color.preview(&receiver, ten, extended, .hdmi, pipeline, 1_188_000_000, 0, 3840, 4400));
+        receiver.hdmi_links.?.max_frl = .lanes4_12g; extended.max_frl_rate = 0;
+        try t.expectError(error.Bandwidth, color.preview(&receiver, ten, extended, .hdmi, pipeline, 1_188_000_000, 0, 3840, 4400));
+        receiver.hdmi_links.?.dsc = .{ .advertised = true, .supported_fields = true, .bpc_mask = 3,
+            .max_frl = .lanes3_6g, .max_slices = 8, .max_slice_clock_mhz = 400, .max_chunk_bytes = 8192 };
+        receiver.hdmi_links.?.max_frl = .lanes3_6g;
+        extended.max_frl_rate = 2; extended.dsc_depths = 3;
+        receiver.hdmi_deep_color = 0;
+        try color.preview(&receiver, ten, extended, .hdmi, pipeline, 1_188_000_000, 0, 3840, 4400);
+        extended.link_flags = 3; extended.compressed_bpp_x16 = 192; extended.bpc = 10;
+        extended.link_payload_bits_per_second = 16_000_000_000;
+        _ = try color.admit(&receiver, ten, source, pipeline, try color.publishedLink(extended, .hdmi), 1_188_000_000, 0);
+        try t.expectError(error.Unsupported, color.admit(&receiver, signal, source, pipeline, try color.publishedLink(extended, .hdmi), 1_188_000_000, 0));
+        extended.dsc_depths = 0;
+        try t.expectError(error.Unsupported, color.preview(&receiver, ten, extended, .hdmi, pipeline, 1_188_000_000, 0, 3840, 4400));
+        receiver.bits_per_color = 10;
+    }
     signal.range = .limited;
     _ = try color.admit(&receiver, signal, source, pipeline, hdmi, 148_500_000, 16);
     var bad = metadata;
@@ -205,6 +251,7 @@ test "licensed receiver fixtures and actual OssiPC base preserve missing extensi
     try t.expect(contains(&result, 6016, 3384));
 }
 test "extension checksums and malformed lengths cannot leak partial audio or timing claims" {
+    try @import("Tests/Display/links_check.zig").check();
     try checkColorMetadata();
     try @import("Tests/Display/vrr_check.zig").check();
     var bytes = television[0..256].*;

@@ -114,6 +114,21 @@ fn decodeSignal(state: anytype, metadata: ?Metadata) Error!Signal {
 }
 pub fn publishedLink(state: anytype, transport: Transport) Error!Link {
     if (state.version != 1 or state.size < 128 or state.flags & 3 != 3) return error.Incomplete;
+    if (state.size >= 192 and state.link_kind != 0) {
+        if ((transport == .displayport) != (state.link_kind == 3 or state.link_kind == 4)) return error.Invalid;
+        if (state.link_kind == 2) {
+            if (transport != .hdmi or state.compressed_bpp_x16 > 1023 or state.bpc > 255) return error.Unsupported;
+            return .{ .hdmi_frl = .{ .payload_bits_per_second = state.link_payload_bits_per_second,
+                .h_total = state.h_total, .h_active = state.h_active,
+                .compressed_bpp_x16 = if (state.link_flags & 2 != 0) @intCast(state.compressed_bpp_x16) else 0,
+                .compressed_bpc = if (state.link_flags & 2 != 0) @intCast(state.bpc) else 0 } };
+        }
+        if (transport == .displayport) return .{ .displayport = .{
+            .payload_bits_per_second = state.link_payload_bits_per_second,
+            .compressed_bpp_x16 = std.math.cast(u16, state.compressed_bpp_x16) orelse return error.Invalid,
+            .compressed_bpc = if (state.link_flags & 2 != 0) std.math.cast(u8, state.bpc) orelse return error.Invalid else 0,
+            .vsc = state.flags & 32 != 0, .hdr_sdp = state.flags & 16 != 0 } };
+    }
     return switch (transport) {
         .dvi => .{ .dvi = state.max_tmds_clock_hz },
         .hdmi => .{ .hdmi = .{ .max_tmds_hz = state.max_tmds_clock_hz, .scdc = state.flags & 64 != 0 } },
@@ -125,8 +140,49 @@ pub const Pipeline = struct { linear_composition: bool, output_transform: bool, 
 pub const Link = union(enum) {
     dvi: u64, // Source TMDS ceiling. DVI is RGB8/full/SDR only.
     hdmi: struct { max_tmds_hz: u64, scdc: bool },
-    displayport: struct { payload_bits_per_second: u64, vsc: bool, hdr_sdp: bool },
+    hdmi_frl: struct { payload_bits_per_second: u64, h_total: u32, h_active: u32,
+        compressed_bpp_x16: u16 = 0, compressed_bpc: u8 = 0 },
+    displayport: struct { payload_bits_per_second: u64, vsc: bool, hdr_sdp: bool, compressed_bpp_x16: u16 = 0, compressed_bpc: u8 = 0 },
 };
+/// A candidate preview deliberately returns no admitted link or PPS. It can
+/// defer a compression-dependent budget only when both ends expose the
+/// implemented depth. The driver must still regenerate PPS, recheck current
+/// source/receiver/IMP facts and train this exact candidate before commit.
+pub fn preview(receiver: anytype, signal: Signal, state: anytype, transport: Transport,
+    pipeline: Pipeline, clock: u64, vic: u16, width: u32, h_total: u32) Error!void
+{
+    if (state.version != 1 or state.size < 128 or state.flags & 7 != 7) return error.Incomplete;
+    const source = try Source.fromPublished(state, transport);
+    // Ignore active compression and timing: neither belongs to this candidate.
+    const ordinary: Link = switch (transport) {
+        .dvi => .{ .dvi = state.max_tmds_clock_hz },
+        .hdmi => .{ .hdmi = .{ .max_tmds_hz = state.max_tmds_clock_hz, .scdc = state.flags & 64 != 0 } },
+        .displayport => .{ .displayport = .{ .payload_bits_per_second = state.dp_payload_bits_per_second,
+            .vsc = state.flags & 32 != 0, .hdr_sdp = state.flags & 16 != 0 } },
+    };
+    _ = admit(receiver, signal, source, pipeline, ordinary, clock, vic) catch |err| {
+        if (state.size < 192 or (err != error.Bandwidth and err != error.Unsupported)) return err;
+        const depth: u32 = if (signal.bpc == 8) 1 else if (signal.bpc == 10) 2 else 0;
+        if (transport == .hdmi and state.max_frl_rate > 0 and state.max_frl_rate <= 6) {
+            const receiver_links = receiver.hdmi_links orelse return error.Bandwidth;
+            const maximum = @min(state.max_frl_rate, @intFromEnum(receiver_links.max_frl));
+            const rate = @import("links.zig").Frl.decode(@intCast(maximum)) catch return error.Unsupported;
+            _ = admit(receiver, signal, source, pipeline, .{ .hdmi_frl = .{
+                .payload_bits_per_second = rate.codingCeiling(), .h_total = h_total, .h_active = width } }, clock, vic) catch |extended_error| {
+                if ((extended_error != error.Bandwidth and extended_error != error.Unsupported) or depth == 0 or state.dsc_depths & depth == 0 or
+                    !receiver_links.dsc.advertised or !receiver_links.dsc.supported_fields or receiver_links.dsc.bpc_mask & depth == 0 or
+                    receiver_links.dsc.max_frl == .none) return extended_error;
+                _ = try hdmiDscCandidate(receiver, signal, source, pipeline, clock, vic);
+                return;
+            };
+            return;
+        }
+        if (transport != .displayport or depth == 0 or state.dsc_depths & depth == 0) return err;
+        _ = try signalPlan(receiver, signal, source, pipeline, clock, vic);
+        try dpSignaling(receiver, signal, source, state.flags & 32 != 0, state.flags & 16 != 0, signal.bpc);
+        return;
+    };
+}
 pub const Plan = struct {
     bpp: u8,
     tmds_hz: u64 = 0,
@@ -189,6 +245,74 @@ pub fn dpSdrMetadata() [36]u8 {
 /// Receiver is the R4GFX EDID Report supplied by its canonical parser module.
 /// Keeping it generic avoids importing that parser under a second module owner.
 pub fn admit(receiver: anytype, signal: Signal, source: Source, pipeline: Pipeline, link: Link, pixel_clock_hz: u64, vic: u16) Error!Plan {
+    var result = try signalPlan(receiver, signal, source, pipeline, pixel_clock_hz, vic);
+    const hdr = signal.transfer != .srgb;
+    switch (link) {
+        .dvi => |limit| {
+            if (hdr or signal.bpc != 8 or signal.primaries != .bt709 or signal.range != .full) return error.Unsupported;
+            if (limit == 0 or pixel_clock_hz > @min(limit, 165_000_000)) return error.Bandwidth;
+            result.tmds_hz = pixel_clock_hz;
+        },
+        .hdmi => |limits| {
+            try hdmiSignaling(receiver, signal, vic, 0);
+            const numerator = std.math.mul(u64, pixel_clock_hz, signal.bpc) catch return error.Bandwidth;
+            result.tmds_hz = numerator / 8 + @intFromBool(numerator % 8 != 0);
+            const sink_limit = if (receiver.max_tmds_hz == 0) @as(u64, 165_000_000) else receiver.max_tmds_hz;
+            if (limits.max_tmds_hz == 0 or result.tmds_hz > @min(limits.max_tmds_hz, sink_limit) or
+                (result.tmds_hz > 340_000_000 and (!limits.scdc or !receiver.scdc))) return error.Bandwidth;
+            if (hdr) { result.metadata[0..30].* = try hdmiMetadata(signal.transfer, signal.metadata.?); result.metadata_bytes = 30; }
+        },
+        .hdmi_frl => |limits| {
+            if ((limits.compressed_bpp_x16 != 0) != (limits.compressed_bpc != 0)) return error.Invalid;
+            try hdmiSignaling(receiver, signal, vic, limits.compressed_bpc);
+            if (!receiver.scdc) return error.Unsupported;
+            const bpp_x16: u32 = if (limits.compressed_bpp_x16 != 0) limits.compressed_bpp_x16 else @as(u32, result.bpp) * 16;
+            if (limits.compressed_bpp_x16 != 0 and (bpp_x16 < 128 or bpp_x16 >= @as(u32, result.bpp) * 16)) return error.Unsupported;
+            if (limits.h_total <= limits.h_active or limits.h_active == 0 or limits.payload_bits_per_second == 0 or
+                @as(u128, pixel_clock_hz) * bpp_x16 * limits.h_active >= @as(u128, limits.payload_bits_per_second) * limits.h_total * 16) return error.Bandwidth;
+            // A coding ceiling cannot replace the transport owner's real RM
+            // capacity and training checks for this exact timing.
+            if (hdr) { result.metadata[0..30].* = try hdmiMetadata(signal.transfer, signal.metadata.?); result.metadata_bytes = 30; }
+        },
+        .displayport => |limits| {
+            if ((limits.compressed_bpp_x16 != 0) != (limits.compressed_bpc != 0)) return error.Invalid;
+            try dpSignaling(receiver, signal, source, limits.vsc, limits.hdr_sdp, limits.compressed_bpc);
+            const bpp_x16: u32 = if (limits.compressed_bpp_x16 != 0) limits.compressed_bpp_x16 else @as(u32, result.bpp) * 16;
+            if (limits.compressed_bpp_x16 != 0 and (bpp_x16 < 128 or bpp_x16 >= @as(u32, result.bpp) * 16)) return error.Unsupported;
+            if (limits.payload_bits_per_second == 0 or @as(u128, pixel_clock_hz) * bpp_x16 >= @as(u128, limits.payload_bits_per_second) * 16) return error.Bandwidth;
+            if (hdr) { result.metadata = try dpMetadata(signal.transfer, signal.metadata.?); result.metadata_bytes = 36; }
+        },
+    }
+    return result;
+}
+fn hdmiSignaling(receiver: anytype, signal: Signal, vic: u16, compressed_bpc: u8) Error!void {
+    if (!receiver.hdmi) return error.Unsupported;
+    if (compressed_bpc != 0) {
+        const receiver_links = receiver.hdmi_links orelse return error.Unsupported;
+        const dsc = receiver_links.dsc;
+        const depth: u8 = if (signal.bpc == 8) 1 else if (signal.bpc == 10) 2 else 0;
+        if (compressed_bpc != signal.bpc or depth == 0 or !dsc.advertised or !dsc.supported_fields or dsc.bpc_mask & depth == 0) return error.Unsupported;
+    } else if (signal.bpc > 8 and receiver.hdmi_deep_color & 1 == 0) return error.Unsupported;
+    if (signal.range != (if (vic <= 1) Range.full else Range.limited) and !receiver.rgb_quantization_selectable) return error.Unsupported;
+}
+/// Packet/color preparation only. No BPP, slice, capacity or activation
+/// admission is returned; the driver must replace this with exact admit().
+pub fn hdmiDscCandidate(receiver: anytype, signal: Signal, source: Source, pipeline: Pipeline, clock: u64, vic: u16) Error!Plan {
+    var result = try signalPlan(receiver, signal, source, pipeline, clock, vic);
+    try hdmiSignaling(receiver, signal, vic, signal.bpc);
+    if (!receiver.scdc) return error.Unsupported;
+    if (!result.clear_hdr) { result.metadata[0..30].* = try hdmiMetadata(signal.transfer, signal.metadata.?); result.metadata_bytes = 30; }
+    return result;
+}
+fn dpSignaling(receiver: anytype, signal: Signal, source: Source, vsc: bool, hdr_sdp: bool, compressed_bpc: u8) Error!void {
+    if (compressed_bpc != 0) {
+        if (compressed_bpc != signal.bpc) return error.Unsupported;
+    } else if (signal.bpc > 8 and receiver.bits_per_color < signal.bpc) return error.Unsupported;
+    const hdr = signal.transfer != .srgb;
+    if ((hdr or signal.primaries == .bt2020 or signal.range == .limited) and (!source.dp_vsc or !vsc)) return error.Unsupported;
+    if (hdr and !hdr_sdp) return error.Unsupported;
+}
+fn signalPlan(receiver: anytype, signal: Signal, source: Source, pipeline: Pipeline, pixel_clock_hz: u64, vic: u16) Error!Plan {
     if (!receiver.complete()) return error.Incomplete;
     if (!receiver.digital or receiver.colors & 1 == 0 or pixel_clock_hz == 0 or vic > 127 or
         (signal.bpc != 8 and signal.bpc != 10) or signal.reference_white == 0 or signal.reference_white > signal.peak or signal.peak > 100_000_000 or signal.black >= signal.reference_white)
@@ -211,32 +335,5 @@ pub fn admit(receiver: anytype, signal: Signal, source: Source, pipeline: Pipeli
         if (!source.static_metadata or !receiver.hdr_present or receiver.hdr_eotf & eotf_bit == 0 or receiver.hdr_static & 1 == 0) return error.Unsupported;
         try signal.metadata.?.validate();
     } else if (signal.metadata != null) return error.Invalid;
-    var result: Plan = .{ .bpp = signal.bpc * 3, .clear_hdr = !hdr };
-    switch (link) {
-        .dvi => |limit| {
-            if (hdr or signal.bpc != 8 or signal.primaries != .bt709 or signal.range != .full) return error.Unsupported;
-            if (limit == 0 or pixel_clock_hz > @min(limit, 165_000_000)) return error.Bandwidth;
-            result.tmds_hz = pixel_clock_hz;
-        },
-        .hdmi => |limits| {
-            if (!receiver.hdmi) return error.Unsupported;
-            if (signal.bpc > 8 and receiver.hdmi_deep_color & 1 == 0) return error.Unsupported;
-            if (signal.range != (if (vic <= 1) Range.full else Range.limited) and !receiver.rgb_quantization_selectable) return error.Unsupported;
-            const numerator = std.math.mul(u64, pixel_clock_hz, signal.bpc) catch return error.Bandwidth;
-            result.tmds_hz = numerator / 8 + @intFromBool(numerator % 8 != 0);
-            const sink_limit = if (receiver.max_tmds_hz == 0) @as(u64, 165_000_000) else receiver.max_tmds_hz;
-            if (limits.max_tmds_hz == 0 or result.tmds_hz > @min(limits.max_tmds_hz, sink_limit) or
-                (result.tmds_hz > 340_000_000 and (!limits.scdc or !receiver.scdc))) return error.Bandwidth;
-            if (hdr) { result.metadata[0..30].* = try hdmiMetadata(signal.transfer, signal.metadata.?); result.metadata_bytes = 30; }
-        },
-        .displayport => |limits| {
-            if (signal.bpc > 8 and receiver.bits_per_color < signal.bpc) return error.Unsupported;
-            if ((hdr or signal.primaries == .bt2020 or signal.range == .limited) and (!source.dp_vsc or !limits.vsc)) return error.Unsupported;
-            if (hdr and !limits.hdr_sdp) return error.Unsupported;
-            const required = std.math.mul(u64, pixel_clock_hz, result.bpp) catch return error.Bandwidth;
-            if (limits.payload_bits_per_second == 0 or required >= limits.payload_bits_per_second) return error.Bandwidth;
-            if (hdr) { result.metadata = try dpMetadata(signal.transfer, signal.metadata.?); result.metadata_bytes = 36; }
-        },
-    }
-    return result;
+    return .{ .bpp = signal.bpc * 3, .clear_hdr = !hdr };
 }

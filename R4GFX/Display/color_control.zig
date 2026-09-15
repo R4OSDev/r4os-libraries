@@ -26,9 +26,9 @@ pub fn validate(draw: anytype, entry: *const catalog.Entry, mode: a.GfxOutputMod
             break timing.vic;
     } else return error.Incomplete;
     const transport: color.Transport = if (state.dp_payload_bits_per_second != 0) .displayport else if (report.hdmi) .hdmi else .dvi;
-    _ = try color.admit(&report, signal, try color.Source.fromPublished(state, transport),
+    try color.preview(&report, signal, state, transport,
         .{ .linear_composition = true, .output_transform = true, .opaque_output = true },
-        try color.publishedLink(state, transport), mode.pixel_clock_hz, vic);
+        mode.pixel_clock_hz, vic, mode.width, mode.h_total);
 }
 
 /// Attempt ledger is independent of mode/display generations changed by a
