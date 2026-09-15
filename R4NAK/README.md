@@ -1,4 +1,4 @@
-# R4NAK runtime compiler
+﻿# R4NAK runtime compiler
 
 R4NAK.R4L 0.1.1 translates caller-provided SPIR-V through pinned Mesa 26.2.2
 NIR and NAK into NVIDIA machine code. It runs on R4OS, independently of R4NV's
