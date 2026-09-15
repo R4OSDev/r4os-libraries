@@ -1,0 +1,113 @@
+# Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
+[CmdletBinding()]
+param([Parameter(Mandatory)][string]$OutputRoot)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
+$unit = [IO.Path]::GetFullPath('..', $PSScriptRoot)
+$libraries = [IO.Path]::GetFullPath('../..', $PSScriptRoot)
+$settings = @{}
+foreach ($line in Get-Content -LiteralPath (Join-Path $libraries 'Settings.R4S')) {
+    if ($line -match '^([A-Z_]+)=(.+)$') { $settings[$Matches[1]] = $Matches[2] }
+}
+function Resolve-Setting([string]$Base, [string]$Key) {
+    [IO.Path]::GetFullPath($settings[$Key].Replace('\', [IO.Path]::DirectorySeparatorChar), $Base)
+}
+function Hash([string]$Path) { (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
+function Run([string]$Program, [string[]]$Arguments) {
+    & $Program @Arguments
+    if ($LASTEXITCODE) { throw "$Program failed ($LASTEXITCODE)" }
+}
+$workspace = Resolve-Setting $libraries 'WORKSPACE_ROOT'
+$devkit = Resolve-Setting $workspace 'DEVKIT_ROOT'
+$mesaTools = Join-Path $libraries 'R4NV/Tools/Compiler'
+$lockPath = Join-Path $mesaTools 'Sources.lock.json'
+$lock = Get-Content -Raw -LiteralPath $lockPath | ConvertFrom-Json
+$basePatch = Hash (Join-Path $mesaTools 'MesaStandalone.patch')
+$prepared = Join-Path $devkit ('Toolchains/MesaNAK/' + $lock.mesa.version + '-' + $basePatch.Substring(0, 16))
+$source = Join-Path $prepared 'Source'
+$stamp = Get-Content -Raw -LiteralPath (Join-Path $prepared 'prepared.json') | ConvertFrom-Json
+if ($stamp.mesa -ne $lock.mesa.sha512 -or $stamp.patch -ne $basePatch) { throw 'Mesa source preparation does not match the shared source lock.' }
+$manifestPath = Join-Path $prepared 'source-files.json'
+$sourceFiles = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+foreach ($file in $sourceFiles) {
+    if ((Hash (Join-Path $source $file.path)) -ne $file.sha256) { throw "Prepared Mesa source changed: $($file.path)" }
+}
+$output = [IO.Path]::GetFullPath($OutputRoot, $workspace)
+$sourcePrefix = $source.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+if ($output -eq $source -or $output.StartsWith($sourcePrefix, [StringComparison]::OrdinalIgnoreCase)) { throw 'R4VK generation must not modify the prepared Mesa source.' }
+$generated = Join-Path $output 'Generated'
+$overlay = Join-Path $output 'CSource'
+[IO.Directory]::CreateDirectory($generated) | Out-Null
+[IO.Directory]::CreateDirectory($overlay) | Out-Null
+# NVK headers use relative quoted includes. Copy its C/header subtree so
+# consumers resolve the patched nvkmd header without touching pinned inputs.
+$nvkSource = Join-Path $source 'src/nouveau/vulkan'
+foreach ($file in Get-ChildItem -LiteralPath $nvkSource -File -Recurse | Where-Object Extension -in @('.c', '.h')) {
+    $relative = [IO.Path]::GetRelativePath($source, $file.FullName)
+    $destination = Join-Path $overlay $relative
+    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($destination)) | Out-Null
+    Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
+}
+$patch = Join-Path $unit 'Port/MesaRuntime.patch'
+$patchedFiles = @([regex]::Matches([IO.File]::ReadAllText($patch), '(?m)^--- a/(.+)$') | ForEach-Object { $_.Groups[1].Value.TrimEnd("`r") })
+foreach ($relative in $patchedFiles) {
+    $destination = Join-Path $overlay $relative
+    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($destination)) | Out-Null
+    Copy-Item -LiteralPath (Join-Path $source $relative) -Destination $destination -Force
+}
+$git = (Get-Command git -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
+Push-Location ([IO.Path]::GetPathRoot($overlay))
+try {
+    Run $git @('apply', '--unsafe-paths', ('--directory=' + $overlay), '--check', $patch)
+    Run $git @('apply', '--unsafe-paths', ('--directory=' + $overlay), $patch)
+} finally { Pop-Location }
+
+$python = (Get-Command $(if ($IsWindows) { 'python.exe' } else { 'python3' }) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
+$cbindgen = (Get-Command cbindgen -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
+$cbindgenVersion = @(& $cbindgen --version)
+if ($LASTEXITCODE -or !$cbindgenVersion.Count -or [string]$cbindgenVersion[0] -notmatch ('(?<![0-9.])' + [regex]::Escape([string]$lock.host_tools.cbindgen) + '(?![0-9.])')) { throw 'Pinned cbindgen version required.' }
+$xml = Join-Path $source 'src/vulkan/registry/vk.xml'
+function Generate([string]$Script, [string[]]$Options) {
+    Run $python (@((Join-Path $source ('src/vulkan/' + $Script)), '--xml', $xml) + $Options)
+}
+$oldBytecode = [Environment]::GetEnvironmentVariable('PYTHONDONTWRITEBYTECODE', 'Process')
+try {
+    [Environment]::SetEnvironmentVariable('PYTHONDONTWRITEBYTECODE', '1', 'Process')
+    foreach ($kind in @('dispatch_table', 'extensions', 'cmd_queue', 'dispatch_trampolines', 'physical_device_features', 'physical_device_properties')) {
+        $options = @('--out-c', (Join-Path $generated "vk_$kind.c"), '--out-h', (Join-Path $generated "vk_$kind.h"))
+        if ($kind -ne 'extensions') { $options += @('--beta', 'false') }
+        Generate "util/vk_$($kind)_gen.py" $options
+    }
+    Generate 'util/gen_enum_to_str.py' @('--out-c', (Join-Path $generated 'vk_enum_to_str.c'), '--out-h', (Join-Path $generated 'vk_enum_to_str.h'), '--out-d', (Join-Path $generated 'vk_enum_defines.h'), '--beta', 'false')
+    Generate 'util/vk_struct_type_cast_gen.py' @('--out', (Join-Path $generated 'vk_struct_type_cast.h'), '--beta', 'false')
+    foreach ($kind in @('physical_device_spirv_caps', 'synchronization_helpers')) {
+        Generate "util/vk_$($kind)_gen.py" @('--out-c', (Join-Path $generated "vk_$kind.c"), '--beta', 'false')
+    }
+    Generate 'runtime/vk_format_info_gen.py' @('--out-c', (Join-Path $generated 'vk_format_info.c'), '--out-h', (Join-Path $generated 'vk_format_info.h'))
+    foreach ($prefix in @('nvk', 'vk_common', 'vk_cmd_enqueue')) {
+        $options = @('--proto', '--weak', '--out-c', (Join-Path $generated "$($prefix)_entrypoints.c"), '--out-h', (Join-Path $generated "$($prefix)_entrypoints.h"), '--prefix', $prefix, '--beta', 'false')
+        if ($prefix -eq 'vk_cmd_enqueue') { $options += @('--prefix', 'vk_cmd_enqueue_unless_primary') }
+        Generate 'util/vk_entrypoints_gen.py' $options
+    }
+    Run $python @((Join-Path $source 'src/nouveau/vulkan/nvk_drirc_gen.py'), '--import-path', (Join-Path $source 'src/util'),
+        '--drirc-src', (Join-Path $generated 'nvk_drirc.c'), '--drirc-hdr', (Join-Path $generated 'nvk_drirc.h'),
+        '--validate', (Join-Path $source 'src/nouveau/vulkan/00-nvk-defaults.conf'))
+    $nilSource = Join-Path $source 'src/nouveau/nil'
+    Run $python @((Join-Path $nilSource 'nil_format_table_gen.py'), '--csv', (Join-Path $nilSource 'nil_formats.csv'),
+        '--out-h', (Join-Path $generated 'nil_format_table.h'), '--out-c', (Join-Path $generated 'nil_format_table.c'))
+    Run $cbindgen @('-q', '--config', (Join-Path $nilSource 'cbindgen.toml'), '--lang', 'c', '--output', (Join-Path $generated 'nil.h'), '--', (Join-Path $nilSource 'lib.rs'))
+} finally { [Environment]::SetEnvironmentVariable('PYTHONDONTWRITEBYTECODE', $oldBytecode, 'Process') }
+$outputs = @(foreach ($directory in @($generated, $overlay)) {
+    Get-ChildItem -LiteralPath $directory -File -Recurse | Sort-Object FullName | ForEach-Object {
+        [ordered]@{ path = [IO.Path]::GetRelativePath($output, $_.FullName).Replace('\', '/'); sha256 = (Hash $_.FullName) }
+    }
+})
+[ordered]@{
+    schema = 1; mesa = $lock.mesa.version; mesa_lock_sha256 = (Hash $lockPath)
+    source_manifest_sha256 = (Hash $manifestPath); source_files_verified = $sourceFiles.Count
+    runtime_patch_sha256 = (Hash $patch); prepare_script_sha256 = (Hash $PSCommandPath)
+    outputs = $outputs
+    scope = 'Generated Vulkan/NVK tables and private source overlays only; no provider binary or runtime capability claim.'
+} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'prepare.json') -Encoding utf8NoBOM
+Write-Host "R4VK pinned Mesa preparation: $output ($($outputs.Count) outputs)"

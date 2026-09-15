@@ -127,3 +127,16 @@ Linux kernel code, LLVM JIT or GPU firmware is linked into R4NAK.R4L.
 The port's runtime adapters, compiler contract, worker, executable cache,
 build orchestration and self-authored diagnostic shader remain original
 Apache-2.0 R4OS material. Upstream lowering algorithms retain their licenses.
+
+
+## R4VK native Vulkan preparation (0.79.35, in progress)
+
+R4VK uses the same checksum-pinned Mesa 26.2.2 source as R4NV/R4NAK.
+`R4VK/Tools/Prepare.ps1` verifies that source manifest before copying private
+NVK C/header inputs and applying `Port/MesaRuntime.patch`. Original Intel,
+Collabora, Red Hat and other Mesa copyright/license notices remain in every
+copied file. The original Mesa Vulkan registry, NVK configuration and NIL
+format generators produce the port's tables; their output notices are retained.
+The generated preparation record identifies the inputs, patch and output hashes.
+This intermediate work does not yet distribute an R4VK binary. Full applicable
+source notices must accompany that artifact when its integration is complete.

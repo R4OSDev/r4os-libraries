@@ -1,0 +1,55 @@
+--- a/src/vulkan/runtime/vk_device.c
++++ b/src/vulkan/runtime/vk_device.c
+@@ -860,7 +860,14 @@
+    }
+ 
+    /* device is not used for host time domains */
+-#if DETECT_OS_WINDOWS
++#if defined(R4OS_VULKAN)
++   /* R4OS exposes its monotonic clock directly. No host clockid_t or
++    * fabricated RAW/UTC domain enters the provider ABI. */
++   extern int r4vk_monotonic_time(uint64_t *timestamp);
++   if (domain == VK_TIME_DOMAIN_CLOCK_MONOTONIC_KHR &&
++       r4vk_monotonic_time(timestamp) == 0)
++      return VK_SUCCESS;
++#elif DETECT_OS_WINDOWS
+    if (domain == VK_TIME_DOMAIN_QUERY_PERFORMANCE_COUNTER_KHR) {
+       LARGE_INTEGER ts;
+       if (QueryPerformanceCounter(&ts)) {
+--- a/src/vulkan/runtime/vk_fence.c
++++ b/src/vulkan/runtime/vk_fence.c
+@@ -344,7 +344,7 @@
+    pExternalFenceProperties->externalFenceFeatures = features;
+ }
+ 
+-#ifndef _WIN32
++#if !defined(_WIN32) && !defined(R4OS_VULKAN)
+ 
+ VKAPI_ATTR VkResult VKAPI_CALL
+ vk_common_ImportFenceFdKHR(VkDevice _device,
+--- a/src/vulkan/runtime/vk_semaphore.c
++++ b/src/vulkan/runtime/vk_semaphore.c
+@@ -532,7 +532,7 @@
+    return VK_SUCCESS;
+ }
+ 
+-#else
++#elif !defined(R4OS_VULKAN)
+ 
+ VKAPI_ATTR VkResult VKAPI_CALL
+ vk_common_ImportSemaphoreFdKHR(VkDevice _device,
+--- a/src/nouveau/vulkan/nvkmd/nvkmd.h
++++ b/src/nouveau/vulkan/nvkmd/nvkmd.h
+@@ -150,10 +150,12 @@
+     */
+    uint32_t bind_align_B;
+ 
++#if !defined(R4OS_VULKAN)
+    struct {
+       dev_t render_dev;
+       dev_t primary_dev;
+    } drm;
++#endif
+ 
+    const struct vk_sync_type *const *sync_types;
+ };

@@ -31,6 +31,22 @@ library destructors. A shared library static supplies only the unique context
 key, never a cached caller pointer. This does not yet audit or port all Mesa
 global state, file APIs, Rust allocation or Vulkan callback allocation paths.
 
+`Port/time.zig` connects Mesa's private monotonic time/deadline helpers to
+R4SYS. Deadline sleep uses the actual event-frequency ratio and rechecks the
+monotonic clock after waking. This is not a POSIX clock or UTC implementation.
+`Port/MesaRuntime.patch` selects this host timestamp path with `R4OS_VULKAN`,
+omits external-FD fence/semaphore entrypoints and excludes DRM device IDs from
+the private nvkmd layout. Those omissions require corresponding Vulkan
+extensions to remain unadvertised in the future provider.
+
+`Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
+the existing pinned Mesa source manifest, creates private C/header overlays
+and runs the original Vulkan/NVK/NIL table generators. Prepare the shared
+Mesa toolchain through `R4NV/Tools/Compiler` first. The script does not download
+sources, alter the pinned source tree or build a complete provider. Consumers
+must compile the private NVK source/header tree together, with `R4OS_VULKAN`
+and the generated headers, so relative includes cannot bypass the port.
+
 The bounded CPU proof uses a temporary native C/R4L fixture, not a Vulkan
 provider. Evidence and remaining integration work are recorded in
 `Docs/Drivers/GrafikVulkan07935.txt/.json` in the workspace's Docs repository.
