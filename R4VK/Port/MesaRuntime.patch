@@ -1,3 +1,25 @@
+--- a/src/vulkan/runtime/vk_image.h
++++ b/src/vulkan/runtime/vk_image.h
+@@ -77,7 +77,7 @@
+    /* wsi_image_create_info::scanout */
+    bool wsi_legacy_scanout;
+ 
+-#if DETECT_OS_LINUX || DETECT_OS_BSD
++#if DETECT_OS_LINUX || DETECT_OS_BSD || defined(R4OS_VULKAN)
+    /* VK_EXT_drm_format_modifier
+     *
+     * Initialized by vk_image_create/init() to DRM_FORMAT_MOD_INVALID.  It's
+--- a/src/vulkan/runtime/vk_image.c
++++ b/src/vulkan/runtime/vk_image.c
+@@ -105,7 +105,7 @@
+       vk_find_struct_const(pCreateInfo->pNext, WSI_IMAGE_CREATE_INFO_MESA);
+    image->wsi_legacy_scanout = wsi_info && wsi_info->scanout;
+ 
+-#if DETECT_OS_LINUX || DETECT_OS_BSD
++#if DETECT_OS_LINUX || DETECT_OS_BSD || defined(R4OS_VULKAN)
+    image->drm_format_mod = ((1ULL << 56) - 1) /* DRM_FORMAT_MOD_INVALID */;
+ #endif
+ 
 --- a/src/vulkan/runtime/vk_device.c
 +++ b/src/vulkan/runtime/vk_device.c
 @@ -860,7 +860,14 @@

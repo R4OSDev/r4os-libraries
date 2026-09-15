@@ -40,14 +40,15 @@ $generated = Join-Path $output 'Generated'
 $overlay = Join-Path $output 'CSource'
 [IO.Directory]::CreateDirectory($generated) | Out-Null
 [IO.Directory]::CreateDirectory($overlay) | Out-Null
-# NVK headers use relative quoted includes. Copy its C/header subtree so
-# consumers resolve the patched nvkmd header without touching pinned inputs.
-$nvkSource = Join-Path $source 'src/nouveau/vulkan'
-foreach ($file in Get-ChildItem -LiteralPath $nvkSource -File -Recurse | Where-Object Extension -in @('.c', '.h')) {
-    $relative = [IO.Path]::GetRelativePath($source, $file.FullName)
-    $destination = Join-Path $overlay $relative
-    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($destination)) | Out-Null
-    Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
+# Quoted includes must resolve one consistent private layout in every C unit.
+# Keep NVK and Vulkan runtime headers with their consuming C source files.
+foreach ($directory in @('src/nouveau/vulkan', 'src/vulkan/runtime')) {
+    foreach ($file in Get-ChildItem -LiteralPath (Join-Path $source $directory) -File -Recurse | Where-Object Extension -in @('.c', '.h')) {
+        $relative = [IO.Path]::GetRelativePath($source, $file.FullName)
+        $destination = Join-Path $overlay $relative
+        [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($destination)) | Out-Null
+        Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
+    }
 }
 $patch = Join-Path $unit 'Port/MesaRuntime.patch'
 $patchedFiles = @([regex]::Matches([IO.File]::ReadAllText($patch), '(?m)^--- a/(.+)$') | ForEach-Object { $_.Groups[1].Value.TrimEnd("`r") })

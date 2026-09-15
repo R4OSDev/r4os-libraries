@@ -1,0 +1,54 @@
+// Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
+// Integer rounding used by Mesa's descriptor bit packing. Decode IEEE values
+// directly: ties go away from zero, independently of MXCSR rounding mode, and
+// valid inputs never raise FE_INEXACT. x86 conversion raises FE_INVALID for
+// non-finite/out-of-range arguments and supplies the integer-indefinite result.
+const builtin = @import("builtin");
+comptime {
+    if (builtin.cpu.arch != .x86_64 or @sizeOf(c_long) != 8) @compileError("R4VK requires the x86_64 C ABI");
+}
+fn rounded(comptime F: type, value: F) i64 {
+    const U = if (F == f32) u32 else u64;
+    const fraction_bits = if (F == f32) 23 else 52;
+    const bias = if (F == f32) 127 else 1023;
+    const bits: U = @bitCast(value);
+    const negative = bits >> (@bitSizeOf(F) - 1) != 0;
+    const exponent_mask: U = if (F == f32) 0xff else 0x7ff;
+    const encoded = (bits >> fraction_bits) & exponent_mask;
+    const exponent: i32 = @as(i32, @intCast(encoded)) - bias;
+    const fraction = bits & ((@as(U, 1) << fraction_bits) - 1);
+    if (exponent >= 63) {
+        if (negative and exponent == 63 and fraction == 0) return -9223372036854775808;
+        return if (F == f32)
+            asm volatile ("cvttss2si %[value], %[result]"
+                : [result] "=r" (-> i64),
+                : [value] "x" (value),
+            )
+        else
+            asm volatile ("cvttsd2si %[value], %[result]"
+                : [result] "=r" (-> i64),
+                : [value] "x" (value),
+            );
+    }
+    if (exponent < -1) return 0;
+    const mantissa: u64 = @as(u64, 1) << fraction_bits | fraction;
+    const magnitude: u64 = if (exponent == -1) 1 else if (exponent >= fraction_bits)
+        mantissa << @as(u6, @intCast(exponent - fraction_bits))
+    else result: {
+        const shift: u6 = @intCast(fraction_bits - exponent);
+        break :result (mantissa >> shift) + ((mantissa >> (shift - 1)) & 1);
+    };
+    return @bitCast(if (negative) @as(u64, 0) -% magnitude else magnitude);
+}
+pub export fn llroundf(value: f32) callconv(.c) c_longlong {
+    return rounded(f32, value);
+}
+pub export fn llround(value: f64) callconv(.c) c_longlong {
+    return rounded(f64, value);
+}
+pub export fn lroundf(value: f32) callconv(.c) c_long {
+    return rounded(f32, value);
+}
+pub export fn lround(value: f64) callconv(.c) c_long {
+    return rounded(f64, value);
+}

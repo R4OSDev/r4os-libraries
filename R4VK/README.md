@@ -39,12 +39,18 @@ omits external-FD fence/semaphore entrypoints and excludes DRM device IDs from
 the private nvkmd layout. Those omissions require corresponding Vulkan
 extensions to remain unadvertised in the future provider.
 
+NVK and the common runtime use one private `vk_image` layout, including NIL's
+modifier metadata and its invalid sentinel. This does not expose the DRM
+modifier query or external-memory entrypoints. `Port/math.zig` supplies the
+integer rounding required by Mesa's descriptor packing: ties away from zero,
+independent of the FPU rounding mode, with x86 invalid/inexact flag semantics.
+
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays
 and runs the original Vulkan/NVK/NIL table generators. Prepare the shared
 Mesa toolchain through `R4NV/Tools/Compiler` first. The script does not download
 sources, alter the pinned source tree or build a complete provider. Consumers
-must compile the private NVK source/header tree together, with `R4OS_VULKAN`
+must compile the private NVK and Vulkan-runtime source/header trees together, with `R4OS_VULKAN`
 and the generated headers, so relative includes cannot bypass the port.
 
 The bounded CPU proof uses a temporary native C/R4L fixture, not a Vulkan
