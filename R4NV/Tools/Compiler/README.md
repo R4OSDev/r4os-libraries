@@ -146,4 +146,6 @@ R4NV build consumes these files without running Mesa or a host compiler.
 Native allocations and the asynchronous render queue consume the fixed
 profiles. The 0.79.19 texture checkpoint includes CPU/f64 reference images
 and a separate f32 method/descriptor model. Real SM86 pixel execution and
-the dynamic R4OS compiler port remain separate work in 0.79.19/0.79.34.
+full Vulkan pipeline integration remain separate work. The dynamic R4OS
+compiler port is now owned by `../../../R4NAK`; see that unit's README and
+`Docs/Drivers/GrafikCompiler07934.txt` in the workspace.

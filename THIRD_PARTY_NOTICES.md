@@ -102,3 +102,28 @@ units from MIT NVIDIA 570.144 cl00de.h and nvfixedtypes.h at commit
 the source and R4NV/ThirdParty/Nvidia/LICENSES.txt, and in the distributed
 NVIDIA runtime license. The pure decoder is statically used by NVIDIA.R4D;
 it adds no firmware binary or external runtime dependency to R4NV.R4L.
+
+
+## R4NAK native runtime compiler (0.79.34)
+
+R4NAK links a freestanding port of Mesa 26.2.2 SPIR-V/NIR/NAK, selected Mesa
+utilities and generated NVIDIA class definitions. Mesa's applicable original
+MIT/BSD-style notices remain intact. The source pin and six build-time Rust
+crates are shared with `R4NV/Tools/Compiler/Sources.lock.json`.
+
+`R4NAK/Tools/Sources.lock.json` additionally pins official Rust 1.85.1 sources
+(core/alloc), compiler_builtins 0.1.140, hashbrown 0.15.2 without optional
+features, and stb_sprintf 1.10 at commit
+2c980bb59875b0d32144a71867fbdebb2f77cd20. Rust/hashbrown retain their MIT or
+Apache-2.0 terms; compiler_builtins includes Apache-2.0 with LLVM exception
+and MIT components. stb_sprintf retains its complete MIT/Unlicense text.
+
+`R4NAK/ThirdParty/NOTICES.txt` collects complete original source notices and
+licenses; `notices.json` records each source/hash. The byte-identical file is
+distributed as `R4OS/LICENSES/R4NAK-NOTICES.txt`. Original source archives and
+precise versions/hashes remain in the two locks. No host libc, Rust std,
+Linux kernel code, LLVM JIT or GPU firmware is linked into R4NAK.R4L.
+
+The port's runtime adapters, compiler contract, worker, executable cache,
+build orchestration and self-authored diagnostic shader remain original
+Apache-2.0 R4OS material. Upstream lowering algorithms retain their licenses.
