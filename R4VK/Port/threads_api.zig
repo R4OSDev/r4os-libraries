@@ -1,0 +1,162 @@
+// Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
+// Native Mesa C11 transport. Mutable locks/once objects must belong to the
+// calling program; process-owned notification handles are not cross-process.
+const std = @import("std");
+const r4os = @import("r4os");
+const a = r4os.abi;
+const sync = @import("threading.zig");
+const Mutex = sync.Mutex;
+const Condition = sync.Condition;
+const Once = extern struct { state: u32, reserved: u32, notification: u64 };
+const Timespec = extern struct { seconds: i64, nanoseconds: i64 };
+const MonotonicCondition = extern struct { cond: Condition };
+var kernel_table: std.atomic.Value(usize) = .init(0);
+
+// The table is kernel-owned and immutable for the boot generation. Keep no
+// caller Bundle, allocator, task pointer or other application storage here.
+pub fn bind(kernel: *const a.R4XStartR4Sys) bool {
+    _ = sync.Host.fromTable(kernel) orelse return false;
+    inline for (.{ "thread_create_handle", "thread_handle_join", "thread_current", "thread_status", "thread_exit", "task_yield" }) |field|
+        if (@field(kernel.*, field) == 0) return false;
+    const previous = kernel_table.cmpxchgStrong(0, @intFromPtr(kernel), .release, .acquire);
+    return previous == null or previous.? == @intFromPtr(kernel);
+}
+fn table() *const a.R4XStartR4Sys {
+    const address = kernel_table.load(.acquire);
+    if (address == 0) @trap();
+    return @ptrFromInt(address);
+}
+fn host() sync.Host {
+    return sync.Host.fromTable(table()).?;
+}
+fn function(comptime name: []const u8) @field(a.R4SysFns, name) {
+    return @ptrFromInt(@field(table().*, name));
+}
+// A void C API cannot report a violated lock lifetime. Never continue with
+// an unlocked/destroyed object or claim that a failed operation succeeded.
+fn require(result: c_int) void {
+    if (result != sync.success) @trap();
+}
+
+pub export fn mtx_init(mutex: *Mutex, flags: c_int) callconv(.c) c_int {
+    if (flags < 0) return sync.failed;
+    return mutex.init(&host(), @intCast(flags));
+}
+pub export fn mtx_destroy(mutex: *Mutex) callconv(.c) void {
+    require(mutex.destroy(&host()));
+}
+pub export fn mtx_lock(mutex: *Mutex) callconv(.c) c_int {
+    return mutex.lock(&host(), sync.forever);
+}
+pub export fn mtx_trylock(mutex: *Mutex) callconv(.c) c_int {
+    return mutex.tryLock(&host());
+}
+pub export fn mtx_unlock(mutex: *Mutex) callconv(.c) c_int {
+    return mutex.unlock(&host());
+}
+pub export fn cnd_init(condition: *Condition) callconv(.c) c_int {
+    return condition.init(&host());
+}
+pub export fn cnd_destroy(condition: *Condition) callconv(.c) void {
+    require(condition.destroy(&host()));
+}
+pub export fn cnd_wait(condition: *Condition, mutex: *Mutex) callconv(.c) c_int {
+    return condition.wait(&host(), mutex, sync.forever);
+}
+pub export fn cnd_signal(condition: *Condition) callconv(.c) c_int {
+    return condition.signal(&host(), false);
+}
+pub export fn cnd_broadcast(condition: *Condition) callconv(.c) c_int {
+    return condition.signal(&host(), true);
+}
+
+pub export fn u_cnd_monotonic_init(condition: *MonotonicCondition) callconv(.c) c_int {
+    return cnd_init(&condition.cond);
+}
+pub export fn u_cnd_monotonic_destroy(condition: *MonotonicCondition) callconv(.c) void {
+    cnd_destroy(&condition.cond);
+}
+pub export fn u_cnd_monotonic_signal(condition: *MonotonicCondition) callconv(.c) c_int {
+    return cnd_signal(&condition.cond);
+}
+pub export fn u_cnd_monotonic_broadcast(condition: *MonotonicCondition) callconv(.c) c_int {
+    return cnd_broadcast(&condition.cond);
+}
+pub export fn u_cnd_monotonic_wait(condition: *MonotonicCondition, mutex: *Mutex) callconv(.c) c_int {
+    return cnd_wait(&condition.cond, mutex);
+}
+pub export fn u_cnd_monotonic_timedwait(condition: *MonotonicCondition, mutex: *Mutex, absolute: *const Timespec) callconv(.c) c_int {
+    if (absolute.nanoseconds < 0 or absolute.nanoseconds >= 1_000_000_000) return sync.failed;
+    const deadline = if (absolute.seconds < 0) 0 else std.math.cast(u64, @as(u128, @intCast(absolute.seconds)) * 1_000_000_000 + @as(u64, @intCast(absolute.nanoseconds))) orelse sync.forever;
+    return condition.cond.wait(&host(), mutex, deadline);
+}
+
+// The C pointer argument and R4OS u64 argument have the same x86_64 ABI.
+// The kernel admits only this program's image or an imported executable R4L
+// generation; it owns the worker's stack, execution pin, join and hard kill.
+pub export fn thrd_create(output: *a.ProgramJoinHandle, entry: *const fn (?*anyopaque) callconv(.c) c_int, argument: ?*anyopaque) callconv(.c) c_int {
+    var candidate: a.ProgramJoinHandle = .{};
+    const result = function("thread_create_handle")(@ptrCast(entry), @intFromPtr(argument), 1024 * 1024, 0, &candidate);
+    if (result != a.thread_ok) return if (result == a.thread_error_no_memory) sync.nomem else sync.failed;
+    output.* = candidate;
+    return sync.success;
+}
+pub export fn thrd_join(thread: a.ProgramJoinHandle, output: ?*c_int) callconv(.c) c_int {
+    var code: i32 = 0;
+    if (function("thread_handle_join")(&thread, sync.forever, &code) != a.thread_ok) return sync.failed;
+    if (output) |value| value.* = code;
+    return sync.success;
+}
+pub export fn thrd_current() callconv(.c) a.ProgramJoinHandle {
+    var info: a.ProgramThreadInfo = .{};
+    if (function("thread_status")(0, &info) != a.thread_ok) return .{};
+    // Current identity is for equality, not a newly acquired join lease.
+    return .{ .thread_id = info.thread_id, .instance_id = info.instance_id };
+}
+pub export fn thrd_equal(left: a.ProgramJoinHandle, right: a.ProgramJoinHandle) callconv(.c) c_int {
+    return @intFromBool(left.thread_id != 0 and left.thread_id == right.thread_id and left.instance_id == right.instance_id);
+}
+pub export fn thrd_yield() callconv(.c) void {
+    function("task_yield")();
+}
+pub export fn thrd_exit(code: c_int) callconv(.c) noreturn {
+    function("thread_exit")(code);
+    @trap();
+}
+
+fn once(once_flag: *Once, callback: *const fn (?*const anyopaque) callconv(.c) void, argument: ?*const anyopaque) void {
+    if (@atomicLoad(u32, &once_flag.state, .acquire) == 2) return;
+    var condition: Condition = .{ .notification = @atomicLoad(u64, &once_flag.notification, .acquire) };
+    if (condition.notification == 0) {
+        require(condition.init(&host()));
+        if (@cmpxchgStrong(u64, &once_flag.notification, 0, condition.notification, .release, .acquire)) |previous| {
+            require(condition.destroy(&host()));
+            condition.notification = previous;
+        }
+    }
+    if (@cmpxchgStrong(u32, &once_flag.state, 0, 1, .acq_rel, .acquire) == null) {
+        callback(argument);
+        @atomicStore(u32, &once_flag.state, 2, .release);
+        require(condition.signal(&host(), true));
+        // C11 has no once destructor. The resident handle belongs to the
+        // process and its reaper, never to this shared library's lifetime.
+        return;
+    }
+    const transport = host();
+    while (@atomicLoad(u32, &once_flag.state, .acquire) != 2) {
+        var sequence: u64 = 0;
+        require(transport.query(condition.notification, &sequence));
+        if (@atomicLoad(u32, &once_flag.state, .acquire) == 2) break;
+        require(transport.waitUntil(condition.notification, sequence, sync.forever));
+    }
+}
+fn onceCallback(argument: ?*const anyopaque) callconv(.c) void {
+    const callback: *const fn () callconv(.c) void = @ptrCast(argument.?);
+    callback();
+}
+pub export fn call_once(flag: *Once, callback: *const fn () callconv(.c) void) callconv(.c) void {
+    once(flag, onceCallback, @ptrCast(callback));
+}
+pub export fn util_call_once_data_slow(flag: *Once, callback: *const fn (?*const anyopaque) callconv(.c) void, data: ?*const anyopaque) callconv(.c) void {
+    once(flag, callback, data);
+}
