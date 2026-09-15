@@ -21,7 +21,7 @@ pub fn bind(kernel: *const a.R4XStartR4Sys) bool {
     const previous = kernel_table.cmpxchgStrong(0, @intFromPtr(kernel), .release, .acquire);
     return previous == null or previous.? == @intFromPtr(kernel);
 }
-fn table() *const a.R4XStartR4Sys {
+pub fn table() *const a.R4XStartR4Sys {
     const address = kernel_table.load(.acquire);
     if (address == 0) @trap();
     return @ptrFromInt(address);
