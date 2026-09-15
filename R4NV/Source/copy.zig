@@ -158,9 +158,15 @@
 //  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //  * OTHER DEALINGS IN THE SOFTWARE.
 //  */
-//! Shared R4NV encoder: Ampere CE virtual copies and system-scope release.
+//! Shared R4NV encoder: class-specific CE copies and system-scope release.
 //! The command producer is limited to 40-bit channel VA; CE operands use 49 bits.
 const std = @import("std");
+pub fn supported(class: u32) bool { return switch (class) { 0xc5b5,0xc6b5,0xc7b5,0xc9b5,0xcab5 => true, else => false }; }
+pub fn supportsBlocks(class: u32) bool { return class == 0xc5b5 or class == 0xc6b5 or class == 0xc7b5; }
+// NVIDIA570.144 uvm_hal.c: C5B5/C6B5 inherit Volta, C7B5 overrides
+// PLC mode; C9B5/CAB5 inherit that override through Hopper. The operand
+// contract deliberately retains its 49-bit range on the wider Blackwell CE.
+fn launchFlags(class: u32) u32 { return if (class == 0xc7b5 or class == 0xc9b5 or class == 0xcab5) 1 << 26 else 0; }
 pub const Error = error{ Bounds, Unsupported };
 pub const words = 17;
 pub const max_words = 37;
@@ -236,7 +242,7 @@ pub fn extent(address: u64, bytes: u64, bits: u6) Error!void {
 }
 pub fn encode(class: u32, transfer: Transfer, semaphore: u64, point: u32) Error![words]u32 {
     if (transfer.rows != null or transfer.source_block != null or transfer.target_block != null) return error.Unsupported;
-    if (class != 0xc6b5 and class != 0xc7b5) return error.Unsupported;
+    if (!supported(class)) return error.Unsupported;
     try extent(transfer.source, transfer.bytes, 49); try extent(transfer.target, transfer.bytes, 49);
     if (transfer.bytes > std.math.maxInt(u32) or (transfer.source < transfer.target + transfer.bytes and
         transfer.target < transfer.source + transfer.bytes)) return error.Bounds;
@@ -246,9 +252,9 @@ pub fn encode(class: u32, transfer: Transfer, semaphore: u64, point: u32) Error!
         inc(0, 1), class, // Independent CE uses subchannel zero, as UVM does.
         inc(0x400, 4), @intCast(transfer.source >> 32), @truncate(transfer.source), @intCast(transfer.target >> 32), @truncate(transfer.target),
         inc(0x418, 1), @intCast(transfer.bytes),
-        inc(0x300, 1), 2 | (1 << 7) | (1 << 8) | @as(u32, if (class == 0xc7b5) 1 << 26 else 0), // C7B5 UVM HAL disables PLC; virtual, pitch, one line.
+        inc(0x300, 1), 2 | (1 << 7) | (1 << 8) | launchFlags(class),
         inc(0x240, 3), @intCast(semaphore >> 32), @truncate(semaphore), point,
-        inc(0x300, 1), (1 << 2) | (1 << 3), // No data; SYS flush then one-word semaphore release.
+        inc(0x300, 1), (1 << 2) | (1 << 3) | launchFlags(class), // No data; SYS flush then one-word semaphore release.
     };
 }
 pub fn encodeTransfer(class: u32, transfer: Transfer, semaphore: u64, point: u32) Error!Program {
@@ -256,7 +262,13 @@ pub fn encodeTransfer(class: u32, transfer: Transfer, semaphore: u64, point: u32
         var out: Program = .{ .count = words };
         out.data[0..words].* = try encode(class, transfer, semaphore, point); return out;
     };
-    if (class != 0xc6b5 and class != 0xc7b5) return error.Unsupported;
+    if (!supported(class)) return error.Unsupported;
+    // Blackwell tiled copies need an explicit surface kind/BPP contract.
+    // Do not silently use the older byte-addressed block profile there.
+    if (!supportsBlocks(class) and (transfer.source_block != null or transfer.target_block != null)) return error.Unsupported;
+    if (class == 0xc5b5) for ([_]?Block{transfer.source_block,transfer.target_block}) |value| if (value) |block| {
+        if (block.x > 0xffff or block.y > 0xffff) return error.Bounds;
+    };
     const source_span = try transfer.span(false); const target_span = try transfer.span(true);
     try extent(transfer.source, source_span, 49); try extent(transfer.target, target_span, 49);
     if ((transfer.source_block != null and transfer.source % 512 != 0) or (transfer.target_block != null and transfer.target % 512 != 0)) return error.Bounds;
@@ -268,15 +280,26 @@ pub fn encodeTransfer(class: u32, transfer: Transfer, semaphore: u64, point: u32
         inc(0, 1), class,
         inc(0x400, 8), @intCast(transfer.source >> 32), @truncate(transfer.source), @intCast(transfer.target >> 32), @truncate(transfer.target),
         rows.source_pitch, rows.target_pitch, @intCast(transfer.bytes), rows.count,
-        inc(0x300, 1), 2 | @as(u32, if (transfer.source_block == null) 1 << 7 else 0) | @as(u32, if (transfer.target_block == null) 1 << 8 else 0) | (1 << 9) | @as(u32, if (class == 0xc7b5) 1 << 26 else 0),
+        inc(0x300, 1), 2 | @as(u32, if (transfer.source_block == null) 1 << 7 else 0) | @as(u32, if (transfer.target_block == null) 1 << 8 else 0) | (1 << 9) | launchFlags(class),
         inc(0x240, 3), @intCast(semaphore >> 32), @truncate(semaphore), point,
-        inc(0x300, 1), (1 << 2) | (1 << 3),
+        inc(0x300, 1), (1 << 2) | (1 << 3) | launchFlags(class),
     };
     // Layout/origin state must precede LAUNCH_DMA. Remap is disabled, so
     // widths and horizontal origins are bytes. C6B5/C7B5 expose independent
     // 32-bit origin methods; no legacy packed 16-bit coordinate truncation.
     var insert: usize = 11;
     for ([_]?Block{transfer.source_block, transfer.target_block}, 0..) |optional, index| if (optional) |block| {
+        if (class == 0xc5b5) {
+            // C5B5 has only the packed 16-bit origin. Its next methods are
+            // unrelated state; the Ampere 32-bit origin cannot be emitted.
+            std.mem.copyBackwards(u32, out.data[insert + 7 .. @as(usize, out.count) + 7], out.data[insert..out.count]);
+            out.data[insert..][0..7].* = .{
+                inc(if (index == 0) 0x728 else 0x70c, 6),
+                0x1000 | (@as(u32, block.log2_gobs) << 4), block.width, block.height, 1, 0, block.x | (block.y << 16),
+            };
+            out.count += 7; insert += 7;
+            continue;
+        }
         std.mem.copyBackwards(u32, out.data[insert + 9 .. @as(usize, out.count) + 9], out.data[insert..out.count]);
         out.data[insert..][0..9].* = .{
             inc(if (index == 0) 0x728 else 0x70c, 5),
@@ -292,7 +315,7 @@ pub fn entry(address: u64) Error![2]u32 {
     return entryWords(address, words);
 }
 pub fn entryWords(address: u64, count: u32) Error![2]u32 {
-    if (count != words and count != 19 and count != 28 and count != max_words) return error.Bounds;
+    if (count != words and count != 19 and count != 26 and count != 28 and count != 33 and count != max_words) return error.Bounds;
     try extent(address, count * 4, 40);
     if (address & 3 != 0) return error.Bounds;
     return .{ @truncate(address), @as(u32, @intCast(address >> 32)) | (count << 10) };

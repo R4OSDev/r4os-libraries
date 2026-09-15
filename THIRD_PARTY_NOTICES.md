@@ -76,11 +76,11 @@ a dependency on Linux, Rust std or the host Mesa binary.
 
 `R4NV/Source/Generated/Shaders` contains compiled output of those original
 R4OS shader descriptions, their NVIDIA headers and a provenance manifest.
-The runtime embeds these five fixed programs; it does not embed the NAK/NIR
+The runtime embeds seven fixed programs per selected SM75/86/89/120 target; it does not embed the NAK/NIR
 compiler implementation. The manifest identifies the compiler recipe and
 each original machine-code, metadata, NIR and assembly artifact.
 
-## R4NV C797 rendering
+## R4NV generation-specific rendering
 
 `render_image.zig`, `render.zig` and `Generated/Render` derive image/state
 fields from the pinned Mesa26.2.2 NVIDIA class headers and MIT NIL/NVK
@@ -88,8 +88,10 @@ sources, with NVIDIA570.144 `nvmisc.h` used by the host reference generator.
 Full NVIDIA, Collabora and Red Hat notices remain in the derived sources,
 `R4NV/ThirdParty/Nvidia/LICENSES.txt` and the distributed NVIDIA GSP runtime
 license. The reference archive is `Nvidia/0.79.19/render-state-20260913`.
-The six fixed shaders remain compiled original R4OS descriptions; the sixth
-adds the matching solid vertex stage. No host compiler is linked into R4OS.
+The seven fixed shaders per target remain compiled original R4OS descriptions.
+C597/C797/C997/CD97 state comes from the corresponding original class header;
+Tools/RenderState/Generate.ps1 records each source and generated-output hash.
+No host compiler is linked into R4OS. Generation evidence: GFX/0.79.33.
 
 
 ## R4NV telemetry decoder (0.79.29)

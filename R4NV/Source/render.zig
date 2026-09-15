@@ -112,17 +112,18 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-//! Bounded C797 rectangle profile. The driver resolves and holds every range;
+//! Bounded class-specific rectangle profiles. The driver holds every range;
 //! applications never supply methods, shader addresses or completion words.
 const std = @import("std");
 pub const image = @import("render_image.zig");
-const hw = @import("Generated/Render/c797.zig");
-const shaders = @import("Generated/Shaders/shaders.zig");
+pub const profiles = @import("render_profiles.zig");
 pub const Error = image.Error || error{Empty};
 pub const packet_bytes = 1280;
 pub const batch_capacity = 16;
 pub const packet_capacity_bytes = packet_bytes * batch_capacity;
-pub const shader_bytes = shaderOffset(shaders.programs.len);
+pub const shader_bytes = profiles.get(0xc797).?.bytes();
+pub const max_shader_bytes = profiles.max_bytes;
+pub fn shaderBytesFor(class: u32) Error!u32 { return (profiles.get(class) orelse return error.Unsupported).bytes(); }
 // The driver's graphics ring has one 4 KB slot, including its 11-word release.
 pub const max_words = 1024 - 11;
 pub const Range = struct {
@@ -228,6 +229,7 @@ pub fn slice(draw: Draw, offset: u64, pixel_limit: u64) Error!Slice {
     return .{ .draw = out, .next = offset + columns * rows, .total = total };
 }
 pub const Binding = struct {
+    class: u32 = 0xc797,
     draw: Draw,
     additional: []const Draw = &.{},
     programs: Range,
@@ -239,7 +241,7 @@ pub const Binding = struct {
             try draw.validate();
             if (!compatible(self.draw, draw)) return error.Unsupported;
         }
-        try self.programs.validate(128, shader_bytes);
+        try self.programs.validate(128, try shaderBytesFor(self.class));
         try self.packet.validate(256, packet_bytes * (1 + self.additional.len));
         const target: Range = .{ .address = self.draw.target.address, .bytes = self.draw.target.bytes };
         if (Range.overlaps(self.programs, self.packet) or Range.overlaps(self.programs, target) or Range.overlaps(self.packet, target)) return error.Unsupported;
@@ -260,16 +262,18 @@ pub fn compatible(first: Draw, next: Draw) bool {
         std.meta.eql(first.color_program, next.color_program);
 }
 pub fn shaderOffset(index: usize) u32 {
-    var offset: u32 = 0;
-    for (shaders.programs[0..index]) |program| offset += std.mem.alignForward(u32, 128 + @as(u32, @intCast(program.code.len)), 128);
-    return offset;
+    return profiles.get(0xc797).?.offset(index);
 }
 /// Once per device generation, into a driver-owned upload allocation.
 pub fn shaderUpload(out: []u8) Error!void {
-    if (out.len != shader_bytes) return error.Bounds;
+    return shaderUploadFor(0xc797, out);
+}
+pub fn shaderUploadFor(class: u32, out: []u8) Error!void {
+    const profile = profiles.get(class) orelse return error.Unsupported;
+    if (out.len != profile.bytes()) return error.Bounds;
     @memset(out, 0);
-    for (shaders.programs, 0..) |program, index| {
-        const offset = shaderOffset(index);
+    for (profile.programs, 0..) |program, index| {
+        const offset = profile.offset(index);
         @memcpy(out[offset..][0..128], std.mem.asBytes(&program.header));
         @memcpy(out[offset + 128..][0..program.code.len], program.code);
     }
@@ -348,23 +352,33 @@ pub const Program = struct {
     }
     fn one(self: *Program, method: u32, value: u32) Error!void { try self.words(method, &.{value}); }
 };
-fn bindShader(out: *Program, programs: Range, index: usize) Error!void {
-    const shader = shaders.programs[index];
+fn bindShader(comptime hw: type, profile: profiles.Profile, out: *Program, programs: Range, index: usize) Error!void {
+    const shader = profile.programs[index];
     const pipeline: u32 = if (shader.stage == 0) 1 else 5;
     const stride = pipeline * 64;
-    const address = programs.address + shaderOffset(index);
+    const address = programs.address + profile.offset(index);
     try out.one(hw.SET_PIPELINE_SHADER + stride, 1 | (pipeline << 4));
     try out.words(hw.SET_PIPELINE_PROGRAM_ADDRESS_A + stride, &.{@intCast(address >> 32), @truncate(address), @intCast((128 + shader.code.len + 255) / 256)});
     try out.words(hw.SET_PIPELINE_REGISTER_COUNT + stride, &.{shader.gprs, shader.stage});
 }
 pub fn encode(binding: Binding, out: *Program) Error!void {
     try binding.validate();
+    return switch (binding.class) {
+        0xc597 => encodeFor(@import("Generated/Render/c597.zig"), binding, out),
+        0xc797 => encodeFor(@import("Generated/Render/c797.zig"), binding, out),
+        0xc997 => encodeFor(@import("Generated/Render/c997.zig"), binding, out),
+        0xcd97 => encodeFor(@import("Generated/Render/cd97.zig"), binding, out),
+        else => error.Unsupported,
+    };
+}
+fn encodeFor(comptime hw: type, binding: Binding, out: *Program) Error!void {
     out.count = 0;
+    const profile = profiles.get(binding.class).?;
     const draw = binding.draw;
     const target = try image.target(draw.target);
     // CE upload must already have a real completion. WFI precedes reuse of
     // descriptor/constant/vertex state; invalidation makes those writes visible.
-    try out.one(hw.SET_OBJECT, 0xc797);
+    try out.one(hw.SET_OBJECT, binding.class);
     try out.one(hw.WAIT_FOR_IDLE, 0);
     try out.one(hw.INVALIDATE_SHADER_CACHES, 0x1011);
     try out.one(hw.INVALIDATE_TEXTURE_DATA_CACHE, 0);
@@ -386,13 +400,13 @@ pub fn encode(binding: Binding, out: *Program) Error!void {
     try out.one(hw.SET_CT_WRITE, if (draw.target.format == .r8) hw.color_write_r else hw.color_write_rgba);
     try out.one(hw.SET_BLEND, @intFromBool(draw.blend == .over));
     try out.words(hw.SET_BLEND_PER_TARGET_SEPARATE_FOR_ALPHA, &.{1, hw.blend_add, hw.blend_one, if (draw.blend == .over) hw.blend_inverse_alpha else hw.blend_zero, hw.blend_add, hw.blend_one, if (draw.blend == .over) hw.blend_inverse_alpha else hw.blend_zero});
-    try bindShader(out, binding.programs, if (draw.source == null) 5 else 0);
-    try bindShader(out, binding.programs, draw.profile()-1);
-    try encodeDraw(draw, binding.packet.address, out);
-    for (binding.additional, 1..) |next, index| try encodeDraw(next, binding.packet.address + index * packet_bytes, out);
+    try bindShader(hw, profile, out, binding.programs, if (draw.source == null) 5 else 0);
+    try bindShader(hw, profile, out, binding.programs, draw.profile()-1);
+    try encodeDraw(hw, draw, binding.packet.address, out);
+    for (binding.additional, 1..) |next, index| try encodeDraw(hw, next, binding.packet.address + index * packet_bytes, out);
     // The driver's private GR semaphore release follows the entire list.
 }
-fn encodeDraw(draw: Draw, packet: u64, out: *Program) Error!void {
+fn encodeDraw(comptime hw: type, draw: Draw, packet: u64, out: *Program) Error!void {
     const clip = try draw.clip();
     try out.words(hw.SET_SCISSOR_ENABLE, &.{1, clip[0] | (clip[2] << 16), clip[1] | (clip[3] << 16)});
     const vertices = packet + 768;

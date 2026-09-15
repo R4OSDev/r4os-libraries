@@ -32,6 +32,7 @@ pub fn check() !void {
         .packet = .{ .address = 0x400000, .bytes = render.packet_bytes },
     };
     var packet: [render.packet_bytes]u8 = undefined;
+    try checkGenerations(binding);
     // Disjoint scissor slices cover the original clipped draw exactly once,
     // while UV interpolation and blend coordinates remain unchanged.
     var visited: [128 * 128]bool = @splat(false);
@@ -132,6 +133,34 @@ pub fn check() !void {
     binding.draw.target.address = 1<<40;
     _ = try render.image.texture(binding.draw.target);
     try t.expectError(error.Unsupported,render.encode(binding,&program));
+}
+
+fn checkGenerations(original: render.Binding) !void {
+    var bytes: [render.max_shader_bytes]u8 = undefined;
+    var stream: render.Program = .{};
+    // Pinned class headers: shader cache is enabled from Ada, and VPRS
+    // selection exists from Ampere. Pipeline addresses use a 64-byte stride.
+    for ([_]u32{0xc597,0xc797,0xc997,0xcd97}, [_]u16{75,86,89,120}) |class, sm| {
+        const profile = render.profiles.get(class).?;
+        try t.expectEqual(sm, profile.sm);
+        var binding = original; binding.class = class; binding.programs.bytes = profile.bytes();
+        try render.shaderUploadFor(class, bytes[0..profile.bytes()]);
+        try render.encode(binding, &stream);
+        try t.expectEqual(class, try state(&stream, 0));
+        try t.expectEqual(@as(u32,@intFromBool(class >= 0xc997)), try state(&stream, 0x0d94));
+        if (class == 0xc597) try t.expectError(error.MissingState, state(&stream, 0x02cc))
+        else try t.expectEqual(@as(u32,2), try state(&stream, 0x02cc));
+        try t.expectEqual(@as(u32,@intCast(binding.programs.address + profile.offset(1))),
+            try state(&stream, 0x2018 + 5 * 64));
+        try t.expectEqual(@as(u32,0x00025482), word(&bytes, profile.offset(1)));
+        binding.programs.bytes -= 1;
+        try t.expectError(error.Bounds, render.encode(binding, &stream));
+    }
+    var bad = original; bad.class = 0xc697;
+    try t.expectError(error.Unsupported, render.encode(bad, &stream));
+    @memset(&bytes, 0xa5);
+    try t.expectError(error.Unsupported, render.shaderUploadFor(0xc697, &bytes));
+    try t.expectEqual(@as(u8,0xa5), bytes[0]);
 }
 
 fn checkColorPackets() !void {

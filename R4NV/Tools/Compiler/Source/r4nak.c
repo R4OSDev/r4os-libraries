@@ -20,10 +20,10 @@ write_bytes(const char *path, const void *data, size_t size)
 
 int main(int argc, char **argv)
 {
-   if (argc != 6) {
-      fprintf(stderr, "Usage: r4nak PROFILE CODE.bin INFO.json ASSEMBLY.txt INPUT-NIR.txt\n"
+   if (argc != 6 && argc != 7) {
+      fprintf(stderr, "Usage: r4nak PROFILE CODE.bin INFO.json ASSEMBLY.txt INPUT-NIR.txt [SM]\n"
                       "Profiles: 1=rectangle vertex, 2=texture, 3=sRGB decode, "
-                      "4=sRGB encode, 5=solid fragment, 6=solid vertex. Target: SM86 only.\n");
+                      "4=sRGB encode, 5=solid fragment, 6=solid vertex, 7=color. SM: 75, 86 (default), 89, 120.\n");
       return 2;
    }
    char *end;
@@ -31,8 +31,14 @@ int main(int argc, char **argv)
    unsigned long profile = strtoul(argv[1], &end, 10);
    if (errno || *end || profile < R4NV_RECT_VERTEX || profile > R4NV_COLOR_FRAGMENT)
       return 2;
+   errno = 0;
+   const unsigned long sm = argc == 7 ? strtoul(argv[6], &end, 10) : 86;
+   if (errno || (argc == 7 && *end) || (sm != 75 && sm != 86 && sm != 89 && sm != 120)) return 2;
+   /* Pinned Mesa winsys/nouveau_device.c max_warps_per_mp_for_sm and the
+    * corresponding NVIDIA architecture tuning guides agree on these limits. */
+   const unsigned max_warps = sm == 75 ? 32 : 48;
    const struct nv_device_info dev = {
-      .type = NV_DEVICE_TYPE_DIS, .sm = 86, .max_warps_per_mp = 48,
+      .type = NV_DEVICE_TYPE_DIS, .sm = sm, .max_warps_per_mp = max_warps,
    };
    glsl_type_singleton_init_or_ref();
    struct nak_compiler *nak = nak_compiler_create(&dev);
@@ -51,7 +57,7 @@ int main(int argc, char **argv)
    bin = nak_compile_shader(nir, true, nak, 0,
                            (profile == R4NV_RECT_VERTEX || profile == R4NV_SOLID_VERTEX) ? NULL : &key, false);
    if (!bin || !bin->code_size || (bin->code_size % 16) ||
-       bin->info.sm != 86 || bin->info.slm_size || bin->info.crs_size ||
+       bin->info.sm != sm || bin->info.slm_size || bin->info.crs_size ||
        bin->info.num_spills_to_mem || bin->info.num_fills_from_mem)
       goto done;
    if (!write_bytes(argv[2], bin->code, bin->code_size) ||
@@ -59,11 +65,11 @@ int main(int argc, char **argv)
    f = fopen(argv[3], "wb");
    if (!f) goto done;
    fprintf(f, "{\n  \"schema\": 1, \"mesa\": \"26.2.2\", \"profile\": %lu,\n"
-              "  \"sm\": %u, \"max_warps_per_mp\": 48, \"stage\": %u,\n"
+              "  \"sm\": %u, \"max_warps_per_mp\": %u, \"stage\": %u,\n"
               "  \"gprs\": %u, \"code_bytes\": %u, \"instructions\": %u,\n"
               "  \"slm_bytes\": %u, \"crs_bytes\": %u, \"max_warps_per_sm\": %u,\n"
               "  \"control_barriers\": %u, \"header\": [",
-           profile, bin->info.sm, bin->info.stage, bin->info.num_gprs,
+           profile, bin->info.sm, max_warps, bin->info.stage, bin->info.num_gprs,
            bin->code_size, bin->info.num_instrs, bin->info.slm_size,
            bin->info.crs_size, bin->info.max_warps_per_sm,
            bin->info.num_control_barriers);
@@ -73,8 +79,8 @@ int main(int argc, char **argv)
    bool info_written = !ferror(f);
    if (fclose(f) != 0) info_written = false;
    if (info_written) {
-      printf("R4NAK profile=%lu SM86 bytes=%u gprs=%u instructions=%u\n",
-             profile, bin->code_size, bin->info.num_gprs, bin->info.num_instrs);
+      printf("R4NAK profile=%lu SM%lu bytes=%u gprs=%u instructions=%u\n",
+             profile, sm, bin->code_size, bin->info.num_gprs, bin->info.num_instrs);
       result = 0;
    }
 done:

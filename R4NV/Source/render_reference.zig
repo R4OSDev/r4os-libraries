@@ -147,6 +147,10 @@ pub fn execute(methods: []const u8, packet: []const u8, program_address: u64, pa
 // case. This remains a host method/descriptor model, not an SM ISA emulator.
 pub const ColorOracle = *const fn (r.ColorProgram, [4]f32, f32, u32, u32) anyerror![4]f32;
 pub fn executeColor(methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface, color_oracle: ?ColorOracle) !void {
+    return executeColorFor(0xc797, methods, packet, program_address, packet_address, target, source, color_oracle);
+}
+pub fn executeColorFor(class: u32, methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface, color_oracle: ?ColorOracle) !void {
+    _ = r.profiles.get(class) orelse return error.Shader;
     if (packet.len == 0 or packet.len > r.packet_capacity_bytes or packet.len % r.packet_bytes != 0) return error.Surface;
     var at: usize = 0; var draws: usize = 0;
     while (at < methods.len) {
@@ -161,16 +165,16 @@ pub fn executeColor(methods: []const u8, packet: []const u8, program_address: u6
             if (vertices < packet_address + 768) return error.Surface;
             const offset = vertices - packet_address - 768;
             if (offset % r.packet_bytes != 0 or offset > packet.len - r.packet_bytes) return error.Surface;
-            try executeDraw(methods[0..at], packet[@intCast(offset)..][0..r.packet_bytes], program_address,
+            try executeDraw(class, methods[0..at], packet[@intCast(offset)..][0..r.packet_bytes], program_address,
                 packet_address + offset, target, source, color_oracle);
             draws += 1;
         }
     }
     if (draws == 0) return error.Method;
 }
-fn executeDraw(methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface, color_oracle: ?ColorOracle) !void {
+fn executeDraw(class: u32, methods: []const u8, packet: []const u8, program_address: u64, packet_address: u64, target: Surface, source: ?Surface, color_oracle: ?ColorOracle) !void {
     if (packet.len != r.packet_bytes or target.bytes.len < @as(u64,target.pitch)*target.height) return error.Surface;
-    try t.expectEqual(@as(u32,0xc797),try method(methods,hw.SET_OBJECT));
+    try t.expectEqual(class,try method(methods,hw.SET_OBJECT));
     try t.expectEqual(target.address,try wideMethod(methods,hw.SET_COLOR_TARGET_A));
     try t.expectEqual(target.pitch,try method(methods,hw.SET_COLOR_TARGET_A+8));
     try t.expectEqual(target.height,try method(methods,hw.SET_COLOR_TARGET_A+12));
@@ -183,7 +187,7 @@ fn executeDraw(methods: []const u8, packet: []const u8, program_address: u64, pa
     var profile: ?u32 = null;
     var offset: u64 = 0;
     const fragment = try wideMethod(methods,hw.SET_PIPELINE_PROGRAM_ADDRESS_A+5*64);
-    for (shaders.programs) |shader| {
+    for (r.profiles.get(class).?.programs) |shader| {
         if (fragment == program_address+offset) profile = shader.profile;
         offset += std.mem.alignForward(u64,128+shader.code.len,128);
     }

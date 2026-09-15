@@ -27,6 +27,12 @@
     "mako_minimum": "0.8.0"
   },
   "target": {"sm": 86, "max_warps_per_mp": 48},
+  "targets": [
+    {"sm": 75, "max_warps_per_mp": 32},
+    {"sm": 86, "max_warps_per_mp": 48},
+    {"sm": 89, "max_warps_per_mp": 48},
+    {"sm": 120, "max_warps_per_mp": 48}
+  ],
   "profiles": [
     {"id": 1, "name": "rectangle_vertex", "stage": 0},
     {"id": 2, "name": "texture_fragment", "stage": 4},

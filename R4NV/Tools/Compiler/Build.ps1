@@ -4,6 +4,7 @@ param(
     [switch]$InstallDependencies,
     [switch]$Offline,
     [switch]$VerifyReproducible,
+    [ValidateSet(75,86,89,120)][int]$ShaderModel = 86,
     [ValidateRange(1, 32)][int]$Jobs = 8,
     [string]$OutputDirectory = '',
     [string]$RustCopyrightFile = ''
@@ -28,6 +29,9 @@ $suffix = if ($IsWindows) { '.exe' } else { '' }
 $lockPath = Join-Path $PSScriptRoot 'Sources.lock.json'
 $lock = Get-Content -LiteralPath $lockPath -Raw | ConvertFrom-Json
 if ($lock.schema -ne 1) { throw 'Unsupported compiler source lock.' }
+$targets=@($lock.targets|Where-Object sm -eq $ShaderModel)
+if($targets.Count -ne 1){throw 'Unsupported shader target'}
+$shaderTarget=$targets[0]
 $watch = [Diagnostics.Stopwatch]::StartNew()
 
 function Invoke-Checked([string]$Program, [string[]]$Arguments) {
@@ -177,20 +181,20 @@ try {
     Invoke-Checked $tools.ninja @('-C', $build, '-j', [string]$Jobs, ('src/nouveau/r4os/r4nak' + $suffix))
     $compiler = Join-Path $build ('src/nouveau/r4os/r4nak' + $suffix)
     $output = if ($OutputDirectory) { [IO.Path]::GetFullPath($OutputDirectory, $workspace) }
-              else { Join-Path $artifacts ('Tools/R4NAK/' + $hostName) }
+              else { Join-Path $artifacts ('Tools/R4NAK/' + $hostName + $(if($ShaderModel -ne 86){'/SM'+$ShaderModel}else{''})) }
     [void](New-Item -ItemType Directory -Path $output -Force)
     $buildRecord = Join-Path $output 'build.json'
     if (Test-Path -LiteralPath $buildRecord) { Remove-Item -LiteralPath $buildRecord }
     $outputs = @(foreach ($profile in $lock.profiles) {
         $prefix = Join-Path $output $profile.name
-        Invoke-Checked $compiler @([string]$profile.id, ($prefix+'.bin'), ($prefix+'.json'), ($prefix+'.asm.txt'), ($prefix+'.nir.txt')) | Out-Host
+        Invoke-Checked $compiler @([string]$profile.id, ($prefix+'.bin'), ($prefix+'.json'), ($prefix+'.asm.txt'), ($prefix+'.nir.txt'), [string]$ShaderModel) | Out-Host
         $info = Get-Content -LiteralPath ($prefix+'.json') -Raw | ConvertFrom-Json
-        if ($info.sm -ne $lock.target.sm -or $info.stage -ne $profile.stage -or $info.profile -ne $profile.id -or
+        if ($info.sm -ne $shaderTarget.sm -or $info.max_warps_per_mp -ne $shaderTarget.max_warps_per_mp -or $info.stage -ne $profile.stage -or $info.profile -ne $profile.id -or
             $info.header.Count -ne 32 -or $info.code_bytes -ne (Get-Item -LiteralPath ($prefix+'.bin')).Length) { throw "Unexpected shader metadata: $($profile.name)" }
         $binaryHash = Hash ($prefix+'.bin')
         if ($VerifyReproducible) {
             $repeat = $prefix + '.repeat'
-            Invoke-Checked $compiler @([string]$profile.id, ($repeat+'.bin'), ($repeat+'.json'), ($repeat+'.asm.txt'), ($repeat+'.nir.txt')) | Out-Host
+            Invoke-Checked $compiler @([string]$profile.id, ($repeat+'.bin'), ($repeat+'.json'), ($repeat+'.asm.txt'), ($repeat+'.nir.txt'), [string]$ShaderModel) | Out-Host
             foreach ($ext in @('.bin', '.json', '.asm.txt', '.nir.txt')) {
                 if ((Hash ($prefix+$ext)) -ne (Hash ($repeat+$ext))) { throw "Nonreproducible compiler output: $($profile.name)$ext" }
                 Remove-Item -LiteralPath ($repeat+$ext)
@@ -204,7 +208,7 @@ try {
                                   'Source/meson.build', 'Source/r4nak.c', 'Source/shaders.c', 'Source/shaders.h', 'Source/color_shader.h')) {
         [ordered]@{path=$file;sha256=(Hash (Join-Path $PSScriptRoot $file))}
     })
-    $recipeText = ($inputs | ConvertTo-Json -Compress) + ($options -join "`n")
+    $recipeText = ($inputs | ConvertTo-Json -Compress) + ($options -join "`n") + ($shaderTarget | ConvertTo-Json -Compress)
     $recipe = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($recipeText))).ToLowerInvariant()
     Copy-Item -LiteralPath $compiler -Destination (Join-Path $output ('r4nak' + $suffix))
     # Host-tool redistribution retains every original source/license archive.
@@ -241,7 +245,7 @@ try {
     }
     $legalBytes = (Get-ChildItem -LiteralPath $legal -File -Recurse | Measure-Object -Property Length -Sum).Sum
     [ordered]@{schema=1;host=$hostName;compiler_id=$recipe;inputs=$inputs;tools=$toolVersions;
-        target=$lock.target;profiles=$outputs;reproducible=$VerifyReproducible.IsPresent;
+        target=$shaderTarget;profiles=$outputs;reproducible=$VerifyReproducible.IsPresent;
         tool_sha256=(Hash $compiler);tool_bytes=(Get-Item -LiteralPath $compiler).Length;
         legal_bytes=$legalBytes;rust_copyright_sha256=(Hash $rustCopyright);
         elapsed_seconds=[Math]::Round($watch.Elapsed.TotalSeconds, 3)} | ConvertTo-Json -Depth 20 |

@@ -96,4 +96,36 @@ test "backend and shader ABI preserve operands, executable identity and rejected
     try t.expectEqual(c.status_invalid, r4nv_backend_v1.encode_copy_layout(&layout, &tiled, tiled.len, &written));
     try t.expectEqualSlices(u32, &tile_before, &tiled);
     try @import("shader_cache_checks.zig").run(&r4nv_shader_v1);
+    try checkCopyGenerations();
+}
+
+fn checkCopyGenerations() !void {
+    const t = std.testing;
+    const input: copy.Transfer = .{ .source = 0x100000, .target = 0x200000, .bytes = 31,
+        .rows = .{ .count = 7, .source_pitch = 128, .target_pitch = 192 },
+        .source_block = .{ .width = 128, .height = 65, .x = 5, .y = 17, .log2_gobs = 2 },
+        .target_block = .{ .width = 192, .height = 79, .x = 21, .y = 31, .log2_gobs = 3 } };
+    const turing = try copy.encodeTransfer(0xc5b5, input, 0x300000, 1);
+    try t.expectEqual(@as(u8,33), turing.count);
+    try t.expectEqual(@as(u32,0x200601ca), turing.data[11]);
+    try t.expectEqual(@as(u32,0x00110005), turing.data[17]);
+    try t.expectEqual(@as(u32,0x001f0015), turing.data[24]);
+    const turing_entry = try copy.entryWords(0x100000, turing.count);
+    try t.expectEqual(@as(u32, 33 << 10), turing_entry[1]);
+    var overflow = input; overflow.source_block.?.x = 65536; overflow.source_block.?.width = 131072;
+    overflow.rows.?.source_pitch = 131072;
+    try t.expectError(error.Bounds, copy.encodeTransfer(0xc5b5, overflow, 0x300000, 1));
+    for ([_]u32{0xc5b5,0xc6b5,0xc7b5,0xc9b5,0xcab5}) |class| {
+        var profile: c.R4NvDeviceProfile = .{ .version = 1, .size = @sizeOf(c.R4NvDeviceProfile),
+            .vendor_id = 0x10de, .copy_class = class, .rm_release = c.rm_release, .command_abi = c.command_abi,
+            .adapter_id = 3, .flags = 0, .device_generation = 7, .reset_generation = 8 };
+        var features: c.R4NvFeatures = undefined;
+        try t.expectEqual(c.status_ok, r4nv_backend_v1.negotiate(&profile, &features));
+        try t.expectEqual(@as(u64,if(class >= 0xc9b5) 3 else 15), features.features);
+        const linear = try copy.encode(class, .{ .source = 0x100000, .target = 0x200000, .bytes = 64 }, 0x300000, 1);
+        try t.expectEqual(class, linear[1]);
+        try t.expectEqual(@as(u32,if(class >= 0xc7b5) 0x04000182 else 0x182), linear[10]);
+        try t.expectEqual(@as(u32,if(class >= 0xc7b5) 0x0400000c else 0xc), linear[16]);
+        if (class >= 0xc9b5) try t.expectError(error.Unsupported, copy.encodeTransfer(class, input, 0x300000, 1));
+    }
 }

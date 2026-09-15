@@ -1,7 +1,7 @@
 ﻿# R4NAK host compiler
 
 This tool builds the pinned Mesa 26.2.2 NIR/NAK compiler and translates seven
-documented R4NV shader profiles for SM86. It produces actual machine code,
+documented R4NV shader profiles for SM75, SM86, SM89 and SM120. It produces actual machine code,
 the NVIDIA shader header, input NIR and readable NAK assembly. It does not
 open a GPU or implement an R4OS runtime compiler.
 
@@ -66,10 +66,14 @@ The shader output is a compiler artifact, not a GPU execution result.
 
 ## Fixed shader contract
 
-The target is SM86 with 48 maximum resident warps per multiprocessor, matching
-the pinned Mesa device-information table. A real renderer must match the GPU
-and negotiate its graphics class before using these artifacts. Other shader
-models require explicit additional profiles and verification.
+`-ShaderModel 75|86|89|120` selects one target; the default remains SM86.
+SM75 uses 32 maximum resident warps per multiprocessor; the other profiles use
+48, matching the pinned Mesa device table. The selected target participates in
+recipe and compiler identity. Its binaries, headers, metadata, NIR and assembly
+must independently reproduce before `EmitRuntime.ps1` imports them. SM86 keeps
+the existing generated directory; other profiles have separate `SM*` folders.
+The renderer must negotiate the measured GPU's class and matching shader model.
+Generated code alone establishes neither native bootstrap nor physical support.
 
 | ID | Source profile | Inputs and result |
 | --- | --- | --- |

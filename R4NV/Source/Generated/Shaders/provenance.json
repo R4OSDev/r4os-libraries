@@ -1,10 +1,14 @@
 {
   "schema": 1,
-  "compiler_id": "3403c1fa1d19985db52c7ec1e86906ee398c0c454d19eff9dc3d72bd90589111",
+  "compiler_id": "4b179c1031f367ca14cf78120d4c0ad95ce6ec22f77db8600628976d4801e9ee",
+  "target": {
+    "sm": 86,
+    "max_warps_per_mp": 48
+  },
   "compiler_inputs": [
     {
       "path": "Sources.lock.json",
-      "sha256": "a930ed54d2928bed840c79e73d6f433b34dd8d80b369251cea186d9ae67da363"
+      "sha256": "e32316dd230f0d800ef6f6d39f72c2c5db004cb6fd3c6387fa819072b68be3f6"
     },
     {
       "path": "MesaStandalone.patch",
@@ -12,7 +16,7 @@
     },
     {
       "path": "Build.ps1",
-      "sha256": "d336e5131188bfd7c863617bddfa5415c4d95ccd8381d50e4246a20dbfbe1276"
+      "sha256": "faa8df84ae12590696ad5f3d487f00eeb77d65d6d495aebb3b6b2b361468ed17"
     },
     {
       "path": "Source/meson.build",
@@ -20,7 +24,7 @@
     },
     {
       "path": "Source/r4nak.c",
-      "sha256": "48e53c3bbf5f8ec1f9e1654460ca6eab8008e1b786f377559bb752815e460eb2"
+      "sha256": "43e0c7db914a07116ef8a639974adc14b5a95693cc9d3bb02395f65ea3d526c0"
     },
     {
       "path": "Source/shaders.c",
@@ -35,7 +39,7 @@
       "sha256": "960c1ad4fa30681ddf0abbcfd770b228588972357665ab950875ba8219fe0a0a"
     }
   ],
-  "emitter_sha256": "1462a52266376b26b6686f8125548e59ac6da5e6da289c0216812428f98ce8b5",
+  "emitter_sha256": "311ab92e96b992af91b35dc2a4670b4629f6487025046d35bb19415b6750d32b",
   "profiles": [
     {
       "profile": 1,
@@ -115,5 +119,5 @@
       "instructions": 512
     }
   ],
-  "generated_zig_sha256": "4a7ba7095f9bdeb4ef7436a0b948767e20ca566666847490e525402487c4f97e"
+  "generated_zig_sha256": "3cde25622fa241b17c77356e79b430308a676aebca52b30ca7911a8a72c7e30a"
 }

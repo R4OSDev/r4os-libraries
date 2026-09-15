@@ -227,6 +227,11 @@ pub const Device = struct {
         const backend_client: ?nv.BackendV1Client = if (self.flags & c.device_software_only != 0) null else nv.BackendV1Client.init(self.bundle.raw) catch null;
         if (backend_client) |client| {
             const queue_api = self.queues();
+            var primary: a.DisplayPresentationInfo = .{};
+            const base_context = self.base();
+            const boot_adapter = if (base_context.displayPresentationInfo(0, &primary) == a.gfx_output_ok and
+                primary.version == 1 and primary.size >= @sizeOf(a.DisplayPresentationInfo) and
+                primary.flags & a.display_presentation_info_active != 0) primary.backend.adapter_id else 0;
             for (1..a.gfx_queue_backend_capacity) |index| {
                 var snapshot: a.GfxBackendInfo = .{};
                 if (queue_api.backendInfo(@intCast(index), &snapshot) != a.gfx_queue_ok) continue;
@@ -248,6 +253,7 @@ pub const Device = struct {
                 // generations. Older kernels supplied only the queue epoch.
                 if (snapshot.size < @sizeOf(a.GfxBackendInfo)) snapshot.memory_generation = binding.device_generation;
                 if (snapshot.memory_generation == 0) continue;
+                if (!preferBackend(snapshot, candidate, boot_adapter)) continue;
                 candidate = snapshot;
                 gpu_operations = c.device_gpu_copy;
                 if (snapshot.size >= @offsetOf(a.GfxBackendInfo, "memory_generation") and snapshot.operations & 8 != 0 and features.features & nv.feature_copy_rows != 0) {
@@ -260,7 +266,6 @@ pub const Device = struct {
                 if (snapshot.operations & 512 != 0) gpu_operations |= c.device_gpu_color;
                 if (snapshot.operations & 32 != 0) gpu_operations |= c.device_gpu_present;
                 if (snapshot.operations & 128 != 0) gpu_operations |= c.device_gpu_direct;
-                break;
             }
         }
         self.gpu_operations = gpu_operations;
@@ -300,6 +305,20 @@ pub const Device = struct {
         return value;
     }
 };
+
+// Prefer a working render engine, then avoid interadapter presentation when
+// capabilities are equal. PCI adapter identity breaks ties independently of
+// driver registration order. No unmeasured performance score is invented.
+fn preferBackend(next: a.GfxBackendInfo, current: a.GfxBackendInfo, boot_adapter: u32) bool {
+    if (current.binding.adapter_id == 0) return true;
+    const next_render = next.operations & 16 != 0;
+    const current_render = current.operations & 16 != 0;
+    if (next_render != current_render) return next_render;
+    const next_boot = next.binding.adapter_id == boot_adapter;
+    const current_boot = current.binding.adapter_id == boot_adapter;
+    if (next_boot != current_boot) return next_boot;
+    return next.binding.adapter_id < current.binding.adapter_id;
+}
 pub fn get(handle: *const c.R4GfxDevice, closing: bool) Error!*Device {
     _ = try pointer(c.R4GfxDevice, @intFromPtr(handle));
     const device = try pointer(Device, handle.address);

@@ -108,4 +108,32 @@ pub fn run(api: *const c.ShaderV1) !void {
     try t.expect(written == 99);
     try t.expectEqual(c.status_ok, api.shader_cache_read(&key, bytes.ptr, good_length, &view));
     try t.expect(view.info.profile == 2);
+    // Compiler checkpoints for the other ISAs. SM86 and SM89 happen to
+    // share this program's bytes, but must still have distinct cache keys.
+    const generation_hashes = [_][]const u8{
+        "5c2554a7ca4bbc06c9fa3dfab087906dccaf6407f0a973238f43f26d243d557d",
+        "8cab96633b9c15083256aa57c7542af79e9861f6c2c449b737c617726a88efbb",
+        "8cab96633b9c15083256aa57c7542af79e9861f6c2c449b737c617726a88efbb",
+        "fae7bea749915e9f69cca9a0d5198678316a7ec0ddf823a79fb8f6c0718f9f9d",
+    };
+    const classes = [_]u32{0xc597,0xc797,0xc997,0xcd97};
+    const models = [_]u32{75,86,89,120};
+    for (classes, models, generation_hashes) |class, sm, hex| {
+        key.graphics_class = class; key.shader_model = sm;
+        try t.expectEqual(c.status_ok, api.shader_cache_write(7, &key, bytes.ptr, bytes.len, &written));
+        try t.expectEqual(c.status_ok, api.shader_cache_read(&key, bytes.ptr, written, &view));
+        try t.expectEqual(sm, view.info.shader_model);
+        try t.expectEqual(@as(u32,if(sm == 75) 32 else 48), view.info.max_warps_per_sm);
+        var expected: [32]u8 = undefined; _ = try std.fmt.hexToBytes(&expected, hex);
+        var actual: [32]u8 = undefined;
+        std.crypto.hash.sha2.Sha256.hash(bytes[384..written], &actual, .{});
+        try t.expectEqualSlices(u8, &expected, &actual);
+        for (classes, models) |other, other_sm| {
+            if (other == class) continue;
+            var alien = key; alien.graphics_class = other; alien.shader_model = other_sm;
+            try t.expectEqual(c.status_cache_miss, api.shader_cache_read(&alien, bytes.ptr, written, &view));
+            alien.shader_model = sm;
+            try t.expectEqual(c.status_unsupported, api.shader_cache_write(7, &alien, bytes.ptr, bytes.len, &written));
+        }
+    }
 }

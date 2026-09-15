@@ -22,6 +22,7 @@ const Model = struct {
     var fail_unmap = false;
     var premature_closes: usize = 0;
     var inventory_reads: usize = 0;
+    var adapters: ?[]const a.GfxBackendInfo = null;
     var status: a.GfxFenceStatus = .{};
     var job_live = false;
     var job_request: a.GfxSubmission = .{};
@@ -62,7 +63,7 @@ const Model = struct {
         serial = 0x100000000; exports = 0; maps = 0; fail_unmap = false; premature_closes = 0; inventory_reads = 0; job_live = false;
         binding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
         nv_table.header = nv.backend_v1_header;
-        operations = 7; dependency_seen = false; job_list = .{}; job_grid_list = .{}; job_color_list = .{};
+        operations = 7; adapters = null; dependency_seen = false; job_list = .{}; job_grid_list = .{}; job_color_list = .{};
         native_request = .{}; native_handle = .{}; native_result = 1;
         native_starts = 0; bad_native_layout = false;
         clock = 100; submit_serial = 0x400000017; feedback = null; shown = @splat(0xabcdef); present_calls = 0; fail_present = false;
@@ -215,6 +216,10 @@ const Model = struct {
     }
     fn backendInfo(index: u32, out: *a.GfxBackendInfo) callconv(.c) i32 {
         inventory_reads += 1;
+        if (adapters) |values| {
+            if (index == 0 or index > values.len) return 0;
+            out.* = values[index - 1]; return 1;
+        }
         if (index != 1) return 0;
         out.* = .{ .binding = binding, .operations = operations, .memory_generation = 73, .profile = .{ .interface_id_lo = nv.backend_v1_header.interface_id_lo,
             .interface_id_hi = nv.backend_v1_header.interface_id_hi, .revision = 1, .data_bytes = 32 } };
@@ -223,7 +228,14 @@ const Model = struct {
         @memcpy(out.profile.data[0..32], std.mem.asBytes(&details)); return 1;
     }
     fn open(input: *const a.GfxQueueConfig, out: *a.GfxQueueHandle) callconv(.c) i32 {
-        if (input.adapter_id != 0) std.debug.assert(input.adapter_id == binding.adapter_id and input.device_generation == binding.device_generation and input.reset_generation == binding.reset_generation);
+        if (input.adapter_id != 0) {
+            const valid = if (adapters) |values| blk: {
+                for (values) |value| if (input.adapter_id == value.binding.adapter_id and
+                    input.device_generation == value.binding.device_generation and input.reset_generation == value.binding.reset_generation) break :blk true;
+                break :blk false;
+            } else input.adapter_id == binding.adapter_id and input.device_generation == binding.device_generation and input.reset_generation == binding.reset_generation;
+            std.debug.assert(valid);
+        }
         for (&queues) |*queue| if (queue.handle.timeline == 0) {
             serial += 1; queue.* = .{ .handle = .{ .timeline = serial }, .config = input.* }; out.* = queue.handle; return 1;
         };
@@ -319,6 +331,136 @@ fn cpuImage(bytes: []u8) c.R4GfxResourceDesc {
     value.image = .{ .cpu_address = @intFromPtr(bytes.ptr), .byte_length = bytes.len, .pitch = 16, .width = 4, .height = 4, .format = c.format_xrgb8888, .reserved = 0 };
     return value;
 }
+fn checkAdapterSelection(storage: *d.Device, handle: *const c.R4GfxDevice) !void {
+    var first: a.GfxBackendInfo = .{};
+    try t.expectEqual(@as(i32, 1), Model.backendInfo(1, &first));
+    var values = [_]a.GfxBackendInfo{ first, first, first };
+    values[0].binding.adapter_id = 17; values[1].binding.adapter_id = 3; values[2].binding.adapter_id = 9;
+    values[0].operations |= 16; values[2].operations |= 16;
+    const presentation = Model.presentation_info;
+    defer { Model.adapters = null; Model.presentation_info = presentation; storage.preferred_adapter = 0; }
+    Model.adapters = &values;
+    Model.presentation_info.head_id = 0;
+    Model.presentation_info.backend = values[1].binding;
+    var state: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.device_refresh(handle, &state));
+    try t.expectEqual(@as(u32, 9), state.adapter_id); // Working render over copy-only boot GPU.
+    std.mem.swap(a.GfxBackendInfo, &values[0], &values[2]);
+    try t.expectEqual(c.status_ok, api.device_refresh(handle, &state));
+    try t.expectEqual(@as(u32, 9), state.adapter_id); // Enumeration order cannot change the result.
+    Model.presentation_info.backend = values[2].binding;
+    try t.expectEqual(c.status_ok, api.device_refresh(handle, &state));
+    try t.expectEqual(@as(u32, 17), state.adapter_id); // Equal render engines prefer the display adapter.
+    storage.preferred_adapter = 3;
+    try t.expectEqual(c.status_ok, api.device_refresh(handle, &state));
+    try t.expectEqual(@as(u32, 3), state.adapter_id);
+    storage.preferred_adapter = 99;
+    try t.expectEqual(c.status_ok, api.device_refresh(handle, &state));
+    try t.expectEqual(@as(u32, 0), state.adapter_id); // Explicit selection never borrows another GPU.
+    storage.preferred_adapter = 0;
+    values[0].profile.interface_id_lo ^= 1; values[1].memory_generation = 0; values[2].binding.milestone = 0;
+    try t.expectEqual(c.status_ok, api.device_refresh(handle, &state));
+    try t.expectEqual(@as(u32, 0), state.adapter_id); // Unusable backends preserve software.
+    Model.adapters = &.{};
+    try t.expectEqual(c.status_ok, api.device_refresh(handle, &state));
+    try t.expectEqual(@as(u32, 0), state.adapter_id);
+}
+fn checkAdapterTransfer(raw: *const a.R4XStartContext) !void {
+    const gfx = @import("r4gfx_binding");
+    const transfer = @import("r4gfx_transfer");
+    const client: gfx.DeviceV1Client = .{ .header = @ptrCast(&api.header) };
+    const colors: gfx.ColorV1Client = .{ .header = @ptrCast(&d.color_api.table.header) };
+    const first = try t.allocator.create(d.Device); defer t.allocator.destroy(first); first.* = .{};
+    const second = try t.allocator.create(d.Device); defer t.allocator.destroy(second); second.* = .{};
+    var backend: a.GfxBackendInfo = .{};
+    try t.expectEqual(@as(i32, 1), Model.backendInfo(1, &backend));
+    var adapters = [_]a.GfxBackendInfo{ backend, backend };
+    adapters[0].binding.adapter_id = 9; adapters[1].binding.adapter_id = 17;
+    adapters[0].operations |= 8; adapters[1].operations |= 8;
+    Model.adapters = &adapters;
+    defer Model.adapters = null;
+    var devices: [2]gfx.R4GfxDevice = undefined;
+    for ([_]*d.Device{ first, second }, 0..) |storage, i| {
+        const config: gfx.R4GfxDeviceConfig = .{ .version = 1, .size = @sizeOf(gfx.R4GfxDeviceConfig),
+            .storage_address = @intFromPtr(storage), .storage_bytes = api.storage_size(), .start_context = @intFromPtr(raw),
+            .preferred_adapter = adapters[i].binding.adapter_id, .flags = 0 };
+        try t.expectEqual(gfx.status_ok, client.device_open(&config, &devices[i]));
+    }
+    const description: gfx.R4GfxColorDescription = .{ .version = 1, .size = @sizeOf(gfx.R4GfxColorDescription),
+        .primaries = gfx.color_primaries_srgb, .transfer = gfx.color_transfer_srgb, .range = gfx.color_range_full,
+        .alpha = gfx.color_alpha_opaque, .precision = gfx.color_precision_unorm8, .flags = 0,
+        .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 };
+    var resources: [2]gfx.R4GfxResource = undefined;
+    var object_ids: [2]usize = undefined;
+    for (&resources, 0..) |*resource, i| {
+        // Model two driver-owned images, each import validated by the actual
+        // provider against its independently selected adapter/memory epoch.
+        var reference: a.GfxBufferReference = .{};
+        try t.expectEqual(@as(i32, 1), Model.create(&.{ .width = 4, .height = 4, .format = c.format_xrgb8888,
+            .plane_count = 1, .plane_pitches = .{256,0,0,0}, .byte_length = 65536, .usage = 28,
+            .location = a.gfx_buffer_location_device_local, .adapter_id = adapters[i].binding.adapter_id,
+            .device_generation = 73, .driver_owner = @intCast(79 + i) }, &reference));
+        object_ids[i] = Model.ref(reference.reference).object.?;
+        var desc = std.mem.zeroes(gfx.R4GfxResourceDesc);
+        desc.version = 1; desc.size = @sizeOf(gfx.R4GfxResourceDesc); desc.kind = gfx.resource_image;
+        desc.source_kind = gfx.source_import_buffer; desc.source_address = @intFromPtr(&reference.reference); desc.flags = gfx.image_target;
+        try t.expectEqual(gfx.status_ok, colors.color_resource_create(&devices[i], &.{ .version = 1,
+            .size = @sizeOf(gfx.R4GfxColorResourceDesc), .resource = desc, .description = description }, resource));
+        try t.expectEqual(@as(i32, 1), Model.release(&reference.reference));
+    }
+    const before = Model.referenceCount();
+    var owner = transfer.Owner.init(&client, &colors, &devices[0], &devices[1], .{ .base = first.base() });
+    for (0..3) |scenario| {
+        try owner.prepare(4, 4, gfx.format_xrgb8888, description);
+        for (&Model.objects[object_ids[0]].bytes, 0..) |*byte, i| byte.* = @truncate(i * 17 + 3);
+        @memset(&Model.objects[object_ids[1]].bytes, 0xa5);
+        try owner.begin(resources[0], resources[1], &.{}, 1, 99999999);
+        try t.expect(owner.sourceHeld() and Model.status.fence.adapter_id == 9 and Model.job_request.dependency_count == 0);
+        try t.expect(Model.objects[Model.ref(Model.job_request.source).object.?].descriptor.adapter_id == 9);
+        try t.expect(Model.objects[Model.ref(Model.job_request.target).object.?].descriptor.location == a.gfx_buffer_location_system);
+        const download = Model.status.fence;
+        owner.poll(2);
+        try t.expect(owner.phase == .download and owner.sourceHeld());
+        try t.expectError(error.Busy, owner.close());
+        if (scenario == 1) {
+            owner.poll(99999999); // Terminal cancellation still retains DMA.
+            try t.expect(owner.phase == .draining and owner.sourceHeld() and Model.job_live);
+            try t.expectError(error.Busy, owner.close());
+            Model.status.flags = 0;
+            owner.poll(99999999);
+            try t.expect(owner.phase == .failed and owner.failure.? == error.Deadline and !owner.sourceHeld());
+            try t.expect(std.mem.allEqual(u8, &Model.objects[object_ids[1]].bytes, 0xa5));
+        } else {
+            Model.complete(); owner.poll(3);
+            try t.expect(owner.phase == .upload and !owner.sourceHeld() and Model.status.fence.adapter_id == 17);
+            try t.expect(Model.status.fence.timeline != download.timeline and Model.job_request.dependency_count == 0);
+            try t.expect(Model.objects[Model.ref(Model.job_request.source).object.?].descriptor.location == a.gfx_buffer_location_system);
+            try t.expect(Model.objects[Model.ref(Model.job_request.target).object.?].descriptor.adapter_id == 17);
+            if (scenario == 2) {
+                owner.cancel(error.Stale); owner.poll(4);
+                try t.expect(owner.phase == .draining and Model.job_live and owner.target.slot != 0);
+                try t.expectError(error.Busy, owner.close());
+                Model.status.flags = 0; owner.poll(5);
+                try t.expect(owner.phase == .failed and owner.failure.? == error.Stale);
+                try t.expect(std.mem.allEqual(u8, &Model.objects[object_ids[1]].bytes, 0xa5));
+            } else {
+                Model.complete(); owner.poll(4);
+                try t.expect(owner.phase == .ready and owner.completed_bytes == 64);
+                for (0..4) |row| {
+                    try t.expectEqualSlices(u8, Model.objects[object_ids[0]].bytes[row * 256..][0..16],
+                        Model.objects[object_ids[1]].bytes[row * 256..][0..16]);
+                    try t.expect(std.mem.allEqual(u8, Model.objects[object_ids[1]].bytes[row * 256 + 16..][0..240], 0xa5));
+                }
+            }
+        }
+        try owner.acknowledge(); try owner.close();
+        try t.expect(!Model.job_live and Model.referenceCount() == before);
+    }
+    for (&devices, &resources) |*device, *resource| {
+        try t.expectEqual(gfx.status_ok, client.resource_release(device, resource));
+        try t.expectEqual(gfx.status_ok, client.device_close(device));
+    }
+}
 pub fn check() !void {
     Model.reset();
     const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
@@ -398,8 +540,10 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expect(state.backend == c.render_backend_software);
     draw.size = @sizeOf(a.R4XStartR4Draw);
+    try checkAdapterSelection(storage, &handle);
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expect(state.backend == c.render_backend_nvidia and state.gpu_operations == c.device_gpu_copy and state.reset_generation == Model.binding.reset_generation);
+    try checkAdapterTransfer(&raw);
     const native_image: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999, .width = 4, .height = 4,
         .format = c.format_xrgb8888, .layout = 0 };
     var create_native = descriptor(c.resource_image); create_native.source_kind = c.source_create_native;
