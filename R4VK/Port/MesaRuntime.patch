@@ -1,3 +1,330 @@
+--- a/src/nouveau/vulkan/nvkmd/nvkmd.c
++++ b/src/nouveau/vulkan/nvkmd/nvkmd.c
+@@ -4,7 +4,9 @@
+  */
+ 
+ #include "nvkmd.h"
++#if !defined(R4OS_VULKAN)
+ #include "nouveau/nvkmd_nouveau.h"
++#endif
+ #include "nv_push.h"
+ #include "util/cache_ops.h"
+ #include "util/u_math.h"
+@@ -82,6 +84,7 @@
+    simple_mtx_init(&mem->map_mutex, mtx_plain);
+ }
+ 
++#if !defined(R4OS_VULKAN)
+ VkResult
+ nvkmd_try_create_pdev_for_drm(struct _drmDevice *drm_device,
+                               struct vk_object_base *log_obj,
+@@ -91,6 +94,8 @@
+    return nvkmd_nouveau_try_create_pdev(drm_device, log_obj,
+                                         debug_flags, pdev_out);
+ }
++
++#endif /* !R4OS_VULKAN */
+ 
+ VkResult MUST_CHECK
+ nvkmd_dev_alloc_mem(struct nvkmd_dev *dev,
+@@ -143,7 +148,8 @@
+    assert(!(map_flags & NVKMD_MEM_MAP_FIXED));
+    result = nvkmd_mem_map(mem, log_obj, map_flags, NULL, NULL);
+    if (result != VK_SUCCESS) {
+-      mem->ops->free(mem);
++      /* Allocation already published this BO in dev->mems. */
++      nvkmd_mem_unref(mem);
+       return result;
+    }
+ 
+@@ -378,6 +384,7 @@
+       mem->ops->unmap(mem, 0, mem->map);
+ 
+    nvkmd_dev_remove_mem(mem->dev, mem);
++   simple_mtx_destroy(&mem->map_mutex);
+ 
+    mem->ops->free(mem);
+ }
+@@ -405,8 +412,6 @@
+       simple_mtx_lock(&mem->map_mutex);
+ 
+       assert((mem->map_cnt == 0) == (mem->map == NULL));
+-      mem->map_cnt++;
+-
+       VkResult result = VK_SUCCESS;
+       if (mem->map == NULL) {
+          /* We always map read/write for internal maps since they're reference
+@@ -420,6 +425,11 @@
+          map = mem->map;
+       }
+ 
++      /* Failed maps must leave the zero-count/null-map invariant intact
++       * so callers may retry or release the BO normally. */
++      if (result == VK_SUCCESS)
++         mem->map_cnt++;
++
+       simple_mtx_unlock(&mem->map_mutex);
+ 
+       if (result != VK_SUCCESS)
+--- a/src/nouveau/vulkan/nvk_descriptor_table.c
++++ b/src/nouveau/vulkan/nvk_descriptor_table.c
+@@ -7,7 +7,9 @@
+ #include "nvk_device.h"
+ #include "nvk_physical_device.h"
+ 
++#if !defined(R4OS_VULKAN)
+ #include <sys/mman.h>
++#endif
+ 
+ static VkResult
+ nvk_descriptor_table_grow_locked(struct nvk_device *dev,
+--- a/src/nouveau/vulkan/nvk_device_memory.c
++++ b/src/nouveau/vulkan/nvk_device_memory.c
+@@ -13,7 +13,9 @@
+ #include "util/u_atomic.h"
+ 
+ #include <inttypes.h>
++#if !defined(R4OS_VULKAN)
+ #include <sys/mman.h>
++#endif
+ 
+ /* Supports opaque fd only */
+ const VkExternalMemoryProperties nvk_opaque_fd_mem_props = {
+@@ -65,6 +67,7 @@
+    return flags;
+ }
+ 
++#if !defined(R4OS_VULKAN)
+ VKAPI_ATTR VkResult VKAPI_CALL
+ nvk_GetMemoryFdPropertiesKHR(VkDevice device,
+                              VkExternalMemoryHandleTypeFlagBits handleType,
+@@ -120,6 +123,8 @@
+    return VK_SUCCESS;
+ }
+ 
++#endif /* !R4OS_VULKAN */
++
+ enum nvk_memory_init {
+    NVK_MEMORY_INIT_NONE,
+    NVK_MEMORY_INIT_ZERO,
+@@ -156,6 +161,15 @@
+       handle_types |= export_info->handleTypes;
+    if (fd_info != NULL)
+       handle_types |= fd_info->handleType;
++
++#if defined(R4OS_VULKAN)
++   /* No FD/dma-buf import or export is part of the native R4OS contract.
++    * Reject it before any GPU allocation, leaving the output and FD intact. */
++   if (handle_types != 0) {
++      result = vk_error(dev, VK_ERROR_INVALID_EXTERNAL_HANDLE);
++      goto fail_alloc;
++   }
++#endif
+ 
+    const bool not_shared = handle_types == 0;
+    bool pinned_to_vram = false;
+@@ -209,7 +223,12 @@
+    const uint64_t aligned_size =
+       align64(pAllocateInfo->allocationSize, alignment);
+ 
+-   const bool is_import = fd_info && fd_info->handleType;
++   const bool is_import =
++#if defined(R4OS_VULKAN)
++      false;
++#else
++      fd_info && fd_info->handleType;
++#endif
+    if (is_import) {
+       assert(fd_info->handleType ==
+                VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT ||
+@@ -289,6 +308,7 @@
+       }
+    }
+ 
++#if !defined(R4OS_VULKAN)
+    if (fd_info && fd_info->handleType) {
+       /* From the Vulkan spec:
+        *
+@@ -301,6 +321,7 @@
+        */
+       close(fd_info->fd);
+    }
++#endif
+ 
+    struct nvk_memory_heap *heap = &pdev->mem_heaps[type->heapIndex];
+    p_atomic_add(&heap->used, mem->mem->size_B);
+@@ -524,6 +545,7 @@
+    *pCommittedMemoryInBytes = mem->mem->size_B;
+ }
+ 
++#if !defined(R4OS_VULKAN)
+ VKAPI_ATTR VkResult VKAPI_CALL
+ nvk_GetMemoryFdKHR(VkDevice device,
+                    const VkMemoryGetFdInfoKHR *pGetFdInfo,
+@@ -542,6 +564,8 @@
+    }
+ }
+ 
++#endif /* !R4OS_VULKAN */
++
+ VKAPI_ATTR uint64_t VKAPI_CALL
+ nvk_GetDeviceMemoryOpaqueCaptureAddress(
+    UNUSED VkDevice device,
+--- a/src/nouveau/vulkan/nvk_instance.c
++++ b/src/nouveau/vulkan/nvk_instance.c
+@@ -3,6 +3,9 @@
+  * SPDX-License-Identifier: MIT
+  */
+ #include "nvk_instance.h"
++#if defined(R4OS_VULKAN)
++#include "r4vk_platform.h"
++#endif
+ 
+ #include "nvk_entrypoints.h"
+ #include "nvk_physical_device.h"
+@@ -54,7 +57,7 @@
+    .EXT_display_surface_counter = true,
+    .EXT_acquire_drm_display = true,
+ #endif
+-#ifndef VK_USE_PLATFORM_WIN32_KHR
++#if !defined(VK_USE_PLATFORM_WIN32_KHR) && !defined(R4OS_VULKAN)
+    .EXT_headless_surface = true,
+ #endif
+    .KHR_device_group_creation = true,
+@@ -147,9 +150,11 @@
+    vk_instance_dispatch_table_from_entrypoints(&dispatch_table,
+                                                &nvk_instance_entrypoints,
+                                                true);
++#if !defined(R4OS_VULKAN) || defined(NVK_USE_WSI_PLATFORM)
+    vk_instance_dispatch_table_from_entrypoints(&dispatch_table,
+                                                &wsi_instance_entrypoints,
+                                                false);
++#endif
+ 
+    result = vk_instance_init(&instance->vk, &instance_extensions,
+                              &dispatch_table, pCreateInfo, pAllocator);
+@@ -160,10 +165,19 @@
+    nvk_init_experimental_flags(instance);
+    nvk_init_dri_options(instance);
+ 
++#if defined(R4OS_VULKAN)
++   instance->vk.physical_devices.enumerate = r4vk_nvk_enumerate_physical_devices;
++#else
+    instance->vk.physical_devices.try_create_for_drm =
+       nvk_create_drm_physical_device;
++#endif
+    instance->vk.physical_devices.destroy = nvk_physical_device_destroy;
+ 
++#if defined(R4OS_VULKAN)
++   STATIC_ASSERT(sizeof(instance->driver_build_sha) == sizeof(r4vk_build_identity));
++   memcpy(instance->driver_build_sha, r4vk_build_identity,
++          sizeof(instance->driver_build_sha));
++#else
+    const struct build_id_note *note =
+       build_id_find_nhdr_for_addr(nvk_CreateInstance);
+    if (!note) {
+@@ -181,6 +195,7 @@
+ 
+    STATIC_ASSERT(sizeof(instance->driver_build_sha) == BLAKE3_KEY_LEN);
+    copy_build_id_to_sha1(instance->driver_build_sha, note);
++#endif
+ 
+    *pInstance = nvk_instance_to_handle(instance);
+    return VK_SUCCESS;
+--- a/src/vulkan/runtime/vk_instance.c
++++ b/src/vulkan/runtime/vk_instance.c
+@@ -23,7 +23,11 @@
+ 
+ #include "vk_instance.h"
+ 
++#if defined(R4OS_VULKAN)
++#include "r4vk_platform.h"
++#else
+ #include "util/libdrm.h"
++#endif
+ #include "util/perf/cpu_trace.h"
+ 
+ #include "vk_alloc.h"
+@@ -38,7 +42,7 @@
+ #include "compiler/glsl_types.h"
+ #endif
+ 
+-#ifndef _WIN32
++#if !defined(_WIN32) && !defined(R4OS_VULKAN)
+ #include "dlfcn.h"
+ #endif
+ 
+@@ -410,6 +414,7 @@
+    instance->trace_mode |= parse_debug_string(os_get_option("MESA_VK_TRACE"), modes);
+ }
+ 
++#if !defined(R4OS_VULKAN)
+ static VkResult
+ enumerate_drm_physical_devices_locked(struct vk_instance *instance)
+ {
+@@ -442,9 +447,21 @@
+    return result;
+ }
+ 
++#endif /* !R4OS_VULKAN */
++
+ static VkResult
+ enumerate_physical_devices_locked(struct vk_instance *instance)
+ {
++#if defined(R4OS_VULKAN)
++   /* Missing native integration is an error, not an empty successful list.
++    * A backend with no eligible adapters must itself return VK_SUCCESS. */
++   if (!instance->physical_devices.enumerate)
++      return VK_ERROR_INITIALIZATION_FAILED;
++   VkResult result = instance->physical_devices.enumerate(instance);
++   if (result != VK_SUCCESS)
++      destroy_physical_devices(instance);
++   return result;
++#else
+    if (instance->physical_devices.enumerate) {
+       VkResult result = instance->physical_devices.enumerate(instance);
+       if (result != VK_ERROR_INCOMPATIBLE_DRIVER)
+@@ -462,6 +479,7 @@
+    }
+ 
+    return result;
++#endif
+ }
+ 
+ static VkResult
+@@ -570,12 +588,18 @@
+    return vk_instance_get_physical_device_proc_addr(instance, pName);
+ }
+ 
++#if !defined(R4OS_VULKAN)
+ static uint32_t vk_icd_version = 7;
++#endif
+ 
+ uint32_t
+ vk_get_negotiated_icd_version(void)
+ {
++#if defined(R4OS_VULKAN)
++   return r4vk_get_icd_version();
++#else
+    return vk_icd_version;
++#endif
+ }
+ 
+ PUBLIC VKAPI_ATTR VkResult VKAPI_CALL
+@@ -643,9 +667,13 @@
+     *          vk_icdGetInstanceProcAddr will be the first method called, to query
+     *          for vk_icdNegotiateLoaderICDInterfaceVersion.
+     */
++#if defined(R4OS_VULKAN)
++   return r4vk_negotiate_icd_version(pSupportedVersion);
++#else
+    vk_icd_version = MIN2(vk_icd_version, *pSupportedVersion);
+    *pSupportedVersion = vk_icd_version;
+    return VK_SUCCESS;
++#endif
+ }
+ 
+ void
 --- a/src/vulkan/runtime/vk_image.h
 +++ b/src/vulkan/runtime/vk_image.h
 @@ -77,7 +77,7 @@

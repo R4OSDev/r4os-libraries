@@ -3,8 +3,8 @@
 // explicitly owned heap per calling process. No caller data lives in R4L BSS.
 const std = @import("std");
 const r4os = @import("r4os");
-const a = r4os.abi;
 const threads = @import("threads_api.zig");
+const local = @import("process_local.zig");
 const Context = struct { heap: r4os.vm_allocator.Heap };
 const Header = struct {
     magic: u64,
@@ -16,37 +16,11 @@ const Header = struct {
 const live: u64 = 0x5244564B414C4C31;
 var context_key: u8 = 0;
 
-fn function(comptime name: []const u8) @field(a.R4SysFns, name) {
-    return @ptrFromInt(@field(threads.table().*, name));
+fn init(owner: *Context) void {
+    owner.* = .{ .heap = .{ .api = threads.table() } };
 }
 fn context() ?*Context {
-    const key = @intFromPtr(&context_key);
-    var value: u64 = 0;
-    if (function("program_local_get")(key, &value) != a.program_local_ok) return null;
-    if (value != 0) return @ptrFromInt(value);
-
-    // Bootstrap only the heap metadata through VM. Normal C allocations use
-    // its existing small-block free lists and reusable direct-region cache.
-    const bytes = comptime std.mem.alignForward(usize, @sizeOf(Context), 4096);
-    comptime std.debug.assert(bytes <= a.vm_commit_resident_max_bytes);
-    var region: a.ProgramVmRegionInfo = .{};
-    if (function("vm_reserve")(bytes, 4096, a.vm_region_flags_default, &region) != a.vm_ok) return null;
-    if (region.id == 0 or region.base == 0 or region.base % 4096 != 0 or region.len < bytes) @trap();
-    if (function("vm_commit")(region.id, 0, bytes, a.vm_commit_flag_resident) != a.vm_ok) {
-        _ = function("vm_release")(region.id);
-        return null;
-    }
-    const candidate: *Context = @ptrFromInt(region.base);
-    candidate.* = .{ .heap = .{ .api = threads.table() } };
-    const result = function("program_local_publish")(key, region.base, &value);
-    if (result == a.program_local_ok) {
-        std.debug.assert(value == region.base);
-        return candidate;
-    }
-    // Losing candidates and failed commits never enter a shared list. Any
-    // failed VM release remains owned by the existing process VM reaper.
-    _ = function("vm_release")(region.id);
-    return if (result == a.program_local_existing and value != 0) @ptrFromInt(value) else null;
+    return local.getOrCreate(Context, &context_key, init);
 }
 fn allocate(bytes: usize, alignment: usize) ?*anyopaque {
     if (alignment == 0 or !std.math.isPowerOfTwo(alignment)) return null;

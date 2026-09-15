@@ -140,3 +140,13 @@ format generators produce the port's tables; their output notices are retained.
 The generated preparation record identifies the inputs, patch and output hashes.
 This intermediate work does not yet distribute an R4VK binary. Full applicable
 source notices must accompany that artifact when its integration is complete.
+
+`R4VK/Tools/PrepareShaders.ps1` builds pinned Mesa CLC and its NIR binding
+generator as host tools. LLVM/Clang retain their upstream Apache-2.0-with-
+LLVM-exception terms; LLVM-SPIRV retains BSD-3-Clause and Expat terms, and
+SPIRV-Tools retains Apache-2.0. Host
+packages keep their full original notices and are not part of the R4OS image.
+The query/indirect-copy OpenCL sources retain Collabora, Red Hat and Valve
+MIT notices. Generated SPIR-V/NIR helpers retain Mesa's generated MIT notice.
+`MesaGenerators.patch` changes metadata lifetime/export only, preserving shader
+algorithms and complete serialized data. No third-party material is relicensed.

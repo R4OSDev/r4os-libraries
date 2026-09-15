@@ -138,16 +138,24 @@ fn once(once_flag: *Once, callback: *const fn (?*const anyopaque) callconv(.c) v
         callback(argument);
         @atomicStore(u32, &once_flag.state, 2, .release);
         require(condition.signal(&host(), true));
-        // C11 has no once destructor. The resident handle belongs to the
-        // process and its reaper, never to this shared library's lifetime.
+        // No waiter needs the event after observing state=done. Keep its
+        // closed, never-reused identity in the flag so a delayed contender
+        // cannot allocate a replacement. Dynamic Mesa mutexes otherwise
+        // accumulate one notification per once object until process exit.
+        require(condition.destroy(&host()));
         return;
     }
     const transport = host();
     while (@atomicLoad(u32, &once_flag.state, .acquire) != 2) {
         var sequence: u64 = 0;
-        require(transport.query(condition.notification, &sequence));
+        const queried = transport.query(condition.notification, &sequence);
         if (@atomicLoad(u32, &once_flag.state, .acquire) == 2) break;
-        require(transport.waitUntil(condition.notification, sequence, sync.forever));
+        require(queried);
+        const waited = transport.waitUntil(condition.notification, sequence, sync.forever);
+        // Completion may close the event between the revision read and wait.
+        // Only the published initialized state makes that race successful.
+        if (@atomicLoad(u32, &once_flag.state, .acquire) == 2) break;
+        require(waited);
     }
 }
 fn onceCallback(argument: ?*const anyopaque) callconv(.c) void {

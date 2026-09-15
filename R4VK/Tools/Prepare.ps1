@@ -4,34 +4,19 @@ param([Parameter(Mandatory)][string]$OutputRoot)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
-$unit = [IO.Path]::GetFullPath('..', $PSScriptRoot)
-$libraries = [IO.Path]::GetFullPath('../..', $PSScriptRoot)
-$settings = @{}
-foreach ($line in Get-Content -LiteralPath (Join-Path $libraries 'Settings.R4S')) {
-    if ($line -match '^([A-Z_]+)=(.+)$') { $settings[$Matches[1]] = $Matches[2] }
-}
-function Resolve-Setting([string]$Base, [string]$Key) {
-    [IO.Path]::GetFullPath($settings[$Key].Replace('\', [IO.Path]::DirectorySeparatorChar), $Base)
-}
+. (Join-Path $PSScriptRoot 'MesaSource.ps1')
+$mesa = Get-R4VKMesaSource
+$unit = $mesa.unit
+$workspace = $mesa.workspace
+$lockPath = $mesa.lock_path
+$lock = $mesa.lock
+$source = $mesa.source
+$manifestPath = $mesa.manifest_path
+$sourceFiles = $mesa.files
 function Hash([string]$Path) { (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
 function Run([string]$Program, [string[]]$Arguments) {
     & $Program @Arguments
     if ($LASTEXITCODE) { throw "$Program failed ($LASTEXITCODE)" }
-}
-$workspace = Resolve-Setting $libraries 'WORKSPACE_ROOT'
-$devkit = Resolve-Setting $workspace 'DEVKIT_ROOT'
-$mesaTools = Join-Path $libraries 'R4NV/Tools/Compiler'
-$lockPath = Join-Path $mesaTools 'Sources.lock.json'
-$lock = Get-Content -Raw -LiteralPath $lockPath | ConvertFrom-Json
-$basePatch = Hash (Join-Path $mesaTools 'MesaStandalone.patch')
-$prepared = Join-Path $devkit ('Toolchains/MesaNAK/' + $lock.mesa.version + '-' + $basePatch.Substring(0, 16))
-$source = Join-Path $prepared 'Source'
-$stamp = Get-Content -Raw -LiteralPath (Join-Path $prepared 'prepared.json') | ConvertFrom-Json
-if ($stamp.mesa -ne $lock.mesa.sha512 -or $stamp.patch -ne $basePatch) { throw 'Mesa source preparation does not match the shared source lock.' }
-$manifestPath = Join-Path $prepared 'source-files.json'
-$sourceFiles = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
-foreach ($file in $sourceFiles) {
-    if ((Hash (Join-Path $source $file.path)) -ne $file.sha256) { throw "Prepared Mesa source changed: $($file.path)" }
 }
 $output = [IO.Path]::GetFullPath($OutputRoot, $workspace)
 $sourcePrefix = $source.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
@@ -108,6 +93,7 @@ $outputs = @(foreach ($directory in @($generated, $overlay)) {
     schema = 1; mesa = $lock.mesa.version; mesa_lock_sha256 = (Hash $lockPath)
     source_manifest_sha256 = (Hash $manifestPath); source_files_verified = $sourceFiles.Count
     runtime_patch_sha256 = (Hash $patch); prepare_script_sha256 = (Hash $PSCommandPath)
+    source_helper_sha256 = (Hash (Join-Path $PSScriptRoot 'MesaSource.ps1'))
     outputs = $outputs
     scope = 'Generated Vulkan/NVK tables and private source overlays only; no provider binary or runtime capability claim.'
 } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'prepare.json') -Encoding utf8NoBOM

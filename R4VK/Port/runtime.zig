@@ -4,6 +4,7 @@ pub const threads = @import("threads_api.zig");
 pub const memory = @import("memory.zig");
 pub const time = @import("time.zig");
 pub const math = @import("math.zig");
+pub const loader = @import("loader.zig");
 
 pub fn bind(kernel: *const r4os.abi.R4XStartR4Sys) bool {
     if (kernel.abi_version < 20 or kernel.size < @offsetOf(r4os.abi.R4XStartR4Sys, "program_local_publish") + 8) return false;
@@ -16,4 +17,5 @@ comptime {
     _ = memory;
     _ = time;
     _ = math;
+    _ = loader;
 }

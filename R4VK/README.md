@@ -15,8 +15,9 @@ executable sections of the program's exact imported library generations.
 The shared port retains only the immutable boot-lifetime kernel table.
 
 Every mutex, condition and once object must belong to one calling process.
-Do not place these objects in shared R4L mutable globals. Once notifications
-have no C11 destructor and are reclaimed by process retirement. Mesa global
+Do not place these objects in shared R4L mutable globals. Once notifications are closed after initialization is published and all
+waiters are notified. A waiter racing that close succeeds only after observing
+the initialized state; the flag retains the closed, never-reused identity. Mesa global
 state must be audited and adapted before integrating additional source units.
 An unreportable void-API lifetime failure traps; it never silently continues.
 UTC timed waits, detached threads and TLS are not implemented or stubbed.
@@ -53,7 +54,34 @@ sources, alter the pinned source tree or build a complete provider. Consumers
 must compile the private NVK and Vulkan-runtime source/header trees together, with `R4OS_VULKAN`
 and the generated headers, so relative includes cannot bypass the port.
 
+`Port/process_local.zig` publishes resident process-owned contexts for the
+heap and loader state. `Port/loader.zig` implements ICD negotiation v1-v7,
+rejects v0, and preserves the lowest negotiated version within one process.
+Mesa's instance path requires an explicit native enumerator: an absent backend
+is an initialization error, and failed enumeration destroys partial devices
+before retry. The future adapter backend and build digest remain required
+external symbols; neither has a successful fallback definition.
+
+The private NVK patch rejects external FD memory before GPU allocation,
+removes its Linux-only entrypoints, rolls back failed internal map counts,
+unlinks failed mapped allocations and destroys each retired BO's map mutex.
+Device/VA allocation and submission still require the actual R4OS backend.
+
+`Tools/PrepareShaders.ps1 -OutputRoot <output>` builds the original Mesa CLC
+and NIR binding generator in a private source tree. It generates the NVK
+query and indirect-copy helpers as native C with unchanged SPIR-V/NIR data.
+`Port/MesaGenerators.patch` exposes the complete immutable printf metadata
+through an explicit accessor instead of a C++ global constructor/destructor.
+The future provider must register it in its process-owned compiler context.
+These host tools are not linked into R4OS. The shared Mesa lock and
+`Tools/ShaderTools.lock.json` pin dependencies; `shaders.json` records options,
+input/tool/output hashes. Windows and Linux use the same PowerShell path;
+only Linux execution has been checked. Host prerequisites include LLVM/Clang
+19 development files, SPIRV-Tools and LLVM-SPIRV with matching pkg-config data
+(Debian: llvm-19-dev, libclang-cpp19-dev, libllvmspirvlib-19-dev, spirv-tools).
+
 The bounded CPU proof uses a temporary native C/R4L fixture, not a Vulkan
-provider. Evidence and remaining integration work are recorded in
+provider. Modeled enumeration and memory failures exercise actual Mesa/NVK
+list, map and refcount code; they do not validate real GPU discovery or DMA. Evidence and remaining integration work are recorded in
 `Docs/Drivers/GrafikVulkan07935.txt/.json` in the workspace's Docs repository.
 Physical GPU validation remains in `ExFiles/Reports/OssiGPU.txt`.
