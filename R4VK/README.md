@@ -1,7 +1,7 @@
 ﻿# R4VK development state
 
 Work for roadmap 0.79.35 is in progress. This directory currently provides
-Mesa's native CPU threading and process-owned memory transport. It does not yet install an R4VK.R4L,
+Mesa's native CPU runtime and NVK memory/VA adapter components. It does not yet install an R4VK.R4L,
 ICD, Vulkan device, GPU submission path or advertised Vulkan feature set.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
@@ -65,8 +65,8 @@ external symbols; neither has a successful fallback definition.
 The private NVK patch rejects external FD memory before GPU allocation,
 removes its Linux-only entrypoints, rolls back failed internal map counts,
 unlinks failed mapped allocations and destroys each retired BO's map mutex.
-Memory allocation, CPU mappings, device discovery and submission still require
-the complete R4OS backend.
+The full Vulkan device, discovery and submission still require the complete
+R4OS backend.
 
 `Port/nvk_va.c` implements NVK's private VA allocation/bind/unbind/free operations
 through the SDK's R4DRAW virtual-resource broker. Its context belongs to one
@@ -83,6 +83,24 @@ context's device-lost state. The final NVK device/queue must propagate this
 state. Sparse/replay VA, nonzero PTE kinds, overlapping replacement and partial
 unbind are explicitly unsupported. No corresponding features may be advertised.
 This is one backend component, not an installed or complete Vulkan provider.
+
+`Port/nvk_mem.c` owns native NVK memory through the common BO and native VRAM
+brokers. Each allocation has its canonical BO reference and a bound VA range;
+failure unwinds in reverse order. Kernel loans retain backing through late
+VA retirement. Internal and client CPU mappings share one persistent kernel
+lease while NVK retains its own internal map count. Persistent mapping requires
+R4DRAW's optional `gfx_buffer_map_persistent` tail (v33, Kernel 0.1.189).
+It holds write-back system RAM without excluding device/queue use. The caller
+must synchronize actual CPU/GPU accesses; this lease is not a GPU barrier.
+
+Mappable LOCAL memory uses GART. Explicit VRAM allocations never silently
+change location, and CPU VRAM/BAR maps, external memory, fixed maps and overmap
+are unsupported. Host coherence must be supplied as a backend capability;
+successful mapping does not establish it. Noncoherent maps use Mesa's actual
+cache operations. Full device construction, published memory types/budgets,
+cache/barrier integration and GPU-use retention remain required. The private
+memory and VA contexts share one atomic device-lost state and outlive their
+NVK objects; the kernel never retains their C addresses or destructors.
 
 `Tools/PrepareShaders.ps1 -OutputRoot <output>` builds the original Mesa CLC
 and NIR binding generator in a private source tree. It generates the NVK
