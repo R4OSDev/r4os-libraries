@@ -81,9 +81,26 @@ Private C errno and diagnostic buffers belong to an admitted compiler worker
 call. Native options preserve upstream defaults; environment-driven shader
 dump/replacement files are excluded. Assertion/abort on that worker fails its
 job; outside it the failure traps. This is not general TLS or a filesystem.
-Each commandbuffer owns its own OOM runout buffer. Mid-shader C/NIR allocation,
-panic/cancellation cleanup and generated shader-helper cache ownership still
-require integration before shader execution can be admitted.
+Each commandbuffer owns its own OOM runout buffer. SPIR-V frontend, complete
+pipeline/cache paths and generated helper printf metadata still need integration.
+
+NVK's NIR-to-machine-code phase now uses an isolated CPU job. Original const
+NIR serialization/deserialization gives the worker its own graph and interned
+types. GLSL/printf caches and diagnostic mutexes are job-owned there; every C
+allocation is tracked separately from Rust backing blocks. OOM/abort retires
+the worker, and exact join precedes disposal of all remaining storage. The
+borrowed device compiler is immutable. No GPU resource or callback-owned
+Vulkan object is created inside this boundary. On success, ordinary shader
+storage receives the code, constants and optional diagnostics before the job
+is destroyed; upload then uses the existing caller-side rollback path.
+
+A targeted SMP4 probe passes private-cache isolation, allocation overflow,
+bounded C-heap exhaustion, abort while holding a private diagnostic mutex,
+unchanged failed-owner output, and two real NAK compute compilations/uploads
+with balanced cleanup. The compute input is an elementary existing NIR graph;
+the GPU peer models uploads and does not execute the machine code. This does
+not establish SPIR-V frontend OOM recovery, full pipelines, shader printf,
+all shader stages, cache compatibility, or Vulkan conformance.
 
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays

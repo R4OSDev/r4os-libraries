@@ -11,6 +11,9 @@ bool r4vk_diagnostics_prepare(void)
 }
 static struct diagnostic_state *state(void)
 {
+   struct diagnostic_state *job = r4vk_compiler_state(2,
+      sizeof(struct diagnostic_state), _Alignof(struct diagnostic_state));
+   if (job) return job;
    struct diagnostic_state *result = r4vk_state_get(&diagnostic_key);
    assert(result);
    return result;

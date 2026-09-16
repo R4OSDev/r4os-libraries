@@ -1317,7 +1317,7 @@
     void *mem_ctx;
 
     /* Use a linear (arena) allocator for all the new types, since
-@@ -55,7 +53,29 @@ static struct {
+@@ -55,7 +53,32 @@ static struct {
     struct hash_table *struct_types;
     struct hash_table *interface_types;
     struct hash_table *subroutine_types;
@@ -1339,6 +1339,9 @@
 +}
 +static struct r4nak_glsl_state *r4nak_glsl_state(void)
 +{
++   struct r4nak_glsl_state *job = r4vk_compiler_state(0,
++      sizeof(struct r4nak_glsl_state), _Alignof(struct r4nak_glsl_state));
++   if (job) return job;
 +   struct r4nak_glsl_state *state = r4vk_state_get(&glsl_key);
 +   assert(state);
 +   return state;
@@ -1348,7 +1351,7 @@
 
  static const glsl_type *
  make_vector_matrix_type(linear_ctx *lin_ctx, uint32_t gl_type,
-@@ -465,8 +485,8 @@ glsl_uint16_type(const glsl_type *t)
+@@ -465,8 +488,8 @@ glsl_uint16_type(const glsl_type *t)
                                      t->interface_row_major, 0);
  }
 
@@ -1359,7 +1362,7 @@
  {
     /* Values of these types must fit in the two bits of
      * glsl_type::sampled_type.
-@@ -483,10 +503,23 @@ glsl_type_singleton_init_or_ref()
+@@ -483,10 +506,23 @@ glsl_type_singleton_init_or_ref()
     simple_mtx_lock(&glsl_type_cache_mutex);
     if (glsl_type_cache.users == 0) {
        glsl_type_cache.mem_ctx = ralloc_context(NULL);
@@ -1386,7 +1389,7 @@
  void
 --- a/src/util/u_printf.c
 +++ b/src/util/u_printf.c
-@@ -376,23 +376,47 @@ u_printf_hash(const u_printf_info *info)
+@@ -376,23 +376,50 @@ u_printf_hash(const u_printf_info *info)
     return hash;
  }
 
@@ -1410,6 +1413,9 @@
 +}
 +static struct r4nak_printf_state *r4nak_printf_state(void)
 +{
++   struct r4nak_printf_state *job = r4vk_compiler_state(1,
++      sizeof(struct r4nak_printf_state), _Alignof(struct r4nak_printf_state));
++   if (job) return job;
 +   struct r4nak_printf_state *state = r4vk_state_get(&printf_key);
 +   assert(state);
 +   return state;
@@ -1786,3 +1792,147 @@
        /* we absolutely do not support Fermi, but if somebody wants to toy
         * around with it, this is a must
         */
+--- a/src/nouveau/vulkan/nvk_shader.c
++++ b/src/nouveau/vulkan/nvk_shader.c
+@@ -22,10 +22,14 @@
+ #include "nak.h"
+ #include "nir.h"
+ #include "nir_builder.h"
++#include "nir_serialize.h"
+ #include "compiler/spirv/nir_spirv.h"
+
+ #include "util/mesa-blake3.h"
+ #include "util/u_debug.h"
++#if defined(R4OS_VULKAN)
++#include "r4vk_state.h"
++#endif
+
+ #include "cla097.h"
+ #include "clb097.h"
+@@ -564,7 +568,11 @@ nvk_compile_nir(struct nvk_device *dev, nir_shader *nir,
+    shader->nak = nak_compile_shader(nir, dump_asm, pdev->nak,
+                                     robust2_modes, fs_key, has_task_shader);
+    if (!shader->nak)
++#if defined(R4OS_VULKAN)
++      return VK_ERROR_UNKNOWN; /* Report after the isolated worker has joined. */
++#else
+       return vk_errorf(pdev, VK_ERROR_UNKNOWN, "Internal compiler error in NAK");
++#endif
+
+    shader->info = shader->nak->info;
+    shader->asm_str = shader->nak->asm_str;
+@@ -1073,6 +1081,96 @@ nvk_shader_fill_push(struct nvk_device *dev,
+
+ static const struct vk_shader_ops nvk_shader_ops;
+
++#if defined(R4OS_VULKAN)
++struct nvk_native_compile_job {
++   struct nvk_device *dev;
++   const struct vk_shader_compile_info *info;
++   const struct vk_graphics_pipeline_state *state;
++   struct nvk_shader output;
++};
++
++static int
++nvk_native_compile_worker(void *argument)
++{
++   struct nvk_native_compile_job *job = argument;
++   const struct vk_shader_compile_info *info = job->info;
++   /* The original const serializer does not modify the caller's NIR. A
++    * plain clone would retain its interned type pointers and mix owners. */
++   struct blob blob;
++   blob_init(&blob);
++   nir_serialize(&blob, info->nir, false);
++   if (blob.out_of_memory) return VK_ERROR_OUT_OF_HOST_MEMORY;
++
++   if (!r4vk_glsl_init_or_ref() || !r4vk_printf_init_or_ref())
++      return VK_ERROR_OUT_OF_HOST_MEMORY;
++   struct blob_reader reader;
++   blob_reader_init(&reader, blob.data, blob.size);
++   nir_shader *nir = nir_deserialize(NULL, info->nir->options, &reader);
++   if (!nir || reader.overrun || reader.current != reader.end)
++      return VK_ERROR_UNKNOWN;
++   blob_finish(&blob);
++
++   nvk_lower_nir(job->dev, nir, info->flags, info->robustness,
++                 info->set_layout_count, info->set_layouts,
++                 &job->output.cbuf_map);
++   struct nak_fs_key fs_key, *key = NULL;
++   if (nir->info.stage == MESA_SHADER_FRAGMENT) {
++      nvk_populate_fs_key(&fs_key, job->state);
++      key = &fs_key;
++   }
++   VkResult result = nvk_compile_nir(job->dev, nir, info->flags,
++                                    info->robustness, key, &job->output);
++   ralloc_free(nir);
++   return result;
++}
++
++static VkResult
++nvk_native_compile(struct nvk_device *dev,
++                    const struct vk_shader_compile_info *info,
++                    const struct vk_graphics_pipeline_state *state,
++                    struct nvk_shader *shader)
++{
++   struct nvk_native_compile_job job = {.dev = dev, .info = info, .state = state};
++   struct r4vk_compiler_job *owner;
++   VkResult result = r4vk_compiler_job_run(nvk_native_compile_worker, &job, &owner);
++   if (result != VK_SUCCESS) return result;
++
++   /* Only CPU bytes cross the job boundary. GPU upload and callback-owned
++    * Vulkan objects remain on the caller's ordinary rollback path. */
++   const struct nvk_shader *out = &job.output;
++   shader->info = out->info;
++   shader->cbuf_map = out->cbuf_map;
++   shader->code_size = out->code_size;
++   shader->data_size = out->data_size;
++   if (!out->code_size || !out->code_ptr) {
++      result = VK_ERROR_UNKNOWN;
++      goto done;
++   }
++   shader->code_ptr = malloc(out->code_size);
++   if (!shader->code_ptr) goto fail_memory;
++   memcpy((void *)shader->code_ptr, out->code_ptr, out->code_size);
++   if (out->data_size) {
++      shader->data_ptr = malloc(out->data_size);
++      if (!shader->data_ptr) goto fail_memory;
++      memcpy((void *)shader->data_ptr, out->data_ptr, out->data_size);
++   }
++   if (out->asm_str) {
++      shader->asm_str = strdup(out->asm_str);
++      if (!shader->asm_str) goto fail_memory;
++   }
++   if (out->nir_str) {
++      shader->nir_str = ralloc_strdup(NULL, out->nir_str);
++      if (!shader->nir_str) goto fail_memory;
++   }
++   goto done;
++fail_memory:
++   result = VK_ERROR_OUT_OF_HOST_MEMORY;
++done:
++   r4vk_compiler_job_destroy(owner);
++   return result;
++}
++#endif
++
+ static void
+ nvk_shader_destroy(struct vk_device *vk_dev,
+                    struct vk_shader *vk_shader,
+@@ -1123,6 +1221,9 @@ nvk_compile_shader(struct nvk_device *dev,
+       return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
+    }
+
++#if defined(R4OS_VULKAN)
++   result = nvk_native_compile(dev, info, state, shader);
++#else
+    nvk_lower_nir(dev, nir, info->flags, info->robustness,
+                  info->set_layout_count, info->set_layouts,
+                  &shader->cbuf_map);
+@@ -1135,6 +1236,7 @@ nvk_compile_shader(struct nvk_device *dev,
+
+    result = nvk_compile_nir(dev, nir, info->flags, info->robustness,
+                             fs_key, shader);
++#endif
+    ralloc_free(nir);
+    if (result != VK_SUCCESS) {
+       nvk_shader_destroy(&dev->vk, &shader->vk, pAllocator);

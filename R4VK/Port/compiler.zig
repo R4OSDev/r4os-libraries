@@ -14,7 +14,7 @@ pub const initialization_failed: i32 = -3;
 pub const compiler_failed: i32 = -13;
 pub const Callback = *const fn (?*anyopaque) callconv(.c) i32;
 const Block = struct { previous: ?*Block, next: ?*Block, arena: *Arena, raw: *anyopaque, bytes: usize };
-const Context = struct { mutex: sync.Mutex = .{}, calls: ?*Call = null };
+const Context = struct { mutex: sync.Mutex = .{}, calls: ?*Call = null, active_count: std.atomic.Value(usize) = .init(0) };
 const Call = struct {
     next: ?*Call = null,
     arena: *Arena,
@@ -40,15 +40,23 @@ fn currentThread() u32 {
     const function: r4os.abi.R4SysFns.thread_current = @ptrFromInt(threads.table().thread_current);
     return function();
 }
-fn active() *Call {
-    const ctx = (local.lookup(Context, &context_key) catch @trap()) orelse @trap();
+fn maybeActive() ?*Call {
+    const ctx = (local.lookup(Context, &context_key) catch @trap()) orelse return null;
+    if (ctx.active_count.load(.acquire) == 0) return null;
     const id = currentThread();
     if (id == 0) @trap();
     require(threads.mtx_lock(&ctx.mutex));
     defer require(threads.mtx_unlock(&ctx.mutex));
     var it = ctx.calls;
     while (it) |call| : (it = call.next) if (call.thread == id) return call;
-    @trap(); // No ambient allocator outside an admitted compiler call.
+    return null;
+}
+fn active() *Call {
+    return maybeActive() orelse @trap(); // No ambient Rust allocator.
+}
+pub fn allocationScope() ?*memory.Scope {
+    const call = maybeActive() orelse return null;
+    return if (call.arena.isolated) &call.arena.c_scope else null;
 }
 fn remove(call: *Call) void {
     const ctx = call.arena.context;
@@ -58,6 +66,7 @@ fn remove(call: *Call) void {
     while (at.*) |found| {
         if (found == call) {
             at.* = found.next;
+            _ = ctx.active_count.fetchSub(1, .release);
             return;
         }
         at = &found.next;
@@ -72,6 +81,7 @@ fn entry(argument: ?*anyopaque) callconv(.c) c_int {
     if (locked != sync.success) return if (locked == sync.nomem) out_of_memory else initialization_failed;
     call.next = ctx.calls;
     ctx.calls = call;
+    _ = ctx.active_count.fetchAdd(1, .release);
     require(threads.mtx_unlock(&ctx.mutex));
     call.status = call.callback(call.argument);
     remove(call);
@@ -91,11 +101,14 @@ pub const Arena = struct {
     log: [1024]u8 = undefined,
     log_length: usize = 0,
     compiler: ?*anyopaque = null,
+    isolated: bool = false,
+    c_scope: memory.Scope = .{},
+    states: [3]struct { pointer: ?*anyopaque = null, bytes: usize = 0, alignment: usize = 0 } = @splat(.{}),
 
     pub fn create(limit_bytes: usize) ?*Arena {
         const ctx = context() orelse return null;
-        const result: *Arena = @ptrCast(@alignCast(memory.malloc(@sizeOf(Arena)) orelse return null));
-        result.* = .{ .context = ctx, .limit_bytes = limit_bytes };
+        const result: *Arena = @ptrCast(@alignCast(memory.mallocUntracked(@sizeOf(Arena)) orelse return null));
+        result.* = .{ .context = ctx, .limit_bytes = limit_bytes, .c_scope = .{ .limit_bytes = limit_bytes } };
         return result;
     }
     pub fn run(self: *Arena, callback: Callback, argument: ?*anyopaque) i32 {
@@ -119,6 +132,7 @@ pub const Arena = struct {
     }
     pub fn destroy(self: *Arena) void {
         if (self.running.load(.acquire)) @trap();
+        self.c_scope.destroy();
         while (self.head) |block| {
             self.head = block.next;
             memory.free(block.raw);
@@ -134,7 +148,7 @@ pub export fn r4nak_port_allocate(size: usize, alignment: usize) callconv(.c) *a
     const overhead = std.math.add(usize, @sizeOf(Block), aligned - 1) catch r4nak_port_fail(2);
     const total = std.math.add(usize, @max(size, 1), overhead) catch r4nak_port_fail(2);
     if (total > arena.limit_bytes -| arena.live_bytes) r4nak_port_fail(2);
-    const raw = memory.malloc(total) orelse r4nak_port_fail(2);
+    const raw = memory.mallocUntracked(total) orelse r4nak_port_fail(2);
     const address = std.mem.alignForward(usize, @intFromPtr(raw) + @sizeOf(Block), aligned);
     const block: *Block = @ptrFromInt(address - @sizeOf(Block));
     block.* = .{ .previous = null, .next = arena.head, .arena = arena, .raw = raw, .bytes = total };
@@ -183,6 +197,49 @@ pub export fn r4vk_compiler_scratch(slot: u32) callconv(.c) [*]u8 {
 }
 pub export fn r4vk_compiler_fail(reason: u32) callconv(.c) noreturn {
     r4nak_port_fail(reason);
+}
+
+// An isolated shader job substitutes its own GLSL/printf/diagnostic metadata.
+// NIR is serialized from the immutable input and deserialized inside the job
+// so no interned type from a different cache is mixed into its object graph.
+pub export fn r4vk_compiler_state(slot: u32, bytes: usize, alignment: usize) callconv(.c) ?*anyopaque {
+    const call = maybeActive() orelse return null;
+    const arena = call.arena;
+    if (!arena.isolated) return null;
+    if (slot >= arena.states.len or bytes == 0 or alignment == 0 or !std.math.isPowerOfTwo(alignment)) r4nak_port_fail(3);
+    const state = &arena.states[slot];
+    if (state.pointer) |pointer| {
+        if (state.bytes != bytes or state.alignment != alignment) r4nak_port_fail(3);
+        return pointer;
+    }
+    const pointer = r4nak_port_allocate(bytes, alignment);
+    @memset(@as([*]u8, @ptrCast(pointer))[0..bytes], 0);
+    state.* = .{ .pointer = pointer, .bytes = bytes, .alignment = alignment };
+    return pointer;
+}
+const Job = struct { callback: Callback, argument: ?*anyopaque, result: i32 = compiler_failed };
+fn runJob(argument: ?*anyopaque) callconv(.c) i32 {
+    const job: *Job = @ptrCast(@alignCast(argument.?));
+    job.result = job.callback(job.argument);
+    return success;
+}
+// A successful owner retains only CPU data for the caller to copy. No GPU
+// allocation, callback-owned Vulkan object, or shared cache may be mutated
+// inside this boundary. Failure leaves the owner output untouched.
+pub export fn r4vk_compiler_job_run(callback: Callback, argument: ?*anyopaque, owner: **Arena) callconv(.c) i32 {
+    const arena = Arena.create(std.math.maxInt(usize)) orelse return out_of_memory;
+    arena.isolated = true;
+    var job: Job = .{ .callback = callback, .argument = argument };
+    const result = arena.run(runJob, &job);
+    if (result != success or job.result != success) {
+        arena.destroy();
+        return if (result != success) result else job.result;
+    }
+    owner.* = arena;
+    return success;
+}
+pub export fn r4vk_compiler_job_destroy(owner: *Arena) callconv(.c) void {
+    owner.destroy();
 }
 
 extern fn nak_compiler_create(?*const anyopaque) callconv(.c) ?*anyopaque;
