@@ -4,6 +4,7 @@
 // valid inputs never raise FE_INEXACT. x86 conversion raises FE_INVALID for
 // non-finite/out-of-range arguments and supplies the integer-indefinite result.
 const builtin = @import("builtin");
+const std = @import("std");
 comptime {
     if (builtin.cpu.arch != .x86_64 or @sizeOf(c_long) != 8) @compileError("R4VK requires the x86_64 C ABI");
 }
@@ -51,4 +52,42 @@ pub export fn lroundf(value: f32) callconv(.c) c_long {
 }
 pub export fn lround(value: f64) callconv(.c) c_long {
     return rounded(f64, value);
+}
+
+// C lrint follows the caller's MXCSR rounding mode, unlike lround. The x86
+// instruction also supplies C's inexact/invalid exception semantics.
+pub export fn lrintf(value: f32) callconv(.c) c_long {
+    return asm volatile ("cvtss2si %[value], %[result]"
+        : [result] "=r" (-> c_long),
+        : [value] "x" (value),
+    );
+}
+pub export fn lrint(value: f64) callconv(.c) c_long {
+    return asm volatile ("cvtsd2si %[value], %[result]"
+        : [result] "=r" (-> c_long),
+        : [value] "x" (value),
+    );
+}
+pub export fn copysignf(value: f32, sign: f32) callconv(.c) f32 {
+    return std.math.copysign(value, sign);
+}
+pub export fn copysign(value: f64, sign: f64) callconv(.c) f64 {
+    return std.math.copysign(value, sign);
+}
+fn decompose(comptime T: type, value: T, exponent: *c_int) T {
+    // C leaves a NaN/Inf exponent unspecified. Use a defined zero instead of
+    // reading std.math.frexp's deliberately undefined NaN exponent.
+    if (!std.math.isFinite(value)) {
+        exponent.* = 0;
+        return value;
+    }
+    const result = std.math.frexp(value);
+    exponent.* = result.exponent;
+    return result.significand;
+}
+pub export fn frexpf(value: f32, exponent: *c_int) callconv(.c) f32 {
+    return decompose(f32, value, exponent);
+}
+pub export fn frexp(value: f64, exponent: *c_int) callconv(.c) f64 {
+    return decompose(f64, value, exponent);
 }

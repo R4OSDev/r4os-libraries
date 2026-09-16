@@ -4,6 +4,18 @@
 #define STB_SPRINTF_NOUNALIGNED
 #include "../../R4NAK/ThirdParty/stb/stb_sprintf.h"
 
+int vsprintf(char *out, const char *format, va_list args)
+{
+   return stbsp_vsprintf(out, format, args);
+}
+int sprintf(char *out, const char *format, ...)
+{
+   va_list args;
+   va_start(args, format);
+   int count = vsprintf(out, format, args);
+   va_end(args);
+   return count;
+}
 int vsnprintf(char *out, size_t capacity, const char *format, va_list args)
 {
    return stbsp_vsnprintf(out, capacity > INT_MAX ? INT_MAX : (int)capacity,

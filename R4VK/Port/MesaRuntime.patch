@@ -194,9 +194,50 @@
  
 --- a/src/vulkan/runtime/vk_device.c
 +++ b/src/vulkan/runtime/vk_device.c
-@@ -860,7 +860,14 @@
+@@ -234,6 +234,11 @@ vk_device_init(struct vk_device *device,
+       break;
+
+    case VK_DEVICE_TIMELINE_MODE_ASSISTED:
++#if defined(R4OS_VULKAN)
++      /* Native policy uses Mesa's ordinary on-demand submit worker. There is
++       * no Linux environment override or competing hardware submit owner. */
++      device->submit_mode = VK_QUEUE_SUBMIT_MODE_THREADED_ON_DEMAND;
++#else
+       if (os_get_option("MESA_VK_ENABLE_SUBMIT_THREAD")) {
+          if (debug_get_bool_option("MESA_VK_ENABLE_SUBMIT_THREAD", false)) {
+             device->submit_mode = VK_QUEUE_SUBMIT_MODE_THREADED;
+@@ -243,6 +248,7 @@ vk_device_init(struct vk_device *device,
+       } else {
+          device->submit_mode = VK_QUEUE_SUBMIT_MODE_THREADED_ON_DEMAND;
+       }
++#endif
+       break;
+
+    default:
+@@ -325,7 +331,9 @@ vk_device_finish(struct vk_device *device)
+       device->sync->finalize(device->sync);
+
+    vk_device_memory_report_finish(device);
++#if !defined(R4OS_VULKAN)
+    vk_memory_trace_finish(device);
++#endif
+
+ #ifdef VK_USE_PLATFORM_ANDROID_KHR
+    if (device->swapchain_private) {
+@@ -442,8 +450,10 @@ _vk_device_set_lost(struct vk_device *device,
+    vk_logd(VK_LOG_OBJS(device), "Timeline mode is %s.",
+            timeline_mode_str(device));
+
++#if !defined(R4OS_VULKAN)
+    if (debug_get_bool_option("MESA_VK_ABORT_ON_DEVICE_LOSS", false))
+       abort();
++#endif
+
+    return VK_ERROR_DEVICE_LOST;
+ }
+@@ -860,7 +870,14 @@ vk_device_get_timestamp(struct vk_device *device, VkTimeDomainKHR domain,
     }
- 
+
     /* device is not used for host time domains */
 -#if DETECT_OS_WINDOWS
 +#if defined(R4OS_VULKAN)
@@ -210,6 +251,19 @@
     if (domain == VK_TIME_DOMAIN_QUERY_PERFORMANCE_COUNTER_KHR) {
        LARGE_INTEGER ts;
        if (QueryPerformanceCounter(&ts)) {
+@@ -902,6 +919,7 @@ fail:
+    return VK_ERROR_FEATURE_NOT_PRESENT;
+ }
+
++#if !defined(R4OS_VULKAN)
+ VKAPI_ATTR VkResult VKAPI_CALL
+ vk_common_GetCalibratedTimestampsKHR(
+    VkDevice _device, uint32_t timestampCount,
+@@ -964,3 +982,4 @@ vk_common_GetCalibratedTimestampsKHR(
+
+    return VK_SUCCESS;
+ }
++#endif /* Native provider does not advertise calibrated timestamps. */
 --- a/src/vulkan/runtime/vk_fence.c
 +++ b/src/vulkan/runtime/vk_fence.c
 @@ -344,7 +344,7 @@
@@ -316,7 +370,17 @@
  }
 
  struct dispatch_table_builder {
-@@ -257,11 +276,15 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
+@@ -220,7 +239,9 @@ init_dispatch_tables(struct nvk_device *dev)
+    init_app_workarounds_entrypoints(dev, &b);
+
+    add_entrypoints(&b, &nvk_device_entrypoints, NVK_DISPATCH_TABLE_COUNT);
++#if !defined(R4OS_VULKAN) || defined(NVK_USE_WSI_PLATFORM)
+    add_entrypoints(&b, &wsi_device_entrypoints, NVK_DISPATCH_TABLE_COUNT);
++#endif
+    add_entrypoints(&b, &vk_common_device_entrypoints, NVK_DISPATCH_TABLE_COUNT);
+ }
+
+@@ -257,11 +278,15 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
        if (result != VK_SUCCESS)
           goto fail_init;
 
@@ -333,7 +397,7 @@
 
        result = nvk_upload_queue_init(dev, &dev->upload);
        if (result != VK_SUCCESS)
-@@ -394,16 +417,21 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
+@@ -394,16 +419,21 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
     if (queue_count > 0 && NAK_CAN_PRINTF) {
        result = nvk_init_printf(dev);
        if (result != VK_SUCCESS)
@@ -1203,3 +1267,17 @@
                            "Invalid image creation parameters");
 
        image->stencil_copy_temp.plane_align_B =
+@@ -1249,9 +1288,13 @@ nvk_CreateImage(VkDevice _device,
+    VkResult result;
+
+    if (wsi_common_is_swapchain_image(pCreateInfo)) {
++#if defined(R4OS_VULKAN) && !defined(NVK_USE_WSI_PLATFORM)
++      return vk_error(dev, VK_ERROR_FEATURE_NOT_PRESENT);
++#else
+       return wsi_common_create_swapchain_image(&pdev->wsi_device,
+                                                pCreateInfo,
+                                                pImage);
++#endif
+    }
+
+    image = vk_zalloc2(&dev->vk.alloc, pAllocator, sizeof(*image), 8,

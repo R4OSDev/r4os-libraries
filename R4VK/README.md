@@ -46,6 +46,29 @@ modifier metadata and its invalid sentinel. This does not expose the DRM
 modifier query or external-memory entrypoints. `Port/math.zig` supplies the
 integer rounding required by Mesa's descriptor packing: ties away from zero,
 independent of the FPU rounding mode, with x86 invalid/inexact flag semantics.
+It also provides MXCSR-sensitive `lrint`, signed-bit-preserving `copysign`
+and `frexp` decomposition for the full NIR/format path. The private C subset
+includes allocation-free nested sorting and OOM-aware string duplication.
+
+`Port/stdio.c` supports caller-owned, seekable output memory streams for Mesa
+diagnostics. Growth failure preserves the buffer, position and ownership;
+close publishes the buffer for the caller to free even after a write error.
+Seek beyond the end allocates on the next write, which zero-fills the gap;
+`SEEK_END` refers to the full buffer length. Explicit flush publishes the
+smaller of position and length, following the [POSIX memory-stream contract](https://pubs.opengroup.org/onlinepubs/9799919799/functions/open_memstream.html).
+This is a private Mesa subset, not a public libc: global `fflush(NULL)` and
+closing console identities return an error. Filesystem streams and shared
+stream registries are not provided. Mesa must serialize each individual stream.
+The targeted Linux host probe checks these primitives with ASan/UBSan and
+the floating-point boundaries with all four MXCSR rounding modes.
+
+The complete selected NVK/Vulkan/NIR/format/push-diagnostic C source set now
+compiles, but its full link still needs native CPU/compiler state and remaining
+option/diagnostic/file helpers. The native device path excludes calibrated
+timestamps, RMV and WSI dispatch; swapchain-image requests return unsupported
+until the native WSI integration exists. Experimental NVX CUBIN imports are
+excluded consistently with the native instance's disabled experimental flags.
+These compile checks do not establish a usable logical VkDevice or shader path.
 
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays
