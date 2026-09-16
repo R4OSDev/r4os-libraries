@@ -17,9 +17,16 @@ function New-R4VKDispatchArchive {
     # Function/data sections remain separate for final section garbage collection.
     # Rust dependency archives keep their ordinary selective extraction semantics.
     $combined = [IO.Path]::ChangeExtension($OutputFile, '.whole.o')
+    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($OutputFile))) | Out-Null
+    # Hundreds of paths exceed Windows' process command-line limit. LLD's
+    # response file keeps the same explicit link_whole set on both hosts.
+    $response = [IO.Path]::ChangeExtension($OutputFile, '.objects.rsp')
+    [IO.File]::WriteAllLines($response, @($Objects | ForEach-Object {
+        '"' + $_.Replace('\', '/').Replace('"', '\"') + '"'
+    }), [Text.UTF8Encoding]::new($false))
     # Same-named static helper sections from different translation units must
     # stay distinct; merging them would retain unrelated shader/print globals.
-    & $Zig ld.lld -r --unique @Objects -o $combined
+    & $Zig ld.lld -r --unique ('@' + $response) -o $combined
     if ($LASTEXITCODE) { throw 'Native dispatch object link failed.' }
     # ar replaces matching members but retains other old members. A rebuild
     # must produce exactly this combined member, never a stale mixed archive.

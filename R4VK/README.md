@@ -163,6 +163,21 @@ The bounded SMP4 probe checks decoded compute/draw/DMA commands, vertex OOM,
 fragment abort, meta retention OOM/rehash/retry and final cleanup. Model
 completion does not prove image contents or physical memory visibility.
 
+`Tools/BuildNative.ps1 -CompilerRoot <native-NAK> -MesaRoot <prepared-Mesa>
+-ShaderRoot <prepared-helpers> -OutputRoot <native-output>` now owns the native
+C dispatch build. Paths resolve against the mapped workspace. It reuses the
+NAK owner's ABI flags/source selection, validates preparation records and all
+outputs, and compiles the selected 512 C units without fixture interceptors.
+Source/header/tool hashes and compiler arguments determine the generated
+`r4vk_build_identity`; `native.json` records the archive and object hashes.
+An unchanged cache is verified, while damaged outputs are rejected.
+One deterministically ordered combined archive member preserves weak Mesa
+dispatch implementations; a response file avoids Windows command-line limits.
+The Linux build, cache reuse/rejection and R4M link pass. Windows execution
+and the final R4VK module/contract/manifest integration remain open. Link the
+archive with matching native NAK/NIL and the R4VK Zig runtime; this step does
+not install a provider or grant Vulkan capabilities.
+
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays
 and runs the original Vulkan/NVK/NIL table generators. Prepare the shared
