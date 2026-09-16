@@ -76,14 +76,6 @@ void r4vk_nvk_filter_physical_caps(struct vk_device_extension_table *ext,
    ext->EXT_map_memory_placed = false;
    ext->EXT_memory_budget = false;
    ext->EXT_hdr_metadata = false;
-   /* These optional paths still bypass the native isolated frontend or
-    * require the separate pipeline-object integration in roadmap 0.79.36.
-    * Do not expose an upstream class flag as a completed native feature. */
-   ext->KHR_pipeline_binary = false;
-   ext->KHR_pipeline_library = false;
-   ext->EXT_graphics_pipeline_library = false;
-   features->pipelineBinaries = false;
-   features->graphicsPipelineLibrary = false;
    features->sparseBinding = false;
    features->sparseResidencyBuffer = false;
    features->sparseResidencyImage2D = false;
