@@ -1945,6 +1945,62 @@
     ralloc_free(nir);
     if (result != VK_SUCCESS) {
        nvk_shader_destroy(&dev->vk, &shader->vk, pAllocator);
+@@ -1275,6 +1386,12 @@ nvk_deserialize_shader(struct vk_device *vk_dev,
+    blob_copy_bytes(blob, &min_sample_shading, sizeof(min_sample_shading));
+
+    const uint8_t shader_version_override = blob_read_uint8(blob);
++#if defined(R4OS_VULKAN)
++   const struct nvk_physical_device *pdev = nvk_device_physical(dev);
++   if (blob->overrun || (unsigned)info.stage > MESA_SHADER_MESH ||
++       info.sm != pdev->info.sm || cbuf_map.cbuf_count > ARRAY_SIZE(cbuf_map.cbufs))
++      return vk_error(dev, VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT);
++#endif
+    const uint8_t expected_shader_version_override =
+       nvk_shader_get_shader_version_override(dev, info.stage);
+
+@@ -1283,6 +1400,13 @@ nvk_deserialize_shader(struct vk_device *vk_dev,
+
+    const uint32_t code_size = blob_read_uint32(blob);
+    const uint32_t data_size = blob_read_uint32(blob);
++   /* Validate all lengths/strings before allocating or uploading anything. */
++   const void *code = blob_read_bytes(blob, code_size);
++   const void *data = blob_read_bytes(blob, data_size);
++   const char *asm_str = blob_read_string(blob);
++   const char *nir_str = blob_read_string(blob);
++   if (!code_size || code_size % 4 || blob->current != blob->end)
++      return vk_error(dev, VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT);
+    if (blob->overrun)
+       return vk_error(dev, VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT);
+
+@@ -1304,19 +1428,22 @@ nvk_deserialize_shader(struct vk_device *vk_dev,
+       return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
+    }
+
+-   shader->data_ptr = malloc(data_size);
+-   if (shader->data_ptr == NULL) {
++   shader->data_ptr = data_size ? malloc(data_size) : NULL;
++   if (data_size && shader->data_ptr == NULL) {
+       nvk_shader_destroy(&dev->vk, &shader->vk, pAllocator);
+       return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
+    }
+
+-   blob_copy_bytes(blob, (void *)shader->code_ptr, shader->code_size);
+-   blob_copy_bytes(blob, (void *)shader->data_ptr, shader->data_size);
++   memcpy((void *)shader->code_ptr, code, code_size);
++   if (data_size) memcpy((void *)shader->data_ptr, data, data_size);
+
+-   const char *asm_str = blob_read_string(blob);
+-   const char *nir_str = blob_read_string(blob);
+    shader->asm_str = (asm_str && asm_str[0]) ? strdup(asm_str) : NULL;
+    shader->nir_str = (nir_str && nir_str[0]) ? ralloc_strdup(NULL, nir_str) : NULL;
++   if ((asm_str && asm_str[0] && !shader->asm_str) ||
++       (nir_str && nir_str[0] && !shader->nir_str)) {
++      nvk_shader_destroy(&dev->vk, &shader->vk, pAllocator);
++      return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
++   }
+
+    if (blob->overrun) {
+       nvk_shader_destroy(&dev->vk, &shader->vk, pAllocator);
 --- a/src/vulkan/runtime/vk_shader.h
 +++ b/src/vulkan/runtime/vk_shader.h
 @@ -95,6 +95,12 @@ struct vk_shader_compile_info {
@@ -2021,7 +2077,100 @@
 
     vk_set_subgroup_size(
        nir, properties->subgroupSize, properties->minSubgroupSize,
-@@ -756,12 +782,9 @@ fail_blob:
+@@ -492,6 +518,22 @@ vk_common_CmdBindPipeline(VkCommandBuffer commandBuffer,
+
+ static const struct vk_pipeline_cache_object_ops pipeline_shader_cache_ops;
+
++static VkResult
++vk_pipeline_lookup_cached_object(struct vk_pipeline_cache *cache,
++                                 const void *key, size_t size,
++                                 const struct vk_pipeline_cache_object_ops *ops,
++                                 bool *hit, struct vk_pipeline_cache_object **object)
++{
++#if defined(R4OS_VULKAN)
++   VkResult result;
++   *object = r4vk_pipeline_cache_lookup_object(cache, key, size, ops, hit, &result);
++   return result;
++#else
++   *object = vk_pipeline_cache_lookup_object(cache, key, size, ops, hit);
++   return VK_SUCCESS;
++#endif
++}
++
+ static struct vk_shader *
+ vk_shader_from_cache_obj(struct vk_pipeline_cache_object *object)
+ {
+@@ -523,12 +565,15 @@ vk_shader_init_cache_obj(struct vk_device *device, struct vk_shader *shader,
+                                  sizeof(shader->pipeline.cache_key));
+ }
+
+-static struct vk_pipeline_cache_object *
+-vk_pipeline_shader_deserialize(struct vk_device *device,
++static VkResult
++vk_pipeline_shader_deserialize_result(struct vk_device *device,
+                                const void *key_data, size_t key_size,
+-                               struct blob_reader *blob)
++                               struct blob_reader *blob,
++                               struct vk_pipeline_cache_object **object)
+ {
+    const struct vk_device_shader_ops *ops = device->shader_ops;
++   if (key_size != sizeof(blake3_hash))
++      return VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT;
+
+    /* TODO: Do we really want to always use the latest version? */
+    const uint32_t version = device->physical->properties.shaderBinaryVersion;
+@@ -536,16 +581,35 @@ vk_pipeline_shader_deserialize(struct vk_device *device,
+    struct vk_shader *shader;
+    VkResult result = ops->deserialize(device, blob, version,
+                                       &device->alloc, &shader);
+-   if (result != VK_SUCCESS) {
+-      assert(result == VK_ERROR_OUT_OF_HOST_MEMORY);
+-      return NULL;
+-   }
++   if (result != VK_SUCCESS) return result;
+
+    vk_shader_init_cache_obj(device, shader, key_data, key_size);
+
+-   return &shader->pipeline.cache_obj;
++   *object = &shader->pipeline.cache_obj;
++   return VK_SUCCESS;
+ }
+
++static struct vk_pipeline_cache_object *
++vk_pipeline_shader_deserialize(struct vk_device *device,
++                               const void *key_data, size_t key_size,
++                               struct blob_reader *blob)
++{
++   struct vk_pipeline_cache_object *object = NULL;
++   vk_pipeline_shader_deserialize_result(device, key_data, key_size, blob, &object);
++   return object;
++}
++#if defined(R4OS_VULKAN)
++static VkResult
++r4vk_pipeline_shader_deserialize(struct vk_pipeline_cache *cache,
++                                 const void *key_data, size_t key_size,
++                                 struct blob_reader *blob,
++                                 struct vk_pipeline_cache_object **object)
++{
++   return vk_pipeline_shader_deserialize_result(cache->base.device,
++                                                 key_data, key_size, blob, object);
++}
++#endif
++
+ static struct vk_pipeline_cache_object *
+ vk_pipeline_shader_deserialize_cb(struct vk_pipeline_cache *cache,
+                                   const void *key_data, size_t key_size,
+@@ -566,6 +630,9 @@ vk_pipeline_shader_destroy(struct vk_device *device,
+ }
+
+ static const struct vk_pipeline_cache_object_ops pipeline_shader_cache_ops = {
++#if defined(R4OS_VULKAN)
++   .r4vk_deserialize = r4vk_pipeline_shader_deserialize,
++#endif
+    .serialize = vk_pipeline_shader_serialize,
+    .deserialize = vk_pipeline_shader_deserialize_cb,
+    .destroy = vk_pipeline_shader_destroy,
+@@ -756,12 +823,9 @@ fail_blob:
  }
 
  static bool
@@ -2036,10 +2185,12 @@
     blob_write_uint32(blob, shader->stage);
     blob_write_bytes(blob, &shader->rs, sizeof(shader->rs));
     blob_write_bytes(blob, &shader->tess, sizeof(shader->tess));
-@@ -775,6 +798,14 @@ vk_pipeline_precomp_shader_serialize(struct vk_pipeline_cache_object *obj,
+@@ -775,11 +839,22 @@ vk_pipeline_precomp_shader_serialize(struct vk_pipeline_cache_object *obj,
     return !blob->out_of_memory;
  }
 
+-static struct vk_pipeline_cache_object *
+-vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
 +static bool
 +vk_pipeline_precomp_shader_serialize(struct vk_pipeline_cache_object *obj,
 +                                     struct blob *blob)
@@ -2048,10 +2199,98 @@
 +      vk_pipeline_precomp_shader_from_cache_obj(obj), blob);
 +}
 +
- static struct vk_pipeline_cache_object *
- vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
++static VkResult
++vk_pipeline_precomp_shader_deserialize_result(struct vk_device *device,
                                         const void *key_data, size_t key_size,
-@@ -916,6 +947,128 @@ vk_pipeline_hash_precomp_shader_stage(struct vk_device *device,
+-                                       struct blob_reader *blob)
++                                       struct blob_reader *blob,
++                                       struct vk_pipeline_cache_object **object)
+ {
++   if (key_size != sizeof(blake3_hash))
++      return VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT;
+    const mesa_shader_stage stage = blob_read_uint32(blob);
+
+    struct vk_pipeline_robustness_state rs;
+@@ -793,12 +868,13 @@ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
+       blob_read_bytes(blob, embedded_sampler_count * sizeof(*embedded_samplers));
+
+    uint64_t nir_size = blob_read_uint64(blob);
+-   if (blob->overrun || nir_size > SIZE_MAX)
+-      return NULL;
++   if (blob->overrun || nir_size > SIZE_MAX || !nir_size ||
++       (unsigned)stage >= MESA_SHADER_STAGES)
++      return VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT;
+
+    const void *nir_data = blob_read_bytes(blob, nir_size);
+-   if (blob->overrun)
+-      return NULL;
++   if (blob->overrun || blob->current != blob->end)
++      return VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT;
+
+    VK_MULTIALLOC(ma);
+    VK_MULTIALLOC_DECL(&ma, struct vk_pipeline_precomp_shader, shader, 1);
+@@ -806,7 +882,7 @@ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
+                       embedded_sampler_count);
+    if (!vk_multialloc_zalloc(&ma, &device->alloc,
+                              VK_SYSTEM_ALLOCATION_SCOPE_DEVICE))
+-      return NULL;
++      return VK_ERROR_OUT_OF_HOST_MEMORY;
+
+    assert(sizeof(shader->cache_key) == key_size);
+    memcpy(shader->cache_key, key_data, sizeof(shader->cache_key));
+@@ -830,15 +906,39 @@ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
+    if (shader->nir_blob.out_of_memory)
+       goto fail_cache_obj;
+
+-   return &shader->cache_obj;
++   *object = &shader->cache_obj;
++   return VK_SUCCESS;
+
+ fail_cache_obj:
++   blob_finish(&shader->nir_blob);
+    vk_pipeline_cache_object_finish(&shader->cache_obj);
+    vk_free(&device->alloc, shader);
+
+-   return NULL;
++   return VK_ERROR_OUT_OF_HOST_MEMORY;
+ }
+
++static struct vk_pipeline_cache_object *
++vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
++                                       const void *key_data, size_t key_size,
++                                       struct blob_reader *blob)
++{
++   struct vk_pipeline_cache_object *object = NULL;
++   vk_pipeline_precomp_shader_deserialize_result(device, key_data, key_size,
++                                                 blob, &object);
++   return object;
++}
++#if defined(R4OS_VULKAN)
++static VkResult
++r4vk_pipeline_precomp_deserialize(struct vk_pipeline_cache *cache,
++                                  const void *key_data, size_t key_size,
++                                  struct blob_reader *blob,
++                                  struct vk_pipeline_cache_object **object)
++{
++   return vk_pipeline_precomp_shader_deserialize_result(cache->base.device,
++                                                        key_data, key_size, blob, object);
++}
++#endif
++
+ static struct vk_pipeline_cache_object *
+ vk_pipeline_precomp_shader_deserialize_cb(struct vk_pipeline_cache *cache,
+                                           const void *key_data, size_t key_size,
+@@ -877,6 +977,9 @@ vk_pipeline_precomp_shader_get_nir(const struct vk_pipeline_precomp_shader *shad
+ }
+
+ static const struct vk_pipeline_cache_object_ops pipeline_precomp_shader_cache_ops = {
++#if defined(R4OS_VULKAN)
++   .r4vk_deserialize = r4vk_pipeline_precomp_deserialize,
++#endif
+    .serialize = vk_pipeline_precomp_shader_serialize,
+    .deserialize = vk_pipeline_precomp_shader_deserialize_cb,
+    .destroy = vk_pipeline_precomp_shader_destroy,
+@@ -916,6 +1019,128 @@ vk_pipeline_hash_precomp_shader_stage(struct vk_device *device,
                                          &rs, stage->precomp_key);
  }
 
@@ -2180,7 +2419,24 @@
  static VkResult
  vk_pipeline_precompile_shader(struct vk_device *device,
                                struct vk_pipeline_cache *cache,
-@@ -944,6 +1097,11 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+@@ -928,12 +1153,13 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+    VkResult result;
+
+    if (cache != NULL) {
+-      struct vk_pipeline_cache_object *cache_obj =
+-         vk_pipeline_cache_lookup_object(cache,
++      struct vk_pipeline_cache_object *cache_obj;
++      VkResult cache_result = vk_pipeline_lookup_cached_object(cache,
+                                          stage->precomp_key,
+                                          sizeof(stage->precomp_key),
+                                          &pipeline_precomp_shader_cache_ops,
+-                                         NULL /* cache_hit */);
++                                         NULL /* cache_hit */, &cache_obj);
++      if (cache_result != VK_SUCCESS) return cache_result;
+       if (cache_obj != NULL) {
+          stage->precomp = vk_pipeline_precomp_shader_from_cache_obj(cache_obj);
+          return VK_SUCCESS;
+@@ -944,6 +1170,11 @@ vk_pipeline_precompile_shader(struct vk_device *device,
         VK_PIPELINE_CREATE_2_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT_KHR)
        return VK_PIPELINE_COMPILE_REQUIRED;
 
@@ -2192,7 +2448,7 @@
     struct vk_pipeline_robustness_state rs;
     vk_pipeline_robustness_state_fill(&device->robustness_state, &rs,
                                       pipeline_info_pNext, info->pNext);
-@@ -987,6 +1145,7 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+@@ -987,6 +1218,7 @@ vk_pipeline_precompile_shader(struct vk_device *device,
     ralloc_free(nir);
     if (stage->precomp == NULL)
        return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
@@ -2200,7 +2456,23 @@
 
     if (cache != NULL) {
        struct vk_pipeline_cache_object *cache_obj = &stage->precomp->cache_obj;
-@@ -2412,7 +2571,6 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -1720,11 +1952,12 @@ vk_graphics_pipeline_compile_shaders(struct vk_device *device,
+             }
+
+             bool cache_hit = false;
+-            struct vk_pipeline_cache_object *cache_obj =
+-               vk_pipeline_cache_lookup_object(cache, &stage->shader_key,
++            struct vk_pipeline_cache_object *cache_obj;
++            VkResult cache_result = vk_pipeline_lookup_cached_object(cache, &stage->shader_key,
+                                                sizeof(stage->shader_key),
+                                                &pipeline_shader_cache_ops,
+-                                               &cache_hit);
++                                               &cache_hit, &cache_obj);
++            if (cache_result != VK_SUCCESS) return cache_result;
+             if (cache_obj != NULL) {
+                assert(stage->shader == NULL);
+                stage->shader = vk_shader_from_cache_obj(cache_obj);
+@@ -2412,15 +2645,15 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
                                    struct vk_pipeline_stage *stage,
                                    bool *cache_hit)
  {
@@ -2208,7 +2480,19 @@
     VkResult result;
 
     if (cache != NULL) {
-@@ -2431,6 +2589,8 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+-      struct vk_pipeline_cache_object *cache_obj =
+-         vk_pipeline_cache_lookup_object(cache, stage->shader_key,
++      struct vk_pipeline_cache_object *cache_obj;
++      VkResult cache_result = vk_pipeline_lookup_cached_object(cache, stage->shader_key,
+                                          sizeof(stage->shader_key),
+                                          &pipeline_shader_cache_ops,
+-                                         cache_hit);
++                                         cache_hit, &cache_obj);
++      if (cache_result != VK_SUCCESS) return cache_result;
+       if (cache_obj != NULL) {
+          stage->shader = vk_shader_from_cache_obj(cache_obj);
+          return VK_SUCCESS;
+@@ -2431,6 +2664,8 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
         VK_PIPELINE_CREATE_2_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT_KHR)
        return VK_PIPELINE_COMPILE_REQUIRED;
 
@@ -2217,7 +2501,7 @@
     const struct nir_shader_compiler_options *nir_options =
        ops->get_nir_options(device->physical, stage->stage,
                             &stage->precomp->rs);
-@@ -2439,6 +2599,7 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2439,6 +2674,7 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
                                                          nir_options);
     if (nir == NULL)
        return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
@@ -2225,7 +2509,7 @@
 
     const VkPushConstantRange *push_range =
        get_push_range_for_stage(pipeline_layout, MESA_SHADER_COMPUTE);
-@@ -2455,7 +2616,12 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2455,7 +2691,12 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
        .stage = stage->stage,
        .flags = shader_flags,
        .next_stage_mask = 0,
@@ -2238,6 +2522,69 @@
        .robustness = &stage->precomp->rs,
        .set_layout_count = pipeline_layout ? pipeline_layout->set_count : 0,
        .set_layouts = pipeline_layout ? pipeline_layout->set_layouts : NULL,
+@@ -3187,11 +3428,12 @@ vk_pipeline_compile_rt_shader(struct vk_device *device,
+
+    if (cache != NULL) {
+       bool cache_hit = false;
+-      struct vk_pipeline_cache_object *cache_obj =
+-         vk_pipeline_cache_lookup_object(cache, stage->shader_key,
++      struct vk_pipeline_cache_object *cache_obj;
++      VkResult cache_result = vk_pipeline_lookup_cached_object(cache, stage->shader_key,
+                                          sizeof(stage->shader_key),
+                                          &pipeline_shader_cache_ops,
+-                                         &cache_hit);
++                                         &cache_hit, &cache_obj);
++      if (cache_result != VK_SUCCESS) return cache_result;
+       if (cache_obj != NULL) {
+          stage->shader = vk_shader_from_cache_obj(cache_obj);
+
+@@ -3309,12 +3551,13 @@ vk_pipeline_compile_rt_shader_group(struct vk_device *device,
+       bool all_shaders_found = true;
+       for (uint32_t i = 0; i < stage_count; i++) {
+          bool cache_hit = false;
+-         struct vk_pipeline_cache_object *cache_obj =
+-            vk_pipeline_cache_lookup_object(cache,
++         struct vk_pipeline_cache_object *cache_obj;
++         VkResult cache_result = vk_pipeline_lookup_cached_object(cache,
+                                             stages[i].shader_key,
+                                             sizeof(stages[i].shader_key),
+                                             &pipeline_shader_cache_ops,
+-                                            &cache_hit);
++                                            &cache_hit, &cache_obj);
++         if (cache_result != VK_SUCCESS) return cache_result;
+
+          if (cache_obj != NULL) {
+             stages[i].shader = vk_shader_from_cache_obj(cache_obj);
+@@ -4122,10 +4365,11 @@ vk_lookup_create_precomp_binary(struct vk_device *device,
+                                 const VkAllocationCallbacks *alloc,
+                                 VkPipelineBinaryKHR *out_binary_h)
+ {
+-   struct vk_pipeline_cache_object *cache_obj =
+-      vk_pipeline_cache_lookup_object(cache, key, key_size,
++   struct vk_pipeline_cache_object *cache_obj;
++   VkResult cache_result = vk_pipeline_lookup_cached_object(cache, key, key_size,
+                                       &pipeline_precomp_shader_cache_ops,
+-                                      NULL);
++                                      NULL, &cache_obj);
++   if (cache_result != VK_SUCCESS) return cache_result;
+    if (cache_obj == NULL)
+       return VK_PIPELINE_BINARY_MISSING_KHR;
+
+@@ -4145,10 +4389,11 @@ vk_lookup_create_shader_binary(struct vk_device *device,
+                                const VkAllocationCallbacks *alloc,
+                                VkPipelineBinaryKHR *out_binary_h)
+ {
+-   struct vk_pipeline_cache_object *cache_obj =
+-      vk_pipeline_cache_lookup_object(cache, key, key_size,
++   struct vk_pipeline_cache_object *cache_obj;
++   VkResult cache_result = vk_pipeline_lookup_cached_object(cache, key, key_size,
+                                       &pipeline_shader_cache_ops,
+-                                      NULL);
++                                      NULL, &cache_obj);
++   if (cache_result != VK_SUCCESS) return cache_result;
+    if (cache_obj == NULL)
+       return VK_PIPELINE_BINARY_MISSING_KHR;
+
 --- a/src/vulkan/runtime/vk_nir.c
 +++ b/src/vulkan/runtime/vk_nir.c
 @@ -133,8 +133,15 @@ vk_spirv_to_nir(struct vk_device *device,
@@ -2258,3 +2605,481 @@
 
     spirv_options_local.sampler_descriptor_size =
        device->physical->properties.samplerDescriptorSize;
+--- a/src/vulkan/runtime/vk_pipeline_cache.h
++++ b/src/vulkan/runtime/vk_pipeline_cache.h
+@@ -49,6 +49,14 @@ struct vk_pipeline_cache_object;
+ #define VK_PIPELINE_CACHE_BLOB_ALIGN 8
+
+ struct vk_pipeline_cache_object_ops {
++#if defined(R4OS_VULKAN)
++   /* Preserve OOM/device loss across lazy deserialization. Incompatible
++    * payloads are cache misses; runtime failures are caller-visible errors. */
++   VkResult (*r4vk_deserialize)(struct vk_pipeline_cache *cache,
++                               const void *key_data, size_t key_size,
++                               struct blob_reader *blob,
++                               struct vk_pipeline_cache_object **object);
++#endif
+    /** Writes this cache object to the given blob
+     *
+     * Because the cache works with both raw blob data and driver object data
+@@ -237,6 +245,13 @@ vk_pipeline_cache_lookup_object(struct vk_pipeline_cache *cache,
+                                 const void *key_data, size_t key_size,
+                                 const struct vk_pipeline_cache_object_ops *ops,
+                                 bool *cache_hit);
++#if defined(R4OS_VULKAN)
++struct vk_pipeline_cache_object * MUST_CHECK
++r4vk_pipeline_cache_lookup_object(struct vk_pipeline_cache *cache,
++                                  const void *key_data, size_t key_size,
++                                  const struct vk_pipeline_cache_object_ops *ops,
++                                  bool *cache_hit, VkResult *result);
++#endif
+
+ /** Adds an object to the pipeline cache
+  *
+--- a/src/vulkan/runtime/vk_pipeline_cache.c
++++ b/src/vulkan/runtime/vk_pipeline_cache.c
+@@ -36,6 +36,10 @@
+ #include "util/disk_cache.h"
+ #include "util/hash_table.h"
+ #include "util/set.h"
++#if defined(R4OS_VULKAN)
++#include "util/mesa-blake3.h"
++static const uint8_t r4vk_cache_format[8] = {'R','4','V','K','C',1,0,0};
++#endif
+
+ #define vk_pipeline_cache_log(cache, ...)                                      \
+    if (cache->base.client_visible)                                             \
+@@ -73,7 +77,7 @@ vk_raw_data_cache_object_deserialize(struct vk_pipeline_cache *cache,
+     * can assume the blob consumes the entire reader and we don't need to
+     * serialize the data size separately.
+     */
+-   assert(blob->current < blob->end);
++   if (blob->overrun || blob->current >= blob->end) return NULL;
+    size_t data_size = blob->end - blob->current;
+    const void *data = blob_read_bytes(blob, data_size);
+
+@@ -232,19 +236,15 @@ vk_pipeline_cache_object_serialize(struct vk_pipeline_cache *cache,
+    }
+
+    if (!object->ops->serialize(object, blob)) {
+-      vk_pipeline_cache_log(cache, "Failed to serialize pipeline cache object");
+       return false;
+    }
+
+    size_t size = blob->size - start;
+    if (size > UINT32_MAX) {
+-      vk_pipeline_cache_log(cache, "Skipping giant (4 GiB or larger) object");
+       return false;
+    }
+
+    if (blob->out_of_memory) {
+-      vk_pipeline_cache_log(cache,
+-                            "Insufficient memory for pipeline cache data");
+       return false;
+    }
+
+@@ -258,8 +258,10 @@ static struct vk_pipeline_cache_object *
+ vk_pipeline_cache_object_deserialize(struct vk_pipeline_cache *cache,
+                                      const void *key_data, uint32_t key_size,
+                                      const void *data, size_t data_size,
+-                                     const struct vk_pipeline_cache_object_ops *ops)
++                                     const struct vk_pipeline_cache_object_ops *ops,
++                                     VkResult *result)
+ {
++   *result = VK_SUCCESS;
+    if (ops == NULL)
+       ops = &vk_raw_data_cache_object_ops;
+
+@@ -272,13 +274,25 @@ vk_pipeline_cache_object_deserialize(struct vk_pipeline_cache *cache,
+    struct blob_reader reader;
+    blob_reader_init(&reader, data, data_size);
+
+-   struct vk_pipeline_cache_object *object =
+-      ops->deserialize(cache, key_data, key_size, &reader);
++   struct vk_pipeline_cache_object *object = NULL;
++#if defined(R4OS_VULKAN)
++   if (ops->r4vk_deserialize) {
++      *result = ops->r4vk_deserialize(cache, key_data, key_size, &reader, &object);
++      if (*result != VK_SUCCESS) return NULL;
++   } else
++#endif
++   object = ops->deserialize(cache, key_data, key_size, &reader);
+
+-   if (object == NULL)
++   if (object == NULL) {
++      *result = VK_ERROR_OUT_OF_HOST_MEMORY;
+       return NULL;
++   }
+
+-   assert(reader.current == reader.end && !reader.overrun);
++   if (reader.current != reader.end || reader.overrun) {
++      vk_pipeline_cache_object_unref(cache->base.device, object);
++      *result = VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT;
++      return NULL;
++   }
+    assert(object->ops == ops);
+    assert(object->ref_cnt == 1);
+    assert(object->key_size == key_size);
+@@ -289,7 +303,8 @@ vk_pipeline_cache_object_deserialize(struct vk_pipeline_cache *cache,
+
+ static struct vk_pipeline_cache_object *
+ vk_pipeline_cache_insert_object(struct vk_pipeline_cache *cache,
+-                                struct vk_pipeline_cache_object *object)
++                                struct vk_pipeline_cache_object *object,
++                                VkResult *error)
+ {
+    assert(object->ops != NULL);
+
+@@ -302,6 +317,13 @@ vk_pipeline_cache_insert_object(struct vk_pipeline_cache *cache,
+    bool found = false;
+    struct set_entry *entry = _mesa_set_search_or_add_pre_hashed(
+        cache->object_cache, hash, object, &found);
++   if (!entry) {
++      vk_pipeline_cache_unlock(cache);
++      if (error) *error = VK_ERROR_OUT_OF_HOST_MEMORY;
++      /* The caller still owns this usable object; no cache reference was
++       * installed. Optional cache insertion may return it uncached. */
++      return object;
++   }
+
+    struct vk_pipeline_cache_object *result = NULL;
+    /* add reference to either the found or inserted object */
+@@ -332,12 +354,13 @@ vk_pipeline_cache_insert_object(struct vk_pipeline_cache *cache,
+    return result;
+ }
+
+-struct vk_pipeline_cache_object *
+-vk_pipeline_cache_lookup_object(struct vk_pipeline_cache *cache,
++static struct vk_pipeline_cache_object *
++vk_pipeline_cache_lookup_object_result(struct vk_pipeline_cache *cache,
+                                 const void *key_data, size_t key_size,
+                                 const struct vk_pipeline_cache_object_ops *ops,
+-                                bool *cache_hit)
++                                bool *cache_hit, VkResult *result)
+ {
++   *result = VK_SUCCESS;
+    assert(key_size <= UINT32_MAX);
+    assert(ops != NULL);
+
+@@ -376,10 +399,10 @@ vk_pipeline_cache_lookup_object(struct vk_pipeline_cache *cache,
+             object = vk_pipeline_cache_object_deserialize(cache,
+                                                           key_data, key_size,
+                                                           data, data_size,
+-                                                          ops);
++                                                          ops, result);
+             free(data);
+             if (object != NULL) {
+-               return vk_pipeline_cache_insert_object(cache, object);
++               return vk_pipeline_cache_insert_object(cache, object, NULL);
+             }
+          }
+       }
+@@ -401,8 +424,17 @@ vk_pipeline_cache_lookup_object(struct vk_pipeline_cache *cache,
+                                               data_obj->base.key_data,
+                                               data_obj->base.key_size,
+                                               data_obj->data,
+-                                              data_obj->data_size, ops);
++                                              data_obj->data_size, ops, result);
+       if (real_object == NULL) {
++         if (cache_hit) *cache_hit = false;
++#if defined(R4OS_VULKAN)
++         if (*result != VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT) {
++            /* A retry must still be able to use the original bytes. */
++            vk_pipeline_cache_object_unref(cache->base.device, object);
++            return NULL;
++         }
++         *result = VK_SUCCESS;
++#endif
+          vk_pipeline_cache_log(cache,
+                                "Deserializing pipeline cache object failed");
+
+@@ -414,7 +446,7 @@ vk_pipeline_cache_lookup_object(struct vk_pipeline_cache *cache,
+       }
+
+       vk_pipeline_cache_object_unref(cache->base.device, object);
+-      object = vk_pipeline_cache_insert_object(cache, real_object);
++      object = vk_pipeline_cache_insert_object(cache, real_object, NULL);
+    }
+
+    assert(object->ops == ops);
+@@ -422,12 +454,34 @@ vk_pipeline_cache_lookup_object(struct vk_pipeline_cache *cache,
+    return object;
+ }
+
++struct vk_pipeline_cache_object *
++vk_pipeline_cache_lookup_object(struct vk_pipeline_cache *cache,
++                                const void *key_data, size_t key_size,
++                                const struct vk_pipeline_cache_object_ops *ops,
++                                bool *cache_hit)
++{
++   VkResult result;
++   return vk_pipeline_cache_lookup_object_result(cache, key_data, key_size,
++                                                 ops, cache_hit, &result);
++}
++#if defined(R4OS_VULKAN)
++struct vk_pipeline_cache_object *
++r4vk_pipeline_cache_lookup_object(struct vk_pipeline_cache *cache,
++                                  const void *key_data, size_t key_size,
++                                  const struct vk_pipeline_cache_object_ops *ops,
++                                  bool *cache_hit, VkResult *result)
++{
++   return vk_pipeline_cache_lookup_object_result(cache, key_data, key_size,
++                                                 ops, cache_hit, result);
++}
++#endif
++
+ struct vk_pipeline_cache_object *
+ vk_pipeline_cache_add_object(struct vk_pipeline_cache *cache,
+                              struct vk_pipeline_cache_object *object)
+ {
+    struct vk_pipeline_cache_object *inserted =
+-       vk_pipeline_cache_insert_object(cache, object);
++       vk_pipeline_cache_insert_object(cache, object, NULL);
+
+    if (object == inserted) {
+       /* If it wasn't in the object cache, it might not be in the disk cache
+@@ -467,12 +521,13 @@ vk_pipeline_cache_create_and_insert_object(struct vk_pipeline_cache *cache,
+       disk_cache_put(disk_cache, cache_key, data, data_size, NULL);
+    }
+
++   VkResult result;
+    struct vk_pipeline_cache_object *object =
+        vk_pipeline_cache_object_deserialize(cache, key_data, key_size, data,
+-                                            data_size, ops);
++                                            data_size, ops, &result);
+
+    if (object)
+-      object = vk_pipeline_cache_insert_object(cache, object);
++      object = vk_pipeline_cache_insert_object(cache, object, NULL);
+
+    return object;
+ }
+@@ -565,9 +620,91 @@ find_ops_for_type(const struct vk_physical_device *pdevice,
+    if (import_ops == NULL || type < 0)
+       return NULL;
+
+-   return import_ops[type];
++   for (int32_t i = 0; import_ops[i]; i++)
++      if (i == type) return import_ops[i];
++   return NULL;
+ }
+
++#if defined(R4OS_VULKAN)
++struct r4vk_cache_record {
++   int32_t type;
++   uint32_t key_size, data_size;
++   const void *key, *data;
++};
++
++static bool
++r4vk_cache_read_record(struct blob_reader *blob, struct r4vk_cache_record *record)
++{
++   /* The checksum covers fields, key and payload; alignment bytes are not
++    * significant and are excluded from the digest. */
++   record->type = blob_read_uint32(blob);
++   record->key_size = blob_read_uint32(blob);
++   record->data_size = blob_read_uint32(blob);
++   if (blob->overrun || !record->key_size || !record->data_size) return false;
++   record->key = blob_read_bytes(blob, record->key_size);
++   blob_reader_align(blob, VK_PIPELINE_CACHE_BLOB_ALIGN);
++   record->data = blob_read_bytes(blob, record->data_size);
++   const void *checksum = blob_read_bytes(blob, BLAKE3_OUT_LEN);
++   if (blob->overrun) return false;
++   struct mesa_blake3 hash;
++   blake3_hash digest;
++   _mesa_blake3_init(&hash);
++   _mesa_blake3_update(&hash, &record->type, sizeof(record->type));
++   _mesa_blake3_update(&hash, &record->key_size, sizeof(record->key_size));
++   _mesa_blake3_update(&hash, &record->data_size, sizeof(record->data_size));
++   _mesa_blake3_update(&hash, record->key, record->key_size);
++   _mesa_blake3_update(&hash, record->data, record->data_size);
++   _mesa_blake3_final(&hash, digest);
++   return memcmp(checksum, digest, sizeof(digest)) == 0;
++}
++
++static bool
++r4vk_pipeline_cache_load(struct vk_pipeline_cache *cache, const void *data, size_t size)
++{
++   struct blob_reader blob;
++   blob_reader_init(&blob, data, size);
++   struct vk_pipeline_cache_header header;
++   blob_copy_bytes(&blob, &header, sizeof(header));
++   uint8_t format[sizeof(r4vk_cache_format)];
++   blob_copy_bytes(&blob, format, sizeof(format));
++   uint32_t count = blob_read_uint32(&blob);
++   if (blob.overrun || memcmp(&header, &cache->header, sizeof(header)) ||
++       memcmp(format, r4vk_cache_format, sizeof(format))) return true;
++
++   /* Preflight the whole envelope before publishing even one raw object.
++    * Incompatible data produces a real empty cache as required by Vulkan. */
++   struct blob_reader scan = blob;
++   if (count > (size_t)(scan.end - scan.current) / (12 + BLAKE3_OUT_LEN))
++      goto incompatible;
++   for (uint32_t i = 0; i < count; i++) {
++      struct r4vk_cache_record record;
++      if (!r4vk_cache_read_record(&scan, &record)) goto incompatible;
++      /* Native imports remain raw until the operation needing the object
++       * can report its allocation/upload errors. */
++      if (record.type != -1) goto incompatible;
++   }
++   if (scan.current != scan.end || scan.overrun) goto incompatible;
++
++   for (uint32_t i = 0; i < count; i++) {
++      struct r4vk_cache_record record;
++      bool valid = r4vk_cache_read_record(&blob, &record);
++      assert(valid);
++      VkResult result = VK_SUCCESS;
++      struct vk_pipeline_cache_object *object = vk_pipeline_cache_object_deserialize(
++         cache, record.key, record.key_size, record.data, record.data_size,
++         NULL, &result);
++      if (!object) return false;
++      object = vk_pipeline_cache_insert_object(cache, object, &result);
++      vk_pipeline_cache_object_unref(cache->base.device, object);
++      if (result != VK_SUCCESS) return false;
++   }
++   return true;
++incompatible:
++   vk_pipeline_cache_log(cache, "Ignoring incompatible native pipeline cache data");
++   return true;
++}
++#endif
++
+ static void
+ vk_pipeline_cache_load(struct vk_pipeline_cache *cache,
+                        const void *data, size_t size)
+@@ -657,11 +794,25 @@ vk_pipeline_cache_create(struct vk_device *device,
+        debug_get_bool_option("VK_ENABLE_PIPELINE_CACHE", true)) {
+       cache->object_cache = _mesa_set_create(NULL, object_key_hash,
+                                              object_keys_equal);
++#if defined(R4OS_VULKAN)
++      if (!cache->object_cache) {
++         vk_pipeline_cache_destroy(cache, pAllocator);
++         return NULL;
++      }
++#endif
+    }
+
+    if (cache->object_cache && pCreateInfo->initialDataSize > 0) {
++#if defined(R4OS_VULKAN)
++      if (!r4vk_pipeline_cache_load(cache, pCreateInfo->pInitialData,
++                                    pCreateInfo->initialDataSize)) {
++         vk_pipeline_cache_destroy(cache, pAllocator);
++         return NULL;
++      }
++#else
+       vk_pipeline_cache_load(cache, pCreateInfo->pInitialData,
+                              pCreateInfo->initialDataSize);
++#endif
+    }
+
+    return cache;
+@@ -738,6 +889,9 @@ vk_common_GetPipelineCacheData(VkDevice _device,
+    }
+
+    blob_write_bytes(&blob, &cache->header, sizeof(cache->header));
++#if defined(R4OS_VULKAN)
++   blob_write_bytes(&blob, r4vk_cache_format, sizeof(r4vk_cache_format));
++#endif
+
+    uint32_t count = 0;
+    intptr_t count_offset = blob_reserve_uint32(&blob);
+@@ -750,6 +904,7 @@ vk_common_GetPipelineCacheData(VkDevice _device,
+    vk_pipeline_cache_lock(cache);
+
+    VkResult result = VK_SUCCESS;
++   bool serialize_failed = false;
+    if (cache->object_cache != NULL) {
+       set_foreach(cache->object_cache, entry) {
+          struct vk_pipeline_cache_object *object = (void *)entry->key;
+@@ -759,13 +914,18 @@ vk_common_GetPipelineCacheData(VkDevice _device,
+
+          size_t blob_size_save = blob.size;
+
++#if defined(R4OS_VULKAN)
++         int32_t type = -1;
++#else
+          int32_t type = find_type_for_ops(device->physical, object->ops);
++#endif
+          blob_write_uint32(&blob, type);
+          blob_write_uint32(&blob, object->key_size);
+          intptr_t data_size_resv = blob_reserve_uint32(&blob);
+          blob_write_bytes(&blob, object->key_data, object->key_size);
+
+          if (!blob_align(&blob, VK_PIPELINE_CACHE_BLOB_ALIGN)) {
++            blob.size = blob_size_save;
+             result = VK_INCOMPLETE;
+             break;
+          }
+@@ -773,6 +933,7 @@ vk_common_GetPipelineCacheData(VkDevice _device,
+          uint32_t data_size;
+          if (!vk_pipeline_cache_object_serialize(cache, object,
+                                                  &blob, &data_size)) {
++            serialize_failed = true;
+             blob.size = blob_size_save;
+             if (blob.out_of_memory) {
+                result = VK_INCOMPLETE;
+@@ -788,6 +949,24 @@ vk_common_GetPipelineCacheData(VkDevice _device,
+
+          assert(data_size_resv >= 0);
+          blob_overwrite_uint32(&blob, data_size_resv, data_size);
++#if defined(R4OS_VULKAN)
++         blake3_hash digest = {0};
++         if (blob.data) {
++            struct mesa_blake3 hash;
++            _mesa_blake3_init(&hash);
++            _mesa_blake3_update(&hash, &type, sizeof(type));
++            _mesa_blake3_update(&hash, &object->key_size, sizeof(object->key_size));
++            _mesa_blake3_update(&hash, &data_size, sizeof(data_size));
++            _mesa_blake3_update(&hash, object->key_data, object->key_size);
++            _mesa_blake3_update(&hash, blob.data + blob.size - data_size, data_size);
++            _mesa_blake3_final(&hash, digest);
++         }
++         if (!blob_write_bytes(&blob, digest, sizeof(digest))) {
++            blob.size = blob_size_save;
++            result = VK_INCOMPLETE;
++            break;
++         }
++#endif
+
+          count++;
+       }
+@@ -795,6 +974,9 @@ vk_common_GetPipelineCacheData(VkDevice _device,
+
+    vk_pipeline_cache_unlock(cache);
+
++   /* Application debug callbacks must not run while holding cache->lock. */
++   if (serialize_failed)
++      vk_pipeline_cache_log(cache, "Could not serialize all pipeline cache objects");
+    blob_overwrite_uint32(&blob, count_offset, count);
+
+    *pDataSize = blob.size;
+@@ -841,6 +1023,11 @@ vk_common_MergePipelineCaches(VkDevice _device,
+             _mesa_set_search_or_add_pre_hashed(dst->object_cache,
+                                                src_entry->hash,
+                                                src_object, &found_in_dst);
++         if (!dst_entry) {
++            vk_pipeline_cache_unlock(src);
++            vk_pipeline_cache_unlock(dst);
++            return VK_ERROR_OUT_OF_HOST_MEMORY;
++         }
+          if (found_in_dst) {
+             struct vk_pipeline_cache_object *dst_object = (void *)dst_entry->key;
+             if (dst_object->ops == &vk_raw_data_cache_object_ops &&
+--- a/src/util/blob.c
++++ b/src/util/blob.c
+@@ -328,10 +328,14 @@ BLOB_READ_TYPE(blob_read_intptr, intptr_t)
+ char *
+ blob_read_string(struct blob_reader *blob)
+ {
+-   int size;
++   size_t size;
+    char *ret;
+    const uint8_t *nul;
+
++   /* A previous bounds failure is sticky, including string reads. */
++   if (blob->overrun)
++      return NULL;
++
+    /* If we're already at the end, then this is an overrun. */
+    if (blob->current >= blob->end) {
+       blob->overrun = true;

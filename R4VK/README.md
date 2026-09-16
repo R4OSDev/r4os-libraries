@@ -112,8 +112,24 @@ SPIR-V storage-buffer shader with specialization, compile-required cache miss,
 cache hits and export/import, frontend OOM/abort, translator error callbacks
 and valid retry. Callback allocations and the final C heap balance. The GPU
 peer models uploads and does not execute the machine code. Graphics linking,
-shader objects, shader printf, malformed-cache handling and Vulkan conformance
-are not established by these checks.
+shader objects, shader printf and Vulkan conformance are not established by
+these checks.
+
+Native pipeline-cache exports retain the standard Vulkan header and add a
+versioned envelope with BLAKE3 record checksums. Import validates the entire
+envelope before creating raw cache objects; incompatible initial data yields
+an empty cache. Lazy typed deserialization preserves allocation/device errors
+and keeps bytes for retry. NVK checks shader metadata and complete payload
+extents before allocating/uploading; diagnostic string OOM remains an error.
+Failed optional insertion retains only the caller's usable object, while
+mandatory import and merge allocation failures unwind and return OOM. Short
+exports contain complete records, and serialization diagnostics run after unlock.
+The fixture cache UUID follows the changed native C source identity; the final
+provider still needs its complete artifact/build identity integration.
+The targeted SMP4 cache probe passes corrupted/truncated inputs, import and
+lazy-load OOM, full-table insertion/merge failure and retry, partial export
+reuse and final zero C allocations. Its first failure exposed a string-reader
+assertion after an earlier bounds error; blob reads now retain that error.
 
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays
