@@ -788,3 +788,77 @@
     struct wsi_device wsi_device;
 
     uint8_t device_uuid[VK_UUID_SIZE];
+--- a/src/vulkan/util/vk_util.c
++++ b/src/vulkan/util/vk_util.c
+@@ -55,6 +55,11 @@ uint32_t vk_get_driver_version(void)
+
+ uint32_t vk_get_version_override(void)
+ {
++#ifdef R4OS_VULKAN
++   /* A native capability profile cannot be enlarged by a Mesa environment
++    * override. Its API version is selected by the integrated provider. */
++   return 0;
++#else
+    const char *str = os_get_option("MESA_VK_VERSION_OVERRIDE");
+    if (str == NULL)
+       return 0;
+@@ -71,6 +76,7 @@ uint32_t vk_get_version_override(void)
+       return 0;
+
+    return VK_MAKE_VERSION(major, minor, patch);
++#endif
+ }
+
+ void
+--- a/src/nouveau/vulkan/nvk_image.c
++++ b/src/nouveau/vulkan/nvk_image.c
+@@ -360,6 +360,15 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+    memset(&pImageFormatProperties->imageFormatProperties, 0,
+           sizeof(pImageFormatProperties->imageFormatProperties));
+
++#ifdef R4OS_VULKAN
++   if ((external_info && external_info->handleType) ||
++       pImageFormatInfo->tiling == VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT ||
++       (pImageFormatInfo->flags & (VK_IMAGE_CREATE_SPARSE_BINDING_BIT |
++                                  VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT |
++                                  VK_IMAGE_CREATE_SPARSE_ALIASED_BIT)))
++      return VK_ERROR_FORMAT_NOT_SUPPORTED;
++#endif
++
+    uint64_t drm_format_mod =
+       get_explicit_drm_format_mod(pImageFormatInfo->pNext);
+    const struct vk_format_ycbcr_info *ycbcr_info =
+@@ -542,6 +551,7 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+    }
+
+    const VkExternalMemoryProperties *ext_mem_props = NULL;
++#ifndef R4OS_VULKAN
+    if (external_info != NULL && external_info->handleType != 0) {
+       bool tiling_has_explicit_layout;
+       switch (pImageFormatInfo->tiling) {
+@@ -594,6 +604,7 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+       }
+    }
+
++#endif
+    unsigned plane_count = vk_format_get_plane_count(pImageFormatInfo->format);
+    if (nvk_use_separate_zs(pdev, pImageFormatInfo->format))
+       plane_count = 2;
+--- a/src/vulkan/runtime/vk_physical_device.c
++++ b/src/vulkan/runtime/vk_physical_device.c
+@@ -283,6 +283,7 @@ vk_common_GetPhysicalDeviceSparseImageFormatProperties(VkPhysicalDevice physical
+ }
+
+ /* VK_KHR_calibrated_timestamps */
++#ifndef R4OS_VULKAN
+ VKAPI_ATTR VkResult VKAPI_CALL
+ vk_common_GetPhysicalDeviceCalibrateableTimeDomainsKHR(
+    VkPhysicalDevice physicalDevice, uint32_t *pTimeDomainCount,
+@@ -316,6 +317,7 @@ vk_common_GetPhysicalDeviceCalibrateableTimeDomainsKHR(
+ }
+
+ /* VK_EXT_tooling_info */
++#endif
+ VKAPI_ATTR VkResult VKAPI_CALL
+ vk_common_GetPhysicalDeviceToolProperties(VkPhysicalDevice physicalDevice,
+                                           uint32_t *pToolCount,

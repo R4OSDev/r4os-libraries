@@ -9,6 +9,9 @@ struct vk_physical_device;
 struct vk_device_extension_table;
 struct vk_features;
 struct vk_properties;
+int r4vk_get_graphics_tables(R4Draw *draw, R4Dev *devices);
+VkResult r4vk_nvk_enumerate_with_tables(struct vk_instance *instance,
+   const R4Draw *draw, const R4Dev *devices);
 
 /* Native construction consumes exactly one enumerated binding. It does not
  * scan PCI, reopen an RM client or select a replacement after reset. */

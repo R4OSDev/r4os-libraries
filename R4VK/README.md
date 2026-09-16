@@ -58,10 +58,13 @@ and the generated headers, so relative includes cannot bypass the port.
 `Port/process_local.zig` publishes resident process-owned contexts for the
 heap and loader state. `Port/loader.zig` implements ICD negotiation v1-v7,
 rejects v0, and preserves the lowest negotiated version within one process.
-Mesa's instance path requires an explicit native enumerator: an absent backend
-is an initialization error, and failed enumeration destroys partial devices
-before retry. The future adapter backend and build digest remain required
-external symbols; neither has a successful fallback definition.
+Mesa's instance path uses the native enumerator in `Port/nvk_enumerate.c`.
+It scans all bounded inventory slots, skips holes/incompatible devices and
+publishes the complete list only after revalidating each captured incarnation.
+Failure destroys all newly created devices; an inventory without eligible
+NVIDIA hardware succeeds with an empty list. Missing platform tables remain
+an initialization error. `Port/platform.zig` retains only immutable boot-time
+table addresses. The final provider's build digest remains a required symbol.
 
 The private NVK patch rejects external FD memory before GPU allocation,
 removes its Linux-only entrypoints, rolls back failed internal map counts,
@@ -135,7 +138,7 @@ The kernel copies one immutable bounded payload per backend incarnation,
 authenticates the publishing driver and invalidates it on reset. Old backends
 without properties remain usable through their original interface. The native
 driver publishes these facts after CE startup, independently of display registration
-(NVIDIA 0.1.131). Vulkan enumeration and device admission remain pending. Architecture
+(NVIDIA 0.1.131). Full provider integration and device admission remain pending. Architecture
 classes describe hardware methods, not admitted command queues. No BAR mapping,
 transfer queue, 2D/M2MF, ZCULL or Vulkan qualification is inferred. Host coherence
 uses the explicit native mapping-policy capability above, not GPU class IDs.
@@ -162,10 +165,13 @@ removes FD/DRM, placed mapping, capture/replay, sparse, calibrated timestamps,
 memory-budget telemetry and HDR metadata that lack native implementations.
 The port does not inherit Linux NVK's conformance version.
 
-The constructor is compiled in assertion/release modes. The temporary SMP4
-fixture executes original Mesa memory/queue queries and capability filtering;
-complete constructor execution and the final advertised API/feature profile
-remain open. `Port/compiler.zig` now gives the real Rust NAK compiler its own
+The constructor is compiled in assertion/release modes. Full public instance
+creation and the final advertised API/feature profile remain open.
+The targeted SMP4 fixture executes the complete original constructor/destructor
+and native enumeration with real NAK/NIL, generated memory/image dispatch,
+OOM and partial-enumeration cleanup. It supplies an explicit minimal instance
+harness and modeled GPU facts; it is not a public CreateInstance/provider test.
+`Port/compiler.zig` gives the real Rust NAK compiler its own
 process-owned arena, retained by the native physical device. Creation and
 destruction run on joinable workers; Rust OOM/panic terminates that worker
 without unwinding through C. The parent waits for exact retirement before
@@ -183,6 +189,18 @@ budget. Full shader jobs still require C/NIR global-state ownership, their
 allocation/abort boundary, cancellation/deadlines and output lifetimes.
 Those are not supplied by wrapping the physical-device constructor alone.
 No successful replacement compiler or default build identity is provided.
+
+Native image-format queries reject external handles, DRM tiling and sparse
+flags with zeroed base properties. Calibrated-clock enumeration is excluded;
+the native API version cannot be raised with Mesa's environment override.
+Formatting uses the existing licensed stb_sprintf implementation; ordinary
+C string operations are provided without the R4NAK job runtime.
+
+Generated native entrypoints preserve weak ELF binding with default visibility.
+R4XBuilder leaves only fully linked, verified ABS64 weak-undefined NULL pointers
+unrelocated. Strong/local undefined targets, nonzero values/addends/pointers,
+unlinked inputs and relaxed GOT relocations remain errors. Manifest-selected
+R4M exports and the loader format are unchanged.
 
 `Port/nvk_submit.c` connects NVK contexts to the canonical native queue. It
 translates GR/compute/copy engine bits, including NVK's copy-only upload

@@ -150,6 +150,11 @@ archive and original Rust/Mesa notices listed under R4NAK above. Its private
 arena/worker adapter is original Apache-2.0 code; no Rust compiler algorithm
 or upstream copyright notice is replaced.
 
+The native R4VK formatting adapter uses the existing `R4NAK/ThirdParty/stb/`
+copy of stb_sprintf, with its complete MIT/Unlicense text retained there.
+Private generated Vulkan entrypoint headers change native ELF visibility only;
+their original Mesa notices and non-R4OS visibility remain intact.
+
 The native device-description adapter checks architecture constants against
 the pinned `src/nouveau/winsys/nouveau_device.c` and NVIDIA class headers.
 Active unit counts, memory sizes and PCI identity are supplied by NVIDIA.R4D;

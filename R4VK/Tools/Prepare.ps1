@@ -79,6 +79,15 @@ try {
         $options = @('--proto', '--weak', '--out-c', (Join-Path $generated "$($prefix)_entrypoints.c"), '--out-h', (Join-Path $generated "$($prefix)_entrypoints.h"), '--prefix', $prefix, '--beta', 'false')
         if ($prefix -eq 'vk_cmd_enqueue') { $options += @('--prefix', 'vk_cmd_enqueue_unless_primary') }
         Generate 'util/vk_entrypoints_gen.py' $options
+        # Preserve weak binding in the final ELF. LLD localizes hidden undefined
+        # entrypoints, losing the evidence that their resolved NULL is optional.
+        # R4M public exports remain selected exclusively by the module manifest.
+        $headerPath = Join-Path $generated "$($prefix)_entrypoints.h"
+        $header = [IO.File]::ReadAllText($headerPath).Replace("`r`n", "`n")
+        $needle = "#ifndef _WIN32`n#define VK_ENTRY_HIDDEN __attribute__ ((visibility(`"hidden`")))"
+        if (!$header.Contains($needle)) { throw 'Pinned entrypoint visibility template changed.' }
+        $replacement = "#if defined(R4OS_VULKAN)`n#define VK_ENTRY_HIDDEN __attribute__ ((visibility(`"default`")))`n#elif !defined(_WIN32)`n#define VK_ENTRY_HIDDEN __attribute__ ((visibility(`"hidden`")))"
+        [IO.File]::WriteAllText($headerPath, $header.Replace($needle, $replacement), [Text.UTF8Encoding]::new($false))
     }
     Run $python @((Join-Path $source 'src/nouveau/vulkan/nvk_drirc_gen.py'), '--import-path', (Join-Path $source 'src/util'),
         '--drirc-src', (Join-Path $generated 'nvk_drirc.c'), '--drirc-hdr', (Join-Path $generated 'nvk_drirc.h'),
