@@ -1803,7 +1803,7 @@
         */
 --- a/src/nouveau/vulkan/nvk_shader.c
 +++ b/src/nouveau/vulkan/nvk_shader.c
-@@ -22,10 +22,14 @@
+@@ -22,10 +22,15 @@
  #include "nak.h"
  #include "nir.h"
  #include "nir_builder.h"
@@ -1814,11 +1814,12 @@
  #include "util/u_debug.h"
 +#if defined(R4OS_VULKAN)
 +#include "r4vk_state.h"
++#include "vk_meta.h"
 +#endif
 
  #include "cla097.h"
  #include "clb097.h"
-@@ -564,7 +568,11 @@ nvk_compile_nir(struct nvk_device *dev, nir_shader *nir,
+@@ -564,7 +569,11 @@ nvk_compile_nir(struct nvk_device *dev, nir_shader *nir,
     shader->nak = nak_compile_shader(nir, dump_asm, pdev->nak,
                                      robust2_modes, fs_key, has_task_shader);
     if (!shader->nak)
@@ -1830,7 +1831,7 @@
 
     shader->info = shader->nak->info;
     shader->asm_str = shader->nak->asm_str;
-@@ -1073,6 +1081,116 @@ nvk_shader_fill_push(struct nvk_device *dev,
+@@ -1073,6 +1082,116 @@ nvk_shader_fill_push(struct nvk_device *dev,
 
  static const struct vk_shader_ops nvk_shader_ops;
 
@@ -1947,7 +1948,7 @@
  static void
  nvk_shader_destroy(struct vk_device *vk_dev,
                     struct vk_shader *vk_shader,
-@@ -1123,6 +1241,9 @@ nvk_compile_shader(struct nvk_device *dev,
+@@ -1123,6 +1242,9 @@ nvk_compile_shader(struct nvk_device *dev,
        return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
     }
 
@@ -1957,7 +1958,7 @@
     nvk_lower_nir(dev, nir, info->flags, info->robustness,
                   info->set_layout_count, info->set_layouts,
                   &shader->cbuf_map);
-@@ -1135,6 +1256,7 @@ nvk_compile_shader(struct nvk_device *dev,
+@@ -1135,6 +1257,7 @@ nvk_compile_shader(struct nvk_device *dev,
 
     result = nvk_compile_nir(dev, nir, info->flags, info->robustness,
                              fs_key, shader);
@@ -1965,7 +1966,49 @@
     ralloc_free(nir);
     if (result != VK_SUCCESS) {
        nvk_shader_destroy(&dev->vk, &shader->vk, pAllocator);
-@@ -1275,6 +1397,12 @@ nvk_deserialize_shader(struct vk_device *vk_dev,
+@@ -1170,6 +1293,41 @@ nvk_compile_shader(struct nvk_device *dev,
+    return VK_SUCCESS;
+ }
+
++#if defined(R4OS_VULKAN)
++VkResult
++nvk_compile_meta_shader_native(struct nvk_device *dev,
++                               nir_shader *(*build)(void *), void *data,
++                               const VkAllocationCallbacks *alloc,
++                               struct nvk_shader **shader_out)
++{
++   VkPipelineShaderStageNirCreateInfoMESA serialized;
++   struct r4vk_compiler_job *owner;
++   VkResult result = vk_meta_build_nir_native(build, data, &serialized, &owner);
++   if (result != VK_SUCCESS)
++      return result;
++
++   const struct vk_pipeline_robustness_state rs_none = {
++      .uniform_buffers = VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DISABLED_EXT,
++      .storage_buffers = VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DISABLED_EXT,
++      .images = VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_ROBUST_IMAGE_ACCESS_2_EXT,
++   };
++   struct vk_shader_compile_info info = {
++      .stage = MESA_SHADER_COMPUTE,
++      .robustness = &rs_none,
++      .r4vk_nir_data = serialized.r4vk_nir_data,
++      .r4vk_nir_size = serialized.r4vk_nir_size,
++   };
++   struct vk_shader *shader = NULL;
++   /* Keep the serialized input alive through compilation. Uploads and Vulkan
++    * objects remain on the caller; only CPU builder data belongs to owner. */
++   result = nvk_compile_shader(dev, &info, NULL, alloc, &shader);
++   r4vk_compiler_job_destroy(owner);
++   if (result == VK_SUCCESS)
++      *shader_out = container_of(shader, struct nvk_shader, vk);
++   return result;
++}
++#endif
++
+ VkResult
+ nvk_compile_nir_shader(struct nvk_device *dev, nir_shader *nir,
+                        const VkAllocationCallbacks *alloc,
+@@ -1275,6 +1433,12 @@ nvk_deserialize_shader(struct vk_device *vk_dev,
     blob_copy_bytes(blob, &min_sample_shading, sizeof(min_sample_shading));
 
     const uint8_t shader_version_override = blob_read_uint8(blob);
@@ -1978,7 +2021,7 @@
     const uint8_t expected_shader_version_override =
        nvk_shader_get_shader_version_override(dev, info.stage);
 
-@@ -1283,6 +1411,13 @@ nvk_deserialize_shader(struct vk_device *vk_dev,
+@@ -1283,6 +1447,13 @@ nvk_deserialize_shader(struct vk_device *vk_dev,
 
     const uint32_t code_size = blob_read_uint32(blob);
     const uint32_t data_size = blob_read_uint32(blob);
@@ -1992,7 +2035,7 @@
     if (blob->overrun)
        return vk_error(dev, VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT);
 
-@@ -1304,19 +1439,22 @@ nvk_deserialize_shader(struct vk_device *vk_dev,
+@@ -1304,19 +1475,22 @@ nvk_deserialize_shader(struct vk_device *vk_dev,
        return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
     }
 
@@ -3621,3 +3664,168 @@
     /* All of the current flags are for sparse which we don't support yet.
      * Even when we do support it, doing sparse on external memory sounds
      * sketchy.  Also, just disallowing flags is the safe option.
+--- a/src/nouveau/vulkan/nvk_shader.h
++++ b/src/nouveau/vulkan/nvk_shader.h
+@@ -162,6 +162,14 @@ nvk_nir_lower_descriptors(nir_shader *nir,
+ bool nvk_nir_lower_mesh_shader(nir_shader *nir, VkShaderCreateFlagsEXT shader_flags);
+ bool nvk_nir_lower_task_shader(nir_shader *nir);
+
++#if defined(R4OS_VULKAN)
++VkResult
++nvk_compile_meta_shader_native(struct nvk_device *dev,
++                               nir_shader *(*build)(void *), void *data,
++                               const VkAllocationCallbacks *alloc,
++                               struct nvk_shader **shader_out);
++#endif
++
+ VkResult
+ nvk_compile_nir_shader(struct nvk_device *dev, nir_shader *nir,
+                        const VkAllocationCallbacks *alloc,
+--- a/src/nouveau/vulkan/nvk_query_pool.c
++++ b/src/nouveau/vulkan/nvk_query_pool.c
+@@ -1041,6 +1041,15 @@ build_copy_queries_shader(void)
+    return build.shader;
+ }
+
++#if defined(R4OS_VULKAN)
++static nir_shader *
++build_copy_queries_shader_native(void *data)
++{
++   (void)data;
++   return build_copy_queries_shader();
++}
++#endif
++
+ static struct nvk_shader *
+ atomic_set_or_destroy_shader(struct nvk_device *dev,
+                              struct nvk_shader **shader_ptr,
+@@ -1066,8 +1075,13 @@ get_copy_queries_shader(struct nvk_device *dev,
+       return VK_SUCCESS;
+    }
+
++#if defined(R4OS_VULKAN)
++   VkResult result = nvk_compile_meta_shader_native(dev,
++      build_copy_queries_shader_native, NULL, &dev->vk.alloc, &shader);
++#else
+    nir_shader *nir = build_copy_queries_shader();
+    VkResult result = nvk_compile_nir_shader(dev, nir, &dev->vk.alloc, &shader);
++#endif
+    if (result != VK_SUCCESS)
+       return result;
+
+--- a/src/vulkan/runtime/vk_meta_clear.c
++++ b/src/vulkan/runtime/vk_meta_clear.c
+@@ -31,6 +31,9 @@
+ #include "vk_util.h"
+
+ #include "nir_builder.h"
++#if defined(R4OS_VULKAN)
++#include "r4vk_state.h"
++#endif
+
+ struct vk_meta_clear_key {
+    enum vk_meta_object_key_type key_type;
+@@ -121,6 +124,14 @@ get_clear_pipeline_layout(struct vk_device *device,
+                                          &key, sizeof(key), layout_out);
+ }
+
++#if defined(R4OS_VULKAN)
++static nir_shader *
++build_clear_shader_native(void *data)
++{
++   return build_clear_shader(data);
++}
++#endif
++
+ static VkResult
+ get_clear_pipeline(struct vk_device *device,
+                    struct vk_meta_device *meta,
+@@ -134,10 +145,18 @@ get_clear_pipeline(struct vk_device *device,
+       return VK_SUCCESS;
+    }
+
++#if defined(R4OS_VULKAN)
++   struct r4vk_compiler_job *owner;
++   VkPipelineShaderStageNirCreateInfoMESA fs_nir_info;
++   VkResult built = vk_meta_build_nir_native(build_clear_shader_native,
++      (void *)key, &fs_nir_info, &owner);
++   if (built != VK_SUCCESS) return built;
++#else
+    const VkPipelineShaderStageNirCreateInfoMESA fs_nir_info = {
+       .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_NIR_CREATE_INFO_MESA,
+       .nir = build_clear_shader(key),
+    };
++#endif
+    const VkPipelineShaderStageCreateInfo fs_info = {
+       .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+       .pNext = &fs_nir_info,
+@@ -181,7 +200,11 @@ get_clear_pipeline(struct vk_device *device,
+                                                       &key->render,
+                                                       key, sizeof(*key),
+                                                       pipeline_out);
++#if defined(R4OS_VULKAN)
++   r4vk_compiler_job_destroy(owner);
++#else
+    ralloc_free(fs_nir_info.nir);
++#endif
+
+    return result;
+ }
+--- a/src/vulkan/runtime/vk_meta_blit_resolve.c
++++ b/src/vulkan/runtime/vk_meta_blit_resolve.c
+@@ -30,6 +30,9 @@
+ #include "vk_render_pass.h"
+
+ #include "nir_builder.h"
++#if defined(R4OS_VULKAN)
++#include "r4vk_state.h"
++#endif
+
+ struct vk_meta_blit_key {
+    enum vk_meta_object_key_type key_type;
+@@ -393,6 +396,14 @@ get_blit_pipeline_layout(struct vk_device *device,
+                                       &key, sizeof(key), layout_out);
+ }
+
++#if defined(R4OS_VULKAN)
++static nir_shader *
++build_blit_shader_native(void *data)
++{
++   return build_blit_shader(data);
++}
++#endif
++
+ static VkResult
+ get_blit_pipeline(struct vk_device *device,
+                   struct vk_meta_device *meta,
+@@ -406,10 +417,18 @@ get_blit_pipeline(struct vk_device *device,
+       return VK_SUCCESS;
+    }
+
++#if defined(R4OS_VULKAN)
++   struct r4vk_compiler_job *owner;
++   VkPipelineShaderStageNirCreateInfoMESA fs_nir_info;
++   VkResult built = vk_meta_build_nir_native(build_blit_shader_native,
++      (void *)key, &fs_nir_info, &owner);
++   if (built != VK_SUCCESS) return built;
++#else
+    const VkPipelineShaderStageNirCreateInfoMESA fs_nir_info = {
+       .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_NIR_CREATE_INFO_MESA,
+       .nir = build_blit_shader(key),
+    };
++#endif
+    const VkPipelineShaderStageCreateInfo fs_info = {
+       .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+       .pNext = &fs_nir_info,
+@@ -469,7 +488,11 @@ get_blit_pipeline(struct vk_device *device,
+                                                       &render,
+                                                       key, sizeof(*key),
+                                                       pipeline_out);
++#if defined(R4OS_VULKAN)
++   r4vk_compiler_job_destroy(owner);
++#else
+    ralloc_free(fs_nir_info.nir);
++#endif
+
+    return result;
+ }

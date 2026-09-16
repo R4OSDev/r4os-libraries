@@ -1,10 +1,12 @@
-﻿# R4VK development state
+﻿# R4VK native Vulkan provider
 
-Work for roadmap 0.79.35 is in progress. This directory currently provides
-Mesa's native CPU runtime and NVK resource devices, memory/VA, hardware
-descriptions and native submit/sync adapters. The regular build produces
-R4VK.R4L with a native loader/ICD bootstrap. `IMAGE_SCOPE=none` keeps it out of
-normal images until the final feature profile and resource/sync admission.
+Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
+R4VK 0.1.2 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+commands and submit/sync adapters through the standard ICD bootstrap.
+`IMAGE_SCOPE=slim` installs the module in every normal image. Without an
+admitted NVIDIA backend, Vulkan enumerates no device and the existing
+firmware-framebuffer renderer continues to work. This is not a software
+Vulkan renderer. Physical GPU qualification remains in OssiGPU.txt.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
 
@@ -47,8 +49,16 @@ RGBA8 and BC1 mip/layer subregions round-trip through real NIL tiling with
 row padding preserved. This CPU data comparison does not execute a GPU copy.
 An actual kernel-broker reset with modeled GPU quiescence makes the old Vulkan
 device report device-lost for WaitIdle/allocation; a new instance/device then
-works. Full API-profile admission still needs the remaining mandatory meta
-shader paths and resource/sync review before normal image installation.
+works. Software admission reuses the matching resource/sync/error proofs;
+physical execution and Vulkan conformance are not implied.
+
+Query-copy compute shaders and Blit/Resolve fragment shaders now build in
+isolated CPU jobs; serialized NIR stays alive until compilation consumes it.
+The common clear builder uses the same boundary, while NVK clears use its
+original hardware commands. Public SMP4 command recording/submission covers
+query copies (32/64-bit, availability), linear/color/integer/depth blits and
+four-sample average/sample-zero resolves, each fresh and cached. This proves
+compilation, uploads and modeled receipts, not GPU pixels or query results.
 
 `Port/threading.zig` implements process-owned mutexes and conditions on the
 R4SYS v19 notification tail (Kernel 0.1.183). An uncontended mutex uses atomic
@@ -73,8 +83,8 @@ initializers discard their own metadata region and use the published winner.
 Regular allocations reuse SDK blocks; OOM returns null and failed realloc
 preserves its input. Process retirement reclaims VM regions without requiring
 library destructors. A shared library static supplies only the unique context
-key, never a cached caller pointer. This does not yet audit or port all Mesa
-global state, file APIs, Rust allocation or Vulkan callback allocation paths.
+key, never a cached caller pointer. The selected source set follows these
+process/worker owners; new Mesa globals and host APIs require their own audit.
 
 `Port/time.zig` connects Mesa's private monotonic time/deadline helpers to
 R4SYS. Deadline sleep uses the actual event-frequency ratio and rechecks the
@@ -111,7 +121,8 @@ The native device path excludes calibrated
 timestamps, RMV and WSI dispatch; swapchain-image requests return unsupported
 until the native WSI integration exists. Experimental NVX CUBIN imports are
 excluded consistently with the native instance's disabled experimental flags.
-The full shader-job boundary and final provider integration remain open.
+The selected shader-job and resource-provider paths are integrated; native
+WSI remains later roadmap work.
 
 CPU capability/once state, GLSL interned types, shader-printf caches and NIR
 diagnostic mutexes belong to the calling process. Generic C state publication
@@ -124,8 +135,9 @@ Private C errno and diagnostic buffers belong to an admitted compiler worker
 call. Native options preserve upstream defaults; environment-driven shader
 dump/replacement files are excluded. Assertion/abort on that worker fails its
 job; outside it the failure traps. This is not general TLS or a filesystem.
-Each commandbuffer owns its own OOM runout buffer. Full graphics pipeline,
-shader-object and generated helper printf metadata integration remains open.
+Each commandbuffer owns its own OOM runout buffer. Generated helper printf
+metadata is registered per process/job. Full graphics pipeline and optional
+shader-object/generated-command integration continues in 0.79.36.
 
 NVK's NIR-to-machine-code phase now uses an isolated CPU job. Original const
 NIR serialization/deserialization gives the worker its own graph and interned
@@ -168,8 +180,8 @@ extents before allocating/uploading; diagnostic string OOM remains an error.
 Failed optional insertion retains only the caller's usable object, while
 mandatory import and merge allocation failures unwind and return OOM. Short
 exports contain complete records, and serialization diagnostics run after unlock.
-The fixture cache UUID follows the changed native C source identity; the final
-provider still needs its complete artifact/build identity integration.
+The provider's cache identity includes the verified native sources, compiler
+archives and build options; Tools/BuildNative.ps1 emits the required digest.
 The targeted SMP4 cache probe passes corrupted/truncated inputs, import and
 lazy-load OOM, full-table insertion/merge failure and retry, partial export
 reuse and final zero C allocations. Its first failure exposed a string-reader
@@ -239,12 +251,12 @@ publishes the complete list only after revalidating each captured incarnation.
 Failure destroys all newly created devices; an inventory without eligible
 NVIDIA hardware succeeds with an empty list. Missing platform tables remain
 an initialization error. `Port/platform.zig` retains only immutable boot-time
-table addresses. The final provider's build digest remains a required symbol.
+table addresses. The verified native build supplies the required build digest.
 
 The private NVK patch rejects external FD memory before GPU allocation,
 removes its Linux-only entrypoints, rolls back failed internal map counts,
 unlinks failed mapped allocations and destroys each retired BO's map mutex.
-Full Vulkan device construction and discovery still require provider integration.
+The canonical provider uses this construction and discovery path.
 
 The private original `nvk_device.c` now checks the exact native backend's loss
 state and marks the Vulkan device lost. Devices without execution queues do
@@ -278,14 +290,14 @@ and requests ordered child cleanup, which may continue after C metadata is freed
 Finite operations use one native clock snapshot for the broker deadline and
 the rounded wait duration. Failed allocation leaves the output unchanged;
 timeout, stale epochs, malformed completion and uncertain cleanup set the
-context's device-lost state. The final NVK device/queue must propagate this
-state. R4DRAW36 plus explicit architecture revision3 IMAGE_LAYOUTS permits
+context's device-lost state. NVK device/queue status propagates this state.
+R4DRAW36 plus explicit architecture revision3 IMAGE_LAYOUTS permits
 uncompressed NVIDIA PTE kinds1..6 in system memory and VRAM. Kind travels in
 the broker's opaque layout byte; the driver supplies matching RM depth/packing
 attributes and requires exact allocation/map acknowledgements. Old backends
 and kernels retain linear-only support. Compressed/unknown kinds, sparse/replay
 VA, overlapping replacement and partial unbind remain unsupported.
-This is one backend component, not an installed or complete Vulkan provider.
+The installed R4VK provider owns these backend components.
 
 `Port/nvk_mem.c` owns native NVK memory through the common BO and native VRAM
 brokers. Each allocation has its canonical BO reference and a bound VA range;
@@ -303,10 +315,10 @@ revision 2's explicit system-memory capability: native x86_64 WB RAM, cached
 RM registration and acknowledged snooped/GPU-uncached maps. Revision 1 and
 revision 2 without that bit remain noncoherent; mismatched versions or unknown
 flags fail without output mutation. Coherent explicit VRAM remains unsupported.
-Noncoherent maps use Mesa's actual cache operations. Vulkan device admission, published memory types/budgets,
-cache/barrier integration remain required. The private
-memory and VA contexts share one atomic device-lost state and outlive their
-NVK objects; the kernel never retains their C addresses or destructors.
+Noncoherent maps use Mesa's actual cache operations. Admitted devices require
+explicit host coherence; memory types expose RAM and VRAM without a BAR heap
+or unsupported budget telemetry. Memory and VA contexts share one atomic
+device-lost state and outlive their NVK objects; the kernel never retains their C addresses or destructors.
 
 `Port/nvk_device.c` reads NVIDIA's architecture facts through the optional
 R4DRAW v34 backend-properties slot (Kernel 0.1.190, NVIDIA 0.1.130). It validates
@@ -320,7 +332,7 @@ The kernel copies one immutable bounded payload per backend incarnation,
 authenticates the publishing driver and invalidates it on reset. Old backends
 without properties remain usable through their original interface. The native
 driver publishes these facts after CE startup, independently of display registration
-(NVIDIA 0.1.131). Full provider integration and device admission remain pending. Architecture
+(NVIDIA 0.1.131). Provider admission validates these records. Architecture
 classes describe hardware methods, not admitted command queues. No BAR mapping,
 transfer queue, 2D/M2MF, ZCULL or Vulkan qualification is inferred. Host coherence
 uses the explicit native mapping-policy capability above, not GPU class IDs.
@@ -451,11 +463,12 @@ propagates device-lost. Objects own their mutexes/conditions; no shared R4L
 mutable cache or invented GPU completion is used. Native absolute waits use
 R4SYS time; the POSIX MESA_VK_MAX_TIMEOUT debug override is excluded.
 
-Tiled memory, sparse-bind contexts and external handles remain unsupported;
+Legacy tiled-BO allocation, sparse-bind contexts and external handles remain
+unsupported; uncompressed tiled images use the explicit VA kinds above;
 GPU timestamps and usage telemetry have no native owner callback. BAR mapping,
-sparse, compression, external-FD and public Vulkan capabilities remain unadvertised.
-Public Vulkan admission, feature/limit reporting and full device/error/logging
-integration remain required; these private adapters are not that admission.
+sparse, compression and external-FD remain unadvertised. The provider filters
+features and limits to the native adapter contract. It does not inherit
+upstream Linux conformance; the published conformance version is zero.
 
 `Tools/PrepareShaders.ps1 -OutputRoot <output>` builds the original Mesa CLC
 and NIR binding generator in a private source tree. It generates the NVK
