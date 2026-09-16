@@ -2176,7 +2176,7 @@
           "description": "gpfifo_class"
         }
       ],
-      "description": "Hardware and native memory-path facts in GfxBackendProperties: BACKEND_V1 identity, data_bytes120, exact-size layout unchanged. Payload version equals properties revision. Revision1 requires flags0; revision2 permits ARCHITECTURE_HOST_COHERENT only. Identity from captured PCI/PMC; active GPC/TPC from acknowledged firmware post-init; VRAM from acknowledged static data; VA bounds from native address-space receipt. Architecture classes do not authorize GPU execution. Host-coherence bit covers canonical system BOs and acknowledged native mapping policy only; no BAR mapping, sparse, Vulkan qualification or physical-test claim. PCI domain remains zero; memory_generation matches enclosing backend inventory. Unknown/incomplete facts remain unavailable. Old revision1 readers reject revision2 properties; backend registration/profile and all existing runtime functions remain unchanged."
+      "description": "Hardware and native memory-path facts in GfxBackendProperties: BACKEND_V1 identity, data_bytes120, exact-size layout unchanged. Payload version equals properties revision. Revision1 requires flags0; revision2 permits ARCHITECTURE_HOST_COHERENT; revision3 additionally permits ARCHITECTURE_IMAGE_LAYOUTS. Identity from captured PCI/PMC; active GPC/TPC from acknowledged firmware post-init; VRAM from acknowledged static data; VA bounds from native address-space receipt. Architecture classes do not authorize GPU execution. Host-coherence bit covers canonical system BOs and acknowledged native mapping policy only; no BAR mapping, sparse, Vulkan qualification or physical-test claim. PCI domain remains zero; memory_generation matches enclosing backend inventory. Unknown/incomplete facts remain unavailable. Old readers reject unknown property revisions; backend registration/profile and all existing runtime functions remain unchanged."
     },
     {
       "name": "R4NvNativeSubmitHeader",
@@ -2607,8 +2607,8 @@
       "zig_name": "architecture_version",
       "c_name": "R4NV_ARCHITECTURE_VERSION",
       "type": "u32",
-      "value": 2,
-      "description": "Architecture properties revision2 retains the exact120-byte layout. Flag bit0 guarantees CPU-cache coherent system-BO mappings on the native x86_64 path: WB canonical RAM, cached RM registration, GPU-uncached VA and acknowledged CPU-snoop mappings. It does not describe VRAM/BAR maps, GPU barriers or physical test status. Revision1 has flags0 and carries no such guarantee."
+      "value": 3,
+      "description": "Architecture properties revision3 retains the exact120-byte layout. Revision1 has flags0; revision2 permits HOST_COHERENT; revision3 additionally permits IMAGE_LAYOUTS. Unknown revisions or flags must be rejected. These facts do not admit a Vulkan device or claim physical qualification."
     },
     {
       "zig_name": "architecture_host_coherent",
@@ -2616,6 +2616,13 @@
       "type": "u32",
       "value": 1,
       "description": "Architecture properties revision2 retains the exact120-byte layout. Flag bit0 guarantees CPU-cache coherent system-BO mappings on the native x86_64 path: WB canonical RAM, cached RM registration, GPU-uncached VA and acknowledged CPU-snoop mappings. It does not describe VRAM/BAR maps, GPU barriers or physical test status. Revision1 has flags0 and carries no such guarantee."
+    },
+    {
+      "zig_name": "architecture_image_layouts",
+      "c_name": "R4NV_ARCHITECTURE_IMAGE_LAYOUTS",
+      "type": "u32",
+      "value": 2,
+      "description": "Revision3: native RM virtual ranges support uncompressed NVIDIA PTE kinds1..6 in GART and VRAM. Use R4DRAW36 range flags bit0 plus kind in bits8..15. Allocation type/depth/packing and format must agree, and RM ACK must preserve the exact kind. Binding uses virtual page kind. No compression, sparse or Vulkan feature claim."
     }
   ],
   "errors": [

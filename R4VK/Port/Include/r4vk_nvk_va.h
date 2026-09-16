@@ -16,6 +16,7 @@ struct r4vk_nvk_va_context {
    R4Draw draw;
    uint32_t adapter_id;
    uint64_t memory_generation;
+   bool image_layouts; /* Explicit revision3 backend + R4DRAW36 admission. */
    uint32_t lost; /* atomic, shared by this device's resource calls */
    /* All live bindings in this device, including aliases whose original BO
     * was destroyed. Serialize only binding publication/removal and the

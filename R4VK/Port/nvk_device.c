@@ -61,7 +61,7 @@ r4vk_nvk_query_architecture(const R4Draw *draw, const R4GfxBackendInfo *backend,
    if (properties.version != 1 || properties.size < sizeof(properties) ||
        properties.interface_id_lo != R4NV_BACKEND_V1_INTERFACE_ID_LO ||
        properties.interface_id_hi != R4NV_BACKEND_V1_INTERFACE_ID_HI ||
-       (properties.revision != 1 && properties.revision != R4NV_ARCHITECTURE_VERSION) ||
+       properties.revision < 1 || properties.revision > R4NV_ARCHITECTURE_VERSION ||
        properties.data_bytes != sizeof(R4NvArchitecture))
       return VK_ERROR_INCOMPATIBLE_DRIVER;
    for (uint32_t i = properties.data_bytes; i < sizeof(properties.data); i++)
@@ -71,8 +71,8 @@ r4vk_nvk_query_architecture(const R4Draw *draw, const R4GfxBackendInfo *backend,
    uint32_t sm, graphics, compute;
    const char *name = chip_name(a.chipset, &sm, &graphics, &compute);
    if (!name) return VK_ERROR_INCOMPATIBLE_DRIVER;
-   const uint32_t known_flags = properties.revision == R4NV_ARCHITECTURE_VERSION ?
-      R4NV_ARCHITECTURE_HOST_COHERENT : 0;
+   const uint32_t known_flags = (properties.revision >= 2 ? R4NV_ARCHITECTURE_HOST_COHERENT : 0) |
+      (properties.revision >= 3 ? R4NV_ARCHITECTURE_IMAGE_LAYOUTS : 0);
    if (a.version != properties.revision || a.size != sizeof(a) || a.vendor_id != 0x10de ||
        !a.device_id || a.device_id >= 0xffff || a.pci_domain || a.pci_bus > 255 ||
        a.pci_device > 31 || a.pci_function > 7 || a.pci_revision > 255 ||
@@ -99,6 +99,8 @@ r4vk_nvk_query_architecture(const R4Draw *draw, const R4GfxBackendInfo *backend,
       .binding = backend->binding, .memory_generation = a.memory_generation,
       .va_start = a.va_start, .va_end = a.va_end, .bind_alignment = a.bind_alignment,
       .host_coherent = (a.flags & R4NV_ARCHITECTURE_HOST_COHERENT) != 0,
+      .image_layouts = (a.flags & R4NV_ARCHITECTURE_IMAGE_LAYOUTS) != 0 &&
+         draw->table && draw->table->abi_version >= R4OS_GFX_VIRTUAL_LAYOUT_API_VERSION,
       .info = {
          .type = NV_DEVICE_TYPE_DIS, .device_id = a.device_id, .chipset = a.chipset,
          .pci = { .domain = a.pci_domain, .bus = a.pci_bus, .dev = a.pci_device,

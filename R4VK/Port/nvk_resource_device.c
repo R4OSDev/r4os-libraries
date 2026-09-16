@@ -98,6 +98,7 @@ static VkResult create_dev(struct nvkmd_pdev *base,
       &physical->draw, current.binding.adapter_id, current.memory_generation,
       r4vk_nvk_mem_reference);
    if (result != VK_SUCCESS) goto fail;
+   device->resources.image_layouts = current.image_layouts;
    /* Only explicit revision2 native mapping-policy facts permit coherence.
     * Revision1 and successful CPU mapping alone supply no such guarantee. */
    result = r4vk_nvk_mem_context_init(&device->memory, &device->resources,

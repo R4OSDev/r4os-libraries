@@ -14,6 +14,7 @@ struct r4vk_nvk_architecture {
    uint64_t memory_generation, va_start, va_end;
    uint32_t bind_alignment;
    bool host_coherent;
+   bool image_layouts;
 };
 VkResult r4vk_nvk_query_architecture(const R4Draw *draw,
                                     const R4GfxBackendInfo *backend,

@@ -94,8 +94,12 @@ Finite operations use one native clock snapshot for the broker deadline and
 the rounded wait duration. Failed allocation leaves the output unchanged;
 timeout, stale epochs, malformed completion and uncertain cleanup set the
 context's device-lost state. The final NVK device/queue must propagate this
-state. Sparse/replay VA, nonzero PTE kinds, overlapping replacement and partial
-unbind are explicitly unsupported. No corresponding features may be advertised.
+state. R4DRAW36 plus explicit architecture revision3 IMAGE_LAYOUTS permits
+uncompressed NVIDIA PTE kinds1..6 in system memory and VRAM. Kind travels in
+the broker's opaque layout byte; the driver supplies matching RM depth/packing
+attributes and requires exact allocation/map acknowledgements. Old backends
+and kernels retain linear-only support. Compressed/unknown kinds, sparse/replay
+VA, overlapping replacement and partial unbind remain unsupported.
 This is one backend component, not an installed or complete Vulkan provider.
 
 `Port/nvk_mem.c` owns native NVK memory through the common BO and native VRAM

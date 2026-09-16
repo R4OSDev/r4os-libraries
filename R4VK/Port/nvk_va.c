@@ -372,7 +372,8 @@ VkResult r4vk_nvk_alloc_va(struct r4vk_nvk_va_context *context,
    (void)log_obj;
    if (!context || !context->dev || !out) return VK_ERROR_INITIALIZATION_FAILED;
    if (r4vk_nvk_va_device_lost(context)) return VK_ERROR_DEVICE_LOST;
-   if (flags & ~NVKMD_VA_GART || pte_kind || fixed_addr)
+   if (flags & ~NVKMD_VA_GART || fixed_addr ||
+       (pte_kind && (!context->image_layouts || pte_kind > 6)))
       return VK_ERROR_FEATURE_NOT_PRESENT;
    if (!size_B || (align_B && !power_of_two(align_B)))
       return VK_ERROR_UNKNOWN;
@@ -386,6 +387,8 @@ VkResult r4vk_nvk_alloc_va(struct r4vk_nvk_va_context *context,
    if (!va) return VK_ERROR_OUT_OF_HOST_MEMORY;
    R4GfxVirtualRequest request = {
       .kind = 1, .byte_length = size_B, .alignment = align_B,
+      .flags = pte_kind ? R4OS_GFX_VIRTUAL_FLAG_BLOCKLINEAR |
+         ((uint32_t)pte_kind << R4OS_GFX_VIRTUAL_LAYOUT_SHIFT) : 0,
       .location = (flags & NVKMD_VA_GART) ? 0 : 1,
    };
    R4GfxVirtualStatus ready;
