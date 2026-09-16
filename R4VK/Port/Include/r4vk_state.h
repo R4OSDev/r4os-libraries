@@ -13,6 +13,7 @@ bool r4vk_glsl_init_or_ref(void);
 bool r4vk_printf_init_or_ref(void);
 _Noreturn void r4vk_compiler_fail(unsigned reason);
 void *r4vk_compiler_state(unsigned slot, size_t bytes, size_t alignment);
+bool r4vk_compiler_isolated(void);
 struct r4vk_compiler_job;
 int r4vk_compiler_job_run(int (*callback)(void *), void *argument,
                          struct r4vk_compiler_job **owner);

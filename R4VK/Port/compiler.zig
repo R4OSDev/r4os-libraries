@@ -58,6 +58,10 @@ pub fn allocationScope() ?*memory.Scope {
     const call = maybeActive() orelse return null;
     return if (call.arena.isolated) &call.arena.c_scope else null;
 }
+pub export fn r4vk_compiler_isolated() callconv(.c) bool {
+    const call = maybeActive() orelse return false;
+    return call.arena.isolated;
+}
 fn remove(call: *Call) void {
     const ctx = call.arena.context;
     require(threads.mtx_lock(&ctx.mutex));

@@ -81,8 +81,8 @@ Private C errno and diagnostic buffers belong to an admitted compiler worker
 call. Native options preserve upstream defaults; environment-driven shader
 dump/replacement files are excluded. Assertion/abort on that worker fails its
 job; outside it the failure traps. This is not general TLS or a filesystem.
-Each commandbuffer owns its own OOM runout buffer. SPIR-V frontend, complete
-pipeline/cache paths and generated helper printf metadata still need integration.
+Each commandbuffer owns its own OOM runout buffer. Full graphics pipeline,
+shader-object and generated helper printf metadata integration remains open.
 
 NVK's NIR-to-machine-code phase now uses an isolated CPU job. Original const
 NIR serialization/deserialization gives the worker its own graph and interned
@@ -94,13 +94,26 @@ Vulkan object is created inside this boundary. On success, ordinary shader
 storage receives the code, constants and optional diagnostics before the job
 is destroyed; upload then uses the existing caller-side rollback path.
 
+Public compute pipelines also run SPIR-V translation, specialization and NIR
+preprocessing in an isolated job. The original precompiled-shader wire format
+crosses that boundary; Vulkan allocation callbacks, cache insertion and GPU
+uploads remain outside it. The compute backend deserializes cached NIR inside
+its own job, without creating a caller-owned intermediate graph. Frontend
+warnings/errors are captured in bounded stack-owned storage and delivered to
+Vulkan debug callbacks after join, including failure; truncation is reported.
+The native builtin-NIR frontend likewise serializes/deserializes its types.
+This does not yet isolate graphics linking or all shader-object paths.
+
 A targeted SMP4 probe passes private-cache isolation, allocation overflow,
 bounded C-heap exhaustion, abort while holding a private diagnostic mutex,
 unchanged failed-owner output, and two real NAK compute compilations/uploads
-with balanced cleanup. The compute input is an elementary existing NIR graph;
-the GPU peer models uploads and does not execute the machine code. This does
-not establish SPIR-V frontend OOM recovery, full pipelines, shader printf,
-all shader stages, cache compatibility, or Vulkan conformance.
+with balanced cleanup. A subsequent public compute probe also passes a valid
+SPIR-V storage-buffer shader with specialization, compile-required cache miss,
+cache hits and export/import, frontend OOM/abort, translator error callbacks
+and valid retry. Callback allocations and the final C heap balance. The GPU
+peer models uploads and does not execute the machine code. Graphics linking,
+shader objects, shader printf, malformed-cache handling and Vulkan conformance
+are not established by these checks.
 
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays

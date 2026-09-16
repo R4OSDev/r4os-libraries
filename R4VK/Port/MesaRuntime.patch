@@ -1821,7 +1821,7 @@
 
     shader->info = shader->nak->info;
     shader->asm_str = shader->nak->asm_str;
-@@ -1073,6 +1081,96 @@ nvk_shader_fill_push(struct nvk_device *dev,
+@@ -1073,6 +1081,105 @@ nvk_shader_fill_push(struct nvk_device *dev,
 
  static const struct vk_shader_ops nvk_shader_ops;
 
@@ -1842,15 +1842,24 @@
 +    * plain clone would retain its interned type pointers and mix owners. */
 +   struct blob blob;
 +   blob_init(&blob);
-+   nir_serialize(&blob, info->nir, false);
-+   if (blob.out_of_memory) return VK_ERROR_OUT_OF_HOST_MEMORY;
++   if (info->nir) {
++      nir_serialize(&blob, info->nir, false);
++      if (blob.out_of_memory) return VK_ERROR_OUT_OF_HOST_MEMORY;
++   } else if (!info->r4vk_nir_data || !info->r4vk_nir_size) {
++      return VK_ERROR_UNKNOWN;
++   }
 +
 +   if (!r4vk_glsl_init_or_ref() || !r4vk_printf_init_or_ref())
 +      return VK_ERROR_OUT_OF_HOST_MEMORY;
 +   struct blob_reader reader;
-+   blob_reader_init(&reader, blob.data, blob.size);
-+   nir_shader *nir = nir_deserialize(NULL, info->nir->options, &reader);
-+   if (!nir || reader.overrun || reader.current != reader.end)
++   blob_reader_init(&reader, info->nir ? blob.data : info->r4vk_nir_data,
++                    info->nir ? blob.size : info->r4vk_nir_size);
++   const struct nir_shader_compiler_options *options = info->nir ?
++      info->nir->options : nvk_get_nir_options(job->dev->vk.physical,
++                                              info->stage, info->robustness);
++   nir_shader *nir = nir_deserialize(NULL, options, &reader);
++   if (!nir || reader.overrun || reader.current != reader.end ||
++       nir->info.stage != info->stage)
 +      return VK_ERROR_UNKNOWN;
 +   blob_finish(&blob);
 +
@@ -1918,7 +1927,7 @@
  static void
  nvk_shader_destroy(struct vk_device *vk_dev,
                     struct vk_shader *vk_shader,
-@@ -1123,6 +1221,9 @@ nvk_compile_shader(struct nvk_device *dev,
+@@ -1123,6 +1230,9 @@ nvk_compile_shader(struct nvk_device *dev,
        return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
     }
 
@@ -1928,7 +1937,7 @@
     nvk_lower_nir(dev, nir, info->flags, info->robustness,
                   info->set_layout_count, info->set_layouts,
                   &shader->cbuf_map);
-@@ -1135,6 +1236,7 @@ nvk_compile_shader(struct nvk_device *dev,
+@@ -1135,6 +1245,7 @@ nvk_compile_shader(struct nvk_device *dev,
 
     result = nvk_compile_nir(dev, nir, info->flags, info->robustness,
                              fs_key, shader);
@@ -1936,3 +1945,316 @@
     ralloc_free(nir);
     if (result != VK_SUCCESS) {
        nvk_shader_destroy(&dev->vk, &shader->vk, pAllocator);
+--- a/src/vulkan/runtime/vk_shader.h
++++ b/src/vulkan/runtime/vk_shader.h
+@@ -95,6 +95,12 @@ struct vk_shader_compile_info {
+    VkPipelineCreateFlags2KHR rt_flags;
+    VkShaderStageFlags next_stage_mask;
+    struct nir_shader *nir;
++#if defined(R4OS_VULKAN)
++   /* Optional borrowed serialized input, consumed inside the CPU job. This
++    * private layout is shared by every native runtime/NVK compilation unit. */
++   const void *r4vk_nir_data;
++   size_t r4vk_nir_size;
++#endif
+
+    const struct vk_pipeline_robustness_state *robustness;
+
+--- a/src/vulkan/runtime/vk_pipeline.c
++++ b/src/vulkan/runtime/vk_pipeline.c
+@@ -46,6 +46,9 @@
+ #include "shader_enums.h"
+
+ #include "util/mesa-blake3.h"
++#if defined(R4OS_VULKAN)
++#include "r4vk_state.h"
++#endif
+
+ struct vk_pipeline_binary {
+    struct vk_object_base base;
+@@ -181,7 +184,23 @@ vk_pipeline_shader_stage_to_nir(struct vk_device *device,
+    if (builtin_nir != NULL) {
+       nir_validate_shader(builtin_nir, "internal shader");
+
+-      nir_shader *clone = nir_shader_clone(mem_ctx, builtin_nir);
++      nir_shader *clone;
++#if defined(R4OS_VULKAN)
++      if (r4vk_compiler_isolated()) {
++         /* Interned types must belong to this frontend's private cache. */
++         struct blob blob;
++         blob_init(&blob);
++         nir_serialize(&blob, builtin_nir, false);
++         if (blob.out_of_memory) return VK_ERROR_OUT_OF_HOST_MEMORY;
++         struct blob_reader reader;
++         blob_reader_init(&reader, blob.data, blob.size);
++         clone = nir_deserialize(mem_ctx, nir_options, &reader);
++         const bool invalid = reader.overrun || reader.current != reader.end;
++         blob_finish(&blob);
++         if (invalid) return VK_ERROR_UNKNOWN;
++      } else
++#endif
++      clone = nir_shader_clone(mem_ctx, builtin_nir);
+       if (clone == NULL)
+          return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
+
+@@ -201,6 +220,9 @@ vk_pipeline_shader_stage_to_nir(struct vk_device *device,
+       const VkShaderModuleCreateInfo *minfo =
+          vk_find_struct_const(info->pNext, SHADER_MODULE_CREATE_INFO);
+       if (unlikely(minfo == NULL)) {
++#if defined(R4OS_VULKAN)
++         if (r4vk_compiler_isolated()) return VK_ERROR_UNKNOWN;
++#endif
+          return vk_errorf(device, VK_ERROR_UNKNOWN,
+                           "No shader module provided");
+       }
+@@ -214,8 +236,12 @@ vk_pipeline_shader_stage_to_nir(struct vk_device *device,
+                                      spirv_options, nir_options,
+                                      false /* internal */,
+                                      mem_ctx);
+-   if (nir == NULL)
++   if (nir == NULL) {
++#if defined(R4OS_VULKAN)
++      if (r4vk_compiler_isolated()) return VK_ERROR_UNKNOWN;
++#endif
+       return vk_errorf(device, VK_ERROR_UNKNOWN, "spirv_to_nir failed");
++   }
+
+    vk_set_subgroup_size(
+       nir, properties->subgroupSize, properties->minSubgroupSize,
+@@ -756,12 +782,9 @@ fail_blob:
+ }
+
+ static bool
+-vk_pipeline_precomp_shader_serialize(struct vk_pipeline_cache_object *obj,
+-                                     struct blob *blob)
++vk_pipeline_precomp_shader_serialize_data(
++   const struct vk_pipeline_precomp_shader *shader, struct blob *blob)
+ {
+-   struct vk_pipeline_precomp_shader *shader =
+-      vk_pipeline_precomp_shader_from_cache_obj(obj);
+-
+    blob_write_uint32(blob, shader->stage);
+    blob_write_bytes(blob, &shader->rs, sizeof(shader->rs));
+    blob_write_bytes(blob, &shader->tess, sizeof(shader->tess));
+@@ -775,6 +798,14 @@ vk_pipeline_precomp_shader_serialize(struct vk_pipeline_cache_object *obj,
+    return !blob->out_of_memory;
+ }
+
++static bool
++vk_pipeline_precomp_shader_serialize(struct vk_pipeline_cache_object *obj,
++                                     struct blob *blob)
++{
++   return vk_pipeline_precomp_shader_serialize_data(
++      vk_pipeline_precomp_shader_from_cache_obj(obj), blob);
++}
++
+ static struct vk_pipeline_cache_object *
+ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
+                                        const void *key_data, size_t key_size,
+@@ -916,6 +947,128 @@ vk_pipeline_hash_precomp_shader_stage(struct vk_device *device,
+                                         &rs, stage->precomp_key);
+ }
+
++#if defined(R4OS_VULKAN)
++struct vk_native_precompile {
++   struct vk_device *device;
++   VkPipelineCreateFlags2KHR flags;
++   const VkPipelineShaderStageCreateInfo *info;
++   struct vk_pipeline_robustness_state rs;
++   struct blob serialized;
++   unsigned message_count, truncated;
++   struct {
++      enum nir_spirv_debug_level level;
++      size_t offset;
++      char text[512];
++   } messages[8];
++};
++
++static void
++vk_native_spirv_message(void *argument, enum nir_spirv_debug_level level,
++                       size_t offset, const char *message)
++{
++   struct vk_native_precompile *job = argument;
++   if (level != NIR_SPIRV_DEBUG_LEVEL_WARNING &&
++       level != NIR_SPIRV_DEBUG_LEVEL_ERROR) return;
++   if (job->message_count == ARRAY_SIZE(job->messages)) {
++      job->truncated++;
++      return;
++   }
++   unsigned i = job->message_count++;
++   job->messages[i].level = level;
++   job->messages[i].offset = offset;
++   int length = snprintf(job->messages[i].text, sizeof(job->messages[i].text),
++                         "%s", message);
++   if (length < 0 || length >= sizeof(job->messages[i].text)) job->truncated++;
++}
++
++static int
++vk_native_precompile_worker(void *argument)
++{
++   struct vk_native_precompile *job = argument;
++   const struct vk_device_shader_ops *ops = job->device->shader_ops;
++   mesa_shader_stage stage = vk_to_mesa_shader_stage(job->info->stage);
++   if (!r4vk_glsl_init_or_ref() || !r4vk_printf_init_or_ref())
++      return VK_ERROR_OUT_OF_HOST_MEMORY;
++   const struct nir_shader_compiler_options *options =
++      ops->get_nir_options(job->device->physical, stage, &job->rs);
++   struct spirv_to_nir_options spirv =
++      ops->get_spirv_options(job->device->physical, stage, &job->rs);
++   spirv.debug.func = vk_native_spirv_message;
++   spirv.debug.private_data = job;
++   /* Invalid SPIR-V follows the original translator's recoverable failure
++    * path; a host debugger trap must not kill the native caller. */
++   spirv.skip_os_break_in_debug_build = true;
++   nir_shader *nir;
++   VkResult result = vk_pipeline_shader_stage_to_nir(job->device, job->flags,
++      job->info, &spirv, options, NULL, &nir);
++   if (result != VK_SUCCESS) return result;
++   if (ops->preprocess_nir) ops->preprocess_nir(job->device->physical, nir, &job->rs);
++
++   const VkShaderDescriptorSetAndBindingMappingInfoEXT *desc_map =
++      vk_find_struct_const(job->info->pNext,
++                           SHADER_DESCRIPTOR_SET_AND_BINDING_MAPPING_INFO_EXT);
++   struct vk_sampler_state_array embedded;
++   bool progress = false;
++   NIR_PASS(progress, nir, vk_nir_lower_descriptor_heaps, desc_map, NULL, &embedded);
++   if (progress) {
++      NIR_PASS(_, nir, nir_remove_dead_variables, nir_var_uniform | nir_var_image, NULL);
++      NIR_PASS(_, nir, nir_opt_dce);
++   }
++   /* Only a serialized CPU payload survives. No cache object, Vulkan
++    * allocator callback or GPU resource is created on this worker. */
++   struct vk_pipeline_precomp_shader data = {
++      .stage = nir->info.stage, .rs = job->rs,
++      .embedded_sampler_count = embedded.sampler_count,
++      .embedded_samplers = embedded.samplers,
++   };
++   vk_pipeline_gather_nir_tess_info(nir, &data.tess);
++   blob_init(&data.nir_blob);
++   nir_serialize(&data.nir_blob, nir, false);
++   blob_init(&job->serialized);
++   bool success = !data.nir_blob.out_of_memory &&
++      vk_pipeline_precomp_shader_serialize_data(&data, &job->serialized);
++   blob_finish(&data.nir_blob);
++   vk_sampler_state_array_finish(&embedded);
++   ralloc_free(nir);
++   return success ? VK_SUCCESS : VK_ERROR_OUT_OF_HOST_MEMORY;
++}
++
++static VkResult
++vk_native_precompile_shader(struct vk_device *device,
++                            VkPipelineCreateFlags2KHR flags,
++                            const void *pipeline_pNext,
++                            const VkPipelineShaderStageCreateInfo *info,
++                            struct vk_pipeline_stage *stage)
++{
++   struct vk_native_precompile job = {.device = device, .flags = flags, .info = info};
++   vk_pipeline_robustness_state_fill(&device->robustness_state, &job.rs,
++                                     pipeline_pNext, info->pNext);
++   struct r4vk_compiler_job *owner;
++   VkResult result = r4vk_compiler_job_run(vk_native_precompile_worker, &job, &owner);
++   /* These stack-owned messages remain valid even after job failure. */
++   for (unsigned i = 0; i < job.message_count; i++) {
++      if (job.messages[i].level == NIR_SPIRV_DEBUG_LEVEL_ERROR)
++         vk_loge(VK_LOG_OBJS(device), "SPIR-V offset %lu: %s",
++                 (unsigned long)job.messages[i].offset, job.messages[i].text);
++      else
++         vk_logw(VK_LOG_OBJS(device), "SPIR-V offset %lu: %s",
++                 (unsigned long)job.messages[i].offset, job.messages[i].text);
++   }
++   if (job.truncated)
++      vk_logw(VK_LOG_OBJS(device), "SPIR-V diagnostics truncated (%u)", job.truncated);
++   if (result != VK_SUCCESS) return vk_error(device, result);
++
++   struct blob_reader reader;
++   blob_reader_init(&reader, job.serialized.data, job.serialized.size);
++   struct vk_pipeline_cache_object *object = vk_pipeline_precomp_shader_deserialize(
++      device, stage->precomp_key, sizeof(stage->precomp_key), &reader);
++   r4vk_compiler_job_destroy(owner);
++   if (!object) return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
++   stage->precomp = vk_pipeline_precomp_shader_from_cache_obj(object);
++   return VK_SUCCESS;
++}
++#endif
++
+ static VkResult
+ vk_pipeline_precompile_shader(struct vk_device *device,
+                               struct vk_pipeline_cache *cache,
+@@ -944,6 +1097,11 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+        VK_PIPELINE_CREATE_2_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT_KHR)
+       return VK_PIPELINE_COMPILE_REQUIRED;
+
++   #if defined(R4OS_VULKAN)
++   result = vk_native_precompile_shader(device, pipeline_flags, pipeline_info_pNext,
++                                        info, stage);
++   if (result != VK_SUCCESS) return result;
++   #else
+    struct vk_pipeline_robustness_state rs;
+    vk_pipeline_robustness_state_fill(&device->robustness_state, &rs,
+                                      pipeline_info_pNext, info->pNext);
+@@ -987,6 +1145,7 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+    ralloc_free(nir);
+    if (stage->precomp == NULL)
+       return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
++   #endif
+
+    if (cache != NULL) {
+       struct vk_pipeline_cache_object *cache_obj = &stage->precomp->cache_obj;
+@@ -2412,7 +2571,6 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+                                   struct vk_pipeline_stage *stage,
+                                   bool *cache_hit)
+ {
+-   const struct vk_device_shader_ops *ops = device->shader_ops;
+    VkResult result;
+
+    if (cache != NULL) {
+@@ -2431,6 +2589,8 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+        VK_PIPELINE_CREATE_2_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT_KHR)
+       return VK_PIPELINE_COMPILE_REQUIRED;
+
++#if !defined(R4OS_VULKAN)
++   const struct vk_device_shader_ops *ops = device->shader_ops;
+    const struct nir_shader_compiler_options *nir_options =
+       ops->get_nir_options(device->physical, stage->stage,
+                            &stage->precomp->rs);
+@@ -2439,6 +2599,7 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+                                                         nir_options);
+    if (nir == NULL)
+       return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
++#endif
+
+    const VkPushConstantRange *push_range =
+       get_push_range_for_stage(pipeline_layout, MESA_SHADER_COMPUTE);
+@@ -2455,7 +2616,12 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+       .stage = stage->stage,
+       .flags = shader_flags,
+       .next_stage_mask = 0,
++#if defined(R4OS_VULKAN)
++      .r4vk_nir_data = stage->precomp->nir_blob.data,
++      .r4vk_nir_size = stage->precomp->nir_blob.size,
++#else
+       .nir = nir,
++#endif
+       .robustness = &stage->precomp->rs,
+       .set_layout_count = pipeline_layout ? pipeline_layout->set_count : 0,
+       .set_layouts = pipeline_layout ? pipeline_layout->set_layouts : NULL,
+--- a/src/vulkan/runtime/vk_nir.c
++++ b/src/vulkan/runtime/vk_nir.c
+@@ -133,8 +133,15 @@ vk_spirv_to_nir(struct vk_device *device,
+
+    struct spirv_to_nir_options spirv_options_local = *spirv_options;
+    spirv_options_local.capabilities = &spirv_caps;
+-   spirv_options_local.debug.func = spirv_nir_debug;
+-   spirv_options_local.debug.private_data = (void *)device;
++#if defined(R4OS_VULKAN)
++   /* Isolated native frontend jobs capture messages for delivery after join.
++    * Never enter application callbacks from their disposable worker. */
++   if (spirv_options_local.debug.func == NULL)
++#endif
++   {
++      spirv_options_local.debug.func = spirv_nir_debug;
++      spirv_options_local.debug.private_data = (void *)device;
++   }
+
+    spirv_options_local.sampler_descriptor_size =
+       device->physical->properties.samplerDescriptorSize;
