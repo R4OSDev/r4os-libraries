@@ -150,6 +150,13 @@ archive and original Rust/Mesa notices listed under R4NAK above. Its private
 arena/worker adapter is original Apache-2.0 code; no Rust compiler algorithm
 or upstream copyright notice is replaced.
 
+`R4VK/Tools/BuildNil.ps1` compiles the original MIT NIL Rust sources with
+their copyright notices retained. Private copies adapt only the freestanding
+prelude, native rounding and image-construction error boundary. Original
+layout and descriptor calculations remain intact; the native worker and C
+result adapters are original Apache-2.0 R4OS material. Rust runtime dependency
+notices are the same as those listed under R4NAK above.
+
 The native R4VK formatting adapter uses the existing `R4NAK/ThirdParty/stb/`
 copy of stb_sprintf, with its complete MIT/Unlicense text retained there.
 Private generated Vulkan entrypoint headers change native ELF visibility only;

@@ -655,40 +655,6 @@
  }
 
  void
---- a/src/nouveau/vulkan/nvk_image.c
-+++ b/src/nouveau/vulkan/nvk_image.c
-@@ -360,6 +360,15 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
-    memset(&pImageFormatProperties->imageFormatProperties, 0,
-           sizeof(pImageFormatProperties->imageFormatProperties));
-
-+#ifdef R4OS_VULKAN
-+   if ((external_info && external_info->handleType) ||
-+       pImageFormatInfo->tiling == VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT ||
-+       (pImageFormatInfo->flags & (VK_IMAGE_CREATE_SPARSE_BINDING_BIT |
-+                                  VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT |
-+                                  VK_IMAGE_CREATE_SPARSE_ALIASED_BIT)))
-+      return VK_ERROR_FORMAT_NOT_SUPPORTED;
-+#endif
-+
-    uint64_t drm_format_mod =
-       get_explicit_drm_format_mod(pImageFormatInfo->pNext);
-    const struct vk_format_ycbcr_info *ycbcr_info =
-@@ -542,6 +551,7 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
-    }
-
-    const VkExternalMemoryProperties *ext_mem_props = NULL;
-+#ifndef R4OS_VULKAN
-    if (external_info != NULL && external_info->handleType != 0) {
-       bool tiling_has_explicit_layout;
-       switch (pImageFormatInfo->tiling) {
-@@ -594,6 +604,7 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
-       }
-    }
-
-+#endif
-    unsigned plane_count = vk_format_get_plane_count(pImageFormatInfo->format);
-    if (nvk_use_separate_zs(pdev, pImageFormatInfo->format))
-       plane_count = 2;
 --- a/src/vulkan/runtime/vk_physical_device.c
 +++ b/src/vulkan/runtime/vk_physical_device.c
 @@ -283,6 +283,7 @@ vk_common_GetPhysicalDeviceSparseImageFormatProperties(VkPhysicalDevice physical
@@ -1110,3 +1076,130 @@
 
        ASSERTED int cmdbuf_n = 0, queue_n = 0, obj_n = 0;
        for (int i = 0; i < object_count; i++) {
+--- a/src/nouveau/vulkan/nvk_image.c
++++ b/src/nouveau/vulkan/nvk_image.c
+@@ -24,6 +24,34 @@
+ #include "clc597.h"
+ #include "clcd97.h"
+
++#if defined(R4OS_VULKAN)
++#include "r4vk_nil.h"
++#endif
++
++static VkResult
++init_nil_image(const struct nv_device_info *dev, struct nil_image *out,
++               const struct nil_image_init_info *info)
++{
++#if defined(R4OS_VULKAN)
++   return r4vk_nil_image_init(dev, out, info);
++#else
++   return nil_image_init(dev, out, info) ? VK_SUCCESS : VK_ERROR_UNKNOWN;
++#endif
++}
++
++static VkResult
++init_nil_image_planar(const struct nv_device_info *dev, struct nil_image *out,
++                      const struct nil_image_init_info *info,
++                      size_t plane, size_t plane_count)
++{
++#if defined(R4OS_VULKAN)
++   return r4vk_nil_image_init_planar(dev, out, info, plane, plane_count);
++#else
++   return nil_image_init_planar(dev, out, info, plane, plane_count) ?
++          VK_SUCCESS : VK_ERROR_UNKNOWN;
++#endif
++}
++
+ static bool
+ nvk_use_separate_zs(const struct nvk_physical_device *pdev, VkFormat vk_format)
+ {
+@@ -360,6 +388,15 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+    memset(&pImageFormatProperties->imageFormatProperties, 0,
+           sizeof(pImageFormatProperties->imageFormatProperties));
+
++#ifdef R4OS_VULKAN
++   if ((external_info && external_info->handleType) ||
++       pImageFormatInfo->tiling == VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT ||
++       (pImageFormatInfo->flags & (VK_IMAGE_CREATE_SPARSE_BINDING_BIT |
++                                  VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT |
++                                  VK_IMAGE_CREATE_SPARSE_ALIASED_BIT)))
++      return VK_ERROR_FORMAT_NOT_SUPPORTED;
++#endif
++
+    uint64_t drm_format_mod =
+       get_explicit_drm_format_mod(pImageFormatInfo->pNext);
+    const struct vk_format_ycbcr_info *ycbcr_info =
+@@ -542,6 +579,7 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+    }
+
+    const VkExternalMemoryProperties *ext_mem_props = NULL;
++#ifndef R4OS_VULKAN
+    if (external_info != NULL && external_info->handleType != 0) {
+       bool tiling_has_explicit_layout;
+       switch (pImageFormatInfo->tiling) {
+@@ -594,6 +632,7 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+       }
+    }
+
++#endif
+    unsigned plane_count = vk_format_get_plane_count(pImageFormatInfo->format);
+    if (nvk_use_separate_zs(pdev, pImageFormatInfo->format))
+       plane_count = 2;
+@@ -982,11 +1021,11 @@ nvk_image_init(struct nvk_device *dev,
+                .usage = usage & ~NIL_IMAGE_USAGE_LINEAR_BIT,
+             };
+
+-            bool ok = nil_image_init(&pdev->info,
++            VkResult nil_result = init_nil_image(&pdev->info,
+                                      &image->linear_tiled_shadows[plane].nil,
+                                      &tiled_shadow_nil_info);
+-            if (!ok)
+-               return vk_errorf(dev, VK_ERROR_UNKNOWN,
++            if (nil_result != VK_SUCCESS)
++               return vk_errorf(dev, nil_result,
+                                 "Invalid image creation parameters");
+
+             /* These are always allocated by the driver so the offset
+@@ -1044,21 +1083,21 @@ nvk_image_init(struct nvk_device *dev,
+    if (usage & NIL_IMAGE_USAGE_VIDEO_BIT) {
+       assert(!image->disjoint);
+       for (uint8_t plane = 0; plane < image->plane_count; plane++) {
+-         bool ok = nil_image_init_planar(&pdev->info,
++         VkResult nil_result = init_nil_image_planar(&pdev->info,
+                                          &image->planes[plane].nil,
+                                          nil_info, plane,
+                                          image->plane_count);
+-         if (!ok)
+-            return vk_errorf(dev, VK_ERROR_UNKNOWN,
++         if (nil_result != VK_SUCCESS)
++            return vk_errorf(dev, nil_result,
+                              "Invalid image creation parameters");
+       }
+    } else {
+       for (uint8_t plane = 0; plane < image->plane_count; plane++) {
+-         bool ok = nil_image_init(&pdev->info,
++         VkResult nil_result = init_nil_image(&pdev->info,
+                                   &image->planes[plane].nil,
+                                   &nil_info[plane]);
+-         if (!ok)
+-            return vk_errorf(dev, VK_ERROR_UNKNOWN,
++         if (nil_result != VK_SUCCESS)
++            return vk_errorf(dev, nil_result,
+                              "Invalid image creation parameters");
+       }
+    }
+@@ -1104,11 +1143,11 @@ nvk_image_init(struct nvk_device *dev,
+          .usage = usage,
+       };
+
+-      bool ok = nil_image_init(&pdev->info,
++      VkResult nil_result = init_nil_image(&pdev->info,
+                                &image->stencil_copy_temp.nil,
+                                &stencil_nil_info);
+-      if (!ok)
+-         return vk_errorf(dev, VK_ERROR_UNKNOWN,
++      if (nil_result != VK_SUCCESS)
++         return vk_errorf(dev, nil_result,
+                           "Invalid image creation parameters");
+
+       image->stencil_copy_temp.plane_align_B =

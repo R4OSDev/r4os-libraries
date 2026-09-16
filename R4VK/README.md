@@ -191,6 +191,24 @@ allocation/abort boundary, cancellation/deadlines and output lifetimes.
 Those are not supplied by wrapping the physical-device constructor alone.
 No successful replacement compiler or default build identity is provided.
 
+`Tools/BuildNil.ps1 -CompilerRoot <R4NAK-cache> -MesaRoot <prepared-Mesa>
+-OutputRoot <separate-output>` builds original freestanding NIL from the same
+verified Mesa source. It checks the current NAK build inputs and archive,
+matches Rust dependency object code against that archive, regenerates target
+bindings, and records tool/input/output hashes in `nil.json`. It requires the
+existing R4NAK preparation and `Tools/Prepare.ps1` outputs; no temporary helper
+or host libc is part of this build. Verified unchanged outputs are reusable.
+
+The two image constructors are private unchecked Rust entries. `Port/nil.c`
+owns their native boundary: a separate short-lived compiler arena runs each
+calculation on a joinable worker and publishes its local image only after
+success. Original layout assertions become format rejection; worker/arena
+OOM and initialization errors retain their distinct Vulkan results. NVK's
+four construction sites propagate these results. No Rust unwind crosses C,
+and an invalid image cannot poison a physical device's NAK compiler. Other
+NIL descriptor/copy operations retain their original valid-input contracts.
+This boundary runs at image construction, not per submitted frame.
+
 Native image-format queries reject external handles, DRM tiling and sparse
 flags with zeroed base properties. Calibrated-clock enumeration is excluded;
 the native API version cannot be raised with Mesa's environment override.

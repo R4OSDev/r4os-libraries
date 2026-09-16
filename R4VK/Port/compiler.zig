@@ -168,6 +168,14 @@ pub export fn r4nak_port_fail(reason: u32) callconv(.c) noreturn {
 extern fn nak_compiler_create(?*const anyopaque) callconv(.c) ?*anyopaque;
 extern fn nak_compiler_destroy(*anyopaque) callconv(.c) void;
 const Create = struct { info: *const anyopaque, compiler: ?*anyopaque = null };
+// NIL image creation has no persistent Rust state. It uses a separate short
+// lived arena so an invalid layout cannot poison a physical device's compiler.
+// The C adapter publishes the calculated image only after successful join.
+pub export fn r4vk_nil_run(callback: Callback, argument: ?*anyopaque) callconv(.c) i32 {
+    const arena = Arena.create(std.math.maxInt(usize)) orelse return out_of_memory;
+    defer arena.destroy();
+    return arena.run(callback, argument);
+}
 fn createCompiler(argument: ?*anyopaque) callconv(.c) i32 {
     const data: *Create = @ptrCast(@alignCast(argument.?));
     data.compiler = nak_compiler_create(data.info) orelse return out_of_memory;
