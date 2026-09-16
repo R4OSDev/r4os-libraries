@@ -68,6 +68,20 @@ removes its Linux-only entrypoints, rolls back failed internal map counts,
 unlinks failed mapped allocations and destroys each retired BO's map mutex.
 Full Vulkan device construction and discovery still require provider integration.
 
+The private original `nvk_device.c` now checks the exact native backend's loss
+state and marks the Vulkan device lost. Devices without execution queues do
+not inspect a nonexistent shader-printf buffer. Native device initialization
+omits DRM FDs and DRM sync-payload copying; ordinary native queue submission
+remains the synchronization path. GPU timestamp queries explicitly return
+unsupported without modifying output until the owner exposes that operation.
+Failed device construction destroys initialized meta state, and a zero-queue
+cache-allocation failure skips resource owners that were never initialized.
+Full constructor/runtime integration and its fault coverage remain pending.
+
+`Port/Include/assert.h` follows C's NDEBUG and re-inclusion rules. The compiler
+port's unconditional assertion macro is unsuitable for Mesa release structures
+whose debug-only fields are absent. Assertions remain active in debug builds.
+
 `Port/nvk_va.c` implements NVK's private VA allocation/bind/unbind/free operations
 through the SDK's R4DRAW virtual-resource broker. Its context belongs to one
 NVK device and requires that device's canonical BO-reference accessor. The
@@ -157,8 +171,8 @@ mutable cache or invented GPU completion is used. Native absolute waits use
 R4SYS time; the POSIX MESA_VK_MAX_TIMEOUT debug override is excluded.
 
 Tiled memory, sparse-bind contexts and external handles remain unsupported;
-GPU timestamps and usage telemetry have no callback. BAR/coherent/sparse,
-compression, external-FD and Vulkan capabilities remain unadvertised.
+GPU timestamps and usage telemetry have no native owner callback. BAR mapping,
+sparse, compression, external-FD and public Vulkan capabilities remain unadvertised.
 Public Vulkan admission, feature/limit reporting and full device/error/logging
 integration remain required; these private adapters are not that admission.
 

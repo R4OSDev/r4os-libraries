@@ -423,3 +423,91 @@
        return os_time_get_absolute_timeout(max_timeout_ms * 1000000ull);
 +#endif
  }
+--- a/src/nouveau/vulkan/nvk_device.c
++++ b/src/nouveau/vulkan/nvk_device.c
+@@ -14,7 +14,11 @@
+ #include "nvkmd/nvkmd.h"
+
+ #include "vk_common_entrypoints.h"
++#if defined(R4OS_VULKAN)
++#include "r4vk_nvk_device.h"
++#else
+ #include "vk_drm_syncobj.h"
++#endif
+ #include "vk_pipeline_cache.h"
+ #include "vk_debug_utils.h"
+ #include "util/u_printf.h"
+@@ -159,7 +163,14 @@ nvk_device_check_status(struct vk_device *vk_dev)
+    VkResult status = VK_SUCCESS;
+    struct nvk_device *dev = container_of(vk_dev, struct nvk_device, vk);
+
+-   if (NAK_CAN_PRINTF)
++#if defined(R4OS_VULKAN)
++   /* The native owner can lose this exact backend incarnation without a
++    * shader printf abort. Never silently attach a replacement after reset. */
++   if (dev->nvkmd && r4vk_nvk_check_device(dev->nvkmd) != VK_SUCCESS)
++      return vk_device_set_lost(vk_dev, "Native NVIDIA backend lost.");
++#endif
++
++   if (dev->nvkmd && NAK_CAN_PRINTF)
+       status = vk_check_printf_status(&dev->vk, &dev->printf);
+
+    return status;
+@@ -168,9 +179,17 @@ nvk_device_check_status(struct vk_device *vk_dev)
+ static VkResult
+ nvk_device_get_timestamp(struct vk_device *vk_dev, uint64_t *timestamp)
+ {
++#if defined(R4OS_VULKAN)
++   /* Host monotonic time is not a GPU timestamp. Until the native owner has
++    * that operation, reject it without modifying the caller's output. */
++   (void)vk_dev;
++   (void)timestamp;
++   return VK_ERROR_FEATURE_NOT_PRESENT;
++#else
+    struct nvk_device *dev = container_of(vk_dev, struct nvk_device, vk);
+    *timestamp = nvkmd_dev_get_gpu_timestamp(dev->nvkmd);
+    return VK_SUCCESS;
++#endif
+ }
+
+ struct dispatch_table_builder {
+@@ -257,11 +276,15 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
+       if (result != VK_SUCCESS)
+          goto fail_init;
+
++#if !defined(R4OS_VULKAN)
+       vk_device_set_drm_fd(&dev->vk, nvkmd_dev_get_drm_fd(dev->nvkmd));
++      dev->vk.copy_sync_payloads = vk_drm_syncobj_copy_payloads;
++#endif
++      /* Native syncs use ordinary queue submission. Leaving the optional
++       * payload-copy optimization unset selects the common fallback. */
+       dev->vk.command_buffer_ops = &nvk_cmd_buffer_ops;
+
+       dev->vk.get_timestamp = nvk_device_get_timestamp;
+-      dev->vk.copy_sync_payloads = vk_drm_syncobj_copy_payloads;
+
+       result = nvk_upload_queue_init(dev, &dev->upload);
+       if (result != VK_SUCCESS)
+@@ -394,16 +417,21 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
+    if (queue_count > 0 && NAK_CAN_PRINTF) {
+       result = nvk_init_printf(dev);
+       if (result != VK_SUCCESS)
+-         goto fail_mem_cache;
++         goto fail_meta;
+    }
+
+    *pDevice = nvk_device_to_handle(dev);
+
+    return VK_SUCCESS;
+
++fail_meta:
++   nvk_device_finish_meta(dev);
+ fail_mem_cache:
+    vk_pipeline_cache_destroy(dev->vk.mem_cache, NULL);
+ fail_queues:
++   /* A zero-queue device never initialized resource owners or their mutexes. */
++   if (dev->nvkmd == NULL)
++      goto fail_init;
+    vk_foreach_queue_safe(iter, &dev->vk) {
+       struct nvk_queue *queue = container_of(iter, struct nvk_queue, vk);
+       nvk_queue_destroy(dev, queue);
