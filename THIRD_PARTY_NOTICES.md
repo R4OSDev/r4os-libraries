@@ -154,6 +154,10 @@ The native R4VK formatting adapter uses the existing `R4NAK/ThirdParty/stb/`
 copy of stb_sprintf, with its complete MIT/Unlicense text retained there.
 Private generated Vulkan entrypoint headers change native ELF visibility only;
 their original Mesa notices and non-R4OS visibility remain intact.
+The private NVK/common-instance and debug-log changes preserve their original
+Collabora/Red Hat/Intel MIT notices. Native option defaults, console transport
+and stdio/log adapters are original Apache-2.0 code; formatting continues to
+use the licensed stb_sprintf copy above.
 
 The native device-description adapter checks architecture constants against
 the pinned `src/nouveau/winsys/nouveau_device.c` and NVIDIA class headers.

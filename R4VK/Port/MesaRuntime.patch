@@ -170,161 +170,6 @@
  VKAPI_ATTR uint64_t VKAPI_CALL
  nvk_GetDeviceMemoryOpaqueCaptureAddress(
     UNUSED VkDevice device,
---- a/src/nouveau/vulkan/nvk_instance.c
-+++ b/src/nouveau/vulkan/nvk_instance.c
-@@ -3,6 +3,9 @@
-  * SPDX-License-Identifier: MIT
-  */
- #include "nvk_instance.h"
-+#if defined(R4OS_VULKAN)
-+#include "r4vk_platform.h"
-+#endif
- 
- #include "nvk_entrypoints.h"
- #include "nvk_physical_device.h"
-@@ -54,7 +57,7 @@
-    .EXT_display_surface_counter = true,
-    .EXT_acquire_drm_display = true,
- #endif
--#ifndef VK_USE_PLATFORM_WIN32_KHR
-+#if !defined(VK_USE_PLATFORM_WIN32_KHR) && !defined(R4OS_VULKAN)
-    .EXT_headless_surface = true,
- #endif
-    .KHR_device_group_creation = true,
-@@ -147,9 +150,11 @@
-    vk_instance_dispatch_table_from_entrypoints(&dispatch_table,
-                                                &nvk_instance_entrypoints,
-                                                true);
-+#if !defined(R4OS_VULKAN) || defined(NVK_USE_WSI_PLATFORM)
-    vk_instance_dispatch_table_from_entrypoints(&dispatch_table,
-                                                &wsi_instance_entrypoints,
-                                                false);
-+#endif
- 
-    result = vk_instance_init(&instance->vk, &instance_extensions,
-                              &dispatch_table, pCreateInfo, pAllocator);
-@@ -160,10 +165,19 @@
-    nvk_init_experimental_flags(instance);
-    nvk_init_dri_options(instance);
- 
-+#if defined(R4OS_VULKAN)
-+   instance->vk.physical_devices.enumerate = r4vk_nvk_enumerate_physical_devices;
-+#else
-    instance->vk.physical_devices.try_create_for_drm =
-       nvk_create_drm_physical_device;
-+#endif
-    instance->vk.physical_devices.destroy = nvk_physical_device_destroy;
- 
-+#if defined(R4OS_VULKAN)
-+   STATIC_ASSERT(sizeof(instance->driver_build_sha) == sizeof(r4vk_build_identity));
-+   memcpy(instance->driver_build_sha, r4vk_build_identity,
-+          sizeof(instance->driver_build_sha));
-+#else
-    const struct build_id_note *note =
-       build_id_find_nhdr_for_addr(nvk_CreateInstance);
-    if (!note) {
-@@ -181,6 +195,7 @@
- 
-    STATIC_ASSERT(sizeof(instance->driver_build_sha) == BLAKE3_KEY_LEN);
-    copy_build_id_to_sha1(instance->driver_build_sha, note);
-+#endif
- 
-    *pInstance = nvk_instance_to_handle(instance);
-    return VK_SUCCESS;
---- a/src/vulkan/runtime/vk_instance.c
-+++ b/src/vulkan/runtime/vk_instance.c
-@@ -23,7 +23,11 @@
- 
- #include "vk_instance.h"
- 
-+#if defined(R4OS_VULKAN)
-+#include "r4vk_platform.h"
-+#else
- #include "util/libdrm.h"
-+#endif
- #include "util/perf/cpu_trace.h"
- 
- #include "vk_alloc.h"
-@@ -38,7 +42,7 @@
- #include "compiler/glsl_types.h"
- #endif
- 
--#ifndef _WIN32
-+#if !defined(_WIN32) && !defined(R4OS_VULKAN)
- #include "dlfcn.h"
- #endif
- 
-@@ -410,6 +414,7 @@
-    instance->trace_mode |= parse_debug_string(os_get_option("MESA_VK_TRACE"), modes);
- }
- 
-+#if !defined(R4OS_VULKAN)
- static VkResult
- enumerate_drm_physical_devices_locked(struct vk_instance *instance)
- {
-@@ -442,9 +447,21 @@
-    return result;
- }
- 
-+#endif /* !R4OS_VULKAN */
-+
- static VkResult
- enumerate_physical_devices_locked(struct vk_instance *instance)
- {
-+#if defined(R4OS_VULKAN)
-+   /* Missing native integration is an error, not an empty successful list.
-+    * A backend with no eligible adapters must itself return VK_SUCCESS. */
-+   if (!instance->physical_devices.enumerate)
-+      return VK_ERROR_INITIALIZATION_FAILED;
-+   VkResult result = instance->physical_devices.enumerate(instance);
-+   if (result != VK_SUCCESS)
-+      destroy_physical_devices(instance);
-+   return result;
-+#else
-    if (instance->physical_devices.enumerate) {
-       VkResult result = instance->physical_devices.enumerate(instance);
-       if (result != VK_ERROR_INCOMPATIBLE_DRIVER)
-@@ -462,6 +479,7 @@
-    }
- 
-    return result;
-+#endif
- }
- 
- static VkResult
-@@ -570,12 +588,18 @@
-    return vk_instance_get_physical_device_proc_addr(instance, pName);
- }
- 
-+#if !defined(R4OS_VULKAN)
- static uint32_t vk_icd_version = 7;
-+#endif
- 
- uint32_t
- vk_get_negotiated_icd_version(void)
- {
-+#if defined(R4OS_VULKAN)
-+   return r4vk_get_icd_version();
-+#else
-    return vk_icd_version;
-+#endif
- }
- 
- PUBLIC VKAPI_ATTR VkResult VKAPI_CALL
-@@ -643,9 +667,13 @@
-     *          vk_icdGetInstanceProcAddr will be the first method called, to query
-     *          for vk_icdNegotiateLoaderICDInterfaceVersion.
-     */
-+#if defined(R4OS_VULKAN)
-+   return r4vk_negotiate_icd_version(pSupportedVersion);
-+#else
-    vk_icd_version = MIN2(vk_icd_version, *pSupportedVersion);
-    *pSupportedVersion = vk_icd_version;
-    return VK_SUCCESS;
-+#endif
- }
- 
- void
 --- a/src/vulkan/runtime/vk_image.h
 +++ b/src/vulkan/runtime/vk_image.h
 @@ -77,7 +77,7 @@
@@ -862,3 +707,406 @@
  VKAPI_ATTR VkResult VKAPI_CALL
  vk_common_GetPhysicalDeviceToolProperties(VkPhysicalDevice physicalDevice,
                                            uint32_t *pToolCount,
+--- a/src/nouveau/vulkan/nvk_instance.c
++++ b/src/nouveau/vulkan/nvk_instance.c
+@@ -3,6 +3,9 @@
+  * SPDX-License-Identifier: MIT
+  */
+ #include "nvk_instance.h"
++#if defined(R4OS_VULKAN)
++#include "r4vk_platform.h"
++#endif
+
+ #include "nvk_entrypoints.h"
+ #include "nvk_physical_device.h"
+@@ -54,7 +57,7 @@ static const struct vk_instance_extension_table instance_extensions = {
+    .EXT_display_surface_counter = true,
+    .EXT_acquire_drm_display = true,
+ #endif
+-#ifndef VK_USE_PLATFORM_WIN32_KHR
++#if !defined(VK_USE_PLATFORM_WIN32_KHR) && !defined(R4OS_VULKAN)
+    .EXT_headless_surface = true,
+ #endif
+    .KHR_device_group_creation = true,
+@@ -78,6 +81,7 @@ nvk_EnumerateInstanceExtensionProperties(const char *pLayerName,
+       &instance_extensions, pPropertyCount, pProperties);
+ }
+
++#ifndef R4OS_VULKAN
+ static void
+ nvk_init_debug_flags(struct nvk_instance *instance)
+ {
+@@ -127,6 +131,8 @@ nvk_init_dri_options(struct nvk_instance *instance)
+       instance->debug_flags |= NVK_DEBUG_ZERO_MEMORY;
+ }
+
++#endif
++
+ VKAPI_ATTR VkResult VKAPI_CALL
+ nvk_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
+                    const VkAllocationCallbacks *pAllocator,
+@@ -147,23 +153,38 @@ nvk_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
+    vk_instance_dispatch_table_from_entrypoints(&dispatch_table,
+                                                &nvk_instance_entrypoints,
+                                                true);
++#if !defined(R4OS_VULKAN) || defined(NVK_USE_WSI_PLATFORM)
+    vk_instance_dispatch_table_from_entrypoints(&dispatch_table,
+                                                &wsi_instance_entrypoints,
+                                                false);
++#endif
+
+    result = vk_instance_init(&instance->vk, &instance_extensions,
+                              &dispatch_table, pCreateInfo, pAllocator);
+    if (result != VK_SUCCESS)
+       goto fail_alloc;
+
++#ifdef R4OS_VULKAN
++   r4vk_nvk_init_instance_options(instance);
++#else
+    nvk_init_debug_flags(instance);
+    nvk_init_experimental_flags(instance);
+    nvk_init_dri_options(instance);
++#endif
+
++#if defined(R4OS_VULKAN)
++   instance->vk.physical_devices.enumerate = r4vk_nvk_enumerate_physical_devices;
++#else
+    instance->vk.physical_devices.try_create_for_drm =
+       nvk_create_drm_physical_device;
++#endif
+    instance->vk.physical_devices.destroy = nvk_physical_device_destroy;
+
++#if defined(R4OS_VULKAN)
++   STATIC_ASSERT(sizeof(instance->driver_build_sha) == sizeof(r4vk_build_identity));
++   memcpy(instance->driver_build_sha, r4vk_build_identity,
++          sizeof(instance->driver_build_sha));
++#else
+    const struct build_id_note *note =
+       build_id_find_nhdr_for_addr(nvk_CreateInstance);
+    if (!note) {
+@@ -181,6 +202,7 @@ nvk_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
+
+    STATIC_ASSERT(sizeof(instance->driver_build_sha) == BLAKE3_KEY_LEN);
+    copy_build_id_to_sha1(instance->driver_build_sha, note);
++#endif
+
+    *pInstance = nvk_instance_to_handle(instance);
+    return VK_SUCCESS;
+@@ -202,8 +224,10 @@ nvk_DestroyInstance(VkInstance _instance,
+    if (!instance)
+       return;
+
++#ifndef R4OS_VULKAN
+    driDestroyOptionCache(&instance->drirc.options);
+    driDestroyOptionInfo(&instance->drirc.available_options);
++#endif
+
+    vk_instance_finish(&instance->vk);
+    vk_free(&instance->vk.alloc, instance);
+--- a/src/vulkan/runtime/vk_instance.c
++++ b/src/vulkan/runtime/vk_instance.c
+@@ -23,7 +23,11 @@
+
+ #include "vk_instance.h"
+
++#if defined(R4OS_VULKAN)
++#include "r4vk_platform.h"
++#else
+ #include "util/libdrm.h"
++#endif
+ #include "util/perf/cpu_trace.h"
+
+ #include "vk_alloc.h"
+@@ -38,17 +42,19 @@
+ #include "compiler/glsl_types.h"
+ #endif
+
+-#ifndef _WIN32
++#if !defined(_WIN32) && !defined(R4OS_VULKAN)
+ #include "dlfcn.h"
+ #endif
+
+ #define VERSION_IS_1_0(version) \
+    (VK_API_VERSION_MAJOR(version) == 1 && VK_API_VERSION_MINOR(version) == 0)
+
++#ifndef R4OS_VULKAN
+ static const struct debug_control trace_options[] = {
+    {"rmv", VK_TRACE_MODE_RMV},
+    {NULL, 0},
+ };
++#endif
+
+ VkResult
+ vk_instance_init(struct vk_instance *instance,
+@@ -57,9 +63,16 @@ vk_instance_init(struct vk_instance *instance,
+                  const VkInstanceCreateInfo *pCreateInfo,
+                  const VkAllocationCallbacks *alloc)
+ {
++   VkResult result;
++   int mutex_result;
++   bool report_mutex = false, utils_mutex = false, physical_mutex = false;
+    memset(instance, 0, sizeof(*instance));
+    vk_object_base_instance_init(instance, &instance->base, VK_OBJECT_TYPE_INSTANCE);
+    instance->alloc = *alloc;
++   /* Logging and rollback may run before the first allocation succeeds. */
++   list_inithead(&instance->debug_report.callbacks);
++   list_inithead(&instance->debug_utils.callbacks);
++   list_inithead(&instance->physical_devices.list);
+
+    util_cpu_trace_init();
+
+@@ -79,7 +92,7 @@ vk_instance_init(struct vk_instance *instance,
+                       VK_SYSTEM_ALLOCATION_SCOPE_OBJECT);
+
+          if (!messenger)
+-            return vk_error(instance, VK_ERROR_OUT_OF_HOST_MEMORY);
++            goto fail_memory;
+
+          vk_object_base_instance_init(instance, &messenger->base,
+                                       VK_OBJECT_TYPE_DEBUG_UTILS_MESSENGER_EXT);
+@@ -107,11 +120,15 @@ vk_instance_init(struct vk_instance *instance,
+          vk_strdup(&instance->alloc, app->pApplicationName,
+                    VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
+       instance->app_info.app_version = app->applicationVersion;
++      if (app->pApplicationName && !instance->app_info.app_name)
++         goto fail_memory;
+
+       instance->app_info.engine_name =
+          vk_strdup(&instance->alloc, app->pEngineName,
+                    VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
+       instance->app_info.engine_version = app->engineVersion;
++      if (app->pEngineName && !instance->app_info.engine_name)
++         goto fail_memory;
+
+       instance->app_info.api_version = app->apiVersion;
+    }
+@@ -144,8 +161,10 @@ vk_instance_init(struct vk_instance *instance,
+     *    VK_ERROR_INCOMPATIBLE_DRIVER for any value of apiVersion."
+     */
+    if (VERSION_IS_1_0(instance_version) &&
+-       !VERSION_IS_1_0(instance->app_info.api_version))
+-      return VK_ERROR_INCOMPATIBLE_DRIVER;
++       !VERSION_IS_1_0(instance->app_info.api_version)) {
++      result = VK_ERROR_INCOMPATIBLE_DRIVER;
++      goto fail;
++   }
+
+    instance->supported_extensions = supported_extensions;
+
+@@ -157,21 +176,27 @@ vk_instance_init(struct vk_instance *instance,
+             break;
+       }
+
+-      if (idx >= VK_INSTANCE_EXTENSION_COUNT)
+-         return vk_errorf(instance, VK_ERROR_EXTENSION_NOT_PRESENT,
++      if (idx >= VK_INSTANCE_EXTENSION_COUNT) {
++         result = vk_errorf(instance, VK_ERROR_EXTENSION_NOT_PRESENT,
+                           "%s not supported",
+                           pCreateInfo->ppEnabledExtensionNames[i]);
++         goto fail;
++      }
+
+-      if (!supported_extensions->extensions[idx])
+-         return vk_errorf(instance, VK_ERROR_EXTENSION_NOT_PRESENT,
++      if (!supported_extensions->extensions[idx]) {
++         result = vk_errorf(instance, VK_ERROR_EXTENSION_NOT_PRESENT,
+                           "%s not supported",
+                           pCreateInfo->ppEnabledExtensionNames[i]);
++         goto fail;
++      }
+
+ #ifdef ANDROID_STRICT
+-      if (!vk_android_allowed_instance_extensions.extensions[idx])
+-         return vk_errorf(instance, VK_ERROR_EXTENSION_NOT_PRESENT,
++      if (!vk_android_allowed_instance_extensions.extensions[idx]) {
++         result = vk_errorf(instance, VK_ERROR_EXTENSION_NOT_PRESENT,
+                           "%s not supported",
+                           pCreateInfo->ppEnabledExtensionNames[i]);
++         goto fail;
++      }
+ #endif
+
+       instance->enabled_extensions.extensions[idx] = true;
+@@ -183,32 +208,32 @@ vk_instance_init(struct vk_instance *instance,
+    vk_instance_dispatch_table_from_entrypoints(
+       &instance->dispatch_table, &vk_common_instance_entrypoints, false);
+
+-   if (mtx_init(&instance->debug_report.callbacks_mutex, mtx_plain) != 0)
+-      return vk_error(instance, VK_ERROR_INITIALIZATION_FAILED);
++   if ((mutex_result = mtx_init(&instance->debug_report.callbacks_mutex, mtx_plain)) != thrd_success)
++      goto fail_mutex;
++   report_mutex = true;
+
+    list_inithead(&instance->debug_report.callbacks);
+
+-   if (mtx_init(&instance->debug_utils.callbacks_mutex, mtx_plain) != 0) {
+-      mtx_destroy(&instance->debug_report.callbacks_mutex);
+-      return vk_error(instance, VK_ERROR_INITIALIZATION_FAILED);
+-   }
++   if ((mutex_result = mtx_init(&instance->debug_utils.callbacks_mutex, mtx_plain)) != thrd_success)
++      goto fail_mutex;
++   utils_mutex = true;
+
+    list_inithead(&instance->debug_utils.callbacks);
+
+    list_inithead(&instance->physical_devices.list);
+
+-   if (mtx_init(&instance->physical_devices.mutex, mtx_plain) != 0) {
+-      mtx_destroy(&instance->debug_report.callbacks_mutex);
+-      mtx_destroy(&instance->debug_utils.callbacks_mutex);
+-      return vk_error(instance, VK_ERROR_INITIALIZATION_FAILED);
+-   }
++   if ((mutex_result = mtx_init(&instance->physical_devices.mutex, mtx_plain)) != thrd_success)
++      goto fail_mutex;
++   physical_mutex = true;
+
++#ifndef R4OS_VULKAN
+    instance->trace_mode = parse_debug_string(os_get_option("MESA_VK_TRACE"), trace_options);
+    instance->trace_per_submit = debug_get_bool_option("MESA_VK_TRACE_PER_SUBMIT", false);
+    if (!instance->trace_per_submit) {
+       instance->trace_frame = (uint32_t)debug_get_num_option("MESA_VK_TRACE_FRAME", 0xFFFFFFFF);
+       instance->trace_trigger_file = os_get_option_secure("MESA_VK_TRACE_TRIGGER");
+    }
++#endif
+
+ #if HAVE_RENDERDOC_INTEGRATION
+    simple_mtx_init(&instance->renderdoc_mtx, mtx_plain);
+@@ -219,6 +244,28 @@ vk_instance_init(struct vk_instance *instance,
+ #endif
+
+    return VK_SUCCESS;
++
++fail_memory:
++   result = vk_error(instance, VK_ERROR_OUT_OF_HOST_MEMORY);
++   goto fail;
++fail_mutex:
++   result = vk_error(instance, mutex_result == thrd_nomem ?
++                               VK_ERROR_OUT_OF_HOST_MEMORY :
++                               VK_ERROR_INITIALIZATION_FAILED);
++fail:
++   if (physical_mutex) mtx_destroy(&instance->physical_devices.mutex);
++   if (utils_mutex) mtx_destroy(&instance->debug_utils.callbacks_mutex);
++   if (report_mutex) mtx_destroy(&instance->debug_report.callbacks_mutex);
++   list_for_each_entry_safe(struct vk_debug_utils_messenger, messenger,
++                            &instance->debug_utils.instance_callbacks, link) {
++      list_del(&messenger->link);
++      vk_object_base_finish(&messenger->base);
++      vk_free(&instance->alloc, messenger);
++   }
++   vk_free(&instance->alloc, (char *)instance->app_info.app_name);
++   vk_free(&instance->alloc, (char *)instance->app_info.engine_name);
++   vk_object_base_finish(&instance->base);
++   return result;
+ }
+
+ static void
+@@ -407,9 +454,12 @@ void
+ vk_instance_add_driver_trace_modes(struct vk_instance *instance,
+                                    const struct debug_control *modes)
+ {
++#ifndef R4OS_VULKAN
+    instance->trace_mode |= parse_debug_string(os_get_option("MESA_VK_TRACE"), modes);
++#endif
+ }
+
++#if !defined(R4OS_VULKAN)
+ static VkResult
+ enumerate_drm_physical_devices_locked(struct vk_instance *instance)
+ {
+@@ -442,9 +492,21 @@ enumerate_drm_physical_devices_locked(struct vk_instance *instance)
+    return result;
+ }
+
++#endif /* !R4OS_VULKAN */
++
+ static VkResult
+ enumerate_physical_devices_locked(struct vk_instance *instance)
+ {
++#if defined(R4OS_VULKAN)
++   /* Missing native integration is an error, not an empty successful list.
++    * A backend with no eligible adapters must itself return VK_SUCCESS. */
++   if (!instance->physical_devices.enumerate)
++      return VK_ERROR_INITIALIZATION_FAILED;
++   VkResult result = instance->physical_devices.enumerate(instance);
++   if (result != VK_SUCCESS)
++      destroy_physical_devices(instance);
++   return result;
++#else
+    if (instance->physical_devices.enumerate) {
+       VkResult result = instance->physical_devices.enumerate(instance);
+       if (result != VK_ERROR_INCOMPATIBLE_DRIVER)
+@@ -462,6 +524,7 @@ enumerate_physical_devices_locked(struct vk_instance *instance)
+    }
+
+    return result;
++#endif
+ }
+
+ static VkResult
+@@ -570,12 +633,18 @@ vk_icdGetPhysicalDeviceProcAddr(VkInstance  _instance,
+    return vk_instance_get_physical_device_proc_addr(instance, pName);
+ }
+
++#if !defined(R4OS_VULKAN)
+ static uint32_t vk_icd_version = 7;
++#endif
+
+ uint32_t
+ vk_get_negotiated_icd_version(void)
+ {
++#if defined(R4OS_VULKAN)
++   return r4vk_get_icd_version();
++#else
+    return vk_icd_version;
++#endif
+ }
+
+ PUBLIC VKAPI_ATTR VkResult VKAPI_CALL
+@@ -643,9 +712,13 @@ vk_icdNegotiateLoaderICDInterfaceVersion(uint32_t *pSupportedVersion)
+     *          vk_icdGetInstanceProcAddr will be the first method called, to query
+     *          for vk_icdNegotiateLoaderICDInterfaceVersion.
+     */
++#if defined(R4OS_VULKAN)
++   return r4vk_negotiate_icd_version(pSupportedVersion);
++#else
+    vk_icd_version = MIN2(vk_icd_version, *pSupportedVersion);
+    *pSupportedVersion = vk_icd_version;
+    return VK_SUCCESS;
++#endif
+ }
+
+ void
+--- a/src/vulkan/runtime/vk_log.c
++++ b/src/vulkan/runtime/vk_log.c
+@@ -115,7 +115,8 @@ __vk_log_impl(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+    if (unlikely(!instance) ||
+        (likely(!instance->enable_debug_logging) &&
+         likely(list_is_empty(&instance->debug_utils.callbacks)) &&
+-        likely(list_is_empty(&instance->debug_report.callbacks))))
++        likely(list_is_empty(&instance->debug_report.callbacks)) &&
++        likely(list_is_empty(&instance->debug_utils.instance_callbacks))))
+       return;
+ #endif
+
+@@ -127,6 +128,12 @@ __vk_log_impl(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+    va_end(va);
+
+    char *message_idname = ralloc_asprintf(NULL, "%s:%d", file, line);
++   /* Diagnostics must not turn an allocation failure into a NULL access. */
++   if (!message || !message_idname) {
++      ralloc_free(message);
++      ralloc_free(message_idname);
++      return;
++   }
+
+    const bool do_log = MESA_VK_LOG ||
+                        (instance && instance->enable_debug_logging);
+@@ -180,6 +187,8 @@ __vk_log_impl(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+
+       VkDebugUtilsObjectNameInfoEXT *object_name_infos =
+          ralloc_array(NULL, VkDebugUtilsObjectNameInfoEXT, object_count);
++      if (!object_name_infos)
++         object_count = 0;
+
+       ASSERTED int cmdbuf_n = 0, queue_n = 0, obj_n = 0;
+       for (int i = 0; i < object_count; i++) {

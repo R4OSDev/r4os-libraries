@@ -165,12 +165,13 @@ removes FD/DRM, placed mapping, capture/replay, sparse, calibrated timestamps,
 memory-budget telemetry and HDR metadata that lack native implementations.
 The port does not inherit Linux NVK's conformance version.
 
-The constructor is compiled in assertion/release modes. Full public instance
-creation and the final advertised API/feature profile remain open.
-The targeted SMP4 fixture executes the complete original constructor/destructor
-and native enumeration with real NAK/NIL, generated memory/image dispatch,
-OOM and partial-enumeration cleanup. It supplies an explicit minimal instance
-harness and modeled GPU facts; it is not a public CreateInstance/provider test.
+The constructor is compiled in assertion/release modes. The final advertised
+API/feature profile and complete logical-device integration remain open.
+The targeted SMP4 fixture executes the original public CreateInstance and
+DestroyInstance, complete physical-device construction and native enumeration
+with real NAK/NIL, generated queries, OOM and partial-enumeration cleanup.
+GPU facts remain modeled; VKPORT is a temporary test module, not an installed
+R4VK provider or a complete logical VkDevice.
 `Port/compiler.zig` gives the real Rust NAK compiler its own
 process-owned arena, retained by the native physical device. Creation and
 destruction run on joinable workers; Rust OOM/panic terminates that worker
@@ -201,6 +202,30 @@ R4XBuilder leaves only fully linked, verified ABS64 weak-undefined NULL pointers
 unrelocated. Strong/local undefined targets, nonzero values/addends/pointers,
 unlinked inputs and relaxed GOT relocations remain errors. Manifest-selected
 R4M exports and the loader format are unchanged.
+
+The original public NVK instance entrypoints use per-instance native defaults
+from `Port/nvk_options.c`, matching the pinned baseline values. Linux DRIRC,
+identity/experimental overrides and RMV/file tracing are excluded from this
+policy. Instance failure unwinds copied application/engine names, creation
+messengers and initialized mutexes; mutex OOM preserves its Vulkan error kind.
+
+Original Mesa error/debug functions are linked to the process-owned C heap.
+Creation callbacks are considered even in a release logging build; diagnostic
+allocation failure cannot turn a returned Vulkan error into a NULL access.
+`Port/console.zig`, `stdio.c` and `log.c` send unbuffered diagnostic output
+through the current caller's R4SYS console. Formatting uses bounded streaming
+scratch space without heap allocation. This supplies console streams only;
+no filesystem FILE, caller stream handle or Linux environment is fabricated.
+
+`Tools/Archive.ps1` preserves Mesa's required `link_whole` dispatch semantics.
+`New-R4VKDispatchArchive` combines the explicit C object set into one archive
+member through Zig LLD `-r --unique`, keeping same-named static sections
+separate for final garbage collection. This retains weak-only generated
+query implementations while excluding unrelated shader globals. Rust archives
+retain normal selective extraction. Rebuilds replace the archive completely.
+The public-instance SMP4 probe covers function lookup, allocation-failure
+rollback, repeated/incomplete enumeration, physical properties and actual
+creation/runtime debug callbacks with zero remaining C allocations.
 
 `Port/nvk_submit.c` connects NVK contexts to the canonical native queue. It
 translates GR/compute/copy engine bits, including NVK's copy-only upload

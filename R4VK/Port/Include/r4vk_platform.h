@@ -15,6 +15,8 @@ extern const uint8_t r4vk_build_identity[32];
 int r4vk_negotiate_icd_version(uint32_t *version);
 uint32_t r4vk_get_icd_version(void);
 struct vk_instance;
+struct nvk_instance;
+void r4vk_nvk_init_instance_options(struct nvk_instance *instance);
 VkResult r4vk_nvk_enumerate_physical_devices(struct vk_instance *instance);
 
 #ifdef __cplusplus
