@@ -129,7 +129,7 @@ build orchestration and self-authored diagnostic shader remain original
 Apache-2.0 R4OS material. Upstream lowering algorithms retain their licenses.
 
 
-## R4VK native Vulkan preparation (0.79.35, in progress)
+## R4VK native Vulkan provider (0.79.35, in progress)
 
 R4VK uses the same checksum-pinned Mesa 26.2.2 source as R4NV/R4NAK.
 `R4VK/Tools/Prepare.ps1` verifies that source manifest before copying private
@@ -138,8 +138,9 @@ Collabora, Red Hat and other Mesa copyright/license notices remain in every
 copied file. The original Mesa Vulkan registry, NVK configuration and NIL
 format generators produce the port's tables; their output notices are retained.
 The generated preparation record identifies the inputs, patch and output hashes.
-This intermediate work does not yet distribute an R4VK binary. Full applicable
-source notices must accompany that artifact when its integration is complete.
+The native R4VK binary retains the compiler/runtime license bundle and
+additional NVK/NIL/Vulkan source notices in R4VK/ThirdParty/NOTICES.txt.
+Distribution stages the identical text as R4OS/LICENSES/R4VK-NOTICES.txt.
 The native physical-device constructor and memory/queue queries retain the
 original Mesa nvk_physical_device.c copyright (2022 Collabora Ltd. and Red Hat
 Inc., MIT). Full original source and the patched private copy are archived in

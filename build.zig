@@ -8,6 +8,8 @@ pub const addR4gfxHostColor = @import("R4GFX/color_build.zig").addAt;
 /// versionierten Consumer-Bindings als benannte Paketpfade bereit; jede R4L
 /// bleibt in ihrer eigenen Einheit baubar und getestet.
 pub fn build(b: *std.Build) void {
+    b.addNamedLazyPath("r4vk_zig_binding", b.path("R4VK/Bindings/Zig/r4vk.zig"));
+    b.addNamedLazyPath("r4vk_c_include", b.path("R4VK/Bindings/C"));
     b.addNamedLazyPath("r4nak_zig_binding", b.path("R4NAK/Bindings/Zig/r4nak.zig"));
     b.addNamedLazyPath("r4nak_c_include", b.path("R4NAK/Bindings/C"));
     b.addNamedLazyPath("r4nak_worker", b.path("R4NAK/Bindings/Zig/worker.zig"));

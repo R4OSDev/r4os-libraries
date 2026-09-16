@@ -1,6 +1,6 @@
 # Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 [CmdletBinding()]
-param([switch]$Offline, [string]$OutputFile = '', [switch]$Rebuild)
+param([switch]$Offline, [string]$OutputFile = '', [switch]$Rebuild, [string]$ResultFile = '')
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (!$IsWindows -and !$IsLinux) { throw 'Supported build hosts: Windows and Linux x64.' }
@@ -117,3 +117,12 @@ if($OutputFile) {
     Copy-Item -LiteralPath $archiveOut -Destination $destination -Force
 }
 Write-Host "R4NAK native archive: $archiveOut"
+if ($ResultFile) {
+    $destination = [IO.Path]::GetFullPath($ResultFile, $workspace)
+    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($destination)) | Out-Null
+    [ordered]@{
+        schema = 1; identity = $id
+        root = [IO.Path]::GetRelativePath($workspace, $buildRoot).Replace('\', '/')
+        record_sha256 = (Hash $record); archive_sha256 = (Hash $archiveOut)
+    } | ConvertTo-Json | Set-Content -LiteralPath $destination -Encoding utf8NoBOM
+}

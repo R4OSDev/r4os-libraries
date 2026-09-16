@@ -2,10 +2,35 @@
 
 Work for roadmap 0.79.35 is in progress. This directory currently provides
 Mesa's native CPU runtime and NVK resource devices, memory/VA, hardware
-descriptions and native submit/sync adapters. It does not yet install an
-R4VK.R4L, ICD or advertised Vulkan feature set.
+descriptions and native submit/sync adapters. The regular build produces
+R4VK.R4L with a native loader/ICD bootstrap. `IMAGE_SCOPE=none` keeps it out of
+normal images until the final feature profile and resource/sync admission.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
+
+Build from the Libraries root with `./Build.sh R4VK` or `Build.bat R4VK`.
+`-Doffline=true` requires cached source archives. `Tools/Build.ps1` resolves
+the mapped workspace, obtains a verified R4NAK build receipt, prepares Mesa
+and shader helpers, builds native C/NIL, and publishes matching archives to
+the Zig build. `Artifacts/Native/R4VK/<host>` holds checked native caches;
+no temporary fixture path is a build dependency. Windows execution remains
+unchecked. Required host tools are described below and in R4NAK/README.md.
+
+Applications import `R4VK:VULKAN_V1:1` through the normal R4M loader. Generated
+C/Zig bindings validate the library table. Its `open` call receives the
+immutable R4SYS/R4DRAW/R4DEV table addresses and returns the standard ICD
+negotiation, instance-proc and physical-device-proc entrypoints. Vulkan then
+uses its ordinary x86_64 C ABI. Opening creates no Vulkan object and does not
+claim GPU availability. Invalid descriptors leave the output unchanged;
+repeat opens with the same boot tables are idempotent. Keep the imported
+library generation alive while using its functions or objects. Contract and
+API details: `Contract/LibraryContract.json` and `Docs/API.md`.
+
+The normal build runs one generated C/Zig ABI conformance case. The independent
+C consumer used for integration links no Mesa/NVK code; all Vulkan calls enter
+the canonical R4VK.R4L. See the current scoped result in
+`Docs/Drivers/GrafikVulkan07935.json` in the workspace Docs repository.
+Full source notices accompany the artifact in `ThirdParty/NOTICES.txt`.
 
 `Port/threading.zig` implements process-owned mutexes and conditions on the
 R4SYS v19 notification tail (Kernel 0.1.183). An uncontended mutex uses atomic
@@ -174,9 +199,9 @@ An unchanged cache is verified, while damaged outputs are rejected.
 One deterministically ordered combined archive member preserves weak Mesa
 dispatch implementations; a response file avoids Windows command-line limits.
 The Linux build, cache reuse/rejection and R4M link pass. Windows execution
-and the final R4VK module/contract/manifest integration remain open. Link the
-archive with matching native NAK/NIL and the R4VK Zig runtime; this step does
-not install a provider or grant Vulkan capabilities.
+remains unchecked. The R4VK module build links the
+archive with matching native NAK/NIL and the R4VK Zig runtime. The archive
+build alone does not grant Vulkan capabilities.
 
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays
@@ -427,8 +452,8 @@ only Linux execution has been checked. Host prerequisites include LLVM/Clang
 19 development files, SPIRV-Tools and LLVM-SPIRV with matching pkg-config data
 (Debian: llvm-19-dev, libclang-cpp19-dev, libllvmspirvlib-19-dev, spirv-tools).
 
-The bounded SMP4 proof uses a temporary native C/R4L fixture, not a Vulkan
-provider. Actual Mesa/NVK resource, sync and timeline code uses real kernel
+Earlier bounded SMP4 proofs use temporary native C/R4L fixtures. Actual
+Mesa/NVK resource, sync and timeline code uses real kernel
 queues and brokers with explicitly modeled GPU/VA receipts. Diagnostic-only
 fixture replacements preserve negative errors and Mesa's lost flag; they do
 not complete work. This does not validate physical GPU execution or DMA.
