@@ -206,8 +206,10 @@ VkResult r4vk_nvk_create_pdev(const R4Draw *draw,
    physical->base.dev_info = architecture.info;
    physical->base.bind_align_B = architecture.bind_alignment;
    physical->timeline = vk_sync_timeline_get_type(&r4vk_nvk_sync_type);
-   physical->sync_types[0] = &r4vk_nvk_sync_type;
-   physical->sync_types[1] = &physical->timeline.sync;
+   /* NVK's internal memory streams require the preferred type to support
+    * timelines. Internal ctx waits/signals unwrap these just like vk_queue. */
+   physical->sync_types[0] = &physical->timeline.sync;
+   physical->sync_types[1] = &r4vk_nvk_sync_type;
    physical->base.sync_types = physical->sync_types;
    physical->references = 1;
    physical->draw = *draw;

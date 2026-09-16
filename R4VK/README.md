@@ -3,7 +3,7 @@
 Work for roadmap 0.79.35 is in progress. This directory currently provides
 Mesa's native CPU runtime and NVK resource devices, memory/VA, hardware
 descriptions and native submit/sync adapters. It does not yet install an
-R4VK.R4L, ICD, Vulkan device or advertised Vulkan feature set.
+R4VK.R4L, ICD or advertised Vulkan feature set.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
 
@@ -63,19 +63,35 @@ The targeted Linux host probe checks these primitives with ASan/UBSan and
 the floating-point boundaries with all four MXCSR rounding modes.
 
 The complete selected NVK/Vulkan/NIR/format/push-diagnostic C source set now
-compiles, but its full link still needs native CPU/compiler state and remaining
-option/diagnostic/file helpers. The native device path excludes calibrated
+compiles (512 translation units) and links with original NAK and native NIL.
+The native device path excludes calibrated
 timestamps, RMV and WSI dispatch; swapchain-image requests return unsupported
 until the native WSI integration exists. Experimental NVX CUBIN imports are
 excluded consistently with the native instance's disabled experimental flags.
-These compile checks do not establish a usable logical VkDevice or shader path.
+The full shader-job boundary and final provider integration remain open.
+
+CPU capability/once state, GLSL interned types, shader-printf caches and NIR
+diagnostic mutexes belong to the calling process. Generic C state publication
+checks size/alignment and zeroes before publication. Instance lifetime owns
+GLSL cache references; initial cache OOM fails construction. CPU instruction
+facts come from CPUID/XCR0. Topology and affinity remain unknown; this selected
+runtime must not use generic Mesa worker-pool scheduling based on those fields.
+
+Private C errno and diagnostic buffers belong to an admitted compiler worker
+call. Native options preserve upstream defaults; environment-driven shader
+dump/replacement files are excluded. Assertion/abort on that worker fails its
+job; outside it the failure traps. This is not general TLS or a filesystem.
+Each commandbuffer owns its own OOM runout buffer. Mid-shader C/NIR allocation,
+panic/cancellation cleanup and generated shader-helper cache ownership still
+require integration before shader execution can be admitted.
 
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays
 and runs the original Vulkan/NVK/NIL table generators. Prepare the shared
 Mesa toolchain through `R4NV/Tools/Compiler` first. The script does not download
 sources, alter the pinned source tree or build a complete provider. Consumers
-must compile the private NVK and Vulkan-runtime source/header trees together, with `R4OS_VULKAN`
+must compile the private NVK, Vulkan-runtime, compiler and util source/header
+trees together, with `R4OS_VULKAN`
 and the generated headers, so relative includes cannot bypass the port.
 
 `Port/process_local.zig` publishes resident process-owned contexts for the
@@ -102,7 +118,14 @@ remains the synchronization path. GPU timestamp queries explicitly return
 unsupported without modifying output until the owner exposes that operation.
 Failed device construction destroys initialized meta state, and a zero-queue
 cache-allocation failure skips resource owners that were never initialized.
-Full constructor/runtime integration and its fault coverage remain pending.
+The targeted SMP4 integration now passes public device/queue construction,
+first-allocation OOM, buffer map/binding, optimal image/view creation, idle and
+balanced destruction. Internal streams use Mesa timelines backed by native
+fences; direct NVKMD calls allocate/unwrap points before submitting and publish
+only successful signals. Timeline OOM/retry and zero/completed waits pass.
+A zero M2MF class denotes an absent engine and emits no legacy setup commands.
+These checks use a modeled GPU peer with real kernel brokers, not GPU execution.
+Further command/shader integration and broader constructor faults remain open.
 
 `Port/Include/assert.h` follows C's NDEBUG and re-inclusion rules. The compiler
 port's unconditional assertion macro is unsuitable for Mesa release structures

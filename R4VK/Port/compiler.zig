@@ -22,6 +22,9 @@ const Call = struct {
     argument: ?*anyopaque,
     thread: u32 = 0,
     status: i32 = compiler_failed,
+    errno_value: c_int = 0,
+    diagnostic_flags: [4096]u8 = undefined,
+    diagnostic_enum: [64]u8 = undefined,
 };
 var context_key: u8 = 0;
 fn init(value: *Context) void {
@@ -163,6 +166,23 @@ pub export fn r4nak_port_fail(reason: u32) callconv(.c) noreturn {
     remove(call);
     // Parent frees arena storage only after this worker has actually exited.
     threads.thrd_exit(status);
+}
+
+// Private C shader helpers share the admitted worker's error/diagnostic
+// lifetime. No process-global errno or last-caller scratch pointer is stored.
+pub export fn r4vk_compiler_errno() callconv(.c) *c_int {
+    return &active().errno_value;
+}
+pub export fn r4vk_compiler_scratch(slot: u32) callconv(.c) [*]u8 {
+    const call = active();
+    return switch (slot) {
+        0 => &call.diagnostic_flags,
+        1 => &call.diagnostic_enum,
+        else => @trap(),
+    };
+}
+pub export fn r4vk_compiler_fail(reason: u32) callconv(.c) noreturn {
+    r4nak_port_fail(reason);
 }
 
 extern fn nak_compiler_create(?*const anyopaque) callconv(.c) ?*anyopaque;

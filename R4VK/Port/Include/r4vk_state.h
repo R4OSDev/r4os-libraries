@@ -1,0 +1,15 @@
+/* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
+#ifndef R4VK_STATE_H
+#define R4VK_STATE_H
+#include <stdbool.h>
+#include <stddef.h>
+bool r4vk_state_ensure(const void *key, size_t bytes, size_t alignment);
+void *r4vk_state_get(const void *key);
+bool r4vk_cpu_state_prepare(void);
+bool r4vk_glsl_state_prepare(void);
+bool r4vk_printf_state_prepare(void);
+bool r4vk_diagnostics_prepare(void);
+bool r4vk_glsl_init_or_ref(void);
+bool r4vk_printf_init_or_ref(void);
+_Noreturn void r4vk_compiler_fail(unsigned reason);
+#endif

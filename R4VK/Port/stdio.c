@@ -1,5 +1,6 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "r4nak_libc.h"
+#include "r4vk_state.h"
 #include "../../R4NAK/ThirdParty/stb/stb_sprintf.h"
 
 /* Console identities are immutable and never retain an application's output
@@ -162,5 +163,7 @@ int fseek(FILE *file, long offset, int origin)
 _Noreturn void r4nak_port_assert(const char *condition, const char *file, int line)
 {
    fprintf(stderr, "R4VK assertion: %s (%s:%d)\n", condition, file, line);
-   __builtin_trap();
+   r4vk_compiler_fail(3);
 }
+
+_Noreturn void abort(void) { r4vk_compiler_fail(3); }

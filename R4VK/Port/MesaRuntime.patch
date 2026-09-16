@@ -847,9 +847,14 @@
  #include "util/perf/cpu_trace.h"
 
  #include "vk_alloc.h"
-@@ -38,17 +42,19 @@
+@@ -37,18 +41,24 @@
+ #if !VK_LITE_RUNTIME_INSTANCE
  #include "compiler/glsl_types.h"
  #endif
++#if defined(R4OS_VULKAN)
++#include "r4vk_state.h"
++#include "compiler/glsl_types.h"
++#endif
 
 -#ifndef _WIN32
 +#if !defined(_WIN32) && !defined(R4OS_VULKAN)
@@ -868,7 +873,7 @@
 
  VkResult
  vk_instance_init(struct vk_instance *instance,
-@@ -57,9 +63,16 @@ vk_instance_init(struct vk_instance *instance,
+@@ -57,9 +67,16 @@ vk_instance_init(struct vk_instance *instance,
                   const VkInstanceCreateInfo *pCreateInfo,
                   const VkAllocationCallbacks *alloc)
  {
@@ -885,7 +890,7 @@
 
     util_cpu_trace_init();
 
-@@ -79,7 +92,7 @@ vk_instance_init(struct vk_instance *instance,
+@@ -79,7 +96,7 @@ vk_instance_init(struct vk_instance *instance,
                        VK_SYSTEM_ALLOCATION_SCOPE_OBJECT);
 
           if (!messenger)
@@ -894,7 +899,7 @@
 
           vk_object_base_instance_init(instance, &messenger->base,
                                        VK_OBJECT_TYPE_DEBUG_UTILS_MESSENGER_EXT);
-@@ -107,11 +120,15 @@ vk_instance_init(struct vk_instance *instance,
+@@ -107,11 +124,15 @@ vk_instance_init(struct vk_instance *instance,
           vk_strdup(&instance->alloc, app->pApplicationName,
                     VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
        instance->app_info.app_version = app->applicationVersion;
@@ -910,7 +915,7 @@
 
        instance->app_info.api_version = app->apiVersion;
     }
-@@ -144,8 +161,10 @@ vk_instance_init(struct vk_instance *instance,
+@@ -144,8 +165,10 @@ vk_instance_init(struct vk_instance *instance,
      *    VK_ERROR_INCOMPATIBLE_DRIVER for any value of apiVersion."
      */
     if (VERSION_IS_1_0(instance_version) &&
@@ -923,7 +928,7 @@
 
     instance->supported_extensions = supported_extensions;
 
-@@ -157,21 +176,27 @@ vk_instance_init(struct vk_instance *instance,
+@@ -157,21 +180,27 @@ vk_instance_init(struct vk_instance *instance,
              break;
        }
 
@@ -957,7 +962,7 @@
  #endif
 
        instance->enabled_extensions.extensions[idx] = true;
-@@ -183,32 +208,32 @@ vk_instance_init(struct vk_instance *instance,
+@@ -183,42 +212,69 @@ vk_instance_init(struct vk_instance *instance,
     vk_instance_dispatch_table_from_entrypoints(
        &instance->dispatch_table, &vk_common_instance_entrypoints, false);
 
@@ -1001,7 +1006,16 @@
 
  #if HAVE_RENDERDOC_INTEGRATION
     simple_mtx_init(&instance->renderdoc_mtx, mtx_plain);
-@@ -219,6 +244,28 @@ vk_instance_init(struct vk_instance *instance,
+ #endif
+
+-#if !VK_LITE_RUNTIME_INSTANCE
++#if defined(R4OS_VULKAN)
++   if (!r4vk_cpu_state_prepare() || !r4vk_glsl_state_prepare() ||
++       !r4vk_printf_state_prepare() || !r4vk_diagnostics_prepare() ||
++       !r4vk_glsl_init_or_ref())
++      goto fail_memory;
++#elif !VK_LITE_RUNTIME_INSTANCE
+    glsl_type_singleton_init_or_ref();
  #endif
 
     return VK_SUCCESS;
@@ -1030,7 +1044,16 @@
  }
 
  static void
-@@ -407,9 +454,12 @@ void
+@@ -236,7 +292,7 @@ vk_instance_finish(struct vk_instance *instance)
+ {
+    destroy_physical_devices(instance);
+
+-#if !VK_LITE_RUNTIME_INSTANCE
++#if defined(R4OS_VULKAN) || !VK_LITE_RUNTIME_INSTANCE
+    glsl_type_singleton_decref();
+ #endif
+
+@@ -407,9 +463,12 @@ void
  vk_instance_add_driver_trace_modes(struct vk_instance *instance,
                                     const struct debug_control *modes)
  {
@@ -1043,7 +1066,7 @@
  static VkResult
  enumerate_drm_physical_devices_locked(struct vk_instance *instance)
  {
-@@ -442,9 +492,21 @@ enumerate_drm_physical_devices_locked(struct vk_instance *instance)
+@@ -442,9 +501,21 @@ enumerate_drm_physical_devices_locked(struct vk_instance *instance)
     return result;
  }
 
@@ -1065,7 +1088,7 @@
     if (instance->physical_devices.enumerate) {
        VkResult result = instance->physical_devices.enumerate(instance);
        if (result != VK_ERROR_INCOMPATIBLE_DRIVER)
-@@ -462,6 +524,7 @@ enumerate_physical_devices_locked(struct vk_instance *instance)
+@@ -462,6 +533,7 @@ enumerate_physical_devices_locked(struct vk_instance *instance)
     }
 
     return result;
@@ -1073,7 +1096,7 @@
  }
 
  static VkResult
-@@ -570,12 +633,18 @@ vk_icdGetPhysicalDeviceProcAddr(VkInstance  _instance,
+@@ -570,12 +642,18 @@ vk_icdGetPhysicalDeviceProcAddr(VkInstance  _instance,
     return vk_instance_get_physical_device_proc_addr(instance, pName);
  }
 
@@ -1092,7 +1115,7 @@
  }
 
  PUBLIC VKAPI_ATTR VkResult VKAPI_CALL
-@@ -643,9 +712,13 @@ vk_icdNegotiateLoaderICDInterfaceVersion(uint32_t *pSupportedVersion)
+@@ -643,9 +721,13 @@ vk_icdNegotiateLoaderICDInterfaceVersion(uint32_t *pSupportedVersion)
      *          vk_icdGetInstanceProcAddr will be the first method called, to query
      *          for vk_icdNegotiateLoaderICDInterfaceVersion.
      */
@@ -1281,3 +1304,485 @@
     }
 
     image = vk_zalloc2(&dev->vk.alloc, pAllocator, sizeof(*image), 8,
+--- a/src/compiler/glsl_types.c
++++ b/src/compiler/glsl_types.c
+@@ -33,9 +33,7 @@
+ #include "util/u_string.h"
+ #include "util/simple_mtx.h"
+
+-static simple_mtx_t glsl_type_cache_mutex = SIMPLE_MTX_INITIALIZER;
+-
+-static struct {
++struct r4nak_glsl_type_cache {
+    void *mem_ctx;
+
+    /* Use a linear (arena) allocator for all the new types, since
+@@ -55,7 +53,29 @@ static struct {
+    struct hash_table *struct_types;
+    struct hash_table *interface_types;
+    struct hash_table *subroutine_types;
+-} glsl_type_cache;
++};
++
++/* Native Vulkan instances in one process share interned types. The metadata
++ * and mutex are process-owned; the original instance refcount owns the data. */
++#include "r4vk_state.h"
++struct r4nak_glsl_state {
++   struct r4nak_glsl_type_cache cache;
++   simple_mtx_t mutex;
++};
++static const unsigned char glsl_key;
++bool r4vk_glsl_state_prepare(void)
++{
++   return r4vk_state_ensure(&glsl_key, sizeof(struct r4nak_glsl_state),
++                            _Alignof(struct r4nak_glsl_state));
++}
++static struct r4nak_glsl_state *r4nak_glsl_state(void)
++{
++   struct r4nak_glsl_state *state = r4vk_state_get(&glsl_key);
++   assert(state);
++   return state;
++}
++#define glsl_type_cache (r4nak_glsl_state()->cache)
++#define glsl_type_cache_mutex (r4nak_glsl_state()->mutex)
+
+ static const glsl_type *
+ make_vector_matrix_type(linear_ctx *lin_ctx, uint32_t gl_type,
+@@ -465,8 +485,8 @@ glsl_uint16_type(const glsl_type *t)
+                                     t->interface_row_major, 0);
+ }
+
+-void
+-glsl_type_singleton_init_or_ref()
++bool
++r4vk_glsl_init_or_ref(void)
+ {
+    /* Values of these types must fit in the two bits of
+     * glsl_type::sampled_type.
+@@ -483,10 +503,23 @@ glsl_type_singleton_init_or_ref()
+    simple_mtx_lock(&glsl_type_cache_mutex);
+    if (glsl_type_cache.users == 0) {
+       glsl_type_cache.mem_ctx = ralloc_context(NULL);
+-      glsl_type_cache.lin_ctx = linear_context(glsl_type_cache.mem_ctx);
++      if (glsl_type_cache.mem_ctx)
++         glsl_type_cache.lin_ctx = linear_context(glsl_type_cache.mem_ctx);
++      if (!glsl_type_cache.mem_ctx || !glsl_type_cache.lin_ctx) {
++         ralloc_free(glsl_type_cache.mem_ctx);
++         memset(&glsl_type_cache, 0, sizeof(glsl_type_cache));
++         simple_mtx_unlock(&glsl_type_cache_mutex);
++         return false;
++      }
+    }
+    glsl_type_cache.users++;
+    simple_mtx_unlock(&glsl_type_cache_mutex);
++   return true;
++}
++
++void glsl_type_singleton_init_or_ref(void)
++{
++   if (!r4vk_glsl_init_or_ref()) r4vk_compiler_fail(2);
+ }
+
+ void
+--- a/src/util/u_printf.c
++++ b/src/util/u_printf.c
+@@ -376,23 +376,47 @@ u_printf_hash(const u_printf_info *info)
+    return hash;
+ }
+
+-static struct {
+-   uint32_t users;
+-   struct hash_table_u64 *ht;
+-} u_printf_cache = {0};
+-
+-static simple_mtx_t u_printf_lock = SIMPLE_MTX_INITIALIZER;
++/* Native Vulkan shader printf metadata can outlive individual shader jobs. */
++#include "r4vk_state.h"
++struct r4nak_printf_state {
++   struct { uint32_t users; struct hash_table_u64 *ht; } cache;
++   simple_mtx_t mutex;
++};
++static const unsigned char printf_key;
++bool r4vk_printf_state_prepare(void)
++{
++   return r4vk_state_ensure(&printf_key, sizeof(struct r4nak_printf_state),
++                            _Alignof(struct r4nak_printf_state));
++}
++static struct r4nak_printf_state *r4nak_printf_state(void)
++{
++   struct r4nak_printf_state *state = r4vk_state_get(&printf_key);
++   assert(state);
++   return state;
++}
++#define u_printf_cache (r4nak_printf_state()->cache)
++#define u_printf_lock (r4nak_printf_state()->mutex)
+
+-void
+-u_printf_singleton_init_or_ref(void)
++bool
++r4vk_printf_init_or_ref(void)
+ {
+    simple_mtx_lock(&u_printf_lock);
+
+-   if ((u_printf_cache.users++) == 0) {
++   if (u_printf_cache.users == 0) {
+       u_printf_cache.ht = _mesa_hash_table_u64_create(NULL);
++      if (!u_printf_cache.ht) {
++         simple_mtx_unlock(&u_printf_lock);
++         return false;
++      }
+    }
+-
++   u_printf_cache.users++;
+    simple_mtx_unlock(&u_printf_lock);
++   return true;
++}
++
++void u_printf_singleton_init_or_ref(void)
++{
++   if (!r4vk_printf_init_or_ref()) r4vk_compiler_fail(2);
+ }
+
+ void
+--- a/src/compiler/nir/nir.c
++++ b/src/compiler/nir/nir.c
+@@ -130,8 +130,7 @@ nir_process_debug_variable_once(void)
+ void
+ nir_process_debug_variable(void)
+ {
+-   static once_flag flag = ONCE_FLAG_INIT;
+-   call_once(&flag, nir_process_debug_variable_once);
++   /* R4OS ABI1 has no environment-driven debug configuration. */
+ }
+ #endif
+
+--- a/src/compiler/spirv/spirv_to_nir.c
++++ b/src/compiler/spirv/spirv_to_nir.c
+@@ -243,8 +243,7 @@ initialize_mesa_spirv_debug(void)
+ static void
+ mesa_spirv_debug_init(void)
+ {
+-   static once_flag initialized_debug_flag = ONCE_FLAG_INIT;
+-   call_once(&initialized_debug_flag, initialize_mesa_spirv_debug);
++   /* R4OS ABI1 has no environment-driven debug configuration. */
+ }
+
+ #ifndef NDEBUG
+@@ -283,11 +282,15 @@ vtn_log(struct vtn_builder *b, enum nir_spirv_debug_level level,
+    }
+
+ #ifndef NDEBUG
++#if defined(R4OS_VULKAN)
++   const enum nir_spirv_debug_level default_level = vtn_default_log_level();
++#else
+    static enum nir_spirv_debug_level default_level =
+       NIR_SPIRV_DEBUG_LEVEL_INVALID;
+
+    if (default_level == NIR_SPIRV_DEBUG_LEVEL_INVALID)
+       default_level = vtn_default_log_level();
++#endif
+
+    if (level >= default_level)
+       fprintf(stderr, "%s\n", message);
+@@ -342,6 +345,7 @@ vtn_log_err(struct vtn_builder *b,
+    ralloc_free(msg);
+ }
+
++#if !defined(R4OS_VULKAN)
+ static void
+ vtn_dump_shader(struct vtn_builder *b, const char *path, const char *name)
+ {
+@@ -361,6 +365,7 @@ vtn_dump_shader(struct vtn_builder *b, const char *path, const char *name)
+
+    vtn_info("SPIR-V shader dumped to %s", filename);
+ }
++#endif
+
+ void
+ _vtn_warn(struct vtn_builder *b, const char *file, unsigned line,
+@@ -400,9 +405,11 @@ _vtn_fail(struct vtn_builder *b, const char *file, unsigned line,
+                file, line, fmt, args);
+    va_end(args);
+
++#if !defined(R4OS_VULKAN)
+    const char *dump_path = os_get_option_secure("MESA_SPIRV_FAIL_DUMP_PATH");
+    if (dump_path)
+       vtn_dump_shader(b, dump_path, "fail");
++#endif
+
+ #ifndef NDEBUG
+    if (!b->options->skip_os_break_in_debug_build)
+@@ -7794,6 +7801,9 @@ spirv_to_nir(const uint32_t *words, size_t word_count,
+
+    _mesa_blake3_compute(words, word_count * sizeof(uint32_t), b->shader->info.source_blake3);
+
++#if !defined(R4OS_VULKAN)
++   /* Native shader inputs and diagnostics use the provider's explicit
++    * in-memory interfaces, without environment-controlled file replacement. */
+    const char *dump_path = os_get_option_secure("MESA_SPIRV_DUMP_PATH");
+    if (dump_path) {
+       char blake3_str[BLAKE3_HEX_LEN];
+@@ -7867,6 +7877,7 @@ spirv_to_nir(const uint32_t *words, size_t word_count,
+       // default (empty) path if shader replacement fails
+       no_shader_replace: ;
+    }
++#endif
+
+    /* Skip the SPIR-V header, handled at vtn_create_builder */
+    words+= 5;
+--- a/src/util/u_cpu_detect.h
++++ b/src/util/u_cpu_detect.h
+@@ -143,11 +143,20 @@ struct _util_cpu_caps_state_t {
+
+ #define U_CPU_INVALID_L3 0xffff
+
++#if defined(R4OS_VULKAN)
++struct _util_cpu_caps_state_t *r4vk_cpu_state(void);
++#endif
++
+ static inline const struct util_cpu_caps_t *
+ util_get_cpu_caps(void)
+ {
+    extern void _util_cpu_detect_once(void);
++#if defined(R4OS_VULKAN)
++   struct _util_cpu_caps_state_t *native_state = r4vk_cpu_state();
++#define _util_cpu_caps_state (*native_state)
++#else
+    extern struct _util_cpu_caps_state_t _util_cpu_caps_state;
++#endif
+
+    /* On most CPU architectures, an atomic read is simply a regular memory
+     * load instruction with some extra compiler magic to prevent code
+@@ -158,6 +167,9 @@ util_get_cpu_caps(void)
+       call_once(&_util_cpu_caps_state.once_flag, _util_cpu_detect_once);
+
+    return &_util_cpu_caps_state.caps;
++#if defined(R4OS_VULKAN)
++#undef _util_cpu_caps_state
++#endif
+ }
+
+ #ifdef __cplusplus
+--- a/src/util/u_debug.c
++++ b/src/util/u_debug.c
+@@ -46,7 +46,7 @@
+ void
+ _debug_vprintf(const char *format, va_list ap)
+ {
+-   static char buf[4096] = {'\0'};
++   char buf[4096] = {'\0'};
+ #if DETECT_OS_WINDOWS
+    /* We buffer until we find a newline. */
+    size_t len = strlen(buf);
+@@ -392,7 +392,8 @@ const char *
+ debug_dump_enum(const struct debug_named_value *names,
+                 uint64_t value)
+ {
+-   static char rest[64];
++   extern char *r4vk_compiler_scratch(unsigned);
++   char *rest = r4vk_compiler_scratch(1);
+
+    while (names->name) {
+       if (names->value == value)
+@@ -400,7 +401,7 @@ debug_dump_enum(const struct debug_named_value *names,
+       ++names;
+    }
+
+-   snprintf(rest, sizeof(rest), "0x%08"PRIx64, value);
++   snprintf(rest, 64, "0x%08"PRIx64, value);
+    return rest;
+ }
+
+@@ -408,8 +409,9 @@ debug_dump_enum(const struct debug_named_value *names,
+ const char *
+ debug_dump_flags(const struct debug_named_value *names, uint64_t value)
+ {
+-   static thread_local char output[4096];
+-   static thread_local char rest[256];
++   extern char *r4vk_compiler_scratch(unsigned);
++   char *output = r4vk_compiler_scratch(0);
++   char rest[256];
+    int first = 1;
+
+    output[0] = '\0';
+@@ -417,11 +419,11 @@ debug_dump_flags(const struct debug_named_value *names, uint64_t value)
+    while (names->name) {
+       if ((names->value & value) == names->value) {
+          if (!first)
+-            strncat(output, "|", sizeof(output) - strlen(output) - 1);
++            strncat(output, "|", 4096 - strlen(output) - 1);
+          else
+             first = 0;
+-         strncat(output, names->name, sizeof(output) - strlen(output) - 1);
+-         output[sizeof(output) - 1] = '\0';
++         strncat(output, names->name, 4096 - strlen(output) - 1);
++         output[4095] = '\0';
+          value &= ~names->value;
+       }
+       ++names;
+@@ -429,13 +431,13 @@ debug_dump_flags(const struct debug_named_value *names, uint64_t value)
+
+    if (value) {
+       if (!first)
+-         strncat(output, "|", sizeof(output) - strlen(output) - 1);
++         strncat(output, "|", 4096 - strlen(output) - 1);
+       else
+          first = 0;
+
+       snprintf(rest, sizeof(rest), "0x%08"PRIx64, value);
+-      strncat(output, rest, sizeof(output) - strlen(output) - 1);
+-      output[sizeof(output) - 1] = '\0';
++      strncat(output, rest, 4096 - strlen(output) - 1);
++      output[4095] = '\0';
+    }
+
+    if (first)
+--- a/src/compiler/nir/nir.h
++++ b/src/compiler/nir/nir.h
+@@ -5158,6 +5158,11 @@ void nir_validate_progress_finish(nir_shader *shader, struct blob *setup_blob, b
+ static inline bool
+ should_skip_nir(const char *name)
+ {
++#if defined(R4OS_VULKAN)
++   /* Native fixed policy has no NIR_SKIP override or shared mutable cache. */
++   const char *list = os_get_option("NIR_SKIP");
++   if (!list) return false;
++#else
+    static const char *list = NULL;
+    if (!list) {
+       /* Comma separated list of names to skip. */
+@@ -5165,6 +5170,7 @@ should_skip_nir(const char *name)
+       if (!list)
+          list = "";
+    }
++#endif
+
+    if (!list[0])
+       return false;
+@@ -5259,7 +5265,12 @@ should_print_nir(UNUSED nir_shader *shader)
+ #define NIR_STRINGIZE_INNER(x) #x
+ #define NIR_STRINGIZE(x)       NIR_STRINGIZE_INNER(x)
+
++#if defined(R4OS_VULKAN)
++simple_mtx_t *r4vk_nir_print_mutex(void);
++#define nir_print_lock (*r4vk_nir_print_mutex())
++#else
+ extern simple_mtx_t nir_print_lock;
++#endif
+
+ #define NIR_PASS(progress, nir, pass, ...) _PASS(pass, nir, {                            \
+    nir_metadata_set_validation_flag(nir);                                                \
+--- a/src/compiler/nir/nir_print.c
++++ b/src/compiler/nir/nir_print.c
+@@ -37,7 +37,9 @@
+ #include "nir.h"
+ #include "nir_builder.h"
+
++#if !defined(R4OS_VULKAN)
+ simple_mtx_t nir_print_lock = SIMPLE_MTX_INITIALIZER;
++#endif
+
+ static void
+ print_indentation(unsigned levels, FILE *fp)
+--- a/src/compiler/nir/nir_validate.c
++++ b/src/compiler/nir/nir_validate.c
+@@ -2395,7 +2395,12 @@ destroy_validate_state(validate_state *state)
+    ralloc_free(state->mem_ctx);
+ }
+
++#if defined(R4OS_VULKAN)
++simple_mtx_t *r4vk_nir_failure_mutex(void);
++#define fail_dump_mutex (*r4vk_nir_failure_mutex())
++#else
+ simple_mtx_t fail_dump_mutex = SIMPLE_MTX_INITIALIZER;
++#endif
+
+ static void
+ dump_errors(validate_state *state, const char *when)
+--- a/src/compiler/spirv/vtn_cfg.c
++++ b/src/compiler/spirv/vtn_cfg.c
+@@ -747,11 +747,15 @@ void
+ vtn_function_emit(struct vtn_builder *b, struct vtn_function *func,
+                   vtn_instruction_handler instruction_handler)
+ {
++#if defined(R4OS_VULKAN)
++   const bool force_unstructured = debug_get_bool_option("MESA_SPIRV_FORCE_UNSTRUCTURED", false);
++#else
+    static int force_unstructured = -1;
+    if (force_unstructured < 0) {
+       force_unstructured =
+          debug_get_bool_option("MESA_SPIRV_FORCE_UNSTRUCTURED", false);
+    }
++#endif
+
+    nir_function_impl *impl = func->nir_func->impl;
+    b->nb = nir_builder_at(nir_after_impl(impl));
+--- a/src/nouveau/vulkan/nvk_cmd_buffer.c
++++ b/src/nouveau/vulkan/nvk_cmd_buffer.c
+@@ -165,7 +165,9 @@ const struct vk_command_buffer_ops nvk_cmd_buffer_ops = {
+ };
+
+ /* If we ever fail to allocate a push, we use this */
++#if !defined(R4OS_VULKAN)
+ static uint32_t push_runout[NVK_CMD_BUFFER_MAX_PUSH];
++#endif
+
+ VkResult
+ nvk_cmd_buffer_alloc_mem(struct nvk_cmd_buffer *cmd, bool force_gart,
+@@ -221,8 +223,13 @@ nvk_cmd_buffer_new_push(struct nvk_cmd_buffer *cmd)
+       vk_command_buffer_set_error(&cmd->vk, result);
+       STATIC_ASSERT(NVK_CMD_BUFFER_MAX_PUSH <= NVK_CMD_MEM_SIZE / 4);
+       cmd->push_mem = NULL;
++#if defined(R4OS_VULKAN)
++      nv_push_init(&cmd->push, cmd->push_runout, 0, subc_mask);
++      cmd->push_mem_limit = &cmd->push_runout[NVK_CMD_BUFFER_MAX_PUSH];
++#else
+       nv_push_init(&cmd->push, push_runout, 0, subc_mask);
+       cmd->push_mem_limit = &push_runout[NVK_CMD_BUFFER_MAX_PUSH];
++#endif
+    } else {
+       nv_push_init(&cmd->push, cmd->push_mem->mem->map, 0, subc_mask);
+       cmd->push_mem_limit =
+--- a/src/nouveau/vulkan/nvk_cmd_buffer.h
++++ b/src/nouveau/vulkan/nvk_cmd_buffer.h
+@@ -232,6 +232,8 @@ struct nvk_cmd_push {
+    bool no_prefetch;
+ };
+
++#define NVK_CMD_BUFFER_MAX_PUSH 512
++
+ struct nvk_cmd_buffer {
+    struct vk_command_buffer vk;
+
+@@ -262,6 +264,10 @@ struct nvk_cmd_buffer {
+    struct nvk_cmd_mem *push_mem;
+    uint32_t *push_mem_limit;
+    struct nv_push push;
++#if defined(R4OS_VULKAN)
++   /* Failed command buffers keep recording into their own bounded scratch. */
++   uint32_t push_runout[NVK_CMD_BUFFER_MAX_PUSH];
++#endif
+
+    /** Array of struct nvk_cmd_push
+     *
+@@ -292,7 +298,6 @@ nvk_cmd_buffer_pool(struct nvk_cmd_buffer *cmd)
+
+ void nvk_cmd_buffer_new_push(struct nvk_cmd_buffer *cmd);
+
+-#define NVK_CMD_BUFFER_MAX_PUSH 512
+
+ static inline struct nv_push *
+ nvk_cmd_buffer_push(struct nvk_cmd_buffer *cmd, uint32_t dw_count)
+--- a/src/nouveau/vulkan/nvk_queue.c
++++ b/src/nouveau/vulkan/nvk_queue.c
+@@ -338,7 +338,9 @@ nvk_queue_init_context_state(struct nvk_queue *queue)
+    struct nv_push *p = &push;
+
+    /* M2MF state */
+-   if (pdev->info.cls_m2mf <= FERMI_MEMORY_TO_MEMORY_FORMAT_A) {
++   /* Zero denotes an absent engine, including on the native backend. */
++   if (pdev->info.cls_m2mf != 0 &&
++       pdev->info.cls_m2mf <= FERMI_MEMORY_TO_MEMORY_FORMAT_A) {
+       /* we absolutely do not support Fermi, but if somebody wants to toy
+        * around with it, this is a must
+        */

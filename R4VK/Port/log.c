@@ -1,6 +1,8 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "util/log.h"
 
+void os_log_message(const char *text) { fputs(text, stderr); }
+
 void mesa_log_v(enum mesa_log_level level, const char *tag,
                 const char *format, va_list args)
 {

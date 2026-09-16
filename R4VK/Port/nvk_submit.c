@@ -1,6 +1,8 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "r4vk_nvk_submit.h"
 #include "r4vk_nvk_device.h"
+#include "vk_sync_timeline.h"
+#include "vk_object.h"
 #include <r4nv.h>
 #include <stdlib.h>
 #include <string.h>
@@ -310,21 +312,41 @@ static void ctx_destroy(struct nvkmd_ctx *base)
    free(ctx);
    r4vk_nvk_resources_unref(resources);
 }
+/* Public vk_queue submissions already unwrap assisted timelines. NVK's
+ * private upload/memory streams bypass that layer and need the same bridge.
+ * Their log object supplies the live Vulkan allocator owner; no device or
+ * timeline pointer is retained by the native context. */
+static bool internal_timeline(struct vk_object_base *log, struct vk_sync *sync)
+{
+   if (!log || !log->device || !sync || sync->flags != VK_SYNC_IS_TIMELINE ||
+       !vk_sync_as_timeline(sync)) return false;
+   const struct vk_sync_timeline_type *type =
+      container_of(sync->type, struct vk_sync_timeline_type, sync);
+   return type->point_sync_type == &r4vk_nvk_sync_type;
+}
 static VkResult ctx_wait(struct nvkmd_ctx *base, struct vk_object_base *log,
                           uint32_t count, const struct vk_sync_wait *waits)
 {
-   (void)log;
    struct native_ctx *ctx = native(base);
    for (uint32_t i = 0; i < count; i++)
-      if (!r4vk_nvk_sync_supported(waits[i].sync, waits[i].wait_value))
+      if (!r4vk_nvk_sync_supported(waits[i].sync, waits[i].wait_value) &&
+          !internal_timeline(log, waits[i].sync))
          return VK_ERROR_FEATURE_NOT_PRESENT;
    for (uint32_t i = 0; i < count; i++) {
       if (ctx->wait_count == ARRAY_SIZE(ctx->waits)) {
          VkResult result = flush(ctx, true);
          if (result != VK_SUCCESS) return result;
       }
+      struct vk_sync_wait wait = waits[i];
+      struct vk_sync_timeline_point *time_point = NULL;
+      if (internal_timeline(log, wait.sync)) {
+         VkResult result = vk_sync_wait_unwrap(log->device, &wait, &time_point);
+         if (result != VK_SUCCESS) return result;
+         if (!wait.sync) continue; /* Zero or an already completed value. */
+      }
       struct r4vk_nvk_point *point = NULL;
-      VkResult result = r4vk_nvk_sync_point(waits[i].sync, ctx->resources, &point);
+      VkResult result = r4vk_nvk_sync_point(wait.sync, ctx->resources, &point);
+      if (time_point) vk_sync_timeline_point_unref(log->device, time_point);
       if (result != VK_SUCCESS) return result;
       if (!point) continue; /* Explicit CPU-signaled binary event. */
       if (point->resources != ctx->resources) {
@@ -386,18 +408,50 @@ static VkResult ctx_exec(struct nvkmd_ctx *base, struct vk_object_base *log,
 static VkResult ctx_signal(struct nvkmd_ctx *base, struct vk_object_base *log,
                             uint32_t count, const struct vk_sync_signal *signals)
 {
-   (void)log;
    struct native_ctx *ctx = native(base);
-   for (uint32_t i = 0; i < count; i++)
-      if (!r4vk_nvk_sync_supported(signals[i].sync, signals[i].signal_value))
-         return VK_ERROR_FEATURE_NOT_PRESENT;
-   VkResult result = flush(ctx, count != 0);
-   if (result != VK_SUCCESS) return result;
+   bool has_timeline = false;
    for (uint32_t i = 0; i < count; i++) {
-      result = r4vk_nvk_sync_assign(signals[i].sync, ctx->last);
-      if (result != VK_SUCCESS) return lost(ctx->resources);
+      if (internal_timeline(log, signals[i].sync) && signals[i].signal_value)
+         has_timeline = true;
+      else if (!r4vk_nvk_sync_supported(signals[i].sync, signals[i].signal_value))
+         return VK_ERROR_FEATURE_NOT_PRESENT;
    }
-   return VK_SUCCESS;
+   /* Allocate every timeline point before submitting or publishing any
+    * signal. Failed allocation leaves the batch and all signals untouched. */
+   struct vk_sync_timeline_point **points = NULL;
+   VkResult result = VK_SUCCESS;
+   if (has_timeline) {
+      points = calloc(count, sizeof(*points));
+      if (!points) return VK_ERROR_OUT_OF_HOST_MEMORY;
+      for (uint32_t i = 0; i < count; i++) {
+         if (!internal_timeline(log, signals[i].sync)) continue;
+         struct vk_sync_signal signal = signals[i];
+         result = vk_sync_signal_unwrap(log->device, &signal, &points[i]);
+         if (result != VK_SUCCESS) goto done;
+      }
+   }
+   result = flush(ctx, count != 0);
+   if (result != VK_SUCCESS) goto done;
+   for (uint32_t i = 0; i < count; i++) {
+      struct vk_sync *sync = points && points[i] ? &points[i]->sync : signals[i].sync;
+      result = r4vk_nvk_sync_assign(sync, ctx->last);
+      if (result != VK_SUCCESS) { result = lost(ctx->resources); goto done; }
+   }
+   if (points) {
+      for (uint32_t i = 0; i < count; i++) {
+         if (!points[i]) continue;
+         result = vk_sync_timeline_point_install(log->device, points[i]);
+         points[i] = NULL; /* Install consumes the reference, also on error. */
+         if (result != VK_SUCCESS) { result = lost(ctx->resources); goto done; }
+      }
+   }
+done:
+   if (points) {
+      for (uint32_t i = 0; i < count; i++)
+         if (points[i]) vk_sync_timeline_point_unref(log->device, points[i]);
+      free(points);
+   }
+   return result;
 }
 static VkResult ctx_flush(struct nvkmd_ctx *base, struct vk_object_base *log)
 {
