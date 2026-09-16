@@ -20,6 +20,22 @@ pub export fn r4vk_monotonic_time(output: *u64) callconv(.c) c_int {
     output.* = info.instant_ns;
     return 0;
 }
+// Finite native resource operations use one clock snapshot for both their
+// absolute broker deadline and the rounded event-wait duration. Publish both
+// outputs only on success; UINT64_MAX remains the public infinite sentinel.
+pub export fn r4vk_operation_deadline(duration: u64, deadline: *u64, timeout_ticks: *u64) callconv(.c) c_int {
+    if (duration == 0 or duration > 60 * ns_per_second) return -1;
+    const info = read() orelse return -1;
+    const until = std.math.add(u64, info.instant_ns, duration) catch return -1;
+    if (until == std.math.maxInt(u64)) return -1;
+    const numerator: u128 = @as(u128, duration) * info.event_frequency_numerator;
+    const denominator: u128 = @as(u128, info.event_frequency_denominator) * ns_per_second;
+    if (numerator == 0 or denominator == 0) return -1;
+    const ticks = numerator / denominator + @intFromBool(numerator % denominator != 0);
+    deadline.* = until;
+    timeout_ticks.* = @intCast(@min(ticks, std.math.maxInt(u64) - 1));
+    return 0;
+}
 pub export fn os_time_get_nano() callconv(.c) i64 {
     const info = read() orelse @trap(); // Mesa's helper has no error return.
     return std.math.cast(i64, info.instant_ns) orelse @trap();

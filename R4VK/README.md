@@ -65,7 +65,24 @@ external symbols; neither has a successful fallback definition.
 The private NVK patch rejects external FD memory before GPU allocation,
 removes its Linux-only entrypoints, rolls back failed internal map counts,
 unlinks failed mapped allocations and destroys each retired BO's map mutex.
-Device/VA allocation and submission still require the actual R4OS backend.
+Memory allocation, CPU mappings, device discovery and submission still require
+the complete R4OS backend.
+
+`Port/nvk_va.c` implements NVK's private VA allocation/bind/unbind/free operations
+through the SDK's R4DRAW virtual-resource broker. Its context belongs to one
+NVK device and requires that device's canonical BO-reference accessor. The
+kernel takes its own BO loan; neither a caller pointer nor a C destructor is
+retained in a driver. Non-sparse bindings may alias the same backing at several
+addresses. Exact unbind waits for confirmed retirement. Free closes the parent
+and requests ordered child cleanup, which may continue after C metadata is freed.
+
+Finite operations use one native clock snapshot for the broker deadline and
+the rounded wait duration. Failed allocation leaves the output unchanged;
+timeout, stale epochs, malformed completion and uncertain cleanup set the
+context's device-lost state. The final NVK device/queue must propagate this
+state. Sparse/replay VA, nonzero PTE kinds, overlapping replacement and partial
+unbind are explicitly unsupported. No corresponding features may be advertised.
+This is one backend component, not an installed or complete Vulkan provider.
 
 `Tools/PrepareShaders.ps1 -OutputRoot <output>` builds the original Mesa CLC
 and NIR binding generator in a private source tree. It generates the NVK
