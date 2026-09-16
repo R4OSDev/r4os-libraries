@@ -31,7 +31,7 @@ $overlay = Join-Path $output 'CSource'
 [IO.File]::WriteAllText((Join-Path $generated 'git_sha1.h'), '#define MESA_GIT_SHA1 ""' + "`n", [Text.UTF8Encoding]::new($false))
 # Quoted includes must resolve one consistent private layout in every C unit.
 # Keep NVK and Vulkan runtime headers with their consuming C source files.
-foreach ($directory in @('src/nouveau/vulkan', 'src/vulkan/runtime', 'src/compiler', 'src/util')) {
+foreach ($directory in @('src/nouveau/vulkan', 'src/vulkan/runtime', 'src/vulkan/util', 'src/compiler', 'src/util')) {
     foreach ($file in Get-ChildItem -LiteralPath (Join-Path $source $directory) -File -Recurse | Where-Object Extension -in @('.c', '.h')) {
         $relative = [IO.Path]::GetRelativePath($source, $file.FullName)
         $destination = Join-Path $overlay $relative

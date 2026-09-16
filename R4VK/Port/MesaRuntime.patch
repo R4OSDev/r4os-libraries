@@ -2028,7 +2028,47 @@
 
  struct vk_pipeline_binary {
     struct vk_object_base base;
-@@ -181,7 +184,23 @@ vk_pipeline_shader_stage_to_nir(struct vk_device *device,
+@@ -113,6 +116,17 @@ get_builtin_nir(const VkPipelineShaderStageCreateInfo *info)
+    return nir;
+ }
+
++#if defined(R4OS_VULKAN)
++static const VkPipelineShaderStageNirCreateInfoMESA *
++get_serialized_nir(const VkPipelineShaderStageCreateInfo *info)
++{
++   if (info->module != VK_NULL_HANDLE) return NULL;
++   const VkPipelineShaderStageNirCreateInfoMESA *nir_info =
++      vk_find_struct_const(info->pNext, PIPELINE_SHADER_STAGE_NIR_CREATE_INFO_MESA);
++   return nir_info && nir_info->r4vk_nir_data ? nir_info : NULL;
++}
++#endif
++
+ static uint32_t
+ get_required_subgroup_size(const void *info_pNext)
+ {
+@@ -177,11 +191,45 @@ vk_pipeline_shader_stage_to_nir(struct vk_device *device,
+
+    assert(info->sType == VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
+
++#if defined(R4OS_VULKAN)
++   const VkPipelineShaderStageNirCreateInfoMESA *serialized = get_serialized_nir(info);
++   if (serialized) {
++      /* Native meta builders publish bytes, never private interned types. */
++      struct blob_reader reader;
++      blob_reader_init(&reader, serialized->r4vk_nir_data, serialized->r4vk_nir_size);
++      nir_shader *nir = nir_deserialize(mem_ctx, nir_options, &reader);
++      if (!nir) return VK_ERROR_OUT_OF_HOST_MEMORY;
++      if (reader.overrun || reader.current != reader.end || nir->info.stage != stage) {
++         ralloc_free(nir);
++         return VK_ERROR_UNKNOWN;
++      }
++      nir_validate_shader(nir, "native internal shader");
++      *nir_out = nir;
++      return VK_SUCCESS;
++   }
++#endif
++
+    nir_shader *builtin_nir = get_builtin_nir(info);
     if (builtin_nir != NULL) {
        nir_validate_shader(builtin_nir, "internal shader");
 
@@ -2053,7 +2093,7 @@
        if (clone == NULL)
           return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
 
-@@ -201,6 +220,9 @@ vk_pipeline_shader_stage_to_nir(struct vk_device *device,
+@@ -201,6 +249,9 @@ vk_pipeline_shader_stage_to_nir(struct vk_device *device,
        const VkShaderModuleCreateInfo *minfo =
           vk_find_struct_const(info->pNext, SHADER_MODULE_CREATE_INFO);
        if (unlikely(minfo == NULL)) {
@@ -2063,7 +2103,7 @@
           return vk_errorf(device, VK_ERROR_UNKNOWN,
                            "No shader module provided");
        }
-@@ -214,8 +236,12 @@ vk_pipeline_shader_stage_to_nir(struct vk_device *device,
+@@ -214,8 +265,12 @@ vk_pipeline_shader_stage_to_nir(struct vk_device *device,
                                       spirv_options, nir_options,
                                       false /* internal */,
                                       mem_ctx);
@@ -2077,7 +2117,23 @@
 
     vk_set_subgroup_size(
        nir, properties->subgroupSize, properties->minSubgroupSize,
-@@ -492,6 +518,22 @@ vk_common_CmdBindPipeline(VkCommandBuffer commandBuffer,
+@@ -240,6 +295,15 @@ vk_pipeline_hash_shader_stage_blake3(VkPipelineCreateFlags2KHR pipeline_flags,
+ {
+    VK_FROM_HANDLE(vk_shader_module, module, info->module);
+
++#if defined(R4OS_VULKAN)
++   const VkPipelineShaderStageNirCreateInfoMESA *serialized = get_serialized_nir(info);
++   if (serialized) {
++      _mesa_blake3_compute(serialized->r4vk_nir_data, serialized->r4vk_nir_size,
++                          stage_blake3);
++      return;
++   }
++#endif
++
+    const nir_shader *builtin_nir = get_builtin_nir(info);
+    if (builtin_nir != NULL) {
+       /* Internal NIR module: serialize and hash the NIR shader.
+@@ -492,6 +556,22 @@ vk_common_CmdBindPipeline(VkCommandBuffer commandBuffer,
 
  static const struct vk_pipeline_cache_object_ops pipeline_shader_cache_ops;
 
@@ -2100,7 +2156,7 @@
  static struct vk_shader *
  vk_shader_from_cache_obj(struct vk_pipeline_cache_object *object)
  {
-@@ -523,12 +565,15 @@ vk_shader_init_cache_obj(struct vk_device *device, struct vk_shader *shader,
+@@ -523,12 +603,15 @@ vk_shader_init_cache_obj(struct vk_device *device, struct vk_shader *shader,
                                   sizeof(shader->pipeline.cache_key));
  }
 
@@ -2119,7 +2175,7 @@
 
     /* TODO: Do we really want to always use the latest version? */
     const uint32_t version = device->physical->properties.shaderBinaryVersion;
-@@ -536,16 +581,35 @@ vk_pipeline_shader_deserialize(struct vk_device *device,
+@@ -536,16 +619,35 @@ vk_pipeline_shader_deserialize(struct vk_device *device,
     struct vk_shader *shader;
     VkResult result = ops->deserialize(device, blob, version,
                                        &device->alloc, &shader);
@@ -2160,7 +2216,7 @@
  static struct vk_pipeline_cache_object *
  vk_pipeline_shader_deserialize_cb(struct vk_pipeline_cache *cache,
                                    const void *key_data, size_t key_size,
-@@ -566,6 +630,9 @@ vk_pipeline_shader_destroy(struct vk_device *device,
+@@ -566,6 +668,9 @@ vk_pipeline_shader_destroy(struct vk_device *device,
  }
 
  static const struct vk_pipeline_cache_object_ops pipeline_shader_cache_ops = {
@@ -2170,7 +2226,7 @@
     .serialize = vk_pipeline_shader_serialize,
     .deserialize = vk_pipeline_shader_deserialize_cb,
     .destroy = vk_pipeline_shader_destroy,
-@@ -756,12 +823,9 @@ fail_blob:
+@@ -756,12 +861,9 @@ fail_blob:
  }
 
  static bool
@@ -2185,7 +2241,7 @@
     blob_write_uint32(blob, shader->stage);
     blob_write_bytes(blob, &shader->rs, sizeof(shader->rs));
     blob_write_bytes(blob, &shader->tess, sizeof(shader->tess));
-@@ -775,11 +839,22 @@ vk_pipeline_precomp_shader_serialize(struct vk_pipeline_cache_object *obj,
+@@ -775,11 +877,22 @@ vk_pipeline_precomp_shader_serialize(struct vk_pipeline_cache_object *obj,
     return !blob->out_of_memory;
  }
 
@@ -2211,7 +2267,7 @@
     const mesa_shader_stage stage = blob_read_uint32(blob);
 
     struct vk_pipeline_robustness_state rs;
-@@ -793,12 +868,13 @@ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
+@@ -793,12 +906,13 @@ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
        blob_read_bytes(blob, embedded_sampler_count * sizeof(*embedded_samplers));
 
     uint64_t nir_size = blob_read_uint64(blob);
@@ -2229,7 +2285,7 @@
 
     VK_MULTIALLOC(ma);
     VK_MULTIALLOC_DECL(&ma, struct vk_pipeline_precomp_shader, shader, 1);
-@@ -806,7 +882,7 @@ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
+@@ -806,7 +920,7 @@ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
                        embedded_sampler_count);
     if (!vk_multialloc_zalloc(&ma, &device->alloc,
                               VK_SYSTEM_ALLOCATION_SCOPE_DEVICE))
@@ -2238,7 +2294,7 @@
 
     assert(sizeof(shader->cache_key) == key_size);
     memcpy(shader->cache_key, key_data, sizeof(shader->cache_key));
-@@ -830,15 +906,39 @@ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
+@@ -830,14 +944,38 @@ vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
     if (shader->nir_blob.out_of_memory)
        goto fail_cache_obj;
 
@@ -2253,8 +2309,8 @@
 
 -   return NULL;
 +   return VK_ERROR_OUT_OF_HOST_MEMORY;
- }
-
++}
++
 +static struct vk_pipeline_cache_object *
 +vk_pipeline_precomp_shader_deserialize(struct vk_device *device,
 +                                       const void *key_data, size_t key_size,
@@ -2274,13 +2330,12 @@
 +{
 +   return vk_pipeline_precomp_shader_deserialize_result(cache->base.device,
 +                                                        key_data, key_size, blob, object);
-+}
+ }
 +#endif
-+
+
  static struct vk_pipeline_cache_object *
  vk_pipeline_precomp_shader_deserialize_cb(struct vk_pipeline_cache *cache,
-                                           const void *key_data, size_t key_size,
-@@ -877,6 +977,9 @@ vk_pipeline_precomp_shader_get_nir(const struct vk_pipeline_precomp_shader *shad
+@@ -877,6 +1015,9 @@ vk_pipeline_precomp_shader_get_nir(const struct vk_pipeline_precomp_shader *shad
  }
 
  static const struct vk_pipeline_cache_object_ops pipeline_precomp_shader_cache_ops = {
@@ -2290,7 +2345,7 @@
     .serialize = vk_pipeline_precomp_shader_serialize,
     .deserialize = vk_pipeline_precomp_shader_deserialize_cb,
     .destroy = vk_pipeline_precomp_shader_destroy,
-@@ -916,6 +1019,128 @@ vk_pipeline_hash_precomp_shader_stage(struct vk_device *device,
+@@ -916,6 +1057,128 @@ vk_pipeline_hash_precomp_shader_stage(struct vk_device *device,
                                          &rs, stage->precomp_key);
  }
 
@@ -2419,7 +2474,7 @@
  static VkResult
  vk_pipeline_precompile_shader(struct vk_device *device,
                                struct vk_pipeline_cache *cache,
-@@ -928,12 +1153,13 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+@@ -928,12 +1191,13 @@ vk_pipeline_precompile_shader(struct vk_device *device,
     VkResult result;
 
     if (cache != NULL) {
@@ -2436,7 +2491,7 @@
        if (cache_obj != NULL) {
           stage->precomp = vk_pipeline_precomp_shader_from_cache_obj(cache_obj);
           return VK_SUCCESS;
-@@ -944,6 +1170,11 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+@@ -944,6 +1208,11 @@ vk_pipeline_precompile_shader(struct vk_device *device,
         VK_PIPELINE_CREATE_2_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT_KHR)
        return VK_PIPELINE_COMPILE_REQUIRED;
 
@@ -2448,7 +2503,7 @@
     struct vk_pipeline_robustness_state rs;
     vk_pipeline_robustness_state_fill(&device->robustness_state, &rs,
                                       pipeline_info_pNext, info->pNext);
-@@ -987,6 +1218,7 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+@@ -987,6 +1256,7 @@ vk_pipeline_precompile_shader(struct vk_device *device,
     ralloc_free(nir);
     if (stage->precomp == NULL)
        return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
@@ -2456,7 +2511,7 @@
 
     if (cache != NULL) {
        struct vk_pipeline_cache_object *cache_obj = &stage->precomp->cache_obj;
-@@ -1720,11 +1952,12 @@ vk_graphics_pipeline_compile_shaders(struct vk_device *device,
+@@ -1720,11 +1990,12 @@ vk_graphics_pipeline_compile_shaders(struct vk_device *device,
              }
 
              bool cache_hit = false;
@@ -2472,7 +2527,7 @@
              if (cache_obj != NULL) {
                 assert(stage->shader == NULL);
                 stage->shader = vk_shader_from_cache_obj(cache_obj);
-@@ -2412,15 +2645,15 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2412,15 +2683,15 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
                                    struct vk_pipeline_stage *stage,
                                    bool *cache_hit)
  {
@@ -2492,7 +2547,7 @@
        if (cache_obj != NULL) {
           stage->shader = vk_shader_from_cache_obj(cache_obj);
           return VK_SUCCESS;
-@@ -2431,6 +2664,8 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2431,6 +2702,8 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
         VK_PIPELINE_CREATE_2_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT_KHR)
        return VK_PIPELINE_COMPILE_REQUIRED;
 
@@ -2501,7 +2556,7 @@
     const struct nir_shader_compiler_options *nir_options =
        ops->get_nir_options(device->physical, stage->stage,
                             &stage->precomp->rs);
-@@ -2439,6 +2674,7 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2439,6 +2712,7 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
                                                          nir_options);
     if (nir == NULL)
        return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
@@ -2509,7 +2564,7 @@
 
     const VkPushConstantRange *push_range =
        get_push_range_for_stage(pipeline_layout, MESA_SHADER_COMPUTE);
-@@ -2455,7 +2691,12 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2455,7 +2729,12 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
        .stage = stage->stage,
        .flags = shader_flags,
        .next_stage_mask = 0,
@@ -2522,7 +2577,7 @@
        .robustness = &stage->precomp->rs,
        .set_layout_count = pipeline_layout ? pipeline_layout->set_count : 0,
        .set_layouts = pipeline_layout ? pipeline_layout->set_layouts : NULL,
-@@ -3187,11 +3428,12 @@ vk_pipeline_compile_rt_shader(struct vk_device *device,
+@@ -3187,11 +3466,12 @@ vk_pipeline_compile_rt_shader(struct vk_device *device,
 
     if (cache != NULL) {
        bool cache_hit = false;
@@ -2538,7 +2593,7 @@
        if (cache_obj != NULL) {
           stage->shader = vk_shader_from_cache_obj(cache_obj);
 
-@@ -3309,12 +3551,13 @@ vk_pipeline_compile_rt_shader_group(struct vk_device *device,
+@@ -3309,12 +3589,13 @@ vk_pipeline_compile_rt_shader_group(struct vk_device *device,
        bool all_shaders_found = true;
        for (uint32_t i = 0; i < stage_count; i++) {
           bool cache_hit = false;
@@ -2555,7 +2610,7 @@
 
           if (cache_obj != NULL) {
              stages[i].shader = vk_shader_from_cache_obj(cache_obj);
-@@ -4122,10 +4365,11 @@ vk_lookup_create_precomp_binary(struct vk_device *device,
+@@ -4122,10 +4403,11 @@ vk_lookup_create_precomp_binary(struct vk_device *device,
                                  const VkAllocationCallbacks *alloc,
                                  VkPipelineBinaryKHR *out_binary_h)
  {
@@ -2570,7 +2625,7 @@
     if (cache_obj == NULL)
        return VK_PIPELINE_BINARY_MISSING_KHR;
 
-@@ -4145,10 +4389,11 @@ vk_lookup_create_shader_binary(struct vk_device *device,
+@@ -4145,10 +4427,11 @@ vk_lookup_create_shader_binary(struct vk_device *device,
                                 const VkAllocationCallbacks *alloc,
                                 VkPipelineBinaryKHR *out_binary_h)
  {
@@ -3083,3 +3138,96 @@
     /* If we're already at the end, then this is an overrun. */
     if (blob->current >= blob->end) {
        blob->overrun = true;
+--- a/src/vulkan/runtime/vk_meta_copy_fill_update.c
++++ b/src/vulkan/runtime/vk_meta_copy_fill_update.c
+@@ -35,6 +35,10 @@
+ #include "vk_pipeline.h"
+
+ #include "util/format/u_format.h"
++#if defined(R4OS_VULKAN)
++#include "r4vk_state.h"
++#include "nir/nir_serialize.h"
++#endif
+
+ struct vk_meta_fill_buffer_key {
+    enum vk_meta_object_key_type key_type;
+@@ -403,6 +407,29 @@ get_gfx_copy_pipeline(
+    return result;
+ }
+
++#if defined(R4OS_VULKAN)
++struct vk_native_meta_nir {
++   const struct vk_meta_device *meta;
++   nir_shader *(*build_nir)(const struct vk_meta_device *, const void *);
++   const void *key;
++   struct blob serialized;
++};
++
++static int
++vk_native_meta_nir_worker(void *argument)
++{
++   struct vk_native_meta_nir *job = argument;
++   if (!r4vk_glsl_init_or_ref() || !r4vk_printf_init_or_ref())
++      return VK_ERROR_OUT_OF_HOST_MEMORY;
++   nir_shader *nir = job->build_nir(job->meta, job->key);
++   if (!nir) return VK_ERROR_OUT_OF_HOST_MEMORY;
++   blob_init(&job->serialized);
++   nir_serialize(&job->serialized, nir, false);
++   ralloc_free(nir);
++   return job->serialized.out_of_memory ? VK_ERROR_OUT_OF_HOST_MEMORY : VK_SUCCESS;
++}
++#endif
++
+ static VkResult
+ get_compute_copy_pipeline(
+    struct vk_device *device, struct vk_meta_device *meta,
+@@ -416,10 +443,22 @@ get_compute_copy_pipeline(
+       return VK_SUCCESS;
+    }
+
++#if defined(R4OS_VULKAN)
++   struct vk_native_meta_nir job = {.meta = meta, .build_nir = build_nir, .key = key_data};
++   struct r4vk_compiler_job *owner;
++   VkResult built = r4vk_compiler_job_run(vk_native_meta_nir_worker, &job, &owner);
++   if (built != VK_SUCCESS) return built;
++   const VkPipelineShaderStageNirCreateInfoMESA cs_nir_info = {
++      .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_NIR_CREATE_INFO_MESA,
++      .r4vk_nir_data = job.serialized.data,
++      .r4vk_nir_size = job.serialized.size,
++   };
++#else
+    const VkPipelineShaderStageNirCreateInfoMESA cs_nir_info = {
+       .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_NIR_CREATE_INFO_MESA,
+       .nir = build_nir(meta, key_data),
+    };
++#endif
+
+    const VkComputePipelineCreateInfo info = {
+       .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+@@ -435,7 +474,11 @@ get_compute_copy_pipeline(
+    VkResult result = vk_meta_create_compute_pipeline(
+       device, meta, &info, key_data, key_size, pipeline_out);
+
++#if defined(R4OS_VULKAN)
++   r4vk_compiler_job_destroy(owner);
++#else
+    ralloc_free(cs_nir_info.nir);
++#endif
+
+    return result;
+ }
+--- a/src/vulkan/util/vk_internal_exts.h
++++ b/src/vulkan/util/vk_internal_exts.h
+@@ -130,6 +130,12 @@ typedef struct VkPipelineShaderStageNirCreateInfoMESA {
+    VkStructureType sType;
+    const void *pNext;
+    struct nir_shader *nir;
++#if defined(R4OS_VULKAN)
++   /* Private native input. Borrowed serialized NIR stays alive until pipeline
++    * creation returns; only the isolated frontend reconstructs its graph. */
++   const void *r4vk_nir_data;
++   size_t r4vk_nir_size;
++#endif
+ } VkPipelineShaderStageNirCreateInfoMESA;
+
+ #define VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_NIR_CREATE_INFO_MESA \

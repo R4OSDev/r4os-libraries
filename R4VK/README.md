@@ -131,6 +131,19 @@ lazy-load OOM, full-table insertion/merge failure and retry, partial export
 reuse and final zero C allocations. Its first failure exposed a string-reader
 assertion after an earlier bounds error; blob reads now retain that error.
 
+Compute meta copy/fill NIR builders now run as isolated CPU jobs. They publish
+serialized bytes through a private native NIR-stage input, retained until
+pipeline creation returns. Hashing consumes those bytes directly; the normal
+isolated frontend reconstructs its graph. No GPU resource or Vulkan allocator
+callback is created on the builder worker. Vulkan util sources/headers share
+the same prepared private layout as runtime consumers.
+The targeted SMP4 probe covers public descriptors/samplers, Fill/Copy/Update,
+barriers, decoded compute launch methods, QueueSubmit2 binary/timeline chains,
+fence timeout/completion/reset and command-pool reuse. Injected meta-builder
+OOM/abort reaches EndCommandBuffer; retry succeeds and final allocation counts
+balance. The backend models receipts without executing the GPU instructions.
+Image commands, final feature admission and installed packaging remain open.
+
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays
 and runs the original Vulkan/NVK/NIL table generators. Prepare the shared
