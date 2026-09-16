@@ -113,9 +113,11 @@ void r4vk_nvk_filter_physical_caps(struct vk_device_extension_table *ext,
    properties->sparseResidencyStandard2DMultisampleBlockShape = false;
    properties->sparseResidencyStandard3DBlockShape = false;
    properties->timestampComputeAndGraphics = false;
-   /* The native submit contract carries no relative-priority selection.
-    * One advertised family/queue does not create a second scheduling level. */
-   properties->discreteQueuePriorities = 1;
+   /* Vulkan requires at least two relative priority levels. The only queue
+    * in each logical device has no competing peer; Vulkan gives these hints
+    * no cross-device scheduling guarantee. Global priority is separate and
+    * the native queue-family query admits only MEDIUM. */
+   properties->discreteQueuePriorities = 2;
    properties->conformanceVersion = (VkConformanceVersion) {0};
    properties->drmHasPrimary = false;
    properties->drmHasRender = false;

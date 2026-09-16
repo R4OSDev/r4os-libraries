@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.2 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.3 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -37,8 +37,16 @@ Full source notices accompany the artifact in `ThirdParty/NOTICES.txt`.
 Native capability queries reject external memory handles consistently:
 buffer queries retain the requested compatible handle type but expose no
 import/export bits; image, fence and semaphore queries likewise promise no
-missing transport. One native scheduling priority is reported. Sparse,
+missing transport. The one queue per logical device admits only MEDIUM global
+priority. Vulkan's two required relative priority levels give no cross-device
+scheduling guarantee. Sparse,
 placed-map, external-FD, DRM and calibrated GPU time remain unavailable.
+The native physical-device API is 1.3 because GPU timestamps are unavailable;
+Vulkan 1.4 requires timestampComputeAndGraphics. Instance API 1.4 and explicit
+extensions such as host-image-copy remain usable. The earlier priority=1
+profile was invalid: Vulkan's required minimum is 2, regardless of global
+priority support. See the normative Required Limits and Queue Priority sections
+in the archived Khronos specification and GrafikVulkan07935.json / nvk_limits.
 Shader objects, generated commands and pipeline libraries/binaries stay
 unadvertised until their separate native integration in 0.79.36; the matching
 feature flags and device-proc lookup agree. This is not their final removal.
