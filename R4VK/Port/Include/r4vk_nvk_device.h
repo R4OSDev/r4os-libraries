@@ -13,6 +13,7 @@ struct r4vk_nvk_architecture {
    R4GfxBackendBinding binding;
    uint64_t memory_generation, va_start, va_end;
    uint32_t bind_alignment;
+   bool host_coherent;
 };
 VkResult r4vk_nvk_query_architecture(const R4Draw *draw,
                                     const R4GfxBackendInfo *backend,
@@ -20,8 +21,8 @@ VkResult r4vk_nvk_query_architecture(const R4Draw *draw,
 
 /* Private NVKMD resource device. The caller supplies an exact enumerated
  * backend; no DRM device, file descriptor or second RM owner is created.
- * This is not VkPhysicalDevice/VkDevice admission: execution contexts and
- * sync types remain unavailable until the native submission backend exists.
+ * This is not VkPhysicalDevice/VkDevice admission: native execution and sync
+ * adapters exist, but public feature/limit and provider integration is separate.
  * Failed creation preserves *out. Each device retains its pdev, and its
  * memory/VA children retain the device through their final C destruction. */
 VkResult r4vk_nvk_create_pdev(const R4Draw *draw,

@@ -184,8 +184,9 @@ VkResult r4vk_nvk_alloc_mem(struct r4vk_nvk_mem_context *context,
    /* BAR mappings are not part of this backend. Mappable LOCAL allocations
     * use GART; an explicit VRAM request never silently becomes host memory. */
    const bool vram = placement == NVKMD_MEM_VRAM ||
-      (placement == NVKMD_MEM_LOCAL && !(flags & NVKMD_MEM_CAN_MAP));
-   if (vram && (flags & NVKMD_MEM_CAN_MAP)) return VK_ERROR_FEATURE_NOT_PRESENT;
+      (placement == NVKMD_MEM_LOCAL && !(flags & (NVKMD_MEM_CAN_MAP | NVKMD_MEM_COHERENT)));
+   if (vram && (flags & (NVKMD_MEM_CAN_MAP | NVKMD_MEM_COHERENT)))
+      return VK_ERROR_FEATURE_NOT_PRESENT;
    if (alignment && !power_of_two(alignment)) return VK_ERROR_UNKNOWN;
    const uint64_t minimum = context->resources->dev->pdev->bind_align_B;
    if (alignment < minimum) alignment = minimum;

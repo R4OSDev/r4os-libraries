@@ -98,9 +98,10 @@ static VkResult create_dev(struct nvkmd_pdev *base,
       &physical->draw, current.binding.adapter_id, current.memory_generation,
       r4vk_nvk_mem_reference);
    if (result != VK_SUCCESS) goto fail;
-   /* R4NV architecture v1 supplies no host-coherence capability. Successful
-    * CPU mapping and the x86 host alone are not proof of GPU coherency. */
-   result = r4vk_nvk_mem_context_init(&device->memory, &device->resources, false);
+   /* Only explicit revision2 native mapping-policy facts permit coherence.
+    * Revision1 and successful CPU mapping alone supply no such guarantee. */
+   result = r4vk_nvk_mem_context_init(&device->memory, &device->resources,
+                                      current.host_coherent);
    if (result != VK_SUCCESS) {
       r4vk_nvk_va_context_finish(&device->resources);
       goto fail;

@@ -93,11 +93,14 @@ R4DRAW's optional `gfx_buffer_map_persistent` tail (v33, Kernel 0.1.189).
 It holds write-back system RAM without excluding device/queue use. The caller
 must synchronize actual CPU/GPU accesses; this lease is not a GPU barrier.
 
-Mappable LOCAL memory uses GART. Explicit VRAM allocations never silently
+Mappable or explicitly coherent LOCAL memory uses GART. Explicit VRAM allocations never silently
 change location, and CPU VRAM/BAR maps, external memory, fixed maps and overmap
-are unsupported. Host coherence must be supplied as a backend capability;
-successful mapping does not establish it. Noncoherent maps use Mesa's actual
-cache operations. Vulkan device admission, published memory types/budgets,
+are unsupported. Host coherence is accepted only from architecture-properties
+revision 2's explicit system-memory capability: native x86_64 WB RAM, cached
+RM registration and acknowledged snooped/GPU-uncached maps. Revision 1 and
+revision 2 without that bit remain noncoherent; mismatched versions or unknown
+flags fail without output mutation. Coherent explicit VRAM remains unsupported.
+Noncoherent maps use Mesa's actual cache operations. Vulkan device admission, published memory types/budgets,
 cache/barrier integration remain required. The private
 memory and VA contexts share one atomic device-lost state and outlive their
 NVK objects; the kernel never retains their C addresses or destructors.
@@ -116,7 +119,8 @@ without properties remain usable through their original interface. The native
 driver publishes these facts after CE startup, independently of display registration
 (NVIDIA 0.1.131). Vulkan enumeration and device admission remain pending. Architecture
 classes describe hardware methods, not admitted command queues. No BAR mapping,
-host coherence, transfer queue, 2D/M2MF, ZCULL or Vulkan qualification is inferred.
+transfer queue, 2D/M2MF, ZCULL or Vulkan qualification is inferred. Host coherence
+uses the explicit native mapping-policy capability above, not GPU class IDs.
 
 `Port/nvk_resource_device.c` creates native `nvkmd_pdev` and `nvkmd_dev` objects
 for an exact backend incarnation. Mesa's original dispatch/list/refcount code

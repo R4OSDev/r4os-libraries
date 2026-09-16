@@ -2176,7 +2176,7 @@
           "description": "gpfifo_class"
         }
       ],
-      "description": "Hardware facts in GfxBackendProperties: BACKEND_V1 identity, properties revision 1, data_bytes 120. Version1 exact-size. Identity from captured PCI/PMC; active GPC/TPC from acknowledged firmware post-init; VRAM from acknowledged static data; VA bounds from the native address-space receipt. Architecture classes describe known hardware methods, not allocated channels or executable queue capability. PCI domain is zero while the native driver supports only domain zero. Flags must be zero: no coherence, BAR mapping, sparse, Vulkan qualification or hardware test claim. memory_generation must match the enclosing backend inventory. Unknown/incomplete facts remain unavailable."
+      "description": "Hardware and native memory-path facts in GfxBackendProperties: BACKEND_V1 identity, data_bytes120, exact-size layout unchanged. Payload version equals properties revision. Revision1 requires flags0; revision2 permits ARCHITECTURE_HOST_COHERENT only. Identity from captured PCI/PMC; active GPC/TPC from acknowledged firmware post-init; VRAM from acknowledged static data; VA bounds from native address-space receipt. Architecture classes do not authorize GPU execution. Host-coherence bit covers canonical system BOs and acknowledged native mapping policy only; no BAR mapping, sparse, Vulkan qualification or physical-test claim. PCI domain remains zero; memory_generation matches enclosing backend inventory. Unknown/incomplete facts remain unavailable. Old revision1 readers reject revision2 properties; backend registration/profile and all existing runtime functions remain unchanged."
     },
     {
       "name": "R4NvNativeSubmitHeader",
@@ -2602,6 +2602,20 @@
       "type": "u32",
       "value": 4,
       "description": "Additional instantiated engine on a graphics native queue. Graphics bit1 remains mandatory. The first submission fixes the queue engine set; later submissions may request subsets. Unsupported topology, class or RM allocation fails before publication. These bits do not promise Vulkan features."
+    },
+    {
+      "zig_name": "architecture_version",
+      "c_name": "R4NV_ARCHITECTURE_VERSION",
+      "type": "u32",
+      "value": 2,
+      "description": "Architecture properties revision2 retains the exact120-byte layout. Flag bit0 guarantees CPU-cache coherent system-BO mappings on the native x86_64 path: WB canonical RAM, cached RM registration, GPU-uncached VA and acknowledged CPU-snoop mappings. It does not describe VRAM/BAR maps, GPU barriers or physical test status. Revision1 has flags0 and carries no such guarantee."
+    },
+    {
+      "zig_name": "architecture_host_coherent",
+      "c_name": "R4NV_ARCHITECTURE_HOST_COHERENT",
+      "type": "u32",
+      "value": 1,
+      "description": "Architecture properties revision2 retains the exact120-byte layout. Flag bit0 guarantees CPU-cache coherent system-BO mappings on the native x86_64 path: WB canonical RAM, cached RM registration, GPU-uncached VA and acknowledged CPU-snoop mappings. It does not describe VRAM/BAR maps, GPU barriers or physical test status. Revision1 has flags0 and carries no such guarantee."
     }
   ],
   "errors": [
