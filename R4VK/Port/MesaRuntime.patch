@@ -1165,7 +1165,8 @@
        for (int i = 0; i < object_count; i++) {
 --- a/src/nouveau/vulkan/nvk_image.c
 +++ b/src/nouveau/vulkan/nvk_image.c
-@@ -24,6 +24,34 @@
+@@ -23,8 +23,49 @@
+ #include "clc197.h"
  #include "clc597.h"
  #include "clcd97.h"
 
@@ -1197,10 +1198,25 @@
 +#endif
 +}
 +
++static uint64_t
++nvk_image_plane_binding_size(const struct nvk_image_plane *plane)
++{
++#ifdef R4OS_VULKAN
++   /* Native VA mappings cover whole binding pages. Include that padding in
++    * the public requirements and keep later planes/zcull out of the range.
++    */
++   return align64(plane->nil.size_B, plane->plane_align_B);
++#else
++   return plane->nil.size_B;
++#endif
++}
++
  static bool
  nvk_use_separate_zs(const struct nvk_physical_device *pdev, VkFormat vk_format)
  {
-@@ -360,6 +388,15 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+    /* Separate depth/stencil doesn't exist pre-Blackwell */
+@@ -359,8 +400,17 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+    /* Initialize to zero in case we return VK_ERROR_FORMAT_NOT_SUPPORTED */
     memset(&pImageFormatProperties->imageFormatProperties, 0,
            sizeof(pImageFormatProperties->imageFormatProperties));
 
@@ -1216,7 +1232,9 @@
     uint64_t drm_format_mod =
        get_explicit_drm_format_mod(pImageFormatInfo->pNext);
     const struct vk_format_ycbcr_info *ycbcr_info =
-@@ -542,6 +579,7 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+       vk_format_get_ycbcr_info(pImageFormatInfo->format);
+@@ -541,8 +591,9 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+          return VK_ERROR_FORMAT_NOT_SUPPORTED;
     }
 
     const VkExternalMemoryProperties *ext_mem_props = NULL;
@@ -1224,7 +1242,9 @@
     if (external_info != NULL && external_info->handleType != 0) {
        bool tiling_has_explicit_layout;
        switch (pImageFormatInfo->tiling) {
-@@ -594,6 +632,7 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+       case VK_IMAGE_TILING_LINEAR:
+@@ -593,8 +644,9 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
+                            vk_ExternalMemoryHandleTypeFlagBits_to_str(external_info->handleType));
        }
     }
 
@@ -1232,7 +1252,9 @@
     unsigned plane_count = vk_format_get_plane_count(pImageFormatInfo->format);
     if (nvk_use_separate_zs(pdev, pImageFormatInfo->format))
        plane_count = 2;
-@@ -982,11 +1021,11 @@ nvk_image_init(struct nvk_device *dev,
+
+@@ -981,13 +1033,13 @@ nvk_image_init(struct nvk_device *dev,
+                .samples = image->vk.samples,
                 .usage = usage & ~NIL_IMAGE_USAGE_LINEAR_BIT,
              };
 
@@ -1247,7 +1269,9 @@
                                  "Invalid image creation parameters");
 
              /* These are always allocated by the driver so the offset
-@@ -1044,21 +1083,21 @@ nvk_image_init(struct nvk_device *dev,
+              * doesn't matter.
+@@ -1043,23 +1095,23 @@ nvk_image_init(struct nvk_device *dev,
+
     if (usage & NIL_IMAGE_USAGE_VIDEO_BIT) {
        assert(!image->disjoint);
        for (uint8_t plane = 0; plane < image->plane_count; plane++) {
@@ -1275,7 +1299,9 @@
                               "Invalid image creation parameters");
        }
     }
-@@ -1104,11 +1143,11 @@ nvk_image_init(struct nvk_device *dev,
+
+@@ -1103,17 +1155,23 @@ nvk_image_init(struct nvk_device *dev,
+          .samples = image->vk.samples,
           .usage = usage,
        };
 
@@ -1290,7 +1316,56 @@
                            "Invalid image creation parameters");
 
        image->stencil_copy_temp.plane_align_B =
-@@ -1249,9 +1288,13 @@ nvk_CreateImage(VkDevice _device,
+          image->stencil_copy_temp.nil.align_B;
++#ifdef R4OS_VULKAN
++      if (image->stencil_copy_temp.nil.pte_kind)
++         image->stencil_copy_temp.plane_align_B =
++            MAX2(image->stencil_copy_temp.plane_align_B,
++                 pdev->nvkmd->bind_align_B);
++#endif
+    }
+
+    uint64_t plane_offset_B = 0;
+    image->image_size_B = 0;
+@@ -1125,21 +1183,23 @@ nvk_image_init(struct nvk_device *dev,
+       if (sparse_bound || image->planes[plane].nil.pte_kind)
+          plane_align_B = MAX2(plane_align_B, pdev->nvkmd->bind_align_B);
+       image->planes[plane].plane_align_B = plane_align_B;
+       image->image_align_B = MAX2(plane_align_B, image->image_align_B);
++      const uint64_t plane_size_B =
++         nvk_image_plane_binding_size(&image->planes[plane]);
+
+       if (explicit_offsets_B[plane] >= 0) {
+          assert(explicit_offsets_B[plane] % plane_align_B == 0);
+          image->planes[plane].plane_offset_B = explicit_offsets_B[plane];
+          image->image_size_B =
+-            MAX2((explicit_offsets_B[plane] + image->planes[plane].nil.size_B),
++            MAX2((explicit_offsets_B[plane] + plane_size_B),
+                  image->image_size_B);
+       } else if (image->disjoint) {
+          image->planes[plane].plane_offset_B = 0;
+       } else {
+          plane_offset_B = align64(plane_offset_B, plane_align_B);
+          image->planes[plane].plane_offset_B = plane_offset_B;
+-         plane_offset_B += image->planes[plane].nil.size_B;
++         plane_offset_B += plane_size_B;
+          image->image_size_B = plane_offset_B;
+       }
+    }
+
+@@ -1157,9 +1217,9 @@ nvk_image_init(struct nvk_device *dev,
+       assert(image->vk.drm_format_mod == DRM_FORMAT_MOD_INVALID);
+       plane_offset_B =
+          align64(plane_offset_B, image->stencil_copy_temp.plane_align_B);
+       image->stencil_copy_temp.plane_offset_B = plane_offset_B;
+-      plane_offset_B += image->stencil_copy_temp.nil.size_B;
++      plane_offset_B += nvk_image_plane_binding_size(&image->stencil_copy_temp);
+       image->image_size_B = plane_offset_B;
+       image->image_align_B = MAX2(image->stencil_copy_temp.plane_align_B,
+                                   image->image_align_B);
+    }
+@@ -1248,11 +1308,15 @@ nvk_CreateImage(VkDevice _device,
+    struct nvk_image *image;
     VkResult result;
 
     if (wsi_common_is_swapchain_image(pCreateInfo)) {
@@ -1304,6 +1379,7 @@
     }
 
     image = vk_zalloc2(&dev->vk.alloc, pAllocator, sizeof(*image), 8,
+                       VK_SYSTEM_ALLOCATION_SCOPE_OBJECT);
 --- a/src/compiler/glsl_types.c
 +++ b/src/compiler/glsl_types.c
 @@ -33,9 +33,7 @@
@@ -2419,7 +2495,7 @@
 -   if (blob->overrun || nir_size > SIZE_MAX)
 -      return NULL;
 +   if (blob->overrun || nir_size > SIZE_MAX || !nir_size ||
-+       (unsigned)stage >= MESA_SHADER_STAGES)
++       (unsigned)stage >= MESA_SHADER_MESH_STAGES)
 +      return VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT;
 
     const void *nir_data = blob_read_bytes(blob, nir_size);
@@ -2495,7 +2571,7 @@
     .deserialize = vk_pipeline_precomp_shader_deserialize_cb,
     .destroy = vk_pipeline_precomp_shader_destroy,
  };
-@@ -915,8 +1058,130 @@ vk_pipeline_hash_precomp_shader_stage(struct vk_device *device,
+@@ -915,8 +1058,131 @@ vk_pipeline_hash_precomp_shader_stage(struct vk_device *device,
     vk_pipeline_hash_shader_stage_blake3(pipeline_flags, info,
                                          &rs, stage->precomp_key);
  }
@@ -2613,10 +2689,11 @@
 +
 +   struct blob_reader reader;
 +   blob_reader_init(&reader, job.serialized.data, job.serialized.size);
-+   struct vk_pipeline_cache_object *object = vk_pipeline_precomp_shader_deserialize(
-+      device, stage->precomp_key, sizeof(stage->precomp_key), &reader);
++   struct vk_pipeline_cache_object *object = NULL;
++   result = vk_pipeline_precomp_shader_deserialize_result(
++      device, stage->precomp_key, sizeof(stage->precomp_key), &reader, &object);
 +   r4vk_compiler_job_destroy(owner);
-+   if (!object) return vk_error(device, VK_ERROR_OUT_OF_HOST_MEMORY);
++   if (result != VK_SUCCESS) return vk_error(device, result);
 +   stage->precomp = vk_pipeline_precomp_shader_from_cache_obj(object);
 +   return VK_SUCCESS;
 +}
@@ -2626,7 +2703,7 @@
  vk_pipeline_precompile_shader(struct vk_device *device,
                                struct vk_pipeline_cache *cache,
                                VkPipelineCreateFlags2KHR pipeline_flags,
-@@ -927,14 +1192,15 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+@@ -927,14 +1193,15 @@ vk_pipeline_precompile_shader(struct vk_device *device,
     const struct vk_device_shader_ops *ops = device->shader_ops;
     VkResult result;
 
@@ -2645,7 +2722,7 @@
           stage->precomp = vk_pipeline_precomp_shader_from_cache_obj(cache_obj);
           return VK_SUCCESS;
        }
-@@ -943,8 +1209,13 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+@@ -943,8 +1210,13 @@ vk_pipeline_precompile_shader(struct vk_device *device,
     if (pipeline_flags &
         VK_PIPELINE_CREATE_2_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT_KHR)
        return VK_PIPELINE_COMPILE_REQUIRED;
@@ -2659,7 +2736,7 @@
     vk_pipeline_robustness_state_fill(&device->robustness_state, &rs,
                                       pipeline_info_pNext, info->pNext);
 
-@@ -986,8 +1257,9 @@ vk_pipeline_precompile_shader(struct vk_device *device,
+@@ -986,8 +1258,9 @@ vk_pipeline_precompile_shader(struct vk_device *device,
     vk_sampler_state_array_finish(&embedded_samplers);
     ralloc_free(nir);
     if (stage->precomp == NULL)
@@ -2669,7 +2746,7 @@
     if (cache != NULL) {
        struct vk_pipeline_cache_object *cache_obj = &stage->precomp->cache_obj;
        cache_obj = vk_pipeline_cache_add_object(cache, cache_obj);
-@@ -1001,9 +1273,25 @@ static VkResult
+@@ -1001,9 +1274,25 @@ static VkResult
  vk_pipeline_load_precomp_from_binary(struct vk_device *device,
                                       struct vk_pipeline_stage *stage,
                                       struct vk_pipeline_binary *binary)
@@ -2696,7 +2773,7 @@
        cache_obj = vk_pipeline_cache_create_and_insert_object(
           device->mem_cache,
           binary->key, sizeof(binary->key),
-@@ -1017,8 +1305,9 @@ vk_pipeline_load_precomp_from_binary(struct vk_device *device,
+@@ -1017,8 +1306,9 @@ vk_pipeline_load_precomp_from_binary(struct vk_device *device,
     }
 
     if (cache_obj == NULL)
@@ -2706,7 +2783,7 @@
     stage->precomp = vk_pipeline_precomp_shader_from_cache_obj(cache_obj);
     memcpy(stage->precomp_key, stage->precomp->cache_key,
            sizeof(stage->precomp_key));
-@@ -1030,9 +1319,24 @@ static VkResult
+@@ -1030,9 +1320,24 @@ static VkResult
  vk_pipeline_load_shader_from_binary(struct vk_device *device,
                                      struct vk_pipeline_stage *stage,
                                      struct vk_pipeline_binary *binary)
@@ -2732,7 +2809,7 @@
        cache_obj = vk_pipeline_cache_create_and_insert_object(
           device->mem_cache,
           binary->key, sizeof(binary->key),
-@@ -1045,8 +1349,9 @@ vk_pipeline_load_shader_from_binary(struct vk_device *device,
+@@ -1045,8 +1350,9 @@ vk_pipeline_load_shader_from_binary(struct vk_device *device,
           device, binary->key, sizeof(binary->key), &reader);
     }
     if (cache_obj == NULL)
@@ -2742,7 +2819,7 @@
     stage->shader = vk_shader_from_cache_obj(cache_obj);
     memcpy(stage->shader_key, stage->shader->pipeline.cache_key,
            sizeof(stage->shader_key));
-@@ -1719,13 +2024,14 @@ vk_graphics_pipeline_compile_shaders(struct vk_device *device,
+@@ -1719,13 +2025,14 @@ vk_graphics_pipeline_compile_shaders(struct vk_device *device,
                 stage->shader = NULL;
              }
 
@@ -2760,7 +2837,7 @@
                 assert(stage->shader == NULL);
                 stage->shader = vk_shader_from_cache_obj(cache_obj);
              } else {
-@@ -1791,8 +2097,9 @@ vk_graphics_pipeline_compile_shaders(struct vk_device *device,
+@@ -1791,8 +2098,9 @@ vk_graphics_pipeline_compile_shaders(struct vk_device *device,
              /* We're the last geometry stage */
              next_stage = VK_SHADER_STAGE_FRAGMENT_BIT;
           }
@@ -2770,7 +2847,7 @@
              ops->get_nir_options(device->physical, stage->stage,
                                   &stage->precomp->rs);
 
-@@ -1807,17 +2114,29 @@ vk_graphics_pipeline_compile_shaders(struct vk_device *device,
+@@ -1807,17 +2115,29 @@ vk_graphics_pipeline_compile_shaders(struct vk_device *device,
 
           if (stage->stage == MESA_SHADER_TESS_CTRL ||
               stage->stage == MESA_SHADER_TESS_EVAL)
@@ -2800,7 +2877,7 @@
              .set_layout_count = compile_info->set_layout_count,
              .set_layouts = compile_info->set_layouts,
              .embedded_sampler_count = stage->precomp->embedded_sampler_count,
-@@ -2071,8 +2390,9 @@ vk_create_graphics_pipeline(struct vk_device *device,
+@@ -2071,8 +2391,9 @@ vk_create_graphics_pipeline(struct vk_device *device,
           (2 * pCreateInfo->stageCount) : pCreateInfo->stageCount;
 
        if (bin_info->binaryCount < expected_binary_count) {
@@ -2810,7 +2887,7 @@
           uint32_t binary_index = 0;
           for (uint32_t i = 0; i < compile_info.stage_count; i++) {
              if (compile_info.stages[i].imported)
-@@ -2411,17 +2731,17 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2411,17 +2732,17 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
                                    struct vk_pipeline_layout *pipeline_layout,
                                    struct vk_pipeline_stage *stage,
                                    bool *cache_hit)
@@ -2832,7 +2909,7 @@
           stage->shader = vk_shader_from_cache_obj(cache_obj);
           return VK_SUCCESS;
        }
-@@ -2430,16 +2750,19 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2430,16 +2751,19 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
     if (pipeline->base.flags &
         VK_PIPELINE_CREATE_2_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT_KHR)
        return VK_PIPELINE_COMPILE_REQUIRED;
@@ -2852,7 +2929,7 @@
     const VkPushConstantRange *push_range =
        get_push_range_for_stage(pipeline_layout, MESA_SHADER_COMPUTE);
 
-@@ -2454,9 +2777,14 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2454,9 +2778,14 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
     struct vk_shader_compile_info compile_info = {
        .stage = stage->stage,
        .flags = shader_flags,
@@ -2867,7 +2944,7 @@
        .set_layout_count = pipeline_layout ? pipeline_layout->set_count : 0,
        .set_layouts = pipeline_layout ? pipeline_layout->set_layouts : NULL,
        .embedded_sampler_count = stage->precomp->embedded_sampler_count,
-@@ -2590,9 +2918,9 @@ vk_create_compute_pipeline(struct vk_device *device,
+@@ -2590,9 +2919,9 @@ vk_create_compute_pipeline(struct vk_device *device,
     }
 
     pipeline->base.stages = VK_SHADER_STAGE_COMPUTE_BIT;
@@ -2878,7 +2955,7 @@
        VK_FROM_HANDLE(vk_pipeline_binary, binary,
                       bin_info->pPipelineBinaries[0]);
 
-@@ -3186,13 +3514,14 @@ vk_pipeline_compile_rt_shader(struct vk_device *device,
+@@ -3186,13 +3515,14 @@ vk_pipeline_compile_rt_shader(struct vk_device *device,
     int64_t stage_start = os_time_get_nano();
 
     if (cache != NULL) {
@@ -2896,7 +2973,7 @@
           stage->shader = vk_shader_from_cache_obj(cache_obj);
 
           if (stage_feedback != NULL) {
-@@ -3308,14 +3637,15 @@ vk_pipeline_compile_rt_shader_group(struct vk_device *device,
+@@ -3308,14 +3638,15 @@ vk_pipeline_compile_rt_shader_group(struct vk_device *device,
 
        bool all_shaders_found = true;
        for (uint32_t i = 0; i < stage_count; i++) {
@@ -2915,7 +2992,7 @@
           if (cache_obj != NULL) {
              stages[i].shader = vk_shader_from_cache_obj(cache_obj);
           } else {
-@@ -4121,12 +4451,13 @@ vk_lookup_create_precomp_binary(struct vk_device *device,
+@@ -4121,12 +4452,13 @@ vk_lookup_create_precomp_binary(struct vk_device *device,
                                  const void *key, uint32_t key_size,
                                  const VkAllocationCallbacks *alloc,
                                  VkPipelineBinaryKHR *out_binary_h)
@@ -2932,7 +3009,7 @@
        return VK_PIPELINE_BINARY_MISSING_KHR;
 
     struct vk_pipeline_precomp_shader *precomp =
-@@ -4144,12 +4475,13 @@ vk_lookup_create_shader_binary(struct vk_device *device,
+@@ -4144,12 +4476,13 @@ vk_lookup_create_shader_binary(struct vk_device *device,
                                 const void *key, uint32_t key_size,
                                 const VkAllocationCallbacks *alloc,
                                 VkPipelineBinaryKHR *out_binary_h)

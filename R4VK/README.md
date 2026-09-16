@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.6 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.7 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -71,7 +71,17 @@ exports, partial callback OOM, graphics draws after library destruction,
 specialized compute submission and binary import after device loss. GPU pixels
 and values remain unverified. Binary retrieval from a persistent driver cache
 is unavailable; pipelineBinaryInternalCache and its control properties are false.
-Full graphics/compute, concurrency and budget admission remain open 0.79.36 work.
+R4VK 0.1.7 reserves complete native binding pages for image planes and aligns
+the D32S8 stencil-copy plane consistently. Public requirements include padding
+before later planes/zcull, preventing an out-of-bounds native image binding.
+Precompiled shader validation includes task/mesh stages and preserves errors
+instead of reporting all frontend payload-transfer failures as host OOM.
+A scoped SMP4 scene compiles all graphics stages, records indexed textured
+draws with depth/stencil/blend through legacy/dynamic rendering and generated
+commands, then reads the target from a storage-image compute shader. The model
+checks selected NVIDIA command encoding, native resource coverage and cleanup;
+it does not execute GPU instructions or verify pixel/compute results.
+Resolve, whole-scope budgets, concurrency and feature/failure admission remain open.
 
 The public C consumer verifies these queries and negative CreateDevice results.
 Original host-image-copy code works on the explicitly host-visible RAM type:
