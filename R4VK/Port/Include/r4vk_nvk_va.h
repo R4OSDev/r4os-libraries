@@ -17,7 +17,24 @@ struct r4vk_nvk_va_context {
    uint64_t memory_generation;
    uint32_t lost; /* atomic, shared by this device's resource calls */
    VkResult (*reference)(struct nvkmd_mem *mem, R4GfxBufferReference *out);
+   /* Optional paired private owner hooks. Set before allocating children;
+    * each successful memory/VA object holds one reference until destruction.
+    * Standalone caller-owned contexts leave both NULL. */
+   void (*retain)(struct r4vk_nvk_va_context *context);
+   void (*release)(struct r4vk_nvk_va_context *context);
 };
+
+static inline void
+r4vk_nvk_resources_ref(struct r4vk_nvk_va_context *context)
+{
+   assert((context->retain == NULL) == (context->release == NULL));
+   if (context->retain) context->retain(context);
+}
+static inline void
+r4vk_nvk_resources_unref(struct r4vk_nvk_va_context *context)
+{
+   if (context->release) context->release(context);
+}
 
 VkResult r4vk_nvk_va_context_init(struct r4vk_nvk_va_context *context,
                                  struct nvkmd_dev *dev, const R4Draw *draw,

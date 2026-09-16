@@ -1,7 +1,7 @@
 ﻿# R4VK development state
 
 Work for roadmap 0.79.35 is in progress. This directory currently provides
-Mesa's native CPU runtime and NVK memory/VA/device-description components. It does not yet install an R4VK.R4L,
+Mesa's native CPU runtime and NVK resource devices, memory/VA and hardware descriptions. It does not yet install an R4VK.R4L,
 ICD, Vulkan device, GPU submission path or advertised Vulkan feature set.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
@@ -97,7 +97,7 @@ Mappable LOCAL memory uses GART. Explicit VRAM allocations never silently
 change location, and CPU VRAM/BAR maps, external memory, fixed maps and overmap
 are unsupported. Host coherence must be supplied as a backend capability;
 successful mapping does not establish it. Noncoherent maps use Mesa's actual
-cache operations. Full device construction, published memory types/budgets,
+cache operations. Vulkan device admission, published memory types/budgets,
 cache/barrier integration and GPU-use retention remain required. The private
 memory and VA contexts share one atomic device-lost state and outlive their
 NVK objects; the kernel never retains their C addresses or destructors.
@@ -113,10 +113,27 @@ CPUID. Errors preserve output, and stale epochs report device-lost.
 The kernel copies one immutable bounded payload per backend incarnation,
 authenticates the publishing driver and invalidates it on reset. Old backends
 without properties remain usable through their original interface. The native
-driver currently publishes these facts with its existing presentation backend;
-headless enumeration and full pdev/device construction remain pending. Architecture
+driver publishes these facts after CE startup, independently of display registration
+(NVIDIA 0.1.131). Vulkan enumeration and device admission remain pending. Architecture
 classes describe hardware methods, not admitted command queues. No BAR mapping,
 host coherence, transfer queue, 2D/M2MF, ZCULL or Vulkan qualification is inferred.
+
+`Port/nvk_resource_device.c` creates native `nvkmd_pdev` and `nvkmd_dev` objects
+for an exact backend incarnation. Mesa's original dispatch/list/refcount code
+reaches the R4OS memory/VA adapters through their device operations. Creation
+and resource allocation revalidate the binding; a missing former incarnation
+sets sticky device-lost instead of selecting a replacement. Logical devices
+have separate memory lists and loss state. They retain their physical owner;
+memory and standalone VA objects retain their logical owner through destruction.
+Final C cleanup may precede resident broker retirement without leaving caller
+pointers in the kernel. Partial construction preserves output and unwinds.
+
+This private resource device has no execution context or sync type yet.
+Context creation, tiled memory and external handles return explicit errors;
+GPU timestamps and usage telemetry have no callback. BAR/coherent/sparse,
+compression, external-FD and Vulkan capabilities remain unadvertised.
+The public Vulkan constructor must require actual submit/sync support before
+admitting this backend; successful NVKMD resource creation is not that admission.
 
 `Tools/PrepareShaders.ps1 -OutputRoot <output>` builds the original Mesa CLC
 and NIR binding generator in a private source tree. It generates the NVK

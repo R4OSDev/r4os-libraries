@@ -1,7 +1,7 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #ifndef R4VK_NVK_DEVICE_H
 #define R4VK_NVK_DEVICE_H
-#include "nv_device_info.h"
+#include "nvkmd/nvkmd.h"
 #include <r4os/r4draw.h>
 #include <vulkan/vulkan_core.h>
 
@@ -17,4 +17,16 @@ struct r4vk_nvk_architecture {
 VkResult r4vk_nvk_query_architecture(const R4Draw *draw,
                                     const R4GfxBackendInfo *backend,
                                     struct r4vk_nvk_architecture *out);
+
+/* Private NVKMD resource device. The caller supplies an exact enumerated
+ * backend; no DRM device, file descriptor or second RM owner is created.
+ * This is not VkPhysicalDevice/VkDevice admission: execution contexts and
+ * sync types remain unavailable until the native submission backend exists.
+ * Failed creation preserves *out. Each device retains its pdev, and its
+ * memory/VA children retain the device through their final C destruction. */
+VkResult r4vk_nvk_create_pdev(const R4Draw *draw,
+                             const R4GfxBackendInfo *backend,
+                             enum nvk_debug debug_flags,
+                             struct nvkmd_pdev **out);
+VkResult r4vk_nvk_check_device(struct nvkmd_dev *dev);
 #endif

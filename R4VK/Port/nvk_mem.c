@@ -221,6 +221,7 @@ VkResult r4vk_nvk_alloc_mem(struct r4vk_nvk_mem_context *context,
       nvkmd_va_free(mem->base.va);
       goto fail_mutex;
    }
+   r4vk_nvk_resources_ref(context->resources);
    *out = &mem->base;
    return VK_SUCCESS;
 fail_mutex:
@@ -307,12 +308,14 @@ static void mem_unmap(struct nvkmd_mem *base, enum nvkmd_mem_map_flags flags,
 static void mem_free(struct nvkmd_mem *base)
 {
    struct native_mem *mem = native(base);
+   struct r4vk_nvk_va_context *resources = mem->context->resources;
    assert(!mem->map_roles);
    release_map(mem); /* One final attempt after an uncertain unmap. */
    nvkmd_va_free(base->va); /* Broker loans outlive this C object. */
    drop(mem->context, mem->reference.reference);
    simple_mtx_destroy(&mem->mutex);
    free(mem);
+   r4vk_nvk_resources_unref(resources);
 }
 static VkResult mem_overmap(struct nvkmd_mem *base, struct vk_object_base *log,
                             enum nvkmd_mem_map_flags flags, void *map)

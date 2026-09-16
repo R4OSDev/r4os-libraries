@@ -195,6 +195,7 @@ static struct native_va *native(struct nvkmd_va *base)
 static void va_free(struct nvkmd_va *base)
 {
    struct native_va *va = native(base);
+   struct r4vk_nvk_va_context *context = va->context;
    /* Parent close releases all child handles and orders their physical
     * retirement. No C pointer or destructor is retained in the broker. */
    abandon(va->context, va->handle);
@@ -205,6 +206,7 @@ static void va_free(struct nvkmd_va *base)
    }
    simple_mtx_destroy(&va->mutex);
    free(va);
+   r4vk_nvk_resources_unref(context);
 }
 static VkResult va_bind(struct nvkmd_va *base, struct vk_object_base *log_obj,
                         uint64_t va_offset, struct nvkmd_mem *mem,
@@ -299,6 +301,7 @@ VkResult r4vk_nvk_alloc_va(struct r4vk_nvk_va_context *context,
                           uint64_t fixed_addr, struct nvkmd_va **out)
 {
    (void)log_obj;
+   if (!context || !context->dev || !out) return VK_ERROR_INITIALIZATION_FAILED;
    if (r4vk_nvk_va_device_lost(context)) return VK_ERROR_DEVICE_LOST;
    if (flags & ~NVKMD_VA_GART || pte_kind || fixed_addr)
       return VK_ERROR_FEATURE_NOT_PRESENT;
@@ -326,6 +329,7 @@ VkResult r4vk_nvk_alloc_va(struct r4vk_nvk_va_context *context,
    va->context = context;
    va->handle = ready.resource;
    simple_mtx_init(&va->mutex, mtx_plain);
+   r4vk_nvk_resources_ref(context);
    *out = &va->base;
    return VK_SUCCESS;
 }
