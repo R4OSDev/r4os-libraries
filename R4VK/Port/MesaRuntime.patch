@@ -513,13 +513,14 @@
        nvk_queue_destroy(dev, queue);
 --- a/src/nouveau/vulkan/nvk_physical_device.c
 +++ b/src/nouveau/vulkan/nvk_physical_device.c
-@@ -15,9 +15,13 @@
+@@ -15,9 +15,14 @@
  #include "nvk_sampler.h"
  #include "nvk_shader.h"
  #include "nvk_wsi.h"
  #include "nvkmd/nvkmd.h"
 +#ifdef R4OS_VULKAN
 +#include "r4vk_nvk_physical.h"
++#include "r4vk_nak.h"
 +#else
  #include "nvkmd/nouveau/nvkmd_nouveau.h"
 +#endif
@@ -527,7 +528,7 @@
  #include "util/detect_os.h"
  #include "util/disk_cache.h"
  #include "util/hex.h"
-@@ -25,14 +29,18 @@
+@@ -25,14 +30,18 @@
  #include "util/os_misc.h"
 
  #include "vk_android.h"
@@ -546,7 +547,7 @@
  #include "nv_push.h"
  #include "cl90c0.h"
  #include "cl91c0.h"
-@@ -85,8 +93,12 @@ nvk_get_vk_version(const struct nv_device_info *info)
+@@ -85,8 +94,12 @@ nvk_get_vk_version(const struct nv_device_info *info)
 
  static bool
  nvk_is_conformant(const struct nv_device_info *info)
@@ -559,7 +560,7 @@
     if (info->type != NV_DEVICE_TYPE_DIS)
        return false;
 
-@@ -98,8 +110,9 @@ nvk_is_conformant(const struct nv_device_info *info)
+@@ -98,8 +111,9 @@ nvk_is_conformant(const struct nv_device_info *info)
     if (info->cls_eng3d == BLACKWELL_B)
        return true;
 
@@ -569,7 +570,7 @@
 
  static bool
  nvk_has_astc(const struct nv_device_info *info)
-@@ -1462,8 +1475,9 @@ nvk_physical_device_free_disk_cache(struct nvk_physical_device *pdev)
+@@ -1462,8 +1476,9 @@ nvk_physical_device_free_disk_cache(struct nvk_physical_device *pdev)
     assert(pdev->vk.disk_cache == NULL);
  #endif
  }
@@ -579,7 +580,7 @@
  nvk_get_sysmem_heap_available(struct nvk_physical_device *pdev)
  {
     uint64_t sysmem_size_B = 0;
-@@ -1483,20 +1497,33 @@ nvk_get_vram_heap_available(struct nvk_physical_device *pdev)
+@@ -1483,20 +1498,33 @@ nvk_get_vram_heap_available(struct nvk_physical_device *pdev)
        return 0;
 
     return pdev->info.vram_size_B - used;
@@ -613,7 +614,7 @@
        return result;
 
     /* We don't support anything pre-Kepler */
-@@ -1504,8 +1531,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+@@ -1504,8 +1532,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
        result = VK_ERROR_INCOMPATIBLE_DRIVER;
        goto fail_nvkmd;
     }
@@ -623,7 +624,7 @@
         !debug_get_bool_option("NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", false)) {
  #ifdef NDEBUG
        result = VK_ERROR_INCOMPATIBLE_DRIVER;
-@@ -1520,8 +1548,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+@@ -1520,8 +1549,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
     }
 
     if (!nvk_is_conformant(&nvkmd->dev_info))
@@ -633,7 +634,7 @@
     struct nvk_physical_device *pdev =
        vk_zalloc(&instance->vk.alloc, sizeof(*pdev),
                  8, VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
-@@ -1533,10 +1562,12 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+@@ -1533,10 +1563,12 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
 
     struct vk_physical_device_dispatch_table dispatch_table;
     vk_physical_device_dispatch_table_from_entrypoints(
@@ -646,7 +647,7 @@
     struct vk_device_extension_table supported_extensions;
     nvk_get_device_extensions(instance, &nvkmd->dev_info,
                               nvkmd->kmd_info.has_alloc_tiled,
-@@ -1548,8 +1579,12 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+@@ -1548,8 +1580,12 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
 
     struct vk_properties properties;
     nvk_get_device_properties(instance, &nvkmd->dev_info, &properties);
@@ -659,7 +660,7 @@
        properties.drmHasRender = true;
        properties.drmRenderMajor = major(nvkmd->drm.render_dev);
        properties.drmRenderMinor = minor(nvkmd->drm.render_dev);
-@@ -1559,8 +1594,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+@@ -1559,8 +1595,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
        properties.drmHasPrimary = true;
        properties.drmPrimaryMajor = major(nvkmd->drm.primary_dev);
        properties.drmPrimaryMinor = minor(nvkmd->drm.primary_dev);
@@ -669,7 +670,7 @@
     result = vk_physical_device_init(&pdev->vk, &instance->vk,
                                      &supported_extensions,
                                      &supported_features,
-@@ -1572,16 +1608,22 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+@@ -1572,16 +1609,27 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
     pdev->nvkmd = nvkmd;
     pdev->info = nvkmd->dev_info;
     pdev->debug_flags = instance->debug_flags;
@@ -679,11 +680,16 @@
 +   if (result != VK_SUCCESS) goto fail_init;
 +#endif
 +
++#ifdef R4OS_VULKAN
++   result = r4vk_nak_create(&pdev->info, &pdev->nak_owner, &pdev->nak);
++   if (result != VK_SUCCESS) goto fail_init;
++#else
     pdev->nak = nak_compiler_create(&pdev->info);
     if (pdev->nak == NULL) {
        result = vk_error(instance, VK_ERROR_OUT_OF_HOST_MEMORY);
        goto fail_init;
     }
++#endif
 
     nvk_physical_device_init_pipeline_cache(pdev);
 
@@ -692,7 +698,7 @@
        os_get_gpu_heap_size(instance->drirc.misc.heap_memory_percent,
                             &instance->drirc.misc.heap_memory_percent);
     if (heap_size == 0) {
-@@ -1684,8 +1726,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+@@ -1684,8 +1732,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
           .queue_count = 2,
        };
     }
@@ -702,7 +708,35 @@
     pdev->vk.supported_sync_types = nvkmd->sync_types;
 
  #ifdef NVK_USE_WSI_PLATFORM
-@@ -1748,8 +1791,9 @@ nvk_GetPhysicalDeviceMemoryProperties2(
+@@ -1699,9 +1748,13 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+    return VK_SUCCESS;
+
+ fail_disk_cache:
+    nvk_physical_device_free_disk_cache(pdev);
++#ifdef R4OS_VULKAN
++   r4vk_nak_destroy(pdev->nak_owner);
++#else
+    nak_compiler_destroy(pdev->nak);
++#endif
+ fail_init:
+    vk_physical_device_finish(&pdev->vk);
+ fail_alloc:
+    vk_free(&instance->vk.alloc, pdev);
+@@ -1719,9 +1772,13 @@ nvk_physical_device_destroy(struct vk_physical_device *vk_pdev)
+ #ifdef NVK_USE_WSI_PLATFORM
+    nvk_finish_wsi(pdev);
+ #endif
+    nvk_physical_device_free_disk_cache(pdev);
++#ifdef R4OS_VULKAN
++   r4vk_nak_destroy(pdev->nak_owner);
++#else
+    nak_compiler_destroy(pdev->nak);
++#endif
+    nvkmd_pdev_destroy(pdev->nvkmd);
+    vk_physical_device_finish(&pdev->vk);
+    vk_free(&pdev->vk.instance->alloc, pdev);
+ }
+@@ -1748,8 +1805,9 @@ nvk_GetPhysicalDeviceMemoryProperties2(
 
     vk_foreach_struct(ext, pMemoryProperties->pNext)
     {
@@ -712,7 +746,7 @@
           VkPhysicalDeviceMemoryBudgetPropertiesEXT *p = (void *)ext;
           const struct nvk_instance *instance =
              nvk_physical_device_instance(pdev);
-@@ -1800,8 +1844,9 @@ nvk_GetPhysicalDeviceMemoryProperties2(
+@@ -1800,8 +1858,9 @@ nvk_GetPhysicalDeviceMemoryProperties2(
              p->heapUsage[i] = 0u;
           }
           break;
@@ -722,7 +756,7 @@
           vk_debug_ignored_stype(ext->sType);
           break;
        }
-@@ -1823,15 +1868,19 @@ nvk_GetPhysicalDeviceQueueFamilyProperties2(
+@@ -1823,15 +1882,19 @@ nvk_GetPhysicalDeviceQueueFamilyProperties2(
 
        vk_outarray_append_typed(VkQueueFamilyProperties2, &out, p) {
           p->queueFamilyProperties.queueFlags = queue_family->queue_flags;
@@ -742,3 +776,15 @@
              (VkExtent3D){1, 1, 1};
 
           vk_foreach_struct(ext, p->pNext) {
+--- a/src/nouveau/vulkan/nvk_physical_device.h
++++ b/src/nouveau/vulkan/nvk_physical_device.h
+@@ -44,6 +44,9 @@ struct nvk_physical_device {
+    struct nvkmd_pdev *nvkmd;
+
+    struct nak_compiler *nak;
++#ifdef R4OS_VULKAN
++   struct r4vk_nak_owner *nak_owner;
++#endif
+    struct wsi_device wsi_device;
+
+    uint8_t device_uuid[VK_UUID_SIZE];

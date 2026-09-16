@@ -165,9 +165,23 @@ The port does not inherit Linux NVK's conformance version.
 The constructor is compiled in assertion/release modes. The temporary SMP4
 fixture executes original Mesa memory/queue queries and capability filtering;
 complete constructor execution and the final advertised API/feature profile
-remain open. In particular, NVK retains a NAK compiler across operations, while
-the existing R4NAK archive allocates within an isolated compilation job. Its
-allocator/abort boundary must be integrated before publishing Vulkan devices.
+remain open. `Port/compiler.zig` now gives the real Rust NAK compiler its own
+process-owned arena, retained by the native physical device. Creation and
+destruction run on joinable workers; Rust OOM/panic terminates that worker
+without unwinding through C. The parent waits for exact retirement before
+releasing storage. Failed owners cannot be reused, and separate owners can
+run concurrently. The process registry contains active calls only; no caller
+pointer lives in shared R4L BSS. Both outputs remain unchanged on create failure.
+
+This adapter links the verified freestanding Rust NAK archive, not R4NAK's
+job runtime or its complete C archive. Successful creation retains the actual
+NAK object, and destruction normally calls its original Rust destructor. If
+a destructor worker cannot start, the arena can release this compiler's CPU
+allocations directly; the pinned object contains no external resources.
+The arena records bounded diagnostics and uses the native process allocation
+budget. Full shader jobs still require C/NIR global-state ownership, their
+allocation/abort boundary, cancellation/deadlines and output lifetimes.
+Those are not supplied by wrapping the physical-device constructor alone.
 No successful replacement compiler or default build identity is provided.
 
 `Port/nvk_submit.c` connects NVK contexts to the canonical native queue. It

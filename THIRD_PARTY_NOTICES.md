@@ -145,6 +145,10 @@ original Mesa nvk_physical_device.c copyright (2022 Collabora Ltd. and Red Hat
 Inc., MIT). Full original source and the patched private copy are archived in
 GFX/0.79.35/Evidence/NvkPhysical. Native backend admission and heap descriptions
 in Port/nvk_physical.c are original Apache-2.0 code.
+The persistent native compiler owner uses the same freestanding Rust NAK
+archive and original Rust/Mesa notices listed under R4NAK above. Its private
+arena/worker adapter is original Apache-2.0 code; no Rust compiler algorithm
+or upstream copyright notice is replaced.
 
 The native device-description adapter checks architecture constants against
 the pinned `src/nouveau/winsys/nouveau_device.c` and NVIDIA class headers.
