@@ -1883,6 +1883,300 @@
         }
       ],
       "description": "Action0=reuse,1=convert through CE; layout0=linear,1=blocklinear. Unknown/undecodable modifiers fail without a plan. Proposed bytes include the pinned native64KB allocation granule; no allocation or GPU qualification occurs here."
+    },
+    {
+      "name": "R4NvArchitecture",
+      "size": 120,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "vendor_id",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "vendor_id"
+        },
+        {
+          "name": "device_id",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_id"
+        },
+        {
+          "name": "chipset",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "chipset"
+        },
+        {
+          "name": "pci_revision",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pci_revision"
+        },
+        {
+          "name": "pci_domain",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pci_domain"
+        },
+        {
+          "name": "pci_bus",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pci_bus"
+        },
+        {
+          "name": "pci_device",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pci_device"
+        },
+        {
+          "name": "pci_function",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pci_function"
+        },
+        {
+          "name": "gpc_count",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "gpc_count"
+        },
+        {
+          "name": "tpc_count",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "tpc_count"
+        },
+        {
+          "name": "shader_model",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "shader_model"
+        },
+        {
+          "name": "mp_per_tpc",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "mp_per_tpc"
+        },
+        {
+          "name": "max_warps_per_mp",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "max_warps_per_mp"
+        },
+        {
+          "name": "rm_release",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "rm_release"
+        },
+        {
+          "name": "vram_bytes",
+          "offset": 64,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "vram_bytes"
+        },
+        {
+          "name": "va_start",
+          "offset": 72,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "va_start"
+        },
+        {
+          "name": "va_end",
+          "offset": 80,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "va_end"
+        },
+        {
+          "name": "memory_generation",
+          "offset": 88,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "memory_generation"
+        },
+        {
+          "name": "bind_alignment",
+          "offset": 96,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "bind_alignment"
+        },
+        {
+          "name": "flags",
+          "offset": 100,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "graphics_class",
+          "offset": 104,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "graphics_class"
+        },
+        {
+          "name": "compute_class",
+          "offset": 108,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "compute_class"
+        },
+        {
+          "name": "copy_class",
+          "offset": 112,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "copy_class"
+        },
+        {
+          "name": "gpfifo_class",
+          "offset": 116,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "gpfifo_class"
+        }
+      ],
+      "description": "Hardware facts in GfxBackendProperties: BACKEND_V1 identity, properties revision 1, data_bytes 120. Version1 exact-size. Identity from captured PCI/PMC; active GPC/TPC from acknowledged firmware post-init; VRAM from acknowledged static data; VA bounds from the native address-space receipt. Architecture classes describe known hardware methods, not allocated channels or executable queue capability. PCI domain is zero while the native driver supports only domain zero. Flags must be zero: no coherence, BAR mapping, sparse, Vulkan qualification or hardware test claim. memory_generation must match the enclosing backend inventory. Unknown/incomplete facts remain unavailable."
     }
   ],
   "constants": [

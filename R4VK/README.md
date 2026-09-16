@@ -1,7 +1,7 @@
 ﻿# R4VK development state
 
 Work for roadmap 0.79.35 is in progress. This directory currently provides
-Mesa's native CPU runtime and NVK memory/VA adapter components. It does not yet install an R4VK.R4L,
+Mesa's native CPU runtime and NVK memory/VA/device-description components. It does not yet install an R4VK.R4L,
 ICD, Vulkan device, GPU submission path or advertised Vulkan feature set.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
@@ -101,6 +101,22 @@ cache operations. Full device construction, published memory types/budgets,
 cache/barrier integration and GPU-use retention remain required. The private
 memory and VA contexts share one atomic device-lost state and outlive their
 NVK objects; the kernel never retains their C addresses or destructors.
+
+`Port/nvk_device.c` reads NVIDIA's architecture facts through the optional
+R4DRAW v34 backend-properties slot (Kernel 0.1.190, NVIDIA 0.1.130). It validates
+the exact backend/memory generation, protocol and supported chip identities
+before constructing Mesa's `nv_device_info`. PCI identity, active GPC/TPC counts,
+VRAM and VA limits come from the driver's captured/acknowledged records. Shader
+geometry uses the pinned SM86/89 definitions; CPU cache granularity comes from
+CPUID. Errors preserve output, and stale epochs report device-lost.
+
+The kernel copies one immutable bounded payload per backend incarnation,
+authenticates the publishing driver and invalidates it on reset. Old backends
+without properties remain usable through their original interface. The native
+driver currently publishes these facts with its existing presentation backend;
+headless enumeration and full pdev/device construction remain pending. Architecture
+classes describe hardware methods, not admitted command queues. No BAR mapping,
+host coherence, transfer queue, 2D/M2MF, ZCULL or Vulkan qualification is inferred.
 
 `Tools/PrepareShaders.ps1 -OutputRoot <output>` builds the original Mesa CLC
 and NIR binding generator in a private source tree. It generates the NVK

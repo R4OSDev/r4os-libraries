@@ -141,6 +141,11 @@ The generated preparation record identifies the inputs, patch and output hashes.
 This intermediate work does not yet distribute an R4VK binary. Full applicable
 source notices must accompany that artifact when its integration is complete.
 
+The native device-description adapter checks architecture constants against
+the pinned `src/nouveau/winsys/nouveau_device.c` and NVIDIA class headers.
+Active unit counts, memory sizes and PCI identity are supplied by NVIDIA.R4D;
+the adapter does not copy the Linux DRM discovery implementation.
+
 `R4VK/Tools/PrepareShaders.ps1` builds pinned Mesa CLC and its NIR binding
 generator as host tools. LLVM/Clang retain their upstream Apache-2.0-with-
 LLVM-exception terms; LLVM-SPIRV retains BSD-3-Clause and Expat terms, and

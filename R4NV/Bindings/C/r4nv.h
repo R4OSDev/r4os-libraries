@@ -288,6 +288,62 @@ _Static_assert(offsetof(R4NvImagePlan, allocation_bytes) == 48u, "R4NvImagePlan.
 _Static_assert(offsetof(R4NvImagePlan, log2_gobs) == 56u, "R4NvImagePlan.log2_gobs offset mismatch");
 _Static_assert(offsetof(R4NvImagePlan, reserved) == 60u, "R4NvImagePlan.reserved offset mismatch");
 
+typedef struct R4NvArchitecture {
+    uint32_t version;
+    uint32_t size;
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t chipset;
+    uint32_t pci_revision;
+    uint32_t pci_domain;
+    uint32_t pci_bus;
+    uint32_t pci_device;
+    uint32_t pci_function;
+    uint32_t gpc_count;
+    uint32_t tpc_count;
+    uint32_t shader_model;
+    uint32_t mp_per_tpc;
+    uint32_t max_warps_per_mp;
+    uint32_t rm_release;
+    uint64_t vram_bytes;
+    uint64_t va_start;
+    uint64_t va_end;
+    uint64_t memory_generation;
+    uint32_t bind_alignment;
+    uint32_t flags;
+    uint32_t graphics_class;
+    uint32_t compute_class;
+    uint32_t copy_class;
+    uint32_t gpfifo_class;
+} R4NvArchitecture;
+_Static_assert(sizeof(R4NvArchitecture) == 120u, "R4NvArchitecture size mismatch");
+_Static_assert(offsetof(R4NvArchitecture, version) == 0u, "R4NvArchitecture.version offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, size) == 4u, "R4NvArchitecture.size offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, vendor_id) == 8u, "R4NvArchitecture.vendor_id offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, device_id) == 12u, "R4NvArchitecture.device_id offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, chipset) == 16u, "R4NvArchitecture.chipset offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, pci_revision) == 20u, "R4NvArchitecture.pci_revision offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, pci_domain) == 24u, "R4NvArchitecture.pci_domain offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, pci_bus) == 28u, "R4NvArchitecture.pci_bus offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, pci_device) == 32u, "R4NvArchitecture.pci_device offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, pci_function) == 36u, "R4NvArchitecture.pci_function offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, gpc_count) == 40u, "R4NvArchitecture.gpc_count offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, tpc_count) == 44u, "R4NvArchitecture.tpc_count offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, shader_model) == 48u, "R4NvArchitecture.shader_model offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, mp_per_tpc) == 52u, "R4NvArchitecture.mp_per_tpc offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, max_warps_per_mp) == 56u, "R4NvArchitecture.max_warps_per_mp offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, rm_release) == 60u, "R4NvArchitecture.rm_release offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, vram_bytes) == 64u, "R4NvArchitecture.vram_bytes offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, va_start) == 72u, "R4NvArchitecture.va_start offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, va_end) == 80u, "R4NvArchitecture.va_end offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, memory_generation) == 88u, "R4NvArchitecture.memory_generation offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, bind_alignment) == 96u, "R4NvArchitecture.bind_alignment offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, flags) == 100u, "R4NvArchitecture.flags offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, graphics_class) == 104u, "R4NvArchitecture.graphics_class offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, compute_class) == 108u, "R4NvArchitecture.compute_class offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, copy_class) == 112u, "R4NvArchitecture.copy_class offset mismatch");
+_Static_assert(offsetof(R4NvArchitecture, gpfifo_class) == 116u, "R4NvArchitecture.gpfifo_class offset mismatch");
+
 #define R4NV_COMMAND_ABI ((uint32_t)1)
 #define R4NV_RM_RELEASE ((uint32_t)570144)
 #define R4NV_FEATURE_COPY_LINEAR ((uint32_t)1)

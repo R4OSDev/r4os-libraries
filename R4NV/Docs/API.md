@@ -57,6 +57,7 @@ Typen
 - `R4NvImageView`: 64 Byte, Alignment 8. Single-plane image metadata, no CPU/GPU address. Location0=system,1=device-local; modifier0=linear. Runtime must authenticate ownership/generations and physical mapping.
 - `R4NvImageRequest`: 80 Byte, Alignment 8. Prepare an image for texture1/render-target2/scanout4. Preference0=preserve suitable layout,1=linear,2=blocklinear; flags1 forces a separate copy. Render+scanout requires the later inactive-image lease and is unsupported here.
 - `R4NvImagePlan`: 64 Byte, Alignment 8. Action0=reuse,1=convert through CE; layout0=linear,1=blocklinear. Unknown/undecodable modifiers fail without a plan. Proposed bytes include the pinned native64KB allocation granule; no allocation or GPU qualification occurs here.
+- `R4NvArchitecture`: 120 Byte, Alignment 8. Hardware facts in GfxBackendProperties: BACKEND_V1 identity, properties revision 1, data_bytes 120. Version1 exact-size. Identity from captured PCI/PMC; active GPC/TPC from acknowledged firmware post-init; VRAM from acknowledged static data; VA bounds from the native address-space receipt. Architecture classes describe known hardware methods, not allocated channels or executable queue capability. PCI domain is zero while the native driver supports only domain zero. Flags must be zero: no coherence, BAR mapping, sparse, Vulkan qualification or hardware test claim. memory_generation must match the enclosing backend inventory. Unknown/incomplete facts remain unavailable.
 
 Besitzregeln
 ------------

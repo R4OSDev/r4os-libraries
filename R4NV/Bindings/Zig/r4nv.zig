@@ -158,6 +158,35 @@ pub const R4NvImagePlan = extern struct {
     log2_gobs: u32,
     reserved: u32,
 };
+
+pub const R4NvArchitecture = extern struct {
+    version: u32,
+    size: u32,
+    vendor_id: u32,
+    device_id: u32,
+    chipset: u32,
+    pci_revision: u32,
+    pci_domain: u32,
+    pci_bus: u32,
+    pci_device: u32,
+    pci_function: u32,
+    gpc_count: u32,
+    tpc_count: u32,
+    shader_model: u32,
+    mp_per_tpc: u32,
+    max_warps_per_mp: u32,
+    rm_release: u32,
+    vram_bytes: u64,
+    va_start: u64,
+    va_end: u64,
+    memory_generation: u64,
+    bind_alignment: u32,
+    flags: u32,
+    graphics_class: u32,
+    compute_class: u32,
+    copy_class: u32,
+    gpfifo_class: u32,
+};
 pub const command_abi: u32 = 1;
 pub const rm_release: u32 = 570144;
 pub const feature_copy_linear: u32 = 1;
