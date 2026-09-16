@@ -1,8 +1,9 @@
 ﻿# R4VK development state
 
 Work for roadmap 0.79.35 is in progress. This directory currently provides
-Mesa's native CPU runtime and NVK resource devices, memory/VA and hardware descriptions. It does not yet install an R4VK.R4L,
-ICD, Vulkan device, GPU submission path or advertised Vulkan feature set.
+Mesa's native CPU runtime and NVK resource devices, memory/VA, hardware
+descriptions and native submit/sync adapters. It does not yet install an
+R4VK.R4L, ICD, Vulkan device or advertised Vulkan feature set.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
 
@@ -65,8 +66,7 @@ external symbols; neither has a successful fallback definition.
 The private NVK patch rejects external FD memory before GPU allocation,
 removes its Linux-only entrypoints, rolls back failed internal map counts,
 unlinks failed mapped allocations and destroys each retired BO's map mutex.
-The full Vulkan device, discovery and submission still require the complete
-R4OS backend.
+Full Vulkan device construction and discovery still require provider integration.
 
 `Port/nvk_va.c` implements NVK's private VA allocation/bind/unbind/free operations
 through the SDK's R4DRAW virtual-resource broker. Its context belongs to one
@@ -98,7 +98,7 @@ change location, and CPU VRAM/BAR maps, external memory, fixed maps and overmap
 are unsupported. Host coherence must be supplied as a backend capability;
 successful mapping does not establish it. Noncoherent maps use Mesa's actual
 cache operations. Vulkan device admission, published memory types/budgets,
-cache/barrier integration and GPU-use retention remain required. The private
+cache/barrier integration remain required. The private
 memory and VA contexts share one atomic device-lost state and outlive their
 NVK objects; the kernel never retains their C addresses or destructors.
 
@@ -128,12 +128,35 @@ memory and standalone VA objects retain their logical owner through destruction.
 Final C cleanup may precede resident broker retirement without leaving caller
 pointers in the kernel. Partial construction preserves output and unwinds.
 
-This private resource device has no execution context or sync type yet.
-Context creation, tiled memory and external handles return explicit errors;
+`Port/nvk_submit.c` connects NVK contexts to the canonical native queue. It
+translates GR/compute/copy engine bits, including NVK's copy-only upload
+context through a GR channel with paired CE. Initial admission waits for an
+actual fence; class IDs alone do not suffice. Push lists split at complete
+method groups, preserve no-prefetch and use the R4NV packet contract.
+
+Submissions retain all live bindings, including aliases after their original
+BO object closes. The broker owns these loans independently of C metadata.
+Because indirect GPU addressing prevents precise access discovery here,
+device queues conservatively chain on genuine GPU fences. This matches the
+currently serialized physical publisher and avoids spurious cross-queue
+writer conflicts. Empty fence batches need no caller binding snapshot.
+The retained device tail is explicitly released at logical device close.
+No resource/submit mutex spans a GPU wait; failed allocation preserves the
+buffered batch. Queue capacity applies bounded backpressure.
+
+`Port/nvk_sync.c` supplies native binary events; Mesa's original timeline
+implementation wraps their actual submitted points. Pending submission is
+distinct from GPU completion. Dependencies pin their kernel handles while
+being copied, completed points release public metadata, and reset/failure
+propagates device-lost. Objects own their mutexes/conditions; no shared R4L
+mutable cache or invented GPU completion is used. Native absolute waits use
+R4SYS time; the POSIX MESA_VK_MAX_TIMEOUT debug override is excluded.
+
+Tiled memory, sparse-bind contexts and external handles remain unsupported;
 GPU timestamps and usage telemetry have no callback. BAR/coherent/sparse,
 compression, external-FD and Vulkan capabilities remain unadvertised.
-The public Vulkan constructor must require actual submit/sync support before
-admitting this backend; successful NVKMD resource creation is not that admission.
+Public Vulkan admission, feature/limit reporting and full device/error/logging
+integration remain required; these private adapters are not that admission.
 
 `Tools/PrepareShaders.ps1 -OutputRoot <output>` builds the original Mesa CLC
 and NIR binding generator in a private source tree. It generates the NVK
@@ -148,8 +171,11 @@ only Linux execution has been checked. Host prerequisites include LLVM/Clang
 19 development files, SPIRV-Tools and LLVM-SPIRV with matching pkg-config data
 (Debian: llvm-19-dev, libclang-cpp19-dev, libllvmspirvlib-19-dev, spirv-tools).
 
-The bounded CPU proof uses a temporary native C/R4L fixture, not a Vulkan
-provider. Modeled enumeration and memory failures exercise actual Mesa/NVK
-list, map and refcount code; they do not validate real GPU discovery or DMA. Evidence and remaining integration work are recorded in
+The bounded SMP4 proof uses a temporary native C/R4L fixture, not a Vulkan
+provider. Actual Mesa/NVK resource, sync and timeline code uses real kernel
+queues and brokers with explicitly modeled GPU/VA receipts. Diagnostic-only
+fixture replacements preserve negative errors and Mesa's lost flag; they do
+not complete work. This does not validate physical GPU execution or DMA.
+Evidence and remaining integration work are recorded in
 `Docs/Drivers/GrafikVulkan07935.txt/.json` in the workspace's Docs repository.
 Physical GPU validation remains in `ExFiles/Reports/OssiGPU.txt`.

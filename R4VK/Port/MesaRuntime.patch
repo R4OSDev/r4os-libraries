@@ -402,3 +402,24 @@
  
     const struct vk_sync_type *const *sync_types;
  };
+--- a/src/vulkan/runtime/vk_sync.c
++++ b/src/vulkan/runtime/vk_sync.c
+@@ -306,6 +306,12 @@
+ static uint64_t
+ get_max_abs_timeout_ns(void)
+ {
++#ifdef R4OS_VULKAN
++   /* Native waits use their caller's deadline and the GPU owner's watchdog.
++    * The POSIX debug environment override is not a native capability, and
++    * its mutable process-global cache cannot live in a shared R4L. */
++   return UINT64_MAX;
++#else
+    static int max_timeout_ms = -1;
+    if (max_timeout_ms < 0)
+       max_timeout_ms = debug_get_num_option("MESA_VK_MAX_TIMEOUT", 0);
+@@ -314,4 +320,5 @@
+       return UINT64_MAX;
+    else
+       return os_time_get_absolute_timeout(max_timeout_ms * 1000000ull);
++#endif
+ }

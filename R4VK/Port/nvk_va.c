@@ -8,6 +8,7 @@ int r4vk_operation_deadline(uint64_t duration_ns, uint64_t *deadline_ns,
 
 struct binding {
    struct binding *next;
+   struct list_head residency;
    R4GfxBufferHandle handle;
    uint64_t offset, bytes;
 };
@@ -97,7 +98,65 @@ VkResult r4vk_nvk_va_context_init(struct r4vk_nvk_va_context *context,
       .dev = dev, .draw = *draw, .adapter_id = adapter,
       .memory_generation = generation, .reference = reference,
    };
+   simple_mtx_init(&context->residency_mutex, mtx_plain);
+   simple_mtx_init(&context->submit_mutex, mtx_plain);
+   list_inithead(&context->residency);
    return VK_SUCCESS;
+}
+
+void r4vk_nvk_va_context_finish(struct r4vk_nvk_va_context *context)
+{
+   assert(list_is_empty(&context->residency));
+   assert(!context->submission_tail);
+   simple_mtx_destroy(&context->submit_mutex);
+   simple_mtx_destroy(&context->residency_mutex);
+}
+
+VkResult r4vk_nvk_va_submit(struct r4vk_nvk_va_context *context,
+                           bool retain_bindings,
+                           const R4GfxQueueHandle *queue,
+                           const R4GfxSubmission *submission,
+                           const R4GfxNativeSubmission *native,
+                           R4GfxFenceStatus *out)
+{
+   if (r4vk_nvk_va_device_lost(context)) return VK_ERROR_DEVICE_LOST;
+   /* NVK may access arbitrary device addresses indirectly. Holding only the
+    * pushbuffer's BO would miss descriptors, shaders, BDA and image storage.
+    * The common broker takes independent canonical loans before returning;
+    * subsequent unbind/free cannot retire any of these GPU mappings early. */
+   simple_mtx_lock(&context->residency_mutex);
+   size_t count = 0;
+   if (retain_bindings) list_for_each_entry(struct binding, b, &context->residency, residency) {
+      (void)b;
+      if (++count > UINT32_MAX || count > SIZE_MAX / sizeof(R4GfxNativeResource)) {
+         simple_mtx_unlock(&context->residency_mutex);
+         return VK_ERROR_OUT_OF_HOST_MEMORY;
+      }
+   }
+   R4GfxNativeResource *resources = count ? calloc(count, sizeof(*resources)) : NULL;
+   if (count && !resources) {
+      simple_mtx_unlock(&context->residency_mutex);
+      return VK_ERROR_OUT_OF_HOST_MEMORY;
+   }
+   size_t index = 0;
+   if (retain_bindings) list_for_each_entry(struct binding, b, &context->residency, residency) {
+      resources[index++] = (R4GfxNativeResource) {
+         .version = 1, .size = sizeof(*resources), .binding = b->handle,
+         .access = 1, /* Native read/write loan; zero is read-only. */
+      };
+   }
+   R4GfxNativeSubmission snapshot = *native;
+   snapshot.resource_count = (uint32_t)count;
+   snapshot.resources = (uintptr_t)resources;
+   const int32_t rc = r4draw_gfx_queue_submit_native(&context->draw, queue,
+                                                   submission, &snapshot, out);
+   free(resources);
+   simple_mtx_unlock(&context->residency_mutex);
+   if (rc == R4OS_GFX_QUEUE_OK) return VK_SUCCESS;
+   if (rc == R4OS_GFX_QUEUE_ERROR_BUSY || rc == R4OS_GFX_QUEUE_ERROR_CAPACITY)
+      return VK_NOT_READY;
+   if (rc == R4OS_GFX_QUEUE_ERROR_OOM) return VK_ERROR_OUT_OF_HOST_MEMORY;
+   return status(context, rc);
 }
 
 /* Dropping the public handle requests cleanup; it does not assert physical
@@ -198,6 +257,10 @@ static void va_free(struct nvkmd_va *base)
    struct r4vk_nvk_va_context *context = va->context;
    /* Parent close releases all child handles and orders their physical
     * retirement. No C pointer or destructor is retained in the broker. */
+   simple_mtx_lock(&context->residency_mutex);
+   for (struct binding *b = va->bindings; b; b = b->next)
+      list_del(&b->residency);
+   simple_mtx_unlock(&context->residency_mutex);
    abandon(va->context, va->handle);
    while (va->bindings) {
       struct binding *next = va->bindings->next;
@@ -250,6 +313,9 @@ static VkResult va_bind(struct nvkmd_va *base, struct vk_object_base *log_obj,
       .next = va->bindings, .handle = ready.resource, .offset = va_offset, .bytes = bytes,
    };
    va->bindings = binding;
+   simple_mtx_lock(&context->residency_mutex);
+   list_addtail(&binding->residency, &context->residency);
+   simple_mtx_unlock(&context->residency_mutex);
    simple_mtx_unlock(&va->mutex);
    return VK_SUCCESS;
 fail:
@@ -279,6 +345,9 @@ static VkResult va_unbind(struct nvkmd_va *base, struct vk_object_base *log_obj,
    while (*link) {
       struct binding *b = *link;
       if (!intersects(offset, bytes, b)) { link = &b->next; continue; }
+      simple_mtx_lock(&va->context->residency_mutex);
+      list_del(&b->residency);
+      simple_mtx_unlock(&va->context->residency_mutex);
       VkResult result = retire(va->context, b->handle);
       *link = b->next;
       free(b);

@@ -1,6 +1,8 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "r4vk_nvk_device.h"
 #include "r4vk_nvk_mem.h"
+#include "r4vk_nvk_submit.h"
+#include "vk_sync_timeline.h"
 #include <stdlib.h>
 
 struct native_pdev {
@@ -8,6 +10,8 @@ struct native_pdev {
    uint32_t references;
    R4Draw draw;
    R4GfxBackendInfo backend;
+   struct vk_sync_timeline_type timeline;
+   const struct vk_sync_type *sync_types[3];
 };
 struct native_dev {
    struct nvkmd_dev base;
@@ -17,7 +21,6 @@ struct native_dev {
 };
 static const struct nvkmd_pdev_ops pdev_ops;
 static const struct nvkmd_dev_ops dev_ops;
-static const struct vk_sync_type *const no_sync_types[] = { NULL };
 
 static struct native_pdev *pdev(struct nvkmd_pdev *base)
 {
@@ -49,6 +52,7 @@ static void release(struct r4vk_nvk_va_context *resources)
    /* NVK removes each BO from this list before its backend destructor.
     * Standalone VAs also retain the device, including after BO destruction. */
    assert(list_is_empty(&device->base.mems));
+   r4vk_nvk_va_context_finish(&device->resources);
    simple_mtx_destroy(&device->base.mems_mutex);
    pdev_unref(device->base.pdev);
    free(device);
@@ -97,7 +101,10 @@ static VkResult create_dev(struct nvkmd_pdev *base,
    /* R4NV architecture v1 supplies no host-coherence capability. Successful
     * CPU mapping and the x86 host alone are not proof of GPU coherency. */
    result = r4vk_nvk_mem_context_init(&device->memory, &device->resources, false);
-   if (result != VK_SUCCESS) goto fail;
+   if (result != VK_SUCCESS) {
+      r4vk_nvk_va_context_finish(&device->resources);
+      goto fail;
+   }
    list_inithead(&device->base.mems);
    simple_mtx_init(&device->base.mems_mutex, mtx_plain);
    device->references = 1;
@@ -116,6 +123,7 @@ static void destroy_dev(struct nvkmd_dev *base)
    /* Retained children may still be cleaned up; further resource use cannot
     * succeed. The resident kernel, not this C allocation, owns late GPU work. */
    p_atomic_set(&device->resources.lost, 1);
+   r4vk_nvk_submit_finish(&device->resources);
    release(&device->resources);
 }
 static VkResult alloc_mem(struct nvkmd_dev *base, struct vk_object_base *log,
@@ -155,9 +163,11 @@ static VkResult import_dma_buf(struct nvkmd_dev *base,
 static VkResult create_ctx(struct nvkmd_dev *base, struct vk_object_base *log,
                            enum nvkmd_engines engines, struct nvkmd_ctx **out)
 {
-   (void)log; (void)engines; (void)out;
+   (void)log;
    VkResult result = r4vk_nvk_check_device(base);
-   return result == VK_SUCCESS ? VK_ERROR_FEATURE_NOT_PRESENT : result;
+   if (result != VK_SUCCESS) return result;
+   return r4vk_nvk_create_ctx(&dev(base)->resources, &pdev(base->pdev)->backend.binding,
+                             engines, out);
 }
 static const struct nvkmd_dev_ops dev_ops = {
    .destroy = destroy_dev, .alloc_mem = alloc_mem, .alloc_tiled_mem = alloc_tiled,
@@ -184,7 +194,10 @@ VkResult r4vk_nvk_create_pdev(const R4Draw *draw,
    physical->base.debug_flags = debug_flags;
    physical->base.dev_info = architecture.info;
    physical->base.bind_align_B = architecture.bind_alignment;
-   physical->base.sync_types = no_sync_types;
+   physical->timeline = vk_sync_timeline_get_type(&r4vk_nvk_sync_type);
+   physical->sync_types[0] = &r4vk_nvk_sync_type;
+   physical->sync_types[1] = &physical->timeline.sync;
+   physical->base.sync_types = physical->sync_types;
    physical->references = 1;
    physical->draw = *draw;
    physical->backend = *backend;
