@@ -102,7 +102,8 @@ its own job, without creating a caller-owned intermediate graph. Frontend
 warnings/errors are captured in bounded stack-owned storage and delivered to
 Vulkan debug callbacks after join, including failure; truncation is reported.
 The native builtin-NIR frontend likewise serializes/deserializes its types.
-This does not yet isolate graphics linking or all shader-object paths.
+Graphics pipeline inputs now use the same serialized boundary described below;
+shader objects and other builtin builders remain open.
 
 A targeted SMP4 probe passes private-cache isolation, allocation overflow,
 bounded C-heap exhaustion, abort while holding a private diagnostic mutex,
@@ -142,7 +143,25 @@ barriers, decoded compute launch methods, QueueSubmit2 binary/timeline chains,
 fence timeout/completion/reset and command-pool reuse. Injected meta-builder
 OOM/abort reaches EndCommandBuffer; retry succeeds and final allocation counts
 balance. The backend models receipts without executing the GPU instructions.
-Image commands, final feature admission and installed packaging remain open.
+The following image checkpoint extends this proof; final feature admission and installed packaging remain open.
+
+Image command integration now includes RGBA8 graphics/compute and BC1/D32
+copy-engine paths, mip/layer subregions and padded rows. The native meta NIR
+builder is shared by copy/fill and rectangle stages; graphics pipeline inputs
+also remain serialized until the backend job. Scalar tessellation state is
+passed separately, without a caller-owned NIR graph. This does not establish
+all geometry/tessellation, pipeline variants or shader-object paths.
+Command buffers request their actual structure alignment; the image probe
+exposed an aligned SSE store on an allocation previously requesting only eight
+bytes. Meta cache initialization, keys and mandatory insertion now report OOM
+and destroy unretained objects. Cache lookups capture object pointers while
+holding the mutex, before another insertion can invalidate table entries.
+Temporary compute-meta push descriptors are freed after their bytes have been
+uploaded into command-owned memory, before restoring the caller state; the
+second guest exposed their previous loss during final allocation accounting.
+The bounded SMP4 probe checks decoded compute/draw/DMA commands, vertex OOM,
+fragment abort, meta retention OOM/rehash/retry and final cleanup. Model
+completion does not prove image contents or physical memory visibility.
 
 `Tools/Prepare.ps1 -OutputRoot <workspace-relative-or-absolute-output>` verifies
 the existing pinned Mesa source manifest, creates private C/header overlays
