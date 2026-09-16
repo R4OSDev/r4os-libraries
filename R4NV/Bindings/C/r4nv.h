@@ -344,6 +344,32 @@ _Static_assert(offsetof(R4NvArchitecture, compute_class) == 108u, "R4NvArchitect
 _Static_assert(offsetof(R4NvArchitecture, copy_class) == 112u, "R4NvArchitecture.copy_class offset mismatch");
 _Static_assert(offsetof(R4NvArchitecture, gpfifo_class) == 116u, "R4NvArchitecture.gpfifo_class offset mismatch");
 
+typedef struct R4NvNativeSubmitHeader {
+    uint32_t version;
+    uint32_t size;
+    uint32_t engine_mask;
+    uint32_t push_count;
+    uint64_t reserved0;
+    uint64_t reserved1;
+} R4NvNativeSubmitHeader;
+_Static_assert(sizeof(R4NvNativeSubmitHeader) == 32u, "R4NvNativeSubmitHeader size mismatch");
+_Static_assert(offsetof(R4NvNativeSubmitHeader, version) == 0u, "R4NvNativeSubmitHeader.version offset mismatch");
+_Static_assert(offsetof(R4NvNativeSubmitHeader, size) == 4u, "R4NvNativeSubmitHeader.size offset mismatch");
+_Static_assert(offsetof(R4NvNativeSubmitHeader, engine_mask) == 8u, "R4NvNativeSubmitHeader.engine_mask offset mismatch");
+_Static_assert(offsetof(R4NvNativeSubmitHeader, push_count) == 12u, "R4NvNativeSubmitHeader.push_count offset mismatch");
+_Static_assert(offsetof(R4NvNativeSubmitHeader, reserved0) == 16u, "R4NvNativeSubmitHeader.reserved0 offset mismatch");
+_Static_assert(offsetof(R4NvNativeSubmitHeader, reserved1) == 24u, "R4NvNativeSubmitHeader.reserved1 offset mismatch");
+
+typedef struct R4NvNativePush {
+    uint64_t address;
+    uint32_t byte_length;
+    uint32_t flags;
+} R4NvNativePush;
+_Static_assert(sizeof(R4NvNativePush) == 16u, "R4NvNativePush size mismatch");
+_Static_assert(offsetof(R4NvNativePush, address) == 0u, "R4NvNativePush.address offset mismatch");
+_Static_assert(offsetof(R4NvNativePush, byte_length) == 8u, "R4NvNativePush.byte_length offset mismatch");
+_Static_assert(offsetof(R4NvNativePush, flags) == 12u, "R4NvNativePush.flags offset mismatch");
+
 #define R4NV_COMMAND_ABI ((uint32_t)1)
 #define R4NV_RM_RELEASE ((uint32_t)570144)
 #define R4NV_FEATURE_COPY_LINEAR ((uint32_t)1)
@@ -381,6 +407,11 @@ _Static_assert(offsetof(R4NvArchitecture, gpfifo_class) == 116u, "R4NvArchitectu
 #define R4NV_IMAGE_REASON_FORCED ((uint32_t)16)
 #define R4NV_IMAGE_REASON_PREFERENCE ((uint32_t)32)
 #define R4NV_SHADER_PROFILE_COLOR_FRAGMENT ((uint32_t)7)
+#define R4NV_NATIVE_SUBMIT_VERSION ((uint32_t)1)
+#define R4NV_NATIVE_ENGINE_GRAPHICS ((uint32_t)1)
+#define R4NV_NATIVE_PUSH_INCOMPLETE ((uint32_t)1)
+#define R4NV_NATIVE_PUSH_NO_PREFETCH ((uint32_t)2)
+#define R4NV_NATIVE_PUSH_LIMIT ((uint32_t)510)
 #define R4NV_STATUS_INVALID ((int32_t)-1)
 #define R4NV_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4NV_STATUS_CAPACITY ((int32_t)-3)

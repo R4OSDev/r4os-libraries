@@ -2177,6 +2177,121 @@
         }
       ],
       "description": "Hardware facts in GfxBackendProperties: BACKEND_V1 identity, properties revision 1, data_bytes 120. Version1 exact-size. Identity from captured PCI/PMC; active GPC/TPC from acknowledged firmware post-init; VRAM from acknowledged static data; VA bounds from the native address-space receipt. Architecture classes describe known hardware methods, not allocated channels or executable queue capability. PCI domain is zero while the native driver supports only domain zero. Flags must be zero: no coherence, BAR mapping, sparse, Vulkan qualification or hardware test claim. memory_generation must match the enclosing backend inventory. Unknown/incomplete facts remain unavailable."
+    },
+    {
+      "name": "R4NvNativeSubmitHeader",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "engine_mask",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "engine_mask"
+        },
+        {
+          "name": "push_count",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "push_count"
+        },
+        {
+          "name": "reserved0",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved0"
+        },
+        {
+          "name": "reserved1",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved1"
+        }
+      ],
+      "description": "Native GfxSubmission operation10 payload, BACKEND_V1 driver profile revision1. Version1 exact32-byte header followed by push_count R4NvNativePush16 records; exact total byte count, reserved fields zero. Payload contains GPU addresses only; all command/resource storage must also be listed as canonical retained GfxNativeResource bindings. The engine mask requests instantiated engines, never architecture-class availability. Unsupported bits fail. Completion means actual engine drain and system-memory ordering, not command fetch. Vulkan resource/cache barriers remain in the native command stream."
+    },
+    {
+      "name": "R4NvNativePush",
+      "size": 16,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "address",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "address"
+        },
+        {
+          "name": "byte_length",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte_length"
+        },
+        {
+          "name": "flags",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        }
+      ],
+      "description": "One subroutine-level GPFIFO push, backed by retained GPU-VA resources. Flags1=incomplete method sequence, flags2=no prefetch/SYNC_WAIT. Unknown bits fail; final push cannot remain incomplete. Addresses/counts are 4-byte aligned and must fit the instantiated FIFO. No CPU pointer or opcode validation interface."
     }
   ],
   "constants": [
@@ -2438,6 +2553,41 @@
       "type": "u32",
       "value": 7,
       "description": "Fixed RGB color transform: sRGB/linear/PQ/HLG, two matrices, explicit range/alpha, white scaling, optional output tone/gamut mapping and ordered dither; CBuf2 ABI4."
+    },
+    {
+      "zig_name": "native_submit_version",
+      "c_name": "R4NV_NATIVE_SUBMIT_VERSION",
+      "type": "u32",
+      "value": 1,
+      "description": "Native submission protocol version1; hardware publication bounds are independent of resource-list size."
+    },
+    {
+      "zig_name": "native_engine_graphics",
+      "c_name": "R4NV_NATIVE_ENGINE_GRAPHICS",
+      "type": "u32",
+      "value": 1,
+      "description": "Native submission protocol version1; hardware publication bounds are independent of resource-list size."
+    },
+    {
+      "zig_name": "native_push_incomplete",
+      "c_name": "R4NV_NATIVE_PUSH_INCOMPLETE",
+      "type": "u32",
+      "value": 1,
+      "description": "Native submission protocol version1; hardware publication bounds are independent of resource-list size."
+    },
+    {
+      "zig_name": "native_push_no_prefetch",
+      "c_name": "R4NV_NATIVE_PUSH_NO_PREFETCH",
+      "type": "u32",
+      "value": 2,
+      "description": "Native submission protocol version1; hardware publication bounds are independent of resource-list size."
+    },
+    {
+      "zig_name": "native_push_limit",
+      "c_name": "R4NV_NATIVE_PUSH_LIMIT",
+      "type": "u32",
+      "value": 510,
+      "description": "Native submission protocol version1; hardware publication bounds are independent of resource-list size."
     }
   ],
   "errors": [

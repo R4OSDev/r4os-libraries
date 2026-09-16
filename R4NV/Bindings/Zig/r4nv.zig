@@ -187,6 +187,21 @@ pub const R4NvArchitecture = extern struct {
     copy_class: u32,
     gpfifo_class: u32,
 };
+
+pub const R4NvNativeSubmitHeader = extern struct {
+    version: u32,
+    size: u32,
+    engine_mask: u32,
+    push_count: u32,
+    reserved0: u64,
+    reserved1: u64,
+};
+
+pub const R4NvNativePush = extern struct {
+    address: u64,
+    byte_length: u32,
+    flags: u32,
+};
 pub const command_abi: u32 = 1;
 pub const rm_release: u32 = 570144;
 pub const feature_copy_linear: u32 = 1;
@@ -224,6 +239,11 @@ pub const image_reason_usage: u32 = 8;
 pub const image_reason_forced: u32 = 16;
 pub const image_reason_preference: u32 = 32;
 pub const shader_profile_color_fragment: u32 = 7;
+pub const native_submit_version: u32 = 1;
+pub const native_engine_graphics: u32 = 1;
+pub const native_push_incomplete: u32 = 1;
+pub const native_push_no_prefetch: u32 = 2;
+pub const native_push_limit: u32 = 510;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_capacity: i32 = -3;

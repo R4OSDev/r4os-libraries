@@ -10,6 +10,15 @@ and tiled command encoding, and image layouts. Generated C/Zig bindings check
 the interface. Optional consumers can use `IMPORT=R4NV:BACKEND_V1:3:1` and keep
 software rendering when the library is unavailable or incompatible.
 
+Native queue packets use `R4NvNativeSubmitHeader` (32 bytes), followed by exactly
+`push_count` `R4NvNativePush` records (16 bytes each). Version 1 admits at most
+510 pushes, flags `incomplete`/`no_prefetch`, and the instantiated graphics engine.
+The final push must be complete. Every referenced BO/VA, including command
+storage, must be retained through the common native resource list. Completion
+is a GPU drain and ordered semaphore, not command fetch; Vulkan resource/cache
+barriers remain in the stream. These wire types add no R4L slots or revisions;
+NVIDIA.R4D decides actual support from its live resources.
+
 `Source/copy.zig` is shared by the R4L and the driver's compiled binding:
 
 | Copy class | Encoding scope |

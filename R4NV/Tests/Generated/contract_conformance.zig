@@ -159,6 +159,17 @@ comptime {
     if (@offsetOf(implementation.R4NvArchitecture, "compute_class") != 108 or @offsetOf(binding.R4NvArchitecture, "compute_class") != 108) @compileError("R4NvArchitecture.compute_class offset drift");
     if (@offsetOf(implementation.R4NvArchitecture, "copy_class") != 112 or @offsetOf(binding.R4NvArchitecture, "copy_class") != 112) @compileError("R4NvArchitecture.copy_class offset drift");
     if (@offsetOf(implementation.R4NvArchitecture, "gpfifo_class") != 116 or @offsetOf(binding.R4NvArchitecture, "gpfifo_class") != 116) @compileError("R4NvArchitecture.gpfifo_class offset drift");
+    if (@sizeOf(implementation.R4NvNativeSubmitHeader) != 32 or @sizeOf(binding.R4NvNativeSubmitHeader) != 32) @compileError("R4NvNativeSubmitHeader size drift");
+    if (@offsetOf(implementation.R4NvNativeSubmitHeader, "version") != 0 or @offsetOf(binding.R4NvNativeSubmitHeader, "version") != 0) @compileError("R4NvNativeSubmitHeader.version offset drift");
+    if (@offsetOf(implementation.R4NvNativeSubmitHeader, "size") != 4 or @offsetOf(binding.R4NvNativeSubmitHeader, "size") != 4) @compileError("R4NvNativeSubmitHeader.size offset drift");
+    if (@offsetOf(implementation.R4NvNativeSubmitHeader, "engine_mask") != 8 or @offsetOf(binding.R4NvNativeSubmitHeader, "engine_mask") != 8) @compileError("R4NvNativeSubmitHeader.engine_mask offset drift");
+    if (@offsetOf(implementation.R4NvNativeSubmitHeader, "push_count") != 12 or @offsetOf(binding.R4NvNativeSubmitHeader, "push_count") != 12) @compileError("R4NvNativeSubmitHeader.push_count offset drift");
+    if (@offsetOf(implementation.R4NvNativeSubmitHeader, "reserved0") != 16 or @offsetOf(binding.R4NvNativeSubmitHeader, "reserved0") != 16) @compileError("R4NvNativeSubmitHeader.reserved0 offset drift");
+    if (@offsetOf(implementation.R4NvNativeSubmitHeader, "reserved1") != 24 or @offsetOf(binding.R4NvNativeSubmitHeader, "reserved1") != 24) @compileError("R4NvNativeSubmitHeader.reserved1 offset drift");
+    if (@sizeOf(implementation.R4NvNativePush) != 16 or @sizeOf(binding.R4NvNativePush) != 16) @compileError("R4NvNativePush size drift");
+    if (@offsetOf(implementation.R4NvNativePush, "address") != 0 or @offsetOf(binding.R4NvNativePush, "address") != 0) @compileError("R4NvNativePush.address offset drift");
+    if (@offsetOf(implementation.R4NvNativePush, "byte_length") != 8 or @offsetOf(binding.R4NvNativePush, "byte_length") != 8) @compileError("R4NvNativePush.byte_length offset drift");
+    if (@offsetOf(implementation.R4NvNativePush, "flags") != 12 or @offsetOf(binding.R4NvNativePush, "flags") != 12) @compileError("R4NvNativePush.flags offset drift");
     if (@sizeOf(implementation.BackendV1) != 64 or @sizeOf(binding.BackendV1) != 64) @compileError("BackendV1 size drift");
     if (@offsetOf(implementation.BackendV1, "negotiate") != 32 or @offsetOf(binding.BackendV1, "negotiate") != 32) @compileError("BackendV1.negotiate slot drift");
     if (@offsetOf(implementation.BackendV1, "encode_copy") != 40 or @offsetOf(binding.BackendV1, "encode_copy") != 40) @compileError("BackendV1.encode_copy slot drift");
