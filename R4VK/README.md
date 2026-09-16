@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.4 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.5 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -54,9 +54,15 @@ every owner on success or failure. Vulkan objects and GPU upload stay on the
 caller. A public SMP4 consumer covers VS/FS creation, binary round-trips,
 incompatible binaries, partial outputs, callback OOM rollback and a specialized
 compute shader's command submission. GPU execution is modeled, not measured.
-See Docs/Drivers/GrafikVulkan07936.txt/.json. Generated commands and pipeline
-libraries/binaries remain required, unadvertised 0.79.36 work; full graphics/
-compute/pipeline admission is still open.
+See Docs/Drivers/GrafikVulkan07936.txt/.json. R4VK 0.1.5 also enables
+EXT_device_generated_commands: its initialization/processing builders and
+the KHR_copy_memory_indirect helper now use isolated NIR/NAK jobs. CPU stride
+and QMD requirements are published only after successful compilation; uploads
+and callback allocations stay on the caller. Public SMP4 checks cover explicit
+and implicit compute preprocessing, shader execution sets, graphics layout
+tokens, callback rollback, indirect copies and modeled submission. Indirect
+memory-to-image copy remains unsupported. Pipeline libraries/binaries and
+full graphics/compute/pipeline admission remain open 0.79.36 work.
 
 The public C consumer verifies these queries and negative CreateDevice results.
 Original host-image-copy code works on the explicitly host-visible RAM type:

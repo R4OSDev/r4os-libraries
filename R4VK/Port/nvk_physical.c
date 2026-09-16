@@ -79,12 +79,9 @@ void r4vk_nvk_filter_physical_caps(struct vk_device_extension_table *ext,
    /* These optional paths still bypass the native isolated frontend or
     * require the separate pipeline-object integration in roadmap 0.79.36.
     * Do not expose an upstream class flag as a completed native feature. */
-   ext->EXT_device_generated_commands = false;
    ext->KHR_pipeline_binary = false;
    ext->KHR_pipeline_library = false;
    ext->EXT_graphics_pipeline_library = false;
-   features->deviceGeneratedCommands = false;
-   features->dynamicGeneratedPipelineLayout = false;
    features->pipelineBinaries = false;
    features->graphicsPipelineLibrary = false;
    features->sparseBinding = false;

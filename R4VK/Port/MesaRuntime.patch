@@ -4081,3 +4081,180 @@
 
        if (first_fail_or_success == VK_SUCCESS)
           first_fail_or_success = result;
+--- a/src/nouveau/vulkan/nvk_cmd_indirect.c
++++ b/src/nouveau/vulkan/nvk_cmd_indirect.c
+@@ -801,27 +801,12 @@ build_process_gfx_cmd_seq(nir_builder *b, struct nvk_nir_push *p,
+       }
+    }
+ }
+
+-static VkResult
+-build_init_shader(struct nvk_device *dev,
+-                  const VkIndirectCommandsLayoutCreateInfoEXT *info,
+-                  uint32_t qmd_size_per_seq_B,
+-                  const VkAllocationCallbacks *pAllocator,
+-                  struct nvk_shader **shader_out)
++static nir_shader *
++build_init_shader_nir(const VkIndirectCommandsLayoutCreateInfoEXT *info,
++                       uint32_t qmd_size_per_seq_B)
+ {
+-   /* There's nothing to initialize for graphics */
+-   if (info->shaderStages & NVK_SHADER_STAGE_GRAPHICS_BITS) {
+-      assert(!(info->shaderStages & ~NVK_SHADER_STAGE_GRAPHICS_BITS));
+-      *shader_out = NULL;
+-      return VK_SUCCESS;
+-   }
+-
+-   if (qmd_size_per_seq_B == 0) {
+-      *shader_out = NULL;
+-      return VK_SUCCESS;
+-   }
+-
+    nir_builder build =
+       nir_builder_init_simple_shader(MESA_SHADER_COMPUTE, NULL,
+                                      "nvk-init-indirect-commands");
+    build.shader->info.workgroup_size[0] = 32;
+@@ -836,16 +821,14 @@ build_init_shader(struct nvk_device *dev,
+       assert(info->shaderStages == VK_SHADER_STAGE_COMPUTE_BIT);
+       store_global_dw(b, in.qmd_pool_addr, 0, nir_imm_int(b, 1));
+    }
+
+-   return nvk_compile_nir_shader(dev, build.shader, pAllocator, shader_out);
++   return build.shader;
+ }
+
+-static VkResult
+-build_process_shader(struct nvk_device *dev,
++static nir_shader *
++build_process_shader_nir(struct nvk_device *dev,
+                      const VkIndirectCommandsLayoutCreateInfoEXT *info,
+-                     const VkAllocationCallbacks *pAllocator,
+-                     struct nvk_shader **shader_out,
+                      uint32_t *cmd_seq_stride_B_out,
+                      uint32_t *qmd_size_per_seq_B_out)
+ {
+    const struct nvk_physical_device *pdev = nvk_device_physical(dev);
+@@ -925,9 +908,88 @@ build_process_shader(struct nvk_device *dev,
+
+    /* We also output this stride to go in the layout struct */
+    *cmd_seq_stride_B_out = push.max_dw_count * 4;
+
+-   return nvk_compile_nir_shader(dev, build.shader, pAllocator, shader_out);
++   return build.shader;
++}
++
++#if defined(R4OS_VULKAN)
++struct nvk_native_indirect_nir {
++   struct nvk_device *dev;
++   const VkIndirectCommandsLayoutCreateInfoEXT *info;
++   uint32_t cmd_seq_stride_B, qmd_size_per_seq_B;
++};
++
++static nir_shader *
++build_init_shader_native(void *argument)
++{
++   struct nvk_native_indirect_nir *input = argument;
++   return build_init_shader_nir(input->info, input->qmd_size_per_seq_B);
++}
++
++static nir_shader *
++build_process_shader_native(void *argument)
++{
++   struct nvk_native_indirect_nir *input = argument;
++   return build_process_shader_nir(input->dev, input->info,
++                                   &input->cmd_seq_stride_B,
++                                   &input->qmd_size_per_seq_B);
++}
++#endif
++
++static VkResult
++build_init_shader(struct nvk_device *dev,
++                  const VkIndirectCommandsLayoutCreateInfoEXT *info,
++                  uint32_t qmd_size_per_seq_B,
++                  const VkAllocationCallbacks *pAllocator,
++                  struct nvk_shader **shader_out)
++{
++   /* There's nothing to initialize for graphics or an empty QMD pool. */
++   if (info->shaderStages & NVK_SHADER_STAGE_GRAPHICS_BITS) {
++      assert(!(info->shaderStages & ~NVK_SHADER_STAGE_GRAPHICS_BITS));
++      *shader_out = NULL;
++      return VK_SUCCESS;
++   }
++   if (qmd_size_per_seq_B == 0) {
++      *shader_out = NULL;
++      return VK_SUCCESS;
++   }
++#if defined(R4OS_VULKAN)
++   struct nvk_native_indirect_nir input = {
++      .dev = dev, .info = info, .qmd_size_per_seq_B = qmd_size_per_seq_B,
++   };
++   return nvk_compile_meta_shader_native(dev, build_init_shader_native, &input,
++                                         pAllocator, shader_out);
++#else
++   nir_shader *nir = build_init_shader_nir(info, qmd_size_per_seq_B);
++   return nvk_compile_nir_shader(dev, nir, pAllocator, shader_out);
++#endif
++}
++
++static VkResult
++build_process_shader(struct nvk_device *dev,
++                     const VkIndirectCommandsLayoutCreateInfoEXT *info,
++                     const VkAllocationCallbacks *pAllocator,
++                     struct nvk_shader **shader_out,
++                     uint32_t *cmd_seq_stride_B_out,
++                     uint32_t *qmd_size_per_seq_B_out)
++{
++#if defined(R4OS_VULKAN)
++   /* The builder writes only CPU scalars on our stack. Publish these into
++    * the Vulkan layout after the isolated builder/backend both succeed. */
++   struct nvk_native_indirect_nir input = {.dev = dev, .info = info};
++   VkResult result = nvk_compile_meta_shader_native(dev,
++      build_process_shader_native, &input, pAllocator, shader_out);
++   if (result == VK_SUCCESS) {
++      *cmd_seq_stride_B_out = input.cmd_seq_stride_B;
++      *qmd_size_per_seq_B_out = input.qmd_size_per_seq_B;
++   }
++   return result;
++#else
++   nir_shader *nir = build_process_shader_nir(dev, info,
++      cmd_seq_stride_B_out, qmd_size_per_seq_B_out);
++   return nvk_compile_nir_shader(dev, nir, pAllocator, shader_out);
++#endif
+ }
+
+ static void
+ nvk_indirect_commands_layout_destroy(struct nvk_device *dev,
+@@ -1276,8 +1338,17 @@ build_copy_indierct_shader(void)
+
+    return build.shader;
+ }
+
++#if defined(R4OS_VULKAN)
++static nir_shader *
++build_copy_indirect_shader_native(void *argument)
++{
++   (void)argument;
++   return build_copy_indierct_shader();
++}
++#endif
++
+ static struct nvk_shader *
+ atomic_set_or_destroy_shader(struct nvk_device *dev,
+                              struct nvk_shader **shader_ptr,
+                              struct nvk_shader *shader,
+@@ -1301,10 +1372,15 @@ get_copy_indirect_shader(struct nvk_device *dev,
+       *shader_out = shader;
+       return VK_SUCCESS;
+    }
+
++#if defined(R4OS_VULKAN)
++   VkResult result = nvk_compile_meta_shader_native(dev,
++      build_copy_indirect_shader_native, NULL, &dev->vk.alloc, &shader);
++#else
+    nir_shader *nir = build_copy_indierct_shader();
+    VkResult result = nvk_compile_nir_shader(dev, nir, &dev->vk.alloc, &shader);
++#endif
+    if (result != VK_SUCCESS)
+       return result;
+
+    *shader_out = atomic_set_or_destroy_shader(dev, &dev->copy_indirect,
