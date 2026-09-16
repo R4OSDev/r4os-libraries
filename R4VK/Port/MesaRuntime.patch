@@ -3845,3 +3845,239 @@
     /* Version override takes priority */
     const uint32_t version_override = vk_get_version_override();
     if (version_override)
+--- a/src/vulkan/runtime/vk_shader.c
++++ b/src/vulkan/runtime/vk_shader.c
+@@ -37,6 +37,10 @@
+ #include "util/mesa-blake3.h"
+
+ #include "nir.h"
++#if defined(R4OS_VULKAN)
++#include "nir/nir_serialize.h"
++#include "r4vk_state.h"
++#endif
+
+ static void
+ vk_shader_init(struct vk_shader *shader,
+@@ -243,11 +247,49 @@ cmp_stage_idx(const void *_a, const void *_b)
+    return vk_shader_cmp_graphics_stages(a->stage, b->stage);
+ }
+
++#if defined(R4OS_VULKAN)
++struct vk_native_shader_frontend {
++   struct vk_device *device;
++   const VkShaderCreateInfoEXT *info;
++   struct vk_sampler_state_array embedded;
++   struct blob serialized;
++   unsigned message_count, truncated;
++   struct {
++      enum nir_spirv_debug_level level;
++      size_t offset;
++      char text[512];
++   } messages[8];
++};
++
++static void
++vk_native_shader_message(void *argument, enum nir_spirv_debug_level level,
++                         size_t offset, const char *message)
++{
++   struct vk_native_shader_frontend *job = argument;
++   if (level != NIR_SPIRV_DEBUG_LEVEL_WARNING &&
++       level != NIR_SPIRV_DEBUG_LEVEL_ERROR) return;
++   if (job->message_count == ARRAY_SIZE(job->messages)) {
++      job->truncated++;
++      return;
++   }
++   unsigned i = job->message_count++;
++   job->messages[i].level = level;
++   job->messages[i].offset = offset;
++   int length = snprintf(job->messages[i].text, sizeof(job->messages[i].text),
++                         "%s", message);
++   if (length < 0 || length >= sizeof(job->messages[i].text)) job->truncated++;
++}
++#endif
++
+ static nir_shader *
+ vk_shader_to_nir(struct vk_device *device,
+                  const VkShaderCreateInfoEXT *info,
+                  const struct vk_pipeline_robustness_state *rs,
+-                 struct vk_sampler_state_array *embedded_samplers_out)
++                 struct vk_sampler_state_array *embedded_samplers_out
++#if defined(R4OS_VULKAN)
++                 , struct vk_native_shader_frontend *job
++#endif
++                 )
+ {
+    const struct vk_device_shader_ops *ops = device->shader_ops;
+    const struct vk_properties *properties = &device->physical->properties;
+@@ -257,6 +299,11 @@ vk_shader_to_nir(struct vk_device *device,
+       ops->get_nir_options(device->physical, stage, rs);
+    struct spirv_to_nir_options spirv_options =
+       ops->get_spirv_options(device->physical, stage, rs);
++#if defined(R4OS_VULKAN)
++   spirv_options.debug.func = vk_native_shader_message;
++   spirv_options.debug.private_data = job;
++   spirv_options.skip_os_break_in_debug_build = true;
++#endif
+
+    nir_shader *nir = vk_spirv_to_nir(device,
+                                      info->pCode, info->codeSize,
+@@ -311,7 +358,7 @@ vk_shader_compile_info_init(struct vk_shader_compile_info *info,
+    }
+
+    *info = (struct vk_shader_compile_info) {
+-      .stage = nir->info.stage,
++      .stage = vk_to_mesa_shader_stage(vk_info->stage),
+       .flags = vk_info->flags,
+       .next_stage_mask = vk_info->nextStage,
+       .nir = nir,
+@@ -325,6 +372,58 @@ vk_shader_compile_info_init(struct vk_shader_compile_info *info,
+    };
+ }
+
++#if defined(R4OS_VULKAN)
++static int
++vk_native_shader_frontend_worker(void *argument)
++{
++   struct vk_native_shader_frontend *job = argument;
++   if (!r4vk_glsl_init_or_ref() || !r4vk_printf_init_or_ref())
++      return VK_ERROR_OUT_OF_HOST_MEMORY;
++   nir_shader *nir = vk_shader_to_nir(job->device, job->info,
++                                     &vk_robustness_disabled,
++                                     &job->embedded, job);
++   if (!nir) return VK_ERROR_UNKNOWN;
++   blob_init(&job->serialized);
++   nir_serialize(&job->serialized, nir, false);
++   ralloc_free(nir);
++   return job->serialized.out_of_memory ? VK_ERROR_OUT_OF_HOST_MEMORY : VK_SUCCESS;
++}
++
++static VkResult
++vk_native_shader_frontend(struct vk_device *device,
++                           const VkShaderCreateInfoEXT *vk_info,
++                           struct set_layouts *set_layouts,
++                           struct vk_shader_compile_info *info,
++                           struct r4vk_compiler_job **owner)
++{
++   struct vk_native_shader_frontend job = {.device = device, .info = vk_info};
++   VkResult result = r4vk_compiler_job_run(vk_native_shader_frontend_worker,
++                                          &job, owner);
++   /* Application diagnostics run on the caller after the isolated job.
++    * Stack-owned messages also survive an aborted frontend. */
++   for (unsigned i = 0; i < job.message_count; i++) {
++      if (job.messages[i].level == NIR_SPIRV_DEBUG_LEVEL_ERROR)
++         vk_loge(VK_LOG_OBJS(device), "SPIR-V offset %lu: %s",
++                 (unsigned long)job.messages[i].offset, job.messages[i].text);
++      else
++         vk_logw(VK_LOG_OBJS(device), "SPIR-V offset %lu: %s",
++                 (unsigned long)job.messages[i].offset, job.messages[i].text);
++   }
++   if (job.truncated)
++      vk_logw(VK_LOG_OBJS(device), "SPIR-V diagnostics truncated (%u)", job.truncated);
++   if (result != VK_SUCCESS) return vk_error(device, result);
++
++   /* Keep only CPU data in the frontend owner until the backend returns.
++    * NIR types never cross owners; Vulkan objects and uploads stay on the
++    * caller's normal allocation and rollback path. */
++   vk_shader_compile_info_init(info, set_layouts, vk_info,
++                               &vk_robustness_disabled, &job.embedded, NULL);
++   info->r4vk_nir_data = job.serialized.data;
++   info->r4vk_nir_size = job.serialized.size;
++   return VK_SUCCESS;
++}
++#endif
++
+ PRAGMA_DIAGNOSTIC_PUSH
+ PRAGMA_DIAGNOSTIC_ERROR(-Wpadded)
+ struct vk_shader_bin_header {
+@@ -619,6 +718,15 @@ vk_common_CreateShadersEXT(VkDevice _device,
+                .idx = i,
+             };
+          } else {
++            struct vk_shader_compile_info info;
++            struct set_layouts set_layouts;
++#if defined(R4OS_VULKAN)
++            struct r4vk_compiler_job *owner;
++            result = vk_native_shader_frontend(device, vk_info, &set_layouts,
++                                                &info, &owner);
++            if (result != VK_SUCCESS)
++               break;
++#else
+             struct vk_sampler_state_array embedded_samplers = {0};
+             nir_shader *nir = vk_shader_to_nir(device, vk_info,
+                                                &vk_robustness_disabled,
+@@ -629,18 +737,21 @@ vk_common_CreateShadersEXT(VkDevice _device,
+                break;
+             }
+
+-            struct vk_shader_compile_info info;
+-            struct set_layouts set_layouts;
+             vk_shader_compile_info_init(&info, &set_layouts,
+                                         vk_info, &vk_robustness_disabled,
+                                         &embedded_samplers, nir);
++#endif
+
+             struct vk_shader *shader;
+             result = vk_compile_shaders(device, 1, &info,
+                                         NULL /* state */, NULL /* features */,
+                                         pAllocator, &shader);
+
++#if defined(R4OS_VULKAN)
++            r4vk_compiler_job_destroy(owner);
++#else
+             vk_sampler_state_array_finish(&embedded_samplers);
++#endif
+
+             if (result != VK_SUCCESS)
+                break;
+@@ -661,7 +772,11 @@ vk_common_CreateShadersEXT(VkDevice _device,
+    if (linked_count > 0) {
+       struct set_layouts set_layouts[VK_MAX_LINKED_SHADER_STAGES];
+       struct vk_shader_compile_info infos[VK_MAX_LINKED_SHADER_STAGES];
++#if defined(R4OS_VULKAN)
++      struct r4vk_compiler_job *owners[VK_MAX_LINKED_SHADER_STAGES] = {0};
++#else
+       struct vk_sampler_state_array embedded_samplers[VK_MAX_LINKED_SHADER_STAGES];
++#endif
+       VkResult result = VK_SUCCESS;
+
+       /* Sort so we guarantee the driver always gets them in-order */
+@@ -669,11 +784,19 @@ vk_common_CreateShadersEXT(VkDevice _device,
+
+       /* Memset for easy error handling */
+       memset(infos, 0, sizeof(infos));
++#if !defined(R4OS_VULKAN)
+       memset(embedded_samplers, 0, sizeof(embedded_samplers));
++#endif
+
+       for (uint32_t l = 0; l < linked_count; l++) {
+          const VkShaderCreateInfoEXT *vk_info = &pCreateInfos[linked[l].idx];
+
++#if defined(R4OS_VULKAN)
++         result = vk_native_shader_frontend(device, vk_info, &set_layouts[l],
++                                             &infos[l], &owners[l]);
++         if (result != VK_SUCCESS)
++            break;
++#else
+          nir_shader *nir = vk_shader_to_nir(device, vk_info,
+                                             &vk_robustness_disabled,
+                                             &embedded_samplers[l]);
+@@ -686,6 +809,7 @@ vk_common_CreateShadersEXT(VkDevice _device,
+          vk_shader_compile_info_init(&infos[l], &set_layouts[l],
+                                      vk_info, &vk_robustness_disabled,
+                                      &embedded_samplers[l], nir);
++#endif
+       }
+
+       if (result == VK_SUCCESS) {
+@@ -705,7 +829,11 @@ vk_common_CreateShadersEXT(VkDevice _device,
+       }
+
+       for (uint32_t l = 0; l < linked_count; l++)
++#if defined(R4OS_VULKAN)
++         if (owners[l]) r4vk_compiler_job_destroy(owners[l]);
++#else
+          vk_sampler_state_array_finish(&embedded_samplers[l]);
++#endif
+
+       if (first_fail_or_success == VK_SUCCESS)
+          first_fail_or_success = result;

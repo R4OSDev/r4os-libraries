@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.3 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.4 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -47,9 +47,16 @@ extensions such as host-image-copy remain usable. The earlier priority=1
 profile was invalid: Vulkan's required minimum is 2, regardless of global
 priority support. See the normative Required Limits and Queue Priority sections
 in the archived Khronos specification and GrafikVulkan07935.json / nvk_limits.
-Shader objects, generated commands and pipeline libraries/binaries stay
-unadvertised until their separate native integration in 0.79.36; the matching
-feature flags and device-proc lookup agree. This is not their final removal.
+The 0.79.36 shader-object checkpoint enables EXT_shader_object. Both linked
+and independent SPIR-V stages run through isolated frontend jobs, retain
+serialized NIR/CPU sampler data through backend compilation, and release
+every owner on success or failure. Vulkan objects and GPU upload stay on the
+caller. A public SMP4 consumer covers VS/FS creation, binary round-trips,
+incompatible binaries, partial outputs, callback OOM rollback and a specialized
+compute shader's command submission. GPU execution is modeled, not measured.
+See Docs/Drivers/GrafikVulkan07936.txt/.json. Generated commands and pipeline
+libraries/binaries remain required, unadvertised 0.79.36 work; full graphics/
+compute/pipeline admission is still open.
 
 The public C consumer verifies these queries and negative CreateDevice results.
 Original host-image-copy code works on the explicitly host-visible RAM type:
