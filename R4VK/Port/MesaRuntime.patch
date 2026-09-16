@@ -4625,3 +4625,53 @@
        return result;
 
     *shader_out = atomic_set_or_destroy_shader(dev, &dev->copy_indirect,
+--- a/src/nouveau/vulkan/nvk_descriptor_set.c
++++ b/src/nouveau/vulkan/nvk_descriptor_set.c
+@@ -682,8 +682,12 @@ nvk_CreateDescriptorPool(VkDevice _device,
+    if (!pool)
+       return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
+
+    list_inithead(&pool->sets);
++   /* Backing allocation may fail before the real address range is ready.
++    * Keep the common destructor valid for every partially built pool.
++    */
++   util_vma_heap_init(&pool->heap, 0, 0);
+
+    const VkMutableDescriptorTypeCreateInfoEXT *mutable_info =
+       vk_find_struct_const(pCreateInfo->pNext,
+                            MUTABLE_DESCRIPTOR_TYPE_CREATE_INFO_EXT);
+@@ -712,10 +716,15 @@ nvk_CreateDescriptorPool(VkDevice _device,
+       uint32_t stride, alignment;
+       nvk_descriptor_stride_align_for_type(pdev, 0 /* not DESCRIPTOR_BUFFER */,
+                                            pCreateInfo->pPoolSizes[i].type,
+                                            type_list, &stride, &alignment);
+-      mem_size += MAX2(stride, max_align) *
+-                 pCreateInfo->pPoolSizes[i].descriptorCount;
++      const uint64_t bytes = (uint64_t)MAX2(stride, max_align) *
++                             pCreateInfo->pPoolSizes[i].descriptorCount;
++      if (bytes > UINT64_MAX - mem_size) {
++         vk_object_free(&dev->vk, pAllocator, pool);
++         return vk_error(dev, VK_ERROR_OUT_OF_DEVICE_MEMORY);
++      }
++      mem_size += bytes;
+    }
+
+    /* Individual descriptor sets are aligned to the min UBO alignment to
+     * ensure that we don't end up with unaligned data access in any shaders.
+@@ -724,9 +733,15 @@ nvk_CreateDescriptorPool(VkDevice _device,
+     * because we're always going to start at least 4B aligned but we're being
+     * conservative here.)  Allocate enough extra space that we can chop it
+     * into maxSets pieces and align each one of them to 32B.
+     */
+-   mem_size += min_set_align_B(pdev) * pCreateInfo->maxSets;
++   const uint64_t padding =
++      (uint64_t)min_set_align_B(pdev) * pCreateInfo->maxSets;
++   if (padding > UINT64_MAX - mem_size) {
++      vk_object_free(&dev->vk, pAllocator, pool);
++      return vk_error(dev, VK_ERROR_OUT_OF_DEVICE_MEMORY);
++   }
++   mem_size += padding;
+
+    if (mem_size > 0) {
+       if (pCreateInfo->flags & VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_EXT) {
+          pool->host_mem = vk_zalloc2(&dev->vk.alloc, pAllocator, mem_size,

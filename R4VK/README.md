@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.7 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.8 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -81,7 +81,17 @@ draws with depth/stencil/blend through legacy/dynamic rendering and generated
 commands, then reads the target from a storage-image compute shader. The model
 checks selected NVIDIA command encoding, native resource coverage and cleanup;
 it does not execute GPU instructions or verify pixel/compute results.
-Resolve, whole-scope budgets, concurrency and feature/failure admission remain open.
+Roadmap 0.79.36 software integration is complete with R4VK 0.1.8. Descriptor
+pool byte calculations use checked 64-bit arithmetic; the empty heap is
+initialized before fallible backing allocation so OOM cleanup is valid.
+The scoped SMP4 probe covers pool rollback/reset, sampler allocation failure
+and reuse, overlapping public compute-pipeline creation with a shared cache,
+MSAA4 color/depth/stencil and explicit image resolves, native command encoding,
+reset/device-lost and exact native BO budget return after destruction.
+Existing matching compiler/cache/queue fault proofs are reused. Original
+class/format tables and native capability filtering define the exposed API.
+These software checks do not execute GPU instructions or qualify Vulkan CTS.
+Physical follow-up remains OssiGPU.txt; native WSI/Present follows in 0.79.37.
 
 The public C consumer verifies these queries and negative CreateDevice results.
 Original host-image-copy code works on the explicitly host-visible RAM type:
@@ -132,7 +142,7 @@ monotonic clock after waking. This is not a POSIX clock or UTC implementation.
 `Port/MesaRuntime.patch` selects this host timestamp path with `R4OS_VULKAN`,
 omits external-FD fence/semaphore entrypoints and excludes DRM device IDs from
 the private nvkmd layout. Those omissions require corresponding Vulkan
-extensions to remain unadvertised in the future provider.
+extensions to remain unadvertised in the installed native provider.
 
 NVK and the common runtime use one private `vk_image` layout, including NIL's
 modifier metadata and its invalid sentinel. This does not expose the DRM
@@ -176,8 +186,8 @@ call. Native options preserve upstream defaults; environment-driven shader
 dump/replacement files are excluded. Assertion/abort on that worker fails its
 job; outside it the failure traps. This is not general TLS or a filesystem.
 Each commandbuffer owns its own OOM runout buffer. Generated helper printf
-metadata is registered per process/job. Full graphics pipeline and optional
-shader-object/generated-command integration continues in 0.79.36.
+metadata is registered per process/job. Graphics pipelines, shader objects
+and generated commands use these owners in completed software 0.79.36.
 
 NVK's NIR-to-machine-code phase now uses an isolated CPU job. Original const
 NIR serialization/deserialization gives the worker its own graph and interned
@@ -198,7 +208,7 @@ warnings/errors are captured in bounded stack-owned storage and delivered to
 Vulkan debug callbacks after join, including failure; truncation is reported.
 The native builtin-NIR frontend likewise serializes/deserializes its types.
 Graphics pipeline inputs now use the same serialized boundary described below;
-shader objects and other builtin builders remain open.
+shader objects and the selected builtin builders use that boundary as well.
 
 A targeted SMP4 probe passes private-cache isolation, allocation overflow,
 bounded C-heap exhaustion, abort while holding a private diagnostic mutex,
@@ -238,7 +248,7 @@ barriers, decoded compute launch methods, QueueSubmit2 binary/timeline chains,
 fence timeout/completion/reset and command-pool reuse. Injected meta-builder
 OOM/abort reaches EndCommandBuffer; retry succeeds and final allocation counts
 balance. The backend models receipts without executing the GPU instructions.
-The following image checkpoint extends this proof; final feature admission and installed packaging remain open.
+The following image checkpoint extends this proof; final software admission and installed packaging are documented in GrafikVulkan07935/36.
 
 Image command integration now includes RGBA8 graphics/compute and BC1/D32
 copy-engine paths, mip/layer subregions and padded rows. The native meta NIR
@@ -313,7 +323,7 @@ fences; direct NVKMD calls allocate/unwrap points before submitting and publish
 only successful signals. Timeline OOM/retry and zero/completed waits pass.
 A zero M2MF class denotes an absent engine and emits no legacy setup commands.
 These checks use a modeled GPU peer with real kernel brokers, not GPU execution.
-Further command/shader integration and broader constructor faults remain open.
+Later command/shader and scoped fault checkpoints extend this initial integration proof.
 
 `Port/Include/assert.h` follows C's NDEBUG and re-inclusion rules. The compiler
 port's unconditional assertion macro is unsuitable for Mesa release structures
@@ -399,8 +409,8 @@ removes FD/DRM, placed mapping, capture/replay, sparse, calibrated timestamps,
 memory-budget telemetry and HDR metadata that lack native implementations.
 The port does not inherit Linux NVK's conformance version.
 
-The constructor is compiled in assertion/release modes. The final advertised
-API/feature profile and complete logical-device integration remain open.
+The constructor is compiled in assertion/release modes. Final API/feature
+and logical-device admission are documented in GrafikVulkan07935/36.
 The targeted SMP4 fixture executes the original public CreateInstance and
 DestroyInstance, complete physical-device construction and native enumeration
 with real NAK/NIL, generated queries, OOM and partial-enumeration cleanup.
@@ -528,6 +538,6 @@ Mesa/NVK resource, sync and timeline code uses real kernel
 queues and brokers with explicitly modeled GPU/VA receipts. Diagnostic-only
 fixture replacements preserve negative errors and Mesa's lost flag; they do
 not complete work. This does not validate physical GPU execution or DMA.
-Evidence and remaining integration work are recorded in
-`Docs/Drivers/GrafikVulkan07935.txt/.json` in the workspace's Docs repository.
+Evidence and software admission are recorded in GrafikVulkan07935.txt/.json
+and GrafikVulkan07936.txt/.json under the workspace's Docs/Drivers directory.
 Physical GPU validation remains in `ExFiles/Reports/OssiGPU.txt`.
