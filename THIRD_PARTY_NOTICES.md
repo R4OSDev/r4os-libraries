@@ -140,6 +140,11 @@ format generators produce the port's tables; their output notices are retained.
 The generated preparation record identifies the inputs, patch and output hashes.
 This intermediate work does not yet distribute an R4VK binary. Full applicable
 source notices must accompany that artifact when its integration is complete.
+The native physical-device constructor and memory/queue queries retain the
+original Mesa nvk_physical_device.c copyright (2022 Collabora Ltd. and Red Hat
+Inc., MIT). Full original source and the patched private copy are archived in
+GFX/0.79.35/Evidence/NvkPhysical. Native backend admission and heap descriptions
+in Port/nvk_physical.c are original Apache-2.0 code.
 
 The native device-description adapter checks architecture constants against
 the pinned `src/nouveau/winsys/nouveau_device.c` and NVIDIA class headers.

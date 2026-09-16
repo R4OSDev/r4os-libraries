@@ -511,3 +511,234 @@
     vk_foreach_queue_safe(iter, &dev->vk) {
        struct nvk_queue *queue = container_of(iter, struct nvk_queue, vk);
        nvk_queue_destroy(dev, queue);
+--- a/src/nouveau/vulkan/nvk_physical_device.c
++++ b/src/nouveau/vulkan/nvk_physical_device.c
+@@ -15,9 +15,13 @@
+ #include "nvk_sampler.h"
+ #include "nvk_shader.h"
+ #include "nvk_wsi.h"
+ #include "nvkmd/nvkmd.h"
++#ifdef R4OS_VULKAN
++#include "r4vk_nvk_physical.h"
++#else
+ #include "nvkmd/nouveau/nvkmd_nouveau.h"
++#endif
+ #include "git_sha1.h"
+ #include "util/detect_os.h"
+ #include "util/disk_cache.h"
+ #include "util/hex.h"
+@@ -25,14 +29,18 @@
+ #include "util/os_misc.h"
+
+ #include "vk_android.h"
+ #include "vk_device.h"
++#ifndef R4OS_VULKAN
+ #include "vk_drm_syncobj.h"
++#endif
+ #include "vk_physical_device.h"
+ #include "vk_shader_module.h"
+ #include "vulkan/wsi/wsi_common.h"
+
++#ifndef R4OS_VULKAN
+ #include <sys/sysmacros.h>
++#endif
+
+ #include "nv_push.h"
+ #include "cl90c0.h"
+ #include "cl91c0.h"
+@@ -85,8 +93,12 @@ nvk_get_vk_version(const struct nv_device_info *info)
+
+ static bool
+ nvk_is_conformant(const struct nv_device_info *info)
+ {
++#ifdef R4OS_VULKAN
++   (void)info;
++   return false; /* A native port does not inherit Linux CTS qualification. */
++#else
+    /* Tegra is not currently supported */
+    if (info->type != NV_DEVICE_TYPE_DIS)
+       return false;
+
+@@ -98,8 +110,9 @@ nvk_is_conformant(const struct nv_device_info *info)
+    if (info->cls_eng3d == BLACKWELL_B)
+       return true;
+
+    return false;
++#endif
+ }
+
+ static bool
+ nvk_has_astc(const struct nv_device_info *info)
+@@ -1462,8 +1475,9 @@ nvk_physical_device_free_disk_cache(struct nvk_physical_device *pdev)
+    assert(pdev->vk.disk_cache == NULL);
+ #endif
+ }
+
++#ifndef R4OS_VULKAN
+ static uint64_t
+ nvk_get_sysmem_heap_available(struct nvk_physical_device *pdev)
+ {
+    uint64_t sysmem_size_B = 0;
+@@ -1483,20 +1497,33 @@ nvk_get_vram_heap_available(struct nvk_physical_device *pdev)
+       return 0;
+
+    return pdev->info.vram_size_B - used;
+ }
++#endif
+
+ VkResult
++#ifdef R4OS_VULKAN
++nvk_create_r4os_physical_device(struct vk_instance *_instance,
++                                const R4Draw *draw, const R4Dev *devices,
++                                const R4GfxBackendInfo *backend,
++                                struct vk_physical_device **pdev_out)
++#else
+ nvk_create_drm_physical_device(struct vk_instance *_instance,
+                                struct _drmDevice *drm_device,
+                                struct vk_physical_device **pdev_out)
++#endif
+ {
+    struct nvk_instance *instance = (struct nvk_instance *)_instance;
+    VkResult result;
+
+    struct nvkmd_pdev *nvkmd;
++#ifdef R4OS_VULKAN
++   if (!pdev_out) return VK_ERROR_INITIALIZATION_FAILED;
++   result = r4vk_nvk_create_pdev(draw, backend, instance->debug_flags, &nvkmd);
++#else
+    result = nvkmd_try_create_pdev_for_drm(drm_device, &instance->vk.base,
+                                           instance->debug_flags, &nvkmd);
++#endif
+    if (result != VK_SUCCESS)
+       return result;
+
+    /* We don't support anything pre-Kepler */
+@@ -1504,8 +1531,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+       result = VK_ERROR_INCOMPATIBLE_DRIVER;
+       goto fail_nvkmd;
+    }
+
++#ifndef R4OS_VULKAN
+    if (!nvk_is_conformant(&nvkmd->dev_info) &&
+        !debug_get_bool_option("NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", false)) {
+ #ifdef NDEBUG
+       result = VK_ERROR_INCOMPATIBLE_DRIVER;
+@@ -1520,8 +1548,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+    }
+
+    if (!nvk_is_conformant(&nvkmd->dev_info))
+       vk_warn_non_conformant_implementation("NVK");
++#endif
+
+    struct nvk_physical_device *pdev =
+       vk_zalloc(&instance->vk.alloc, sizeof(*pdev),
+                 8, VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
+@@ -1533,10 +1562,12 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+
+    struct vk_physical_device_dispatch_table dispatch_table;
+    vk_physical_device_dispatch_table_from_entrypoints(
+       &dispatch_table, &nvk_physical_device_entrypoints, true);
++#ifdef NVK_USE_WSI_PLATFORM
+    vk_physical_device_dispatch_table_from_entrypoints(
+       &dispatch_table, &wsi_physical_device_entrypoints, false);
++#endif
+
+    struct vk_device_extension_table supported_extensions;
+    nvk_get_device_extensions(instance, &nvkmd->dev_info,
+                              nvkmd->kmd_info.has_alloc_tiled,
+@@ -1548,8 +1579,12 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+
+    struct vk_properties properties;
+    nvk_get_device_properties(instance, &nvkmd->dev_info, &properties);
+
++#ifdef R4OS_VULKAN
++   r4vk_nvk_filter_physical_caps(&supported_extensions, &supported_features,
++                                 &properties);
++#else
+    if (nvkmd->drm.render_dev) {
+       properties.drmHasRender = true;
+       properties.drmRenderMajor = major(nvkmd->drm.render_dev);
+       properties.drmRenderMinor = minor(nvkmd->drm.render_dev);
+@@ -1559,8 +1594,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+       properties.drmHasPrimary = true;
+       properties.drmPrimaryMajor = major(nvkmd->drm.primary_dev);
+       properties.drmPrimaryMinor = minor(nvkmd->drm.primary_dev);
+    }
++#endif
+
+    result = vk_physical_device_init(&pdev->vk, &instance->vk,
+                                     &supported_extensions,
+                                     &supported_features,
+@@ -1572,16 +1608,22 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+    pdev->nvkmd = nvkmd;
+    pdev->info = nvkmd->dev_info;
+    pdev->debug_flags = instance->debug_flags;
+
++#ifdef R4OS_VULKAN
++   result = r4vk_nvk_init_physical_resources(pdev, devices);
++   if (result != VK_SUCCESS) goto fail_init;
++#endif
++
+    pdev->nak = nak_compiler_create(&pdev->info);
+    if (pdev->nak == NULL) {
+       result = vk_error(instance, VK_ERROR_OUT_OF_HOST_MEMORY);
+       goto fail_init;
+    }
+
+    nvk_physical_device_init_pipeline_cache(pdev);
+
++#ifndef R4OS_VULKAN
+    uint64_t heap_size =
+       os_get_gpu_heap_size(instance->drirc.misc.heap_memory_percent,
+                            &instance->drirc.misc.heap_memory_percent);
+    if (heap_size == 0) {
+@@ -1684,8 +1726,9 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
+          .queue_count = 2,
+       };
+    }
+    assert(pdev->queue_family_count <= ARRAY_SIZE(pdev->queue_families));
++#endif
+
+    pdev->vk.supported_sync_types = nvkmd->sync_types;
+
+ #ifdef NVK_USE_WSI_PLATFORM
+@@ -1748,8 +1791,9 @@ nvk_GetPhysicalDeviceMemoryProperties2(
+
+    vk_foreach_struct(ext, pMemoryProperties->pNext)
+    {
+       switch (ext->sType) {
++#ifndef R4OS_VULKAN
+       case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT: {
+          VkPhysicalDeviceMemoryBudgetPropertiesEXT *p = (void *)ext;
+          const struct nvk_instance *instance =
+             nvk_physical_device_instance(pdev);
+@@ -1800,8 +1844,9 @@ nvk_GetPhysicalDeviceMemoryProperties2(
+             p->heapUsage[i] = 0u;
+          }
+          break;
+       }
++#endif
+       default:
+          vk_debug_ignored_stype(ext->sType);
+          break;
+       }
+@@ -1823,15 +1868,19 @@ nvk_GetPhysicalDeviceQueueFamilyProperties2(
+
+       vk_outarray_append_typed(VkQueueFamilyProperties2, &out, p) {
+          p->queueFamilyProperties.queueFlags = queue_family->queue_flags;
+          p->queueFamilyProperties.queueCount = queue_family->queue_count;
++#ifdef R4OS_VULKAN
++         p->queueFamilyProperties.timestampValidBits = 0;
++#else
+          if (queue_family->queue_flags &
+              (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT |
+               VK_QUEUE_TRANSFER_BIT)) {
+             p->queueFamilyProperties.timestampValidBits = 64;
+          } else {
+             p->queueFamilyProperties.timestampValidBits = 0;
+          }
++#endif
+          p->queueFamilyProperties.minImageTransferGranularity =
+             (VkExtent3D){1, 1, 1};
+
+          vk_foreach_struct(ext, p->pNext) {

@@ -181,6 +181,15 @@ static const struct nvkmd_pdev_ops pdev_ops = {
    /* No usage telemetry or DRM FD. Corresponding kmd_info flags stay false. */
 };
 
+VkResult r4vk_nvk_query_pdev_architecture(struct nvkmd_pdev *base,
+                                         struct r4vk_nvk_architecture *out)
+{
+   if (!base || base->ops != &pdev_ops || !out)
+      return VK_ERROR_INITIALIZATION_FAILED;
+   const struct native_pdev *physical = pdev(base);
+   return r4vk_nvk_query_architecture(&physical->draw, &physical->backend, out);
+}
+
 VkResult r4vk_nvk_create_pdev(const R4Draw *draw,
                              const R4GfxBackendInfo *backend,
                              enum nvk_debug debug_flags,

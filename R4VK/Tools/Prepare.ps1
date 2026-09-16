@@ -25,6 +25,10 @@ $generated = Join-Path $output 'Generated'
 $overlay = Join-Path $output 'CSource'
 [IO.Directory]::CreateDirectory($generated) | Out-Null
 [IO.Directory]::CreateDirectory($overlay) | Out-Null
+# The pinned input is a release archive, not a Git checkout. Do not inherit
+# the workspace Git HEAD or a host MESA_GIT_SHA1_OVERRIDE as Mesa's identity.
+# Pipeline caches use the separately required full r4vk_build_identity.
+[IO.File]::WriteAllText((Join-Path $generated 'git_sha1.h'), '#define MESA_GIT_SHA1 ""' + "`n", [Text.UTF8Encoding]::new($false))
 # Quoted includes must resolve one consistent private layout in every C unit.
 # Keep NVK and Vulkan runtime headers with their consuming C source files.
 foreach ($directory in @('src/nouveau/vulkan', 'src/vulkan/runtime')) {

@@ -150,6 +150,26 @@ memory and standalone VA objects retain their logical owner through destruction.
 Final C cleanup may precede resident broker retirement without leaving caller
 pointers in the kernel. Partial construction preserves output and unwinds.
 
+The original NVK physical-device constructor now has a native entry receiving
+an exact R4OS backend and the immutable platform tables. `Port/nvk_physical.c`
+revalidates the captured NVKMD owner and describes two heaps: non-mappable
+device-local VRAM, and cached/coherent system memory. System capacity comes
+from R4DEV total physical RAM minus the application reserve, rounded to the
+backend binding alignment; allocation budgets still apply independently.
+One graphics/compute/transfer queue is exposed by the resource description,
+with medium priority and no sparse or timestamp-query claim. Native filtering
+removes FD/DRM, placed mapping, capture/replay, sparse, calibrated timestamps,
+memory-budget telemetry and HDR metadata that lack native implementations.
+The port does not inherit Linux NVK's conformance version.
+
+The constructor is compiled in assertion/release modes. The temporary SMP4
+fixture executes original Mesa memory/queue queries and capability filtering;
+complete constructor execution and the final advertised API/feature profile
+remain open. In particular, NVK retains a NAK compiler across operations, while
+the existing R4NAK archive allocates within an isolated compilation job. Its
+allocator/abort boundary must be integrated before publishing Vulkan devices.
+No successful replacement compiler or default build identity is provided.
+
 `Port/nvk_submit.c` connects NVK contexts to the canonical native queue. It
 translates GR/compute/copy engine bits, including NVK's copy-only upload
 context through a GR channel with paired CE. Initial admission waits for an
