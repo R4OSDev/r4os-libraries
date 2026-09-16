@@ -32,6 +32,24 @@ the canonical R4VK.R4L. See the current scoped result in
 `Docs/Drivers/GrafikVulkan07935.json` in the workspace Docs repository.
 Full source notices accompany the artifact in `ThirdParty/NOTICES.txt`.
 
+Native capability queries reject external memory handles consistently:
+buffer queries retain the requested compatible handle type but expose no
+import/export bits; image, fence and semaphore queries likewise promise no
+missing transport. One native scheduling priority is reported. Sparse,
+placed-map, external-FD, DRM and calibrated GPU time remain unavailable.
+Shader objects, generated commands and pipeline libraries/binaries stay
+unadvertised until their separate native integration in 0.79.36; the matching
+feature flags and device-proc lookup agree. This is not their final removal.
+
+The public C consumer verifies these queries and negative CreateDevice results.
+Original host-image-copy code works on the explicitly host-visible RAM type:
+RGBA8 and BC1 mip/layer subregions round-trip through real NIL tiling with
+row padding preserved. This CPU data comparison does not execute a GPU copy.
+An actual kernel-broker reset with modeled GPU quiescence makes the old Vulkan
+device report device-lost for WaitIdle/allocation; a new instance/device then
+works. Full API-profile admission still needs the remaining mandatory meta
+shader paths and resource/sync review before normal image installation.
+
 `Port/threading.zig` implements process-owned mutexes and conditions on the
 R4SYS v19 notification tail (Kernel 0.1.183). An uncontended mutex uses atomic
 state and current-thread identity; it performs no notification wait/wake.
@@ -444,7 +462,7 @@ and NIR binding generator in a private source tree. It generates the NVK
 query and indirect-copy helpers as native C with unchanged SPIR-V/NIR data.
 `Port/MesaGenerators.patch` exposes the complete immutable printf metadata
 through an explicit accessor instead of a C++ global constructor/destructor.
-The future provider must register it in its process-owned compiler context.
+The provider registers it in its process-owned compiler context.
 These host tools are not linked into R4OS. The shared Mesa lock and
 `Tools/ShaderTools.lock.json` pin dependencies; `shaders.json` records options,
 input/tool/output hashes. Windows and Linux use the same PowerShell path;

@@ -3606,3 +3606,18 @@
  struct vk_meta_rect {
     uint32_t x0, y0, x1, y1;
     float z;
+--- a/src/nouveau/vulkan/nvk_buffer.c
++++ b/src/nouveau/vulkan/nvk_buffer.c
+@@ -228,6 +228,12 @@ nvk_GetPhysicalDeviceExternalBufferProperties(
+     */
+    assert(pExternalBufferInfo->handleType != 0);
+ 
++#ifdef R4OS_VULKAN
++   /* Native resources have no import/export handle transport. Keep the
++    * required compatibleHandleTypes value, but advertise no operation. */
++   goto unsupported;
++#endif
++
+    /* All of the current flags are for sparse which we don't support yet.
+     * Even when we do support it, doing sparse on external memory sounds
+     * sketchy.  Also, just disallowing flags is the safe option.

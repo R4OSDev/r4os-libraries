@@ -76,6 +76,19 @@ void r4vk_nvk_filter_physical_caps(struct vk_device_extension_table *ext,
    ext->EXT_map_memory_placed = false;
    ext->EXT_memory_budget = false;
    ext->EXT_hdr_metadata = false;
+   /* These optional paths still bypass the native isolated frontend or
+    * require the separate pipeline-object integration in roadmap 0.79.36.
+    * Do not expose an upstream class flag as a completed native feature. */
+   ext->EXT_shader_object = false;
+   ext->EXT_device_generated_commands = false;
+   ext->KHR_pipeline_binary = false;
+   ext->KHR_pipeline_library = false;
+   ext->EXT_graphics_pipeline_library = false;
+   features->shaderObject = false;
+   features->deviceGeneratedCommands = false;
+   features->dynamicGeneratedPipelineLayout = false;
+   features->pipelineBinaries = false;
+   features->graphicsPipelineLibrary = false;
    features->sparseBinding = false;
    features->sparseResidencyBuffer = false;
    features->sparseResidencyImage2D = false;
@@ -100,6 +113,9 @@ void r4vk_nvk_filter_physical_caps(struct vk_device_extension_table *ext,
    properties->sparseResidencyStandard2DMultisampleBlockShape = false;
    properties->sparseResidencyStandard3DBlockShape = false;
    properties->timestampComputeAndGraphics = false;
+   /* The native submit contract carries no relative-priority selection.
+    * One advertised family/queue does not create a second scheduling level. */
+   properties->discreteQueuePriorities = 1;
    properties->conformanceVersion = (VkConformanceVersion) {0};
    properties->drmHasPrimary = false;
    properties->drmHasRender = false;
