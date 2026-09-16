@@ -12,7 +12,10 @@ software rendering when the library is unavailable or incompatible.
 
 Native queue packets use `R4NvNativeSubmitHeader` (32 bytes), followed by exactly
 `push_count` `R4NvNativePush` records (16 bytes each). Version 1 admits at most
-510 pushes, flags `incomplete`/`no_prefetch`, and the instantiated graphics engine.
+510 pushes and flags `incomplete`/`no_prefetch`. Engine mask bit1 requires graphics;
+bits2/4 additionally request instantiated compute/copy objects. The first job
+fixes the queue's engine set; subsequent jobs may request subsets. Unknown bits,
+missing classes or an unpaired copy engine fail before GPU publication.
 The final push must be complete. Every referenced BO/VA, including command
 storage, must be retained through the common native resource list. Completion
 is a GPU drain and ordered semaphore, not command fetch; Vulkan resource/cache

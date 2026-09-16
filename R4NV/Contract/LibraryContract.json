@@ -2588,6 +2588,20 @@
       "type": "u32",
       "value": 510,
       "description": "Native submission protocol version1; hardware publication bounds are independent of resource-list size."
+    },
+    {
+      "zig_name": "native_engine_compute",
+      "c_name": "R4NV_NATIVE_ENGINE_COMPUTE",
+      "type": "u32",
+      "value": 2,
+      "description": "Additional instantiated engine on a graphics native queue. Graphics bit1 remains mandatory. The first submission fixes the queue engine set; later submissions may request subsets. Unsupported topology, class or RM allocation fails before publication. These bits do not promise Vulkan features."
+    },
+    {
+      "zig_name": "native_engine_copy",
+      "c_name": "R4NV_NATIVE_ENGINE_COPY",
+      "type": "u32",
+      "value": 4,
+      "description": "Additional instantiated engine on a graphics native queue. Graphics bit1 remains mandatory. The first submission fixes the queue engine set; later submissions may request subsets. Unsupported topology, class or RM allocation fails before publication. These bits do not promise Vulkan features."
     }
   ],
   "errors": [

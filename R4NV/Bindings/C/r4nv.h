@@ -412,6 +412,8 @@ _Static_assert(offsetof(R4NvNativePush, flags) == 12u, "R4NvNativePush.flags off
 #define R4NV_NATIVE_PUSH_INCOMPLETE ((uint32_t)1)
 #define R4NV_NATIVE_PUSH_NO_PREFETCH ((uint32_t)2)
 #define R4NV_NATIVE_PUSH_LIMIT ((uint32_t)510)
+#define R4NV_NATIVE_ENGINE_COMPUTE ((uint32_t)2)
+#define R4NV_NATIVE_ENGINE_COPY ((uint32_t)4)
 #define R4NV_STATUS_INVALID ((int32_t)-1)
 #define R4NV_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4NV_STATUS_CAPACITY ((int32_t)-3)
