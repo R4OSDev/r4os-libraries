@@ -3,6 +3,7 @@
 param(
     [switch]$InstallDependencies,
     [switch]$Offline,
+    [switch]$PrepareSources,
     [switch]$VerifyReproducible,
     [ValidateSet(75,86,89,120)][int]$ShaderModel = 86,
     [ValidateRange(1, 32)][int]$Jobs = 8,
@@ -75,6 +76,7 @@ if ($InstallDependencies) {
 }
 $toolVersions = [ordered]@{}
 $tools = @{}
+if (!$PrepareSources) {
 foreach ($name in @('rustc', 'meson', 'ninja', 'bindgen', 'cbindgen')) {
     $tools[$name] = Find-Tool ($name + $suffix)
     $toolVersions[$name] = Read-Version $tools[$name] $lock.host_tools.$name
@@ -82,6 +84,7 @@ foreach ($name in @('rustc', 'meson', 'ninja', 'bindgen', 'cbindgen')) {
 $cc = Find-Tool $(if ($IsWindows) { 'clang-cl.exe' } else { 'clang-19' })
 $cxx = if ($IsWindows) { $cc } else { Find-Tool 'clang++-19' }
 $toolVersions.clang = Read-Version $cc $lock.host_tools.clang
+}
 $git = Find-Tool ('git' + $suffix)
 $tar = Find-Tool ('tar' + $suffix)
 $curl = Find-Tool ('curl' + $suffix)
@@ -152,6 +155,10 @@ if (!(Test-Path -LiteralPath $preparedStamp)) {
     foreach ($file in (Get-Content -LiteralPath $sourceManifest -Raw | ConvertFrom-Json)) {
         if ((Hash (Join-Path $source $file.path)) -ne $file.sha256) { throw "Prepared compiler source changed: $($file.path)" }
     }
+}
+if ($PrepareSources) {
+    Write-Host "Verified shared Mesa sources: $source"
+    return
 }
 $r4osSources = Join-Path $source 'src/nouveau/r4os'
 [void](New-Item -ItemType Directory -Path $r4osSources -Force)

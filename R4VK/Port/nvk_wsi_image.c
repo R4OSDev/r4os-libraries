@@ -39,7 +39,9 @@ static VkFormatFeatureFlags2 usage_features(VkImageUsageFlags usage)
 
 static VkResult admit_descriptor(const struct nvk_physical_device *pdev,
                                  const R4GfxBufferDescriptor *desc,
-                                 VkFormat format, VkImageUsageFlags usage)
+                                 VkFormat format, VkImageUsageFlags usage,
+                                 VkImageCreateFlags flags,
+                                 const VkImageFormatListCreateInfo *formats)
 {
    const uint32_t bpp = pixel_size(desc->format, format);
    const VkImageUsageFlags allowed = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
@@ -47,6 +49,12 @@ static VkResult admit_descriptor(const struct nvk_physical_device *pdev,
       VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
       VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
    if (!bpp || !usage || (usage & ~allowed)) return VK_ERROR_FORMAT_NOT_SUPPORTED;
+   const VkImageCreateFlags mutable_flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT |
+      VK_IMAGE_CREATE_EXTENDED_USAGE_BIT;
+   if (flags && flags != mutable_flags) return VK_ERROR_INITIALIZATION_FAILED;
+   VkResult result = r4vk_wsi_validate_formats(format,
+      flags ? VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR : 0, formats);
+   if (result != VK_SUCCESS) return result;
    if (!desc->width || !desc->height || desc->plane_count != 1 || desc->plane_offsets[0] ||
        desc->width > pdev->vk.properties.maxImageDimension2D ||
        desc->height > pdev->vk.properties.maxImageDimension2D ||
@@ -65,8 +73,16 @@ static VkResult admit_descriptor(const struct nvk_physical_device *pdev,
    const struct nil_format layout_format = nil_format(nvk_format_to_pipe_format(format));
    if (nil_select_best_drm_format_mod(&pdev->info, layout_format, 1, &desc->modifier) != desc->modifier)
       return VK_ERROR_FORMAT_NOT_SUPPORTED;
-   const VkFormatFeatureFlags2 features = nvk_get_image_format_features(pdev,
+   VkFormatFeatureFlags2 features = nvk_get_image_format_features(pdev,
       format, VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT, desc->modifier);
+   if (flags & VK_IMAGE_CREATE_EXTENDED_USAGE_BIT) {
+      /* An allowed view may supply usage absent from the base format, e.g.
+       * storage on a linear UNORM view of an sRGB image. */
+      features = 0;
+      for (uint32_t i = 0; i < formats->viewFormatCount; i++)
+         features |= nvk_get_image_format_features(pdev, formats->pViewFormats[i],
+            VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT, desc->modifier);
+   }
    const VkFormatFeatureFlags2 required = usage_features(usage);
    if ((features & required) != required) return VK_ERROR_FORMAT_NOT_SUPPORTED;
    return VK_SUCCESS;
@@ -89,6 +105,8 @@ static uint32_t memory_type(const struct nvk_physical_device *pdev,
 VkResult r4vk_nvk_import_wsi_image(VkDevice device,
                                   const R4GfxBufferHandle *source,
                                   VkFormat format, VkImageUsageFlags usage,
+                                  VkImageCreateFlags flags,
+                                  const VkImageFormatListCreateInfo *formats,
                                   const VkAllocationCallbacks *allocator,
                                   struct r4vk_nvk_wsi_image *out)
 {
@@ -101,17 +119,23 @@ VkResult r4vk_nvk_import_wsi_image(VkDevice device,
       source, &backing, &candidate.descriptor);
    if (result != VK_SUCCESS) return result;
    const R4GfxBufferDescriptor *desc = &candidate.descriptor;
-   result = admit_descriptor(pdev, desc, format, usage);
+   result = admit_descriptor(pdev, desc, format, usage, flags, formats);
    if (result != VK_SUCCESS) goto fail_backing;
 
+   VkImageFormatListCreateInfo list = {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO,
+      .viewFormatCount = formats ? formats->viewFormatCount : 0,
+      .pViewFormats = formats ? formats->pViewFormats : NULL,
+   };
    const VkSubresourceLayout plane = {.rowPitch = desc->plane_pitches[0]};
    const VkImageDrmFormatModifierExplicitCreateInfoEXT modifier = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT,
+      .pNext = formats ? &list : NULL,
       .drmFormatModifier = desc->modifier, .drmFormatModifierPlaneCount = 1,
       .pPlaneLayouts = &plane,
    };
    const VkImageCreateInfo create = {
-      .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, .pNext = &modifier,
+      .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, .pNext = &modifier, .flags = flags,
       .imageType = VK_IMAGE_TYPE_2D, .format = format,
       .extent = {desc->width, desc->height, 1}, .mipLevels = 1, .arrayLayers = 1,
       .samples = VK_SAMPLE_COUNT_1_BIT, .tiling = VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT,

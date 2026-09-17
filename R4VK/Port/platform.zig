@@ -2,6 +2,7 @@
 // Only immutable boot-lifetime platform tables may be bound here.
 const std = @import("std");
 const a = @import("r4os").abi;
+const system_info = @import("r4native").system_info;
 var draw_address: std.atomic.Value(usize) = .init(0);
 var devices_address: std.atomic.Value(usize) = .init(0);
 
@@ -10,7 +11,7 @@ pub fn bind(draw: *const a.R4XStartR4Draw, devices: *const a.R4XStartR4Dev) bool
         draw.size < @offsetOf(a.R4XStartR4Draw, "gfx_queue_backend_info") + 8 or
         draw.gfx_queue_backend_info == 0 or
         devices.size < @offsetOf(a.R4XStartR4Dev, "memory_pressure_snapshot") + 8 or
-        devices.memory_pressure_snapshot == 0) return false;
+        devices.memory_pressure_snapshot == 0 or !system_info.bind(devices)) return false;
     const old_draw = draw_address.cmpxchgStrong(0, @intFromPtr(draw), .acq_rel, .acquire);
     if (old_draw != null and old_draw.? != @intFromPtr(draw)) return false;
     const old_devices = devices_address.cmpxchgStrong(0, @intFromPtr(devices), .acq_rel, .acquire);
@@ -28,8 +29,4 @@ pub export fn r4vk_get_graphics_tables(draw: *usize, devices: *usize) callconv(.
     return 1;
 }
 
-// The x86_64 R4SYS VM contract and shared SDK allocator use 4 KiB pages.
-pub export fn os_get_page_size(output: *u64) callconv(.c) bool {
-    output.* = 4096;
-    return true;
-}
+comptime { _ = system_info; }

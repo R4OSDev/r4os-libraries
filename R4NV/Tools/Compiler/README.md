@@ -12,8 +12,11 @@ Repositories/Libraries/R4NV/Tools/Compiler/Build.sh -InstallDependencies -Verify
 ```
 
 Once the host tools and seven source archives are present, use `-Offline`.
-Normal library and image builds do not download or rebuild Mesa. This optional
-host build is deliberately outside the interactive rendering path.
+`-PrepareSources` only acquires/verifies the shared Mesa source tree and its
+locked archive inputs. It needs Git, tar and (for downloads) curl, but does
+not require Rust, Meson or the compiler executables. The R4GL software build
+uses this path; runtime library builds maintain their own native artifacts.
+The shader-generation host build stays outside interactive rendering.
 
 On Windows, run the same `Build.ps1` through `Build.bat` from an x64 developer
 environment with these tools on PATH:

@@ -7,15 +7,33 @@ const a = r4os.abi;
 const sync = @import("threading.zig");
 const Mutex = sync.Mutex;
 const Condition = sync.Condition;
-const Once = extern struct { state: u32, reserved: u32, notification: u64 };
+pub const Once = extern struct { state: u32 = 0, reserved: u32 = 0, notification: u64 = 0 };
 const Timespec = extern struct { seconds: i64, nanoseconds: i64 };
 const MonotonicCondition = extern struct { cond: Condition };
 var kernel_table: std.atomic.Value(usize) = .init(0);
+pub const Entry = *const fn (?*anyopaque) callconv(.c) c_int;
+/// Immutable code-only dispatch owned by the consuming R4L. It must be bound
+/// before that library creates workers; no process data is retained here.
+pub const Lifecycle = struct {
+    create: *const fn (*a.ProgramJoinHandle, Entry, ?*anyopaque) c_int,
+    finish_current: *const fn () bool,
+};
+var lifecycle_table: std.atomic.Value(usize) = .init(0);
+pub fn bindLifecycle(value: *const Lifecycle) bool {
+    const old = lifecycle_table.cmpxchgStrong(0, @intFromPtr(value), .release, .acquire);
+    return old == null or old.? == @intFromPtr(value);
+}
+fn lifecycle() ?*const Lifecycle {
+    const address = lifecycle_table.load(.acquire);
+    return if (address == 0) null else @ptrFromInt(address);
+}
 
 // The table is kernel-owned and immutable for the boot generation. Keep no
 // caller Bundle, allocator, task pointer or other application storage here.
 pub fn bind(kernel: *const a.R4XStartR4Sys) bool {
     _ = sync.Host.fromTable(kernel) orelse return false;
+    if (kernel.abi_version < 21 or kernel.size < @offsetOf(a.R4XStartR4Sys, "thread_current_handle") + 8 or
+        kernel.thread_current_handle == 0) return false;
     inline for (.{ "thread_create_handle", "thread_handle_join", "thread_current", "thread_status", "thread_exit", "task_yield" }) |field|
         if (@field(kernel.*, field) == 0) return false;
     const previous = kernel_table.cmpxchgStrong(0, @intFromPtr(kernel), .release, .acquire);
@@ -44,6 +62,10 @@ pub export fn mtx_init(mutex: *Mutex, flags: c_int) callconv(.c) c_int {
 }
 pub export fn mtx_destroy(mutex: *Mutex) callconv(.c) void {
     require(mutex.destroy(&host()));
+}
+/// Private retryable destruction for a quiescent native runtime shutdown.
+pub export fn r4native_mutex_close(mutex: *Mutex) callconv(.c) c_int {
+    return mutex.destroy(&host());
 }
 pub export fn mtx_lock(mutex: *Mutex) callconv(.c) c_int {
     return mutex.lock(&host(), sync.forever);
@@ -94,7 +116,11 @@ pub export fn u_cnd_monotonic_timedwait(condition: *MonotonicCondition, mutex: *
 // The C pointer argument and R4OS u64 argument have the same x86_64 ABI.
 // The kernel admits only this program's image or an imported executable R4L
 // generation; it owns the worker's stack, execution pin, join and hard kill.
-pub export fn thrd_create(output: *a.ProgramJoinHandle, entry: *const fn (?*anyopaque) callconv(.c) c_int, argument: ?*anyopaque) callconv(.c) c_int {
+pub export fn thrd_create(output: *a.ProgramJoinHandle, entry: Entry, argument: ?*anyopaque) callconv(.c) c_int {
+    if (lifecycle()) |owner| return owner.create(output, entry, argument);
+    return createRaw(output, entry, argument);
+}
+pub fn createRaw(output: *a.ProgramJoinHandle, entry: Entry, argument: ?*anyopaque) c_int {
     var candidate: a.ProgramJoinHandle = .{};
     const result = function("thread_create_handle")(@ptrCast(entry), @intFromPtr(argument), 1024 * 1024, 0, &candidate);
     if (result != a.thread_ok) return if (result == a.thread_error_no_memory) sync.nomem else sync.failed;
@@ -108,18 +134,20 @@ pub export fn thrd_join(thread: a.ProgramJoinHandle, output: ?*c_int) callconv(.
     return sync.success;
 }
 pub export fn thrd_current() callconv(.c) a.ProgramJoinHandle {
-    var info: a.ProgramThreadInfo = .{};
-    if (function("thread_status")(0, &info) != a.thread_ok) return .{};
-    // Current identity is for equality, not a newly acquired join lease.
-    return .{ .thread_id = info.thread_id, .instance_id = info.instance_id };
+    var identity: a.ProgramJoinHandle = .{};
+    if (function("thread_current_handle")(&identity) != a.thread_ok) return .{};
+    return identity;
 }
 pub export fn thrd_equal(left: a.ProgramJoinHandle, right: a.ProgramJoinHandle) callconv(.c) c_int {
-    return @intFromBool(left.thread_id != 0 and left.thread_id == right.thread_id and left.instance_id == right.instance_id);
+    return @intFromBool(left.thread_id != 0 and left.thread_generation != 0 and
+        left.thread_id == right.thread_id and left.instance_id == right.instance_id and
+        left.thread_generation == right.thread_generation and left.instance_generation == right.instance_generation);
 }
 pub export fn thrd_yield() callconv(.c) void {
     function("task_yield")();
 }
 pub export fn thrd_exit(code: c_int) callconv(.c) noreturn {
+    if (lifecycle()) |owner| if (!owner.finish_current()) @trap();
     function("thread_exit")(code);
     @trap();
 }

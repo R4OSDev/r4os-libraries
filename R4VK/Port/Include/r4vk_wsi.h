@@ -40,4 +40,6 @@ void r4vk_window_wait(const R4XStartContext *application,
 VKAPI_ATTR VkResult VKAPI_CALL r4vkCreateWindowSurface(VkInstance instance,
    const R4VkWindowSurfaceCreateInfo *info, const VkAllocationCallbacks *allocator,
    VkSurfaceKHR *surface);
+VKAPI_ATTR VkResult VKAPI_CALL r4vkDrainWindowSwapchain(VkDevice device,
+   VkSwapchainKHR swapchain, uint64_t timeout_ns);
 #endif

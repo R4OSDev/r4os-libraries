@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.14 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.17 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -74,6 +74,24 @@ alias creation/binding and local device-group presentation use these images.
 Acquisition signals the supplied Vulkan semaphore/fence only when WINSVC
 returns an available image. Present consumes binary waits through Mesa
 submission and lends its actual native completion fence to the compositor.
+
+Enable `VK_KHR_swapchain_mutable_format` for compatible views of one native
+window buffer. Creation validates Mesa's format compatibility class and owns
+the supplied view-format list. Native images carry MUTABLE_FORMAT and
+EXTENDED_USAGE; image aliases preserve the same flags and allowed format set.
+A targeted SMP4 run checks UNORM/sRGB views, caller-list lifetime, aliasing,
+invalid lists, resize and complete retirement with real WINSVC and modeled
+GPU completion. Format-class predicates also pass ASan/UBSan. Evidence:
+`ExFiles/Reference/GFX/0.79.39/Evidence/VulkanMutableFormats`. This enables
+Zink window integration; it does not qualify native GL presentation or pixels.
+
+The private `r4vkDrainWindowSwapchain` instance entrypoint waits until already
+posted images leave the WINSVC producer queue. Zink uses it before replacing a
+FIFO chain with another policy. Timeout preserves frames and allows retry;
+consumer-held images may remain live. This is not a GPU-completion or VBlank
+wait. External synchronization and the live device/chain are caller-owned.
+Evidence/EGLZinkSwap covers the actual helper through native EGL mode changes,
+including timeout/order, synchronization loss and exact pre-exit buffer balance.
 
 Retirement preserves fences and native queue ownership while Desktop holds
 an image, including after destroying the Vulkan device. Vulkan images and
@@ -190,10 +208,10 @@ query copies (32/64-bit, availability), linear/color/integer/depth blits and
 four-sample average/sample-zero resolves, each fresh and cached. This proves
 compilation, uploads and modeled receipts, not GPU pixels or query results.
 
-`Port/threading.zig` implements process-owned mutexes and conditions on the
+`../Shared/Native/threading.zig` implements process-owned mutexes and conditions on the
 R4SYS v19 notification tail (Kernel 0.1.183). An uncontended mutex uses atomic
 state and current-thread identity; it performs no notification wait/wake.
-`Port/threads_api.zig` exports the C11 subset used by Mesa, native joinable
+`../Shared/Native/threads.zig` exports the C11 subset used by Mesa, native joinable
 workers and its monotonic condition interface. Kernel thread admission checks
 executable sections of the program's exact imported library generations.
 The shared port retains only the immutable boot-lifetime kernel table.
@@ -204,9 +222,15 @@ waiters are notified. A waiter racing that close succeeds only after observing
 the initialized state; the flag retains the closed, never-reused identity. Mesa global
 state must be audited and adapted before integrating additional source units.
 An unreportable void-API lifetime failure traps; it never silently continues.
-UTC timed waits, detached threads and TLS are not implemented or stubbed.
+UTC timed waits and detached threads remain unimplemented. The shared native
+emulated-TLS helper is available for the OpenGL integration; R4VK does not
+instantiate it or substitute it for its isolated compiler-job state.
 
-`Port/runtime.zig` binds the combined port to R4SYS v20 (Kernel 0.1.184).
+`Port/runtime.zig` binds the combined port to R4SYS v21 (Kernel 0.1.196).
+The compiled `r4native` module owns locks, C11 transport and process-local
+publication. Current-thread identity and equality include both generations;
+older kernels fail bootstrap explicitly. This changes no public Vulkan slot
+or advertised device feature.
 `Port/memory.zig` implements C allocation with one explicitly owned SDK Heap
 per calling process, published through program_local_get/publish. Competing
 initializers discard their own metadata region and use the published winner.
@@ -232,6 +256,8 @@ independent of the FPU rounding mode, with x86 invalid/inexact flag semantics.
 It also provides MXCSR-sensitive `lrint`, signed-bit-preserving `copysign`
 and `frexp` decomposition for the full NIR/format path. The private C subset
 includes allocation-free nested sorting and OOM-aware string duplication.
+`Port/sort.c` includes `../Shared/Native/sort.c`; the existing search/sort
+algorithms are shared unchanged, and the native cache hashes this source.
 
 `Port/stdio.c` supports caller-owned, seekable output memory streams for Mesa
 diagnostics. Growth failure preserves the buffer, position and ownership;

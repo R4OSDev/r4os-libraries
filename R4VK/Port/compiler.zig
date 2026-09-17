@@ -5,8 +5,8 @@ const std = @import("std");
 const r4os = @import("r4os");
 const memory = @import("memory.zig");
 const local = @import("process_local.zig");
-const threads = @import("threads_api.zig");
-const sync = @import("threading.zig");
+const threads = @import("r4native").threads;
+const sync = @import("r4native").threading;
 
 pub const success: i32 = 0;
 pub const out_of_memory: i32 = -1; // VkResult

@@ -50,6 +50,8 @@ struct r4vk_swapchain {
    struct native_chain *record;
    uint32_t count;
    struct r4vk_nvk_wsi_image images[3];
+   VkImageFormatListCreateInfo format_list;
+   VkFormat view_formats[]; /* owned copy; application arrays may expire */
 };
 struct wsi_state {
    once_flag once;
@@ -320,12 +322,17 @@ VkResult r4vk_create_swapchain_alias(VkDevice device, const VkImageCreateInfo *i
        info->extent.depth != 1 || info->mipLevels != 1 || info->arrayLayers != 1 ||
        info->samples != VK_SAMPLE_COUNT_1_BIT || info->tiling != VK_IMAGE_TILING_OPTIMAL ||
        info->usage != original->usage || info->initialLayout != VK_IMAGE_LAYOUT_UNDEFINED ||
-       info->sharingMode != VK_SHARING_MODE_EXCLUSIVE || (info->flags & ~VK_IMAGE_CREATE_ALIAS_BIT))
+       info->sharingMode != VK_SHARING_MODE_EXCLUSIVE || (info->flags & ~VK_IMAGE_CREATE_ALIAS_BIT) != original->create_flags)
+      return VK_ERROR_INITIALIZATION_FAILED;
+   const VkImageFormatListCreateInfo *formats =
+      vk_find_struct_const(info->pNext, IMAGE_FORMAT_LIST_CREATE_INFO);
+   if (!r4vk_wsi_equal_formats(formats, &sc->format_list))
       return VK_ERROR_INITIALIZATION_FAILED;
    const R4GfxBufferDescriptor *desc = &sc->images[0].descriptor;
    const VkSubresourceLayout plane = {.rowPitch = desc->plane_pitches[0]};
    const VkImageDrmFormatModifierExplicitCreateInfoEXT modifier = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT,
+      .pNext = sc->format_list.viewFormatCount ? &sc->format_list : NULL,
       .drmFormatModifier = desc->modifier, .drmFormatModifierPlaneCount = 1, .pPlaneLayouts = &plane,
    };
    VkImageCreateInfo native = *info;
@@ -425,7 +432,16 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
       info->imageColorSpace, info->compositeAlpha);
    const uint32_t mode = info->presentMode == VK_PRESENT_MODE_FIFO_KHR ? R4OS_WINDOW_GRAPHICS_FIFO :
       info->presentMode == VK_PRESENT_MODE_MAILBOX_KHR ? R4OS_WINDOW_GRAPHICS_MAILBOX : 0;
-   if (info->flags || info->imageArrayLayers != 1 || !info->imageUsage ||
+   const VkImageFormatListCreateInfo *formats =
+      vk_find_struct_const(info->pNext, IMAGE_FORMAT_LIST_CREATE_INFO);
+   result = r4vk_wsi_validate_formats(info->imageFormat, info->flags, formats);
+   if (result != VK_SUCCESS) goto fail_window;
+   const VkImageCreateFlags image_flags = info->flags & VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR ?
+      VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT | VK_IMAGE_CREATE_EXTENDED_USAGE_BIT : 0;
+   if (image_flags && !dev->vk.enabled_extensions.KHR_swapchain_mutable_format) {
+      result = VK_ERROR_EXTENSION_NOT_PRESENT; goto fail_window;
+   }
+   if (info->imageArrayLayers != 1 || !info->imageUsage ||
        (info->imageUsage & ~caps.usage) || !info->compositeAlpha ||
        !(info->compositeAlpha & caps.common_alpha) || format == UINT32_MAX ||
        info->minImageCount < caps.config.min_images || info->minImageCount > caps.config.max_images ||
@@ -443,10 +459,14 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
          if (group->modes != VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_BIT_KHR) {
             result = VK_ERROR_INITIALIZATION_FAILED; goto fail_window;
          }
-      } else vk_debug_ignored_stype(ext->sType);
+      } else if (ext->sType != VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO)
+         vk_debug_ignored_stype(ext->sType);
    }
+   const uint32_t format_count = formats ? formats->viewFormatCount : 0;
+   const uint64_t bytes = sizeof(struct r4vk_swapchain) + (uint64_t)format_count * sizeof(VkFormat);
+   if (bytes > SIZE_MAX) { result = VK_ERROR_OUT_OF_HOST_MEMORY; goto fail_window; }
    struct r4vk_swapchain *sc = vk_zalloc2(&dev->vk.alloc, allocator,
-      sizeof(*sc), 8, VK_SYSTEM_ALLOCATION_SCOPE_OBJECT);
+      (size_t)bytes, 8, VK_SYSTEM_ALLOCATION_SCOPE_OBJECT);
    if (!sc) { result = VK_ERROR_OUT_OF_HOST_MEMORY; goto fail_window; }
    struct native_chain *chain = calloc(1, sizeof(*chain));
    if (!chain) {
@@ -455,6 +475,11 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
    }
    vk_object_base_init(&dev->vk, &sc->base, VK_OBJECT_TYPE_SWAPCHAIN_KHR);
    sc->device = dev; sc->record = chain; sc->count = info->minImageCount;
+   if (format_count) memcpy(sc->view_formats, formats->pViewFormats, format_count * sizeof(VkFormat));
+   sc->format_list = (VkImageFormatListCreateInfo) {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO,
+      .viewFormatCount = format_count, .pViewFormats = sc->view_formats,
+   };
    chain->window = w; chain->config = caps.config; chain->count = sc->count; chain->live = true;
    chain->next = w->chains; w->chains = chain; /* Takes window_get reference. */
    R4Dev devices;
@@ -471,7 +496,8 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
       result = source_image(chain, caps.config.formats[format].format, &chain->sources[i]);
       if (result != VK_SUCCESS) goto fail_chain;
       result = r4vk_nvk_import_wsi_image(device, &chain->sources[i].reference,
-         info->imageFormat, info->imageUsage, allocator, &sc->images[i]);
+         info->imageFormat, info->imageUsage, image_flags,
+         format_count ? &sc->format_list : NULL, allocator, &sc->images[i]);
       if (result != VK_SUCCESS) goto fail_chain;
       command = request_for(chain, R4OS_WINDOW_GRAPHICS_ATTACH);
       command.image_slot = i; command.source = chain->sources[i].reference;
@@ -531,6 +557,54 @@ nvk_GetSwapchainImagesKHR(VkDevice device, VkSwapchainKHR handle, uint32_t *coun
    for (uint32_t i = 0; i < written; i++) images[i] = sc->images[i].image;
    *count = written;
    return written < sc->count ? VK_INCOMPLETE : VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+r4vkDrainWindowSwapchain(VkDevice device, VkSwapchainKHR handle, uint64_t timeout_ns)
+{
+   struct r4vk_swapchain *sc = swapchain(handle);
+   if (!sc || sc->device != nvk_device_from_handle(device)) return VK_ERROR_DEVICE_LOST;
+   struct native_chain *chain = sc->record;
+   struct native_window *w = chain->window;
+   uint64_t start;
+   if (r4vk_monotonic_time(&start)) return VK_ERROR_DEVICE_LOST;
+   const uint64_t until = timeout_ns > UINT64_MAX - start ? UINT64_MAX : start + timeout_ns;
+   for (;;) {
+      lock(&w->mutex);
+      VkResult result = chain->error;
+      bool queued = false;
+      if (result == VK_SUCCESS) result = r4vk_nvk_check_device(sc->device->nvkmd);
+      if (result == VK_SUCCESS && !drain(w, NULL)) result = VK_NOT_READY;
+      for (uint32_t slot = 0; result == VK_SUCCESS && slot < chain->count; slot++) {
+         R4WindowGraphicsRequest query = request_for(chain, R4OS_WINDOW_GRAPHICS_CHAIN_STATUS);
+         R4WindowGraphicsReply reply;
+         query.image_slot = slot;
+         if (!r4vk_window_request(&w->application, &query, &reply)) {
+            result = r4vk_window_service_dead(&w->application, &w->identity.service) ?
+               VK_ERROR_SURFACE_LOST_KHR : VK_NOT_READY;
+            break;
+         }
+         result = vk_result(reply.result);
+         if (result != VK_SUCCESS) break;
+         if (memcmp(&reply.surface, &w->identity, sizeof(w->identity)) ||
+             reply.chain != chain->chain || reply.image_slot != slot ||
+             reply.flags > R4OS_WINDOW_GRAPHICS_IMAGE_RETURNING) {
+            result = VK_ERROR_SURFACE_LOST_KHR;
+            break;
+         }
+         queued |= reply.flags == R4OS_WINDOW_GRAPHICS_IMAGE_QUEUED;
+         w->revision = reply.revision;
+      }
+      const uint64_t revision = w->revision;
+      unlock(&w->mutex);
+      if (result != VK_SUCCESS && result != VK_NOT_READY) return result;
+      if (result == VK_SUCCESS && !queued) return VK_SUCCESS;
+      if (!timeout_ns) return VK_NOT_READY;
+      uint64_t now;
+      if (r4vk_monotonic_time(&now)) return VK_ERROR_DEVICE_LOST;
+      if (now >= until) return VK_TIMEOUT;
+      r4vk_window_wait(&w->application, &w->identity.owner, revision, until - now);
+   }
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL

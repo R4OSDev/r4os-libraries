@@ -827,7 +827,7 @@
 
     vk_instance_finish(&instance->vk);
     vk_free(&instance->vk.alloc, instance);
-@@ -213,6 +243,11 @@
+@@ -213,6 +243,14 @@
  nvk_GetInstanceProcAddr(VkInstance _instance, const char *pName)
  {
     VK_FROM_HANDLE(nvk_instance, instance, _instance);
@@ -835,6 +835,9 @@
 +   if (instance && instance->vk.enabled_extensions.KHR_surface &&
 +       !strcmp(pName, R4VK_WINDOW_SURFACE_ENTRYPOINT))
 +      return (PFN_vkVoidFunction)r4vkCreateWindowSurface;
++   if (instance && instance->vk.enabled_extensions.KHR_surface &&
++       !strcmp(pName, R4VK_WINDOW_DRAIN_ENTRYPOINT))
++      return (PFN_vkVoidFunction)r4vkDrainWindowSwapchain;
 +#endif
     return vk_instance_get_proc_addr(&instance->vk,
                                      &nvk_instance_entrypoints,

@@ -73,6 +73,11 @@ foreach ($directory in @('Port', 'Tools', 'Source', 'Contract')) {
 foreach ($directory in $inputs.header_roots) {
     $paths += @(Get-ChildItem -LiteralPath $directory -Recurse -File -Filter '*.h' | ForEach-Object FullName)
 }
+# These implementation sources are included by the thin Port C wrappers.
+# Hashing only the wrappers would silently accept stale native archives.
+foreach ($name in @('string.c', 'format.c', 'stdio.c', 'sort.c', 'numeric.c')) {
+    $paths += Join-Path $mesa.libraries ('Shared/Native/' + $name)
+}
 $records = @(foreach ($path in $paths | Sort-Object -Unique) {
     [ordered]@{path = [IO.Path]::GetRelativePath($mesa.workspace, $path).Replace('\', '/'); sha256 = (Get-R4VKFileHash $path)}
 })

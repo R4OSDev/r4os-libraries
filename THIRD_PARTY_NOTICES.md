@@ -12,6 +12,8 @@ R4OS material.
 | R4FONT | Google Brotli | 1.2.0 | MIT | `R4FONT/ThirdParty/r4font/brotli/LICENSE` |
 | R4FONT | zlib | 1.3.1 | zlib License | `R4FONT/ThirdParty/r4font/ZLIB-LICENSE` |
 | R4GFX | LittleCMS ICC core | 2.18 | MIT | `R4GFX/ThirdParty/LittleCMS/LICENSE` and `UPSTREAM.json` |
+| Shared native math | Zig stdlib and bundled musl | Zig 0.16.0, exact file hashes pinned | MIT and original per-file permissive notices | `Shared/Native/Math/Sources.json` and `Shared/Native/Math/NOTICES.txt` |
+| Shared native numeric/string scanner | Bundled musl, original and adapted units | Zig 0.16.0, exact file hashes pinned | MIT | `Shared/Native/Scan/Sources.json` and `Shared/Native/Scan/NOTICES.txt` |
 
 Exact upstream commits, included paths, local patches, hashes, and verification
 commands are recorded in
@@ -128,6 +130,20 @@ The port's runtime adapters, compiler contract, worker, executable cache,
 build orchestration and self-authored diagnostic shader remain original
 Apache-2.0 R4OS material. Upstream lowering algorithms retain their licenses.
 
+
+## R4GL native EGL/OpenGL provider (0.79.39, in progress)
+
+R4GL uses the same pinned Mesa 26.2.2 source. Its ordered patches, generator
+plan and native unit/flag selection live under `R4GL/Port` and `R4GL/Tools`.
+Selected libc++ sources bundled with Zig retain Apache-2.0 WITH LLVM-exception;
+their exact hashes are in `R4GL/Tools/CppSources.json`. Original Mesa source
+and header notices, the complete Mesa license inventory and LLVM license
+are retained in `R4GL/ThirdParty/NOTICES.txt`, with per-file provenance in
+`notices.json`. This header/license superset does not claim all components
+are linked. Original Khronos EGL/GL/KHR headers in `Bindings/C` retain their
+notices and have exact source hashes in `ThirdParty/headers.json`.
+Distribution installs the byte-identical bundle as `R4GL-NOTICES.txt`.
+Shared native math/scanner notices remain with their existing owners.
 
 ## R4VK native Vulkan provider (0.79.35, in progress)
 

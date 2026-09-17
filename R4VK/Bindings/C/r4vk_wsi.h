@@ -25,4 +25,14 @@ typedef VkResult (VKAPI_PTR *PFN_r4vkCreateWindowSurface)(
     VkInstance instance, const R4VkWindowSurfaceCreateInfo *info,
     const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 
+/* Private companion entrypoint from the same live instance resolver. Wait for
+ * all already-posted frames in this swapchain to leave WINSVC's producer queue.
+ * Consumer-held images may remain live; this is not a scanout/VBlank wait.
+ * The caller externally synchronizes the swapchain and keeps it/device alive.
+ * Zero timeout polls (VK_NOT_READY); a finite elapsed timeout returns VK_TIMEOUT.
+ * Neither timeout cancels frames, retires the chain nor changes its policy. */
+#define R4VK_WINDOW_DRAIN_ENTRYPOINT "r4vkDrainWindowSwapchain"
+typedef VkResult (VKAPI_PTR *PFN_r4vkDrainWindowSwapchain)(
+    VkDevice device, VkSwapchainKHR swapchain, uint64_t timeout_ns);
+
 #endif

@@ -17,7 +17,7 @@ $zigRoot = Resolve-Setting $devkit 'ZIG_ROOT'
 $sdk = Resolve-Setting $repositories 'SDK_ROOT'
 $contract = Resolve-Setting $repositories 'CONTRACT_ROOT'
 $zig = Join-Path $zigRoot $(if ($IsWindows) { 'zig.exe' } else { 'zig' })
-$units = @('R4STD', 'R4IMG', 'R4FONT', 'R4GFX', 'R4NV', 'R4NAK', 'R4VK')
+$units = @('R4STD', 'R4IMG', 'R4FONT', 'R4GFX', 'R4NV', 'R4NAK', 'R4VK', 'R4GL')
 $forward = @($args)
 if ($forward.Count -gt 0 -and ($forward[0] -in $units -or $forward[0] -eq 'ALL')) {
     if ($forward[0] -ne 'ALL') { $units = @($forward[0]) }

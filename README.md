@@ -1,7 +1,7 @@
 ﻿# R4OS Runtime Libraries
 
 This repository contains the independent Runtime-R4L units R4STD, R4IMG, R4GFX, R4NV,
-R4NAK, R4VK, and R4FONT. Each library owns its implementation, contract, baseline, Zig and C
+R4NAK, R4VK, R4GL, and R4FONT. Each library owns its implementation, contract, baseline, Zig and C
 bindings, manifest, and tests.
 
 ## Build and validation
@@ -19,12 +19,15 @@ Build and test one unit:
     ./Build.sh R4NV test
     ./Build.sh R4NAK
     ./Build.sh R4VK
+    ./Build.sh R4GL
 
 R4NAK is the freestanding C/Rust SPIR-V/NIR/NAK runtime compiler. Its first
 build needs the pinned host tools and sources described in `R4NAK/README.md`.
 R4VK is the native Mesa Vulkan provider under development. Its regular build
 prepares the matching NVK/NIL/NAK dependencies; see `R4VK/README.md`. It remains
-excluded from normal images until the capability profile is admitted.
+available as an optional runtime in slim/full images. R4GL provides native
+Mesa software EGL/OpenGL without a GPU or host Rust compiler; see
+`R4GL/README.md` for the current profile and lifecycle contract.
 
 Both `Build.bat` and `./Build.sh` use the shared PowerShell 7 `Build.ps1`. Dependency paths are mapped by
 `Settings.R4S`.

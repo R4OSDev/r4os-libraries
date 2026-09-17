@@ -1,6 +1,6 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 const a = @import("r4os").abi;
-const threads = @import("threads_api.zig");
+const threads = @import("r4native").threads;
 
 // R4SYS resolves the current caller's output on each write. No application
 // stream or Bundle is cached in shared library storage.
