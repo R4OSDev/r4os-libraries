@@ -168,6 +168,32 @@ static VkResult check_backing(struct r4vk_nvk_mem_context *context,
    return VK_SUCCESS;
 }
 
+/* Both allocation and import acquire exactly the same VA, residency and
+ * parent-device lifetime. The caller still owns the BO reference on failure. */
+static VkResult bind_backing(struct native_mem *mem,
+                             struct vk_object_base *log_obj,
+                             uint64_t size, uint64_t alignment,
+                             enum nvkmd_mem_flags flags, bool vram)
+{
+   struct r4vk_nvk_mem_context *context = mem->context;
+   nvkmd_mem_init(context->resources->dev, &mem->base, &mem_ops, flags, size, alignment);
+   simple_mtx_init(&mem->mutex, mtx_plain);
+   VkResult result = nvkmd_dev_alloc_va(mem->base.dev, log_obj,
+      vram ? 0 : NVKMD_VA_GART, 0, size, alignment, 0, &mem->base.va);
+   if (result != VK_SUCCESS) goto fail;
+   result = nvkmd_va_bind_mem(mem->base.va, log_obj, 0, &mem->base, 0, size);
+   if (result != VK_SUCCESS) {
+      nvkmd_va_free(mem->base.va);
+      goto fail;
+   }
+   r4vk_nvk_resources_ref(context->resources);
+   return VK_SUCCESS;
+fail:
+   simple_mtx_destroy(&mem->mutex);
+   simple_mtx_destroy(&mem->base.map_mutex);
+   return result;
+}
+
 VkResult r4vk_nvk_alloc_mem(struct r4vk_nvk_mem_context *context,
                            struct vk_object_base *log_obj,
                            uint64_t size, uint64_t alignment,
@@ -212,22 +238,94 @@ VkResult r4vk_nvk_alloc_mem(struct r4vk_nvk_mem_context *context,
    result = check_backing(context, &mem->reference, vram, size);
    if (result != VK_SUCCESS) goto fail_reference;
    if (!vram && context->host_coherent) flags |= NVKMD_MEM_COHERENT;
-   nvkmd_mem_init(context->resources->dev, &mem->base, &mem_ops, flags, size, alignment);
-   simple_mtx_init(&mem->mutex, mtx_plain);
-   result = nvkmd_dev_alloc_va(mem->base.dev, log_obj, vram ? 0 : NVKMD_VA_GART,
-                              0, size, alignment, 0, &mem->base.va);
-   if (result != VK_SUCCESS) goto fail_mutex;
-   result = nvkmd_va_bind_mem(mem->base.va, log_obj, 0, &mem->base, 0, size);
-   if (result != VK_SUCCESS) {
-      nvkmd_va_free(mem->base.va);
-      goto fail_mutex;
-   }
-   r4vk_nvk_resources_ref(context->resources);
+   result = bind_backing(mem, log_obj, size, alignment, flags, vram);
+   if (result != VK_SUCCESS) goto fail_reference;
    *out = &mem->base;
    return VK_SUCCESS;
-fail_mutex:
-   simple_mtx_destroy(&mem->mutex);
-   simple_mtx_destroy(&mem->base.map_mutex);
+fail_reference:
+   if (valid(mem->reference.reference)) drop(context, mem->reference.reference);
+fail_metadata:
+   free(mem);
+   return is_lost(context) ? VK_ERROR_DEVICE_LOST : result;
+}
+
+VkResult r4vk_nvk_import_mem(struct r4vk_nvk_mem_context *context,
+                            struct vk_object_base *log_obj,
+                            const R4GfxBufferHandle *source,
+                            struct nvkmd_mem **out,
+                            R4GfxBufferDescriptor *descriptor)
+{
+   if (!context || !context->resources || !out || !descriptor)
+      return VK_ERROR_INITIALIZATION_FAILED;
+   if (is_lost(context)) return VK_ERROR_DEVICE_LOST;
+   if (!source || !valid(*source)) return VK_ERROR_INVALID_EXTERNAL_HANDLE;
+   const struct r4vk_nvk_va_context *resources = context->resources;
+   if (!resources->draw.table->gfx_buffer_import) return VK_ERROR_FEATURE_NOT_PRESENT;
+   struct native_mem *mem = calloc(1, sizeof(*mem));
+   if (!mem) return VK_ERROR_OUT_OF_HOST_MEMORY;
+   mem->context = context;
+   /* Share before describe: after successful import the producer can close
+    * its own reference without invalidating our metadata or GPU backing. */
+   int32_t rc = r4draw_gfx_buffer_import(&resources->draw, source, &mem->reference);
+   VkResult result;
+   if (rc != 1) {
+      /* A stale/closed caller handle is not a reset of this Vulkan device. */
+      result = rc == R4OS_GFX_BUFFER_ERROR_INVALID ||
+               rc == R4OS_GFX_BUFFER_ERROR_STALE ||
+               rc == R4OS_GFX_BUFFER_ERROR_CLOSED ?
+               VK_ERROR_INVALID_EXTERNAL_HANDLE : status(context, rc);
+      goto fail_metadata;
+   }
+   const R4GfxBufferReference *ref = &mem->reference;
+   if (ref->version != 1 || ref->size < sizeof(*ref) || ref->reserved0 ||
+       !valid(ref->buffer) || !valid(ref->reference)) {
+      result = lost(context);
+      goto fail_reference;
+   }
+   /* Native submissions use mutable residency loans. Immutable capture and
+    * mapping-only references must never acquire stronger access here. */
+   result = VK_ERROR_INVALID_EXTERNAL_HANDLE;
+   if (ref->flags) goto fail_reference;
+   R4GfxBufferDescriptor desc;
+   rc = r4draw_gfx_buffer_describe(&resources->draw, &ref->reference, &desc);
+   if (rc != 1) { result = status(context, rc); goto fail_reference; }
+   if (desc.version != 1 || desc.size < sizeof(desc) || desc.reserved0) {
+      result = lost(context);
+      goto fail_reference;
+   }
+   const uint64_t alignment = resources->dev->pdev->bind_align_B;
+   const uint32_t transfer = R4OS_GFX_BUFFER_USAGE_TRANSFER_SOURCE |
+                             R4OS_GFX_BUFFER_USAGE_TRANSFER_TARGET;
+   const uint32_t cpu = R4OS_GFX_BUFFER_USAGE_CPU_READ | R4OS_GFX_BUFFER_USAGE_CPU_WRITE;
+   /* Do not round an imported extent up: those extra bytes are not ours.
+    * The descriptor's alignment describes backing, not the new GPU VA. */
+   if (!desc.byte_length || (desc.byte_length & (alignment - 1)) ||
+       !power_of_two(desc.alignment) || (desc.usage & transfer) != transfer ||
+       (desc.usage & ~(transfer | cpu | R4OS_GFX_BUFFER_USAGE_RENDER | R4OS_GFX_BUFFER_USAGE_SCANOUT)))
+      goto fail_reference;
+   bool vram;
+   enum nvkmd_mem_flags flags = NVKMD_MEM_SHARED;
+   if (desc.location == R4OS_GFX_BUFFER_LOCATION_DEVICE_LOCAL) {
+      if (desc.adapter_id != resources->adapter_id || !desc.driver_owner ||
+          desc.device_generation != resources->memory_generation || (desc.usage & cpu))
+         goto fail_reference;
+      vram = true;
+      flags |= NVKMD_MEM_VRAM;
+   } else if (desc.location == R4OS_GFX_BUFFER_LOCATION_SYSTEM) {
+      if (desc.adapter_id || desc.driver_owner || desc.device_generation || desc.modifier)
+         goto fail_reference;
+      vram = false;
+      flags |= NVKMD_MEM_GART;
+      if ((desc.usage & cpu) == cpu) flags |= NVKMD_MEM_CAN_MAP;
+      if (context->host_coherent) flags |= NVKMD_MEM_COHERENT;
+   } else {
+      goto fail_reference;
+   }
+   result = bind_backing(mem, log_obj, desc.byte_length, alignment, flags, vram);
+   if (result != VK_SUCCESS) goto fail_reference;
+   *out = &mem->base;
+   *descriptor = desc;
+   return VK_SUCCESS;
 fail_reference:
    if (valid(mem->reference.reference)) drop(context, mem->reference.reference);
 fail_metadata:

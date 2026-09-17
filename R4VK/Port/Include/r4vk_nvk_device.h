@@ -31,6 +31,16 @@ VkResult r4vk_nvk_create_pdev(const R4Draw *draw,
                              enum nvk_debug debug_flags,
                              struct nvkmd_pdev **out);
 VkResult r4vk_nvk_check_device(struct nvkmd_dev *dev);
+/* Private WSI building block, not a Vulkan extension or FD import. Takes
+ * an independent mutable reference; the source reference stays owned by
+ * its caller. Outputs change only on success. Descriptor geometry and
+ * modifier are preserved, not reinterpreted as a compatible Vulkan image.
+ * Image-layout and presentation admission remain the WSI owner's work. */
+VkResult r4vk_nvk_import_buffer(struct nvkmd_dev *dev,
+                               struct vk_object_base *log_obj,
+                               const R4GfxBufferHandle *source,
+                               struct nvkmd_mem **out,
+                               R4GfxBufferDescriptor *descriptor);
 VkResult r4vk_nvk_query_pdev_architecture(struct nvkmd_pdev *pdev,
                                          struct r4vk_nvk_architecture *out);
 #endif

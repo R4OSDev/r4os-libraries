@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.8 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.9 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -9,6 +9,16 @@ firmware-framebuffer renderer continues to work. This is not a software
 Vulkan renderer. Physical GPU qualification remains in OssiGPU.txt.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
+
+Roadmap 0.79.37 is in progress. The private NVKMD canonical-BO import takes
+an independent reference, checks placement/access/adapter generation, and
+uses the normal VA/residency/unref owners. It preserves image geometry and
+modifiers without claiming Vulkan image compatibility. A targeted SMP4
+probe covers sharing, rollback and late GPU retirement with modeled NVIDIA
+completion; it does not exercise window presentation. Surface/swapchain,
+window transport and compositor integration remain open. No new public
+extension or FD-import capability is exposed. See
+`Docs/Drivers/GrafikVulkan07937.txt` and `.json` in the Docs repository.
 
 Build from the Libraries root with `./Build.sh R4VK` or `Build.bat R4VK`.
 `-Doffline=true` requires cached source archives. `Tools/Build.ps1` resolves

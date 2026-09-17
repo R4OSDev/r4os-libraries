@@ -145,6 +145,24 @@ static VkResult alloc_va(struct nvkmd_dev *base, struct vk_object_base *log,
    return r4vk_nvk_alloc_va(&dev(base)->resources, log, flags, kind,
                            size, alignment, fixed, out);
 }
+VkResult r4vk_nvk_import_buffer(struct nvkmd_dev *base,
+                               struct vk_object_base *log,
+                               const R4GfxBufferHandle *source,
+                               struct nvkmd_mem **out,
+                               R4GfxBufferDescriptor *descriptor)
+{
+   VkResult result = r4vk_nvk_check_device(base);
+   if (result != VK_SUCCESS) return result;
+   result = r4vk_nvk_import_mem(&dev(base)->memory, log, source, out, descriptor);
+   if (result == VK_SUCCESS) {
+      /* Private imports bypass nvkmd_dev_import_dma_buf, whose successful
+       * publication is required by lookup and the ordinary memory unref. */
+      simple_mtx_lock(&base->mems_mutex);
+      list_addtail(&(*out)->link, &base->mems);
+      simple_mtx_unlock(&base->mems_mutex);
+   }
+   return result;
+}
 static VkResult alloc_tiled(struct nvkmd_dev *base, struct vk_object_base *log,
                             uint64_t size, uint64_t alignment, uint8_t kind,
                             uint16_t mode, enum nvkmd_mem_flags flags,

@@ -18,6 +18,13 @@ VkResult r4vk_nvk_alloc_mem(struct r4vk_nvk_mem_context *context,
                            uint64_t size_B, uint64_t align_B,
                            enum nvkmd_mem_flags flags,
                            struct nvkmd_mem **out);
+/* Backend half of the private canonical-BO import. Like alloc_mem, the
+ * successful result still needs publication in the device's memory list. */
+VkResult r4vk_nvk_import_mem(struct r4vk_nvk_mem_context *context,
+                            struct vk_object_base *log_obj,
+                            const R4GfxBufferHandle *source,
+                            struct nvkmd_mem **out,
+                            R4GfxBufferDescriptor *descriptor);
 VkResult r4vk_nvk_mem_reference(struct nvkmd_mem *mem,
                                R4GfxBufferReference *out);
 #endif
