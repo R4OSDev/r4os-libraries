@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.10 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.11 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -18,9 +18,31 @@ NVK's tiled-shadow handling for mixed rendering. A scoped SMP4 consumer links
 the full production NVK/NIL/NAK archives and checks the actual NVIDIA layout
 calculator for UNORM8, sRGB, 10-bit and FP16, producer-close, render submission,
 callback OOM and cleanup. GPU execution and completion are modeled; pixels and
-physical presentation are unverified. Surface/swapchain, window transport and
-compositor integration remain open. No public WSI or FD/DRM extension is exposed.
+physical presentation are unverified. Desktop now consumes the common WINSVC
+window transport. R4VK provides native window surfaces and the standard KHR
+surface queries; swapchain/acquire/present integration remains open.
+No FD/DRM import or unregistered Vulkan platform extension is advertised.
 See `Docs/Drivers/GrafikVulkan07937.txt` and `.json` in the Docs repository.
+
+Native surface entrypoint: include `Bindings/C/r4vk_wsi.h`, enable
+`VK_KHR_surface` (optionally `VK_KHR_get_surface_capabilities2`) on the instance,
+and obtain `R4VK_WINDOW_SURFACE_ENTRYPOINT` from the R4VK instance-proc loader.
+Pass version 1, the exact create-info size, the original calling R4XStart
+context and its Desktop window ID. `VK_NOT_READY` means that Desktop has not
+published that GPU window; creation does not wait indefinitely. The resulting
+`VkSurfaceKHR` uses ordinary surface support/capability/format/present-mode
+queries and `vkDestroySurfaceKHR`. No private Vulkan extension string,
+structure type, ICD platform number or R4L table revision is invented.
+
+Surfaces pin the process, Desktop and service generations. Queries take fresh
+WINSVC snapshots; resize/DPI changes update the exact extent, hiding preserves
+the surface, and service replacement requires explicit recreation. Supported
+formats are the intersection of published color contracts and actual NVK/NIL
+linear-image capabilities: B8G8R8A8 UNORM/sRGB, with supported opaque or
+electrically premultiplied alpha. Image counts, FIFO/MAILBOX and output binding
+come from Desktop; image usage and alpha flags must work for all enumerated
+formats. FP16/HDR color-space mappings and `VK_KHR_swapchain` are not enabled
+by this surface-only checkpoint.
 
 Build from the Libraries root with `./Build.sh R4VK` or `Build.bat R4VK`.
 `-Doffline=true` requires cached source archives. `Tools/Build.ps1` resolves
@@ -178,13 +200,13 @@ The targeted Linux host probe checks these primitives with ASan/UBSan and
 the floating-point boundaries with all four MXCSR rounding modes.
 
 The complete selected NVK/Vulkan/NIR/format/push-diagnostic C source set now
-compiles (513 translation units) and links with original NAK and native NIL.
+compiles (514 translation units) and links with original NAK and native NIL.
 The native device path excludes calibrated
-timestamps, RMV and WSI dispatch; swapchain-image requests return unsupported
-until the native WSI integration exists. Experimental NVX CUBIN imports are
+timestamps, RMV and swapchain dispatch; swapchain-image requests return unsupported
+until the native presentation integration exists. Experimental NVX CUBIN imports are
 excluded consistently with the native instance's disabled experimental flags.
 The selected shader-job and resource-provider paths are integrated; native
-WSI remains later roadmap work.
+swapchain presentation remains roadmap work.
 
 CPU capability/once state, GLSL interned types, shader-printf caches and NIR
 diagnostic mutexes belong to the calling process. Generic C state publication

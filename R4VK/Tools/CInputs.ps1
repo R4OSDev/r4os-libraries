@@ -31,7 +31,7 @@ function Get-R4VKNativeCInputs {
     $headers = @((Join-Path $Mesa.unit 'Port/Include'), (Join-Path $MesaRoot 'CSource'),
         (Join-Path $ShaderRoot '.'), (Join-Path $MesaRoot 'Generated'),
         (Join-Path $sdk 'Shared/C/include'), (Join-Path $contract 'Generated/SDK/C/include'),
-        (Join-Path $Mesa.libraries 'R4NV/Bindings/C'))
+        (Join-Path $Mesa.libraries 'R4NV/Bindings/C'), (Join-Path $Mesa.libraries 'R4GFX/Bindings/C'))
     foreach ($directory in @('src/vulkan/util', 'src/vulkan/runtime', 'src/nouveau/vulkan',
                              'src', 'src/compiler', 'src/compiler/nir', 'src/util')) {
         $headers += Join-Path $MesaRoot ('CSource/' + $directory)
@@ -84,6 +84,7 @@ function Get-R4VKNativeCInputs {
         sources = @($files | Sort-Object -Unique); arguments = $cArgs; host_build = $hostBuild
         header_roots = @((Join-Path $unit 'Port/Include'), (Join-Path $CompilerRoot 'NativeBindings'),
             $hostBuild, (Join-Path $sdk 'Shared/C/include'), (Join-Path $contract 'Generated/SDK/C/include'),
-            (Join-Path $Mesa.libraries 'R4NV/Bindings/C'), (Join-Path (& $Clang -print-resource-dir) 'include'))
+            (Join-Path $Mesa.libraries 'R4NV/Bindings/C'), (Join-Path $Mesa.libraries 'R4GFX/Bindings/C'),
+            (Join-Path $Mesa.unit 'Bindings/C'), (Join-Path (& $Clang -print-resource-dir) 'include'))
     }
 }

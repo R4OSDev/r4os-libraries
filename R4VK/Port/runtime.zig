@@ -8,6 +8,7 @@ pub const loader = @import("loader.zig");
 pub const compiler = @import("compiler.zig");
 pub const platform = @import("platform.zig");
 pub const console = @import("console.zig");
+pub const window = @import("window.zig");
 
 pub fn bind(kernel: *const r4os.abi.R4XStartR4Sys) bool {
     if (kernel.abi_version < 20 or kernel.size < @offsetOf(r4os.abi.R4XStartR4Sys, "program_local_publish") + 8) return false;
@@ -22,4 +23,5 @@ comptime {
     _ = math;
     _ = loader;
     _ = console;
+    _ = window;
 }
