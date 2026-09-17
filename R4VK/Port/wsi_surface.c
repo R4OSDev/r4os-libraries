@@ -65,47 +65,84 @@ static VkImageUsageFlags format_usage(const struct nvk_physical_device *pdev, Vk
    return usage;
 }
 
-static void add_format(struct r4vk_surface_caps *caps, VkFormat format,
+static void add_format(struct r4vk_surface_caps *caps, VkSurfaceFormatKHR format,
                       VkImageUsageFlags usage, VkCompositeAlphaFlagsKHR alpha)
 {
    if (!(usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) return;
    for (uint32_t i = 0; i < caps->format_count; i++) {
-      if (caps->formats[i].format == format) { caps->alpha[i] |= alpha; return; }
+      if (caps->formats[i].format == format.format &&
+          caps->formats[i].colorSpace == format.colorSpace) {
+         caps->alpha[i] |= alpha;
+         caps->usage &= usage;
+         return;
+      }
    }
    const uint32_t i = caps->format_count++;
    assert(i < ARRAY_SIZE(caps->formats));
-   caps->formats[i] = (VkSurfaceFormatKHR){format, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+   caps->formats[i] = format;
    caps->alpha[i] = alpha;
    caps->usage &= usage;
 }
 
-static VkCompositeAlphaFlagsKHR native_alpha(const R4WindowGraphicsFormat *entry)
+static VkCompositeAlphaFlagsKHR native_format(const R4WindowGraphicsFormat *entry,
+                                              VkSurfaceFormatKHR *format)
 {
    if (entry->reserved) return 0;
    R4GfxColorDescription color;
    memcpy(&color, entry->color, sizeof(color));
-   VkCompositeAlphaFlagsKHR alpha;
-   if (entry->format == R4OS_GFX_BUFFER_FORMAT_XRGB8888 && color.alpha == R4GFX_COLOR_ALPHA_OPAQUE)
-      alpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-   else if (entry->format == R4OS_GFX_BUFFER_FORMAT_ARGB8888 && color.alpha == R4GFX_COLOR_ALPHA_ELECTRICAL)
-      alpha = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
-   else return 0;
-   const R4GfxColorDescription expected = {
+   R4GfxColorDescription expected = {
       .version = 1, .size = sizeof(expected), .primaries = R4GFX_COLOR_PRIMARIES_SRGB,
       .transfer = R4GFX_COLOR_TRANSFER_SRGB, .range = R4GFX_COLOR_RANGE_FULL,
       .alpha = color.alpha, .precision = R4GFX_COLOR_PRECISION_UNORM8,
       .reference_white = 1000000, .peak = 1000000,
    };
-   return memcmp(&expected, &color, sizeof(color)) ? 0 : alpha;
+   uint32_t premultiplied = R4GFX_COLOR_ALPHA_ELECTRICAL;
+   bool opaque_format;
+   switch (entry->format) {
+   case R4OS_GFX_BUFFER_FORMAT_XRGB8888:
+   case R4OS_GFX_BUFFER_FORMAT_ARGB8888:
+      *format = (VkSurfaceFormatKHR){VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+      opaque_format = entry->format == R4OS_GFX_BUFFER_FORMAT_XRGB8888;
+      break;
+   case R4OS_GFX_BUFFER_FORMAT_ABGR16161616F:
+      *format = (VkSurfaceFormatKHR){VK_FORMAT_R16G16B16A16_SFLOAT, VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT};
+      expected.transfer = R4GFX_COLOR_TRANSFER_LINEAR;
+      expected.precision = R4GFX_COLOR_PRECISION_FLOAT16;
+      expected.reference_white = 800000;
+      expected.peak = 100000000;
+      premultiplied = R4GFX_COLOR_ALPHA_OPTICAL;
+      opaque_format = color.alpha == R4GFX_COLOR_ALPHA_OPAQUE;
+      break;
+   case R4OS_GFX_BUFFER_FORMAT_XRGB2101010:
+   case R4OS_GFX_BUFFER_FORMAT_ARGB2101010:
+      *format = (VkSurfaceFormatKHR){VK_FORMAT_A2R10G10B10_UNORM_PACK32, VK_COLOR_SPACE_HDR10_ST2084_EXT};
+      expected.primaries = R4GFX_COLOR_PRIMARIES_BT2020;
+      expected.transfer = R4GFX_COLOR_TRANSFER_PQ;
+      expected.precision = R4GFX_COLOR_PRECISION_UNORM10;
+      expected.reference_white = 2030000;
+      expected.peak = 100000000;
+      opaque_format = entry->format == R4OS_GFX_BUFFER_FORMAT_XRGB2101010;
+      break;
+   default: return 0;
+   }
+   if (memcmp(&expected, &color, sizeof(color))) return 0;
+   if (opaque_format && color.alpha == R4GFX_COLOR_ALPHA_OPAQUE)
+      return VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+   if (!opaque_format && color.alpha == premultiplied)
+      return VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
+   return 0;
 }
 
 uint32_t r4vk_surface_format(const R4WindowGraphicsConfig *config,
    VkFormat format, VkColorSpaceKHR space, VkCompositeAlphaFlagBitsKHR alpha)
 {
-   if ((format != VK_FORMAT_B8G8R8A8_UNORM && format != VK_FORMAT_B8G8R8A8_SRGB) ||
-       space != VK_COLOR_SPACE_SRGB_NONLINEAR_KHR || !alpha) return UINT32_MAX;
-   for (uint32_t i = 0; i < config->format_count; i++)
-      if (native_alpha(&config->formats[i]) == alpha) return i;
+   if (!alpha) return UINT32_MAX;
+   if (format == VK_FORMAT_B8G8R8A8_SRGB) format = VK_FORMAT_B8G8R8A8_UNORM;
+   for (uint32_t i = 0; i < config->format_count; i++) {
+      VkSurfaceFormatKHR mapped;
+      if (native_format(&config->formats[i], &mapped) == alpha &&
+          mapped.format == format && mapped.colorSpace == space) return i;
+   }
    return UINT32_MAX;
 }
 
@@ -145,13 +182,17 @@ VkResult r4vk_surface_snapshot(struct nvk_physical_device *pdev, VkSurfaceKHR ha
    for (uint32_t i = 0; i < config->format_count; i++) {
       const R4WindowGraphicsFormat *entry = &config->formats[i];
       if (entry->reserved) continue;
-      /* Admit only byte-identical color contracts with an implemented Vulkan
-       * color-space mapping. FP16/HDR remains in the shared compositor but is
-       * not silently relabelled as a Vulkan extended color space. */
-      const VkCompositeAlphaFlagsKHR alpha = native_alpha(entry);
-      if (!alpha) continue;
-      add_format(caps, VK_FORMAT_B8G8R8A8_UNORM, format_usage(pdev, VK_FORMAT_B8G8R8A8_UNORM), alpha);
-      add_format(caps, VK_FORMAT_B8G8R8A8_SRGB, format_usage(pdev, VK_FORMAT_B8G8R8A8_SRGB), alpha);
+      /* Only exact, implemented color contracts may be exposed. In
+       * particular legacy 100-nit FP16 is not scRGB's absolute 80-nit scale. */
+      VkSurfaceFormatKHR mapped;
+      const VkCompositeAlphaFlagsKHR alpha = native_format(entry, &mapped);
+      if (!alpha || (mapped.colorSpace != VK_COLOR_SPACE_SRGB_NONLINEAR_KHR &&
+                     !surface->instance->enabled_extensions.EXT_swapchain_colorspace)) continue;
+      add_format(caps, mapped, format_usage(pdev, mapped.format), alpha);
+      if (mapped.format == VK_FORMAT_B8G8R8A8_UNORM) {
+         mapped.format = VK_FORMAT_B8G8R8A8_SRGB;
+         add_format(caps, mapped, format_usage(pdev, mapped.format), alpha);
+      }
    }
    caps->common_alpha = ~0u;
    for (uint32_t i = 0; i < caps->format_count; i++) caps->common_alpha &= caps->alpha[i];

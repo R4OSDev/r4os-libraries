@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.12 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.13 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -20,8 +20,9 @@ calculator for UNORM8, sRGB, 10-bit and FP16, producer-close, render submission,
 callback OOM and cleanup. GPU execution and completion are modeled; pixels and
 physical presentation are unverified. Desktop now consumes the common WINSVC
 window transport. R4VK provides native window surfaces, standard KHR surface
-queries and swapchain/acquire/present through real WINSVC. Complete Desktop,
-color and failure integration acceptance remains open.
+queries and swapchain/acquire/present through real WINSVC. scRGB/HDR10 windows
+use the shared Desktop HDR/SDR and capture policy. Complete Desktop and
+failure integration acceptance remains open.
 No FD/DRM import or unregistered Vulkan platform extension is advertised.
 See `Docs/Drivers/GrafikVulkan07937.txt` and `.json` in the Docs repository.
 
@@ -42,7 +43,17 @@ formats are the intersection of published color contracts and actual NVK/NIL
 linear-image capabilities: B8G8R8A8 UNORM/sRGB, with supported opaque or
 electrically premultiplied alpha. Image counts, FIFO/MAILBOX and output binding
 come from Desktop; image usage and alpha flags must work for all enumerated
-formats. FP16/HDR color-space mappings are not enabled yet.
+formats. With `VK_EXT_swapchain_colorspace` enabled on the instance, exact
+published contracts additionally expose R16G16B16A16_SFLOAT/scRGB linear
+(1.0 = 80 cd/m2) and A2R10G10B10_UNORM_PACK32/HDR10 ST2084 (BT2020/PQ).
+Both admit opaque and premultiplied alpha when published. Legacy 100-nit
+FP16 is not relabeled as scRGB. CreateSwapchain checks the advertised pair.
+HDR metadata remains disabled; the default content envelope is 10000 cd/m2,
+not a claim about panel brightness. Desktop converts absolute window values
+into its FP16 working scale and applies the common output tone/gamut mapping
+only after composition. SDR UI white follows the confirmed output white.
+The existing compositor tests cover absolute 80/1000-nit inputs, SDR/HDR
+outputs, capture, warm resource reuse and removal of the HDR source.
 
 Enable `VK_KHR_swapchain` on the device for normal swapchain creation, image
 enumeration, acquire and queue presentation. Native allocation selects the

@@ -750,18 +750,19 @@
 
  #include "nvk_entrypoints.h"
  #include "nvk_physical_device.h"
-@@ -27,6 +31,10 @@
+@@ -27,6 +31,11 @@
  }
 
  static const struct vk_instance_extension_table instance_extensions = {
 +#ifdef R4OS_VULKAN
 +   .KHR_surface = true,
 +   .KHR_get_surface_capabilities2 = true,
++   .EXT_swapchain_colorspace = true,
 +#endif
  #ifdef NVK_USE_WSI_PLATFORM
     .KHR_get_surface_capabilities2 = true,
     .KHR_surface = true,
-@@ -54,7 +62,7 @@
+@@ -54,7 +63,7 @@
     .EXT_display_surface_counter = true,
     .EXT_acquire_drm_display = true,
  #endif
@@ -770,7 +771,7 @@
     .EXT_headless_surface = true,
  #endif
     .KHR_device_group_creation = true,
-@@ -78,6 +86,7 @@
+@@ -78,6 +87,7 @@
        &instance_extensions, pPropertyCount, pProperties);
  }
 
@@ -778,7 +779,7 @@
  static void
  nvk_init_debug_flags(struct nvk_instance *instance)
  {
-@@ -127,6 +136,8 @@
+@@ -127,6 +137,8 @@
        instance->debug_flags |= NVK_DEBUG_ZERO_MEMORY;
  }
 
@@ -787,7 +788,7 @@
  VKAPI_ATTR VkResult VKAPI_CALL
  nvk_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
                     const VkAllocationCallbacks *pAllocator,
-@@ -147,23 +158,38 @@
+@@ -147,23 +159,38 @@
     vk_instance_dispatch_table_from_entrypoints(&dispatch_table,
                                                 &nvk_instance_entrypoints,
                                                 true);
@@ -827,7 +828,7 @@
     const struct build_id_note *note =
        build_id_find_nhdr_for_addr(nvk_CreateInstance);
     if (!note) {
-@@ -181,6 +207,7 @@
+@@ -181,6 +208,7 @@
 
     STATIC_ASSERT(sizeof(instance->driver_build_sha) == BLAKE3_KEY_LEN);
     copy_build_id_to_sha1(instance->driver_build_sha, note);
@@ -835,7 +836,7 @@
 
     *pInstance = nvk_instance_to_handle(instance);
     return VK_SUCCESS;
-@@ -202,8 +229,10 @@
+@@ -202,8 +230,10 @@
     if (!instance)
        return;
 
@@ -846,7 +847,7 @@
 
     vk_instance_finish(&instance->vk);
     vk_free(&instance->vk.alloc, instance);
-@@ -213,6 +242,11 @@
+@@ -213,6 +243,11 @@
  nvk_GetInstanceProcAddr(VkInstance _instance, const char *pName)
  {
     VK_FROM_HANDLE(nvk_instance, instance, _instance);

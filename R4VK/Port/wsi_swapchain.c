@@ -416,6 +416,11 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
    result = r4vk_surface_snapshot(nvk_device_physical_mut(dev), info->surface, &caps);
    if (result != VK_SUCCESS) goto fail_window;
    if (!caps.supported) { result = VK_ERROR_SURFACE_LOST_KHR; goto fail_window; }
+   bool advertised = false;
+   for (uint32_t i = 0; i < caps.format_count; i++)
+      advertised |= caps.formats[i].format == info->imageFormat &&
+                    caps.formats[i].colorSpace == info->imageColorSpace;
+   if (!advertised) { result = VK_ERROR_FORMAT_NOT_SUPPORTED; goto fail_window; }
    const uint32_t format = r4vk_surface_format(&caps.config, info->imageFormat,
       info->imageColorSpace, info->compositeAlpha);
    const uint32_t mode = info->presentMode == VK_PRESENT_MODE_FIFO_KHR ? R4OS_WINDOW_GRAPHICS_FIFO :
