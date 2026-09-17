@@ -49,16 +49,6 @@ nvk_DestroySurfaceKHR(VkInstance handle, VkSurfaceKHR surface,
    vk_free2(&instance->alloc, allocator, surface_from_handle(surface));
 }
 
-struct surface_caps {
-   R4WindowGraphicsConfig config;
-   uint32_t format_count;
-   VkSurfaceFormatKHR formats[16];
-   VkCompositeAlphaFlagsKHR alpha[16];
-   VkImageUsageFlags usage;
-   VkCompositeAlphaFlagsKHR common_alpha;
-   bool supported;
-};
-
 static VkImageUsageFlags format_usage(const struct nvk_physical_device *pdev, VkFormat format)
 {
    /* Swapchain imports use an uncompressed linear BO. Query the exact NIL
@@ -75,7 +65,7 @@ static VkImageUsageFlags format_usage(const struct nvk_physical_device *pdev, Vk
    return usage;
 }
 
-static void add_format(struct surface_caps *caps, VkFormat format,
+static void add_format(struct r4vk_surface_caps *caps, VkFormat format,
                       VkImageUsageFlags usage, VkCompositeAlphaFlagsKHR alpha)
 {
    if (!(usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) return;
@@ -89,10 +79,40 @@ static void add_format(struct surface_caps *caps, VkFormat format,
    caps->usage &= usage;
 }
 
-static VkResult snapshot(struct nvk_physical_device *pdev, VkSurfaceKHR handle,
-                         struct surface_caps *caps)
+static VkCompositeAlphaFlagsKHR native_alpha(const R4WindowGraphicsFormat *entry)
 {
-   *caps = (struct surface_caps){0};
+   if (entry->reserved) return 0;
+   R4GfxColorDescription color;
+   memcpy(&color, entry->color, sizeof(color));
+   VkCompositeAlphaFlagsKHR alpha;
+   if (entry->format == R4OS_GFX_BUFFER_FORMAT_XRGB8888 && color.alpha == R4GFX_COLOR_ALPHA_OPAQUE)
+      alpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+   else if (entry->format == R4OS_GFX_BUFFER_FORMAT_ARGB8888 && color.alpha == R4GFX_COLOR_ALPHA_ELECTRICAL)
+      alpha = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
+   else return 0;
+   const R4GfxColorDescription expected = {
+      .version = 1, .size = sizeof(expected), .primaries = R4GFX_COLOR_PRIMARIES_SRGB,
+      .transfer = R4GFX_COLOR_TRANSFER_SRGB, .range = R4GFX_COLOR_RANGE_FULL,
+      .alpha = color.alpha, .precision = R4GFX_COLOR_PRECISION_UNORM8,
+      .reference_white = 1000000, .peak = 1000000,
+   };
+   return memcmp(&expected, &color, sizeof(color)) ? 0 : alpha;
+}
+
+uint32_t r4vk_surface_format(const R4WindowGraphicsConfig *config,
+   VkFormat format, VkColorSpaceKHR space, VkCompositeAlphaFlagBitsKHR alpha)
+{
+   if ((format != VK_FORMAT_B8G8R8A8_UNORM && format != VK_FORMAT_B8G8R8A8_SRGB) ||
+       space != VK_COLOR_SPACE_SRGB_NONLINEAR_KHR || !alpha) return UINT32_MAX;
+   for (uint32_t i = 0; i < config->format_count; i++)
+      if (native_alpha(&config->formats[i]) == alpha) return i;
+   return UINT32_MAX;
+}
+
+VkResult r4vk_surface_snapshot(struct nvk_physical_device *pdev, VkSurfaceKHR handle,
+                         struct r4vk_surface_caps *caps)
+{
+   *caps = (struct r4vk_surface_caps){0};
    struct r4vk_surface *surface = surface_from_handle(handle);
    if (!surface || surface->instance != pdev->vk.instance) return VK_ERROR_SURFACE_LOST_KHR;
    R4WindowGraphicsReply reply;
@@ -128,21 +148,8 @@ static VkResult snapshot(struct nvk_physical_device *pdev, VkSurfaceKHR handle,
       /* Admit only byte-identical color contracts with an implemented Vulkan
        * color-space mapping. FP16/HDR remains in the shared compositor but is
        * not silently relabelled as a Vulkan extended color space. */
-      R4GfxColorDescription color;
-      memcpy(&color, entry->color, sizeof(color));
-      VkCompositeAlphaFlagsKHR alpha;
-      if (entry->format == R4OS_GFX_BUFFER_FORMAT_XRGB8888 && color.alpha == R4GFX_COLOR_ALPHA_OPAQUE)
-         alpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-      else if (entry->format == R4OS_GFX_BUFFER_FORMAT_ARGB8888 && color.alpha == R4GFX_COLOR_ALPHA_ELECTRICAL)
-         alpha = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
-      else continue;
-      const R4GfxColorDescription expected = {
-         .version = 1, .size = sizeof(expected), .primaries = R4GFX_COLOR_PRIMARIES_SRGB,
-         .transfer = R4GFX_COLOR_TRANSFER_SRGB, .range = R4GFX_COLOR_RANGE_FULL,
-         .alpha = color.alpha, .precision = R4GFX_COLOR_PRECISION_UNORM8,
-         .reference_white = 1000000, .peak = 1000000,
-      };
-      if (memcmp(&expected, &color, sizeof(color))) continue;
+      const VkCompositeAlphaFlagsKHR alpha = native_alpha(entry);
+      if (!alpha) continue;
       add_format(caps, VK_FORMAT_B8G8R8A8_UNORM, format_usage(pdev, VK_FORMAT_B8G8R8A8_UNORM), alpha);
       add_format(caps, VK_FORMAT_B8G8R8A8_SRGB, format_usage(pdev, VK_FORMAT_B8G8R8A8_SRGB), alpha);
    }
@@ -159,8 +166,8 @@ nvk_GetPhysicalDeviceSurfaceSupportKHR(VkPhysicalDevice handle, uint32_t family,
 {
    VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
    *supported = false;
-   struct surface_caps caps;
-   VkResult result = snapshot(pdev, surface, &caps);
+   struct r4vk_surface_caps caps;
+   VkResult result = r4vk_surface_snapshot(pdev, surface, &caps);
    if (result == VK_SUCCESS && family < pdev->queue_family_count &&
        (pdev->queue_families[family].queue_flags & VK_QUEUE_GRAPHICS_BIT))
       *supported = caps.supported;
@@ -172,8 +179,8 @@ nvk_GetPhysicalDeviceSurfaceCapabilitiesKHR(VkPhysicalDevice handle,
    VkSurfaceKHR surface, VkSurfaceCapabilitiesKHR *out)
 {
    VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
-   struct surface_caps caps;
-   VkResult result = snapshot(pdev, surface, &caps);
+   struct r4vk_surface_caps caps;
+   VkResult result = r4vk_surface_snapshot(pdev, surface, &caps);
    if (result != VK_SUCCESS) return result;
    if (!caps.supported) return VK_ERROR_SURFACE_LOST_KHR;
    VkExtent2D extent = {caps.config.width, caps.config.height};
@@ -192,8 +199,8 @@ nvk_GetPhysicalDeviceSurfaceFormatsKHR(VkPhysicalDevice handle,
    VkSurfaceKHR surface, uint32_t *count, VkSurfaceFormatKHR *out)
 {
    VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
-   struct surface_caps caps;
-   VkResult result = snapshot(pdev, surface, &caps);
+   struct r4vk_surface_caps caps;
+   VkResult result = r4vk_surface_snapshot(pdev, surface, &caps);
    if (result != VK_SUCCESS) return result;
    if (!caps.supported) return VK_ERROR_SURFACE_LOST_KHR;
    if (!out) { *count = caps.format_count; return VK_SUCCESS; }
@@ -208,8 +215,8 @@ nvk_GetPhysicalDeviceSurfacePresentModesKHR(VkPhysicalDevice handle,
    VkSurfaceKHR surface, uint32_t *count, VkPresentModeKHR *out)
 {
    VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
-   struct surface_caps caps;
-   VkResult result = snapshot(pdev, surface, &caps);
+   struct r4vk_surface_caps caps;
+   VkResult result = r4vk_surface_snapshot(pdev, surface, &caps);
    if (result != VK_SUCCESS) return result;
    if (!caps.supported) return VK_ERROR_SURFACE_LOST_KHR;
    const VkPresentModeKHR modes[] = {VK_PRESENT_MODE_FIFO_KHR, VK_PRESENT_MODE_MAILBOX_KHR};
@@ -235,8 +242,8 @@ nvk_GetPhysicalDeviceSurfaceFormats2KHR(VkPhysicalDevice handle,
    /* One snapshot serves both enumeration and copy, including changing size
     * or visibility. Preserve the caller's sType/pNext on each output entry. */
    VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
-   struct surface_caps caps;
-   VkResult result = snapshot(pdev, info->surface, &caps);
+   struct r4vk_surface_caps caps;
+   VkResult result = r4vk_surface_snapshot(pdev, info->surface, &caps);
    if (result != VK_SUCCESS) return result;
    if (!caps.supported) return VK_ERROR_SURFACE_LOST_KHR;
    if (!out) { *count = caps.format_count; return VK_SUCCESS; }

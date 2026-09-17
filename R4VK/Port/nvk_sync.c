@@ -13,6 +13,7 @@ struct native_sync {
    struct u_cnd_monotonic condition;
    struct r4vk_nvk_point *point;
    bool signaled;
+   bool hold_fence;
 };
 static struct native_sync *native(struct vk_sync *base)
 {
@@ -46,12 +47,14 @@ static VkResult sync_init(struct vk_device *device, struct vk_sync *base,
    sync->device = device;
    sync->point = NULL;
    sync->signaled = initial != 0;
+   sync->hold_fence = false;
    return VK_SUCCESS;
 }
 static void sync_finish(struct vk_device *device, struct vk_sync *base)
 {
    (void)device;
    struct native_sync *sync = native(base);
+   if (sync->hold_fence && sync->point) r4vk_nvk_point_unexport(sync->point);
    r4vk_nvk_point_unref(sync->point);
    u_cnd_monotonic_destroy(&sync->condition);
    mtx_destroy(&sync->mutex);
@@ -96,12 +99,18 @@ static VkResult replace(struct native_sync *sync, struct r4vk_nvk_point *point,
    VkResult result = lock(sync);
    if (result != VK_SUCCESS) return result;
    struct r4vk_nvk_point *old = sync->point;
+   const bool old_pinned = sync->hold_fence && old;
+   if (sync->hold_fence && point) {
+      result = r4vk_nvk_point_pin(point, NULL);
+      if (result != VK_SUCCESS) { unlock(sync); return result; }
+   }
    r4vk_nvk_point_ref(point);
    sync->point = point;
    sync->signaled = signaled;
    if (u_cnd_monotonic_broadcast(&sync->condition) != thrd_success)
       result = VK_ERROR_DEVICE_LOST;
    unlock(sync);
+   if (old_pinned) r4vk_nvk_point_unexport(old);
    r4vk_nvk_point_unref(old);
    return result;
 }
@@ -109,6 +118,43 @@ VkResult r4vk_nvk_sync_assign(struct vk_sync *base, struct r4vk_nvk_point *point
 {
    assert(point);
    return replace(native(base), point, false);
+}
+VkResult r4vk_nvk_sync_prepare_present(struct vk_sync *base)
+{
+   if (!r4vk_nvk_sync_supported(base, 0)) return VK_ERROR_FEATURE_NOT_PRESENT;
+   struct native_sync *sync = native(base);
+   VkResult result = lock(sync);
+   if (result != VK_SUCCESS) return result;
+   if (sync->point || sync->signaled || sync->hold_fence) result = VK_ERROR_UNKNOWN;
+   else sync->hold_fence = true;
+   unlock(sync);
+   return result;
+}
+/* Transfer one independent point reference and metadata pin to WSI. The
+ * Vulkan fence may now be destroyed; native resources remain independently
+ * owned even after VkDevice destruction. The caller unexports then unrefs. */
+VkResult r4vk_nvk_sync_take_present(struct vk_sync *base,
+   struct r4vk_nvk_point **out, R4GfxFence *fence)
+{
+   struct native_sync *sync = native(base);
+   VkResult result = lock(sync);
+   if (result != VK_SUCCESS) return result;
+   if (!sync->hold_fence) { unlock(sync); return VK_ERROR_UNKNOWN; }
+   result = pending(sync, UINT64_MAX, NULL);
+   if (result == VK_SUCCESS && !sync->point) result = VK_ERROR_UNKNOWN;
+   if (result == VK_SUCCESS) {
+      /* A second pin copies the identity while the existing signal pin
+       * protects it. Transfer the original pin and release this extra one. */
+      result = r4vk_nvk_point_pin(sync->point, fence);
+      if (result == VK_SUCCESS) {
+         r4vk_nvk_point_unexport(sync->point);
+         r4vk_nvk_point_ref(sync->point);
+         *out = sync->point;
+         sync->hold_fence = false;
+      }
+   }
+   unlock(sync);
+   return result;
 }
 static VkResult sync_signal(struct vk_device *device, struct vk_sync *base,
                              uint64_t value)
@@ -135,6 +181,9 @@ static VkResult sync_move(struct vk_device *device, struct vk_sync *dst_base,
    if (result != VK_SUCCESS) return result;
    result = lock(second);
    if (result != VK_SUCCESS) { unlock(first); return result; }
+   if (src->hold_fence || dst->hold_fence) {
+      unlock(second); unlock(first); return VK_ERROR_FEATURE_NOT_PRESENT;
+   }
    struct r4vk_nvk_point *old = dst->point;
    dst->point = src->point; dst->signaled = src->signaled;
    src->point = NULL; src->signaled = false;

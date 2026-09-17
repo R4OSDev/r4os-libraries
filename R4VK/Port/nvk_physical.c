@@ -64,6 +64,7 @@ void r4vk_nvk_filter_physical_caps(struct vk_device_extension_table *ext,
 {
    /* These require host/backend operations absent in the native adapter.
     * Hardware class support in upstream NVK is not enough to enable them. */
+   ext->KHR_swapchain = true; /* Native WINSVC ownership, independent of Mesa platform WSI. */
    ext->KHR_external_memory_fd = false;
    ext->KHR_external_semaphore_fd = false;
    ext->KHR_external_fence_fd = false;

@@ -1,6 +1,7 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #ifndef R4VK_NATIVE_WSI_H
 #define R4VK_NATIVE_WSI_H
+#include <stdbool.h>
 #include "../../Bindings/C/r4vk_wsi.h"
 #include <r4os/r4draw.h>
 struct vk_instance;
@@ -10,8 +11,32 @@ struct r4vk_surface {
    const R4XStartContext *application;
    R4WindowGraphicsSurface identity;
 };
+struct r4vk_surface_caps {
+   R4WindowGraphicsConfig config;
+   uint32_t format_count;
+   VkSurfaceFormatKHR formats[16];
+   VkCompositeAlphaFlagsKHR alpha[16];
+   VkImageUsageFlags usage;
+   VkCompositeAlphaFlagsKHR common_alpha;
+   bool supported;
+};
+VkResult r4vk_surface_snapshot(struct nvk_physical_device *pdev,
+   VkSurfaceKHR surface, struct r4vk_surface_caps *caps);
+uint32_t r4vk_surface_format(const R4WindowGraphicsConfig *config,
+   VkFormat format, VkColorSpaceKHR space, VkCompositeAlphaFlagBitsKHR alpha);
+VkResult r4vk_create_swapchain_alias(VkDevice device, const VkImageCreateInfo *info,
+   const VkAllocationCallbacks *allocator, VkImage *out);
+VkDeviceMemory r4vk_swapchain_memory(VkDevice device, VkSwapchainKHR chain, uint32_t index);
 int32_t r4vk_window_query(const R4XStartContext *application, uint32_t window_id,
    const R4WindowGraphicsSurface *expected, R4WindowGraphicsReply *reply);
+/* true means a complete, validated response (possibly a business error).
+ * false leaves the outcome unknown; retry the exact immutable request. */
+bool r4vk_window_request(const R4XStartContext *application,
+   const R4WindowGraphicsRequest *request, R4WindowGraphicsReply *reply);
+bool r4vk_window_service_dead(const R4XStartContext *application,
+   const R4ProgramProcessHandle *service);
+void r4vk_window_wait(const R4XStartContext *application,
+   const R4ProgramProcessHandle *owner, uint64_t revision, uint64_t duration_ns);
 VKAPI_ATTR VkResult VKAPI_CALL r4vkCreateWindowSurface(VkInstance instance,
    const R4VkWindowSurfaceCreateInfo *info, const VkAllocationCallbacks *allocator,
    VkSurfaceKHR *surface);

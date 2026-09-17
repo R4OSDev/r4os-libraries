@@ -22,9 +22,13 @@ void r4vk_nvk_point_unref(struct r4vk_nvk_point *point);
 VkResult r4vk_nvk_point_wait(struct r4vk_nvk_point *point, uint64_t abs_timeout_ns);
 VkResult r4vk_nvk_point_export(struct r4vk_nvk_point *point, R4GfxFence *out);
 void r4vk_nvk_point_unexport(struct r4vk_nvk_point *point);
+VkResult r4vk_nvk_point_pin(struct r4vk_nvk_point *point, R4GfxFence *out);
 bool r4vk_nvk_sync_supported(const struct vk_sync *sync, uint64_t value);
 VkResult r4vk_nvk_sync_point(struct vk_sync *sync,
                             struct r4vk_nvk_va_context *resources,
                             struct r4vk_nvk_point **out);
 VkResult r4vk_nvk_sync_assign(struct vk_sync *sync, struct r4vk_nvk_point *point);
+VkResult r4vk_nvk_sync_prepare_present(struct vk_sync *sync);
+VkResult r4vk_nvk_sync_take_present(struct vk_sync *sync,
+   struct r4vk_nvk_point **out, R4GfxFence *fence);
 #endif

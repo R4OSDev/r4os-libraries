@@ -10,18 +10,23 @@
 int r4vk_operation_deadline(uint64_t, uint64_t *, uint64_t *);
 int r4vk_wait_ticks(uint64_t, uint64_t *);
 
+struct native_ctx;
+static void ctx_unref(struct native_ctx *ctx);
 struct r4vk_nvk_point {
    uint32_t references;
    simple_mtx_t mutex;
    struct r4vk_nvk_va_context *resources;
+   struct native_ctx *queue_owner;
    R4GfxFence fence;
    uint32_t exports;
    VkResult result;
    bool complete;
+   bool signal_pending; /* Signal owners may reserve completed metadata. */
    struct r4vk_nvk_point *next; /* One context's in-flight collection ref. */
 };
 struct native_ctx {
    struct nvkmd_ctx base;
+   uint32_t references; /* Public context plus immutable completion points. */
    struct r4vk_nvk_va_context *resources;
    R4GfxBackendBinding backend;
    R4GfxQueueHandle queue;
@@ -68,7 +73,7 @@ static bool status_valid(const R4GfxFenceStatus *value, R4GfxFence fence)
 /* point->mutex held; wait/dependency exports protect a copied kernel handle. */
 static void release_fence(struct r4vk_nvk_point *point)
 {
-   if (!point->complete || point->exports || !point->fence.slot) return;
+   if (!point->complete || point->exports || point->signal_pending || !point->fence.slot) return;
    if (r4draw_gfx_fence_release(&point->resources->draw, &point->fence) != R4OS_GFX_QUEUE_OK)
       point->result = lost(point->resources);
    point->fence.slot = 0;
@@ -87,8 +92,10 @@ void r4vk_nvk_point_unref(struct r4vk_nvk_point *point)
        r4draw_gfx_fence_release(&point->resources->draw, &point->fence) != R4OS_GFX_QUEUE_OK)
       lost(point->resources);
    struct r4vk_nvk_va_context *resources = point->resources;
+   struct native_ctx *queue_owner = point->queue_owner;
    simple_mtx_destroy(&point->mutex);
    free(point);
+   ctx_unref(queue_owner);
    r4vk_nvk_resources_unref(resources);
 }
 VkResult r4vk_nvk_point_wait(struct r4vk_nvk_point *point, uint64_t until)
@@ -143,6 +150,29 @@ void r4vk_nvk_point_unexport(struct r4vk_nvk_point *point)
 {
    simple_mtx_lock(&point->mutex);
    assert(point->exports); point->exports--;
+   release_fence(point);
+   simple_mtx_unlock(&point->mutex);
+}
+/* WSI signal assignment runs before signal_pending is cleared. Unlike a
+ * queue dependency, a presentation receipt still needs completed metadata. */
+VkResult r4vk_nvk_point_pin(struct r4vk_nvk_point *point, R4GfxFence *out)
+{
+   simple_mtx_lock(&point->mutex);
+   VkResult result = VK_SUCCESS;
+   if (!point->fence.slot || (point->complete && point->result != VK_SUCCESS))
+      result = VK_ERROR_DEVICE_LOST;
+   else {
+      point->exports++;
+      if (out) *out = point->fence;
+   }
+   simple_mtx_unlock(&point->mutex);
+   return result;
+}
+static void publish_signals(struct r4vk_nvk_point *point)
+{
+   if (!point) return;
+   simple_mtx_lock(&point->mutex);
+   point->signal_pending = false;
    release_fence(point);
    simple_mtx_unlock(&point->mutex);
 }
@@ -250,7 +280,7 @@ done:
    if (replaced) r4vk_nvk_point_unref(previous);
    return result;
 }
-static VkResult flush(struct native_ctx *ctx, bool force)
+static VkResult flush(struct native_ctx *ctx, bool force, bool reserve_signals)
 {
    VkResult result = reap(ctx);
    if (result != VK_SUCCESS) return result;
@@ -259,7 +289,10 @@ static VkResult flush(struct native_ctx *ctx, bool force)
    if (!point) return VK_ERROR_OUT_OF_HOST_MEMORY;
    point->references = 1;
    point->resources = ctx->resources;
+   point->queue_owner = ctx;
+   p_atomic_inc(&ctx->references);
    point->result = VK_NOT_READY;
+   point->signal_pending = reserve_signals;
    simple_mtx_init(&point->mutex, mtx_plain);
    r4vk_nvk_resources_ref(point->resources);
    R4GfxSubmission submission = {
@@ -296,21 +329,29 @@ static VkResult flush(struct native_ctx *ctx, bool force)
    ctx->pending = point;
    return VK_SUCCESS;
 }
+static void ctx_unref(struct native_ctx *ctx)
+{
+   if (!p_atomic_dec_zero(&ctx->references)) return;
+   /* Closing a queue invalidates its fence namespace. WSI points keep that
+    * namespace alive until the last Desktop loan ends, beyond VkDevice. */
+   if (r4draw_gfx_queue_close(&ctx->resources->draw, &ctx->queue) != R4OS_GFX_QUEUE_OK)
+      lost(ctx->resources);
+   struct r4vk_nvk_va_context *resources = ctx->resources;
+   free(ctx);
+   r4vk_nvk_resources_unref(resources);
+}
 static void ctx_destroy(struct nvkmd_ctx *base)
 {
    struct native_ctx *ctx = native(base);
-   if (r4draw_gfx_queue_close(&ctx->resources->draw, &ctx->queue) != R4OS_GFX_QUEUE_OK)
-      lost(ctx->resources);
    clear_waits(ctx);
    r4vk_nvk_point_unref(ctx->last);
+   ctx->last = NULL;
    while (ctx->pending) {
       struct r4vk_nvk_point *point = ctx->pending;
       ctx->pending = point->next;
       r4vk_nvk_point_unref(point);
    }
-   struct r4vk_nvk_va_context *resources = ctx->resources;
-   free(ctx);
-   r4vk_nvk_resources_unref(resources);
+   ctx_unref(ctx);
 }
 /* Public vk_queue submissions already unwrap assisted timelines. NVK's
  * private upload/memory streams bypass that layer and need the same bridge.
@@ -334,7 +375,7 @@ static VkResult ctx_wait(struct nvkmd_ctx *base, struct vk_object_base *log,
          return VK_ERROR_FEATURE_NOT_PRESENT;
    for (uint32_t i = 0; i < count; i++) {
       if (ctx->wait_count == ARRAY_SIZE(ctx->waits)) {
-         VkResult result = flush(ctx, true);
+         VkResult result = flush(ctx, true, false);
          if (result != VK_SUCCESS) return result;
       }
       struct vk_sync_wait wait = waits[i];
@@ -392,7 +433,7 @@ static VkResult ctx_exec(struct nvkmd_ctx *base, struct vk_object_base *log,
       uint32_t end = i;
       while (execs[end++].incomplete) {}
       if (end - i > R4NV_NATIVE_PUSH_LIMIT - ctx->packet.header.push_count) {
-         result = flush(ctx, false);
+         result = flush(ctx, false, false);
          if (result != VK_SUCCESS) return result;
       }
       for (; i < end; i++) {
@@ -430,7 +471,7 @@ static VkResult ctx_signal(struct nvkmd_ctx *base, struct vk_object_base *log,
          if (result != VK_SUCCESS) goto done;
       }
    }
-   result = flush(ctx, count != 0);
+   result = flush(ctx, count != 0, count != 0);
    if (result != VK_SUCCESS) goto done;
    for (uint32_t i = 0; i < count; i++) {
       struct vk_sync *sync = points && points[i] ? &points[i]->sync : signals[i].sync;
@@ -446,6 +487,7 @@ static VkResult ctx_signal(struct nvkmd_ctx *base, struct vk_object_base *log,
       }
    }
 done:
+   publish_signals(ctx->last);
    if (points) {
       for (uint32_t i = 0; i < count; i++)
          if (points[i]) vk_sync_timeline_point_unref(log->device, points[i]);
@@ -456,13 +498,13 @@ done:
 static VkResult ctx_flush(struct nvkmd_ctx *base, struct vk_object_base *log)
 {
    (void)log;
-   return flush(native(base), false);
+   return flush(native(base), false, false);
 }
 static VkResult ctx_sync(struct nvkmd_ctx *base, struct vk_object_base *log)
 {
    (void)log;
    struct native_ctx *ctx = native(base);
-   VkResult result = flush(ctx, false);
+   VkResult result = flush(ctx, false, false);
    if (result != VK_SUCCESS) return result;
    if (ctx->last) result = r4vk_nvk_point_wait(ctx->last, UINT64_MAX);
    return result == VK_SUCCESS ? reap(ctx) : result;
@@ -492,6 +534,7 @@ VkResult r4vk_nvk_create_ctx(struct r4vk_nvk_va_context *resources,
    struct native_ctx *ctx = calloc(1, sizeof(*ctx));
    if (!ctx) return VK_ERROR_OUT_OF_HOST_MEMORY;
    ctx->base = (struct nvkmd_ctx){ .ops = &ctx_ops, .dev = resources->dev };
+   ctx->references = 1;
    ctx->resources = resources;
    ctx->backend = *backend;
    ctx->packet.header = (R4NvNativeSubmitHeader) {
@@ -521,7 +564,7 @@ VkResult r4vk_nvk_create_ctx(struct r4vk_nvk_va_context *resources,
    }
    /* A live class ID is insufficient. The first empty batch instantiates all
     * requested real RM engine objects and executes the physical fence suffix. */
-   result = flush(ctx, true);
+   result = flush(ctx, true, false);
    if (result == VK_SUCCESS) result = ctx_sync(&ctx->base, NULL);
    if (result != VK_SUCCESS) { ctx_destroy(&ctx->base); return result; }
    *out = &ctx->base;

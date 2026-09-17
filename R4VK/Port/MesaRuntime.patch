@@ -1190,13 +1190,14 @@
        for (int i = 0; i < object_count; i++) {
 --- a/src/nouveau/vulkan/nvk_image.c
 +++ b/src/nouveau/vulkan/nvk_image.c
-@@ -23,8 +23,49 @@
+@@ -23,6 +23,48 @@
  #include "clc197.h"
  #include "clc597.h"
  #include "clcd97.h"
-
++
 +#if defined(R4OS_VULKAN)
 +#include "r4vk_nil.h"
++#include "r4vk_wsi.h"
 +#endif
 +
 +static VkResult
@@ -1235,13 +1236,10 @@
 +   return plane->nil.size_B;
 +#endif
 +}
-+
+
  static bool
  nvk_use_separate_zs(const struct nvk_physical_device *pdev, VkFormat vk_format)
- {
-    /* Separate depth/stencil doesn't exist pre-Blackwell */
-@@ -359,8 +400,17 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
-    /* Initialize to zero in case we return VK_ERROR_FORMAT_NOT_SUPPORTED */
+@@ -360,6 +402,15 @@
     memset(&pImageFormatProperties->imageFormatProperties, 0,
            sizeof(pImageFormatProperties->imageFormatProperties));
 
@@ -1257,9 +1255,7 @@
     uint64_t drm_format_mod =
        get_explicit_drm_format_mod(pImageFormatInfo->pNext);
     const struct vk_format_ycbcr_info *ycbcr_info =
-       vk_format_get_ycbcr_info(pImageFormatInfo->format);
-@@ -541,8 +591,9 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
-          return VK_ERROR_FORMAT_NOT_SUPPORTED;
+@@ -542,6 +593,7 @@
     }
 
     const VkExternalMemoryProperties *ext_mem_props = NULL;
@@ -1267,9 +1263,7 @@
     if (external_info != NULL && external_info->handleType != 0) {
        bool tiling_has_explicit_layout;
        switch (pImageFormatInfo->tiling) {
-       case VK_IMAGE_TILING_LINEAR:
-@@ -593,8 +644,9 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
-                            vk_ExternalMemoryHandleTypeFlagBits_to_str(external_info->handleType));
+@@ -594,6 +646,7 @@
        }
     }
 
@@ -1277,9 +1271,7 @@
     unsigned plane_count = vk_format_get_plane_count(pImageFormatInfo->format);
     if (nvk_use_separate_zs(pdev, pImageFormatInfo->format))
        plane_count = 2;
-
-@@ -981,13 +1033,13 @@ nvk_image_init(struct nvk_device *dev,
-                .samples = image->vk.samples,
+@@ -982,11 +1035,11 @@
                 .usage = usage & ~NIL_IMAGE_USAGE_LINEAR_BIT,
              };
 
@@ -1294,9 +1286,7 @@
                                  "Invalid image creation parameters");
 
              /* These are always allocated by the driver so the offset
-              * doesn't matter.
-@@ -1043,23 +1095,23 @@ nvk_image_init(struct nvk_device *dev,
-
+@@ -1044,21 +1097,21 @@
     if (usage & NIL_IMAGE_USAGE_VIDEO_BIT) {
        assert(!image->disjoint);
        for (uint8_t plane = 0; plane < image->plane_count; plane++) {
@@ -1324,9 +1314,7 @@
                               "Invalid image creation parameters");
        }
     }
-
-@@ -1103,17 +1155,23 @@ nvk_image_init(struct nvk_device *dev,
-          .samples = image->vk.samples,
+@@ -1104,15 +1157,21 @@
           .usage = usage,
        };
 
@@ -1351,9 +1339,7 @@
     }
 
     uint64_t plane_offset_B = 0;
-    image->image_size_B = 0;
-@@ -1125,21 +1183,23 @@ nvk_image_init(struct nvk_device *dev,
-       if (sparse_bound || image->planes[plane].nil.pte_kind)
+@@ -1126,19 +1185,21 @@
           plane_align_B = MAX2(plane_align_B, pdev->nvkmd->bind_align_B);
        image->planes[plane].plane_align_B = plane_align_B;
        image->image_align_B = MAX2(plane_align_B, image->image_align_B);
@@ -1377,9 +1363,7 @@
           image->image_size_B = plane_offset_B;
        }
     }
-
-@@ -1157,9 +1217,9 @@ nvk_image_init(struct nvk_device *dev,
-       assert(image->vk.drm_format_mod == DRM_FORMAT_MOD_INVALID);
+@@ -1158,7 +1219,7 @@
        plane_offset_B =
           align64(plane_offset_B, image->stencil_copy_temp.plane_align_B);
        image->stencil_copy_temp.plane_offset_B = plane_offset_B;
@@ -1388,14 +1372,12 @@
        image->image_size_B = plane_offset_B;
        image->image_align_B = MAX2(image->stencil_copy_temp.plane_align_B,
                                    image->image_align_B);
-    }
-@@ -1248,11 +1308,15 @@ nvk_CreateImage(VkDevice _device,
-    struct nvk_image *image;
+@@ -1249,9 +1310,13 @@
     VkResult result;
 
     if (wsi_common_is_swapchain_image(pCreateInfo)) {
 +#if defined(R4OS_VULKAN) && !defined(NVK_USE_WSI_PLATFORM)
-+      return vk_error(dev, VK_ERROR_FEATURE_NOT_PRESENT);
++      return r4vk_create_swapchain_alias(_device, pCreateInfo, pAllocator, pImage);
 +#else
        return wsi_common_create_swapchain_image(&pdev->wsi_device,
                                                 pCreateInfo,
@@ -1404,7 +1386,25 @@
     }
 
     image = vk_zalloc2(&dev->vk.alloc, pAllocator, sizeof(*image), 8,
-                       VK_SYSTEM_ALLOCATION_SCOPE_OBJECT);
+@@ -1668,7 +1733,17 @@
+ #endif
+
+    /* Ignore this struct on Android, we cannot access swapchain structures there. */
+-#ifdef NVK_USE_WSI_PLATFORM
++#if defined(R4OS_VULKAN)
++   if (mem == NULL) {
++      const VkBindImageMemorySwapchainInfoKHR *swapchain_info =
++         vk_find_struct_const(info->pNext, BIND_IMAGE_MEMORY_SWAPCHAIN_INFO_KHR);
++      if (!swapchain_info) return VK_ERROR_INVALID_EXTERNAL_HANDLE;
++      mem = nvk_device_memory_from_handle(r4vk_swapchain_memory(nvk_device_to_handle(dev),
++         swapchain_info->swapchain, swapchain_info->imageIndex));
++      if (!mem) return VK_ERROR_INVALID_EXTERNAL_HANDLE;
++      offset_B = 0;
++   }
++#elif defined(NVK_USE_WSI_PLATFORM)
+    if (mem == NULL) {
+       const VkBindImageMemorySwapchainInfoKHR *swapchain_info =
+          vk_find_struct_const(info->pNext, BIND_IMAGE_MEMORY_SWAPCHAIN_INFO_KHR);
 --- a/src/compiler/glsl_types.c
 +++ b/src/compiler/glsl_types.c
 @@ -33,9 +33,7 @@

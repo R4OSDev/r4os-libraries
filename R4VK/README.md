@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.11 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.12 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -19,8 +19,9 @@ the full production NVK/NIL/NAK archives and checks the actual NVIDIA layout
 calculator for UNORM8, sRGB, 10-bit and FP16, producer-close, render submission,
 callback OOM and cleanup. GPU execution and completion are modeled; pixels and
 physical presentation are unverified. Desktop now consumes the common WINSVC
-window transport. R4VK provides native window surfaces and the standard KHR
-surface queries; swapchain/acquire/present integration remains open.
+window transport. R4VK provides native window surfaces, standard KHR surface
+queries and swapchain/acquire/present through real WINSVC. Complete Desktop,
+color and failure integration acceptance remains open.
 No FD/DRM import or unregistered Vulkan platform extension is advertised.
 See `Docs/Drivers/GrafikVulkan07937.txt` and `.json` in the Docs repository.
 
@@ -41,8 +42,25 @@ formats are the intersection of published color contracts and actual NVK/NIL
 linear-image capabilities: B8G8R8A8 UNORM/sRGB, with supported opaque or
 electrically premultiplied alpha. Image counts, FIFO/MAILBOX and output binding
 come from Desktop; image usage and alpha flags must work for all enumerated
-formats. FP16/HDR color-space mappings and `VK_KHR_swapchain` are not enabled
-by this surface-only checkpoint.
+formats. FP16/HDR color-space mappings are not enabled yet.
+
+Enable `VK_KHR_swapchain` on the device for normal swapchain creation, image
+enumeration, acquire and queue presentation. Native allocation selects the
+actual pitch/backing; Vulkan and WINSVC import the same canonical BO. Image
+alias creation/binding and local device-group presentation use these images.
+Acquisition signals the supplied Vulkan semaphore/fence only when WINSVC
+returns an available image. Present consumes binary waits through Mesa
+submission and lends its actual native completion fence to the compositor.
+
+Retirement preserves fences and native queue ownership while Desktop holds
+an image, including after destroying the Vulkan device. Vulkan images and
+user allocation callbacks finish synchronously at swapchain destruction;
+independent native records finish after broker acknowledgement or exact
+service death. Unknown RPC outcomes retain the original immutable request.
+Old-swapchain replacement, timeout, hide, resize, aliases, render/present and
+service-restart cleanup are covered by one targeted SMP4 fixture using the
+canonical library, real WINSVC and modeled GPU execution. This does not yet
+validate pixels or the complete production Desktop presentation path.
 
 Build from the Libraries root with `./Build.sh R4VK` or `Build.bat R4VK`.
 `-Doffline=true` requires cached source archives. `Tools/Build.ps1` resolves
