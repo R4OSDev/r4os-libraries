@@ -168,9 +168,10 @@ static VkResult alloc_tiled(struct nvkmd_dev *base, struct vk_object_base *log,
                             uint16_t mode, enum nvkmd_mem_flags flags,
                             struct nvkmd_mem **out)
 {
-   (void)log; (void)size; (void)alignment; (void)kind; (void)mode; (void)flags; (void)out;
    VkResult result = r4vk_nvk_check_device(base);
-   return result == VK_SUCCESS ? VK_ERROR_FEATURE_NOT_PRESENT : result;
+   if (result != VK_SUCCESS) return result;
+   return r4vk_nvk_alloc_tiled_mem(&dev(base)->memory, log, size, alignment,
+                                   kind, mode, flags, out);
 }
 static VkResult import_dma_buf(struct nvkmd_dev *base,
                                struct vk_object_base *log, int fd,

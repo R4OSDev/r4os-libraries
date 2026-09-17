@@ -173,13 +173,14 @@ static VkResult check_backing(struct r4vk_nvk_mem_context *context,
 static VkResult bind_backing(struct native_mem *mem,
                              struct vk_object_base *log_obj,
                              uint64_t size, uint64_t alignment,
-                             enum nvkmd_mem_flags flags, bool vram)
+                             enum nvkmd_mem_flags flags, bool vram,
+                             uint8_t pte_kind)
 {
    struct r4vk_nvk_mem_context *context = mem->context;
    nvkmd_mem_init(context->resources->dev, &mem->base, &mem_ops, flags, size, alignment);
    simple_mtx_init(&mem->mutex, mtx_plain);
    VkResult result = nvkmd_dev_alloc_va(mem->base.dev, log_obj,
-      vram ? 0 : NVKMD_VA_GART, 0, size, alignment, 0, &mem->base.va);
+      vram ? 0 : NVKMD_VA_GART, pte_kind, size, alignment, 0, &mem->base.va);
    if (result != VK_SUCCESS) goto fail;
    result = nvkmd_va_bind_mem(mem->base.va, log_obj, 0, &mem->base, 0, size);
    if (result != VK_SUCCESS) {
@@ -194,10 +195,11 @@ fail:
    return result;
 }
 
-VkResult r4vk_nvk_alloc_mem(struct r4vk_nvk_mem_context *context,
-                           struct vk_object_base *log_obj,
-                           uint64_t size, uint64_t alignment,
-                           enum nvkmd_mem_flags flags, struct nvkmd_mem **out)
+static VkResult allocate_mem(struct r4vk_nvk_mem_context *context,
+                              struct vk_object_base *log_obj,
+                              uint64_t size, uint64_t alignment,
+                              enum nvkmd_mem_flags flags, uint8_t pte_kind,
+                              struct nvkmd_mem **out)
 {
    if (!context || !context->resources || !out) return VK_ERROR_INITIALIZATION_FAILED;
    if (is_lost(context)) return VK_ERROR_DEVICE_LOST;
@@ -238,7 +240,7 @@ VkResult r4vk_nvk_alloc_mem(struct r4vk_nvk_mem_context *context,
    result = check_backing(context, &mem->reference, vram, size);
    if (result != VK_SUCCESS) goto fail_reference;
    if (!vram && context->host_coherent) flags |= NVKMD_MEM_COHERENT;
-   result = bind_backing(mem, log_obj, size, alignment, flags, vram);
+   result = bind_backing(mem, log_obj, size, alignment, flags, vram, pte_kind);
    if (result != VK_SUCCESS) goto fail_reference;
    *out = &mem->base;
    return VK_SUCCESS;
@@ -247,6 +249,32 @@ fail_reference:
 fail_metadata:
    free(mem);
    return is_lost(context) ? VK_ERROR_DEVICE_LOST : result;
+}
+
+VkResult r4vk_nvk_alloc_mem(struct r4vk_nvk_mem_context *context,
+                           struct vk_object_base *log_obj,
+                           uint64_t size, uint64_t alignment,
+                           enum nvkmd_mem_flags flags, struct nvkmd_mem **out)
+{
+   return allocate_mem(context, log_obj, size, alignment, flags, 0, out);
+}
+
+VkResult r4vk_nvk_alloc_tiled_mem(struct r4vk_nvk_mem_context *context,
+                                 struct vk_object_base *log_obj,
+                                 uint64_t size, uint64_t alignment,
+                                 uint8_t pte_kind, uint16_t tile_mode,
+                                 enum nvkmd_mem_flags flags, struct nvkmd_mem **out)
+{
+   if (!context || !context->resources || !out) return VK_ERROR_INITIALIZATION_FAILED;
+   if (is_lost(context)) return VK_ERROR_DEVICE_LOST;
+   /* Uncompressed native mappings carry kind in the VA owner; GOB height
+    * and depth belong to NIL's image/command descriptors, not BO metadata.
+    * No compression allocation, dma-buf flags or second alias is needed. */
+   if (!context->resources->image_layouts || !pte_kind || pte_kind > 6 ||
+       (tile_mode & ~0x770u) || ((tile_mode >> 4) & 7) > 5 ||
+       ((tile_mode >> 8) & 7) > 5)
+      return VK_ERROR_FEATURE_NOT_PRESENT;
+   return allocate_mem(context, log_obj, size, alignment, flags, pte_kind, out);
 }
 
 VkResult r4vk_nvk_import_mem(struct r4vk_nvk_mem_context *context,
@@ -321,7 +349,7 @@ VkResult r4vk_nvk_import_mem(struct r4vk_nvk_mem_context *context,
    } else {
       goto fail_reference;
    }
-   result = bind_backing(mem, log_obj, desc.byte_length, alignment, flags, vram);
+   result = bind_backing(mem, log_obj, desc.byte_length, alignment, flags, vram, 0);
    if (result != VK_SUCCESS) goto fail_reference;
    *out = &mem->base;
    *descriptor = desc;

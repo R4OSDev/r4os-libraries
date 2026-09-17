@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.9 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.10 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -10,15 +10,17 @@ Vulkan renderer. Physical GPU qualification remains in OssiGPU.txt.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
 
-Roadmap 0.79.37 is in progress. The private NVKMD canonical-BO import takes
-an independent reference, checks placement/access/adapter generation, and
-uses the normal VA/residency/unref owners. It preserves image geometry and
-modifiers without claiming Vulkan image compatibility. A targeted SMP4
-probe covers sharing, rollback and late GPU retirement with modeled NVIDIA
-completion; it does not exercise window presentation. Surface/swapchain,
-window transport and compositor integration remain open. No new public
-extension or FD-import capability is exposed. See
-`Docs/Drivers/GrafikVulkan07937.txt` and `.json` in the Docs repository.
+Roadmap 0.79.37 is in progress. The private canonical-BO import and WSI image
+constructor share existing NVK memory/VA owners. The image constructor checks
+channel format, geometry, modifier and actual NVK/NIL capabilities, then binds
+the same BO to an ordinary VkImage/device-memory pair. Linear images retain
+NVK's tiled-shadow handling for mixed rendering. A scoped SMP4 consumer links
+the full production NVK/NIL/NAK archives and checks the actual NVIDIA layout
+calculator for UNORM8, sRGB, 10-bit and FP16, producer-close, render submission,
+callback OOM and cleanup. GPU execution and completion are modeled; pixels and
+physical presentation are unverified. Surface/swapchain, window transport and
+compositor integration remain open. No public WSI or FD/DRM extension is exposed.
+See `Docs/Drivers/GrafikVulkan07937.txt` and `.json` in the Docs repository.
 
 Build from the Libraries root with `./Build.sh R4VK` or `Build.bat R4VK`.
 `-Doffline=true` requires cached source archives. `Tools/Build.ps1` resolves
@@ -176,7 +178,7 @@ The targeted Linux host probe checks these primitives with ASan/UBSan and
 the floating-point boundaries with all four MXCSR rounding modes.
 
 The complete selected NVK/Vulkan/NIR/format/push-diagnostic C source set now
-compiles (512 translation units) and links with original NAK and native NIL.
+compiles (513 translation units) and links with original NAK and native NIL.
 The native device path excludes calibrated
 timestamps, RMV and WSI dispatch; swapchain-image requests return unsupported
 until the native WSI integration exists. Experimental NVX CUBIN imports are
@@ -523,8 +525,8 @@ propagates device-lost. Objects own their mutexes/conditions; no shared R4L
 mutable cache or invented GPU completion is used. Native absolute waits use
 R4SYS time; the POSIX MESA_VK_MAX_TIMEOUT debug override is excluded.
 
-Legacy tiled-BO allocation, sparse-bind contexts and external handles remain
-unsupported; uncompressed tiled images use the explicit VA kinds above;
+Uncompressed tiled allocations and images use the explicit VA kinds above;
+sparse-bind contexts, compression allocation and external handles remain unsupported;
 GPU timestamps and usage telemetry have no native owner callback. BAR mapping,
 sparse, compression and external-FD remain unadvertised. The provider filters
 features and limits to the native adapter contract. It does not inherit
