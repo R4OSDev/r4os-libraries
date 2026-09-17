@@ -100,7 +100,9 @@ void r4vk_nvk_filter_physical_caps(struct vk_device_extension_table *ext,
    properties->sparseResidencyStandard2DBlockShape = false;
    properties->sparseResidencyStandard2DMultisampleBlockShape = false;
    properties->sparseResidencyStandard3DBlockShape = false;
-   properties->timestampComputeAndGraphics = false;
+   /* Query timestamps use NVK's original four-word GPU report semaphore.
+    * They need no host clock read; calibrated timestamps remain disabled. */
+   properties->timestampComputeAndGraphics = true;
    /* Vulkan requires at least two relative priority levels. The only queue
     * in each logical device has no competing peer; Vulkan gives these hints
     * no cross-device scheduling guarantee. Global priority is separate and

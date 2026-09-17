@@ -665,26 +665,6 @@
           vk_debug_ignored_stype(ext->sType);
           break;
        }
-@@ -1823,15 +1882,19 @@ nvk_GetPhysicalDeviceQueueFamilyProperties2(
-
-       vk_outarray_append_typed(VkQueueFamilyProperties2, &out, p) {
-          p->queueFamilyProperties.queueFlags = queue_family->queue_flags;
-          p->queueFamilyProperties.queueCount = queue_family->queue_count;
-+#ifdef R4OS_VULKAN
-+         p->queueFamilyProperties.timestampValidBits = 0;
-+#else
-          if (queue_family->queue_flags &
-              (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT |
-               VK_QUEUE_TRANSFER_BIT)) {
-             p->queueFamilyProperties.timestampValidBits = 64;
-          } else {
-             p->queueFamilyProperties.timestampValidBits = 0;
-          }
-+#endif
-          p->queueFamilyProperties.minImageTransferGranularity =
-             (VkExtent3D){1, 1, 1};
-
-          vk_foreach_struct(ext, p->pNext) {
 --- a/src/nouveau/vulkan/nvk_physical_device.h
 +++ b/src/nouveau/vulkan/nvk_physical_device.h
 @@ -44,6 +44,9 @@ struct nvk_physical_device {
@@ -4229,9 +4209,9 @@
  nvk_get_vk_version(const struct nv_device_info *info)
  {
 +#ifdef R4OS_VULKAN
-+   /* Vulkan 1.4 requires timestampComputeAndGraphics. The native backend
-+    * deliberately exposes no GPU timestamps, so its device API is 1.3.
-+    * Instance API 1.4 and separately implemented extensions remain valid. */
++   /* Keep the admitted baseline at Vulkan 1.3 until the complete higher
++    * profile has been accepted. GPU query timestamps do not establish
++    * Vulkan 1.4 acceptance; separately implemented extensions stay valid. */
 +   (void)info;
 +   return VK_MAKE_VERSION(1, 3, VK_HEADER_VERSION);
 +#endif

@@ -1,7 +1,7 @@
 ﻿# R4VK native Vulkan provider
 
 Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.13 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
+R4VK 0.1.14 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
 commands and submit/sync adapters through the standard ICD bootstrap.
 `IMAGE_SCOPE=slim` installs the module in every normal image. Without an
 admitted NVIDIA backend, Vulkan enumerates no device and the existing
@@ -9,6 +9,13 @@ firmware-framebuffer renderer continues to work. This is not a software
 Vulkan renderer. Physical GPU qualification remains in OssiGPU.txt.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
+
+Roadmap 0.79.38 accepts the software Vulkan 1.3 profile. Captured public
+queries for modeled GA106/AD106 backends pass selected unmodified Khronos
+CTS feature, limit, format and sample-count predicates through a host replay
+adapter. Public timestamp queries/reset/copy and unavailable-result handling
+pass a targeted SMP4 run. These are software checks; no physical GPU results
+or official conformance are inferred. See `GrafikVulkan07938.txt/.json` in Docs.
 
 Roadmap 0.79.37 software integration is complete. The private canonical-BO import and WSI image
 constructor share existing NVK memory/VA owners. The image constructor checks
@@ -111,9 +118,12 @@ missing transport. The one queue per logical device admits only MEDIUM global
 priority. Vulkan's two required relative priority levels give no cross-device
 scheduling guarantee. Sparse,
 placed-map, external-FD, DRM and calibrated GPU time remain unavailable.
-The native physical-device API is 1.3 because GPU timestamps are unavailable;
-Vulkan 1.4 requires timestampComputeAndGraphics. Instance API 1.4 and explicit
-extensions such as host-image-copy remain usable. The earlier priority=1
+The native physical-device API stays at the selected 1.3 baseline until a
+complete higher profile is accepted. GPU query timestamps expose 64 valid
+bits and Mesa's 1 ns period; the original NVK graphics/compute/copy report
+commands write GPU time directly. This does not require the unsupported
+host GPU-clock callback used for calibrated timestamps. Instance API 1.4 and
+separately implemented extensions such as host-image-copy remain usable. The earlier priority=1
 profile was invalid: Vulkan's required minimum is 2, regardless of global
 priority support. See the normative Required Limits and Queue Priority sections
 in the archived Khronos specification and GrafikVulkan07935.json / nvk_limits.
@@ -382,8 +392,9 @@ The private original `nvk_device.c` now checks the exact native backend's loss
 state and marks the Vulkan device lost. Devices without execution queues do
 not inspect a nonexistent shader-printf buffer. Native device initialization
 omits DRM FDs and DRM sync-payload copying; ordinary native queue submission
-remains the synchronization path. GPU timestamp queries explicitly return
-unsupported without modifying output until the owner exposes that operation.
+remains the synchronization path. The host GPU-clock callback explicitly returns unsupported without modifying
+output until the owner exposes that operation. Ordinary command-buffer
+timestamp queries use the independent GPU report path.
 Failed device construction destroys initialized meta state, and a zero-queue
 cache-allocation failure skips resource owners that were never initialized.
 The targeted SMP4 integration now passes public device/queue construction,
@@ -474,7 +485,7 @@ device-local VRAM, and cached/coherent system memory. System capacity comes
 from R4DEV total physical RAM minus the application reserve, rounded to the
 backend binding alignment; allocation budgets still apply independently.
 One graphics/compute/transfer queue is exposed by the resource description,
-with medium priority and no sparse or timestamp-query claim. Native filtering
+with medium priority, 64-bit GPU query timestamps and no sparse claim. Native filtering
 removes FD/DRM, placed mapping, capture/replay, sparse, calibrated timestamps,
 memory-budget telemetry and HDR metadata that lack native implementations.
 The port does not inherit Linux NVK's conformance version.
@@ -585,7 +596,7 @@ R4SYS time; the POSIX MESA_VK_MAX_TIMEOUT debug override is excluded.
 
 Uncompressed tiled allocations and images use the explicit VA kinds above;
 sparse-bind contexts, compression allocation and external handles remain unsupported;
-GPU timestamps and usage telemetry have no native owner callback. BAR mapping,
+Calibrated GPU time and usage telemetry have no native owner callback. BAR mapping,
 sparse, compression and external-FD remain unadvertised. The provider filters
 features and limits to the native adapter contract. It does not inherit
 upstream Linux conformance; the published conformance version is zero.
