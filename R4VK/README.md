@@ -10,7 +10,7 @@ Vulkan renderer. Physical GPU qualification remains in OssiGPU.txt.
 The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
 contracts; NVIDIA.R4D remains the sole hardware owner.
 
-Roadmap 0.79.37 is in progress. The private canonical-BO import and WSI image
+Roadmap 0.79.37 software integration is complete. The private canonical-BO import and WSI image
 constructor share existing NVK memory/VA owners. The image constructor checks
 channel format, geometry, modifier and actual NVK/NIL capabilities, then binds
 the same BO to an ordinary VkImage/device-memory pair. Linear images retain
@@ -21,8 +21,13 @@ callback OOM and cleanup. GPU execution and completion are modeled; pixels and
 physical presentation are unverified. Desktop now consumes the common WINSVC
 window transport. R4VK provides native window surfaces, standard KHR surface
 queries and swapchain/acquire/present through real WINSVC. scRGB/HDR10 windows
-use the shared Desktop HDR/SDR and capture policy. Complete Desktop and
-failure integration acceptance remains open.
+use the shared Desktop HDR/SDR and capture policy. Targeted SMP4 integration
+connects public Vulkan calls to the actual Desktop Window/compositor owners,
+canonical R4GFX output swapchain, real kernel routing and capture. Resize,
+modeled output replacement/reset, producer kill, service restart and actual
+GUI-shell consumer death preserve generations and release all BO budgets.
+R4GFX 0.1.17 fixes output-queue teardown after reset. The guest uses a
+controlled shell rather than the complete R4DESK App event loop.
 No FD/DRM import or unregistered Vulkan platform extension is advertised.
 See `Docs/Drivers/GrafikVulkan07937.txt` and `.json` in the Docs repository.
 
@@ -70,8 +75,10 @@ independent native records finish after broker acknowledgement or exact
 service death. Unknown RPC outcomes retain the original immutable request.
 Old-swapchain replacement, timeout, hide, resize, aliases, render/present and
 service-restart cleanup are covered by one targeted SMP4 fixture using the
-canonical library, real WINSVC and modeled GPU execution. This does not yet
-validate pixels or the complete production Desktop presentation path.
+canonical library, real WINSVC and modeled GPU execution. The subsequent
+Desktop-owner integration verifies output/capture and process failure as
+described above. Physical pixels, HDMI and interactive Desktop behavior
+remain in OssiGPU.txt /0.79.37.
 
 Build from the Libraries root with `./Build.sh R4VK` or `Build.bat R4VK`.
 `-Doffline=true` requires cached source archives. `Tools/Build.ps1` resolves

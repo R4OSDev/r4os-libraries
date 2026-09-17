@@ -427,7 +427,7 @@ fn resizeImpl(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, requ
     candidate.configure(value.config, projection(device, value.info, value.target)) catch |err| return stateError(err);
     // Validate every old ownership record before either pool is mutated.
     for (slot.images[0..slot.state.config.count]) |image| if ((try device.resource(image, false)).public_refs == 0) return error.Stale;
-    if (slot.queue.timeline != 0) { try d.platform(device.queues().close(&slot.queue)); slot.queue = .{}; }
+    try closeQueue(device, slot);
     retainPool(device, value);
     try releasePool(device, slot);
     slot.state = candidate; slot.info = value.info; slot.target = value.target; slot.images = value.images; slot.work = @splat(.{}); slot.path = value.info.path;
@@ -448,9 +448,17 @@ fn closeSlot(device: *d.Device, slot: *Slot) d.Error!i32 {
         slot.work[i] = .{};
     };
     try releasePool(device, slot);
-    if (slot.queue.timeline != 0) { try d.platform(device.queues().close(&slot.queue)); slot.queue = .{}; }
+    try closeQueue(device, slot);
     slot.closed = true;
     return c.status_ok;
+}
+fn closeQueue(device: *d.Device, slot: *Slot) d.Error!void {
+    if (slot.queue.timeline == 0) return;
+    // Reset may already remove an empty queue. Its monotonic timeline cannot
+    // name a replacement; all frame jobs were retired before reaching here.
+    const rc = device.queues().close(&slot.queue);
+    if (rc != a.gfx_queue_error_stale) try d.platform(rc);
+    slot.queue = .{};
 }
 pub fn closeAll(device: *d.Device) bool {
     var okay = true;

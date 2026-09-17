@@ -1,7 +1,7 @@
 ﻿# R4GFX
 
 R4GFX is the userland graphics library. Its runtime module owns render resources,
-backend selection and CPU rendering;
+backend selection, CPU rendering and native render/present submission;
 R4DRAW owns shared buffers, queues and presentation. The compiled `Display/`
 helpers parse receiver metadata and the Zig bindings expose queue/output helpers.
 The Report keeps SCDC and low-rate scrambling separate; malformed extensions
@@ -9,24 +9,26 @@ contribute neither flag. Consumers decide link policy from a complete report.
 These source helpers compile in their consumers, separately from R4GFX.R4L.
 
 Build this unit with `../Build.sh R4GFX` on Linux or `..\Build.bat R4GFX` on
-Windows. Both use the same PS7 build. Add `test` for the existing eight owner
-and C/Zig conformance cases. No guest or benchmark runs automatically.
+Windows. Both use the same PS7 build with the existing owner, display and
+C/Zig conformance checks. `test` selects those checks explicitly. No guest
+or benchmark runs automatically.
 
 ## Runtime interfaces
 
-`module.R4MF` is authoritative. Module 0.1.4 exports three independent tables:
+`module.R4MF` is authoritative. Module 0.1.17 exports four independent tables:
 
 | Import | Behavior |
 | --- | --- |
 | `R4GFX:API_V1:1` | Checked linear layouts and rectangle fill; original table and payloads unchanged. |
 | `R4GFX:RENDER_V1:1` | Capability query and ordered, bounded CPU 2D batches. |
-| `R4GFX:DEVICE_V1:3` | Caller-owned devices, images/targets, samplers, pipelines, raster imports and canonical copy receipts. |
+| `R4GFX:DEVICE_V1:10` | Caller-owned resources, native allocation, queued copy/render, output swapchains and canonical completion receipts. |
+| `R4GFX:COLOR_V1:2` | Explicit color resources, FP16/HDR transforms and combined color/grid render jobs. |
 
 Bindings and API documentation are generated from `Contract/LibraryContract.json`.
 Use `ApiV1Client.init` or `RenderV1Client.init` with the app start context. The
 generated clients check interface identity, revision, size and required slots.
-RENDER_V1 reports software rendering. DEVICE_V1 selects a compatible native copy
-backend when the caller also imports `R4NV:BACKEND_V1:2:1`; a missing or incompatible
+RENDER_V1 reports software rendering. DEVICE_V1 selects a compatible native
+backend when the caller also imports `R4NV:BACKEND_V1:3:1`; a missing or incompatible
 R4NV keeps software rendering and copying available.
 
 ## Device resources
@@ -51,7 +53,7 @@ Leave `image` and `source_generation` zero. A selected native backend is require
 Creation waits on the common request outside frame execution; the returned BO
 supplies actual pitch/extent. Closing the app or timing out does not free active
 driver work. The driver uses a separate finite RM budget; native backing is not
-CPU mapped. Public scanout creation and GPU rendering remain separate work.
+CPU mapped. Scanout creation and GPU rendering use their explicit capability-gated paths.
 
 Overlapping leases for the same immutable shared-raster generation reuse one BO
 import. No upload or raster conversion occurs. Imported BO descriptors supply their
@@ -73,8 +75,9 @@ never transferred to a new binding.
 as RENDER_V1 and maps each distinct BO once. All primitive validation precedes pixel
 writes. A failed physical unmap can still return busy after rendering; resources
 remain tracked until release succeeds. Result metadata and input/storage ranges must
-not alias. Native capabilities currently advertise copy only: unsupported drawing
-uses this bounded CPU path and its result identifies the actual software backend.
+not alias. Native queue capabilities separately gate copy, render, grid/color lists and
+presentation. The synchronous CPU renderer reports the software backend;
+queued native work uses the corresponding DEVICE_V1/COLOR_V1 submission calls.
 
 `copy_submit` uses the canonical queue and returns a job, not synthetic completion.
 Query/cancel/release preserve its original device/reset generation. An old queue stays
@@ -82,9 +85,13 @@ open until its last receipt is released. Cancellation/deadline alone never frees
 GPU resources. Close is retryable (`status_busy`); continue querying/releasing or retry
 close while retaining storage. Opaque device-local images are not CPU shadows.
 
-The Desktop batches fills through DEVICE_V1, flushes before other scene operations
-and retains imported shared rasters with its active/staging frame leases. Its borrowed
-scene target is released at each scene boundary. R4DRAW still handles presentation.
+Output-swapchain close and resize accept an already absent queue after reset,
+matching ordinary device-queue retirement. This applies only after all exact
+frame jobs have retired; busy queues and active GPU resources remain retained.
+
+The Desktop composes its retained layers and WINSVC window images through
+DEVICE_V1/COLOR_V1 and uses the common output swapchain and capture owner.
+R4DRAW retains the underlying BOs, queues and driver-owned presentation routes.
 DISPLAYD `/BUFFERS` includes two dependent row copies and exact 16-pixel readback through
 this interface, in addition to the original RENDER_V1 scene.
 
@@ -156,7 +163,7 @@ the renderer. Map release and presentation are separate caller actions.
 `Repositories/Diagnostics/DisplayDiag/src/buffers.zig` is the executable client
 example, including read leases surviving producer release and balanced teardown.
 
-Native shader rendering and complete GPU Desktop composition belong to 0.79.19/20.
+Native shader rendering and GPU Desktop composition were added in 0.79.19/20.
 A passing CPU scene does not qualify NVIDIA hardware. Software evidence lives in
 `Docs/Drivers/GrafikRender07917.txt`; physical follow-up remains in
 `ExFiles/Reports/OssiGPU.txt`, section 0.79.17.

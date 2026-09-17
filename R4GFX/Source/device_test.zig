@@ -928,6 +928,14 @@ fn checkOutputSwapchains(input: c.R4GfxDeviceConfig) !void {
     try t.expect(Model.outputs[0].live and Model.outputs[0].status.flags != 0);
     Model.outputs[0].status.flags = 0;
     try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chains[0]));
+    // The kernel removes empty old timelines during device reset. The last
+    // frame is already released, so closing its absent queue is idempotent.
+    const device = try d.get(&handle, true);
+    const old_queue = device.chains[chains[1].slot - 1].queue;
+    try t.expect(old_queue.timeline != 0 and !Model.outputs[1].live);
+    try t.expectEqual(a.gfx_queue_ok, Model.close(&old_queue));
+    try t.expectEqual(a.gfx_queue_error_stale, Model.close(&old_queue));
+    try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chains[1]));
     try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chains[1]));
     for (&images) |*pair| for (pair) |*image| try t.expectEqual(c.status_ok, api.resource_release(&handle, image));
     try t.expectEqual(c.status_ok, api.device_close(&handle));
