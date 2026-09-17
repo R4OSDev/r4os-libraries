@@ -503,7 +503,7 @@ comptime {
     if (@offsetOf(implementation.DeviceV1, "memory_trim") != 280 or @offsetOf(binding.DeviceV1, "memory_trim") != 280) @compileError("DeviceV1.memory_trim slot drift");
     if (@offsetOf(implementation.DeviceV1, "resource_resident") != 288 or @offsetOf(binding.DeviceV1, "resource_resident") != 288) @compileError("DeviceV1.resource_resident slot drift");
     if (@offsetOf(implementation.DeviceV1, "resource_priority") != 296 or @offsetOf(binding.DeviceV1, "resource_priority") != 296) @compileError("DeviceV1.resource_priority slot drift");
-    if (@sizeOf(implementation.ColorV1) != 128 or @sizeOf(binding.ColorV1) != 128) @compileError("ColorV1 size drift");
+    if (@sizeOf(implementation.ColorV1) != 136 or @sizeOf(binding.ColorV1) != 136) @compileError("ColorV1 size drift");
     if (@offsetOf(implementation.ColorV1, "color_description_validate") != 32 or @offsetOf(binding.ColorV1, "color_description_validate") != 32) @compileError("ColorV1.color_description_validate slot drift");
     if (@offsetOf(implementation.ColorV1, "color_profile_storage_size") != 40 or @offsetOf(binding.ColorV1, "color_profile_storage_size") != 40) @compileError("ColorV1.color_profile_storage_size slot drift");
     if (@offsetOf(implementation.ColorV1, "color_profile_open") != 48 or @offsetOf(binding.ColorV1, "color_profile_open") != 48) @compileError("ColorV1.color_profile_open slot drift");
@@ -516,6 +516,7 @@ comptime {
     if (@offsetOf(implementation.ColorV1, "color_resource_transform") != 104 or @offsetOf(binding.ColorV1, "color_resource_transform") != 104) @compileError("ColorV1.color_resource_transform slot drift");
     if (@offsetOf(implementation.ColorV1, "color_profile_generate") != 112 or @offsetOf(binding.ColorV1, "color_profile_generate") != 112) @compileError("ColorV1.color_profile_generate slot drift");
     if (@offsetOf(implementation.ColorV1, "color_render_submit") != 120 or @offsetOf(binding.ColorV1, "color_render_submit") != 120) @compileError("ColorV1.color_render_submit slot drift");
+    if (@offsetOf(implementation.ColorV1, "color_render_submit_grid") != 128 or @offsetOf(binding.ColorV1, "color_render_submit_grid") != 128) @compileError("ColorV1.color_render_submit_grid slot drift");
 }
 
 test "generated implementation and binding views are identical" {

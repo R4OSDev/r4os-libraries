@@ -2218,7 +2218,7 @@
       "zig_type": "ColorV1",
       "c_type": "R4GfxColorV1",
       "abi_major": 1,
-      "revision": 1,
+      "revision": 2,
       "interface_id_lo": 1380928579,
       "interface_id_hi": 827868743,
       "known_required_flags": 0,
@@ -2926,6 +2926,81 @@
             "ownership": "Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error."
           },
           "description": "Submit1..16 compatible draws using explicit retained resource colors and a fixed native color program. Requires device_gpu_color, a nearest sampler and request.transfer=identity. R4GFX derives matrices, transfer/range, white scaling and optional tone/gamut/dither; the queue retains copied coefficients and BOs until real execution. Untagged/ICC resources are rejected by this named-color shader. CPU ICC processing remains available through COLOR_V1. Failure admits no prefix and does not write output."
+        },
+        {
+          "name": "color_render_submit_grid",
+          "c_name": "r4gfx_color_render_submit_grid",
+          "symbol": "r4gfx_color_render_submit_grid_impl",
+          "slot": 12,
+          "since_revision": 2,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxRenderGridListRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "flags",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "color_transform_output, color_transform_relative_white and color_transform_dither, applied once to the completed source. OVER only targets linear optical-premultiplied FP16 and cannot tone-map the destination."
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error."
+          },
+          "description": "Color-render1..16 compatible draws with per-draw exact logical grids in one native job. Same color/resource/dependency rules as color_render_submit; requires device_gpu_color_grid. Rotation and DPI sampling precede the shared color transform. No CPU mapping, intermediate image or partial admission."
         }
       ],
       "description": "Userland color descriptions and retained, bounded RGB ICC transformations. Native output capability and physical color acceptance are separate."
@@ -8776,6 +8851,13 @@
       "type": "u32",
       "value": 6,
       "description": "memory_phase_retire"
+    },
+    {
+      "zig_name": "device_gpu_color_grid",
+      "c_name": "R4GFX_DEVICE_GPU_COLOR_GRID",
+      "type": "u32",
+      "value": 512,
+      "description": "Backend combines exact logical-grid sampling and named-color conversion in one native job. Requires the distinct combined capability, not just separate color/grid support."
     }
   ],
   "errors": [

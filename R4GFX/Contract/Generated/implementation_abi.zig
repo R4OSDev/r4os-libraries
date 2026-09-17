@@ -696,6 +696,7 @@ pub const memory_phase_describe: u32 = 3;
 pub const memory_phase_submit: u32 = 4;
 pub const memory_phase_copy: u32 = 5;
 pub const memory_phase_retire: u32 = 6;
+pub const device_gpu_color_grid: u32 = 512;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -833,14 +834,14 @@ pub const DeviceV1 = extern struct {
 };
 
 pub const color_v1_export_name = "COLOR_V1";
-pub const color_v1_revision: u16 = 1;
+pub const color_v1_revision: u16 = 2;
 pub const color_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 128,
+    .size = 136,
     .abi_major = 1,
-    .abi_minor = 1,
+    .abi_minor = 2,
     .interface_id_lo = 0x524f4c43,
     .interface_id_hi = 0x31584647,
 };
@@ -856,6 +857,7 @@ pub const ColorV1ColorResourceInfoFn = *const fn (device: *const R4GfxDevice, re
 pub const ColorV1ColorResourceTransformFn = *const fn (device: *const R4GfxDevice, source: *const R4GfxResource, target: *const R4GfxResource, request: *const R4GfxColorTransform, output: *R4GfxCpuStats) callconv(.c) i32;
 pub const ColorV1ColorProfileGenerateFn = *const fn (definition: *const R4GfxColorProfileDefinition, scratch_address: u64, scratch_bytes: u64, output_address: u64, output_capacity: u64, output_bytes: *u64) callconv(.c) i32;
 pub const ColorV1ColorRenderSubmitFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderListRequest, flags: u32, output: *R4GfxJob) callconv(.c) i32;
+pub const ColorV1ColorRenderSubmitGridFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderGridListRequest, flags: u32, output: *R4GfxJob) callconv(.c) i32;
 pub const ColorV1 = extern struct {
     header: InterfaceHeader,
     color_description_validate: ColorV1ColorDescriptionValidateFn,
@@ -870,4 +872,5 @@ pub const ColorV1 = extern struct {
     color_resource_transform: ColorV1ColorResourceTransformFn,
     color_profile_generate: ColorV1ColorProfileGenerateFn,
     color_render_submit: ColorV1ColorRenderSubmitFn,
+    color_render_submit_grid: ColorV1ColorRenderSubmitGridFn,
 };

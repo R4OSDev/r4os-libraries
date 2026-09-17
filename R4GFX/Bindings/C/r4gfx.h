@@ -1156,6 +1156,7 @@ _Static_assert(offsetof(R4GfxMemoryInfo, failures) == 96u, "R4GfxMemoryInfo.fail
 #define R4GFX_MEMORY_PHASE_SUBMIT ((uint32_t)4)
 #define R4GFX_MEMORY_PHASE_COPY ((uint32_t)5)
 #define R4GFX_MEMORY_PHASE_RETIRE ((uint32_t)6)
+#define R4GFX_DEVICE_GPU_COLOR_GRID ((uint32_t)512)
 #define R4GFX_STATUS_INVALID ((int32_t)-1)
 #define R4GFX_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4GFX_STATUS_OVERFLOW ((int32_t)-3)
@@ -1587,10 +1588,10 @@ static inline int32_t r4gfx_resource_priority(R4GfxDeviceV1Client *client, const
 
 #define R4GFX_COLOR_V1_EXPORT_NAME "COLOR_V1"
 #define R4GFX_COLOR_V1_ABI_MAJOR 1u
-#define R4GFX_COLOR_V1_REVISION 1u
+#define R4GFX_COLOR_V1_REVISION 2u
 #define R4GFX_COLOR_V1_INTERFACE_ID_LO 0x524f4c43ull
 #define R4GFX_COLOR_V1_INTERFACE_ID_HI 0x31584647ull
-#define R4GFX_COLOR_V1_TABLE_SIZE 128u
+#define R4GFX_COLOR_V1_TABLE_SIZE 136u
 #define R4GFX_COLOR_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4GFX_COLOR_V1_TABLE_SIZE, R4GFX_COLOR_V1_ABI_MAJOR, R4GFX_COLOR_V1_REVISION, R4GFX_COLOR_V1_INTERFACE_ID_LO, R4GFX_COLOR_V1_INTERFACE_ID_HI }
 typedef int32_t (*R4GfxColorV1ColorDescriptionValidateFn)(const R4GfxColorDescription * description);
 typedef uint64_t (*R4GfxColorV1ColorProfileStorageSizeFn)(void);
@@ -1604,6 +1605,7 @@ typedef int32_t (*R4GfxColorV1ColorResourceInfoFn)(const R4GfxDevice * device, c
 typedef int32_t (*R4GfxColorV1ColorResourceTransformFn)(const R4GfxDevice * device, const R4GfxResource * source, const R4GfxResource * target, const R4GfxColorTransform * request, R4GfxCpuStats * output);
 typedef int32_t (*R4GfxColorV1ColorProfileGenerateFn)(const R4GfxColorProfileDefinition * definition, uint64_t scratch_address, uint64_t scratch_bytes, uint64_t output_address, uint64_t output_capacity, uint64_t * output_bytes);
 typedef int32_t (*R4GfxColorV1ColorRenderSubmitFn)(const R4GfxDevice * device, const R4GfxRenderListRequest * request, uint32_t flags, R4GfxJob * output);
+typedef int32_t (*R4GfxColorV1ColorRenderSubmitGridFn)(const R4GfxDevice * device, const R4GfxRenderGridListRequest * request, uint32_t flags, R4GfxJob * output);
 typedef struct R4GfxColorV1 {
     R4LInterfaceHeader header;
     R4GfxColorV1ColorDescriptionValidateFn color_description_validate;
@@ -1618,8 +1620,9 @@ typedef struct R4GfxColorV1 {
     R4GfxColorV1ColorResourceTransformFn color_resource_transform;
     R4GfxColorV1ColorProfileGenerateFn color_profile_generate;
     R4GfxColorV1ColorRenderSubmitFn color_render_submit;
+    R4GfxColorV1ColorRenderSubmitGridFn color_render_submit_grid;
 } R4GfxColorV1;
-_Static_assert(sizeof(R4GfxColorV1) == 128u, "R4GfxColorV1 size mismatch");
+_Static_assert(sizeof(R4GfxColorV1) == 136u, "R4GfxColorV1 size mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_description_validate) == 32u, "R4GfxColorV1.color_description_validate offset mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_profile_storage_size) == 40u, "R4GfxColorV1.color_profile_storage_size offset mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_profile_open) == 48u, "R4GfxColorV1.color_profile_open offset mismatch");
@@ -1632,13 +1635,14 @@ _Static_assert(offsetof(R4GfxColorV1, color_resource_info) == 96u, "R4GfxColorV1
 _Static_assert(offsetof(R4GfxColorV1, color_resource_transform) == 104u, "R4GfxColorV1.color_resource_transform offset mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_profile_generate) == 112u, "R4GfxColorV1.color_profile_generate offset mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_render_submit) == 120u, "R4GfxColorV1.color_render_submit offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_render_submit_grid) == 128u, "R4GfxColorV1.color_render_submit_grid offset mismatch");
 typedef struct R4GfxColorV1Client { const R4LInterfaceHeader *header; } R4GfxColorV1Client;
 
 static inline int32_t r4gfx_color_v1_init(const R4XStartContext *ctx, R4GfxColorV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "COLOR_V1");
-    const R4LInterfaceExpectation expected = { 0x524f4c43ull, 0x31584647ull, 1u, 1u, 128u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x524f4c43ull, 0x31584647ull, 1u, 2u, 136u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
@@ -1654,6 +1658,7 @@ static inline int32_t r4gfx_color_v1_init(const R4XStartContext *ctx, R4GfxColor
     if (r4l_slot_address(header, 104u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 112u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 120u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 128u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -1715,6 +1720,11 @@ static inline int32_t r4gfx_color_profile_generate(R4GfxColorV1Client *client, c
 
 static inline int32_t r4gfx_color_render_submit(R4GfxColorV1Client *client, const R4GfxDevice * device, const R4GfxRenderListRequest * request, uint32_t flags, R4GfxJob * output) {
     R4GfxColorV1ColorRenderSubmitFn function = (R4GfxColorV1ColorRenderSubmitFn)r4l_slot_address(client->header, 120u);
+    return function(device, request, flags, output);
+}
+
+static inline int32_t r4gfx_color_render_submit_grid(R4GfxColorV1Client *client, const R4GfxDevice * device, const R4GfxRenderGridListRequest * request, uint32_t flags, R4GfxJob * output) {
+    R4GfxColorV1ColorRenderSubmitGridFn function = (R4GfxColorV1ColorRenderSubmitGridFn)r4l_slot_address(client->header, 128u);
     return function(device, request, flags, output);
 }
 

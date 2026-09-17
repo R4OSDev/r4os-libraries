@@ -264,6 +264,7 @@ pub const Device = struct {
                 if (snapshot.operations & 64 != 0) gpu_operations |= c.device_gpu_render_list;
                 if (snapshot.operations & 256 != 0) gpu_operations |= c.device_gpu_grid;
                 if (snapshot.operations & 512 != 0) gpu_operations |= c.device_gpu_color;
+                if (snapshot.operations & (@as(u64, 1) << a.gfx_queue_operation_render_color_grid_list) != 0) gpu_operations |= c.device_gpu_color_grid;
                 if (snapshot.operations & 32 != 0) gpu_operations |= c.device_gpu_present;
                 if (snapshot.operations & 128 != 0) gpu_operations |= c.device_gpu_direct;
             }
@@ -462,6 +463,11 @@ pub fn submitColorRender(handle: *const c.R4GfxDevice, request: *const c.R4GfxRe
     const device = get(handle, false) catch |err| return code(err);
     separateInput(handle, output) catch |err| return code(err);
     return @import("device_native_render.zig").submitColorList(device, request, flags, output) catch |err| code(err);
+}
+pub fn submitColorGridRender(handle: *const c.R4GfxDevice, request: *const c.R4GfxRenderGridListRequest, flags: u32, output: *c.R4GfxJob) callconv(.c) i32 {
+    const device = get(handle, false) catch |err| return code(err);
+    separateInput(handle, output) catch |err| return code(err);
+    return @import("device_native_render.zig").submitColorGridList(device, request, flags, output) catch |err| code(err);
 }
 pub fn prepareImage(handle: *const c.R4GfxDevice, request: *const c.R4GfxImagePrepareRequest, output: *c.R4GfxPreparedImage) callconv(.c) i32 {
     const device = get(handle, false) catch |err| return code(err);

@@ -177,9 +177,15 @@ fn checkColorPackets() !void {
         .scissor = .{ .x = 0, .y = 0, .width = 128, .height = 128 }, .transfer = .color, .color_program = color,
     };
     var draws: [render.batch_capacity]render.Draw = @splat(draw);
+    for (&draws, 0..) |*item, i| item.grid = .{ .enabled = 1, .rotation = @intCast(i % 4), .scale = 120,
+        .pixel_width = 128, .pixel_height = 128, .viewport_width = 128, .viewport_height = 128,
+        .guest_width = 128, .guest_height = 128 };
     var packets: [render.packet_capacity_bytes]u8 = undefined;
     try render.packetUploadList(&draws, &packets);
-    for (0..draws.len) |i| try t.expectEqualSlices(u8, std.mem.asBytes(&color), packets[i*render.packet_bytes+1024..][0..256]);
+    for (0..draws.len) |i| {
+        try t.expectEqualSlices(u8, std.mem.asBytes(&color), packets[i*render.packet_bytes+1024..][0..256]);
+        try t.expectEqualSlices(u8, std.mem.asBytes(&draws[i].grid), packets[i*render.packet_bytes+544..][0..64]);
+    }
     var program: render.Program = .{};
     const binding: render.Binding = .{ .draw = draws[0], .additional = draws[1..],
         .programs = .{ .address = 0x300000, .bytes = render.shader_bytes }, .packet = .{ .address = 0x400000, .bytes = packets.len } };

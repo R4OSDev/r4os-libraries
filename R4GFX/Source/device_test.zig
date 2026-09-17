@@ -250,7 +250,7 @@ const Model = struct {
     fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
         std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows or
             input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_render_list or input.operation == a.gfx_queue_operation_present or
-            input.operation == a.gfx_queue_operation_direct_present or input.operation == a.gfx_queue_operation_render_grid_list or input.operation == a.gfx_queue_operation_render_color_list) and input.dependency_count <= 1);
+            input.operation == a.gfx_queue_operation_direct_present or input.operation == a.gfx_queue_operation_render_grid_list or input.operation == a.gfx_queue_operation_render_color_list or input.operation == a.gfx_queue_operation_render_color_grid_list) and input.dependency_count <= 1);
         if (input.dependency_count == 1) {
             std.debug.assert(job_live and std.meta.eql(input.dependencies[0], status.fence));
             dependency_seen = true;
@@ -279,6 +279,15 @@ const Model = struct {
         std.debug.assert(input.operation == a.gfx_queue_operation_render_color_list and list.count > 0 and list.count <= 16);
         const rc = submit(queue, input, out);
         if (rc == a.gfx_queue_ok) job_color_list = list.*;
+        return rc;
+    }
+    fn submitColorGridList(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, list: *const a.GfxRenderColorGridList, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        std.debug.assert(input.operation == a.gfx_queue_operation_render_color_grid_list and list.count > 0 and list.count <= 16);
+        const rc = submit(queue, input, out);
+        if (rc == a.gfx_queue_ok) {
+            job_color_list = .{ .count = list.count, .commands = list.commands, .program = list.program };
+            job_grid_list = .{ .count = list.count, .commands = list.commands, .grids = list.grids };
+        }
         return rc;
     }
     fn query(input: *const a.GfxFence, out: *a.GfxFenceStatus) callconv(.c) i32 {
@@ -475,6 +484,7 @@ pub fn check() !void {
         .gfx_queue_submit_render_list = @intFromPtr(&Model.submitList),
         .gfx_queue_submit_render_grid_list = @intFromPtr(&Model.submitGridList),
         .gfx_queue_submit_render_color_list = @intFromPtr(&Model.submitColorList),
+        .gfx_queue_submit_render_color_grid_list = @intFromPtr(&Model.submitColorGridList),
         .display_presentation_info = @intFromPtr(&Model.presentInfo), .display_presentation_feedback = @intFromPtr(&Model.presentFeedback),
         .display_present_regions = @intFromPtr(&Model.presentPixels),
         .gfx_fence_query = @intFromPtr(&Model.query), .gfx_fence_cancel = @intFromPtr(&Model.cancel), .gfx_fence_release = @intFromPtr(&Model.drop) };
@@ -1386,6 +1396,17 @@ fn checkNativeGrid(config: *const c.R4GfxDeviceConfig) !void {
 }
 
 fn checkNativeColor(config: *const c.R4GfxDeviceConfig) !void {
+    try checkNativeColorMode(config, false);
+    try checkNativeColorMode(config, true);
+}
+fn submitColorCase(combined: bool, device: *const c.R4GfxDevice, list: *const c.R4GfxRenderListRequest,
+    grids: *const [2]c.R4GfxLogicalGrid, flags: u32, output: *c.R4GfxJob) i32 {
+    const colors = &@import("main.zig").r4gfx_color_v1;
+    if (!combined) return colors.color_render_submit(device, list, flags, output);
+    return colors.color_render_submit_grid(device, &.{ .version = 1, .size = @sizeOf(c.R4GfxRenderGridListRequest),
+        .count = list.count, .reserved = 0, .commands = list.commands, .grids = @intFromPtr(grids) }, flags, output);
+}
+fn checkNativeColorMode(config: *const c.R4GfxDeviceConfig, combined: bool) !void {
     const colors = &@import("main.zig").r4gfx_color_v1;
     Model.reset(); Model.operations = 93;
     var handle: c.R4GfxDevice = undefined;
@@ -1416,20 +1437,41 @@ fn checkNativeColor(config: *const c.R4GfxDeviceConfig) !void {
     command.source = source; command.target = target; command.pipeline = pipeline; command.sampler = sampler; command.opacity = 255;
     command.source_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 }; command.target_rect = command.source_rect; command.scissor = command.source_rect;
     var commands = [_]c.R4GfxRenderRequest{command,command}; commands[1].opacity = 127;
+    var grids: [2]c.R4GfxLogicalGrid = @splat(std.mem.zeroes(c.R4GfxLogicalGrid));
+    grids[1] = .{ .enabled = 1, .rotation = 3, .scale = 120, .reserved = 0,
+        .pixel_width = 4, .pixel_height = 4, .target_x = 0, .target_y = 0, .viewport_x = 0, .viewport_y = 0,
+        .viewport_width = 4, .viewport_height = 4, .guest_width = 4, .guest_height = 4, .source_x = 0, .source_y = 0 };
     const list: c.R4GfxRenderListRequest = .{ .version = 1, .size = @sizeOf(c.R4GfxRenderListRequest), .commands = @intFromPtr(&commands), .count = 2, .reserved = 0 };
     const flags = c.color_transform_output | c.color_transform_relative_white | c.color_transform_dither;
     var job = std.mem.zeroes(c.R4GfxJob); job.generation = 79; const untouched = job;
-    try t.expectEqual(c.status_unsupported, colors.color_render_submit(&handle, &list, flags, &job));
+    try t.expectEqual(c.status_unsupported, submitColorCase(combined, &handle, &list, &grids, flags, &job));
     try t.expectEqualDeep(untouched,job);
-    Model.operations |= 512;
+    Model.operations |= 512 | 256;
     var info: c.R4GfxDeviceInfo = undefined;
     try t.expectEqual(c.status_ok,api.device_refresh(&handle,&info));
     try t.expect(info.gpu_operations & c.device_gpu_color != 0);
+    if (combined) {
+        try t.expectEqual(c.status_unsupported, submitColorCase(true, &handle, &list, &grids, flags, &job));
+        try t.expectEqualDeep(untouched, job);
+        Model.operations |= @as(u64, 1) << a.gfx_queue_operation_render_color_grid_list;
+        try t.expectEqual(c.status_ok, api.device_refresh(&handle, &info));
+        try t.expect(info.gpu_operations & c.device_gpu_color_grid != 0);
+        grids[1].scale = 0;
+        try t.expectEqual(c.status_invalid, submitColorCase(true, &handle, &list, &grids, flags, &job));
+        try t.expect(!Model.job_live and Model.maps == 0);
+        try t.expectEqualDeep(untouched, job);
+        grids[1].scale = 120;
+    }
     commands[1].transfer = c.render_transfer_srgb_encode;
-    try t.expectEqual(c.status_invalid,colors.color_render_submit(&handle,&list,flags,&job));
+    try t.expectEqual(c.status_invalid,submitColorCase(combined,&handle,&list,&grids,flags,&job));
     try t.expect(!Model.job_live and Model.maps == 0); try t.expectEqualDeep(untouched,job);
     commands[1].transfer = c.render_transfer_identity;
-    try t.expectEqual(c.status_ok,colors.color_render_submit(&handle,&list,flags,&job));
+    try t.expectEqual(c.status_ok,submitColorCase(combined,&handle,&list,&grids,flags,&job));
+    if (combined) {
+        try t.expectEqualDeep(@as(a.GfxSampleGrid, @bitCast(grids[1])), Model.job_grid_list.grids[1]);
+        grids[1].rotation = 0;
+        try t.expect(Model.job_grid_list.grids[1].rotation == 3 and Model.maps == 0);
+    }
     const copied = Model.job_color_list;
     // Identical XR30 storage is insufficient: PQ/HLG, primaries, range and
     // luminance must match the actual output before any present submission.

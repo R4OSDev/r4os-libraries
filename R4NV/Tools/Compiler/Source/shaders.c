@@ -155,7 +155,7 @@ r4nv_build_shader(enum r4nv_shader_profile profile,
          nir_def *coord = nir_fmin(&b, nir_fmax(&b, nir_load_var(&b, uv),
                                                nir_channels(&b, bounds, 3)),
                                        nir_channels(&b, bounds, 12));
-         if (profile == R4NV_TEXTURE_FRAGMENT)
+         if (profile == R4NV_TEXTURE_FRAGMENT || profile == R4NV_COLOR_FRAGMENT)
             coord = grid_coordinates(&b, coord);
          nir_tex_instr *tex = nir_tex_instr_create(b.shader, 3);
          tex->op = nir_texop_tex;

@@ -46,6 +46,12 @@ fn submitListCommon(device: *d.Device, input: *const c.R4GfxRenderListRequest, c
     return execute(device, copied[0..request.count], true, null, color_flags, output);
 }
 pub fn submitGridList(device: *d.Device, input: *const c.R4GfxRenderGridListRequest, output: *c.R4GfxJob) d.Error!i32 {
+    return submitGridListCommon(device, input, null, output);
+}
+pub fn submitColorGridList(device: *d.Device, input: *const c.R4GfxRenderGridListRequest, flags: u32, output: *c.R4GfxJob) d.Error!i32 {
+    return submitGridListCommon(device, input, flags, output);
+}
+fn submitGridListCommon(device: *d.Device, input: *const c.R4GfxRenderGridListRequest, color_flags: ?u32, output: *c.R4GfxJob) d.Error!i32 {
     _ = try d.pointer(c.R4GfxRenderGridListRequest, @intFromPtr(input));
     try d.outputSafe(c.R4GfxJob, output, device);
     const request = input.*;
@@ -65,7 +71,7 @@ pub fn submitGridList(device: *d.Device, input: *const c.R4GfxRenderGridListRequ
     var grids: [c.render_list_capacity]c.R4GfxLogicalGrid = undefined;
     @memcpy(commands[0..request.count], @as([*]const c.R4GfxRenderRequest, @ptrFromInt(request.commands))[0..request.count]);
     @memcpy(grids[0..request.count], @as([*]const c.R4GfxLogicalGrid, @ptrFromInt(request.grids))[0..request.count]);
-    return execute(device, commands[0..request.count], true, grids[0..request.count], null, output);
+    return execute(device, commands[0..request.count], true, grids[0..request.count], color_flags, output);
 }
 fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: bool, grids: ?[]const c.R4GfxLogicalGrid, color_flags: ?u32, output: *c.R4GfxJob) d.Error!i32 {
     const request = requests[0];
@@ -87,6 +93,7 @@ fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: b
     if (batched and device.gpu_operations & c.device_gpu_render_list == 0) return error.Unsupported;
     if (grids != null and device.gpu_operations & c.device_gpu_grid == 0) return error.Unsupported;
     if (color_flags != null and device.gpu_operations & c.device_gpu_color == 0) return error.Unsupported;
+    if (color_flags != null and grids != null and device.gpu_operations & c.device_gpu_color_grid == 0) return error.Unsupported;
     const pipeline = try device.resource(request.pipeline, true);
     if (pipeline.kind != c.resource_pipeline) return error.Invalid;
     const fill = pipeline.operation == c.render_operation_fill;
@@ -149,7 +156,12 @@ fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: b
     @memcpy(submission.dependencies[0..request.dependency_count], dependencies[0..request.dependency_count]);
     const queues = device.queues();
     var status: a.GfxFenceStatus = .{};
-    if (color_program) |program| {
+    if (color_program != null and grids != null) {
+        var mapped: a.GfxRenderColorGridList = .{ .count = list.count, .commands = list.commands, .program = color_program.? };
+        for (grids.?, 0..) |grid, i| mapped.grids[i] = @bitCast(grid);
+        submission.operation = a.gfx_queue_operation_render_color_grid_list;
+        try d.platform(queues.submitRenderColorGridList(&device.queue, &submission, &mapped, &status));
+    } else if (color_program) |program| {
         const mapped: a.GfxRenderColorList = .{ .count = list.count, .commands = list.commands, .program = program };
         submission.operation = a.gfx_queue_operation_render_color_list;
         try d.platform(queues.submitRenderColorList(&device.queue, &submission, &mapped, &status));

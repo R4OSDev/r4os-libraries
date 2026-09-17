@@ -19,6 +19,7 @@ pub const table: c.ColorV1 = .{
     .color_resource_transform = @import("color_resource.zig").transform,
     .color_profile_generate = profileGenerate,
     .color_render_submit = d.submitColorRender,
+    .color_render_submit_grid = d.submitColorGridRender,
 };
 const live_magic: u64 = 0x3146434349584647;
 const closed_magic: u64 = 0x3046434349584647;

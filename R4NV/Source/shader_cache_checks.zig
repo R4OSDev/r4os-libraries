@@ -19,10 +19,10 @@ pub fn run(api: *const c.ShaderV1) !void {
         "a27451b864b05ab0b32d16083965674ef4dc2175a6e459fd22055b63dd0b8173",
         "94811e8c07f6e09dcba8c3c0cce8aacedbab7293b76542935ecbf150abd39984",
         "356c276ffdc82e9cc63e49fb5a79b7602ff82d4981804689f7ec8f8c042ccc04",
-        "8cab96633b9c15083256aa57c7542af79e9861f6c2c449b737c617726a88efbb",
+        "9ac73a0a942d795b653f471eb2adb7f229fcfbea7cfd119ccf3e5728e2494403",
     };
-    const sizes = [_]u32{ 112, 2208, 816, 832, 80, 80, 8192 };
-    const instructions = [_]u32{ 7, 138, 51, 52, 5, 5, 512 };
+    const sizes = [_]u32{ 112, 2208, 816, 832, 80, 80, 10144 };
+    const instructions = [_]u32{ 7, 138, 51, 52, 5, 5, 634 };
     var storage: [c.shader_cache_max_bytes + 8]u8 align(8) = @splat(0xa5);
     const bytes = storage[1 .. 1 + c.shader_cache_max_bytes]; // ABI promises byte alignment.
     var view: c.R4NvShaderView = std.mem.zeroes(c.R4NvShaderView);
@@ -111,10 +111,10 @@ pub fn run(api: *const c.ShaderV1) !void {
     // Compiler checkpoints for the other ISAs. SM86 and SM89 happen to
     // share this program's bytes, but must still have distinct cache keys.
     const generation_hashes = [_][]const u8{
-        "5c2554a7ca4bbc06c9fa3dfab087906dccaf6407f0a973238f43f26d243d557d",
-        "8cab96633b9c15083256aa57c7542af79e9861f6c2c449b737c617726a88efbb",
-        "8cab96633b9c15083256aa57c7542af79e9861f6c2c449b737c617726a88efbb",
-        "fae7bea749915e9f69cca9a0d5198678316a7ec0ddf823a79fb8f6c0718f9f9d",
+        "5ed3d8630864630340ffac5d51e781c6c764ec65a181d0da5a82bdfa05873f93",
+        "9ac73a0a942d795b653f471eb2adb7f229fcfbea7cfd119ccf3e5728e2494403",
+        "9ac73a0a942d795b653f471eb2adb7f229fcfbea7cfd119ccf3e5728e2494403",
+        "315b97e096a7b7b6ab0a17e3f23f87702757a5a607460e03bd045cfcb2d526d1",
     };
     const classes = [_]u32{0xc597,0xc797,0xc997,0xcd97};
     const models = [_]u32{75,86,89,120};

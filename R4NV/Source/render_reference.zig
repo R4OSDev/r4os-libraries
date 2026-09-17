@@ -239,7 +239,7 @@ fn executeDraw(class: u32, methods: []const u8, packet: []const u8, program_addr
             const v = scalar(packet,788)+(py-y0)/(y3-y0)*(scalar(packet,908)-scalar(packet,788));
             color = sample(src,.{std.math.clamp(u,scalar(packet,528),scalar(packet,536)),std.math.clamp(v,scalar(packet,532),scalar(packet,540))},linear);
             if (word(packet, 544) != 0) {
-                if (id != 2 or linear) return error.Sampler;
+                if ((id != 2 and id != 7) or linear) return error.Sampler;
                 // Decode the actual uploaded CBuf, independently of Draw and
                 // its admission helper. These are the shader's integer stages.
                 const nx: i64 = @as(i64, @intCast(x)) + @as(i32, @bitCast(word(packet, 564)));

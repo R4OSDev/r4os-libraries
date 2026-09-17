@@ -171,7 +171,7 @@ pub const Draw = struct {
         if ((self.transfer == .color) != (self.color_program != null)) return error.Unsupported;
         if (self.color_program) |program| {
             try program.validate();
-            if (self.source == null or self.filter != .nearest or self.grid.enabled != 0) return error.Unsupported;
+            if (self.source == null or self.filter != .nearest) return error.Unsupported;
             if (self.blend == .over and (program.words[0] & 1 != 0 or program.words[2] != 2 or program.words[4] != 4 or
                 self.target.format != .abgr16161616f)) return error.Unsupported;
             if (self.target.format == .abgr16161616f and program.words[0] & 2 != 0) return error.Unsupported;
@@ -194,7 +194,8 @@ pub const Draw = struct {
             if ((self.color & 255) > alpha or ((self.color >> 8) & 255) > alpha or ((self.color >> 16) & 255) > alpha) return error.Bounds;
         }
         const clipped = try self.clip();
-        if (self.grid.enabled != 0 and (self.source == null or self.filter != .nearest or self.transfer != .identity)) return error.Unsupported;
+        if (self.grid.enabled != 0 and (self.source == null or self.filter != .nearest or
+            (self.transfer != .identity and self.transfer != .color))) return error.Unsupported;
         try self.grid.validate(self.source_rect, Rect{ .x = @intCast(clipped[0]), .y = @intCast(clipped[1]),
             .width = clipped[2] - clipped[0], .height = clipped[3] - clipped[1] });
     }
