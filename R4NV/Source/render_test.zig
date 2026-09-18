@@ -21,6 +21,7 @@ pub fn check() !void {
     try render.reference_model.check();
     try checkColorPackets();
     try checkYuvPackets();
+    try checkEncodePackets();
     var binding: render.Binding = .{
         .draw = .{
             .target = .{ .address = 0x100000, .bytes = 65536, .width = 128, .height = 128, .pitch = 512, .format = .argb8888, .layout = .linear },
@@ -134,6 +135,81 @@ pub fn check() !void {
     binding.draw.target.address = 1<<40;
     _ = try render.image.texture(binding.draw.target);
     try t.expectError(error.Unsupported,render.encode(binding,&program));
+}
+
+fn checkEncodePackets() !void {
+    var draw: render.Draw = .{
+        .target = .{ .address = 0x100000, .bytes = 4096, .width = 128, .height = 32, .pitch = 128, .format = .r8, .layout = .linear },
+        .source = .{ .address = 0x200000, .bytes = 4096, .width = 62, .height = 46, .pitch = 64, .format = .r8, .layout = .blocklinear, .log2_gobs = 1 },
+        .encode_input = .{ .format = .nv12, .plane = .chroma, .extent = .{62, 46},
+            .chroma = .{ .address = 0x210000, .bytes = 2048, .width = 31, .height = 23, .pitch = 64, .format = .rg8, .layout = .blocklinear, .log2_gobs = 1 } },
+        .destination = .{ .x = 0, .y = 0, .width = 128, .height = 32 },
+        .source_rect = .{ .x = 0, .y = 0, .width = 62, .height = 46 },
+        .scissor = .{ .x = 0, .y = 0, .width = 128, .height = 32 },
+    };
+    var packet: [render.packet_bytes]u8 = undefined;
+    for ([_]bool{ false, true }) |planar| {
+        draw.encode_input.?.format = if (planar) .yuv420p else .nv12;
+        draw.encode_input.?.chroma.format = if (planar) .r8 else .rg8;
+        draw.encode_input.?.second = if (planar) draw.encode_input.?.chroma else null;
+        if (draw.encode_input.?.second) |*second| second.address = 0x220000;
+        try render.packetUpload(draw, &packet);
+        try t.expectEqual(@as(u32, 9), draw.profile());
+        try t.expectEqual(@as(u32, 0x6010021d), word(&packet, 0));
+        try t.expectEqual(@as(u32, if (planar) 0x6010021d else 0x60d01218), word(&packet, 32));
+        for ([_]u32{ if (planar) 3 else 1, 1, 128, 62, 46 }, 0..) |value, i| try t.expectEqual(value, word(&packet, 256 + 4 * i));
+        try t.expect(std.mem.allEqual(u8, packet[276..512], 0));
+        for (render.profiles.catalog) |profile| {
+            var program: render.Program = .{};
+            try render.encode(.{ .class = profile.class, .draw = draw,
+                .programs = .{ .address = 0x300000, .bytes = profile.bytes() },
+                .packet = .{ .address = 0x400000, .bytes = render.packet_bytes } }, &program);
+            try t.expectEqual(@as(u32, 0x300000 + profile.offset(5)), try state(&program, hw.SET_PIPELINE_PROGRAM_ADDRESS_A + 64 + 4));
+            try t.expectEqual(@as(u32, 0x300000 + profile.offset(8)), try state(&program, hw.SET_PIPELINE_PROGRAM_ADDRESS_A + 5 * 64 + 4));
+            try t.expectError(error.MissingState, state(&program, hw.SET_TEX_SAMPLER_POOL_A));
+            try t.expectEqual(@as(u32, 0x31), try state(&program, hw.BIND_GROUP_CONSTANT_BUFFER + 128));
+            try t.expectEqual(@as(u32, if (planar) 2 else 1), try state(&program, hw.SET_TEX_HEADER_POOL_A + 8));
+            try t.expect(program.count + 11 <= 1024);
+            var batch: [render.batch_capacity]render.Draw = @splat(draw);
+            for (&batch, 0..) |*entry, i| entry.scissor = .{ .x = 0, .y = @intCast(i), .width = 128, .height = 1 };
+            try render.encode(.{ .class = profile.class, .draw = batch[0], .additional = batch[1..],
+                .programs = .{ .address = 0x300000, .bytes = profile.bytes() },
+                .packet = .{ .address = 0x400000, .bytes = render.packet_capacity_bytes } }, &program);
+            try t.expect(program.count + 11 <= 1024);
+        }
+        // Arbitrary scissor slicing must preserve the packing's global byte
+        // coordinates. Full input/target geometry and CBuf3 remain unchanged.
+        const part = try render.slice(draw, 17, 70);
+        var sliced: [render.packet_bytes]u8 = undefined;
+        try render.packetUpload(part.draw, &sliced);
+        try t.expectEqualSlices(u8, packet[256..512], sliced[256..512]);
+    }
+    const good = draw;
+    draw.encode_input.?.second.?.address = draw.target.address;
+    const before = packet;
+    try t.expectError(error.Unsupported, render.packetUpload(draw, &packet));
+    try t.expectEqualSlices(u8, &before, &packet);
+    draw = good; draw.opacity = 254;
+    try t.expectError(error.Unsupported, draw.validate());
+    draw = good; draw.source_rect.width -= 2;
+    try t.expectError(error.Unsupported, draw.validate());
+    draw = good; draw.target.layout = .blocklinear;
+    try t.expectError(error.Unsupported, draw.validate());
+    draw = good; draw.encode_input.?.second = null;
+    try t.expectError(error.Bounds, draw.validate());
+    draw = good; draw.source.?.width = 64; draw.source.?.height = 48;
+    draw.encode_input.?.chroma.width = 32; draw.encode_input.?.chroma.height = 24;
+    draw.encode_input.?.second.?.width = 32; draw.encode_input.?.second.?.height = 24;
+    try render.packetUpload(draw, &packet);
+    try t.expectEqual(@as(u32, 62), word(&packet, 268));
+    try t.expectEqual(@as(u32, 46), word(&packet, 272));
+    try t.expectEqual(@as(u32, 47) | (1 << 31), word(&packet, 20)); // Full TIC storage height.
+    draw = good; draw.encode_input.?.plane = .luma;
+    try t.expectError(error.Unsupported, draw.validate()); // Wrong target rows.
+    draw.target.height = 48; draw.target.bytes = 6144; draw.destination.height = 48; draw.scissor.height = 48;
+    try render.packetUpload(draw, &packet);
+    try t.expectEqual(@as(u32, 0), word(&packet, 260));
+    std.debug.print("render encode input: NV12/I420 integer planes, padding geometry, alias rejection and sliced packing commands: OK\n", .{});
 }
 
 fn checkGenerations(original: render.Binding) !void {

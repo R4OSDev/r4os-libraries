@@ -54,7 +54,7 @@ pub const Allocator = struct {
             return null;
         }
         // Reserve the temporary overlap too. Failure leaves the old object and
-        // its accounting intact, regardless of the caller's current decoder.
+        // its accounting intact, regardless of the caller's current stream.
         const next = self.allocate(header.budget, bytes, header.alignment) orelse return null;
         const copied = @min(bytes, header.requested);
         @memcpy(@as([*]u8, @ptrCast(next))[0..copied], @as([*]const u8, @ptrCast(pointer))[0..copied]);

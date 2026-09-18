@@ -3,14 +3,28 @@ const std = @import("std");
 const r = @import("r4os");
 const a = r.abi;
 const nv = @import("r4nv_binding");
-const Budget = @import("video_allocation").Budget;
+const Budget = @import("native_allocation").Budget;
 
 pub const Error = error{ Invalid, Unsupported, NoMemory, Busy, Stale, Timeout, Internal };
 pub const granule: u64 = 65536;
-pub const address_limit: u64 = 1 << 40; // NVDEC method addresses, not the GPU's VA width.
+pub const address_limit: u64 = 1 << 40; // Video method addresses, not the GPU's VA width.
 const duration_ns: u64 = 5_000_000_000;
 const modifier_base: u64 = 0x0300000000606010; // Uncompressed Turing generic kind 6.
 pub const Clock = *const fn () ?a.MonotonicClockInfo;
+
+pub const Engine = enum {
+    decode,
+    encode,
+    graphics,
+
+    pub fn mask(self: Engine) u32 {
+        return switch (self) {
+            .decode => nv.native_engine_video,
+            .encode => nv.native_engine_encode,
+            .graphics => nv.native_engine_graphics,
+        };
+    }
+};
 
 fn payload(value: anytype) bool {
     return value.version == 1 and value.size >= @sizeOf(@TypeOf(value));
@@ -47,10 +61,14 @@ pub const Device = struct {
     va_start: u64,
     va_end: u64,
     class: u32,
+    engine: Engine = .decode,
 
     // Architecture selects a packet format. Actual engine/class admission is
     // performed by the native queue on submission; no GR template is required.
     pub fn query(base: r.program.Context, adapter: u32) Error!Device {
+        return queryFor(base, adapter, .decode);
+    }
+    pub fn queryFor(base: r.program.Context, adapter: u32, engine: Engine) Error!Device {
         if (adapter == 0) return error.Invalid;
         const q: r.gfx_queue.Context = .{ .base = base };
         var found: ?a.GfxBackendInfo = null;
@@ -84,8 +102,8 @@ pub const Device = struct {
         for (properties.data[properties.data_bytes..]) |byte| if (byte != 0) return error.Invalid;
         const arch = std.mem.bytesToValue(nv.R4NvArchitecture, properties.data[0..@sizeOf(nv.R4NvArchitecture)]);
         const class: u32 = switch (arch.chipset) {
-            0x172, 0x173, 0x174, 0x176, 0x177 => 0xc7b0,
-            0x192, 0x193, 0x194, 0x196, 0x197 => 0xc9b0,
+            0x172, 0x173, 0x174, 0x176, 0x177 => switch (engine) { .decode => 0xc7b0, .encode => 0xc7b7, .graphics => 0xc797 },
+            0x192, 0x193, 0x194, 0x196, 0x197 => switch (engine) { .decode => 0xc9b0, .encode => 0xc9b7, .graphics => 0xc997 },
             else => return error.Unsupported,
         };
         // This path uses persistent write-back system BOs. Require the driver's
@@ -97,19 +115,23 @@ pub const Device = struct {
             arch.va_start >= address_limit or arch.va_end > (@as(u64, 1) << 49) or
             (arch.va_start | arch.va_end) % granule != 0) return error.Unsupported;
         if (arch.memory_generation != info.memory_generation) return error.Stale;
+        if (engine == .graphics and (arch.graphics_class != class or
+            arch.shader_model != (if (class == 0xc797) @as(u32, 86) else 89))) return error.Unsupported;
         return .{ .binding = info.binding, .memory_generation = arch.memory_generation,
-            .va_start = arch.va_start, .va_end = @min(arch.va_end, address_limit), .class = class };
+            .va_start = arch.va_start, .va_end = @min(arch.va_end, address_limit), .class = class, .engine = engine };
     }
 };
 
 // Stable, single-worker owner. Every Resource borrows this Context and its
-// budget until close succeeds. The caller retains both through all FFmpeg and
-// public frame loans. Failed operations leave exact handles for later cleanup.
+// budget until close succeeds. The caller retains both through all codec and
+// public loans. Failed operations leave exact handles for later cleanup.
 pub const Context = struct {
     base: r.program.Context,
     device: Device,
     budget: *Budget,
     clock: Clock,
+    timeout_ns: u64 = duration_ns,
+    until_ns: u64 = 0, // Optional whole-job bound shared by preparation/codec.
     queue: a.GfxQueueHandle = .{},
     fence: a.GfxFence = .{},
     poisoned: bool = false,
@@ -127,7 +149,12 @@ pub const Context = struct {
         return clock;
     }
     pub fn deadline(self: *const Context) Error!u64 {
-        return std.math.add(u64, (try self.instant()).instant_ns, duration_ns) catch error.Internal;
+        if (self.timeout_ns == 0 or self.timeout_ns > duration_ns) return error.Invalid;
+        const now = (try self.instant()).instant_ns;
+        const local = std.math.add(u64, now, self.timeout_ns) catch return error.Internal;
+        if (self.until_ns == 0) return local;
+        if (self.until_ns <= now) return error.Timeout;
+        return @min(local, self.until_ns);
     }
     fn ticks(self: *const Context, until: u64) Error!u64 {
         const clock = try self.instant();
@@ -172,7 +199,7 @@ pub const Context = struct {
         }
         const packet = extern struct { header: nv.R4NvNativeSubmitHeader, push: nv.R4NvNativePush }{
             .header = .{ .version = nv.native_submit_version, .size = @sizeOf(nv.R4NvNativeSubmitHeader),
-                .engine_mask = nv.native_engine_video, .push_count = 1, .reserved0 = 0, .reserved1 = 0 },
+                .engine_mask = self.device.engine.mask(), .push_count = 1, .reserved0 = 0, .reserved1 = 0 },
             .push = .{ .address = commands.address, .byte_length = command_bytes, .flags = 0 },
         };
         const submission: a.GfxSubmission = .{ .operation = a.gfx_queue_operation_native, .deadline_ns = until };
@@ -210,8 +237,8 @@ pub const Context = struct {
             else => error.Internal,
         };
         asm volatile ("mfence" ::: .{ .memory = true });
-        // This is only ordered engine completion. The NVDEC owner must inspect
-        // fresh picture status before publishing pixels or reusing scratch.
+        // This is only ordered engine completion. The codec owner must inspect
+        // fresh picture status before publishing output or reusing scratch.
     }
     pub fn close(self: *Context) Error!void {
         self.poisoned = true;
@@ -247,6 +274,34 @@ pub const Resource = struct {
     charged: usize = 0,
     ready: bool = false,
     retiring: bool = false,
+    borrowed: bool = false,
+
+    /// A retained external BO already charged by its input/session owner. That
+    /// owner must outlive this VA loan and every submitted fence. No extra CPU
+    /// map, allocation, reference release or duplicate budget charge occurs.
+    pub fn borrow(self: *Resource, ctx: *Context, backing: a.GfxBufferReference) Error!void {
+        if (self.owner != null) return error.Busy;
+        if (ctx.poisoned) return error.Stale;
+        if (!payload(backing) or !valid(backing.reference) or !valid(backing.buffer) or
+            backing.reserved0 != 0 or backing.flags & ~a.gfx_buffer_reference_immutable != 0) return error.Invalid;
+        var d: a.GfxBufferDescriptor = .{};
+        try result(ctx.buffers().describe(&backing.reference, &d));
+        if (!payload(d) or d.reserved0 != 0 or d.byte_length == 0 or d.byte_length >= address_limit or
+            d.byte_length % granule != 0 or d.alignment < granule or !std.math.isPowerOfTwo(d.alignment) or
+            d.usage & a.gfx_buffer_usage_transfer_source == 0) return error.Unsupported;
+        if (d.location == a.gfx_buffer_location_device_local) {
+            if (d.adapter_id != ctx.device.binding.adapter_id or d.device_generation != ctx.device.memory_generation or
+                d.driver_owner == 0) return error.Stale;
+        } else if (d.location != a.gfx_buffer_location_system or d.modifier != 0 or d.adapter_id != 0 or
+            d.device_generation != 0 or d.driver_owner != 0) return error.Unsupported;
+        if (d.modifier != 0 and (d.modifier & ~@as(u64, 15) != modifier_base or d.modifier & 15 > 5)) return error.Unsupported;
+        const until = try ctx.deadline();
+        self.owner = ctx;
+        self.borrowed = true;
+        self.backing = backing;
+        self.descriptor = d;
+        try self.bind(until);
+    }
 
     fn begin(self: *Resource, ctx: *Context, bytes: usize) Error!u64 {
         if (self.owner != null) return error.Busy;
@@ -384,7 +439,7 @@ pub const Resource = struct {
             !valid(self.mapping.lease)) return error.Busy;
         return @as([*]u8, @ptrFromInt(self.mapping.cpu_address))[0..@intCast(self.mapping.byte_length)];
     }
-    // Used only by the decoder worker when replacing sequence scratch. All
+    // Used only by the codec worker when replacing sequence scratch. All
     // resources share one deadline; the GUI-facing retirement path uses close.
     pub fn closeUntil(self: *Resource, until: u64) Error!void {
         self.close() catch |err| {
@@ -425,10 +480,10 @@ pub const Resource = struct {
             self.pending = .{};
         }
         if (valid(self.backing.reference)) {
-            try result(ctx.buffers().release(&self.backing.reference));
+            if (!self.borrowed) try result(ctx.buffers().release(&self.backing.reference));
             self.backing = .{};
         }
-        ctx.budget.release(self.charged);
+        if (self.charged != 0) ctx.budget.release(self.charged);
         self.* = .{};
     }
 };

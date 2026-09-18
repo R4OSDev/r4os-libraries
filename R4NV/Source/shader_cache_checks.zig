@@ -21,9 +21,10 @@ pub fn run(api: *const c.ShaderV1) !void {
         "356c276ffdc82e9cc63e49fb5a79b7602ff82d4981804689f7ec8f8c042ccc04",
         "d4ecf66ff0fa3256d5e080488427720ff212c98c58f19d2d511c0be7c5dc5447",
         "2439c347520463a6c76824c0e8e4435b2838f49281301ab0db7fee83b1ddc49e",
+        "67317382b2ababa0d950b8d8aa49ab9db13e7109978a2b067cb7e770dfd156d7",
     };
-    const sizes = [_]u32{ 112, 2208, 816, 832, 80, 80, 10976, 11056 };
-    const instructions = [_]u32{ 7, 138, 51, 52, 5, 5, 686, 691 };
+    const sizes = [_]u32{ 112, 2208, 816, 832, 80, 80, 10976, 11056, 1104 };
+    const instructions = [_]u32{ 7, 138, 51, 52, 5, 5, 686, 691, 69 };
     var storage: [c.shader_cache_max_bytes + 8]u8 align(8) = @splat(0xa5);
     const bytes = storage[1 .. 1 + c.shader_cache_max_bytes]; // ABI promises byte alignment.
     var view: c.R4NvShaderView = std.mem.zeroes(c.R4NvShaderView);
@@ -47,7 +48,7 @@ pub fn run(api: *const c.ShaderV1) !void {
     }
     try t.expect(storage[0] == 0xa5 and storage[storage.len - 1] == 0xa5);
     const accepted_info = info;
-    try t.expectEqual(c.status_unsupported, api.shader_info(9, &info));
+    try t.expectEqual(c.status_unsupported, api.shader_info(10, &info));
     try t.expectEqualDeep(accepted_info, info);
     try t.expectEqual(c.status_ok, api.shader_cache_write(2, &key, bytes.ptr, bytes.len, &written));
     const good = storage;
@@ -98,7 +99,7 @@ pub fn run(api: *const c.ShaderV1) !void {
     try t.expectEqualDeep(accepted_view, view);
     written = 99;
     try t.expectEqual(c.status_capacity, api.shader_cache_write(2, &key, bytes.ptr, good_length - 1, &written));
-    try t.expectEqual(c.status_unsupported, api.shader_cache_write(9, &key, bytes.ptr, bytes.len, &written));
+    try t.expectEqual(c.status_unsupported, api.shader_cache_write(10, &key, bytes.ptr, bytes.len, &written));
     try t.expectEqual(c.status_invalid, api.shader_cache_write(4, &key, bytes.ptr, bytes.len, &key.version));
     try t.expectEqual(c.status_invalid, api.shader_cache_write(4, &key, bytes.ptr, bytes.len, @ptrCast(@alignCast(&storage[4]))));
     try t.expectEqual(c.status_invalid, api.shader_cache_write(4, &key, @ptrCast(&key), bytes.len, &written));

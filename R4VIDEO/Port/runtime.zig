@@ -3,13 +3,13 @@ const std = @import("std");
 const r = @import("r4os");
 const native = @import("r4native");
 const a = r.abi;
-pub const Budget = @import("video_allocation").Budget;
+pub const Budget = @import("native_allocation").Budget;
 const Policy = struct {
     pub fn currentBudget() ?*Budget {
         return if (currentOwner()) |owner| &owner.memory else null;
     }
 };
-pub const memory = @import("memory.zig").Runtime(Policy);
+pub const memory = native.budgeted_memory.Runtime(Policy, @import("native_allocation"));
 const lifecycle = native.thread_lifecycle.Runtime(memory, releaseApiThread);
 var bound: std.atomic.Value(bool) = .init(false);
 const Process = struct { phase: std.atomic.Value(u32) = .init(0), io_error: bool = false }; // binding, ready, closing, closed

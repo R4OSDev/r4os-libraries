@@ -149,6 +149,7 @@ pub const Blend = enum { replace, over };
 pub const Transfer = enum { identity, decode_srgb, encode_srgb, color };
 pub const ColorProgram = @import("render_color.zig").Program;
 pub const YuvSampling = @import("render_yuv.zig").Sampling;
+pub const EncodeSampling = @import("render_encode.zig").Sampling;
 pub const reference_model = if (@import("builtin").is_test) @import("render_reference.zig") else struct {};
 pub const Draw = struct {
     target: image.Image,
@@ -161,6 +162,7 @@ pub const Draw = struct {
     transfer: Transfer = .identity,
     color_program: ?ColorProgram = null,
     yuv: ?YuvSampling = null,
+    encode_input: ?EncodeSampling = null,
     color: u32 = 0,
     opacity: u8 = 255,
     /// YUV/COLOR callers retain their normalized16-bit opacity through the
@@ -169,11 +171,23 @@ pub const Draw = struct {
     grid: @import("render_grid.zig").Grid = .{},
 
     pub fn profile(self: Draw) u32 {
+        if (self.encode_input != null) return 9;
         if (self.yuv != null) return 8;
         if (self.source == null) return 5;
         return switch (self.transfer) { .identity => 2, .decode_srgb => 3, .encode_srgb => 4, .color => 7 };
     }
     pub fn validate(self: Draw) Error!void {
+        if (self.encode_input) |sampling| {
+            const source = self.source orelse return error.Unsupported;
+            try sampling.validate(source, self.target);
+            if (self.yuv != null or self.transfer != .identity or self.color_program != null or
+                self.opacity != 255 or self.opacity_linear != null or self.blend != .replace or
+                self.filter != .nearest or self.grid.enabled != 0 or self.color != 0 or
+                self.source_rect.x != 0 or self.source_rect.y != 0 or self.source_rect.width != sampling.extent[0] or
+                self.source_rect.height != sampling.extent[1] or self.destination.x != 0 or self.destination.y != 0 or
+                self.destination.width != self.target.width or self.destination.height != self.target.height)
+                return error.Unsupported;
+        }
         if (self.opacity_linear) |value| {
             if (self.yuv == null or !std.math.isFinite(value) or value < 0 or value > 1) return error.Bounds;
         }
@@ -207,6 +221,9 @@ pub const Draw = struct {
                     if (Range.overlaps(.{ .address = view.address, .bytes = view.bytes }, .{ .address = self.target.address, .bytes = self.target.bytes })) return error.Unsupported;
                 };
             }
+            if (self.encode_input) |sampling| for ([_]?image.Image{ sampling.chroma, sampling.second }) |plane| if (plane) |view| {
+                if (Range.overlaps(.{ .address = view.address, .bytes = view.bytes }, .{ .address = self.target.address, .bytes = self.target.bytes })) return error.Unsupported;
+            };
         } else if (self.transfer != .identity) return error.Unsupported;
         if (self.target.format == .r8 and (self.blend != .replace or self.transfer != .identity)) return error.Unsupported;
         if (self.source == null and self.target.format.hasAlpha()) {
@@ -274,6 +291,10 @@ pub const Binding = struct {
             const source: Range = .{ .address = view.address, .bytes = view.bytes };
             if (Range.overlaps(self.programs, source) or Range.overlaps(self.packet, source)) return error.Unsupported;
         };
+        if (self.draw.encode_input) |sampling| for ([_]?image.Image{ sampling.chroma, sampling.second }) |plane| if (plane) |view| {
+            const source: Range = .{ .address = view.address, .bytes = view.bytes };
+            if (Range.overlaps(self.programs, source) or Range.overlaps(self.packet, source)) return error.Unsupported;
+        };
     }
     pub fn matches(self: Binding, draws: []const Draw) bool {
         if (draws.len != 1 + self.additional.len or !std.meta.eql(self.draw, draws[0])) return false;
@@ -284,7 +305,8 @@ pub const Binding = struct {
 pub fn compatible(first: Draw, next: Draw) bool {
     return std.meta.eql(first.target, next.target) and std.meta.eql(first.source, next.source) and
         first.filter == next.filter and first.blend == next.blend and first.transfer == next.transfer and
-        std.meta.eql(first.color_program, next.color_program) and std.meta.eql(first.yuv, next.yuv);
+        std.meta.eql(first.color_program, next.color_program) and std.meta.eql(first.yuv, next.yuv) and
+        std.meta.eql(first.encode_input, next.encode_input);
 }
 pub fn shaderOffset(index: usize) u32 {
     return profiles.get(0xc797).?.offset(index);
@@ -313,7 +335,7 @@ pub fn packetUpload(draw: Draw, out: []u8) Error!void {
     @memset(out, 0);
     if (draw.color_program) |program| @memcpy(out[1024..1280], std.mem.asBytes(&program));
     if (draw.source) |source| {
-        const tic = try image.textureTyped(source, if (draw.yuv != null) .unsigned_integer else .normalized);
+        const tic = try image.textureTyped(source, if (draw.yuv != null or draw.encode_input != null) .unsigned_integer else .normalized);
         @memcpy(out[0..32], std.mem.asBytes(&tic));
         if (draw.yuv) |sampling| {
             const cb = try image.textureTyped(sampling.chroma, .unsigned_integer);
@@ -327,6 +349,17 @@ pub fn packetUpload(draw: Draw, out: []u8) Error!void {
             const parameters = sampling.program(source, draw.source_rect, draw.filter);
             // Integer texel fetches need no sampler. Reuse the TSC region
             // for CBuf3, preserving the1280-byte packet and existing offsets.
+            @memcpy(out[256..512], std.mem.asBytes(&parameters));
+        } else if (draw.encode_input) |sampling| {
+            const cb = try image.textureTyped(sampling.chroma, .unsigned_integer);
+            @memcpy(out[32..64], std.mem.asBytes(&cb));
+            std.mem.writeInt(u32, out[516..520], 1, .little);
+            if (sampling.second) |plane| {
+                const cr = try image.textureTyped(plane, .unsigned_integer);
+                @memcpy(out[64..96], std.mem.asBytes(&cr));
+                std.mem.writeInt(u32, out[520..524], 2, .little);
+            }
+            const parameters = sampling.program(draw.target);
             @memcpy(out[256..512], std.mem.asBytes(&parameters));
         } else {
             const tsc = image.sampler(draw.filter);
@@ -440,7 +473,7 @@ fn encodeFor(comptime hw: type, binding: Binding, out: *Program) Error!void {
     try out.one(hw.SET_CT_WRITE, if (draw.target.format == .r8) hw.color_write_r else hw.color_write_rgba);
     try out.one(hw.SET_BLEND, @intFromBool(draw.blend == .over));
     try out.words(hw.SET_BLEND_PER_TARGET_SEPARATE_FOR_ALPHA, &.{1, hw.blend_add, hw.blend_one, if (draw.blend == .over) hw.blend_inverse_alpha else hw.blend_zero, hw.blend_add, hw.blend_one, if (draw.blend == .over) hw.blend_inverse_alpha else hw.blend_zero});
-    try bindShader(hw, profile, out, binding.programs, if (draw.source == null) 5 else 0);
+    try bindShader(hw, profile, out, binding.programs, if (draw.source == null or draw.encode_input != null) 5 else 0);
     try bindShader(hw, profile, out, binding.programs, draw.profile()-1);
     try encodeDraw(hw, draw, binding.packet.address, out);
     for (binding.additional, 1..) |next, index| try encodeDraw(hw, next, binding.packet.address + index * packet_bytes, out);
@@ -456,8 +489,9 @@ fn encodeDraw(comptime hw: type, draw: Draw, packet: u64, out: *Program) Error!v
     if (draw.source != null) {
         const sampler_address = packet + 256;
         const constants = packet + 512;
-        try out.words(hw.SET_TEX_HEADER_POOL_A, &.{@intCast(packet >> 32), @truncate(packet), if (draw.yuv) |sampling| sampling.planeCount() - 1 else 0});
-        if (draw.yuv == null) try out.words(hw.SET_TEX_SAMPLER_POOL_A, &.{@intCast(sampler_address >> 32), @truncate(sampler_address), 0});
+        try out.words(hw.SET_TEX_HEADER_POOL_A, &.{@intCast(packet >> 32), @truncate(packet),
+            if (draw.yuv) |sampling| sampling.planeCount() - 1 else if (draw.encode_input) |sampling| sampling.planeCount() - 1 else 0});
+        if (draw.yuv == null and draw.encode_input == null) try out.words(hw.SET_TEX_SAMPLER_POOL_A, &.{@intCast(sampler_address >> 32), @truncate(sampler_address), 0});
         try out.words(hw.SET_CONSTANT_BUFFER_SELECTOR_A, &.{256, @intCast(constants >> 32), @truncate(constants)});
         try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 | (1 << 4));
     } else try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 << 4);
@@ -466,7 +500,7 @@ fn encodeDraw(comptime hw: type, draw: Draw, packet: u64, out: *Program) Error!v
         try out.words(hw.SET_CONSTANT_BUFFER_SELECTOR_A, &.{256, @intCast(constants >> 32), @truncate(constants)});
         try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 | (2 << 4));
     }
-    if (draw.yuv != null) {
+    if (draw.yuv != null or draw.encode_input != null) {
         const constants = packet + 256;
         try out.words(hw.SET_CONSTANT_BUFFER_SELECTOR_A, &.{256, @intCast(constants >> 32), @truncate(constants)});
         try out.one(hw.BIND_GROUP_CONSTANT_BUFFER + 4 * 32, 1 | (3 << 4));

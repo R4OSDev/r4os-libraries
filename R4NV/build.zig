@@ -4,6 +4,7 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("backend", b.path("Source/backend.zig"));
     b.addNamedLazyPath("render_encoder", b.path("Source/render_api.zig"));
     b.addNamedLazyPath("video", b.path("Source/video.zig"));
+    b.addNamedLazyPath("encode", b.path("Source/encode.zig"));
     b.addNamedLazyPath("implementation", b.path("Contract/Generated/implementation_abi.zig"));
     const sdk_build = b.lazyImport(@This(), "r4os_sdk") orelse return;
     const sdk = sdk_build.sdk(b, b.dependencyFromBuildZig(sdk_build, .{}), .{});

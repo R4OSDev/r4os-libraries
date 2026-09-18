@@ -1,0 +1,27 @@
+{
+  "scope": "Four complete H264 setup/control blocks, emitted with original C types under NVENC7.3/8.2 magic. This proves wire layout, not hardware admission or video output.",
+  "bytes": 4608,
+  "sha256": "4c9dd6deabb73f0a06bc9d2d71e50c3fd10c2aa96a19a861242239a6dd95a72c",
+  "generator": "Tests/nvenc_h264_reference.c",
+  "generator_sha256": "fe61c001d64e599168e802a200c97fa12e29a44aa2b74ff727c3a5ada1ad129d",
+  "sources": [
+    {
+      "path": "Original/Nvidia/OpenGpuDoc/classes/video/nvenc_drv.h",
+      "bytes": 275485,
+      "sha256": "04ba0a17c2a50e6102f7511c6294c2b61d99fdd1b6651410a3d63c4924da323d",
+      "origin": {
+        "id": "nvidia-open-gpu-doc",
+        "revision": "9fdf5c4062007929d9f4e6cbad9c9771fe61b880",
+        "url": "https://codeload.github.com/NVIDIA/open-gpu-doc/tar.gz/9fdf5c4062007929d9f4e6cbad9c9771fe61b880",
+        "archive_sha256": "901999de58461d953531f55445a3f653ca76ff58cec722bedb9f064d25808707",
+        "sha256": "04ba0a17c2a50e6102f7511c6294c2b61d99fdd1b6651410a3d63c4924da323d"
+      }
+    }
+  ],
+  "records": [
+    "C7B7 IDR QP0",
+    "C7B7 P QP51",
+    "C9B7 IDR QP0",
+    "C9B7 P QP51"
+  ]
+}

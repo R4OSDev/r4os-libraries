@@ -3318,6 +3318,13 @@
       "description": "Integer NV12/P010/YUV420P plane sampling, CBuf3 phase/matrix and common CBuf2 color. Nearest/bilinear image resampling in linear RGB. Pair with rectangle vertex profile1."
     },
     {
+      "zig_name": "shader_profile_encode_fragment",
+      "c_name": "R4NV_SHADER_PROFILE_ENCODE_FRAGMENT",
+      "type": "u32",
+      "value": 9,
+      "description": "Integer NV12/I420 input packing into row-major16x16 byte tiles with edge replication; CBuf3 geometry. Pair with solid vertex profile6. This wire profile does not certify physical NVENC layout support."
+    },
+    {
       "zig_name": "native_submit_version",
       "c_name": "R4NV_NATIVE_SUBMIT_VERSION",
       "type": "u32",
@@ -3372,6 +3379,13 @@
       "type": "u32",
       "value": 8,
       "description": "Separate NVDEC native queue. This bit must appear alone; it cannot be combined with graphics, compute or copy. The first submission fixes the queue engine family. Actual engine topology, class and RM allocation must succeed before publication. Queue completion proves engine drain and memory ordering only; a codec must independently validate NVDEC picture status before exposing output. Older drivers reject this bit."
+    },
+    {
+      "zig_name": "native_engine_encode",
+      "c_name": "R4NV_NATIVE_ENGINE_ENCODE",
+      "type": "u32",
+      "value": 16,
+      "description": "Separate NVENC native queue. This bit must appear alone and cannot share a timeline with NVDEC, graphics, compute or copy. Actual engine topology, class and RM allocation must succeed before publication. Queue completion proves physical drain and memory ordering only; the encoder must validate NVENC status and bounded bitstream length before exposing a packet. Older drivers reject this bit."
     },
     {
       "zig_name": "architecture_version",

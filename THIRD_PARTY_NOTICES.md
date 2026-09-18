@@ -233,3 +233,21 @@ Its NVIDIA/Mesa MIT source attribution and full notices remain in that source,
 `R4NV/Source/nvdec_h264_vectors.json` and `R4NV/ThirdParty/Nvidia/LICENSES.txt`.
 The R4VIDEO resource, lifetime and public-lease integration is original
 Apache-2.0 R4OS code.
+
+
+## R4ENC / OpenH264
+
+`R4ENC` builds Cisco OpenH264 2.6.0 encoder/common/processing sources and x86
+assembly under their original BSD-2-Clause terms. The full source license is
+`R4ENC/ThirdParty/OpenH264-LICENSE.txt`; the original archive SHA256 is pinned
+in `R4ENC/ThirdParty/Sources.json`. `Port/r4os.patch` adapts the private
+freestanding synchronization and clock boundary while preserving notices.
+No Cisco binary package or proprietary NVIDIA encoder library is included.
+Shared formatting reuses the licensed stb_sprintf copy described above;
+shared math retains `Shared/Native/Math/NOTICES.txt`. The R4OS runtime and
+codec adapters are original Apache-2.0 material. Distribution stages
+`R4ENC-NOTICES.txt` and the full `OpenH264-BSD-2-Clause.txt` source license.
+
+R4NV NVENC status decoding follows NVIDIA open-gpu-doc nvenc_drv.h (MIT).
+Original-header fixture provenance is in R4NV/Source/nvenc_status_vectors.json;
+the full notice is retained in R4NV/ThirdParty/Nvidia/LICENSES.txt.

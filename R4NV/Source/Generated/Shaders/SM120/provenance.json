@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "compiler_id": "f4d37f9c39f3ced3a095d89509affbfb2021dc81af53c5034d76f9b21687d11e",
+  "compiler_id": "8f0b4b84b7d6ba046f1efe6acc026c815ffc8cb7d1cc221742be8ba09621facf",
   "target": {
     "sm": 120,
     "max_warps_per_mp": 48
@@ -8,7 +8,7 @@
   "compiler_inputs": [
     {
       "path": "Sources.lock.json",
-      "sha256": "0075c40525aac0ede568c78a03023d9b0d376703d8e8e7c6901e3235f85b6fef"
+      "sha256": "6d31db6ba6f9e4b60cfc0f0f2857bfeba44e6e76175d1c328de275e50925dda8"
     },
     {
       "path": "MesaStandalone.patch",
@@ -16,7 +16,7 @@
     },
     {
       "path": "Build.ps1",
-      "sha256": "8ddcc2dde6feab788309ba994ffa03447a75408b125897670066162f957f25b1"
+      "sha256": "5b7356ca1da51b5278de7df2e6743dcadc1d2e18c3b6f17b36d23b02dd3feb59"
     },
     {
       "path": "Source/meson.build",
@@ -24,15 +24,15 @@
     },
     {
       "path": "Source/r4nak.c",
-      "sha256": "b4cdffc3c4037c3e316dddaf2f13cc214b77a563429abfeafb2177493537b929"
+      "sha256": "8be26b40a41adf87a142454bbd5b75a9bab1207b586ef4090d3188cadff29b95"
     },
     {
       "path": "Source/shaders.c",
-      "sha256": "cabce9840d7175c61325b690ef572a582000d3feedd5bb7d544898c35b9ef3d1"
+      "sha256": "47b92f2438b717e0f06646d7788d1e8b64389761c02047a780e3683027f0ad18"
     },
     {
       "path": "Source/shaders.h",
-      "sha256": "00d66273d54c59ba41d137cbd02b378f57ec1ab316169352aeaae945c93aedc9"
+      "sha256": "21b5e2d088760c9c1c6cca4bafbb18a0d6a004021f34fef471900ad2a8b82785"
     },
     {
       "path": "Source/color_shader.h",
@@ -41,6 +41,10 @@
     {
       "path": "Source/yuv_shader.h",
       "sha256": "ea842ca93272324a5f71cddf803ba947a194ec61b6f2f4387a6558166d6b1f4f"
+    },
+    {
+      "path": "Source/encode_shader.h",
+      "sha256": "c81a85484a5f12b156d2f0ddb404940fbf73890cb33e347406a78813dff35dd1"
     }
   ],
   "emitter_sha256": "311ab92e96b992af91b35dc2a4670b4629f6487025046d35bb19415b6750d32b",
@@ -132,7 +136,18 @@
       "code_bytes": 12160,
       "gprs": 32,
       "instructions": 760
+    },
+    {
+      "profile": 9,
+      "name": "encode_fragment",
+      "sha256": "7622a366ad92360133a13a1cf70418b375bc21f3b84620d8e9d32bbf7bac6cec",
+      "metadata_sha256": "78d94a1ab57412c1a5e104e0c1db09e2fa69d0d8271b1c90da101aa460f84f60",
+      "assembly_sha256": "97e7952967da8945f97e61e8d9a27f975b86bdddd7fa92dc0ef18ab7d930e756",
+      "nir_sha256": "393565cecdab4a9d7dd9845d1350a222e95c965fd20592e9088a2c05ff90ca61",
+      "code_bytes": 1152,
+      "gprs": 24,
+      "instructions": 72
     }
   ],
-  "generated_zig_sha256": "e8b8320f83c32c52b0ec22f56cef9cc506bd0e874b16563e09ba61c5dbd53f30"
+  "generated_zig_sha256": "db5bedcd779c890069669c6bfef12077f57e4d19f61995b03736b0cb90205c63"
 }

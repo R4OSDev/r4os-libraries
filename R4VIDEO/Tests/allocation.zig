@@ -1,6 +1,6 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 const std = @import("std");
-const m = @import("video_allocation");
+const m = @import("native_allocation");
 const Budget = m.Budget;
 const Allocator = m.Allocator;
 

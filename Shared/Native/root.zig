@@ -9,6 +9,7 @@ pub const thread_local = @import("thread_local.zig");
 pub const thread_lifecycle = @import("thread_lifecycle.zig");
 pub const finalizers = @import("finalizers.zig");
 pub const memory = @import("memory.zig");
+pub const budgeted_memory = @import("budgeted_memory.zig");
 pub const math = @import("math.zig");
 pub const random = @import("random.zig");
 pub const time = @import("time.zig");

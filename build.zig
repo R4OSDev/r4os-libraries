@@ -8,6 +8,10 @@ pub const addR4gfxHostColor = @import("R4GFX/color_build.zig").addAt;
 /// versionierten Consumer-Bindings als benannte Paketpfade bereit; jede R4L
 /// bleibt in ihrer eigenen Einheit baubar und getestet.
 pub fn build(b: *std.Build) void {
+    b.addNamedLazyPath("r4enc_zig_binding", b.path("R4ENC/Bindings/Zig/r4enc.zig"));
+    b.addNamedLazyPath("r4enc_c_include", b.path("R4ENC/Bindings/C"));
+    b.addNamedLazyPath("r4enc_recording_mux", b.path("R4ENC/Bindings/Zig/recording_mux.zig"));
+    b.addNamedLazyPath("r4enc_recording_pixels", b.path("R4ENC/Bindings/Zig/recording_pixels.zig"));
     b.addNamedLazyPath("r4video_zig_binding", b.path("R4VIDEO/Bindings/Zig/r4video.zig"));
     b.addNamedLazyPath("r4video_playback", b.path("R4VIDEO/Bindings/Zig/playback.zig"));
     b.addNamedLazyPath("r4video_c_include", b.path("R4VIDEO/Bindings/C"));
@@ -20,6 +24,7 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4nak_worker", b.path("R4NAK/Bindings/Zig/worker.zig"));
     b.addNamedLazyPath("r4nv_copy", b.path("R4NV/Source/copy.zig"));
     b.addNamedLazyPath("r4nv_video", b.path("R4NV/Source/video.zig"));
+    b.addNamedLazyPath("r4nv_encode", b.path("R4NV/Source/encode.zig"));
     b.addNamedLazyPath("r4nv_render", b.path("R4NV/Source/render.zig"));
     b.addNamedLazyPath("r4nv_telemetry", b.path("R4NV/Source/telemetry.zig"));
     b.addNamedLazyPath("r4nv_zig_binding", b.path("R4NV/Bindings/Zig/r4nv.zig"));

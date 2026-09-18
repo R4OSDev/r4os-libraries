@@ -6,6 +6,7 @@
 #include "nir_builder.h"
 #include "color_shader.h"
 #include "yuv_shader.h"
+#include "encode_shader.h"
 
 /* R4NV graphics constant-buffer ABI 4. CBuf 0 reserves bytes 0..63:
  * 0..7 sample locations (u4/u4), 16..31 sample masks (u16),
@@ -105,7 +106,7 @@ nir_shader *
 r4nv_build_shader(enum r4nv_shader_profile profile,
                   const nir_shader_compiler_options *options)
 {
-   if (profile < R4NV_RECT_VERTEX || profile > R4NV_YUV_FRAGMENT)
+   if (profile < R4NV_RECT_VERTEX || profile > R4NV_ENCODE_FRAGMENT)
       return NULL;
    bool vertex = profile == R4NV_RECT_VERTEX || profile == R4NV_SOLID_VERTEX;
    nir_builder b = nir_builder_init_simple_shader(
@@ -137,7 +138,9 @@ r4nv_build_shader(enum r4nv_shader_profile profile,
       nir_variable *tint = varying(&b, nir_var_shader_in, glsl_vec4_type(),
                                   "premultiplied_tint", VARYING_SLOT_VAR1);
       nir_def *color = nir_load_var(&b, tint);
-      if (profile == R4NV_YUV_FRAGMENT) {
+      if (profile == R4NV_ENCODE_FRAGMENT) {
+         color = r4nv_encode_pack(&b, nir_channel(&b, color, 3));
+      } else if (profile == R4NV_YUV_FRAGMENT) {
          nir_variable *uv = varying(&b, nir_var_shader_in, glsl_vec2_type(), "uv", VARYING_SLOT_VAR0);
          color = r4nv_yuv_transform(&b, nir_load_var(&b, uv), nir_channel(&b, color, 3));
       } else if (profile != R4NV_SOLID_FRAGMENT) {

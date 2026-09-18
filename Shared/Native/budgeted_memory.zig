@@ -1,11 +1,9 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 const std = @import("std");
 const r = @import("r4os");
-const native = @import("r4native");
-const allocation = @import("video_allocation");
-pub const Budget = allocation.Budget;
+const native = @import("root.zig");
 
-pub fn Runtime(comptime Policy: type) type {
+pub fn Runtime(comptime Policy: type, comptime allocation: type) type {
     return struct {
         const Context = struct { heap: r.vm_allocator.Heap, allocations: allocation.Allocator };
         var key: u8 = 0;

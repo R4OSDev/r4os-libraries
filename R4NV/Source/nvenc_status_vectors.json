@@ -1,0 +1,25 @@
+{
+  "scope": "Original NVIDIA C status structures; two success and two independent engine/microcode error records. No GPU execution.",
+  "source": {
+    "path": "Original/Nvidia/OpenGpuDoc/classes/video/nvenc_drv.h",
+    "bytes": 275485,
+    "sha256": "04ba0a17c2a50e6102f7511c6294c2b61d99fdd1b6651410a3d63c4924da323d",
+    "origin": {
+      "id": "nvidia-open-gpu-doc",
+      "revision": "9fdf5c4062007929d9f4e6cbad9c9771fe61b880",
+      "url": "https://codeload.github.com/NVIDIA/open-gpu-doc/tar.gz/9fdf5c4062007929d9f4e6cbad9c9771fe61b880",
+      "archive_sha256": "901999de58461d953531f55445a3f653ca76ff58cec722bedb9f064d25808707",
+      "sha256": "04ba0a17c2a50e6102f7511c6294c2b61d99fdd1b6651410a3d63c4924da323d"
+    }
+  },
+  "generator": "Tests/nvenc_status_reference.c",
+  "generator_sha256": "3e5a0428c3b7217d080e38f1ff1dfae7bc680f300b9db1a22c5daec3cb8b47eb",
+  "bytes": 576,
+  "sha256": "3b925f7cc4b73271faabd3e7a9e9bc534142fe1e1f0545c8ba342cf8214a6082",
+  "records": [
+    "IDR",
+    "P",
+    "Engine error",
+    "Microcode error"
+  ]
+}

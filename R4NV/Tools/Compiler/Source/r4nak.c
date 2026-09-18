@@ -23,13 +23,13 @@ int main(int argc, char **argv)
    if (argc != 6 && argc != 7) {
       fprintf(stderr, "Usage: r4nak PROFILE CODE.bin INFO.json ASSEMBLY.txt INPUT-NIR.txt [SM]\n"
                       "Profiles: 1=rectangle vertex, 2=texture, 3=sRGB decode, "
-                      "4=sRGB encode, 5=solid fragment, 6=solid vertex, 7=color. SM: 75, 86 (default), 89, 120.\n");
+                      "4=sRGB encode, 5=solid fragment, 6=solid vertex, 7=color, 8=YUV, 9=encode input. SM: 75, 86 (default), 89, 120.\n");
       return 2;
    }
    char *end;
    errno = 0;
    unsigned long profile = strtoul(argv[1], &end, 10);
-   if (errno || *end || profile < R4NV_RECT_VERTEX || profile > R4NV_YUV_FRAGMENT)
+   if (errno || *end || profile < R4NV_RECT_VERTEX || profile > R4NV_ENCODE_FRAGMENT)
       return 2;
    errno = 0;
    const unsigned long sm = argc == 7 ? strtoul(argv[6], &end, 10) : 86;

@@ -14,11 +14,11 @@ Native queue packets use `R4NvNativeSubmitHeader` (32 bytes), followed by exactl
 `push_count` `R4NvNativePush` records (16 bytes each). Version 1 admits at most
 510 pushes and flags `incomplete`/`no_prefetch`. Engine mask bit1 selects graphics;
 bits2/4 additionally request instantiated compute/copy objects. Bit8 alone selects
-a separate NVDEC queue and requires no ready GR template. The first job fixes
+a separate NVDEC queue; bit16 alone selects NVENC. Neither requires a ready GR template. The first job fixes
 the queue's engine family/set; graphics jobs may request subsets. Mixing video
 with graphics/compute/copy, changing families, unknown bits, missing classes or
 an unpaired copy engine fails before GPU publication. Video queue completion
-proves engine drain and memory ordering; the codec must also check NVDEC picture
+proves engine drain and memory ordering; the codec must also check its picture
 status before exposing output. R4VIDEO owns decoder integration and frame leases;
 the media facade connects those leases to R4GFX composition and App-Audio.
 The final push must be complete. Every referenced BO/VA, including command
@@ -43,6 +43,29 @@ inside the existing R4NV test group. VIDEO_V1's NVIDIA codec integration also
 passes modeled replies; physical decoding remains pending. Provenance:
 `Source/nvdec_h264_vectors.json` and `Tests/nvdec_h264_reference.c`.
 
+`Source/encode.zig` (`r4nv_encode`) supplies C7B7/C9B7 H.264 Constrained Baseline
+parameter blocks, one-slice CQP IDR/P controls, matching Annex-B SPS/PPS and a
+61-word native command stream. The profile is progressive8-bit NV12, one
+short-term reference, no reorder and BT.709 limited; headers retain nominal
+timing without asserting a fixed cadence for dropped capture frames. Level5.1
+picture/rate limits and QP0..51 are checked. Native picture state uses the same
+frame-number, POC and QP definitions as the generated parameter sets.
+
+The input layout's `block_height_field` is an explicit NVIDIA wire value.
+The BO owner must admit the actual modifier, complete tiled extents and valid
+macroblock padding. Command checks cover40-bit addresses, minimum footprints,
+disjoint ranges and the complete H.264 app/method selection. They do not qualify
+an arbitrary surface layout. A fresh completion record and validated codec
+status remain mandatory. No GPU allocation, submission or NVENC capability is
+published by these pure helpers; R4ENC native integration remains open.
+
+Existing provider tests compare complete picture/control blocks and methods
+against the original NVIDIA C types. Independent FFmpeg decoding of two actual
+SPS/PPS outputs with test-only I_PCM slices checks exact pixels, cropping,
+colorimetry and parsed VUI timing. This is header validation, not NVENC output
+or compression-quality evidence. See `Source/nvenc_*_vectors.json`, canonical
+`Tests/nvenc_*_reference.c` and GFX/0.79.41/Evidence/NvencParameters.
+
 `Source/copy.zig` is shared by the R4L and the driver's compiled binding:
 
 | Copy class | Encoding scope |
@@ -59,7 +82,7 @@ GPU resources themselves; a rejected call leaves output and count unchanged.
 
 `SHADER_V1` revision 1 is a separate 56-byte metadata/cache table. The keyed
 cache admits exactly C597/SM75, C797/SM86, C997/SM89 or CD97/SM120. Every target
-has seven fixed programs with its original NVIDIA header. Class and shader
+has nine fixed programs with its original NVIDIA header. Class and shader
 model must agree with the measured driver profile. The legacy unkeyed metadata
 entry continues to describe SM86. See `Docs/API.md` for the unchanged ABI.
 

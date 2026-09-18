@@ -275,7 +275,7 @@ use finite IPC deadlines; wait slices are capped at 25 ms. R4VK retains only
 its private exported C names as thin wrappers.
 
 c_runtime.h and c11_threads.h own the private native C declarations shared by
-R4GL and the developing R4VIDEO port. R4GL retains thin include wrappers at its
+R4GL, R4VIDEO and R4ENC. R4GL retains thin include wrappers at its
 existing paths. The declarations were moved byte-for-byte in 0.79.40; native
 consumers still select and bind their own implementations and process owners.
 
@@ -287,3 +287,23 @@ percent, newline and tab; unsupported directives or insufficient storage
 return zero. It is not a full locale/POSIX libc. R4VIDEO consumes it together
 with R4SYS wall/monotonic time. R4VIDEO keeps its concurrent allocation budget
 outside memory.Runtime's isolated compiler-job Scope.
+
+budget.zig/budgeted_allocation.zig hold finite atomic leaf/aggregate limits and
+allocation headers carrying the original owner across worker free/realloc.
+budgeted_memory.Runtime(Policy, Allocation) binds those algorithms to the
+calling program's VM heap. R4VIDEO and R4ENC select their stream through Policy;
+they retain the budget until all allocations, workers and BO loans retire.
+This is the existing decoder accounting moved into the shared owner in 0.79.41,
+not a second allocator implementation or a new public API.
+
+gpu_resources.zig is the common single-worker GPU BO/VA/queue owner used by
+R4VIDEO and the R4ENC native session. native_allocation is the shared budget
+module identity. Device.queryFor selects decode, encode or validated GR packet classes and
+engine masks, preserving the driver's actual channel admission. Timeout retains
+the fence and physical resource loans; CPU access/reuse is forbidden until
+completion, and BO/VA budgets survive delayed retirement. Tests/gpu_model.zig
+provides the common SDK-dispatch fixture inside the existing codec cases.
+Codec-specific parameter/status inspection remains in each library's tests.
+Borrowed resources own only their VA, with no duplicate budget charge or
+reference release. Their retained input/session owner must survive physical
+retirement. An optional shared job deadline bounds preparation and encoding.

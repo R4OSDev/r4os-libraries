@@ -2,7 +2,7 @@
 const std = @import("std");
 const r = @import("r4os");
 const a = r.abi;
-const Budget = @import("video_allocation").Budget;
+const Budget = @import("native_allocation").Budget;
 
 // One worker owns each Surface. Published VIDEO_V1 loans borrow its references;
 // the worker may close/rewrite only after every CPU reader and exact GPU receipt.

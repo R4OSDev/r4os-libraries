@@ -2,7 +2,7 @@
 const std = @import("std");
 
 /// Stable owner, retained until every allocation, worker and surface reservation
-/// is returned. Limits never change while the owner is in use. A decoder has
+/// is returned. Limits never change while the owner is in use. A stream has
 /// exactly one aggregate runtime parent; no locks span allocation or kernel I/O.
 pub const Budget = struct {
     limit: usize,

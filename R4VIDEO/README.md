@@ -96,7 +96,7 @@ callback tables, four failure stages and exact budget teardown. The same
 changed R4VIDEO module also passes the existing 39-frame public software
 probe. This is not GPU decode evidence. Evidence: GFX/0.79.40/Evidence/NvdecBridge.
 
-Source/gpu_resources.zig now owns native NV12 allocations, coherent system
+../Shared/Native/gpu_resources.zig owns native NV12 allocations, coherent system
 uploads/status, VRAM scratch, acknowledged GPU VA bindings and engine-8 queue
 submissions. Architecture/epoch admission covers GA10x (C7B0) and Ada (C9B0);
 the driver separately validates an offered NVDEC instance/class. No GR template
