@@ -119,6 +119,7 @@ pub fn release(device: *d.Device, handle: *const c.R4GfxJob) d.Error!i32 {
     if (value.phase != a.gfx_queue_phase_terminal or value.flags & (a.gfx_queue_flag_device_active | a.gfx_queue_flag_resources_held) != 0) return error.Busy;
     const queues = device.queues();
     try d.platform(queues.release(&item.fence));
+    if (item.native_yuv_count != 0) device.native_yuv.release(item.native_yuv_indices[0..item.native_yuv_count]);
     for ([_]c.R4GfxResource{item.source, item.target}) |resource| {
         if (resource.slot == 0) continue;
         const held = try device.resource(resource, false);

@@ -40,6 +40,7 @@
     {"id": 4, "name": "srgb_encode_fragment", "stage": 4},
     {"id": 5, "name": "solid_fragment", "stage": 4},
     {"id": 6, "name": "solid_vertex", "stage": 0},
-    {"id": 7, "name": "color_fragment", "stage": 4}
+    {"id": 7, "name": "color_fragment", "stage": 4},
+    {"id": 8, "name": "yuv_fragment", "stage": 4}
   ]
 }

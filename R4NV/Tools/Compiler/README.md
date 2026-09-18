@@ -1,6 +1,6 @@
 ﻿# R4NAK host compiler
 
-This tool builds the pinned Mesa 26.2.2 NIR/NAK compiler and translates seven
+This tool builds the pinned Mesa 26.2.2 NIR/NAK compiler and translates eight
 documented R4NV shader profiles for SM75, SM86, SM89 and SM120. It produces actual machine code,
 the NVIDIA shader header, input NIR and readable NAK assembly. It does not
 open a GPU or implement an R4OS runtime compiler.
@@ -87,12 +87,13 @@ Generated code alone establishes neither native bootstrap nor physical support.
 | 5 | Solid fragment | Writes the interpolated premultiplied tint. |
 | 6 | Solid vertex | Uses attributes 0 and 2; writes position/tint without unused UV outputs. Pair with profile 5. |
 | 7 | Color fragment | Named RGB transfer/primaries/range/alpha conversion, white scaling and optional output tone/gamut mapping and dither; CBuf2 coefficients. Pair with profile 1. |
+| 8 | YUV fragment | NV12/P010/YUV420P integer plane loads, explicit chroma phase and range/matrix, then shared color conversion; CBuf3 sampling coefficients. Pair with profile 1. |
 
-Profiles 1 and 2–4/7 share their UV/tint interface. Profile 6 pairs with 5,
+Profiles 1 and 2–4/7–8 share their UV/tint interface. Profile 6 pairs with 5,
 so the fixed pipeline does not require disabling out-of-range attribute
 exceptions for unused vertex outputs.
 
-Nearest/bilinear filtering is sampler state. Resource ABI4 keeps the combined
+For RGB profiles, nearest/bilinear filtering is sampler state. Resource ABI4 keeps the combined
 TIC/TSC word in constant buffer 1 at byte 0 and normalized source-texel-center
 bounds at bytes 16..31. All texture profiles clamp ordinary interpolated UVs
 to those bounds, including bilinear crops and one-texel views.
@@ -105,7 +106,7 @@ divisions to select exact logical cells and guest texels. Only the final texel
 center becomes a normalized float. The driver validates clipped corners and
 requires nearest filtering with identity transfer; pixels remain on the GPU.
 The reproducible SM86 grid fragment has 2208 code bytes; the largest complete
-cache entry is 8576 bytes. Earlier resource ABI keys cannot select these
+cache entry across the four ISAs is 12544 bytes (SM120 YUV). Earlier resource ABI keys cannot select these
 programs, while the public shader table and payload layouts remain unchanged.
 
 NAK's internal graphics constants use buffer 0: sample locations at byte 0,
@@ -116,14 +117,23 @@ texture/render views must avoid a second automatic sRGB transfer.
 
 Profile7 uses a separate256-byte constant buffer2. The layout is documented
 in `Source/color_shader.h`. R4GFX computes the coefficients; the fixed NIR
-program evaluates sRGB, PQ and HLG, two primary matrices, alpha conventions,
+program evaluates sRGB, BT.1886, PQ and HLG, two primary matrices, alpha conventions,
 white scaling, a rational luminance shoulder and neutral-axis gamut mapping.
 It supports nearest sampling; bilinear encoded samples are not advertised as
-linear-light interpolation. The SM86 program is8192 bytes/512 instructions,
+linear-light interpolation. The SM86 program is10976 bytes/686 instructions,
 uses24 GPRs and has no scratch or stack allocation. Compilation and numerical
 host checks do not establish physical GPU execution.
 
-`Source/shaders.c` and `Source/color_shader.h` are the source of truth. Metadata uses explicit JSON fields;
+Profile8 uses integer texel fetches instead of hardware normalized filtering.
+It discards the six P010 padding bits before reconstructing chroma and applies
+the EOTF before optional bilinear RGB interpolation. CBuf1 holds up to three
+TIC indices; CBuf3 holds the explicit matrix, phase, coded dimensions and crop.
+The unused sampler area in the1280-byte upload packet carries CBuf3. The SM86
+program has11056 bytes/691 instructions,32 GPRs and no scratch or stack.
+`RENDER_V1` exposes matched shader upload and bounded YUV-list encoding;
+canonical BO/VA loans and physical retirement remain with the caller/queue.
+
+`Source/shaders.c`, `Source/color_shader.h` and `Source/yuv_shader.h` are the source of truth. Metadata uses explicit JSON fields;
 no host C-structure layout is serialized. Compilation fails on spills, local
 scratch or call-stack allocation in these bounded profiles. Generated NAK
 assembly is diagnostic text, not external `nvdisasm` output.
@@ -139,10 +149,10 @@ pwsh -NoProfile -File Repositories/Libraries/R4NV/Tools/Compiler/EmitRuntime.ps1
 `-CompilerOutputDirectory` optionally selects a different verified output set.
 The emitter checks the current recipe inputs and all recorded code, metadata,
 NIR and assembly hashes before replacing generated runtime files. It also
-validates the seven profiles, target and bounded metadata. Modified headers
+validates the eight profiles, target and bounded metadata. Modified headers
 are rejected even when the machine-code file itself is unchanged.
 
-The checked-in `Source/Generated/Shaders` files contain only the seven programs,
+The checked-in `Source/Generated/Shaders` files contain only the eight programs,
 metadata and provenance. R4NV's separate `SHADER_V1` table exposes a bounded,
 driver/GPU/compiler/ABI/format/pipeline-state-bound byte cache. The regular
 R4NV build consumes these files without running Mesa or a host compiler.

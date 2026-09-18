@@ -19,10 +19,11 @@ pub fn run(api: *const c.ShaderV1) !void {
         "a27451b864b05ab0b32d16083965674ef4dc2175a6e459fd22055b63dd0b8173",
         "94811e8c07f6e09dcba8c3c0cce8aacedbab7293b76542935ecbf150abd39984",
         "356c276ffdc82e9cc63e49fb5a79b7602ff82d4981804689f7ec8f8c042ccc04",
-        "9ac73a0a942d795b653f471eb2adb7f229fcfbea7cfd119ccf3e5728e2494403",
+        "d4ecf66ff0fa3256d5e080488427720ff212c98c58f19d2d511c0be7c5dc5447",
+        "2439c347520463a6c76824c0e8e4435b2838f49281301ab0db7fee83b1ddc49e",
     };
-    const sizes = [_]u32{ 112, 2208, 816, 832, 80, 80, 10144 };
-    const instructions = [_]u32{ 7, 138, 51, 52, 5, 5, 634 };
+    const sizes = [_]u32{ 112, 2208, 816, 832, 80, 80, 10976, 11056 };
+    const instructions = [_]u32{ 7, 138, 51, 52, 5, 5, 686, 691 };
     var storage: [c.shader_cache_max_bytes + 8]u8 align(8) = @splat(0xa5);
     const bytes = storage[1 .. 1 + c.shader_cache_max_bytes]; // ABI promises byte alignment.
     var view: c.R4NvShaderView = std.mem.zeroes(c.R4NvShaderView);
@@ -31,7 +32,7 @@ pub fn run(api: *const c.ShaderV1) !void {
     for (hashes, sizes, instructions, 1..) |hex, size, count, id| {
         const profile: u32 = @intCast(id);
         try t.expectEqual(c.status_ok, api.shader_info(profile, &info));
-        try t.expect(info.code_bytes == size and info.instructions == count and info.registers == 24 and info.max_warps_per_sm == 48 and
+        try t.expect(info.code_bytes == size and info.instructions == count and info.registers == @as(u32, if (id == 8) 32 else 24) and info.max_warps_per_sm == 48 and
             info.stage == @as(u32, if (id == 1 or id == 6) 0 else 4) and info.scratch_bytes == 0 and info.stack_bytes == 0 and info.header_bytes == 128);
         try t.expectEqual(c.status_ok, api.shader_cache_write(profile, &key, bytes.ptr, bytes.len, &written));
         try t.expect(written == 384 + size);
@@ -46,7 +47,7 @@ pub fn run(api: *const c.ShaderV1) !void {
     }
     try t.expect(storage[0] == 0xa5 and storage[storage.len - 1] == 0xa5);
     const accepted_info = info;
-    try t.expectEqual(c.status_unsupported, api.shader_info(8, &info));
+    try t.expectEqual(c.status_unsupported, api.shader_info(9, &info));
     try t.expectEqualDeep(accepted_info, info);
     try t.expectEqual(c.status_ok, api.shader_cache_write(2, &key, bytes.ptr, bytes.len, &written));
     const good = storage;
@@ -97,7 +98,7 @@ pub fn run(api: *const c.ShaderV1) !void {
     try t.expectEqualDeep(accepted_view, view);
     written = 99;
     try t.expectEqual(c.status_capacity, api.shader_cache_write(2, &key, bytes.ptr, good_length - 1, &written));
-    try t.expectEqual(c.status_unsupported, api.shader_cache_write(8, &key, bytes.ptr, bytes.len, &written));
+    try t.expectEqual(c.status_unsupported, api.shader_cache_write(9, &key, bytes.ptr, bytes.len, &written));
     try t.expectEqual(c.status_invalid, api.shader_cache_write(4, &key, bytes.ptr, bytes.len, &key.version));
     try t.expectEqual(c.status_invalid, api.shader_cache_write(4, &key, bytes.ptr, bytes.len, @ptrCast(@alignCast(&storage[4]))));
     try t.expectEqual(c.status_invalid, api.shader_cache_write(4, &key, @ptrCast(&key), bytes.len, &written));
@@ -111,16 +112,23 @@ pub fn run(api: *const c.ShaderV1) !void {
     // Compiler checkpoints for the other ISAs. SM86 and SM89 happen to
     // share this program's bytes, but must still have distinct cache keys.
     const generation_hashes = [_][]const u8{
-        "5ed3d8630864630340ffac5d51e781c6c764ec65a181d0da5a82bdfa05873f93",
-        "9ac73a0a942d795b653f471eb2adb7f229fcfbea7cfd119ccf3e5728e2494403",
-        "9ac73a0a942d795b653f471eb2adb7f229fcfbea7cfd119ccf3e5728e2494403",
-        "315b97e096a7b7b6ab0a17e3f23f87702757a5a607460e03bd045cfcb2d526d1",
+        "4e3e7007bbf8abb5cf0fcc4d90ee003c8b613805ed90b7c7a188e344bc813154",
+        "d4ecf66ff0fa3256d5e080488427720ff212c98c58f19d2d511c0be7c5dc5447",
+        "d4ecf66ff0fa3256d5e080488427720ff212c98c58f19d2d511c0be7c5dc5447",
+        "3d816e091c0d105cca2fb82ea36bd0551761bebc86f005218df4049f663ee814",
+    };
+    const yuv_hashes = [_][]const u8{
+        "c38e0a3c5ecd94d79104be2780d5e0a28532663475464e3fb65d3edd2586b092",
+        "2439c347520463a6c76824c0e8e4435b2838f49281301ab0db7fee83b1ddc49e",
+        "2439c347520463a6c76824c0e8e4435b2838f49281301ab0db7fee83b1ddc49e",
+        "23d44c7f2a434ddf583bd1c1288f7fb045e60a3c71256be50c3d2431ef7d9c46",
     };
     const classes = [_]u32{0xc597,0xc797,0xc997,0xcd97};
     const models = [_]u32{75,86,89,120};
-    for (classes, models, generation_hashes) |class, sm, hex| {
+    for (classes, models, generation_hashes, yuv_hashes) |class, sm, color_hex, yuv_hex| {
+      for ([_]u32{7,8}, [_][]const u8{color_hex,yuv_hex}) |profile, hex| {
         key.graphics_class = class; key.shader_model = sm;
-        try t.expectEqual(c.status_ok, api.shader_cache_write(7, &key, bytes.ptr, bytes.len, &written));
+        try t.expectEqual(c.status_ok, api.shader_cache_write(profile, &key, bytes.ptr, bytes.len, &written));
         try t.expectEqual(c.status_ok, api.shader_cache_read(&key, bytes.ptr, written, &view));
         try t.expectEqual(sm, view.info.shader_model);
         try t.expectEqual(@as(u32,if(sm == 75) 32 else 48), view.info.max_warps_per_sm);
@@ -133,7 +141,8 @@ pub fn run(api: *const c.ShaderV1) !void {
             var alien = key; alien.graphics_class = other; alien.shader_model = other_sm;
             try t.expectEqual(c.status_cache_miss, api.shader_cache_read(&alien, bytes.ptr, written, &view));
             alien.shader_model = sm;
-            try t.expectEqual(c.status_unsupported, api.shader_cache_write(7, &alien, bytes.ptr, bytes.len, &written));
+            try t.expectEqual(c.status_unsupported, api.shader_cache_write(profile, &alien, bytes.ptr, bytes.len, &written));
         }
+      }
     }
 }

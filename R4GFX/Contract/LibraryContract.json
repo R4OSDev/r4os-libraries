@@ -2218,7 +2218,7 @@
       "zig_type": "ColorV1",
       "c_type": "R4GfxColorV1",
       "abi_major": 1,
-      "revision": 2,
+      "revision": 4,
       "interface_id_lo": 1380928579,
       "interface_id_hi": 827868743,
       "known_required_flags": 0,
@@ -3001,6 +3001,143 @@
             "ownership": "Copies every draw and dependency; retains the common source and target until physical job retirement. No accepted prefix on admission error."
           },
           "description": "Color-render1..16 compatible draws with per-draw exact logical grids in one native job. Same color/resource/dependency rules as color_render_submit; requires device_gpu_color_grid. Rotation and DPI sampling precede the shared color transform. No CPU mapping, intermediate image or partial admission."
+        },
+        {
+          "name": "color_yuv_image_transform",
+          "c_name": "r4gfx_color_yuv_image_transform",
+          "symbol": "r4gfx_color_yuv_image_transform_impl",
+          "slot": 13,
+          "since_revision": 3,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "source",
+              "type": {
+                "name": "R4GfxYuvImage",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "source"
+            },
+            {
+              "name": "target",
+              "type": {
+                "name": "R4GfxColorImage",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "target"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxColorTransform",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxCpuStats",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes each retained profile and exclusively owns writable target storage. All descriptors, statistics and ICC state must be separate from writable pixels. Independent image/profile operations share no mutable state."
+          },
+          "description": "Convert, crop, resample or composite explicit NV12/P010/YUV420P into a named RGB8/10-bit/FP16 or ICC target using the common bounded CPU color pipeline. Bilinear chroma reconstruction uses original coded sample positions; nearest/bilinear image scaling and OVER operate in display-linear RGB after the EOTF. Supports independent pitches, odd crops and dimensions, separate Y/C ranges and10-bit precision without an intermediate RGB image. Caller explicitly supplies missing stream metadata. All source storage is borrowed until this synchronous call returns; no implicit GPU readback. Validation errors preserve pixels/statistics; discard the offscreen result after execution errors."
+        },
+        {
+          "name": "color_yuv_render_submit",
+          "c_name": "r4gfx_color_yuv_render_submit",
+          "symbol": "r4gfx_color_yuv_render_submit_impl",
+          "slot": 14,
+          "since_revision": 4,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxYuvRenderRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4GfxJob",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "handle_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Device owns imported BOs, reusable VA mappings and command uploads. Caller serializes device access and holds decoder consumers until job completion/release. No retained caller pointers."
+          },
+          "description": "Compose canonical NV12/P010/YUV420P planes directly through the negotiated native GPU queue and public R4NV encoder. No full-frame RGB staging or CPU image mapping. Uses the common color policy, native job fences, reset detection and physical resource retirement."
         }
       ],
       "description": "Userland color descriptions and retained, bounded RGB ICC transformations. Native output capability and physical color acceptance are separate."
@@ -7897,6 +8034,659 @@
         }
       ],
       "description": "Device-owned residency accounting. Aliases are deduplicated. Pinned/reclaimable bytes are subsets; pending backing and global kernel charges may outlive logical replacement. No claim of actual GPU free space."
+    },
+    {
+      "name": "R4GfxYuvDescription",
+      "size": 48,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "primaries",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "primaries"
+        },
+        {
+          "name": "transfer",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "transfer"
+        },
+        {
+          "name": "matrix",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "matrix"
+        },
+        {
+          "name": "range",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "range"
+        },
+        {
+          "name": "chroma_location",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "chroma_location"
+        },
+        {
+          "name": "flags",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "reference_white",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reference_white"
+        },
+        {
+          "name": "peak",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "peak"
+        },
+        {
+          "name": "black",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "black"
+        },
+        {
+          "name": "reserved",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Version1/size48; flags/reserved zero. Explicit H.273 CICP primaries, transfer and matrix; unknown/reserved or unsupported codes are rejected. range1=full,2=limited. chroma_location1=left,2=center,3=top-left,4=top,5=bottom-left,6=bottom (H.273 Chroma420SampleLocType plus1; zero unspecified is rejected). Presentation reference_white/peak/black are cd/m2 times10000. Conventional SDR transfer codes1/6/7/14/15 use the BT.1886 reference display EOTF;8=linear,13=sRGB,16=PQ,18=HLG. Range removal occurs before RGB transfer decoding; no resolution-dependent color guess."
+    },
+    {
+      "name": "R4GfxYuvPlane",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "cpu_address",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "cpu_address"
+        },
+        {
+          "name": "byte_length",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte_length"
+        },
+        {
+          "name": "pitch",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pitch"
+        },
+        {
+          "name": "reserved",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Borrowed readable linear CPU plane for the duration of a synchronous call. Positive row pitch in bytes; reserved zero. byte_length must cover the final visible row including every sample, but need not include trailing row padding. Unused planes are all zero. This is not a GPU mapping request."
+    },
+    {
+      "name": "R4GfxYuvImage",
+      "size": 192,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "format",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "format"
+        },
+        {
+          "name": "width",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width"
+        },
+        {
+          "name": "height",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "plane_count",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "plane_count"
+        },
+        {
+          "name": "reserved",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "crop",
+          "offset": 32,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "crop"
+        },
+        {
+          "name": "description",
+          "offset": 48,
+          "type": {
+            "name": "R4GfxYuvDescription",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "description"
+        },
+        {
+          "name": "plane0",
+          "offset": 96,
+          "type": {
+            "name": "R4GfxYuvPlane",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "plane0"
+        },
+        {
+          "name": "plane1",
+          "offset": 128,
+          "type": {
+            "name": "R4GfxYuvPlane",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "plane1"
+        },
+        {
+          "name": "plane2",
+          "offset": 160,
+          "type": {
+            "name": "R4GfxYuvPlane",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "plane2"
+        }
+      ],
+      "description": "Version1/size192; reserved zero. Progressive 4:2:0 coded dimensions1..16384 and explicit nonempty visible crop. Format1=NV12 (Y,interleaved CbCr),2=P010 (same two planes, little-endian16-bit words with10 meaningful MSBs),3=YUV420P (three independent8-bit planes). Chroma extents round coded dimensions up to half. Pitch is a multiple of the plane sample size; P010 padding bits are ignored. Every operation source rectangle lies inside crop and uses absolute coded coordinates, preserving chroma phase for odd crops. No input planes may alias writable target pixels, statistics or retained ICC state."
+    },
+    {
+      "name": "R4GfxYuvBufferPlane",
+      "size": 40,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "reference_id",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reference_id"
+        },
+        {
+          "name": "reserved",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "reference_generation",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reference_generation"
+        },
+        {
+          "name": "offset",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "offset"
+        },
+        {
+          "name": "byte_length",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte_length"
+        },
+        {
+          "name": "pitch",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pitch"
+        }
+      ],
+      "description": "Borrowed canonical GfxBuffer reference, not a CPU/GPU address. reserved0. offset/byte_length/pitch select one plane inside the described BO; native modifier comes only from its canonical descriptor. Multiple planes may share a BO. Successful submit retains independent BO/VA loans until physical completion; BUSY may retain bounded reusable cache entries but submits no draw. Source pixels must remain immutable until the returned job is physically released. Linear pitch must be32-byte aligned; native storage must admit a page-aligned mapping. No implicit staging or readback."
+    },
+    {
+      "name": "R4GfxYuvBufferImage",
+      "size": 216,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "format",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "format"
+        },
+        {
+          "name": "width",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width"
+        },
+        {
+          "name": "height",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "plane_count",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "plane_count"
+        },
+        {
+          "name": "reserved",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "crop",
+          "offset": 32,
+          "type": {
+            "name": "R4GfxRect",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "crop"
+        },
+        {
+          "name": "description",
+          "offset": 48,
+          "type": {
+            "name": "R4GfxYuvDescription",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "description"
+        },
+        {
+          "name": "plane0",
+          "offset": 96,
+          "type": {
+            "name": "R4GfxYuvBufferPlane",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "plane0"
+        },
+        {
+          "name": "plane1",
+          "offset": 136,
+          "type": {
+            "name": "R4GfxYuvBufferPlane",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "plane1"
+        },
+        {
+          "name": "plane2",
+          "offset": 176,
+          "type": {
+            "name": "R4GfxYuvBufferPlane",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "plane2"
+        }
+      ],
+      "description": "Version1/size216. Same explicit format, coded dimensions, crop and CICP meaning as R4GfxYuvImage, with canonical BO planes instead of CPU pointers. Plane count2 for NV12/P010,3 for YUV420P; unused plane and reserved fields zero. Chroma dimensions round up. No allocation format, resolution or display state supplies missing color metadata."
+    },
+    {
+      "name": "R4GfxYuvRenderRequest",
+      "size": 344,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "source",
+          "offset": 8,
+          "type": {
+            "name": "R4GfxYuvBufferImage",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "source"
+        },
+        {
+          "name": "target",
+          "offset": 224,
+          "type": {
+            "name": "R4GfxResource",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "target"
+        },
+        {
+          "name": "transform",
+          "offset": 256,
+          "type": {
+            "name": "R4GfxColorTransform",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "transform"
+        },
+        {
+          "name": "deadline_ns",
+          "offset": 320,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "deadline_ns"
+        },
+        {
+          "name": "dependency_count",
+          "offset": 328,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dependency_count"
+        },
+        {
+          "name": "reserved",
+          "offset": 332,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        },
+        {
+          "name": "dependencies",
+          "offset": 336,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dependencies"
+        }
+      ],
+      "description": "Version1/size344. Explicit colored RGB target resource and the same bounded source/target transform as the CPU path. Source rectangle lies within the visible coded crop. Only BLIT or linear-optical-FP16 OVER. deadline_ns is a future absolute monotonic deadline for preparation and execution. Up to copy_max_dependencies borrowed R4GfxCopyFence values; no pointer with zero count. Preparation is nonblocking: BUSY leaves output unchanged and requires retry/pump; OK publishes one ordinary R4GfxJob with its actual queue fence. Decode-frame consumer ownership must span BUSY and then this fence plus job release. Unsupported layouts/colors return explicit status; the media owner chooses CPU fallback. Cache mappings are bounded and reused; device close may remain BUSY until VA retirement ACKs."
     }
   ],
   "constants": [
@@ -8858,6 +9648,48 @@
       "type": "u32",
       "value": 512,
       "description": "Backend combines exact logical-grid sampling and named-color conversion in one native job. Requires the distinct combined capability, not just separate color/grid support."
+    },
+    {
+      "zig_name": "color_primaries_bt601_625",
+      "c_name": "R4GFX_COLOR_PRIMARIES_BT601_625",
+      "type": "u32",
+      "value": 5,
+      "description": "BT.601625-line primaries, D65."
+    },
+    {
+      "zig_name": "color_primaries_bt601_525",
+      "c_name": "R4GFX_COLOR_PRIMARIES_BT601_525",
+      "type": "u32",
+      "value": 6,
+      "description": "BT.601525-line/SMPTE-C primaries, D65."
+    },
+    {
+      "zig_name": "color_transfer_bt1886",
+      "c_name": "R4GFX_COLOR_TRANSFER_BT1886",
+      "type": "u32",
+      "value": 6,
+      "description": "BT.1886 reference display EOTF; peak equals reference_white. Explicit black is supported; this is not the camera OETF."
+    },
+    {
+      "zig_name": "yuv_format_nv12",
+      "c_name": "R4GFX_YUV_FORMAT_NV12",
+      "type": "u32",
+      "value": 1,
+      "description": "Two-plane8-bit4:2:0."
+    },
+    {
+      "zig_name": "yuv_format_p010",
+      "c_name": "R4GFX_YUV_FORMAT_P010",
+      "type": "u32",
+      "value": 2,
+      "description": "Two-plane10-bit4:2:0 in high bits of little-endian16-bit words."
+    },
+    {
+      "zig_name": "yuv_format_yuv420p",
+      "c_name": "R4GFX_YUV_FORMAT_YUV420P",
+      "type": "u32",
+      "value": 3,
+      "description": "Three-plane8-bit4:2:0."
     }
   ],
   "errors": [

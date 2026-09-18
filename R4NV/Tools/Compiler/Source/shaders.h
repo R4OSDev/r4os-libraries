@@ -14,6 +14,7 @@ enum r4nv_shader_profile {
    R4NV_SOLID_FRAGMENT = 5,
    R4NV_SOLID_VERTEX = 6,
    R4NV_COLOR_FRAGMENT = 7,
+   R4NV_YUV_FRAGMENT = 8,
 };
 
 nir_shader *r4nv_build_shader(enum r4nv_shader_profile profile,

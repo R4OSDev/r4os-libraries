@@ -7,6 +7,7 @@ const d = @import("device.zig");
 const color = @import("color.zig");
 const pixels = @import("color_pixels.zig");
 const icc = @import("color_icc.zig");
+const yuv = @import("color_yuv.zig");
 const tile_width = 64;
 const sample_capacity = tile_width * 4;
 const Value = color.Value;
@@ -89,10 +90,49 @@ pub const Image = struct {
         for (samples) |value| if (!pixels.finite(value)) return error.Invalid;
     }
 };
+// Both inputs feed the same bounded linear-light composition and output
+// policy. YUV reconstruction precedes the EOTF and RGB interpolation.
+const Input = union(enum) {
+    rgb: Image,
+    yuv: yuv.Image,
+    fn description(self: *const Input) color.Description {
+        return switch (self.*) { .rgb => |*image| image.description, .yuv => |*image| image.encoding.description };
+    }
+    fn floating(self: *const Input) bool {
+        return switch (self.*) { .rgb => |*image| image.format == .abgr16161616f, .yuv => false };
+    }
+    fn readBytes(self: *const Input) u64 {
+        return switch (self.*) { .rgb => |*image| image.format.bytes(), .yuv => |*image| image.readBytes() };
+    }
+    fn rectangle(self: *const Input, rect: c.R4GfxRect) d.Error!void {
+        switch (self.*) {
+            .rgb => |image| try rectangleRgb(image, rect),
+            .yuv => |*image| try image.rectangle(.{ .x = rect.x, .y = rect.y, .width = rect.width, .height = rect.height }),
+        }
+    }
+    fn aliases(self: *const Input, address: u64, bytes: u64) bool {
+        switch (self.*) {
+            .rgb => |*image| return d.overlaps(image.storage.cpu_address, image.storage.byte_length, address, bytes),
+            .yuv => |*image| for (image.planes) |plane| {
+                if (d.overlaps(@intFromPtr(plane.bytes.ptr), plane.bytes.len, address, bytes)) return true;
+            },
+        }
+        return false;
+    }
+    fn load(self: *const Input, x: u32, y: u32) Value {
+        return switch (self.*) { .rgb => |*image| image.load(x, y), .yuv => |*image| image.load(x, y) };
+    }
+    fn decode(self: *const Input, samples: []Value) d.Error!void {
+        switch (self.*) {
+            .rgb => |*image| try image.decode(samples),
+            .yuv => |*image| for (samples) |*value| { value.* = image.encoding.decode(value.rgb, 1); },
+        }
+    }
+};
 fn profileError(err: icc.Error) d.Error {
     return switch (err) { error.Memory => error.Limit, error.Alias => error.Alias, error.Unsupported => error.Unsupported, else => error.Invalid };
 }
-fn rectangle(image: Image, rect: c.R4GfxRect) d.Error!void {
+fn rectangleRgb(image: Image, rect: c.R4GfxRect) d.Error!void {
     if (rect.width == 0 or rect.height == 0 or rect.x >= image.storage.width or rect.y >= image.storage.height or
         rect.width > image.storage.width - rect.x or rect.height > image.storage.height - rect.y) return error.Invalid;
 }
@@ -107,7 +147,7 @@ fn coordinate(value: u32, source: u32, target: u32, linear: bool) Axis {
     const low: u32 = @intFromFloat(@floor(clamped));
     return .{ .low = low, .high = @min(low + 1, source - 1), .weight = @floatCast(clamped - @floor(clamped)) };
 }
-fn gather(source: *const Image, request: c.R4GfxColorTransform, x: u32, y: u32, samples: []Value, weights: [][2]f32) void {
+fn gather(source: *const Input, request: c.R4GfxColorTransform, x: u32, y: u32, samples: []Value, weights: [][2]f32) void {
     const linear = request.sampler == c.render_sampler_bilinear;
     const across = if (linear) @as(usize, 4) else 1;
     const sy = coordinate(y, request.source_rect.height, request.target_rect.height, linear);
@@ -124,18 +164,24 @@ fn gather(source: *const Image, request: c.R4GfxColorTransform, x: u32, y: u32, 
 }
 
 pub fn execute(source: Image, target: Image, request: c.R4GfxColorTransform) d.Error!c.R4GfxCpuStats {
+    return executeInput(.{ .rgb = source }, target, request);
+}
+pub fn executeYuv(source: yuv.Image, target: Image, request: c.R4GfxColorTransform) d.Error!c.R4GfxCpuStats {
+    return executeInput(.{ .yuv = source }, target, request);
+}
+fn executeInput(source: Input, target: Image, request: c.R4GfxColorTransform) d.Error!c.R4GfxCpuStats {
     if (request.version != 1 or request.size != @sizeOf(c.R4GfxColorTransform) or request.flags & ~@as(u32, 7) != 0 or request.opacity > 65535) return error.Invalid;
     if ((request.sampler != c.render_sampler_nearest and request.sampler != c.render_sampler_bilinear) or
         (request.operation != c.render_operation_blit and request.operation != c.render_operation_over)) return error.Unsupported;
     const output_mapping = request.flags & c.color_transform_output != 0;
     const blend = request.operation == c.render_operation_over;
     if (target.profile != null and (blend or !output_mapping)) return error.Unsupported;
-    try rectangle(source, request.source_rect);
-    try rectangle(target, request.target_rect);
+    try source.rectangle(request.source_rect);
+    try rectangleRgb(target, request.target_rect);
     const count: u64 = @as(u64, request.target_rect.width) * request.target_rect.height;
     if (request.pixel_budget > c.render_max_pixels or count > request.pixel_budget) return error.Limit;
-    if (d.overlaps(source.storage.cpu_address, source.storage.byte_length, target.storage.cpu_address, target.storage.byte_length)) return error.Alias;
-    const tone = color.ToneMap.init(source.description, target.description, request.flags & c.color_transform_relative_white != 0) catch return error.Invalid;
+    if (source.aliases(target.storage.cpu_address, target.storage.byte_length)) return error.Alias;
+    const tone = color.ToneMap.init(source.description(), target.description, request.flags & c.color_transform_relative_white != 0) catch return error.Invalid;
     var mapper = tone;
     mapper.gain = 1;
     if (blend) mapper = color.ToneMap.init(.{ .primaries = .bt2020, .transfer = .linear,
@@ -146,16 +192,16 @@ pub fn execute(source: Image, target: Image, request: c.R4GfxColorTransform) d.E
     var resolved: [tile_width]Value = undefined;
     var weights: [tile_width][2]f32 = undefined;
     var stats: c.R4GfxCpuStats = .{ .pixels = count, .commands = 1, .reserved = 0,
-        .read_bytes = count * (source.format.bytes() * across + @as(u64, if (blend) target.format.bytes() else 0)), .write_bytes = count * target.format.bytes() };
+        .read_bytes = count * (source.readBytes() * across + @as(u64, if (blend) target.format.bytes() else 0)), .write_bytes = count * target.format.bytes() };
     // Only sampled FP16 pixels require a preflight. This is bounded by the
     // submitted pixel budget even when reducing a much larger source image.
-    if (source.format == .abgr16161616f or (blend and target.format == .abgr16161616f)) {
+    if (source.floating() or (blend and target.format == .abgr16161616f)) {
         var y: u32 = 0;
         while (y < request.target_rect.height) : (y += 1) {
             var x: u32 = 0;
             while (x < request.target_rect.width) {
                 const n = @min(tile_width, request.target_rect.width - x);
-                if (source.format == .abgr16161616f) {
+                if (source.floating()) {
                     gather(&source, request, x, y, samples[0 .. n * across], weights[0..n]);
                     for (samples[0 .. n * across]) |value| if (!pixels.finite(value)) return error.Invalid;
                 }
@@ -165,7 +211,7 @@ pub fn execute(source: Image, target: Image, request: c.R4GfxColorTransform) d.E
                 x += n;
             }
         }
-        if (source.format == .abgr16161616f) stats.read_bytes += count * across * source.format.bytes();
+        if (source.floating()) stats.read_bytes += count * across * source.readBytes();
         if (blend and target.format == .abgr16161616f) stats.read_bytes += count * target.format.bytes();
     }
     const opacity = @as(f32, @floatFromInt(request.opacity)) / 65535;

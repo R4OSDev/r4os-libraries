@@ -16,6 +16,7 @@
         "R4NAK",
         "R4VK",
         "R4GL",
+        "R4VIDEO",
         "Shared",
         "README.md",
         "DOCUMENTATION.de.txt",

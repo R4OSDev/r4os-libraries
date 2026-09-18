@@ -202,6 +202,64 @@ pub const R4NvNativePush = extern struct {
     byte_length: u32,
     flags: u32,
 };
+
+pub const R4NvRenderInfo = extern struct {
+    version: u32,
+    size: u32,
+    graphics_class: u32,
+    shader_model: u32,
+    program_bytes: u32,
+    packet_bytes: u32,
+    max_command_words: u32,
+    max_draws: u32,
+};
+
+pub const R4NvRenderRect = extern struct {
+    x: i32,
+    y: i32,
+    width: u32,
+    height: u32,
+};
+
+pub const R4NvRenderPlane = extern struct {
+    address: u64,
+    byte_length: u64,
+    modifier: u64,
+    width: u32,
+    height: u32,
+    pitch: u32,
+    format: u32,
+};
+
+pub const R4NvYuvDraw = extern struct {
+    luma: R4NvRenderPlane,
+    chroma: R4NvRenderPlane,
+    second_chroma: R4NvRenderPlane,
+    target: R4NvRenderPlane,
+    source_rect: R4NvRenderRect,
+    destination: R4NvRenderRect,
+    scissor: R4NvRenderRect,
+    format: u32,
+    filter: u32,
+    blend: u32,
+    opacity: u32,
+    chroma_x: u32,
+    chroma_y: u32,
+};
+
+pub const R4NvYuvRender = extern struct {
+    version: u32,
+    size: u32,
+    graphics_class: u32,
+    draw_count: u32,
+    draws: u64,
+    program_address: u64,
+    program_bytes: u64,
+    packet_address: u64,
+    packet_bytes: u64,
+    color_program: u64,
+    yuv_matrix: u64,
+};
 pub const command_abi: u32 = 1;
 pub const rm_release: u32 = 570144;
 pub const feature_copy_linear: u32 = 1;
@@ -239,6 +297,7 @@ pub const image_reason_usage: u32 = 8;
 pub const image_reason_forced: u32 = 16;
 pub const image_reason_preference: u32 = 32;
 pub const shader_profile_color_fragment: u32 = 7;
+pub const shader_profile_yuv_fragment: u32 = 8;
 pub const native_submit_version: u32 = 1;
 pub const native_engine_graphics: u32 = 1;
 pub const native_push_incomplete: u32 = 1;
@@ -246,6 +305,7 @@ pub const native_push_no_prefetch: u32 = 2;
 pub const native_push_limit: u32 = 510;
 pub const native_engine_compute: u32 = 2;
 pub const native_engine_copy: u32 = 4;
+pub const native_engine_video: u32 = 8;
 pub const architecture_version: u32 = 3;
 pub const architecture_host_coherent: u32 = 1;
 pub const architecture_image_layouts: u32 = 2;
@@ -298,4 +358,26 @@ pub const ShaderV1 = extern struct {
     shader_info: ShaderV1ShaderInfoFn,
     shader_cache_write: ShaderV1ShaderCacheWriteFn,
     shader_cache_read: ShaderV1ShaderCacheReadFn,
+};
+
+pub const render_v1_export_name = "RENDER_V1";
+pub const render_v1_revision: u16 = 1;
+pub const render_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 56,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x52344e56524e4452,
+    .interface_id_hi = 0x52344f5330373934,
+};
+pub const RenderV1RenderInfoFn = *const fn (graphics_class: u32, output: *R4NvRenderInfo) callconv(.c) i32;
+pub const RenderV1RenderUploadFn = *const fn (graphics_class: u32, bytes: [*]u8, capacity: u32, written: *u32) callconv(.c) i32;
+pub const RenderV1EncodeYuvFn = *const fn (request: *const R4NvYuvRender, commands: [*]u32, capacity: u32, packets: [*]u8, packet_capacity: u32, written: *u32) callconv(.c) i32;
+pub const RenderV1 = extern struct {
+    header: InterfaceHeader,
+    render_info: RenderV1RenderInfoFn,
+    render_upload: RenderV1RenderUploadFn,
+    encode_yuv: RenderV1EncodeYuvFn,
 };

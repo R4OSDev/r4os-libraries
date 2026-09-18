@@ -6,8 +6,8 @@ pub const Program = extern struct {
     words: [64]u32 = @splat(0),
     pub fn scalar(self: Program, byte: usize) f32 { return @bitCast(self.words[byte / 4]); }
     pub fn validate(self: Program) error{ Bounds, Unsupported }!void {
-        if (self.words[0] & ~@as(u32, 3) != 0 or self.words[1] < 1 or self.words[1] > 4 or
-            self.words[2] < 1 or self.words[2] > 4 or self.words[3] < 1 or self.words[3] > 4 or self.words[4] < 1 or self.words[4] > 4) return error.Unsupported;
+        if (self.words[0] & ~@as(u32, 3) != 0 or !supportedTransfer(self.words[1]) or
+            !supportedTransfer(self.words[2]) or self.words[3] < 1 or self.words[3] > 4 or self.words[4] < 1 or self.words[4] > 4) return error.Unsupported;
         for (self.words[5..8]) |value| if (value != 0) return error.Bounds;
         for (self.words[50..]) |value| if (value != 0) return error.Bounds;
         for (self.words[8..50]) |word| if (!std.math.isFinite(@as(f32, @bitCast(word)))) return error.Bounds;
@@ -24,4 +24,5 @@ pub const Program = extern struct {
         if ((self.words[0] & 2 != 0) != (self.scalar(196) != 0) or (self.words[0] & 2 != 0 and self.words[0] & 1 == 0)) return error.Unsupported;
     }
 };
+fn supportedTransfer(value: u32) bool { return (value >= 1 and value <= 4) or value == 6; }
 comptime { if (@sizeOf(Program) != 256) @compileError("color constant buffer ABI"); }

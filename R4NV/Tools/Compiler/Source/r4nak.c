@@ -29,7 +29,7 @@ int main(int argc, char **argv)
    char *end;
    errno = 0;
    unsigned long profile = strtoul(argv[1], &end, 10);
-   if (errno || *end || profile < R4NV_RECT_VERTEX || profile > R4NV_COLOR_FRAGMENT)
+   if (errno || *end || profile < R4NV_RECT_VERTEX || profile > R4NV_YUV_FRAGMENT)
       return 2;
    errno = 0;
    const unsigned long sm = argc == 7 ? strtoul(argv[6], &end, 10) : 86;

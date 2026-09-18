@@ -170,6 +170,54 @@ comptime {
     if (@offsetOf(implementation.R4NvNativePush, "address") != 0 or @offsetOf(binding.R4NvNativePush, "address") != 0) @compileError("R4NvNativePush.address offset drift");
     if (@offsetOf(implementation.R4NvNativePush, "byte_length") != 8 or @offsetOf(binding.R4NvNativePush, "byte_length") != 8) @compileError("R4NvNativePush.byte_length offset drift");
     if (@offsetOf(implementation.R4NvNativePush, "flags") != 12 or @offsetOf(binding.R4NvNativePush, "flags") != 12) @compileError("R4NvNativePush.flags offset drift");
+    if (@sizeOf(implementation.R4NvRenderInfo) != 32 or @sizeOf(binding.R4NvRenderInfo) != 32) @compileError("R4NvRenderInfo size drift");
+    if (@offsetOf(implementation.R4NvRenderInfo, "version") != 0 or @offsetOf(binding.R4NvRenderInfo, "version") != 0) @compileError("R4NvRenderInfo.version offset drift");
+    if (@offsetOf(implementation.R4NvRenderInfo, "size") != 4 or @offsetOf(binding.R4NvRenderInfo, "size") != 4) @compileError("R4NvRenderInfo.size offset drift");
+    if (@offsetOf(implementation.R4NvRenderInfo, "graphics_class") != 8 or @offsetOf(binding.R4NvRenderInfo, "graphics_class") != 8) @compileError("R4NvRenderInfo.graphics_class offset drift");
+    if (@offsetOf(implementation.R4NvRenderInfo, "shader_model") != 12 or @offsetOf(binding.R4NvRenderInfo, "shader_model") != 12) @compileError("R4NvRenderInfo.shader_model offset drift");
+    if (@offsetOf(implementation.R4NvRenderInfo, "program_bytes") != 16 or @offsetOf(binding.R4NvRenderInfo, "program_bytes") != 16) @compileError("R4NvRenderInfo.program_bytes offset drift");
+    if (@offsetOf(implementation.R4NvRenderInfo, "packet_bytes") != 20 or @offsetOf(binding.R4NvRenderInfo, "packet_bytes") != 20) @compileError("R4NvRenderInfo.packet_bytes offset drift");
+    if (@offsetOf(implementation.R4NvRenderInfo, "max_command_words") != 24 or @offsetOf(binding.R4NvRenderInfo, "max_command_words") != 24) @compileError("R4NvRenderInfo.max_command_words offset drift");
+    if (@offsetOf(implementation.R4NvRenderInfo, "max_draws") != 28 or @offsetOf(binding.R4NvRenderInfo, "max_draws") != 28) @compileError("R4NvRenderInfo.max_draws offset drift");
+    if (@sizeOf(implementation.R4NvRenderRect) != 16 or @sizeOf(binding.R4NvRenderRect) != 16) @compileError("R4NvRenderRect size drift");
+    if (@offsetOf(implementation.R4NvRenderRect, "x") != 0 or @offsetOf(binding.R4NvRenderRect, "x") != 0) @compileError("R4NvRenderRect.x offset drift");
+    if (@offsetOf(implementation.R4NvRenderRect, "y") != 4 or @offsetOf(binding.R4NvRenderRect, "y") != 4) @compileError("R4NvRenderRect.y offset drift");
+    if (@offsetOf(implementation.R4NvRenderRect, "width") != 8 or @offsetOf(binding.R4NvRenderRect, "width") != 8) @compileError("R4NvRenderRect.width offset drift");
+    if (@offsetOf(implementation.R4NvRenderRect, "height") != 12 or @offsetOf(binding.R4NvRenderRect, "height") != 12) @compileError("R4NvRenderRect.height offset drift");
+    if (@sizeOf(implementation.R4NvRenderPlane) != 40 or @sizeOf(binding.R4NvRenderPlane) != 40) @compileError("R4NvRenderPlane size drift");
+    if (@offsetOf(implementation.R4NvRenderPlane, "address") != 0 or @offsetOf(binding.R4NvRenderPlane, "address") != 0) @compileError("R4NvRenderPlane.address offset drift");
+    if (@offsetOf(implementation.R4NvRenderPlane, "byte_length") != 8 or @offsetOf(binding.R4NvRenderPlane, "byte_length") != 8) @compileError("R4NvRenderPlane.byte_length offset drift");
+    if (@offsetOf(implementation.R4NvRenderPlane, "modifier") != 16 or @offsetOf(binding.R4NvRenderPlane, "modifier") != 16) @compileError("R4NvRenderPlane.modifier offset drift");
+    if (@offsetOf(implementation.R4NvRenderPlane, "width") != 24 or @offsetOf(binding.R4NvRenderPlane, "width") != 24) @compileError("R4NvRenderPlane.width offset drift");
+    if (@offsetOf(implementation.R4NvRenderPlane, "height") != 28 or @offsetOf(binding.R4NvRenderPlane, "height") != 28) @compileError("R4NvRenderPlane.height offset drift");
+    if (@offsetOf(implementation.R4NvRenderPlane, "pitch") != 32 or @offsetOf(binding.R4NvRenderPlane, "pitch") != 32) @compileError("R4NvRenderPlane.pitch offset drift");
+    if (@offsetOf(implementation.R4NvRenderPlane, "format") != 36 or @offsetOf(binding.R4NvRenderPlane, "format") != 36) @compileError("R4NvRenderPlane.format offset drift");
+    if (@sizeOf(implementation.R4NvYuvDraw) != 232 or @sizeOf(binding.R4NvYuvDraw) != 232) @compileError("R4NvYuvDraw size drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "luma") != 0 or @offsetOf(binding.R4NvYuvDraw, "luma") != 0) @compileError("R4NvYuvDraw.luma offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "chroma") != 40 or @offsetOf(binding.R4NvYuvDraw, "chroma") != 40) @compileError("R4NvYuvDraw.chroma offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "second_chroma") != 80 or @offsetOf(binding.R4NvYuvDraw, "second_chroma") != 80) @compileError("R4NvYuvDraw.second_chroma offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "target") != 120 or @offsetOf(binding.R4NvYuvDraw, "target") != 120) @compileError("R4NvYuvDraw.target offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "source_rect") != 160 or @offsetOf(binding.R4NvYuvDraw, "source_rect") != 160) @compileError("R4NvYuvDraw.source_rect offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "destination") != 176 or @offsetOf(binding.R4NvYuvDraw, "destination") != 176) @compileError("R4NvYuvDraw.destination offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "scissor") != 192 or @offsetOf(binding.R4NvYuvDraw, "scissor") != 192) @compileError("R4NvYuvDraw.scissor offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "format") != 208 or @offsetOf(binding.R4NvYuvDraw, "format") != 208) @compileError("R4NvYuvDraw.format offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "filter") != 212 or @offsetOf(binding.R4NvYuvDraw, "filter") != 212) @compileError("R4NvYuvDraw.filter offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "blend") != 216 or @offsetOf(binding.R4NvYuvDraw, "blend") != 216) @compileError("R4NvYuvDraw.blend offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "opacity") != 220 or @offsetOf(binding.R4NvYuvDraw, "opacity") != 220) @compileError("R4NvYuvDraw.opacity offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "chroma_x") != 224 or @offsetOf(binding.R4NvYuvDraw, "chroma_x") != 224) @compileError("R4NvYuvDraw.chroma_x offset drift");
+    if (@offsetOf(implementation.R4NvYuvDraw, "chroma_y") != 228 or @offsetOf(binding.R4NvYuvDraw, "chroma_y") != 228) @compileError("R4NvYuvDraw.chroma_y offset drift");
+    if (@sizeOf(implementation.R4NvYuvRender) != 72 or @sizeOf(binding.R4NvYuvRender) != 72) @compileError("R4NvYuvRender size drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "version") != 0 or @offsetOf(binding.R4NvYuvRender, "version") != 0) @compileError("R4NvYuvRender.version offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "size") != 4 or @offsetOf(binding.R4NvYuvRender, "size") != 4) @compileError("R4NvYuvRender.size offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "graphics_class") != 8 or @offsetOf(binding.R4NvYuvRender, "graphics_class") != 8) @compileError("R4NvYuvRender.graphics_class offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "draw_count") != 12 or @offsetOf(binding.R4NvYuvRender, "draw_count") != 12) @compileError("R4NvYuvRender.draw_count offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "draws") != 16 or @offsetOf(binding.R4NvYuvRender, "draws") != 16) @compileError("R4NvYuvRender.draws offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "program_address") != 24 or @offsetOf(binding.R4NvYuvRender, "program_address") != 24) @compileError("R4NvYuvRender.program_address offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "program_bytes") != 32 or @offsetOf(binding.R4NvYuvRender, "program_bytes") != 32) @compileError("R4NvYuvRender.program_bytes offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "packet_address") != 40 or @offsetOf(binding.R4NvYuvRender, "packet_address") != 40) @compileError("R4NvYuvRender.packet_address offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "packet_bytes") != 48 or @offsetOf(binding.R4NvYuvRender, "packet_bytes") != 48) @compileError("R4NvYuvRender.packet_bytes offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "color_program") != 56 or @offsetOf(binding.R4NvYuvRender, "color_program") != 56) @compileError("R4NvYuvRender.color_program offset drift");
+    if (@offsetOf(implementation.R4NvYuvRender, "yuv_matrix") != 64 or @offsetOf(binding.R4NvYuvRender, "yuv_matrix") != 64) @compileError("R4NvYuvRender.yuv_matrix offset drift");
     if (@sizeOf(implementation.BackendV1) != 64 or @sizeOf(binding.BackendV1) != 64) @compileError("BackendV1 size drift");
     if (@offsetOf(implementation.BackendV1, "negotiate") != 32 or @offsetOf(binding.BackendV1, "negotiate") != 32) @compileError("BackendV1.negotiate slot drift");
     if (@offsetOf(implementation.BackendV1, "encode_copy") != 40 or @offsetOf(binding.BackendV1, "encode_copy") != 40) @compileError("BackendV1.encode_copy slot drift");
@@ -179,6 +227,10 @@ comptime {
     if (@offsetOf(implementation.ShaderV1, "shader_info") != 32 or @offsetOf(binding.ShaderV1, "shader_info") != 32) @compileError("ShaderV1.shader_info slot drift");
     if (@offsetOf(implementation.ShaderV1, "shader_cache_write") != 40 or @offsetOf(binding.ShaderV1, "shader_cache_write") != 40) @compileError("ShaderV1.shader_cache_write slot drift");
     if (@offsetOf(implementation.ShaderV1, "shader_cache_read") != 48 or @offsetOf(binding.ShaderV1, "shader_cache_read") != 48) @compileError("ShaderV1.shader_cache_read slot drift");
+    if (@sizeOf(implementation.RenderV1) != 56 or @sizeOf(binding.RenderV1) != 56) @compileError("RenderV1 size drift");
+    if (@offsetOf(implementation.RenderV1, "render_info") != 32 or @offsetOf(binding.RenderV1, "render_info") != 32) @compileError("RenderV1.render_info slot drift");
+    if (@offsetOf(implementation.RenderV1, "render_upload") != 40 or @offsetOf(binding.RenderV1, "render_upload") != 40) @compileError("RenderV1.render_upload slot drift");
+    if (@offsetOf(implementation.RenderV1, "encode_yuv") != 48 or @offsetOf(binding.RenderV1, "encode_yuv") != 48) @compileError("RenderV1.encode_yuv slot drift");
 }
 
 test "generated implementation and binding views are identical" {
@@ -186,4 +238,6 @@ test "generated implementation and binding views are identical" {
     try std.testing.expectEqual(implementation.backend_v1_header.interface_id_lo, binding.backend_v1_header.interface_id_lo);
     try std.testing.expectEqual(implementation.shader_v1_header.size, binding.shader_v1_header.size);
     try std.testing.expectEqual(implementation.shader_v1_header.interface_id_lo, binding.shader_v1_header.interface_id_lo);
+    try std.testing.expectEqual(implementation.render_v1_header.size, binding.render_v1_header.size);
+    try std.testing.expectEqual(implementation.render_v1_header.interface_id_lo, binding.render_v1_header.interface_id_lo);
 }

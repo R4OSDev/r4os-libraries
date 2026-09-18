@@ -10,6 +10,7 @@ Dieses Repository enthaelt die offiziellen unabhaengigen Runtime-R4Ls:
 - `R4NAK` fuer den freestanding SPIR-V/NIR/NAK-Laufzeitcompiler
 - `R4VK` fuer die native Mesa-Vulkan-Anbindung
 - `R4GL` fuer EGL/OpenGL mit explizitem Mesa-Softwareprofil
+- `R4VIDEO` fuer asynchrone H.264-Dekodierung und gemeinsame YUV-BO-Leihen
 - `R4FONT` fuer TTF, OpenType/CFF, WOFF, WOFF2 und Font-Rasterung
 
 Jede Library besitzt ihren Contract, ihre Baseline, Implementierung,
@@ -44,6 +45,8 @@ separat offen in ExFiles/Reports/OssiGPU.txt /0.79.34.
 R4GL verwendet die gemeinsame gepruefte Mesa-Quelle, braucht aber keinen
 Rust-Hostcompiler. Sein Build kompiliert Softpipe/EGL, die C/C++-Laufzeit und
 gepinntes Musl; Versionen, Grenzen und Prozessabschluss stehen in R4GL/README.md.
+R4VIDEO verwendet den gepinnten FFmpeg-Decoderkern mit clang/NASM. Es bleibt
+waehrend der Integration bei IMAGE_SCOPE=none; Build und Grenzen: R4VIDEO/README.md.
 
 Die Starter wenden die Settings vor der Zig-Paketaufloesung an. SDK und
 Plattform-Contract sind im Paketbaum inhaltlich gepinnt; die gemappten lokalen
@@ -55,11 +58,11 @@ Consumer-Bindings
 Das Rootpaket `r4os_libraries` stellt die Zig-Bindings als benannte Pfade
 `r4std_zig_binding`, `r4img_zig_binding`, `r4gfx_zig_binding`,
 `r4nv_zig_binding`, `r4nak_zig_binding`, `r4vk_zig_binding`, `r4gl_zig_binding`
-und `r4font_zig_binding` bereit.
+und `r4font_zig_binding`, `r4video_zig_binding` bereit.
 `r4nak_worker` liefert die optionale R4SYS-Worker-/Dateicache-Anbindung. Fuer
 C-Verbraucher existieren entsprechend `r4std_c_include`, `r4img_c_include` und
 `r4font_c_include`, `r4gfx_c_include`, `r4nv_c_include`, `r4nak_c_include`,
-`r4vk_c_include` und `r4gl_c_include`.
+`r4vk_c_include`, `r4gl_c_include` und `r4video_c_include`.
 Ein Modul pinnt dieses Paket und uebergibt nur den
 benoetigten Pfad an den SDK-Manifestbuild; die Runtime-Implementierungen werden
 dadurch weder eingebettet noch mit dem Verbraucher gekoppelt.

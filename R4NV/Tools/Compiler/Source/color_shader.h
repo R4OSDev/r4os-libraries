@@ -4,10 +4,11 @@
  * display policy runs in this shader or the kernel.
  * 0:u4(flags,src transfer,dst transfer,src alpha),16:u4(dst alpha,0,0,0)
  * 32/80:three float4 matrix rows,128/144:float4(white,peak,HLG gamma,beta)
+ * BT.1886 uses gamma slot1 and beta=(black/white)^(1/2.4).
  * 160:float4(src range gain,bias,dst range gain,bias)
  * 176:float4(gain,source peak,knee,shoulder),192:float4(target peak,quantum,0,0)
  * 208..255:zero. Flags:1 output tone/gamut mapping,2 ordered dither.
- * Transfers:1 sRGB,2 linear,3 PQ,4 HLG. Alpha:1 opaque,2 straight,
+ * Transfers:1 sRGB,2 linear,3 PQ,4 HLG,6 BT.1886. Alpha:1 opaque,2 straight,
  * 3 encoded premultiplied,4 linear premultiplied. */
 #ifndef R4NV_COLOR_SHADER_H
 #define R4NV_COLOR_SHADER_H
@@ -97,9 +98,23 @@ static nir_def *r4c_transfer(nir_builder *b, nir_def *rgb, nir_def *tag, nir_def
    nir_push_if(b, nir_ieq_imm(b, tag, 3));
    nir_def *pq = r4c_pq(b, rgb, encode);
    nir_push_else(b, NULL);
+   nir_push_if(b, nir_ieq_imm(b, tag, 6));
+   nir_def *white = nir_channel(b, params, 0), *lift = nir_channel(b, params, 3);
+   nir_def *gain = nir_fsub(b, nir_imm_float(b, 1), lift);
+   nir_def *video;
+   if (encode) {
+      nir_def *light = r4c_max(b, nir_fdiv(b, rgb, white), 0);
+      video = nir_fdiv(b, nir_fsub(b, nir_fpow(b, light, nir_imm_float(b, 1.0 / 2.4)), lift), gain);
+   } else {
+      nir_def *signal = r4c_max(b, nir_fadd(b, nir_fmul(b, rgb, gain), lift), 0);
+      video = nir_fmul(b, nir_fpow(b, signal, nir_imm_float(b, 2.4)), white);
+   }
+   nir_push_else(b, NULL);
    nir_def *hlg = r4c_hlg(b, rgb, params, encode);
    nir_pop_if(b, NULL);
-   nir_def *hdr = nir_if_phi(b, pq, hlg);
+   nir_def *display = nir_if_phi(b, video, hlg);
+   nir_pop_if(b, NULL);
+   nir_def *hdr = nir_if_phi(b, pq, display);
    nir_pop_if(b, NULL);
    nir_def *other = nir_if_phi(b, linear, hdr);
    nir_pop_if(b, NULL);
@@ -130,10 +145,10 @@ static nir_def *r4c_dither(nir_builder *b)
    }
    return nir_fadd_imm(b, nir_fmul_imm(b, nir_u2f32(b, index), 1.0 / 64), -31.5 / 64);
 }
-static nir_def *r4nv_color_transform(nir_builder *b, nir_def *rgba, nir_def *opacity)
+static nir_def *r4nv_color_decode(nir_builder *b, nir_def *rgba)
 {
-   nir_def *head = r4c_uniform(b, 0), *tail = r4c_uniform(b, 16);
-   nir_def *flags = nir_channel(b, head, 0), *source_alpha = nir_channel(b, head, 3), *target_alpha = nir_channel(b, tail, 0);
+   nir_def *head = r4c_uniform(b, 0);
+   nir_def *source_alpha = nir_channel(b, head, 3);
    nir_def *a = nir_bcsel(b, nir_ieq_imm(b, source_alpha, 1), nir_imm_float(b, 1), nir_fsat(b, nir_channel(b, rgba, 3)));
    nir_def *safe_a = nir_bcsel(b, nir_fgt_imm(b, a, 0), a, nir_imm_float(b, 1));
    nir_def *ranges = r4c_uniform(b, 160);
@@ -142,10 +157,18 @@ static nir_def *r4nv_color_transform(nir_builder *b, nir_def *rgba, nir_def *opa
    rgb = r4c_transfer(b, rgb, nir_channel(b, head, 1), r4c_uniform(b, 128), false);
    rgb = nir_bcsel(b, nir_ieq_imm(b, source_alpha, 4), rgb, nir_fmul(b, rgb, a));
    rgb = nir_bcsel(b, nir_fgt_imm(b, a, 0), r4c_matrix(b, 32, rgb), nir_imm_vec3(b, 0, 0, 0));
+   return nir_vec4(b, nir_channel(b, rgb, 0), nir_channel(b, rgb, 1), nir_channel(b, rgb, 2), a);
+}
+static nir_def *r4nv_color_encode(nir_builder *b, nir_def *rgba, nir_def *opacity)
+{
+   nir_def *head = r4c_uniform(b, 0), *tail = r4c_uniform(b, 16);
+   nir_def *flags = nir_channel(b, head, 0), *target_alpha = nir_channel(b, tail, 0);
+   nir_def *ranges = r4c_uniform(b, 160);
+   nir_def *rgb = nir_channels(b, rgba, 7), *a = nir_channel(b, rgba, 3);
    nir_def *tone = r4c_uniform(b, 176), *target = r4c_uniform(b, 192);
    rgb = nir_fmul(b, rgb, nir_fmul(b, nir_channel(b, tone, 0), opacity));
    a = nir_fmul(b, a, opacity);
-   safe_a = nir_bcsel(b, nir_fgt_imm(b, a, 0), a, nir_imm_float(b, 1));
+   nir_def *safe_a = nir_bcsel(b, nir_fgt_imm(b, a, 0), a, nir_imm_float(b, 1));
    nir_def *output = nir_ine_imm(b, nir_iand_imm(b, flags, 1), 0);
    nir_push_if(b, output);
    nir_def *y = nir_fdiv(b, r4c_luminance(b, rgb), safe_a);
@@ -176,5 +199,9 @@ static nir_def *r4nv_color_transform(nir_builder *b, nir_def *rgba, nir_def *opa
    nir_def *noise = nir_fmul(b, r4c_dither(b), nir_channel(b, target, 1));
    out_rgb = nir_fadd(b, out_rgb, nir_bcsel(b, nir_ine_imm(b, nir_iand_imm(b, flags, 2), 0), noise, nir_imm_float(b, 0)));
    return nir_vec4(b, nir_channel(b, out_rgb, 0), nir_channel(b, out_rgb, 1), nir_channel(b, out_rgb, 2), target_a);
+}
+static nir_def *r4nv_color_transform(nir_builder *b, nir_def *rgba, nir_def *opacity)
+{
+   return r4nv_color_encode(b, r4nv_color_decode(b, rgba), opacity);
 }
 #endif

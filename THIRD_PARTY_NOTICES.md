@@ -12,6 +12,7 @@ R4OS material.
 | R4FONT | Google Brotli | 1.2.0 | MIT | `R4FONT/ThirdParty/r4font/brotli/LICENSE` |
 | R4FONT | zlib | 1.3.1 | zlib License | `R4FONT/ThirdParty/r4font/ZLIB-LICENSE` |
 | R4GFX | LittleCMS ICC core | 2.18 | MIT | `R4GFX/ThirdParty/LittleCMS/LICENSE` and `UPSTREAM.json` |
+| R4VIDEO | FFmpeg libavcodec/libavutil H.264 subset | 9.0.1 | LGPL-2.1-or-later; GPL/nonfree disabled | `R4VIDEO/ThirdParty/Sources.json` and `COPYING.LGPLv2.1`; original notices retained in prepared sources |
 | Shared native math | Zig stdlib and bundled musl | Zig 0.16.0, exact file hashes pinned | MIT and original per-file permissive notices | `Shared/Native/Math/Sources.json` and `Shared/Native/Math/NOTICES.txt` |
 | Shared native numeric/string scanner | Bundled musl, original and adapted units | Zig 0.16.0, exact file hashes pinned | MIT | `Shared/Native/Scan/Sources.json` and `Shared/Native/Scan/NOTICES.txt` |
 
@@ -95,6 +96,28 @@ C597/C797/C997/CD97 state comes from the corresponding original class header;
 Tools/RenderState/Generate.ps1 records each source and generated-output hash.
 No host compiler is linked into R4OS. Generation evidence: GFX/0.79.33.
 
+
+## R4NV H.264 NVDEC encoding (0.79.40)
+
+`R4NV/Source/video.zig` derives wire definitions from NVIDIA's MIT
+`nvdec_drv.h`, `clc7b0.h` and `clc9b0.h`. Buffer sizing, EOS and reference
+marking use the MIT Mesa NVK H.264 implementation at commit
+`684c1b339bddbed6f11af93161da1c1bba77edb1`, copyright 2024 Collabora, Ltd
+and Red Hat, Inc. Full notices are in `R4NV/ThirdParty/Nvidia/LICENSES.txt`.
+`Source/nvdec_h264_vectors.json` identifies every input hash and the independent
+C-header fixture generator. Original sources and reproducible evidence are
+retained under `ExFiles/Reference/GFX/0.79.40`. No CUDA, CUVID or NVDECODE
+runtime is linked. This compiled helper does not itself enable a hardware codec.
+
+## R4GFX YUV color interpretation (0.79.40)
+
+The original R4GFX YUV arithmetic follows ITU-T H.273 (07/2024) and ITU-R
+BT.1886-0. The SDR presentation mapping was checked against libplacebo commit
+`3330a515d62139259c26239014f286e233bd3a5c`. No libplacebo implementation is
+compiled or copied into R4GFX. Unmodified reference documents, source headers,
+license, URLs and SHA256 hashes are retained for local study under
+`ExFiles/Reference/GFX/0.79.40/YuvSources` in the workspace. Original R4GFX and
+fixed NIR shader changes remain Apache-2.0; reference rights remain unchanged.
 
 ## R4NV telemetry decoder (0.79.29)
 
@@ -197,3 +220,16 @@ The query/indirect-copy OpenCL sources retain Collabora, Red Hat and Valve
 MIT notices. Generated SPIR-V/NIR helpers retain Mesa's generated MIT notice.
 `MesaGenerators.patch` changes metadata lifetime/export only, preserving shader
 algorithms and complete serialized data. No third-party material is relicensed.
+## R4VIDEO private NVDEC bridge
+
+`R4VIDEO/Port/nvdec.c` adapts H.264 parameter/reference mapping from FFmpeg's
+`libavcodec/nvdec_h264.c` (copyright 2016 Anton Khirnov), under LGPL-2.1-or-later.
+Its notice remains in the adapter. `FFmpegNvdec.patch` adds only private
+R4VIDEO hardware-format/callback registration; original FFmpeg source notices
+remain intact. The adapter uses R4OS worker callbacks, without CUDA/CUVID.
+
+The R4VIDEO GPU owner compiles R4NV's H.264 encoder from `R4NV/Source/video.zig`.
+Its NVIDIA/Mesa MIT source attribution and full notices remain in that source,
+`R4NV/Source/nvdec_h264_vectors.json` and `R4NV/ThirdParty/Nvidia/LICENSES.txt`.
+The R4VIDEO resource, lifetime and public-lease integration is original
+Apache-2.0 R4OS code.

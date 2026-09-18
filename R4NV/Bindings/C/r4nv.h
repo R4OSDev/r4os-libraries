@@ -370,6 +370,112 @@ _Static_assert(offsetof(R4NvNativePush, address) == 0u, "R4NvNativePush.address 
 _Static_assert(offsetof(R4NvNativePush, byte_length) == 8u, "R4NvNativePush.byte_length offset mismatch");
 _Static_assert(offsetof(R4NvNativePush, flags) == 12u, "R4NvNativePush.flags offset mismatch");
 
+typedef struct R4NvRenderInfo {
+    uint32_t version;
+    uint32_t size;
+    uint32_t graphics_class;
+    uint32_t shader_model;
+    uint32_t program_bytes;
+    uint32_t packet_bytes;
+    uint32_t max_command_words;
+    uint32_t max_draws;
+} R4NvRenderInfo;
+_Static_assert(sizeof(R4NvRenderInfo) == 32u, "R4NvRenderInfo size mismatch");
+_Static_assert(offsetof(R4NvRenderInfo, version) == 0u, "R4NvRenderInfo.version offset mismatch");
+_Static_assert(offsetof(R4NvRenderInfo, size) == 4u, "R4NvRenderInfo.size offset mismatch");
+_Static_assert(offsetof(R4NvRenderInfo, graphics_class) == 8u, "R4NvRenderInfo.graphics_class offset mismatch");
+_Static_assert(offsetof(R4NvRenderInfo, shader_model) == 12u, "R4NvRenderInfo.shader_model offset mismatch");
+_Static_assert(offsetof(R4NvRenderInfo, program_bytes) == 16u, "R4NvRenderInfo.program_bytes offset mismatch");
+_Static_assert(offsetof(R4NvRenderInfo, packet_bytes) == 20u, "R4NvRenderInfo.packet_bytes offset mismatch");
+_Static_assert(offsetof(R4NvRenderInfo, max_command_words) == 24u, "R4NvRenderInfo.max_command_words offset mismatch");
+_Static_assert(offsetof(R4NvRenderInfo, max_draws) == 28u, "R4NvRenderInfo.max_draws offset mismatch");
+
+typedef struct R4NvRenderRect {
+    int32_t x;
+    int32_t y;
+    uint32_t width;
+    uint32_t height;
+} R4NvRenderRect;
+_Static_assert(sizeof(R4NvRenderRect) == 16u, "R4NvRenderRect size mismatch");
+_Static_assert(offsetof(R4NvRenderRect, x) == 0u, "R4NvRenderRect.x offset mismatch");
+_Static_assert(offsetof(R4NvRenderRect, y) == 4u, "R4NvRenderRect.y offset mismatch");
+_Static_assert(offsetof(R4NvRenderRect, width) == 8u, "R4NvRenderRect.width offset mismatch");
+_Static_assert(offsetof(R4NvRenderRect, height) == 12u, "R4NvRenderRect.height offset mismatch");
+
+typedef struct R4NvRenderPlane {
+    uint64_t address;
+    uint64_t byte_length;
+    uint64_t modifier;
+    uint32_t width;
+    uint32_t height;
+    uint32_t pitch;
+    uint32_t format;
+} R4NvRenderPlane;
+_Static_assert(sizeof(R4NvRenderPlane) == 40u, "R4NvRenderPlane size mismatch");
+_Static_assert(offsetof(R4NvRenderPlane, address) == 0u, "R4NvRenderPlane.address offset mismatch");
+_Static_assert(offsetof(R4NvRenderPlane, byte_length) == 8u, "R4NvRenderPlane.byte_length offset mismatch");
+_Static_assert(offsetof(R4NvRenderPlane, modifier) == 16u, "R4NvRenderPlane.modifier offset mismatch");
+_Static_assert(offsetof(R4NvRenderPlane, width) == 24u, "R4NvRenderPlane.width offset mismatch");
+_Static_assert(offsetof(R4NvRenderPlane, height) == 28u, "R4NvRenderPlane.height offset mismatch");
+_Static_assert(offsetof(R4NvRenderPlane, pitch) == 32u, "R4NvRenderPlane.pitch offset mismatch");
+_Static_assert(offsetof(R4NvRenderPlane, format) == 36u, "R4NvRenderPlane.format offset mismatch");
+
+typedef struct R4NvYuvDraw {
+    R4NvRenderPlane luma;
+    R4NvRenderPlane chroma;
+    R4NvRenderPlane second_chroma;
+    R4NvRenderPlane target;
+    R4NvRenderRect source_rect;
+    R4NvRenderRect destination;
+    R4NvRenderRect scissor;
+    uint32_t format;
+    uint32_t filter;
+    uint32_t blend;
+    uint32_t opacity;
+    uint32_t chroma_x;
+    uint32_t chroma_y;
+} R4NvYuvDraw;
+_Static_assert(sizeof(R4NvYuvDraw) == 232u, "R4NvYuvDraw size mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, luma) == 0u, "R4NvYuvDraw.luma offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, chroma) == 40u, "R4NvYuvDraw.chroma offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, second_chroma) == 80u, "R4NvYuvDraw.second_chroma offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, target) == 120u, "R4NvYuvDraw.target offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, source_rect) == 160u, "R4NvYuvDraw.source_rect offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, destination) == 176u, "R4NvYuvDraw.destination offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, scissor) == 192u, "R4NvYuvDraw.scissor offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, format) == 208u, "R4NvYuvDraw.format offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, filter) == 212u, "R4NvYuvDraw.filter offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, blend) == 216u, "R4NvYuvDraw.blend offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, opacity) == 220u, "R4NvYuvDraw.opacity offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, chroma_x) == 224u, "R4NvYuvDraw.chroma_x offset mismatch");
+_Static_assert(offsetof(R4NvYuvDraw, chroma_y) == 228u, "R4NvYuvDraw.chroma_y offset mismatch");
+
+typedef struct R4NvYuvRender {
+    uint32_t version;
+    uint32_t size;
+    uint32_t graphics_class;
+    uint32_t draw_count;
+    uint64_t draws;
+    uint64_t program_address;
+    uint64_t program_bytes;
+    uint64_t packet_address;
+    uint64_t packet_bytes;
+    uint64_t color_program;
+    uint64_t yuv_matrix;
+} R4NvYuvRender;
+_Static_assert(sizeof(R4NvYuvRender) == 72u, "R4NvYuvRender size mismatch");
+_Static_assert(offsetof(R4NvYuvRender, version) == 0u, "R4NvYuvRender.version offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, size) == 4u, "R4NvYuvRender.size offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, graphics_class) == 8u, "R4NvYuvRender.graphics_class offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, draw_count) == 12u, "R4NvYuvRender.draw_count offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, draws) == 16u, "R4NvYuvRender.draws offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, program_address) == 24u, "R4NvYuvRender.program_address offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, program_bytes) == 32u, "R4NvYuvRender.program_bytes offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, packet_address) == 40u, "R4NvYuvRender.packet_address offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, packet_bytes) == 48u, "R4NvYuvRender.packet_bytes offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, color_program) == 56u, "R4NvYuvRender.color_program offset mismatch");
+_Static_assert(offsetof(R4NvYuvRender, yuv_matrix) == 64u, "R4NvYuvRender.yuv_matrix offset mismatch");
+
 #define R4NV_COMMAND_ABI ((uint32_t)1)
 #define R4NV_RM_RELEASE ((uint32_t)570144)
 #define R4NV_FEATURE_COPY_LINEAR ((uint32_t)1)
@@ -407,6 +513,7 @@ _Static_assert(offsetof(R4NvNativePush, flags) == 12u, "R4NvNativePush.flags off
 #define R4NV_IMAGE_REASON_FORCED ((uint32_t)16)
 #define R4NV_IMAGE_REASON_PREFERENCE ((uint32_t)32)
 #define R4NV_SHADER_PROFILE_COLOR_FRAGMENT ((uint32_t)7)
+#define R4NV_SHADER_PROFILE_YUV_FRAGMENT ((uint32_t)8)
 #define R4NV_NATIVE_SUBMIT_VERSION ((uint32_t)1)
 #define R4NV_NATIVE_ENGINE_GRAPHICS ((uint32_t)1)
 #define R4NV_NATIVE_PUSH_INCOMPLETE ((uint32_t)1)
@@ -414,6 +521,7 @@ _Static_assert(offsetof(R4NvNativePush, flags) == 12u, "R4NvNativePush.flags off
 #define R4NV_NATIVE_PUSH_LIMIT ((uint32_t)510)
 #define R4NV_NATIVE_ENGINE_COMPUTE ((uint32_t)2)
 #define R4NV_NATIVE_ENGINE_COPY ((uint32_t)4)
+#define R4NV_NATIVE_ENGINE_VIDEO ((uint32_t)8)
 #define R4NV_ARCHITECTURE_VERSION ((uint32_t)3)
 #define R4NV_ARCHITECTURE_HOST_COHERENT ((uint32_t)1)
 #define R4NV_ARCHITECTURE_IMAGE_LAYOUTS ((uint32_t)2)
@@ -533,6 +641,58 @@ static inline int32_t r4nv_shader_cache_write(R4NvShaderV1Client *client, uint32
 static inline int32_t r4nv_shader_cache_read(R4NvShaderV1Client *client, const R4NvShaderKey * key, const uint8_t * bytes, uint32_t length, R4NvShaderView * output) {
     R4NvShaderV1ShaderCacheReadFn function = (R4NvShaderV1ShaderCacheReadFn)r4l_slot_address(client->header, 48u);
     return function(key, bytes, length, output);
+}
+
+#define R4NV_RENDER_V1_EXPORT_NAME "RENDER_V1"
+#define R4NV_RENDER_V1_ABI_MAJOR 1u
+#define R4NV_RENDER_V1_REVISION 1u
+#define R4NV_RENDER_V1_INTERFACE_ID_LO 0x52344e56524e4452ull
+#define R4NV_RENDER_V1_INTERFACE_ID_HI 0x52344f5330373934ull
+#define R4NV_RENDER_V1_TABLE_SIZE 56u
+#define R4NV_RENDER_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4NV_RENDER_V1_TABLE_SIZE, R4NV_RENDER_V1_ABI_MAJOR, R4NV_RENDER_V1_REVISION, R4NV_RENDER_V1_INTERFACE_ID_LO, R4NV_RENDER_V1_INTERFACE_ID_HI }
+typedef int32_t (*R4NvRenderV1RenderInfoFn)(uint32_t graphics_class, R4NvRenderInfo * output);
+typedef int32_t (*R4NvRenderV1RenderUploadFn)(uint32_t graphics_class, uint8_t * bytes, uint32_t capacity, uint32_t * written);
+typedef int32_t (*R4NvRenderV1EncodeYuvFn)(const R4NvYuvRender * request, uint32_t * commands, uint32_t capacity, uint8_t * packets, uint32_t packet_capacity, uint32_t * written);
+typedef struct R4NvRenderV1 {
+    R4LInterfaceHeader header;
+    R4NvRenderV1RenderInfoFn render_info;
+    R4NvRenderV1RenderUploadFn render_upload;
+    R4NvRenderV1EncodeYuvFn encode_yuv;
+} R4NvRenderV1;
+_Static_assert(sizeof(R4NvRenderV1) == 56u, "R4NvRenderV1 size mismatch");
+_Static_assert(offsetof(R4NvRenderV1, render_info) == 32u, "R4NvRenderV1.render_info offset mismatch");
+_Static_assert(offsetof(R4NvRenderV1, render_upload) == 40u, "R4NvRenderV1.render_upload offset mismatch");
+_Static_assert(offsetof(R4NvRenderV1, encode_yuv) == 48u, "R4NvRenderV1.encode_yuv offset mismatch");
+typedef struct R4NvRenderV1Client { const R4LInterfaceHeader *header; } R4NvRenderV1Client;
+
+static inline int32_t r4nv_render_v1_init(const R4XStartContext *ctx, R4NvRenderV1Client *out_client) {
+    if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4NV", "RENDER_V1");
+    const R4LInterfaceExpectation expected = { 0x52344e56524e4452ull, 0x52344f5330373934ull, 1u, 1u, 56u, 0u, 0u };
+    const R4LInterfaceHeader *header = 0;
+    int32_t status = r4l_validate_import(item, &expected, &header);
+    if (status != R4L_BINDING_OK) return status;
+    if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    out_client->header = header;
+    return R4L_BINDING_OK;
+}
+
+static inline int32_t r4nv_render_info(R4NvRenderV1Client *client, uint32_t graphics_class, R4NvRenderInfo * output) {
+    R4NvRenderV1RenderInfoFn function = (R4NvRenderV1RenderInfoFn)r4l_slot_address(client->header, 32u);
+    return function(graphics_class, output);
+}
+
+static inline int32_t r4nv_render_upload(R4NvRenderV1Client *client, uint32_t graphics_class, uint8_t * bytes, uint32_t capacity, uint32_t * written) {
+    R4NvRenderV1RenderUploadFn function = (R4NvRenderV1RenderUploadFn)r4l_slot_address(client->header, 40u);
+    return function(graphics_class, bytes, capacity, written);
+}
+
+static inline int32_t r4nv_encode_yuv(R4NvRenderV1Client *client, const R4NvYuvRender * request, uint32_t * commands, uint32_t capacity, uint8_t * packets, uint32_t packet_capacity, uint32_t * written) {
+    R4NvRenderV1EncodeYuvFn function = (R4NvRenderV1EncodeYuvFn)r4l_slot_address(client->header, 48u);
+    return function(request, commands, capacity, packets, packet_capacity, written);
 }
 
 #endif

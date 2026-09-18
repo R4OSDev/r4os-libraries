@@ -17,7 +17,7 @@ pub const Program = extern struct {
 fn transfer(desc: color.Description) [4]f32 {
     return .{ desc.reference_white, desc.peak,
         if (desc.transfer == .hlg) color.hlgGamma(desc.peak) else 1,
-        if (desc.transfer == .hlg) color.hlgBeta(desc) else 0 };
+        if (desc.transfer == .hlg) color.hlgBeta(desc) else if (desc.transfer == .bt1886) color.bt1886Lift(desc) else 0 };
 }
 pub fn build(source: color.Description, target: color.Description, flags: u32, over: bool) color.Error!Program {
     const from = try color.Encoding.init(source);

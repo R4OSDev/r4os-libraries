@@ -1020,6 +1020,140 @@ _Static_assert(offsetof(R4GfxMemoryInfo, evictions) == 80u, "R4GfxMemoryInfo.evi
 _Static_assert(offsetof(R4GfxMemoryInfo, restores) == 88u, "R4GfxMemoryInfo.restores offset mismatch");
 _Static_assert(offsetof(R4GfxMemoryInfo, failures) == 96u, "R4GfxMemoryInfo.failures offset mismatch");
 
+typedef struct R4GfxYuvDescription {
+    uint32_t version;
+    uint32_t size;
+    uint32_t primaries;
+    uint32_t transfer;
+    uint32_t matrix;
+    uint32_t range;
+    uint32_t chroma_location;
+    uint32_t flags;
+    uint32_t reference_white;
+    uint32_t peak;
+    uint32_t black;
+    uint32_t reserved;
+} R4GfxYuvDescription;
+_Static_assert(sizeof(R4GfxYuvDescription) == 48u, "R4GfxYuvDescription size mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, version) == 0u, "R4GfxYuvDescription.version offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, size) == 4u, "R4GfxYuvDescription.size offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, primaries) == 8u, "R4GfxYuvDescription.primaries offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, transfer) == 12u, "R4GfxYuvDescription.transfer offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, matrix) == 16u, "R4GfxYuvDescription.matrix offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, range) == 20u, "R4GfxYuvDescription.range offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, chroma_location) == 24u, "R4GfxYuvDescription.chroma_location offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, flags) == 28u, "R4GfxYuvDescription.flags offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, reference_white) == 32u, "R4GfxYuvDescription.reference_white offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, peak) == 36u, "R4GfxYuvDescription.peak offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, black) == 40u, "R4GfxYuvDescription.black offset mismatch");
+_Static_assert(offsetof(R4GfxYuvDescription, reserved) == 44u, "R4GfxYuvDescription.reserved offset mismatch");
+
+typedef struct R4GfxYuvPlane {
+    uint64_t cpu_address;
+    uint64_t byte_length;
+    uint64_t pitch;
+    uint64_t reserved;
+} R4GfxYuvPlane;
+_Static_assert(sizeof(R4GfxYuvPlane) == 32u, "R4GfxYuvPlane size mismatch");
+_Static_assert(offsetof(R4GfxYuvPlane, cpu_address) == 0u, "R4GfxYuvPlane.cpu_address offset mismatch");
+_Static_assert(offsetof(R4GfxYuvPlane, byte_length) == 8u, "R4GfxYuvPlane.byte_length offset mismatch");
+_Static_assert(offsetof(R4GfxYuvPlane, pitch) == 16u, "R4GfxYuvPlane.pitch offset mismatch");
+_Static_assert(offsetof(R4GfxYuvPlane, reserved) == 24u, "R4GfxYuvPlane.reserved offset mismatch");
+
+typedef struct R4GfxYuvImage {
+    uint32_t version;
+    uint32_t size;
+    uint32_t format;
+    uint32_t width;
+    uint32_t height;
+    uint32_t plane_count;
+    uint64_t reserved;
+    R4GfxRect crop;
+    R4GfxYuvDescription description;
+    R4GfxYuvPlane plane0;
+    R4GfxYuvPlane plane1;
+    R4GfxYuvPlane plane2;
+} R4GfxYuvImage;
+_Static_assert(sizeof(R4GfxYuvImage) == 192u, "R4GfxYuvImage size mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, version) == 0u, "R4GfxYuvImage.version offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, size) == 4u, "R4GfxYuvImage.size offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, format) == 8u, "R4GfxYuvImage.format offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, width) == 12u, "R4GfxYuvImage.width offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, height) == 16u, "R4GfxYuvImage.height offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, plane_count) == 20u, "R4GfxYuvImage.plane_count offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, reserved) == 24u, "R4GfxYuvImage.reserved offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, crop) == 32u, "R4GfxYuvImage.crop offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, description) == 48u, "R4GfxYuvImage.description offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, plane0) == 96u, "R4GfxYuvImage.plane0 offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, plane1) == 128u, "R4GfxYuvImage.plane1 offset mismatch");
+_Static_assert(offsetof(R4GfxYuvImage, plane2) == 160u, "R4GfxYuvImage.plane2 offset mismatch");
+
+typedef struct R4GfxYuvBufferPlane {
+    uint32_t reference_id;
+    uint32_t reserved;
+    uint64_t reference_generation;
+    uint64_t offset;
+    uint64_t byte_length;
+    uint64_t pitch;
+} R4GfxYuvBufferPlane;
+_Static_assert(sizeof(R4GfxYuvBufferPlane) == 40u, "R4GfxYuvBufferPlane size mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferPlane, reference_id) == 0u, "R4GfxYuvBufferPlane.reference_id offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferPlane, reserved) == 4u, "R4GfxYuvBufferPlane.reserved offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferPlane, reference_generation) == 8u, "R4GfxYuvBufferPlane.reference_generation offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferPlane, offset) == 16u, "R4GfxYuvBufferPlane.offset offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferPlane, byte_length) == 24u, "R4GfxYuvBufferPlane.byte_length offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferPlane, pitch) == 32u, "R4GfxYuvBufferPlane.pitch offset mismatch");
+
+typedef struct R4GfxYuvBufferImage {
+    uint32_t version;
+    uint32_t size;
+    uint32_t format;
+    uint32_t width;
+    uint32_t height;
+    uint32_t plane_count;
+    uint64_t reserved;
+    R4GfxRect crop;
+    R4GfxYuvDescription description;
+    R4GfxYuvBufferPlane plane0;
+    R4GfxYuvBufferPlane plane1;
+    R4GfxYuvBufferPlane plane2;
+} R4GfxYuvBufferImage;
+_Static_assert(sizeof(R4GfxYuvBufferImage) == 216u, "R4GfxYuvBufferImage size mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, version) == 0u, "R4GfxYuvBufferImage.version offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, size) == 4u, "R4GfxYuvBufferImage.size offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, format) == 8u, "R4GfxYuvBufferImage.format offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, width) == 12u, "R4GfxYuvBufferImage.width offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, height) == 16u, "R4GfxYuvBufferImage.height offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, plane_count) == 20u, "R4GfxYuvBufferImage.plane_count offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, reserved) == 24u, "R4GfxYuvBufferImage.reserved offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, crop) == 32u, "R4GfxYuvBufferImage.crop offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, description) == 48u, "R4GfxYuvBufferImage.description offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, plane0) == 96u, "R4GfxYuvBufferImage.plane0 offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, plane1) == 136u, "R4GfxYuvBufferImage.plane1 offset mismatch");
+_Static_assert(offsetof(R4GfxYuvBufferImage, plane2) == 176u, "R4GfxYuvBufferImage.plane2 offset mismatch");
+
+typedef struct R4GfxYuvRenderRequest {
+    uint32_t version;
+    uint32_t size;
+    R4GfxYuvBufferImage source;
+    R4GfxResource target;
+    R4GfxColorTransform transform;
+    uint64_t deadline_ns;
+    uint32_t dependency_count;
+    uint32_t reserved;
+    uint64_t dependencies;
+} R4GfxYuvRenderRequest;
+_Static_assert(sizeof(R4GfxYuvRenderRequest) == 344u, "R4GfxYuvRenderRequest size mismatch");
+_Static_assert(offsetof(R4GfxYuvRenderRequest, version) == 0u, "R4GfxYuvRenderRequest.version offset mismatch");
+_Static_assert(offsetof(R4GfxYuvRenderRequest, size) == 4u, "R4GfxYuvRenderRequest.size offset mismatch");
+_Static_assert(offsetof(R4GfxYuvRenderRequest, source) == 8u, "R4GfxYuvRenderRequest.source offset mismatch");
+_Static_assert(offsetof(R4GfxYuvRenderRequest, target) == 224u, "R4GfxYuvRenderRequest.target offset mismatch");
+_Static_assert(offsetof(R4GfxYuvRenderRequest, transform) == 256u, "R4GfxYuvRenderRequest.transform offset mismatch");
+_Static_assert(offsetof(R4GfxYuvRenderRequest, deadline_ns) == 320u, "R4GfxYuvRenderRequest.deadline_ns offset mismatch");
+_Static_assert(offsetof(R4GfxYuvRenderRequest, dependency_count) == 328u, "R4GfxYuvRenderRequest.dependency_count offset mismatch");
+_Static_assert(offsetof(R4GfxYuvRenderRequest, reserved) == 332u, "R4GfxYuvRenderRequest.reserved offset mismatch");
+_Static_assert(offsetof(R4GfxYuvRenderRequest, dependencies) == 336u, "R4GfxYuvRenderRequest.dependencies offset mismatch");
+
 #define R4GFX_STATUS_OK ((int32_t)0)
 #define R4GFX_FORMAT_XRGB8888 ((uint32_t)875713112)
 #define R4GFX_FORMAT_ARGB8888 ((uint32_t)875713089)
@@ -1157,6 +1291,12 @@ _Static_assert(offsetof(R4GfxMemoryInfo, failures) == 96u, "R4GfxMemoryInfo.fail
 #define R4GFX_MEMORY_PHASE_COPY ((uint32_t)5)
 #define R4GFX_MEMORY_PHASE_RETIRE ((uint32_t)6)
 #define R4GFX_DEVICE_GPU_COLOR_GRID ((uint32_t)512)
+#define R4GFX_COLOR_PRIMARIES_BT601_625 ((uint32_t)5)
+#define R4GFX_COLOR_PRIMARIES_BT601_525 ((uint32_t)6)
+#define R4GFX_COLOR_TRANSFER_BT1886 ((uint32_t)6)
+#define R4GFX_YUV_FORMAT_NV12 ((uint32_t)1)
+#define R4GFX_YUV_FORMAT_P010 ((uint32_t)2)
+#define R4GFX_YUV_FORMAT_YUV420P ((uint32_t)3)
 #define R4GFX_STATUS_INVALID ((int32_t)-1)
 #define R4GFX_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4GFX_STATUS_OVERFLOW ((int32_t)-3)
@@ -1588,10 +1728,10 @@ static inline int32_t r4gfx_resource_priority(R4GfxDeviceV1Client *client, const
 
 #define R4GFX_COLOR_V1_EXPORT_NAME "COLOR_V1"
 #define R4GFX_COLOR_V1_ABI_MAJOR 1u
-#define R4GFX_COLOR_V1_REVISION 2u
+#define R4GFX_COLOR_V1_REVISION 4u
 #define R4GFX_COLOR_V1_INTERFACE_ID_LO 0x524f4c43ull
 #define R4GFX_COLOR_V1_INTERFACE_ID_HI 0x31584647ull
-#define R4GFX_COLOR_V1_TABLE_SIZE 136u
+#define R4GFX_COLOR_V1_TABLE_SIZE 152u
 #define R4GFX_COLOR_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4GFX_COLOR_V1_TABLE_SIZE, R4GFX_COLOR_V1_ABI_MAJOR, R4GFX_COLOR_V1_REVISION, R4GFX_COLOR_V1_INTERFACE_ID_LO, R4GFX_COLOR_V1_INTERFACE_ID_HI }
 typedef int32_t (*R4GfxColorV1ColorDescriptionValidateFn)(const R4GfxColorDescription * description);
 typedef uint64_t (*R4GfxColorV1ColorProfileStorageSizeFn)(void);
@@ -1606,6 +1746,8 @@ typedef int32_t (*R4GfxColorV1ColorResourceTransformFn)(const R4GfxDevice * devi
 typedef int32_t (*R4GfxColorV1ColorProfileGenerateFn)(const R4GfxColorProfileDefinition * definition, uint64_t scratch_address, uint64_t scratch_bytes, uint64_t output_address, uint64_t output_capacity, uint64_t * output_bytes);
 typedef int32_t (*R4GfxColorV1ColorRenderSubmitFn)(const R4GfxDevice * device, const R4GfxRenderListRequest * request, uint32_t flags, R4GfxJob * output);
 typedef int32_t (*R4GfxColorV1ColorRenderSubmitGridFn)(const R4GfxDevice * device, const R4GfxRenderGridListRequest * request, uint32_t flags, R4GfxJob * output);
+typedef int32_t (*R4GfxColorV1ColorYuvImageTransformFn)(const R4GfxYuvImage * source, const R4GfxColorImage * target, const R4GfxColorTransform * request, R4GfxCpuStats * output);
+typedef int32_t (*R4GfxColorV1ColorYuvRenderSubmitFn)(const R4GfxDevice * device, const R4GfxYuvRenderRequest * request, R4GfxJob * output);
 typedef struct R4GfxColorV1 {
     R4LInterfaceHeader header;
     R4GfxColorV1ColorDescriptionValidateFn color_description_validate;
@@ -1621,8 +1763,10 @@ typedef struct R4GfxColorV1 {
     R4GfxColorV1ColorProfileGenerateFn color_profile_generate;
     R4GfxColorV1ColorRenderSubmitFn color_render_submit;
     R4GfxColorV1ColorRenderSubmitGridFn color_render_submit_grid;
+    R4GfxColorV1ColorYuvImageTransformFn color_yuv_image_transform;
+    R4GfxColorV1ColorYuvRenderSubmitFn color_yuv_render_submit;
 } R4GfxColorV1;
-_Static_assert(sizeof(R4GfxColorV1) == 136u, "R4GfxColorV1 size mismatch");
+_Static_assert(sizeof(R4GfxColorV1) == 152u, "R4GfxColorV1 size mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_description_validate) == 32u, "R4GfxColorV1.color_description_validate offset mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_profile_storage_size) == 40u, "R4GfxColorV1.color_profile_storage_size offset mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_profile_open) == 48u, "R4GfxColorV1.color_profile_open offset mismatch");
@@ -1636,13 +1780,15 @@ _Static_assert(offsetof(R4GfxColorV1, color_resource_transform) == 104u, "R4GfxC
 _Static_assert(offsetof(R4GfxColorV1, color_profile_generate) == 112u, "R4GfxColorV1.color_profile_generate offset mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_render_submit) == 120u, "R4GfxColorV1.color_render_submit offset mismatch");
 _Static_assert(offsetof(R4GfxColorV1, color_render_submit_grid) == 128u, "R4GfxColorV1.color_render_submit_grid offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_yuv_image_transform) == 136u, "R4GfxColorV1.color_yuv_image_transform offset mismatch");
+_Static_assert(offsetof(R4GfxColorV1, color_yuv_render_submit) == 144u, "R4GfxColorV1.color_yuv_render_submit offset mismatch");
 typedef struct R4GfxColorV1Client { const R4LInterfaceHeader *header; } R4GfxColorV1Client;
 
 static inline int32_t r4gfx_color_v1_init(const R4XStartContext *ctx, R4GfxColorV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "COLOR_V1");
-    const R4LInterfaceExpectation expected = { 0x524f4c43ull, 0x31584647ull, 1u, 2u, 136u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x524f4c43ull, 0x31584647ull, 1u, 4u, 152u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
@@ -1659,6 +1805,8 @@ static inline int32_t r4gfx_color_v1_init(const R4XStartContext *ctx, R4GfxColor
     if (r4l_slot_address(header, 112u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 120u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 128u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 136u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 144u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -1726,6 +1874,16 @@ static inline int32_t r4gfx_color_render_submit(R4GfxColorV1Client *client, cons
 static inline int32_t r4gfx_color_render_submit_grid(R4GfxColorV1Client *client, const R4GfxDevice * device, const R4GfxRenderGridListRequest * request, uint32_t flags, R4GfxJob * output) {
     R4GfxColorV1ColorRenderSubmitGridFn function = (R4GfxColorV1ColorRenderSubmitGridFn)r4l_slot_address(client->header, 128u);
     return function(device, request, flags, output);
+}
+
+static inline int32_t r4gfx_color_yuv_image_transform(R4GfxColorV1Client *client, const R4GfxYuvImage * source, const R4GfxColorImage * target, const R4GfxColorTransform * request, R4GfxCpuStats * output) {
+    R4GfxColorV1ColorYuvImageTransformFn function = (R4GfxColorV1ColorYuvImageTransformFn)r4l_slot_address(client->header, 136u);
+    return function(source, target, request, output);
+}
+
+static inline int32_t r4gfx_color_yuv_render_submit(R4GfxColorV1Client *client, const R4GfxDevice * device, const R4GfxYuvRenderRequest * request, R4GfxJob * output) {
+    R4GfxColorV1ColorYuvRenderSubmitFn function = (R4GfxColorV1ColorYuvRenderSubmitFn)r4l_slot_address(client->header, 144u);
+    return function(device, request, output);
 }
 
 #endif

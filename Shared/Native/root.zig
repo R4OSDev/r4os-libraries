@@ -13,6 +13,7 @@ pub const math = @import("math.zig");
 pub const random = @import("random.zig");
 pub const time = @import("time.zig");
 pub const wall_clock = @import("wall_clock.zig");
+pub const calendar = @import("calendar.zig");
 pub const system_info = @import("system_info.zig");
 pub const window = @import("window.zig");
 pub const application = @import("application.zig");

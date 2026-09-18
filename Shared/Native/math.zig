@@ -108,6 +108,27 @@ pub export fn atanf(value: f32) callconv(.c) f32 {
 pub export fn atan2f(y: f32, x: f32) callconv(.c) f32 {
     return std.math.atan2(y, x);
 }
+pub export fn acos(value: f64) callconv(.c) f64 {
+    return std.math.acos(value);
+}
+pub export fn asin(value: f64) callconv(.c) f64 {
+    return std.math.asin(value);
+}
+pub export fn atan(value: f64) callconv(.c) f64 {
+    return std.math.atan(value);
+}
+pub export fn atan2(y: f64, x: f64) callconv(.c) f64 {
+    return std.math.atan2(y, x);
+}
+pub export fn sinh(value: f64) callconv(.c) f64 {
+    return std.math.sinh(value);
+}
+pub export fn cosh(value: f64) callconv(.c) f64 {
+    return std.math.cosh(value);
+}
+pub export fn tanh(value: f64) callconv(.c) f64 {
+    return std.math.tanh(value);
+}
 pub export fn copysignf(value: f32, sign: f32) callconv(.c) f32 {
     return std.math.copysign(value, sign);
 }

@@ -15,14 +15,14 @@ or benchmark runs automatically.
 
 ## Runtime interfaces
 
-`module.R4MF` is authoritative. Module 0.1.17 exports four independent tables:
+`module.R4MF` is authoritative. Module 0.1.18 exports four independent tables:
 
 | Import | Behavior |
 | --- | --- |
 | `R4GFX:API_V1:1` | Checked linear layouts and rectangle fill; original table and payloads unchanged. |
 | `R4GFX:RENDER_V1:1` | Capability query and ordered, bounded CPU 2D batches. |
 | `R4GFX:DEVICE_V1:10` | Caller-owned resources, native allocation, queued copy/render, output swapchains and canonical completion receipts. |
-| `R4GFX:COLOR_V1:2` | Explicit color resources, FP16/HDR transforms and combined color/grid render jobs. |
+| `R4GFX:COLOR_V1:4` | Explicit RGB/YUV colors, FP16/HDR transforms and native multi-plane YUV/color/grid render jobs. |
 
 Bindings and API documentation are generated from `Contract/LibraryContract.json`.
 Use `ApiV1Client.init` or `RenderV1Client.init` with the app start context. The
@@ -180,6 +180,26 @@ color changes use the shared timed mode controller and COLORS.R4S schema2.
 JPEG/BMP/PNG characterization is supplied by R4IMG. Detailed interface
 layouts: [Docs/API.md](Docs/API.md); workspace architecture and evidence:
 Docs/Desktop/GrafikFarbe07925.txt and GrafikFarbe07925.json.
+
+Revision3 appends `color_yuv_image_transform` for borrowed linear NV12, P010
+and YUV420P planes. Explicit CICP, separate Y/C ranges, all six chroma positions,
+odd coded dimensions/crops and independent pitches feed the same tiled RGB
+composition/output pipeline. P010 keeps ten meaningful bits through FP16 or
+10-bit RGB output. Conventional SDR video uses the BT.1886 display EOTF;
+BT.601525/625 primaries and explicit black/white levels are supported. Missing
+metadata is rejected for the media owner to resolve explicitly. The function
+does not map VRAM or allocate a full-frame RGB intermediate.
+
+Revision4 appends `color_yuv_render_submit` for canonical BO planes. The public
+R4NV RENDER_V1 encoder supplies integer NV12/P010/YUV420P sampling and shared
+color conversion. Device-owned, bounded BO/VA mappings and coherent command
+uploads are reused across frames. Preparation returns BUSY without waiting;
+successful submission publishes an ordinary DEVICE_V1 job and its real fence.
+Decoder consumers must remain held through preparation and physical job release.
+Reset, cache trimming and close retain mappings until retirement acknowledgements.
+No native pixels are CPU-mapped. Unsupported layouts/colors remain explicit so
+the media owner can choose the CPU path. Hardware pixel/performance acceptance
+and the decoder/media presentation integration remain separate follow-ups.
 
 
 ## Variable refresh

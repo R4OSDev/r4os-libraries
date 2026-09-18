@@ -20,6 +20,8 @@ pub const table: c.ColorV1 = .{
     .color_profile_generate = profileGenerate,
     .color_render_submit = d.submitColorRender,
     .color_render_submit_grid = d.submitColorGridRender,
+    .color_yuv_image_transform = yuvImageTransform,
+    .color_yuv_render_submit = @import("native_yuv.zig").submit,
 };
 const live_magic: u64 = 0x3146434349584647;
 const closed_magic: u64 = 0x3046434349584647;
@@ -54,6 +56,15 @@ pub fn description(input: *const c.R4GfxColorDescription) d.Error!color.Descript
 pub fn descriptionValidate(input: *const c.R4GfxColorDescription) callconv(.c) i32 {
     _ = description(input) catch |err| return d.code(err);
     return c.status_ok;
+}
+pub fn yuvDescription(desc: c.R4GfxYuvDescription) d.Error!@import("color_yuv.zig").Metadata {
+    const yuv = @import("color_yuv.zig");
+    if (desc.version != 1 or desc.size != @sizeOf(c.R4GfxYuvDescription) or desc.flags != 0 or desc.reserved != 0) return error.Invalid;
+    return .{ .primaries = desc.primaries, .transfer = desc.transfer, .matrix = desc.matrix,
+        .range = std.enums.fromInt(yuv.Range, desc.range) orelse return error.Unsupported,
+        .chroma = std.enums.fromInt(yuv.Chroma, desc.chroma_location) orelse return error.Unsupported,
+        .reference_white = @as(f32, @floatFromInt(desc.reference_white)) / 10000,
+        .peak = @as(f32, @floatFromInt(desc.peak)) / 10000, .black = @as(f32, @floatFromInt(desc.black)) / 10000 };
 }
 pub fn profileStorageSize() callconv(.c) u64 {
     return prefix_bytes + 16 * 1024 * 1024;
@@ -218,5 +229,57 @@ fn transform(source: *const c.R4GfxColorImage, target: *const c.R4GfxColorImage,
         images[i] = try pipeline.Image.init(input.image, desc, profile);
     }
     const stats = try pipeline.execute(images[0], images[1], request.*);
+    output.* = stats;
+}
+
+pub fn yuvImageTransform(source: *const c.R4GfxYuvImage, target: *const c.R4GfxColorImage, request: *const c.R4GfxColorTransform, output: *c.R4GfxCpuStats) callconv(.c) i32 {
+    transformYuv(source, target, request, output) catch |err| return d.code(err);
+    return c.status_ok;
+}
+fn transformYuv(source: *const c.R4GfxYuvImage, target: *const c.R4GfxColorImage, request: *const c.R4GfxColorTransform, output: *c.R4GfxCpuStats) d.Error!void {
+    const yuv = @import("color_yuv.zig");
+    _ = try d.pointer(c.R4GfxCpuStats, @intFromPtr(output));
+    const inputs = .{ source, target, request };
+    inline for (inputs) |input| {
+        const T = @typeInfo(@TypeOf(input)).pointer.child;
+        _ = try d.pointer(T, @intFromPtr(input));
+        if (d.overlaps(@intFromPtr(input), @sizeOf(T), @intFromPtr(output), @sizeOf(c.R4GfxCpuStats))) return error.Alias;
+    }
+    const from = source.*; const to = target.*; const operation = request.*;
+    if (from.version != 1 or from.size != @sizeOf(c.R4GfxYuvImage) or from.reserved != 0 or
+        to.version != 1 or to.size != @sizeOf(c.R4GfxColorImage)) return error.Invalid;
+    const format = std.enums.fromInt(yuv.Format, from.format) orelse return error.Unsupported;
+    if (from.plane_count != @as(u32, if (format == .yuv420p) 3 else 2)) return error.Invalid;
+    const metadata = try yuvDescription(from.description);
+    inline for (inputs) |input| if (d.overlaps(@intFromPtr(input), @sizeOf(@typeInfo(@TypeOf(input)).pointer.child), to.image.cpu_address, to.image.byte_length)) return error.Alias;
+    if (d.overlaps(@intFromPtr(output), @sizeOf(c.R4GfxCpuStats), to.image.cpu_address, to.image.byte_length)) return error.Alias;
+    var planes: [3]yuv.Plane = undefined;
+    for ([_]c.R4GfxYuvPlane{ from.plane0, from.plane1, from.plane2 }, &planes, 0..) |plane, *view, i| {
+        if (plane.reserved != 0) return error.Invalid;
+        if (i >= from.plane_count) {
+            if (plane.cpu_address != 0 or plane.byte_length != 0 or plane.pitch != 0) return error.Invalid;
+            view.* = .{ .bytes = &.{}, .pitch = 0 };
+            continue;
+        }
+        _ = try d.pointer(u8, plane.cpu_address);
+        _ = std.math.add(u64, plane.cpu_address, plane.byte_length) catch return error.Overflow;
+        if (d.overlaps(plane.cpu_address, plane.byte_length, @intFromPtr(output), @sizeOf(c.R4GfxCpuStats)) or
+            d.overlaps(plane.cpu_address, plane.byte_length, to.image.cpu_address, to.image.byte_length)) return error.Alias;
+        const bytes: [*]const u8 = @ptrFromInt(plane.cpu_address);
+        view.* = .{ .bytes = bytes[0..plane.byte_length], .pitch = plane.pitch };
+    }
+    const image = try yuv.Image.init(format, from.width, from.height,
+        .{ .x = from.crop.x, .y = from.crop.y, .width = from.crop.width, .height = from.crop.height }, planes, metadata);
+    var profile: ?*const icc.Profile = null;
+    if (to.profile.address != 0 or to.profile.generation != 0) {
+        const state = try get(&to.profile, false);
+        if (state.direction != c.color_profile_output) return error.Invalid;
+        inline for (inputs) |input| if (!separate(state, @intFromPtr(input), @sizeOf(@typeInfo(@TypeOf(input)).pointer.child))) return error.Alias;
+        if (!separate(state, @intFromPtr(output), @sizeOf(c.R4GfxCpuStats)) or !separate(state, to.image.cpu_address, to.image.byte_length)) return error.Alias;
+        for (planes) |plane| if (!separate(state, @intFromPtr(plane.bytes.ptr), plane.bytes.len)) return error.Alias;
+        profile = if (state.profile) |*value| value else return error.Stale;
+    }
+    const target_image = try pipeline.Image.init(to.image, try description(&to.description), profile);
+    const stats = try pipeline.executeYuv(image, target_image, operation);
     output.* = stats;
 }

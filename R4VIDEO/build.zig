@@ -1,0 +1,68 @@
+const std = @import("std");
+
+pub fn build(b: *std.Build) void {
+    b.addNamedLazyPath("binding", b.path("Bindings/Zig/r4video.zig"));
+    b.addNamedLazyPath("playback", b.path("Bindings/Zig/playback.zig"));
+    b.addNamedLazyPath("c_include", b.path("Bindings/C"));
+    const sdk_build = b.lazyImport(@This(), "r4os_sdk") orelse return;
+    const sdk = sdk_build.sdk(b, b.dependencyFromBuildZig(sdk_build, .{}), .{});
+    const host = sdk.createR4osModule(b.graph.host, .ReleaseSafe);
+    const implementation = b.createModule(.{ .root_source_file = b.path("Contract/Generated/implementation_abi.zig"), .target = b.graph.host });
+    implementation.addImport("r4os", host);
+    const binding = b.createModule(.{ .root_source_file = b.path("Bindings/Zig/r4video.zig"), .target = b.graph.host });
+    binding.addImport("r4os", host);
+    const conformance = b.createModule(.{ .root_source_file = b.path("Tests/Generated/contract_conformance.zig"), .target = b.graph.host });
+    conformance.addImport("implementation", implementation);
+    conformance.addImport("binding", binding);
+    conformance.addIncludePath(b.path("Bindings/C"));
+    conformance.addIncludePath(sdk.profile.c_include_root);
+    conformance.addIncludePath(sdk.profile.contract_c_include_root);
+    conformance.addCSourceFile(.{ .file = b.path("Tests/Generated/contract_conformance.c"), .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" } });
+    const parity = b.createModule(.{ .root_source_file = b.path("Tests/graphics_parity.zig"), .target = b.graph.host });
+    parity.addImport("r4os", host);
+    parity.addImport("binding", binding);
+    const allocations = b.createModule(.{ .root_source_file = b.path("Source/allocation.zig"), .target = b.graph.host });
+    const resources = b.createModule(.{ .root_source_file = b.path("Tests/allocation.zig"), .target = b.graph.host });
+    const graphics_binding = b.createModule(.{ .root_source_file = b.path("../R4GFX/Bindings/Zig/r4gfx_abi.zig"), .target = b.graph.host });
+    graphics_binding.addImport("r4os", host);
+    const playback = b.createModule(.{ .root_source_file = b.path("Bindings/Zig/playback.zig"), .target = b.graph.host });
+    playback.addImport("r4os", host);
+    playback.addImport("r4gfx_binding", graphics_binding);
+    resources.addImport("playback", playback);
+    resources.addImport("r4gfx_binding", graphics_binding);
+    resources.addImport("video_allocation", allocations);
+    const nv = b.createModule(.{ .root_source_file = b.path("../R4NV/Bindings/Zig/r4nv.zig"), .target = b.graph.host });
+    nv.addImport("r4os", host);
+    const gpu = b.createModule(.{ .root_source_file = b.path("Source/gpu_resources.zig"), .target = b.graph.host });
+    gpu.addImport("r4os", host);
+    gpu.addImport("r4nv_binding", nv);
+    gpu.addImport("video_allocation", allocations);
+    resources.addImport("gpu_resources", gpu);
+    resources.addImport("r4os", host);
+    resources.addImport("r4nv_binding", nv);
+    const video = b.createModule(.{ .root_source_file = b.path("../R4NV/Source/video.zig"), .target = b.graph.host });
+    const decoder = b.createModule(.{ .root_source_file = b.path("Source/gpu_decoder.zig"), .target = b.graph.host });
+    decoder.addImport("gpu_resources", gpu);
+    decoder.addImport("r4nv_video", video);
+    resources.addImport("gpu_decoder", decoder);
+    resources.addIncludePath(b.path("Port"));
+    const check = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });
+    check.addFileArg(b.path("Tools/Contract.ps1"));
+    check.has_side_effects = true;
+    const tests = b.step("test", "VIDEO_V1 ABI, canonical graphics identities and concurrent allocation budgets");
+    tests.dependOn(&check.step);
+    for ([_]*std.Build.Module{ conformance, parity, resources }) |module| {
+        const run = b.addRunArtifact(b.addTest(.{ .root_module = module }));
+        tests.dependOn(&run.step);
+    }
+    const native = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });
+    native.addFileArg(b.path("Tools/Build.ps1"));
+    native.addArg("-OutputRoot");
+    const archives = native.addOutputDirectoryArg("native");
+    if (b.option(bool, "offline", "Require cached source archives") orelse false) native.addArg("-Offline");
+    native.has_side_effects = true;
+    _ = sdk.addR4MFWithOptions(b.path("module.R4MF"), .{ .native_archives = &.{
+        archives.path(b, "R4VIDEO-FFmpeg.a"), archives.path(b, "R4NativeMath.a"), archives.path(b, "R4NativeScan.a"),
+    } });
+    b.getInstallStep().dependOn(tests);
+}

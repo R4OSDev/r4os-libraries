@@ -1,0 +1,695 @@
+{
+  "schema": 1,
+  "ffmpeg": "9.0.1",
+  "roots": [
+    "avcodec_find_decoder",
+    "avcodec_alloc_context3",
+    "avcodec_open2",
+    "avcodec_send_packet",
+    "avcodec_receive_frame",
+    "avcodec_flush_buffers",
+    "avcodec_free_context",
+    "av_parser_init",
+    "av_parser_parse2",
+    "av_parser_close",
+    "av_packet_alloc",
+    "av_packet_free",
+    "av_new_packet",
+    "av_packet_unref",
+    "av_frame_alloc",
+    "av_frame_free",
+    "av_frame_unref",
+    "av_frame_ref",
+    "av_frame_move_ref",
+    "av_buffer_create",
+    "av_buffer_ref",
+    "av_buffer_unref",
+    "av_buffer_get_opaque",
+    "av_buffer_alloc",
+    "av_buffer_get_ref_count",
+    "av_cpu_count",
+    "av_get_cpu_flags"
+  ],
+  "units": [
+    {
+      "source": "libavcodec/allcodecs.c",
+      "kind": "c",
+      "object": "libavcodec/allcodecs.o"
+    },
+    {
+      "source": "libavcodec/aom_film_grain.c",
+      "kind": "c",
+      "object": "libavcodec/aom_film_grain.o"
+    },
+    {
+      "source": "libavcodec/atsc_a53.c",
+      "kind": "c",
+      "object": "libavcodec/atsc_a53.o"
+    },
+    {
+      "source": "libavcodec/avcodec.c",
+      "kind": "c",
+      "object": "libavcodec/avcodec.o"
+    },
+    {
+      "source": "libavcodec/bitstream_filters.c",
+      "kind": "c",
+      "object": "libavcodec/bitstream_filters.o"
+    },
+    {
+      "source": "libavcodec/bsf.c",
+      "kind": "c",
+      "object": "libavcodec/bsf.o"
+    },
+    {
+      "source": "libavcodec/cabac.c",
+      "kind": "c",
+      "object": "libavcodec/cabac.o"
+    },
+    {
+      "source": "libavcodec/codec_desc.c",
+      "kind": "c",
+      "object": "libavcodec/codec_desc.o"
+    },
+    {
+      "source": "libavcodec/codec_par.c",
+      "kind": "c",
+      "object": "libavcodec/codec_par.o"
+    },
+    {
+      "source": "libavcodec/decode.c",
+      "kind": "c",
+      "object": "libavcodec/decode.o"
+    },
+    {
+      "source": "libavcodec/dovi_rpu.c",
+      "kind": "c",
+      "object": "libavcodec/dovi_rpu.o"
+    },
+    {
+      "source": "libavcodec/dovi_rpudec.c",
+      "kind": "c",
+      "object": "libavcodec/dovi_rpudec.o"
+    },
+    {
+      "source": "libavcodec/dynamic_hdr_vivid.c",
+      "kind": "c",
+      "object": "libavcodec/dynamic_hdr_vivid.o"
+    },
+    {
+      "source": "libavcodec/encode.c",
+      "kind": "c",
+      "object": "libavcodec/encode.o"
+    },
+    {
+      "source": "libavcodec/error_resilience.c",
+      "kind": "c",
+      "object": "libavcodec/error_resilience.o"
+    },
+    {
+      "source": "libavcodec/exif.c",
+      "kind": "c",
+      "object": "libavcodec/exif.o"
+    },
+    {
+      "source": "libavcodec/get_buffer.c",
+      "kind": "c",
+      "object": "libavcodec/get_buffer.o"
+    },
+    {
+      "source": "libavcodec/golomb.c",
+      "kind": "c",
+      "object": "libavcodec/golomb.o"
+    },
+    {
+      "source": "libavcodec/h2645_parse.c",
+      "kind": "c",
+      "object": "libavcodec/h2645_parse.o"
+    },
+    {
+      "source": "libavcodec/h2645_sei.c",
+      "kind": "c",
+      "object": "libavcodec/h2645_sei.o"
+    },
+    {
+      "source": "libavcodec/h2645_vui.c",
+      "kind": "c",
+      "object": "libavcodec/h2645_vui.o"
+    },
+    {
+      "source": "libavcodec/h2645data.c",
+      "kind": "c",
+      "object": "libavcodec/h2645data.o"
+    },
+    {
+      "source": "libavcodec/h264_cabac.c",
+      "kind": "c",
+      "object": "libavcodec/h264_cabac.o"
+    },
+    {
+      "source": "libavcodec/h264_cavlc.c",
+      "kind": "c",
+      "object": "libavcodec/h264_cavlc.o"
+    },
+    {
+      "source": "libavcodec/h264_direct.c",
+      "kind": "c",
+      "object": "libavcodec/h264_direct.o"
+    },
+    {
+      "source": "libavcodec/h264_loopfilter.c",
+      "kind": "c",
+      "object": "libavcodec/h264_loopfilter.o"
+    },
+    {
+      "source": "libavcodec/h264_mb.c",
+      "kind": "c",
+      "object": "libavcodec/h264_mb.o"
+    },
+    {
+      "source": "libavcodec/h264_parse.c",
+      "kind": "c",
+      "object": "libavcodec/h264_parse.o"
+    },
+    {
+      "source": "libavcodec/h264_parser.c",
+      "kind": "c",
+      "object": "libavcodec/h264_parser.o"
+    },
+    {
+      "source": "libavcodec/h264_picture.c",
+      "kind": "c",
+      "object": "libavcodec/h264_picture.o"
+    },
+    {
+      "source": "libavcodec/h264_ps.c",
+      "kind": "c",
+      "object": "libavcodec/h264_ps.o"
+    },
+    {
+      "source": "libavcodec/h264_refs.c",
+      "kind": "c",
+      "object": "libavcodec/h264_refs.o"
+    },
+    {
+      "source": "libavcodec/h264_sei.c",
+      "kind": "c",
+      "object": "libavcodec/h264_sei.o"
+    },
+    {
+      "source": "libavcodec/h264_slice.c",
+      "kind": "c",
+      "object": "libavcodec/h264_slice.o"
+    },
+    {
+      "source": "libavcodec/h264chroma.c",
+      "kind": "c",
+      "object": "libavcodec/h264chroma.o"
+    },
+    {
+      "source": "libavcodec/h264data.c",
+      "kind": "c",
+      "object": "libavcodec/h264data.o"
+    },
+    {
+      "source": "libavcodec/h264dec.c",
+      "kind": "c",
+      "object": "libavcodec/h264dec.o"
+    },
+    {
+      "source": "libavcodec/h264dsp.c",
+      "kind": "c",
+      "object": "libavcodec/h264dsp.o"
+    },
+    {
+      "source": "libavcodec/h264idct.c",
+      "kind": "c",
+      "object": "libavcodec/h264idct.o"
+    },
+    {
+      "source": "libavcodec/h264pred.c",
+      "kind": "c",
+      "object": "libavcodec/h264pred.o"
+    },
+    {
+      "source": "libavcodec/h264qpel.c",
+      "kind": "c",
+      "object": "libavcodec/h264qpel.o"
+    },
+    {
+      "source": "libavcodec/h274.c",
+      "kind": "c",
+      "object": "libavcodec/h274.o"
+    },
+    {
+      "source": "libavcodec/itut35.c",
+      "kind": "c",
+      "object": "libavcodec/itut35.o"
+    },
+    {
+      "source": "libavcodec/mathtables.c",
+      "kind": "c",
+      "object": "libavcodec/mathtables.o"
+    },
+    {
+      "source": "libavcodec/me_cmp.c",
+      "kind": "c",
+      "object": "libavcodec/me_cmp.o"
+    },
+    {
+      "source": "libavcodec/options.c",
+      "kind": "c",
+      "object": "libavcodec/options.o"
+    },
+    {
+      "source": "libavcodec/packet.c",
+      "kind": "c",
+      "object": "libavcodec/packet.o"
+    },
+    {
+      "source": "libavcodec/parser.c",
+      "kind": "c",
+      "object": "libavcodec/parser.o"
+    },
+    {
+      "source": "libavcodec/parsers.c",
+      "kind": "c",
+      "object": "libavcodec/parsers.o"
+    },
+    {
+      "source": "libavcodec/profiles.c",
+      "kind": "c",
+      "object": "libavcodec/profiles.o"
+    },
+    {
+      "source": "libavcodec/pthread.c",
+      "kind": "c",
+      "object": "libavcodec/pthread.o"
+    },
+    {
+      "source": "libavcodec/pthread_frame.c",
+      "kind": "c",
+      "object": "libavcodec/pthread_frame.o"
+    },
+    {
+      "source": "libavcodec/pthread_slice.c",
+      "kind": "c",
+      "object": "libavcodec/pthread_slice.o"
+    },
+    {
+      "source": "libavcodec/simple_idct.c",
+      "kind": "c",
+      "object": "libavcodec/simple_idct.o"
+    },
+    {
+      "source": "libavcodec/startcode.c",
+      "kind": "c",
+      "object": "libavcodec/startcode.o"
+    },
+    {
+      "source": "libavcodec/threadprogress.c",
+      "kind": "c",
+      "object": "libavcodec/threadprogress.o"
+    },
+    {
+      "source": "libavcodec/tiff_common.c",
+      "kind": "c",
+      "object": "libavcodec/tiff_common.o"
+    },
+    {
+      "source": "libavcodec/utils.c",
+      "kind": "c",
+      "object": "libavcodec/utils.o"
+    },
+    {
+      "source": "libavcodec/videodsp.c",
+      "kind": "c",
+      "object": "libavcodec/videodsp.o"
+    },
+    {
+      "source": "libavcodec/vlc.c",
+      "kind": "c",
+      "object": "libavcodec/vlc.o"
+    },
+    {
+      "source": "libavcodec/x86/constants.c",
+      "kind": "c",
+      "object": "libavcodec/x86/constants.o"
+    },
+    {
+      "source": "libavcodec/x86/fpel.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/fpel.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_chromamc.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_chromamc.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_chromamc_10bit.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_chromamc_10bit.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_deblock.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_deblock.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_deblock_10bit.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_deblock_10bit.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_idct.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_idct.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_idct_10bit.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_idct_10bit.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_intrapred.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_intrapred.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_intrapred_10bit.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_intrapred_10bit.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_intrapred_init.c",
+      "kind": "c",
+      "object": "libavcodec/x86/h264_intrapred_init.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_qpel.c",
+      "kind": "c",
+      "object": "libavcodec/x86/h264_qpel.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_qpel_10bit.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_qpel_10bit.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_qpel_8bit.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_qpel_8bit.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_weight.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_weight.o"
+    },
+    {
+      "source": "libavcodec/x86/h264_weight_10bit.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/h264_weight_10bit.o"
+    },
+    {
+      "source": "libavcodec/x86/h264chroma_init.c",
+      "kind": "c",
+      "object": "libavcodec/x86/h264chroma_init.o"
+    },
+    {
+      "source": "libavcodec/x86/h264dsp_init.c",
+      "kind": "c",
+      "object": "libavcodec/x86/h264dsp_init.o"
+    },
+    {
+      "source": "libavcodec/x86/me_cmp.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/me_cmp.o"
+    },
+    {
+      "source": "libavcodec/x86/me_cmp_init.c",
+      "kind": "c",
+      "object": "libavcodec/x86/me_cmp_init.o"
+    },
+    {
+      "source": "libavcodec/x86/qpel.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/qpel.o"
+    },
+    {
+      "source": "libavcodec/x86/videodsp.asm",
+      "kind": "asm",
+      "object": "libavcodec/x86/videodsp.o"
+    },
+    {
+      "source": "libavcodec/x86/videodsp_init.c",
+      "kind": "c",
+      "object": "libavcodec/x86/videodsp_init.o"
+    },
+    {
+      "source": "libavutil/ambient_viewing_environment.c",
+      "kind": "c",
+      "object": "libavutil/ambient_viewing_environment.o"
+    },
+    {
+      "source": "libavutil/avsscanf.c",
+      "kind": "c",
+      "object": "libavutil/avsscanf.o"
+    },
+    {
+      "source": "libavutil/avstring.c",
+      "kind": "c",
+      "object": "libavutil/avstring.o"
+    },
+    {
+      "source": "libavutil/bprint.c",
+      "kind": "c",
+      "object": "libavutil/bprint.o"
+    },
+    {
+      "source": "libavutil/buffer.c",
+      "kind": "c",
+      "object": "libavutil/buffer.o"
+    },
+    {
+      "source": "libavutil/channel_layout.c",
+      "kind": "c",
+      "object": "libavutil/channel_layout.o"
+    },
+    {
+      "source": "libavutil/container_fifo.c",
+      "kind": "c",
+      "object": "libavutil/container_fifo.o"
+    },
+    {
+      "source": "libavutil/cpu.c",
+      "kind": "c",
+      "object": "libavutil/cpu.o"
+    },
+    {
+      "source": "libavutil/crc.c",
+      "kind": "c",
+      "object": "libavutil/crc.o"
+    },
+    {
+      "source": "libavutil/dict.c",
+      "kind": "c",
+      "object": "libavutil/dict.o"
+    },
+    {
+      "source": "libavutil/display.c",
+      "kind": "c",
+      "object": "libavutil/display.o"
+    },
+    {
+      "source": "libavutil/dovi_meta.c",
+      "kind": "c",
+      "object": "libavutil/dovi_meta.o"
+    },
+    {
+      "source": "libavutil/error.c",
+      "kind": "c",
+      "object": "libavutil/error.o"
+    },
+    {
+      "source": "libavutil/eval.c",
+      "kind": "c",
+      "object": "libavutil/eval.o"
+    },
+    {
+      "source": "libavutil/fifo.c",
+      "kind": "c",
+      "object": "libavutil/fifo.o"
+    },
+    {
+      "source": "libavutil/file_open.c",
+      "kind": "c",
+      "object": "libavutil/file_open.o"
+    },
+    {
+      "source": "libavutil/film_grain_params.c",
+      "kind": "c",
+      "object": "libavutil/film_grain_params.o"
+    },
+    {
+      "source": "libavutil/frame.c",
+      "kind": "c",
+      "object": "libavutil/frame.o"
+    },
+    {
+      "source": "libavutil/hdr_dynamic_metadata.c",
+      "kind": "c",
+      "object": "libavutil/hdr_dynamic_metadata.o"
+    },
+    {
+      "source": "libavutil/hdr_dynamic_vivid_metadata.c",
+      "kind": "c",
+      "object": "libavutil/hdr_dynamic_vivid_metadata.o"
+    },
+    {
+      "source": "libavutil/hwcontext.c",
+      "kind": "c",
+      "object": "libavutil/hwcontext.o"
+    },
+    {
+      "source": "libavutil/imgutils.c",
+      "kind": "c",
+      "object": "libavutil/imgutils.o"
+    },
+    {
+      "source": "libavutil/log.c",
+      "kind": "c",
+      "object": "libavutil/log.o"
+    },
+    {
+      "source": "libavutil/mastering_display_metadata.c",
+      "kind": "c",
+      "object": "libavutil/mastering_display_metadata.o"
+    },
+    {
+      "source": "libavutil/mathematics.c",
+      "kind": "c",
+      "object": "libavutil/mathematics.o"
+    },
+    {
+      "source": "libavutil/md5.c",
+      "kind": "c",
+      "object": "libavutil/md5.o"
+    },
+    {
+      "source": "libavutil/mem.c",
+      "kind": "c",
+      "object": "libavutil/mem.o"
+    },
+    {
+      "source": "libavutil/opt.c",
+      "kind": "c",
+      "object": "libavutil/opt.o"
+    },
+    {
+      "source": "libavutil/parseutils.c",
+      "kind": "c",
+      "object": "libavutil/parseutils.o"
+    },
+    {
+      "source": "libavutil/pixdesc.c",
+      "kind": "c",
+      "object": "libavutil/pixdesc.o"
+    },
+    {
+      "source": "libavutil/random_seed.c",
+      "kind": "c",
+      "object": "libavutil/random_seed.o"
+    },
+    {
+      "source": "libavutil/rational.c",
+      "kind": "c",
+      "object": "libavutil/rational.o"
+    },
+    {
+      "source": "libavutil/refstruct.c",
+      "kind": "c",
+      "object": "libavutil/refstruct.o"
+    },
+    {
+      "source": "libavutil/reverse.c",
+      "kind": "c",
+      "object": "libavutil/reverse.o"
+    },
+    {
+      "source": "libavutil/samplefmt.c",
+      "kind": "c",
+      "object": "libavutil/samplefmt.o"
+    },
+    {
+      "source": "libavutil/sha.c",
+      "kind": "c",
+      "object": "libavutil/sha.o"
+    },
+    {
+      "source": "libavutil/side_data.c",
+      "kind": "c",
+      "object": "libavutil/side_data.o"
+    },
+    {
+      "source": "libavutil/slicethread.c",
+      "kind": "c",
+      "object": "libavutil/slicethread.o"
+    },
+    {
+      "source": "libavutil/stereo3d.c",
+      "kind": "c",
+      "object": "libavutil/stereo3d.o"
+    },
+    {
+      "source": "libavutil/time.c",
+      "kind": "c",
+      "object": "libavutil/time.o"
+    },
+    {
+      "source": "libavutil/timecode.c",
+      "kind": "c",
+      "object": "libavutil/timecode.o"
+    },
+    {
+      "source": "libavutil/timecode_internal.c",
+      "kind": "c",
+      "object": "libavutil/timecode_internal.o"
+    },
+    {
+      "source": "libavutil/utils.c",
+      "kind": "c",
+      "object": "libavutil/utils.o"
+    },
+    {
+      "source": "libavutil/video_enc_params.c",
+      "kind": "c",
+      "object": "libavutil/video_enc_params.o"
+    },
+    {
+      "source": "libavutil/x86/cpu.c",
+      "kind": "c",
+      "object": "libavutil/x86/cpu.o"
+    },
+    {
+      "source": "libavutil/x86/cpuid.asm",
+      "kind": "asm",
+      "object": "libavutil/x86/cpuid.o"
+    },
+    {
+      "source": "libavutil/x86/crc.asm",
+      "kind": "asm",
+      "object": "libavutil/x86/crc.o"
+    },
+    {
+      "source": "libavutil/x86/imgutils.asm",
+      "kind": "asm",
+      "object": "libavutil/x86/imgutils.o"
+    },
+    {
+      "source": "libavutil/x86/imgutils_init.c",
+      "kind": "c",
+      "object": "libavutil/x86/imgutils_init.o"
+    }
+  ]
+}

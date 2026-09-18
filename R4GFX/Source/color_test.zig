@@ -10,6 +10,7 @@ fn rgbNear(expected: color.Rgb, actual: color.Rgb, tolerance: f32) !void {
     for (expected, actual) |e, a| try near(e, a, tolerance);
 }
 pub fn check(api: *const c.ColorV1) !void {
+    try @import("color_yuv_test.zig").check(api);
     try checkGenerated(api);
     try checkIcc();
     try checkApi(api);
@@ -263,8 +264,9 @@ fn checkImages(api: *const c.ColorV1) !void {
 fn checkLookup() !void {
     // Compare the bounded lookup path against the independently anchored
     // analytic path, including off-grid values and near-black10-bit codes.
-    for ([_]color.Transfer{ .srgb, .pq, .hlg }) |transfer| {
-        const desc: color.Description = .{ .primaries = .bt2020, .transfer = transfer, .precision = .unorm10, .reference_white = 203, .peak = if (transfer == .srgb) 203 else 1000 };
+    for ([_]color.Transfer{ .srgb, .pq, .hlg, .bt1886 }) |transfer| {
+        const desc: color.Description = .{ .primaries = .bt2020, .transfer = transfer, .precision = .unorm10, .reference_white = 203,
+            .peak = if (transfer == .srgb or transfer == .bt1886) 203 else 1000, .black = if (transfer == .bt1886) 0.005 else 0 };
         const exact = try color.Encoding.init(desc);
         const fast = try color.Encoding.initFast(desc);
         for (0..2048) |i| {

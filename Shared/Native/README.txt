@@ -42,7 +42,7 @@ the normal kernel VM cleanup. C NULL/default and secure-option policy belongs
 to the consumer; R4VK currently retains its explicit fixed-option policy.
 
 math.zig owns native x86_64 rounding, copysign/frexp and the C wrappers for
-Zig's musl-derived inverse trigonometric functions. lrint/llrint/rint follow
+Zig's musl-derived inverse trigonometric and hyperbolic functions. lrint/llrint/rint follow
 the caller's MXCSR rounding mode; lround uses ties away from zero. rint keeps
 signed zero and does not convert already integral large finite values to i64.
 Zig compiler-rt supplies elementary trig/log/exp, fma, sqrt and basic rounding.
@@ -93,8 +93,8 @@ and closes the process registry and standard streams, retaining caller-owned
 memory-stream buffers. Its result distinguishes completed cleanup with an I/O
 error from an incomplete close requiring retry. Remaining records retain their
 mutex identities for retry; a completed call is sequentially idempotent and
-rejects subsequent opens/standard-stream operations. Product exit integration
-is still pending. A failed stream-lock setup permits retry.
+rejects subsequent opens/standard-stream operations. R4GL calls this from its
+quiescent process-finish path. A failed stream-lock setup permits retry.
 
 process_local.initializedBlob adds one-time construction after publication.
 All users of a key wait for the same completed initializer; the unique key's
@@ -158,7 +158,7 @@ finishCurrent is a terminal thread cleanup operation, not eglReleaseThread and
 not an operation to call halfway through a managed worker. Application threads
 created outside this native transport require an explicit library thread-scope
 cleanup. Process kill retains kernel VM/resource cleanup and does not run foreign
-destructors. Product R4GL process shutdown and API bindings are still pending.
+destructors. R4GL binds the worker/API lifecycle and joins before process finish.
 
 finalizers.Runtime(Memory) owns a process-local dynamic LIFO callback list for
 one consuming R4L, without a fixed callback capacity. Ordinary atexit callbacks
@@ -178,10 +178,10 @@ retains the callback code for the process lifetime. C++ metadata and its mutex
 remain in the process owner until kernel process cleanup; handlers never live
 in shared mutable globals. The fatal policy is deliberately consumer-owned.
 
-0.79.39 integration is in progress. Native fixtures exercise real Mesa EGL/
-Softpipe pbuffer and window rendering, compiler-emitted TLS and process-owned
-state. Product R4GL still needs integration of these native runtime adapters;
-the fixtures' explicit cleanup is not a product lifecycle contract.
+0.79.39 integrates these owners into R4GL. Its product path covers EGL/Softpipe
+pbuffer and WINSVC windows, resize/fullscreen and quiescent process finish.
+Native fixtures complement the product SMP4 evidence; they are not independent
+hardware or API-conformance certification.
 
 sort.c supplies allocation-free heapsort with caller-stack comparator context,
 plain qsort and binary search. Nested calls and parallel callers share no
@@ -273,3 +273,17 @@ the exact process/window/service incarnation. Mutation serials, unknown-reply
 retries, buffer loans and retirement remain in each graphics producer. Calls
 use finite IPC deadlines; wait slices are capped at 25 ms. R4VK retains only
 its private exported C names as thin wrappers.
+
+c_runtime.h and c11_threads.h own the private native C declarations shared by
+R4GL and the developing R4VIDEO port. R4GL retains thin include wrappers at its
+existing paths. The declarations were moved byte-for-byte in 0.79.40; native
+consumers still select and bind their own implementations and process owners.
+
+calendar.zig is a private UTC C adapter over R4STD date arithmetic. gmtime_r /
+localtime_r use caller storage; mktime normalizes calendar fields within years
+1..9999. No host timezone or shared tm object is introduced. The bounded
+strftime adapter supports the numeric UTC log formats Y/y/m/d/H/M/S/j, z/Z,
+percent, newline and tab; unsupported directives or insufficient storage
+return zero. It is not a full locale/POSIX libc. R4VIDEO consumes it together
+with R4SYS wall/monotonic time. R4VIDEO keeps its concurrent allocation budget
+outside memory.Runtime's isolated compiler-job Scope.

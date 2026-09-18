@@ -4,8 +4,8 @@
 //! ITU-R BT.2100-3, Tables 2/4/5/9. Exact originals: GFX/0.79.25/Sources.json.
 const std = @import("std");
 pub const Error = error{ Invalid, Unsupported, Singular };
-pub const Primaries = enum(u32) { srgb = 1, display_p3 = 2, bt2020 = 3, icc = 4 };
-pub const Transfer = enum(u32) { srgb = 1, linear = 2, pq = 3, hlg = 4, icc = 5 };
+pub const Primaries = enum(u32) { srgb = 1, display_p3 = 2, bt2020 = 3, icc = 4, bt601_625 = 5, bt601_525 = 6 };
+pub const Transfer = enum(u32) { srgb = 1, linear = 2, pq = 3, hlg = 4, icc = 5, bt1886 = 6 };
 pub const Range = enum(u32) {
     full = 1,
     limited = 2,
@@ -66,6 +66,8 @@ pub const Description = struct {
         if (self.transfer == .pq and self.black != 0) return error.Unsupported;
         if (self.transfer == .hlg) {
             if (self.primaries != .bt2020 or hlgBeta(self) >= 1) return error.Unsupported;
+        } else if (self.transfer == .bt1886) {
+            if (self.peak != self.reference_white or bt1886Lift(self) >= 1) return error.Unsupported;
         } else if (self.black != 0) return error.Unsupported;
     }
     pub fn hdr(self: Description) bool {
@@ -156,6 +158,8 @@ pub fn chromaticities(primaries: Primaries) Chromaticities {
         .srgb => .{ .red = .{ 0.64, 0.33 }, .green = .{ 0.30, 0.60 }, .blue = .{ 0.15, 0.06 } },
         .display_p3 => .{ .red = .{ 0.68, 0.32 }, .green = .{ 0.265, 0.69 }, .blue = .{ 0.15, 0.06 } },
         .bt2020 => .{ .red = .{ 0.708, 0.292 }, .green = .{ 0.170, 0.797 }, .blue = .{ 0.131, 0.046 } },
+        .bt601_625 => .{ .red = .{ 0.64, 0.33 }, .green = .{ 0.29, 0.60 }, .blue = .{ 0.15, 0.06 } },
+        .bt601_525 => .{ .red = .{ 0.630, 0.340 }, .green = .{ 0.310, 0.595 }, .blue = .{ 0.155, 0.070 } },
         .icc => unreachable, // An admitted ICC transform supplies its PCS.
     };
 }
@@ -175,6 +179,23 @@ pub fn srgbEncode(linear: f32) f32 {
     const x = @abs(linear);
     const result = if (x <= 0.0031308) 12.92 * x else 1.055 * std.math.pow(f32, x, 1.0 / 2.4) - 0.055;
     return std.math.copysign(result, linear);
+}
+// BT.1886 reference display EOTF, not the inverse camera OETF. Its normalized
+// form avoids an unbounded black-offset coefficient as black approaches white.
+// Original specification: GFX/0.79.40/YuvSources/BT.1886-2011.pdf, Annex 1.
+pub fn bt1886Lift(desc: Description) f32 {
+    return std.math.pow(f32, desc.black / desc.reference_white, 1.0 / 2.4);
+}
+fn gamma24Decode(signal: f32) f32 { return std.math.pow(f32, @max(signal, 0), 2.4); }
+fn gamma24Encode(light: f32) f32 { return std.math.pow(f32, @max(light, 0), 1.0 / 2.4); }
+fn bt1886Decode(desc: Description, lift: f32, signal: f32, lookup: bool) f32 {
+    const x = @max((1 - lift) * signal + lift, 0);
+    return desc.reference_white * (if (lookup and x <= 1) CurveTable.at(&gamma24_table.decode, x) else gamma24Decode(x));
+}
+fn bt1886Encode(desc: Description, lift: f32, light: f32, lookup: bool) f32 {
+    const x = @max(light / desc.reference_white, 0);
+    const root = if (lookup and x <= 1) CurveTable.at(&gamma24_table.encode, @sqrt(x)) else gamma24Encode(x);
+    return (root - lift) / (1 - lift);
 }
 // PQ is absolute. Reference-white policy must never rescale the PQ EOTF.
 // f64 intermediates avoid cancellation near the 10000 cd/m2 endpoint.
@@ -225,6 +246,7 @@ const CurveTable = struct {
 const srgb_table = CurveTable.init(srgbDecode, srgbEncode, 1, false);
 const pq_table = CurveTable.init(pqDecode, pqEncode, 10000, true);
 const hlg_table = CurveTable.init(hlgSceneDecode, hlgSceneEncode, 1, false);
+const gamma24_table = CurveTable.init(gamma24Decode, gamma24Encode, 1, false);
 fn hlgDecode(desc: Description, encoded: Rgb, lookup: bool) Rgb {
     const beta = hlgBeta(desc);
     var scene: Rgb = undefined;
@@ -280,10 +302,12 @@ pub const Encoding = struct {
     to_working: Matrix,
     from_working: Matrix,
     lookup: bool = false,
+    black_lift: f32 = 0,
     pub fn init(desc: Description) Error!Encoding {
         try desc.validate();
         if (desc.transfer == .icc) return error.Unsupported;
-        return .{ .description = desc, .to_working = primariesMatrix(desc.primaries, .bt2020), .from_working = primariesMatrix(.bt2020, desc.primaries) };
+        return .{ .description = desc, .to_working = primariesMatrix(desc.primaries, .bt2020), .from_working = primariesMatrix(.bt2020, desc.primaries),
+            .black_lift = if (desc.transfer == .bt1886) bt1886Lift(desc) else 0 };
     }
     pub fn initFast(desc: Description) Error!Encoding {
         var result = try init(desc);
@@ -302,6 +326,7 @@ pub const Encoding = struct {
         } else for (&rgb) |*channel| channel.* = switch (desc.transfer) {
             .srgb => (if (self.lookup and @abs(channel.*) <= 1) std.math.copysign(CurveTable.at(&srgb_table.decode, @abs(channel.*)), channel.*) else srgbDecode(channel.*)) * desc.reference_white,
             .linear => channel.* * desc.reference_white,
+            .bt1886 => bt1886Decode(desc, self.black_lift, channel.*, self.lookup),
             .pq => if (self.lookup) CurveTable.at(&pq_table.decode, channel.*) else pqDecode(channel.*),
             .hlg, .icc => unreachable,
         };
@@ -318,6 +343,7 @@ pub const Encoding = struct {
         } else for (&rgb) |*channel| channel.* = switch (desc.transfer) {
             .srgb => if (self.lookup and @abs(channel.*) <= desc.reference_white) std.math.copysign(CurveTable.at(&srgb_table.encode, @sqrt(@abs(channel.*) / desc.reference_white)), channel.*) else srgbEncode(channel.* / desc.reference_white),
             .linear => channel.* / desc.reference_white,
+            .bt1886 => bt1886Encode(desc, self.black_lift, channel.*, self.lookup),
             .pq => if (self.lookup) CurveTable.at(&pq_table.encode, @sqrt(@sqrt(unit(channel.* / 10000)))) else pqEncode(channel.*),
             .hlg, .icc => unreachable,
         };

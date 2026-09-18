@@ -28,6 +28,9 @@ pub fn build(b: *std.Build) void {
     const nv_backend = b.createModule(.{ .root_source_file = nv_package.namedLazyPath("backend"), .target = b.graph.host });
     nv_backend.addImport("r4l_contract", nv_implementation);
     provider.addImport("r4nv_backend", nv_backend);
+    const nv_render = b.createModule(.{ .root_source_file = nv_package.namedLazyPath("render_encoder"), .target = b.graph.host });
+    nv_render.addImport("r4l_contract", nv_implementation);
+    provider.addImport("r4nv_render_encoder", nv_render);
     @import("color_build.zig").add(b, provider);
     const conformance = b.createModule(.{ .root_source_file = b.path("Tests/Generated/contract_conformance.zig"), .target = b.graph.host });
     conformance.addImport("implementation", implementation);

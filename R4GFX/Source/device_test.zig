@@ -10,7 +10,7 @@ const d = @import("device.zig");
 const c = d.c;
 const api = &@import("main.zig").r4gfx_device_v1;
 const Model = struct {
-    const Object = struct { bytes: [65536]u8 = @splat(0), descriptor: a.GfxBufferDescriptor = .{}, live: bool = false };
+    const Object = struct { bytes: [131072]u8 align(8) = @splat(0), descriptor: a.GfxBufferDescriptor = .{}, live: bool = false };
     const Ref = struct { object: ?usize = null, generation: u64 = 0, mapped: bool = false };
     const Queue = struct { handle: a.GfxQueueHandle = .{}, config: a.GfxQueueConfig = .{} };
     var objects: [4]Object = @splat(.{});
@@ -57,6 +57,88 @@ const Model = struct {
         .negotiate = @ptrCast(&nv_provider.r4nv_negotiate_impl), .encode_copy = @ptrCast(&nv_provider.r4nv_encode_copy_impl),
         .encode_copy_layout = @ptrCast(&nv_provider.r4nv_encode_copy_layout_impl),
         .image_layout = @ptrCast(&nv_provider.r4nv_image_layout_impl) };
+    const encoder = @import("r4nv_render_encoder");
+    var nv_render: nv.RenderV1 = .{ .header = nv.render_v1_header,
+        .render_info = @ptrCast(&encoder.r4nv_render_info_impl), .render_upload = @ptrCast(&encoder.r4nv_render_upload_impl),
+        .encode_yuv = @ptrCast(&encoder.r4nv_encode_yuv_impl) };
+    const Virtual = struct { request: a.GfxVirtualRequest = .{}, handle: a.GfxBufferHandle = .{}, address: u64 = 0, closing: bool = false };
+    var virtuals: [16]Virtual = @splat(.{});
+    var virtual_starts: usize = 0;
+    var virtual_closes: usize = 0;
+    var virtual_ack = false;
+    var retire_ack = false;
+    fn properties(input: *const a.GfxBackendBinding, out: *a.GfxBackendProperties) callconv(.c) i32 {
+        std.debug.assert(std.meta.eql(input.*, binding));
+        var arch = std.mem.zeroes(nv.R4NvArchitecture);
+        arch.version = nv.architecture_version; arch.size = @sizeOf(nv.R4NvArchitecture);
+        arch.vendor_id = 0x10de; arch.rm_release = nv.rm_release; arch.graphics_class = 0xc797; arch.shader_model = 86;
+        arch.memory_generation = 73; arch.va_start = 0x10000000; arch.va_end = 0x20000000; arch.bind_alignment = 65536;
+        arch.flags = nv.architecture_host_coherent | nv.architecture_image_layouts;
+        out.* = .{ .interface_id_lo = nv.backend_v1_header.interface_id_lo, .interface_id_hi = nv.backend_v1_header.interface_id_hi,
+            .revision = nv.architecture_version, .data_bytes = @sizeOf(nv.R4NvArchitecture) };
+        @memcpy(out.data[0..@sizeOf(nv.R4NvArchitecture)], std.mem.asBytes(&arch));
+        return 1;
+    }
+    fn virtualNode(handle: a.GfxBufferHandle) *Virtual {
+        for (&virtuals) |*entry| if (std.meta.eql(entry.handle, handle)) return entry;
+        unreachable;
+    }
+    fn virtualStart(input: *const a.GfxVirtualRequest, out: *a.GfxVirtualStatus) callconv(.c) i32 {
+        std.debug.assert(input.adapter_id == binding.adapter_id and input.memory_generation == 73 and input.kind >= 1 and input.kind <= 2);
+        for (&virtuals, 0..) |*entry, i| if (entry.handle.id == 0) {
+            serial += 1; virtual_starts += 1;
+            entry.* = .{ .request = input.*, .handle = .{ .id = @intCast(1000+i), .generation = serial },
+                .address = if (input.kind == 1) 0x10000000 + i * 0x20000 else virtualNode(input.parent).address };
+            if (input.kind == 2) _ = ref(input.reference);
+            return virtualQuery(&entry.handle, out);
+        };
+        return a.gfx_buffer_error_capacity;
+    }
+    fn virtualQuery(input: *const a.GfxBufferHandle, out: *a.GfxVirtualStatus) callconv(.c) i32 {
+        const entry = virtualNode(input.*);
+        out.* = .{ .resource = entry.handle, .parent = entry.request.parent, .kind = entry.request.kind,
+            .byte_length = entry.request.byte_length, .deadline_ns = entry.request.deadline_ns,
+            .flags = if (entry.closing) (if (retire_ack) @as(u32,7) else 3) else (if (virtual_ack) @as(u32,1) else 0),
+            .result = if (virtual_ack) 1 else 0, .address = if (virtual_ack) entry.address else 0 };
+        return 1;
+    }
+    fn virtualClose(input: *const a.GfxBufferHandle, flags: u32) callconv(.c) i32 {
+        const entry = virtualNode(input.*);
+        std.debug.assert(!job_live and entry.request.kind == 1);
+        if (flags == 0) { entry.closing = true; virtual_closes += 1; return 1; }
+        std.debug.assert(flags == 1 and retire_ack and entry.closing);
+        for (&virtuals) |*child| if (std.meta.eql(child.request.parent, input.*)) { child.* = .{}; };
+        entry.* = .{};
+        return 1;
+    }
+    fn mapPersistent(input: *const a.GfxBufferHandle, access: u32, offset: u64, bytes: u64, out: *a.GfxBufferMap) callconv(.c) i32 {
+        const rc = map(input, access, offset, bytes, out);
+        out.cache_policy = a.gfx_buffer_cache_write_back;
+        return rc;
+    }
+    fn submitNative(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, native: *const a.GfxNativeSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        std.debug.assert(input.operation == a.gfx_queue_operation_native and native.resource_count == 3 and native.command_bytes == 48);
+        const header: *const nv.R4NvNativeSubmitHeader = @ptrFromInt(native.commands);
+        const push: *const nv.R4NvNativePush = @ptrFromInt(native.commands + 32);
+        std.debug.assert(header.engine_mask == nv.native_engine_graphics and header.push_count == 1 and push.byte_length > 0 and push.byte_length <= 4096);
+        const loans = @as([*]const a.GfxNativeResource,@ptrFromInt(native.resources))[0..native.resource_count];
+        for (loans, 0..) |loan, i| {
+            const entry = virtualNode(loan.binding);
+            std.debug.assert(entry.request.kind == 2 and !entry.closing and loan.access == @intFromBool(i == 2));
+            _ = ref(entry.request.reference);
+        }
+        const upload = virtualNode(loans[0].binding);
+        const object = &objects[ref(upload.request.reference).object.?];
+        std.debug.assert(object.descriptor.location == 0 and push.address >= upload.address and push.address + push.byte_length <= upload.address + object.descriptor.byte_length);
+        var info: nv.R4NvRenderInfo = undefined;
+        std.debug.assert(nv_render.render_info(0xc797, &info) == nv.status_ok);
+        const packet = std.mem.alignForward(usize, info.program_bytes, 256);
+        std.debug.assert(std.mem.readInt(u32, object.bytes[packet..][0..4], .little) == 0x6010021d and
+            std.mem.readInt(u32, object.bytes[packet+32..][0..4], .little) == 0x60d01218 and
+            std.mem.readInt(u32, object.bytes[packet+256..][0..4], .little) == 1 and
+            std.mem.readInt(u32, object.bytes[packet+332..][0..4], .little) == 0);
+        return submit(queue, input, out);
+    }
 
     fn reset() void {
         objects = @splat(.{}); references = @splat(.{}); queues = @splat(.{});
@@ -69,6 +151,7 @@ const Model = struct {
         clock = 100; submit_serial = 0x400000017; feedback = null; shown = @splat(0xabcdef); present_calls = 0; fail_present = false;
         retire_requested = false;
         outputs = @splat(.{});
+        virtuals = @splat(.{}); virtual_starts = 0; virtual_closes = 0; virtual_ack = false; retire_ack = false;
         presentation_info = .{ .flags = a.display_presentation_info_active, .head_id = 2, .display_generation = 1,
             .sequence = 1, .width = 4, .height = 4, .format = c.format_xrgb8888, .policies = 7, .buffer_count = 2, .plane_count = 1 };
     }
@@ -250,7 +333,7 @@ const Model = struct {
     fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
         std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows or
             input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_render_list or input.operation == a.gfx_queue_operation_present or
-            input.operation == a.gfx_queue_operation_direct_present or input.operation == a.gfx_queue_operation_render_grid_list or input.operation == a.gfx_queue_operation_render_color_list or input.operation == a.gfx_queue_operation_render_color_grid_list) and input.dependency_count <= 1);
+            input.operation == a.gfx_queue_operation_direct_present or input.operation == a.gfx_queue_operation_render_grid_list or input.operation == a.gfx_queue_operation_render_color_list or input.operation == a.gfx_queue_operation_render_color_grid_list or input.operation == a.gfx_queue_operation_native) and input.dependency_count <= 1);
         if (input.dependency_count == 1) {
             std.debug.assert(job_live and std.meta.eql(input.dependencies[0], status.fence));
             dependency_seen = true;
@@ -492,6 +575,7 @@ pub fn check() !void {
         .{ .group_id = @intFromEnum(a.R4LGroup.r4sys), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&sys) },
         .{ .group_id = @intFromEnum(a.R4LGroup.r4draw), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&draw) },
         .{ .module_name = @intFromPtr("R4NV"), .symbol_name = @intFromPtr("BACKEND_V1"), .min_version = nv.backend_v1_revision },
+        .{ .module_name = @intFromPtr("R4NV"), .symbol_name = @intFromPtr("RENDER_V1"), .min_version = nv.render_v1_revision },
     };
     const raw: a.R4XStartContext = .{ .flags = a.r4xstart_flag_imports_valid, .imports = @intFromPtr(&imports), .import_count = imports.len, .instance_id = 7 };
     var config: c.R4GfxDeviceConfig = .{ .version = 1, .size = @sizeOf(c.R4GfxDeviceConfig), .storage_address = @intFromPtr(storage),
@@ -689,6 +773,94 @@ pub fn check() !void {
     draw.display_output_presentation_info = @intFromPtr(&Model.outputInfo);
     draw.gfx_queue_submit_output = @intFromPtr(&Model.submitOutput);
     try checkOutputSwapchains(config);
+    draw.gfx_buffer_map_persistent = @intFromPtr(&Model.mapPersistent);
+    draw.gfx_queue_backend_properties = @intFromPtr(&Model.properties);
+    draw.gfx_virtual_start = @intFromPtr(&Model.virtualStart);
+    draw.gfx_virtual_query = @intFromPtr(&Model.virtualQuery);
+    draw.gfx_virtual_close = @intFromPtr(&Model.virtualClose);
+    draw.gfx_queue_submit_native = @intFromPtr(&Model.submitNative);
+    imports[3].table = @intFromPtr(&Model.nv_render); imports[3].resolved_version = nv.render_v1_revision;
+    try checkNativeYuv(&config);
+}
+
+fn checkNativeYuv(config: *const c.R4GfxDeviceConfig) !void {
+    Model.reset(); Model.operations = 29 | (@as(u64,1) << a.gfx_queue_operation_native);
+    const colors = &@import("main.zig").r4gfx_color_v1;
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    var source: a.GfxBufferReference = .{};
+    try t.expectEqual(@as(i32,1), Model.create(&.{ .byte_length = 131072, .alignment = 65536, .modifier = 0x0300000000606011,
+        .width = 4, .height = 32, .format = a.gfx_buffer_format_nv12, .plane_count = 2, .plane_offsets = .{0,65536,0,0}, .plane_pitches = .{64,64,0,0},
+        .usage = 28, .location = 1, .adapter_id = Model.binding.adapter_id, .device_generation = 73, .driver_owner = 79 }, &source));
+    var native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999,
+        .width = 4, .height = 4, .format = c.format_abgr16161616f, .layout = 0 };
+    var desc: c.R4GfxColorResourceDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxColorResourceDesc),
+        .resource = descriptor(c.resource_image), .description = .{ .version = 1, .size = @sizeOf(c.R4GfxColorDescription),
+            .primaries = c.color_primaries_srgb, .transfer = c.color_transfer_linear, .range = c.color_range_full,
+            .alpha = c.color_alpha_optical, .precision = c.color_precision_float16, .flags = 0,
+            .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 } };
+    desc.resource.flags = c.image_target; desc.resource.source_kind = c.source_create_native; desc.resource.source_address = @intFromPtr(&native);
+    var target: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, colors.color_resource_create(&handle, &desc, &target));
+    var request = std.mem.zeroes(c.R4GfxYuvRenderRequest);
+    request.version = 1; request.size = @sizeOf(c.R4GfxYuvRenderRequest); request.target = target; request.deadline_ns = native.deadline_ns;
+    request.source = .{ .version = 1, .size = @sizeOf(c.R4GfxYuvBufferImage), .format = 1, .width = 4, .height = 4, .plane_count = 2, .reserved = 0,
+        .crop = .{ .x = 1, .y = 1, .width = 3, .height = 3 },
+        .description = .{ .version = 1, .size = @sizeOf(c.R4GfxYuvDescription), .primaries = 1, .transfer = 1, .matrix = 1, .range = 2,
+            .chroma_location = 1, .flags = 0, .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 },
+        .plane0 = .{ .reference_id = source.reference.id, .reference_generation = source.reference.generation, .reserved = 0, .offset = 0, .byte_length = 65536, .pitch = 64 },
+        .plane1 = .{ .reference_id = source.reference.id, .reference_generation = source.reference.generation, .reserved = 0, .offset = 65536, .byte_length = 65536, .pitch = 64 },
+        .plane2 = std.mem.zeroes(c.R4GfxYuvBufferPlane) };
+    request.transform = .{ .version = 1, .size = @sizeOf(c.R4GfxColorTransform), .source_rect = request.source.crop,
+        .target_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 }, .sampler = 1, .operation = c.render_operation_over,
+        .opacity = 32768, .flags = 0, .pixel_budget = 16 };
+    var job = std.mem.zeroes(c.R4GfxJob);
+    const empty = job;
+    for (0..3) |_| {
+        try t.expectEqual(c.status_busy, colors.color_yuv_render_submit(&handle, &request, &job));
+        try t.expectEqualDeep(empty, job);
+    }
+    try t.expect(Model.virtual_starts == 3 and Model.maps == 1 and !Model.job_live);
+    // Allocation/VA acknowledgement is separate from acceptance and rendering.
+    Model.virtual_ack = true;
+    for (0..6) |_| {
+        const rc = colors.color_yuv_render_submit(&handle, &request, &job);
+        if (rc == c.status_ok) break;
+        try t.expectEqual(c.status_busy, rc);
+    }
+    try t.expect(job.slot != 0 and Model.job_live and Model.virtual_starts == 6 and Model.maps == 1);
+    var memory: c.R4GfxMemoryInfo = undefined;
+    try t.expectEqual(c.status_ok, api.memory_info(&handle, &memory));
+    try t.expect(memory.resident_bytes == 196608 and memory.pinned_bytes == 196608 and memory.system_bytes == 65536);
+    try t.expectEqual(c.status_limit, api.memory_trim(&handle, request.deadline_ns));
+    try t.expect(Model.virtual_closes == 0);
+    const maps = Model.virtual_starts;
+    const count = Model.referenceCount();
+    try t.expectEqual(c.status_busy, api.job_release(&handle, &job));
+    try t.expect(Model.referenceCount() == count and Model.virtual_closes == 0);
+    Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_complete; Model.status.flags = 0;
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    // A second frame reuses both BO mappings and the prepared shader upload.
+    try t.expectEqual(c.status_ok, colors.color_yuv_render_submit(&handle, &request, &job));
+    try t.expect(Model.virtual_starts == maps and Model.maps == 1);
+    Model.binding.reset_generation += 1;
+    var refreshed: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &refreshed));
+    var rejected = empty;
+    try t.expectEqual(c.status_stale, colors.color_yuv_render_submit(&handle, &request, &rejected));
+    try t.expectEqualDeep(empty, rejected);
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &target));
+    try t.expectEqual(@as(i32,1), Model.release(&source.reference));
+    try t.expectEqual(c.status_busy, api.device_close(&handle));
+    try t.expect(Model.job_live and Model.virtual_closes == 0 and Model.referenceCount() >= 3);
+    Model.status.flags = 0; // Engine stopped; canonical queue loans may retire.
+    try t.expectEqual(c.status_busy, api.device_close(&handle));
+    try t.expect(!Model.job_live and Model.virtual_closes == 3 and Model.referenceCount() == 3);
+    Model.retire_ack = true; // Separate map/RM retirement acknowledgement.
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
+    for (Model.virtuals) |entry| try t.expect(entry.handle.id == 0);
+    std.debug.print("native YUV: public encoder, one upload/no pixel maps, cached BO/VA reuse, reset and separate engine/map retirement: OK\n", .{});
 }
 
 fn checkResidency(config: *const c.R4GfxDeviceConfig) !void {

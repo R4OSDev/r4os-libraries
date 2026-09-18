@@ -40,6 +40,7 @@ pub fn eligible(device: *const d.Device, item: *const d.Resource) bool {
         item.public_refs == 0 or item.invalidated or item.evicted or item.residency_busy or item.job_refs != 0 or
         item.map.lease.id != 0 or item.priority == pinned_priority or item.descriptor.location != a.gfx_buffer_location_device_local or
         item.descriptor.usage & a.gfx_buffer_usage_scanout != 0 or item.backing.reference.id == 0) return false;
+    if (device.native_yuv.contains(item.backing.buffer)) return false;
     // A second resource may share this mutable BO. Replacing just one alias
     // would split their contents, even if the physical BO remained alive.
     for (&device.resources) |*other| if (other != item and other.serial != 0 and
@@ -61,6 +62,21 @@ pub fn snapshot(device: *const d.Device) Snapshot {
         result.phase = work.phase;
         if (work.other.reference.id != 0) result.pending_bytes = work.descriptor.byte_length;
     }
+    // Native cache references can outlive a logical image/decoder reference.
+    // Count those BOs once, including the bounded coherent command uploads.
+    cached: for (&device.native_yuv.entries, 0..) |*entry, index| {
+        const item = &entry.resource;
+        if (!item.live()) continue;
+        for (&device.resources) |*logical| if (logical.serial != 0 and logical.backing.reference.id != 0 and
+            std.meta.eql(logical.backing.buffer, item.backing.buffer)) continue :cached;
+        for (device.native_yuv.entries[0..index]) |*prior| if (prior.resource.live() and
+            std.meta.eql(prior.resource.backing.buffer, item.backing.buffer)) continue :cached;
+        if (item.descriptor.location == a.gfx_buffer_location_device_local) {
+            result.resident_bytes += item.descriptor.byte_length;
+            result.pinned_bytes += item.descriptor.byte_length;
+        } else result.system_bytes += item.descriptor.byte_length;
+    }
+    for (&device.native_yuv.uploads) |*item| if (item.live()) { result.system_bytes += item.descriptor.byte_length; };
     return result;
 }
 fn now(device: *d.Device) d.Error!u64 {

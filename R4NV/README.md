@@ -12,15 +12,36 @@ software rendering when the library is unavailable or incompatible.
 
 Native queue packets use `R4NvNativeSubmitHeader` (32 bytes), followed by exactly
 `push_count` `R4NvNativePush` records (16 bytes each). Version 1 admits at most
-510 pushes and flags `incomplete`/`no_prefetch`. Engine mask bit1 requires graphics;
-bits2/4 additionally request instantiated compute/copy objects. The first job
-fixes the queue's engine set; subsequent jobs may request subsets. Unknown bits,
-missing classes or an unpaired copy engine fail before GPU publication.
+510 pushes and flags `incomplete`/`no_prefetch`. Engine mask bit1 selects graphics;
+bits2/4 additionally request instantiated compute/copy objects. Bit8 alone selects
+a separate NVDEC queue and requires no ready GR template. The first job fixes
+the queue's engine family/set; graphics jobs may request subsets. Mixing video
+with graphics/compute/copy, changing families, unknown bits, missing classes or
+an unpaired copy engine fails before GPU publication. Video queue completion
+proves engine drain and memory ordering; the codec must also check NVDEC picture
+status before exposing output. R4VIDEO owns decoder integration and frame leases;
+the media facade connects those leases to R4GFX composition and App-Audio.
 The final push must be complete. Every referenced BO/VA, including command
 storage, must be retained through the common native resource list. Completion
 is a GPU drain and ordered semaphore, not command fetch; Vulkan resource/cache
 barriers remain in the stream. These wire types add no R4L slots or revisions;
 NVIDIA.R4D decides actual support from its live resources.
+
+`Source/video.zig` (named build path `r4nv_video`) supplies bounded, compiled
+H.264 picture/DPB and NVDEC command encoding for C7B0/C9B0. It supports progressive
+8-bit 4:2:0 Baseline/Main/High with KBL NV12 surfaces, up to 16 references and
+255 slices. It checks buffer extents, 40-bit method addresses and overlapping
+allocations; reference and output lifetimes remain with R4VIDEO and the common
+BO/VA/fence owners. Its slice collector writes Annex B prefixes, EOS, a final
+slice boundary and zero padding. Status decoding requires a successful queue
+fence and the exact macroblock count without decoder/slice errors. Every job
+must first replace its previous status record with `pendingStatus()`.
+
+The helper adds no R4L slot or external runtime. Original NVIDIA-header vectors
+exercise signed picture fields, DPB marking, scaling matrices and status layout
+inside the existing R4NV test group. VIDEO_V1's NVIDIA codec integration also
+passes modeled replies; physical decoding remains pending. Provenance:
+`Source/nvdec_h264_vectors.json` and `Tests/nvdec_h264_reference.c`.
 
 `Source/copy.zig` is shared by the R4L and the driver's compiled binding:
 

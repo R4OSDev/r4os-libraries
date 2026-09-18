@@ -20,6 +20,7 @@ fn state(program: *const render.Program, method: u32) !u32 {
 pub fn check() !void {
     try render.reference_model.check();
     try checkColorPackets();
+    try checkYuvPackets();
     var binding: render.Binding = .{
         .draw = .{
             .target = .{ .address = 0x100000, .bytes = 65536, .width = 128, .height = 128, .pitch = 512, .format = .argb8888, .layout = .linear },
@@ -169,6 +170,12 @@ fn checkColorPackets() !void {
     for ([_]usize{32,80}) |base| for (0..3) |i| { color.words[(base + i * 20) / 4] = @bitCast(@as(f32,1)); };
     const scalars = [_]f32{203,1000,1,0, 203,1000,1,0, 1,0,1,0, 1,1000,750,250, 1000,1.0/1023.0};
     for (scalars, 32..) |value, i| color.words[i] = @bitCast(value);
+    var video_color = color;
+    video_color.words[1] = 6;
+    video_color.words[35] = @bitCast(@as(f32, 0.0562341325));
+    try video_color.validate();
+    video_color.words[2] = 5; // ICC is not executable by the fixed named-color shader.
+    try t.expectError(error.Unsupported, video_color.validate());
     const draw: render.Draw = .{
         .target = .{ .address = 0x100000, .bytes = 65536, .width = 128, .height = 128, .pitch = 512, .format = .xrgb2101010, .layout = .linear },
         .source = .{ .address = 0x200000, .bytes = 131072, .width = 128, .height = 128, .pitch = 1024, .format = .abgr16161616f, .layout = .linear },
@@ -203,4 +210,83 @@ fn checkColorPackets() !void {
     draws[15] = draw; draws[15].blend = .over;
     try t.expectError(error.Unsupported, render.packetUploadList(&draws, &packets));
     std.debug.print("render color: FP16 to XR30, copied CBuf2,16 draws fit4KB ring, invalid/torn programs rejected: OK\n", .{});
+}
+
+pub fn yuvFixture() render.Draw {
+    var color: render.ColorProgram = .{};
+    color.words[0..5].* = .{ 0, 6, 2, 1, 4 };
+    for ([_]usize{32,80}) |base| for (0..3) |i| { color.words[(base + i * 20) / 4] = @bitCast(@as(f32,1)); };
+    const scalars = [_]f32{203,203,1,0, 203,203,1,0, 1,0,1,0, 1,203,150,53, 203,0};
+    for (scalars, 32..) |value, i| color.words[i] = @bitCast(value);
+    return .{
+        .target = .{ .address = 0x100000, .bytes = 2048, .width = 16, .height = 16, .pitch = 128, .format = .abgr16161616f, .layout = .linear },
+        .source = .{ .address = 0x200000, .bytes = 160, .width = 7, .height = 5, .pitch = 32, .format = .r8, .layout = .linear },
+        .yuv = .{ .format = .nv12,
+            .chroma = .{ .address = 0x210000, .bytes = 96, .width = 4, .height = 3, .pitch = 32, .format = .rg8, .layout = .linear },
+            .matrix = .{ .{1.1643836,0,1.7927411,-0.9729451}, .{1.1643836,-0.2132486,-0.5329093,0.3014827}, .{1.1643836,2.1124018,0,-1.1334022} },
+            .origin = .{0,0.5} },
+        .destination = .{ .x = -1, .y = 0, .width = 18, .height = 16 },
+        .source_rect = .{ .x = 1, .y = 1, .width = 5, .height = 3 },
+        .scissor = .{ .x = 0, .y = 0, .width = 16, .height = 16 },
+        .transfer = .color, .color_program = color, .filter = .bilinear, .blend = .over,
+    };
+}
+fn checkYuvPackets() !void {
+    var draw = yuvFixture();
+    const color = draw.color_program.?;
+    var packet: [render.packet_bytes]u8 = undefined;
+    var program: render.Program = .{};
+    for ([_]u32{1,2,3}) |format| {
+        draw.yuv.?.format = @enumFromInt(format);
+        draw.source.?.format = if (format == 2) .r16 else .r8;
+        draw.yuv.?.chroma.format = switch (format) { 1 => .rg8, 2 => .rg16, else => .r8 };
+        draw.yuv.?.second = if (format == 3) draw.yuv.?.chroma else null;
+        if (draw.yuv.?.second) |*second| second.address = 0x220000;
+        try render.packetUpload(draw, &packet);
+        // Independent class-header anchors: UINT (not UNORM), separate TIC
+        // indices, six-bit P010 shift and absolute odd-crop sample centers.
+        try t.expectEqual(@as(u32, if (format == 2) 0x6010021b else 0x6010021d), word(&packet, 0));
+        try t.expectEqual(@as(u32, switch (format) { 1 => 0x60d01218, 2 => 0x60d0120c, else => 0x6010021d }), word(&packet, 32));
+        try t.expectEqual(format, word(&packet, 256));
+        try t.expectEqual(@as(u32,1), word(&packet, 260));
+        try t.expectEqual(@as(u32, if (format == 2) 6 else 0), word(&packet, 332));
+        try t.expectEqual(@as(u32,0), word(&packet, 512));
+        try t.expectEqual(@as(u32,1), word(&packet, 516));
+        if (format == 3) try t.expectEqual(@as(u32,2), word(&packet, 520));
+        for ([_]f32{1,1,5,3}, 0..) |value, i| try t.expectEqual(@as(u32,@bitCast(value)), word(&packet, 336 + i * 4));
+        try t.expectEqualSlices(u8, std.mem.asBytes(&color), packet[1024..1280]);
+        var draws: [render.batch_capacity]render.Draw = @splat(draw);
+        for (&draws, 0..) |*item, i| { item.scissor.x = @intCast(i); item.scissor.width = 1; }
+        for ([_]u32{0xc597,0xc797,0xc997,0xcd97}) |class| {
+            const profile = render.profiles.get(class).?;
+            const binding: render.Binding = .{ .class = class, .draw = draws[0], .additional = draws[1..],
+                .programs = .{ .address = 0x300000, .bytes = profile.bytes() },
+                .packet = .{ .address = 0x400000, .bytes = render.packet_capacity_bytes } };
+            try render.encode(binding, &program);
+            try t.expect(program.count + 11 <= 1024);
+            try t.expectEqual(@as(u32,if (format == 3) 2 else 1), try state(&program, hw.SET_TEX_HEADER_POOL_A+8));
+            try t.expectError(error.MissingState, state(&program, hw.SET_TEX_SAMPLER_POOL_A));
+            try t.expectEqual(@as(u32,0x31), try state(&program, hw.BIND_GROUP_CONSTANT_BUFFER+128));
+            try t.expectEqual(@as(u32,0x400000+15*render.packet_bytes+256), try state(&program, hw.SET_CONSTANT_BUFFER_SELECTOR_A+8));
+            try t.expectEqual(@as(u32,0x300000+profile.offset(7)), try state(&program, hw.SET_PIPELINE_PROGRAM_ADDRESS_A+5*64+4));
+        }
+    }
+    const original = draw;
+    const before = packet;
+    draw.yuv.?.second.?.address = draw.target.address;
+    try t.expectError(error.Unsupported, render.packetUpload(draw, &packet));
+    try t.expectEqualSlices(u8, &before, &packet);
+    draw = original; draw.yuv.?.chroma.width -= 1;
+    try t.expectError(error.Bounds, draw.validate());
+    draw = original; draw.yuv.?.origin[1] = 0.25;
+    try t.expectError(error.Bounds, draw.validate());
+    draw = original; draw.yuv.?.matrix[0][0] = std.math.nan(f32);
+    try t.expectError(error.Bounds, draw.validate());
+    draw = original; draw.color_program = null;
+    try t.expectError(error.Unsupported, draw.validate());
+    draw = original; draw.grid.enabled = 1;
+    try t.expectError(error.Unsupported, draw.validate());
+    draw = original; draw.color_program.?.words[3] = 4;
+    try t.expectError(error.Unsupported, draw.validate());
+    std.debug.print("render YUV: 3 integer plane layouts, odd crop, P010 packing, four classes,16 draws fit4KB ring: OK\n", .{});
 }

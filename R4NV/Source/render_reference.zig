@@ -179,7 +179,8 @@ fn executeDraw(class: u32, methods: []const u8, packet: []const u8, program_addr
     try t.expectEqual(target.pitch,try method(methods,hw.SET_COLOR_TARGET_A+8));
     try t.expectEqual(target.height,try method(methods,hw.SET_COLOR_TARGET_A+12));
     try t.expectEqual(@as(u32,switch (target.format) { .argb8888 => 0xcf, .xrgb8888 => 0xe6, .r8 => 0xf3,
-        .xrgb2101010, .argb2101010 => 0xdf, .abgr16161616f => 0xca }),try method(methods,hw.SET_COLOR_TARGET_A+16));
+        .xrgb2101010, .argb2101010 => 0xdf, .abgr16161616f => 0xca,
+        .rg8, .r16, .rg16 => return error.Format }),try method(methods,hw.SET_COLOR_TARGET_A+16));
     try t.expectEqual(@as(u32,0x1000),try method(methods,hw.SET_COLOR_TARGET_A+20)); // Linear reference views only.
     try t.expectEqual(packet_address+768,try wideMethod(methods,hw.SET_VERTEX_STREAM_A_FORMAT+4));
     try t.expectEqual(@as(u32,40),try method(methods,hw.SET_VERTEX_STREAM_A_FORMAT)&0xfff);
@@ -211,7 +212,8 @@ fn executeDraw(class: u32, methods: []const u8, packet: []const u8, program_addr
         try t.expectEqual(src.width,(word(packet,16)&0xffff)+1);
         try t.expectEqual(src.height,(word(packet,20)&0xffff)+1);
         try t.expectEqual(@as(u32,switch (src.format) { .argb8888 => 0x54e24908, .xrgb8888 => 0x74e24908, .r8 => 0x7010011d,
-            .xrgb2101010 => 0x74e24909, .argb2101010 => 0x54e24909, .abgr16161616f => 0x58d7ff83 }),word(packet,0));
+            .xrgb2101010 => 0x74e24909, .argb2101010 => 0x54e24909, .abgr16161616f => 0x58d7ff83,
+            .rg8, .r16, .rg16 => return error.Format }),word(packet,0));
         try t.expectEqual(@as(u32,0x24092),word(packet,256));
         const filter = word(packet,260);
         if (filter != 0x91 and filter != 0xa2) return error.Sampler;

@@ -41,6 +41,24 @@ Independent fixed-shader metadata and executable byte-cache boundary. BACKEND_V1
 - Slot 2, Offset 48: `shader_cache_read` - Returns a view only after exact key/compiler/layout/length/integrity and fixed-program matching. Incompatible or damaged cache data returns CACHE_MISS with output unchanged. The input key must come from the current driver/renderer, not the cached entry.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Bounded pure operation over caller-owned storage. No allocation, I/O, GPU access, retained pointer or compilation. Rejection preserves all outputs..
 
+RENDER_V1
+---------
+
+Pure public fixed-render encoder for the native graphics producer. Color and YUV metadata policy remain with R4GFX. The canonical BO/VA and native queue owners retain all GPU resources through physical drain. No driver-private implementation imports are required by consumers.
+
+- ELF-Symbol: `r4nv_render_v1`
+- ABI-Major: 1
+- Revision: 1
+- Interface-ID: `0x52344f5330373934:0x52344e56524e4452`
+- Tabellengroesse: 56 Byte
+
+- Slot 0, Offset 32: `render_info` - Query one pinned C597/SM75,C797/SM86,C997/SM89 or CD97/SM120 encoder profile.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Pure bounded encoding. Caller owns all inputs and outputs; no retained pointers, GPU allocation, execution or wait..
+- Slot 1, Offset 40: `render_upload` - Write the matched immutable shader headers/code into caller storage. At least render_info.program_bytes are required; written is set only on success.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Pure bounded encoding. Caller owns all inputs and outputs; no retained pointers, GPU allocation, execution or wait..
+- Slot 2, Offset 48: `encode_yuv` - Encode a bounded draw list and draw_count*packet_bytes bytes of TIC/CBuf/vertex data. capacity counts u32 command words; packet_capacity counts bytes. Native engine_graphics owns completion and its release sequence. Does not submit or claim a render result.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4NV_STATUS`; Besitz: Pure bounded encoding. Caller owns all inputs and outputs; no retained pointers, GPU allocation, execution or wait..
+
 Typen
 -----
 
@@ -60,6 +78,11 @@ Typen
 - `R4NvArchitecture`: 120 Byte, Alignment 8. Hardware and native memory-path facts in GfxBackendProperties: BACKEND_V1 identity, data_bytes120, exact-size layout unchanged. Payload version equals properties revision. Revision1 requires flags0; revision2 permits ARCHITECTURE_HOST_COHERENT; revision3 additionally permits ARCHITECTURE_IMAGE_LAYOUTS. Identity from captured PCI/PMC; active GPC/TPC from acknowledged firmware post-init; VRAM from acknowledged static data; VA bounds from native address-space receipt. Architecture classes do not authorize GPU execution. Host-coherence bit covers canonical system BOs and acknowledged native mapping policy only; no BAR mapping, sparse, Vulkan qualification or physical-test claim. PCI domain remains zero; memory_generation matches enclosing backend inventory. Unknown/incomplete facts remain unavailable. Old readers reject unknown property revisions; backend registration/profile and all existing runtime functions remain unchanged.
 - `R4NvNativeSubmitHeader`: 32 Byte, Alignment 8. Native GfxSubmission operation10 payload, BACKEND_V1 driver profile revision1. Version1 exact32-byte header followed by push_count R4NvNativePush16 records; exact total byte count, reserved fields zero. Payload contains GPU addresses only; all command/resource storage must also be listed as canonical retained GfxNativeResource bindings. The engine mask requests instantiated engines, never architecture-class availability. Unsupported bits fail. Completion means actual engine drain and system-memory ordering, not command fetch. Vulkan resource/cache barriers remain in the native command stream.
 - `R4NvNativePush`: 16 Byte, Alignment 8. One subroutine-level GPFIFO push, backed by retained GPU-VA resources. Flags1=incomplete method sequence, flags2=no prefetch/SYNC_WAIT. Unknown bits fail; final push cannot remain incomplete. Addresses/counts are 4-byte aligned and must fit the instantiated FIFO. No CPU pointer or opcode validation interface.
+- `R4NvRenderInfo`: 32 Byte, Alignment 4. Version1/size32. Encoder storage limits only; never evidence of physical GPU availability. Program upload address requires128-byte alignment, packet address256-byte alignment; shader/packet/target addresses are below2^40.
+- `R4NvRenderRect`: 16 Byte, Alignment 4. Fixed nonempty signed rectangle; source coordinates are absolute coded luma samples.
+- `R4NvRenderPlane`: 40 Byte, Alignment 8. An already acknowledged GPU view, not a BO or a CPU pointer. Explicit DRM fourcc and modifier0=linear or NVIDIA blocklinear0x0300000000606010 plus log2 GOB height0..5. Source storage R8,GR88,R16,GR1616 is sampled as unsigned integers. Address/extent/pitch bounds are validated. The caller must retain and loan the underlying canonical BO/VA to the native queue.
+- `R4NvYuvDraw`: 232 Byte, Alignment 8. Fixed232-byte draw. format1=NV12,2=P010,3=YUV420P; second_chroma is all-zero for two-plane formats. filter0=nearest,1=linear RGB bilinear; chroma reconstruction is bilinear before transfer decoding. blend0=replace,1=OVER into linear optical FP16. opacity0..65535, normalized through float vertex attributes to match COLOR_V1. chroma_x/y are IEEE754 binary32 bit patterns: x0 or0.5; y0,0.5 or1. Crop preserves this coded chroma phase. P010 low6 bits are discarded before interpolation.
+- `R4NvYuvRender`: 72 Byte, Alignment 8. Version1/size72. draws borrows1..16 R4NvYuvDraw values. All draws share source views, target, format, filter, blend and chroma phase; crop, geometry, scissor and opacity may vary. color_program borrows64 aligned u32 words using COLOR CBuf2/resource ABI4, source opaque/full-range; yuv_matrix borrows12 aligned IEEE754 binary32 words, row-major affine normalized YCbCr-to-electrical-RGB3x4. Inputs are copied during the call and never retained. GPU addresses are distinct from these CPU pointers. Outputs remain unchanged on every failure; all output spans must be disjoint from each other and input spans.
 
 Besitzregeln
 ------------

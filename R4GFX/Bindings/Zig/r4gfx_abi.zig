@@ -560,6 +560,79 @@ pub const R4GfxMemoryInfo = extern struct {
     restores: u64,
     failures: u64,
 };
+
+pub const R4GfxYuvDescription = extern struct {
+    version: u32,
+    size: u32,
+    primaries: u32,
+    transfer: u32,
+    matrix: u32,
+    range: u32,
+    chroma_location: u32,
+    flags: u32,
+    reference_white: u32,
+    peak: u32,
+    black: u32,
+    reserved: u32,
+};
+
+pub const R4GfxYuvPlane = extern struct {
+    cpu_address: u64,
+    byte_length: u64,
+    pitch: u64,
+    reserved: u64,
+};
+
+pub const R4GfxYuvImage = extern struct {
+    version: u32,
+    size: u32,
+    format: u32,
+    width: u32,
+    height: u32,
+    plane_count: u32,
+    reserved: u64,
+    crop: R4GfxRect,
+    description: R4GfxYuvDescription,
+    plane0: R4GfxYuvPlane,
+    plane1: R4GfxYuvPlane,
+    plane2: R4GfxYuvPlane,
+};
+
+pub const R4GfxYuvBufferPlane = extern struct {
+    reference_id: u32,
+    reserved: u32,
+    reference_generation: u64,
+    offset: u64,
+    byte_length: u64,
+    pitch: u64,
+};
+
+pub const R4GfxYuvBufferImage = extern struct {
+    version: u32,
+    size: u32,
+    format: u32,
+    width: u32,
+    height: u32,
+    plane_count: u32,
+    reserved: u64,
+    crop: R4GfxRect,
+    description: R4GfxYuvDescription,
+    plane0: R4GfxYuvBufferPlane,
+    plane1: R4GfxYuvBufferPlane,
+    plane2: R4GfxYuvBufferPlane,
+};
+
+pub const R4GfxYuvRenderRequest = extern struct {
+    version: u32,
+    size: u32,
+    source: R4GfxYuvBufferImage,
+    target: R4GfxResource,
+    transform: R4GfxColorTransform,
+    deadline_ns: u64,
+    dependency_count: u32,
+    reserved: u32,
+    dependencies: u64,
+};
 pub const status_ok: i32 = 0;
 pub const format_xrgb8888: u32 = 875713112;
 pub const format_argb8888: u32 = 875713089;
@@ -697,6 +770,12 @@ pub const memory_phase_submit: u32 = 4;
 pub const memory_phase_copy: u32 = 5;
 pub const memory_phase_retire: u32 = 6;
 pub const device_gpu_color_grid: u32 = 512;
+pub const color_primaries_bt601_625: u32 = 5;
+pub const color_primaries_bt601_525: u32 = 6;
+pub const color_transfer_bt1886: u32 = 6;
+pub const yuv_format_nv12: u32 = 1;
+pub const yuv_format_p010: u32 = 2;
+pub const yuv_format_yuv420p: u32 = 3;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;
@@ -834,14 +913,14 @@ pub const DeviceV1 = extern struct {
 };
 
 pub const color_v1_export_name = "COLOR_V1";
-pub const color_v1_revision: u16 = 2;
+pub const color_v1_revision: u16 = 4;
 pub const color_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 136,
+    .size = 152,
     .abi_major = 1,
-    .abi_minor = 2,
+    .abi_minor = 4,
     .interface_id_lo = 0x524f4c43,
     .interface_id_hi = 0x31584647,
 };
@@ -858,6 +937,8 @@ pub const ColorV1ColorResourceTransformFn = *const fn (device: *const R4GfxDevic
 pub const ColorV1ColorProfileGenerateFn = *const fn (definition: *const R4GfxColorProfileDefinition, scratch_address: u64, scratch_bytes: u64, output_address: u64, output_capacity: u64, output_bytes: *u64) callconv(.c) i32;
 pub const ColorV1ColorRenderSubmitFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderListRequest, flags: u32, output: *R4GfxJob) callconv(.c) i32;
 pub const ColorV1ColorRenderSubmitGridFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxRenderGridListRequest, flags: u32, output: *R4GfxJob) callconv(.c) i32;
+pub const ColorV1ColorYuvImageTransformFn = *const fn (source: *const R4GfxYuvImage, target: *const R4GfxColorImage, request: *const R4GfxColorTransform, output: *R4GfxCpuStats) callconv(.c) i32;
+pub const ColorV1ColorYuvRenderSubmitFn = *const fn (device: *const R4GfxDevice, request: *const R4GfxYuvRenderRequest, output: *R4GfxJob) callconv(.c) i32;
 pub const ColorV1 = extern struct {
     header: InterfaceHeader,
     color_description_validate: ColorV1ColorDescriptionValidateFn,
@@ -873,6 +954,8 @@ pub const ColorV1 = extern struct {
     color_profile_generate: ColorV1ColorProfileGenerateFn,
     color_render_submit: ColorV1ColorRenderSubmitFn,
     color_render_submit_grid: ColorV1ColorRenderSubmitGridFn,
+    color_yuv_image_transform: ColorV1ColorYuvImageTransformFn,
+    color_yuv_render_submit: ColorV1ColorYuvRenderSubmitFn,
 };
 
 pub const ApiV1Client = struct {
@@ -1163,8 +1246,8 @@ pub const ColorV1Client = struct {
             .interface_id_lo = 0x524f4c43,
             .interface_id_hi = 0x31584647,
             .abi_major = 1,
-            .min_revision = 2,
-            .required_size = 136,
+            .min_revision = 4,
+            .required_size = 152,
             .known_required_flags = 0,
         });
         if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
@@ -1180,6 +1263,8 @@ pub const ColorV1Client = struct {
         if (r4os.runtime_r4l.slotAddress(header, 112) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 120) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 128) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 136) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 144) == null) return error.MissingSlot;
         return .{ .header = header };
     }
 
@@ -1246,5 +1331,15 @@ pub const ColorV1Client = struct {
     pub fn color_render_submit_grid(self: *const ColorV1Client, device: *const R4GfxDevice, request: *const R4GfxRenderGridListRequest, flags: u32, output: *R4GfxJob) i32 {
         const function = r4os.runtime_r4l.functionAt(ColorV1ColorRenderSubmitGridFn, self.header, 128) orelse unreachable;
         return function(device, request, flags, output);
+    }
+
+    pub fn color_yuv_image_transform(self: *const ColorV1Client, source: *const R4GfxYuvImage, target: *const R4GfxColorImage, request: *const R4GfxColorTransform, output: *R4GfxCpuStats) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorYuvImageTransformFn, self.header, 136) orelse unreachable;
+        return function(source, target, request, output);
+    }
+
+    pub fn color_yuv_render_submit(self: *const ColorV1Client, device: *const R4GfxDevice, request: *const R4GfxYuvRenderRequest, output: *R4GfxJob) i32 {
+        const function = r4os.runtime_r4l.functionAt(ColorV1ColorYuvRenderSubmitFn, self.header, 144) orelse unreachable;
+        return function(device, request, output);
     }
 };

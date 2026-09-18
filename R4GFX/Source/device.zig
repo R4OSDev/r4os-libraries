@@ -92,6 +92,8 @@ pub const Job = struct {
     counted: bool = false,
     render: bool = false,
     chain_refs: u32 = 0,
+    native_yuv_count: u8 = 0,
+    native_yuv_indices: [4]u8 = @splat(0),
 };
 pub const Device = struct {
     // These two fields persist through close so reopening cannot revive handles.
@@ -120,6 +122,7 @@ pub const Device = struct {
     counters: c.R4GfxDeviceInfo = std.mem.zeroes(c.R4GfxDeviceInfo),
     resources: [c.device_resource_capacity]Resource = @splat(.{}),
     jobs: [c.device_job_capacity]Job = @splat(.{}),
+    native_yuv: @import("native_yuv_cache.zig").Owner = .{},
     chains: [c.swapchain_capacity]@import("device_swapchain.zig").Slot = @splat(.{}),
     // Per-device scratch avoids large render arrays on an application stack.
     images: [c.render_max_images]c.R4GfxCpuImage = undefined,
@@ -326,6 +329,7 @@ pub fn get(handle: *const c.R4GfxDevice, closing: bool) Error!*Device {
     if (device.magic != live_magic or device.self_address != handle.address or device.generation != handle.generation) return error.Stale;
     if (!closing and device.closing) return error.Busy;
     @import("device_residency.zig").step(device);
+    device.native_yuv.step(device);
     return device;
 }
 pub fn storageSize() callconv(.c) u64 { return @sizeOf(Device); }
@@ -391,6 +395,7 @@ pub fn memoryInfo(handle: *const c.R4GfxDevice, output: *c.R4GfxMemoryInfo) call
 pub fn memoryTrim(handle: *const c.R4GfxDevice, deadline: u64) callconv(.c) i32 {
     const device = get(handle, false) catch |err| return code(err);
     device.selectBackend() catch |err| return code(err);
+    device.native_yuv.trim(device) catch |err| return code(err);
     @import("device_residency.zig").trim(device, deadline) catch |err| return code(err);
     return c.status_ok;
 }
@@ -530,6 +535,8 @@ pub fn close(handle: *const c.R4GfxDevice) callconv(.c) i32 {
     for (&device.resources) |*item| item.public_refs = 0;
     if (!device.cleanResources()) busy = true;
     if (!device.drainQueues()) busy = true;
+    device.native_yuv.step(device);
+    if (device.native_yuv.profile != null) busy = true;
     if (busy) return c.status_busy;
     device.magic = closed_magic;
     return c.status_ok;

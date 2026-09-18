@@ -13,6 +13,9 @@ pub const r4nv_image_layout_impl = @import("image_layout.zig").r4nv_image_layout
 pub const r4nv_shader_info_impl = shaders.r4nv_shader_info_impl;
 pub const r4nv_shader_cache_write_impl = shaders.r4nv_shader_cache_write_impl;
 pub const r4nv_shader_cache_read_impl = shaders.r4nv_shader_cache_read_impl;
+pub const r4nv_render_info_impl = @import("render_api.zig").r4nv_render_info_impl;
+pub const r4nv_render_upload_impl = @import("render_api.zig").r4nv_render_upload_impl;
+pub const r4nv_encode_yuv_impl = @import("render_api.zig").r4nv_encode_yuv_impl;
 
 pub export var r4nv_backend_v1: c.BackendV1 align(8) linksection(".data.r4l_exports") = .{
     .header = c.backend_v1_header,
@@ -27,16 +30,24 @@ pub export var r4nv_shader_v1: c.ShaderV1 align(8) linksection(".data.r4l_export
     .shader_cache_write = r4nv_shader_cache_write_impl,
     .shader_cache_read = r4nv_shader_cache_read_impl,
 };
+pub export var r4nv_render_v1: c.RenderV1 align(8) linksection(".data.r4l_exports") = .{
+    .header = c.render_v1_header,
+    .render_info = r4nv_render_info_impl,
+    .render_upload = r4nv_render_upload_impl,
+    .encode_yuv = r4nv_encode_yuv_impl,
+};
 pub export var r4nv_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
     .magic = r4os.abi.r4l_abi_magic, .abi_version = r4os.abi.r4l_abi_version,
     .size = r4os.abi.r4l_query_struct_size, .group = 0, .kernel_bridge = 0, .reserved = 0,
 };
 
 test "backend and shader ABI preserve operands, executable identity and rejected outputs" {
+    try @import("video_checks.zig").run();
     try @import("telemetry_checks.zig").run();
     const t = std.testing;
     try @import("image_layout_checks.zig").run(&r4nv_backend_v1);
     try @import("render_image_test.zig").check();
+    try @import("render_api_checks.zig").run(&r4nv_render_v1);
     var profile: c.R4NvDeviceProfile = .{ .version = 1, .size = @sizeOf(c.R4NvDeviceProfile),
         .vendor_id = 0x10de, .copy_class = 0xc6b5, .rm_release = c.rm_release, .command_abi = c.command_abi,
         .adapter_id = 3, .flags = 0, .device_generation = 0x100000007, .reset_generation = 0x200000008 };
