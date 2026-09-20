@@ -648,3 +648,5 @@ not complete work. This does not validate physical GPU execution or DMA.
 Evidence and software admission are recorded in GrafikVulkan07935.txt/.json
 and GrafikVulkan07936.txt/.json under the workspace's Docs/Drivers directory.
 Physical GPU validation remains in `ExFiles/Reports/OssiGPU.txt`.
+
+A small public ICD consumer is available in Examples/Enumerate.zig.

@@ -211,3 +211,7 @@ DEVICE_V1 swapchains remove fixed-phase scheduling only after the common
 output API confirms active VRR. Native scheduling still owns actual deadlines
 and buffer completion; LFC is not advertised. Workspace architecture and
 software evidence: Docs/Desktop/GrafikVRR07926.txt and GrafikVRR07926.json.
+
+Small public resource/import and compositor-output examples are available in
+Examples/. Integration, measured software costs and lifecycle guidance:
+Docs/Desktop/GrafikIntegration07944.txt in the workspace Docs repository.
