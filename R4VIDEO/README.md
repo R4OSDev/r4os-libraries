@@ -200,8 +200,11 @@ This proves software integration, not native GPU pixels or audible A/V sync.
 
 ## Distribution and rebuilding
 
-Every normal image contains `R4OS/SOURCES/R4VIDEO/R4VIDEO-SOURCE.tar.gz` and its
-SHA256 manifest alongside the replaceable library. `Tools/PackageSources.ps1`
+Every normal image and graphics video update contains
+`R4OS/SOURCES/R4VIDEO/SOURCE.TGZ` (gzip-compressed tar) and its JSON SHA256
+`MANIFEST` alongside the replaceable library. Older long filenames can remain
+as historical sources; the current pair uses short leaves for atomic first
+installation through SYSUPD. `Tools/PackageSources.ps1`
 packages the matching module identity, original FFmpeg archive, all port patches
 and R4VIDEO/SDK/contract/native-helper sources needed for a complete rebuild.
 Full distribution terms and replacement steps are in `R4VIDEO-NOTICES.txt`;
