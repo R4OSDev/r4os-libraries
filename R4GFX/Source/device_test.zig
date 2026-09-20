@@ -1086,6 +1086,15 @@ fn checkOutputSwapchains(input: c.R4GfxDeviceConfig) !void {
     }
     try t.expect(Model.outputs[0].live and Model.outputs[1].live and Model.present_calls == 0);
     try t.expect(Model.outputs[0].status.fence.timeline != Model.outputs[1].status.fence.timeline);
+    // Resize arrives before either physical output has completed. Admission
+    // must preserve the held pool, even if a receiver disappears next.
+    const references = Model.referenceCount();
+    const mappings = Model.maps;
+    const resize: c.R4GfxSwapchainDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxSwapchainDesc),
+        .head_id = Model.outputs[0].target.head_id, .policy = c.present_policy_fifo, .flags = 0,
+        .count = 2, .display_generation = Model.outputs[0].target.display_generation, .images = @intFromPtr(&images[0]) };
+    try t.expectEqual(c.status_busy, api.swapchain_resize(&handle, &chains[0], &resize));
+    try t.expect(Model.referenceCount() == references and Model.maps == mappings and Model.premature_closes == 0);
     const slow = Model.outputs[0].status;
     Model.outputs[1].status.phase = a.gfx_queue_phase_terminal;
     Model.outputs[1].status.result = a.gfx_queue_result_complete; Model.outputs[1].status.flags = 0;
@@ -1111,7 +1120,10 @@ fn checkOutputSwapchains(input: c.R4GfxDeviceConfig) !void {
     try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chains[1]));
     for (&images) |*pair| for (pair) |*image| try t.expectEqual(c.status_ok, api.resource_release(&handle, image));
     try t.expectEqual(c.status_ok, api.device_close(&handle));
-    try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0 and Model.present_calls == 0);
+    try t.expect(Model.referenceCount() == 0 and Model.maps == 0 and Model.premature_closes == 0 and Model.present_calls == 0);
+    for (&Model.objects) |*object| try t.expect(!object.live);
+    for (&Model.queues) |*queue| try t.expect(queue.handle.timeline == 0);
+    for (&Model.outputs) |*output| try t.expect(!output.live);
 }
 
 fn chainFrame(status: c.R4GfxSwapchainStatus, frame: c.R4GfxSwapchainFrame) c.R4GfxSwapchainFrameStatus {

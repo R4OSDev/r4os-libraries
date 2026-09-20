@@ -40,13 +40,18 @@ pub fn build(b: *std.Build) void {
     conformance.addIncludePath(sdk.profile.contract_c_include_root);
     conformance.addCSourceFile(.{ .file = b.path("Tests/Generated/contract_conformance.c"), .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" } });
     const step = b.step("test", "R4GFX layout, transactional software access and C/Zig ABI conformance");
+    const provider_filter = b.option([]const u8, "provider-test-filter", "Run only matching existing provider tests without rebuilding the module");
     const display_tests = b.createModule(.{ .root_source_file = b.path("display_tests.zig"), .target = b.graph.host, .optimize = .ReleaseSafe });
     display_tests.addImport("r4os", host);
     for ([_]*std.Build.Module{ provider, conformance, display_tests }) |module| {
-        const run = b.addRunArtifact(b.addTest(.{ .root_module = module }));
+        if (provider_filter != null and module != provider) continue;
+        const run = b.addRunArtifact(b.addTest(.{ .root_module = module,
+            .filters = if (provider_filter) |filter| &.{filter} else &.{} }));
         step.dependOn(&run.step);
         b.getInstallStep().dependOn(&run.step);
     }
-    if (artifact.verification) |verification| step.dependOn(verification);
-    artifact.output.addStepDependencies(step);
+    if (provider_filter == null) {
+        if (artifact.verification) |verification| step.dependOn(verification);
+        artifact.output.addStepDependencies(step);
+    }
 }
