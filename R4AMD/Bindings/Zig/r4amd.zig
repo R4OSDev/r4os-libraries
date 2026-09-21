@@ -15,9 +15,55 @@ pub const R4AmdInfo = extern struct {
     capability_flags: u32,
     reserved: u32,
 };
+
+pub const R4AmdDriverProfile = extern struct {
+    version: u32,
+    size: u32,
+    vendor_id: u32,
+    device_id: u32,
+    gc_version: u32,
+    sdma_version: u32,
+    command_abi: u32,
+    reserved: u32,
+};
+
+pub const R4AmdDeviceProfile = extern struct {
+    version: u32,
+    size: u32,
+    vendor_id: u32,
+    device_id: u32,
+    gc_version: u32,
+    sdma_version: u32,
+    command_abi: u32,
+    flags: u32,
+    adapter_id: u32,
+    reserved: u32,
+    device_generation: u64,
+    reset_generation: u64,
+};
+
+pub const R4AmdFeatures = extern struct {
+    version: u32,
+    size: u32,
+    command_abi: u32,
+    features: u32,
+    gpu_address_bits: u32,
+    max_command_words: u32,
+    reserved0: u32,
+    reserved1: u32,
+};
 pub const info_version: u32 = 1;
 pub const status_ok: i32 = 0;
+pub const profile_version: u32 = 1;
+pub const command_abi: u32 = 1;
+pub const vendor_id: u32 = 4098;
+pub const gc_9_1_0: u32 = 590080;
+pub const sdma_4_1_0: u32 = 262400;
+pub const feature_copy_linear: u32 = 1;
+pub const feature_copy_rows: u32 = 2;
+pub const feature_copy_layout: u32 = 4;
 pub const status_invalid: i32 = -1;
+pub const status_unsupported: i32 = -2;
 
 pub const info_v1_export_name = "INFO_V1";
 pub const info_v1_revision: u16 = 1;
@@ -35,6 +81,24 @@ pub const InfoV1GetInfoFn = *const fn (output: *R4AmdInfo, output_bytes: u32) ca
 pub const InfoV1 = extern struct {
     header: InterfaceHeader,
     get_info: InfoV1GetInfoFn,
+};
+
+pub const backend_v1_export_name = "BACKEND_V1";
+pub const backend_v1_revision: u16 = 1;
+pub const backend_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 40,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x414d4432,
+    .interface_id_hi = 0x52344f53,
+};
+pub const BackendV1NegotiateFn = *const fn (profile: *const R4AmdDeviceProfile, output: *R4AmdFeatures) callconv(.c) i32;
+pub const BackendV1 = extern struct {
+    header: InterfaceHeader,
+    negotiate: BackendV1NegotiateFn,
 };
 
 pub const InfoV1Client = struct {
@@ -57,5 +121,28 @@ pub const InfoV1Client = struct {
     pub fn get_info(self: *const InfoV1Client, output: *R4AmdInfo, output_bytes: u32) i32 {
         const function = r4os.runtime_r4l.functionAt(InfoV1GetInfoFn, self.header, 32) orelse unreachable;
         return function(output, output_bytes);
+    }
+};
+
+pub const BackendV1Client = struct {
+    header: *const InterfaceHeader,
+
+    pub fn init(raw: *const r4os.abi.R4XStartContext) !BackendV1Client {
+        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, backend_v1_export_name) orelse return error.MissingImport;
+        const header = try r4os.runtime_r4l.validateImport(item, .{
+            .interface_id_lo = 0x414d4432,
+            .interface_id_hi = 0x52344f53,
+            .abi_major = 1,
+            .min_revision = 1,
+            .required_size = 40,
+            .known_required_flags = 0,
+        });
+        if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
+        return .{ .header = header };
+    }
+
+    pub fn negotiate(self: *const BackendV1Client, profile: *const R4AmdDeviceProfile, output: *R4AmdFeatures) i32 {
+        const function = r4os.runtime_r4l.functionAt(BackendV1NegotiateFn, self.header, 32) orelse unreachable;
+        return function(profile, output);
     }
 };

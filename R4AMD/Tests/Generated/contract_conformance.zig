@@ -13,11 +13,46 @@ comptime {
     if (@offsetOf(implementation.R4AmdInfo, "implementation_stage") != 20 or @offsetOf(binding.R4AmdInfo, "implementation_stage") != 20) @compileError("R4AmdInfo.implementation_stage offset drift");
     if (@offsetOf(implementation.R4AmdInfo, "capability_flags") != 24 or @offsetOf(binding.R4AmdInfo, "capability_flags") != 24) @compileError("R4AmdInfo.capability_flags offset drift");
     if (@offsetOf(implementation.R4AmdInfo, "reserved") != 28 or @offsetOf(binding.R4AmdInfo, "reserved") != 28) @compileError("R4AmdInfo.reserved offset drift");
+    if (@sizeOf(implementation.R4AmdDriverProfile) != 32 or @sizeOf(binding.R4AmdDriverProfile) != 32) @compileError("R4AmdDriverProfile size drift");
+    if (@offsetOf(implementation.R4AmdDriverProfile, "version") != 0 or @offsetOf(binding.R4AmdDriverProfile, "version") != 0) @compileError("R4AmdDriverProfile.version offset drift");
+    if (@offsetOf(implementation.R4AmdDriverProfile, "size") != 4 or @offsetOf(binding.R4AmdDriverProfile, "size") != 4) @compileError("R4AmdDriverProfile.size offset drift");
+    if (@offsetOf(implementation.R4AmdDriverProfile, "vendor_id") != 8 or @offsetOf(binding.R4AmdDriverProfile, "vendor_id") != 8) @compileError("R4AmdDriverProfile.vendor_id offset drift");
+    if (@offsetOf(implementation.R4AmdDriverProfile, "device_id") != 12 or @offsetOf(binding.R4AmdDriverProfile, "device_id") != 12) @compileError("R4AmdDriverProfile.device_id offset drift");
+    if (@offsetOf(implementation.R4AmdDriverProfile, "gc_version") != 16 or @offsetOf(binding.R4AmdDriverProfile, "gc_version") != 16) @compileError("R4AmdDriverProfile.gc_version offset drift");
+    if (@offsetOf(implementation.R4AmdDriverProfile, "sdma_version") != 20 or @offsetOf(binding.R4AmdDriverProfile, "sdma_version") != 20) @compileError("R4AmdDriverProfile.sdma_version offset drift");
+    if (@offsetOf(implementation.R4AmdDriverProfile, "command_abi") != 24 or @offsetOf(binding.R4AmdDriverProfile, "command_abi") != 24) @compileError("R4AmdDriverProfile.command_abi offset drift");
+    if (@offsetOf(implementation.R4AmdDriverProfile, "reserved") != 28 or @offsetOf(binding.R4AmdDriverProfile, "reserved") != 28) @compileError("R4AmdDriverProfile.reserved offset drift");
+    if (@sizeOf(implementation.R4AmdDeviceProfile) != 56 or @sizeOf(binding.R4AmdDeviceProfile) != 56) @compileError("R4AmdDeviceProfile size drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "version") != 0 or @offsetOf(binding.R4AmdDeviceProfile, "version") != 0) @compileError("R4AmdDeviceProfile.version offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "size") != 4 or @offsetOf(binding.R4AmdDeviceProfile, "size") != 4) @compileError("R4AmdDeviceProfile.size offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "vendor_id") != 8 or @offsetOf(binding.R4AmdDeviceProfile, "vendor_id") != 8) @compileError("R4AmdDeviceProfile.vendor_id offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "device_id") != 12 or @offsetOf(binding.R4AmdDeviceProfile, "device_id") != 12) @compileError("R4AmdDeviceProfile.device_id offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "gc_version") != 16 or @offsetOf(binding.R4AmdDeviceProfile, "gc_version") != 16) @compileError("R4AmdDeviceProfile.gc_version offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "sdma_version") != 20 or @offsetOf(binding.R4AmdDeviceProfile, "sdma_version") != 20) @compileError("R4AmdDeviceProfile.sdma_version offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "command_abi") != 24 or @offsetOf(binding.R4AmdDeviceProfile, "command_abi") != 24) @compileError("R4AmdDeviceProfile.command_abi offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "flags") != 28 or @offsetOf(binding.R4AmdDeviceProfile, "flags") != 28) @compileError("R4AmdDeviceProfile.flags offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "adapter_id") != 32 or @offsetOf(binding.R4AmdDeviceProfile, "adapter_id") != 32) @compileError("R4AmdDeviceProfile.adapter_id offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "reserved") != 36 or @offsetOf(binding.R4AmdDeviceProfile, "reserved") != 36) @compileError("R4AmdDeviceProfile.reserved offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "device_generation") != 40 or @offsetOf(binding.R4AmdDeviceProfile, "device_generation") != 40) @compileError("R4AmdDeviceProfile.device_generation offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceProfile, "reset_generation") != 48 or @offsetOf(binding.R4AmdDeviceProfile, "reset_generation") != 48) @compileError("R4AmdDeviceProfile.reset_generation offset drift");
+    if (@sizeOf(implementation.R4AmdFeatures) != 32 or @sizeOf(binding.R4AmdFeatures) != 32) @compileError("R4AmdFeatures size drift");
+    if (@offsetOf(implementation.R4AmdFeatures, "version") != 0 or @offsetOf(binding.R4AmdFeatures, "version") != 0) @compileError("R4AmdFeatures.version offset drift");
+    if (@offsetOf(implementation.R4AmdFeatures, "size") != 4 or @offsetOf(binding.R4AmdFeatures, "size") != 4) @compileError("R4AmdFeatures.size offset drift");
+    if (@offsetOf(implementation.R4AmdFeatures, "command_abi") != 8 or @offsetOf(binding.R4AmdFeatures, "command_abi") != 8) @compileError("R4AmdFeatures.command_abi offset drift");
+    if (@offsetOf(implementation.R4AmdFeatures, "features") != 12 or @offsetOf(binding.R4AmdFeatures, "features") != 12) @compileError("R4AmdFeatures.features offset drift");
+    if (@offsetOf(implementation.R4AmdFeatures, "gpu_address_bits") != 16 or @offsetOf(binding.R4AmdFeatures, "gpu_address_bits") != 16) @compileError("R4AmdFeatures.gpu_address_bits offset drift");
+    if (@offsetOf(implementation.R4AmdFeatures, "max_command_words") != 20 or @offsetOf(binding.R4AmdFeatures, "max_command_words") != 20) @compileError("R4AmdFeatures.max_command_words offset drift");
+    if (@offsetOf(implementation.R4AmdFeatures, "reserved0") != 24 or @offsetOf(binding.R4AmdFeatures, "reserved0") != 24) @compileError("R4AmdFeatures.reserved0 offset drift");
+    if (@offsetOf(implementation.R4AmdFeatures, "reserved1") != 28 or @offsetOf(binding.R4AmdFeatures, "reserved1") != 28) @compileError("R4AmdFeatures.reserved1 offset drift");
     if (@sizeOf(implementation.InfoV1) != 40 or @sizeOf(binding.InfoV1) != 40) @compileError("InfoV1 size drift");
     if (@offsetOf(implementation.InfoV1, "get_info") != 32 or @offsetOf(binding.InfoV1, "get_info") != 32) @compileError("InfoV1.get_info slot drift");
+    if (@sizeOf(implementation.BackendV1) != 40 or @sizeOf(binding.BackendV1) != 40) @compileError("BackendV1 size drift");
+    if (@offsetOf(implementation.BackendV1, "negotiate") != 32 or @offsetOf(binding.BackendV1, "negotiate") != 32) @compileError("BackendV1.negotiate slot drift");
 }
 
 test "generated implementation and binding views are identical" {
     try std.testing.expectEqual(implementation.info_v1_header.size, binding.info_v1_header.size);
     try std.testing.expectEqual(implementation.info_v1_header.interface_id_lo, binding.info_v1_header.interface_id_lo);
+    try std.testing.expectEqual(implementation.backend_v1_header.size, binding.backend_v1_header.size);
+    try std.testing.expectEqual(implementation.backend_v1_header.interface_id_lo, binding.backend_v1_header.interface_id_lo);
 }

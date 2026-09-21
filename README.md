@@ -35,7 +35,8 @@ included in normal profiles with corresponding sources; see `R4VIDEO/README.md`.
 
 R4AMD and R4ACO provide the AMD foundation and compile genuine pinned
 AddrLib/ACO/NIR sources during their normal build. They currently expose
-only build identity and remain outside normal image profiles; see their READMEs.
+build identity (plus AMD protocol negotiation with zero encoder features)
+and remain outside normal image profiles; see their READMEs.
 
 Both `Build.bat` and `./Build.sh` use the shared PowerShell 7 `Build.ps1`. Dependency paths are mapped by
 `Settings.R4S`.

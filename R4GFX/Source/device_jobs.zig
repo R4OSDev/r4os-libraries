@@ -58,7 +58,7 @@ fn submitRequest(device: *d.Device, request: c.R4GfxCopyRequest, rows: u32, sour
     if (!device.cleanResources()) return error.Busy;
     try device.ensureQueue();
     const queues = device.queues();
-    const software = device.backend() == c.render_backend_nvidia and rows != 0 and device.gpu_operations & c.device_gpu_copy_rows == 0;
+    const software = @import("providers.zig").hardware(device.backend()) and rows != 0 and device.gpu_operations & c.device_gpu_copy_rows == 0;
     if (software and (source.descriptor.location != a.gfx_buffer_location_system or target.descriptor.location != a.gfx_buffer_location_system)) return error.Unsupported;
     const queue = if (software) try device.softwareQueue() else &device.queue;
     var status: a.GfxFenceStatus = .{};
@@ -84,7 +84,7 @@ fn query(device: *d.Device, item: *d.Job) d.Error!a.GfxFenceStatus {
         if (item.render) {
             // A draw is neither a copy nor CPU traffic. Future render counters
             // must derive from its completed render receipt, not byte_length.
-        } else if (item.backend == c.render_backend_nvidia) device.counters.gpu_copy_bytes +|= item.bytes else {
+        } else if (@import("providers.zig").hardware(item.backend)) device.counters.gpu_copy_bytes +|= item.bytes else {
             device.counters.cpu_read_bytes +|= item.bytes;
             device.counters.cpu_write_bytes +|= item.bytes;
         }

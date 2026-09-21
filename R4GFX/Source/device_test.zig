@@ -6,6 +6,8 @@ const t = std.testing;
 const a = @import("r4os").abi;
 const nv = @import("r4nv_binding");
 const nv_provider = @import("r4nv_backend");
+const amd = @import("r4amd_binding");
+const amd_provider = @import("r4amd_backend");
 const d = @import("device.zig");
 const c = d.c;
 const api = &@import("main.zig").r4gfx_device_v1;
@@ -23,6 +25,7 @@ const Model = struct {
     var premature_closes: usize = 0;
     var inventory_reads: usize = 0;
     var adapters: ?[]const a.GfxBackendInfo = null;
+    var reject_adapter: u32 = 0;
     var status: a.GfxFenceStatus = .{};
     var job_live = false;
     var job_request: a.GfxSubmission = .{};
@@ -311,6 +314,7 @@ const Model = struct {
         @memcpy(out.profile.data[0..32], std.mem.asBytes(&details)); return 1;
     }
     fn open(input: *const a.GfxQueueConfig, out: *a.GfxQueueHandle) callconv(.c) i32 {
+        if (input.adapter_id != 0 and input.adapter_id == reject_adapter) return a.gfx_queue_error_device_lost;
         if (input.adapter_id != 0) {
             const valid = if (adapters) |values| blk: {
                 for (values) |value| if (input.adapter_id == value.binding.adapter_id and
@@ -423,6 +427,158 @@ fn cpuImage(bytes: []u8) c.R4GfxResourceDesc {
     value.image = .{ .cpu_address = @intFromPtr(bytes.ptr), .byte_length = bytes.len, .pitch = 16, .width = 4, .height = 4, .format = c.format_xrgb8888, .reserved = 0 };
     return value;
 }
+// This extends the existing device integration case. AMD's actual negotiation
+// is used first; an explicit test-only future encoder enables common-queue
+// routing/lifetime checks without claiming GPU support in R4AMD 0.1.1.
+const ProviderProbe = struct {
+    var nv_calls: usize = 0;
+    var amd_calls: usize = 0;
+    var implemented: bool = false;
+    fn nvidia(profile: *const nv.R4NvDeviceProfile, output: *nv.R4NvFeatures) callconv(.c) i32 {
+        nv_calls += 1;
+        return nv_provider.r4nv_negotiate_impl(@ptrCast(profile), @ptrCast(output));
+    }
+    fn amdgpu(profile: *const amd.R4AmdDeviceProfile, output: *amd.R4AmdFeatures) callconv(.c) i32 {
+        amd_calls += 1;
+        const result = amd_provider.negotiate(@ptrCast(profile), @ptrCast(output));
+        if (result == amd.status_ok and implemented) {
+            output.features = amd.feature_copy_linear | amd.feature_copy_rows;
+            output.gpu_address_bits = 48; output.max_command_words = 64;
+        }
+        return result;
+    }
+};
+fn providerImage(handle: *const c.R4GfxDevice) !c.R4GfxResource {
+    var loan: a.GfxBufferReference = .{};
+    try t.expectEqual(@as(i32, 1), Model.create(&.{ .byte_length = 64, .alignment = 4096, .width = 4, .height = 4,
+        .format = a.gfx_buffer_format_xrgb8888, .plane_count = 1, .plane_pitches = .{ 16, 0, 0, 0 },
+        .location = a.gfx_buffer_location_device_local, .adapter_id = 3, .driver_owner = 80, .device_generation = 97 }, &loan));
+    var desc = descriptor(c.resource_image); desc.flags = c.image_target; desc.source_kind = c.source_import_buffer;
+    desc.source_address = @intFromPtr(&loan.reference);
+    var resource: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(handle, &desc, &resource));
+    try t.expectEqual(@as(i32, 1), Model.release(&loan.reference));
+    return resource;
+}
+fn checkProviders(raw: *const a.R4XStartContext, imports: *[5]a.R4XStartImport) !void {
+    const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
+    var table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu };
+    const old_nv = Model.nv_table.negotiate;
+    const old_presentation = Model.presentation_info;
+    Model.nv_table.negotiate = ProviderProbe.nvidia;
+    ProviderProbe.nv_calls = 0; ProviderProbe.amd_calls = 0; ProviderProbe.implemented = false;
+    defer {
+        Model.adapters = null; Model.nv_table.negotiate = old_nv;
+        Model.presentation_info = old_presentation; Model.reject_adapter = 0;
+        imports[4].table = 0; imports[4].resolved_version = 0;
+    }
+    var nvidia: a.GfxBackendInfo = .{};
+    try t.expectEqual(@as(i32, 1), Model.backendInfo(1, &nvidia));
+    var amdgpu = nvidia;
+    amdgpu.binding.adapter_id = 3;
+    amdgpu.memory_generation = 97; // Deliberately not the queue generation.
+    amdgpu.operations = 0xfff; // Unimplemented render bits must not be admitted.
+    amdgpu.profile = .{ .interface_id_lo = amd.backend_v1_header.interface_id_lo,
+        .interface_id_hi = amd.backend_v1_header.interface_id_hi, .revision = 1, .data_bytes = @sizeOf(amd.R4AmdDriverProfile) };
+    const details: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile),
+        .vendor_id = amd.vendor_id, .device_id = 0x15d8, .gc_version = amd.gc_9_1_0,
+        .sdma_version = amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
+    @memcpy(amdgpu.profile.data[0..@sizeOf(amd.R4AmdDriverProfile)], std.mem.asBytes(&details));
+    var unknown = amdgpu; unknown.binding.adapter_id = 1;
+    unknown.profile.interface_id_lo = 0x1af4; // Unrecognized/Virtio profile retains its existing software path.
+    var values = [_]a.GfxBackendInfo{ nvidia, amdgpu, unknown };
+    Model.adapters = &values;
+    Model.presentation_info.backend = amdgpu.binding;
+    Model.presentation_info.flags |= a.display_presentation_info_active;
+    const config: c.R4GfxDeviceConfig = .{ .version = 1, .size = @sizeOf(c.R4GfxDeviceConfig), .storage_address = @intFromPtr(storage),
+        .storage_bytes = api.storage_size(), .start_context = @intFromPtr(raw), .preferred_adapter = 0, .flags = 0 };
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(&config, &handle));
+    defer _ = api.device_close(&handle);
+    var state: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.device_info(&handle, &state));
+    try t.expectEqual(c.render_backend_nvidia, state.backend); // AMD optional import absent.
+    imports[4].table = @intFromPtr(&table); imports[4].resolved_version = amd.backend_v1_revision;
+    table.header.abi_major = 2;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_nvidia, state.backend); // Incompatible optional table.
+    table.header = amd.backend_v1_header;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_nvidia, state.backend); // Real AMD returns zero encoder capabilities.
+    ProviderProbe.implemented = true;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_amd, state.backend);
+    try t.expectEqual(c.device_gpu_copy | c.device_gpu_copy_rows, state.gpu_operations);
+    std.mem.swap(a.GfxBackendInfo, &values[0], &values[2]);
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_amd, state.backend); // Registration order irrelevant.
+    std.mem.swap(a.GfxBackendInfo, &values[0], &values[2]);
+    storage.preferred_adapter = 3;
+    const nv_before = ProviderProbe.nv_calls;
+    values[1].profile.interface_id_lo = nv.backend_v1_header.interface_id_lo;
+    values[1].profile.interface_id_hi = nv.backend_v1_header.interface_id_hi;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_software, state.backend);
+    try t.expectEqual(nv_before, ProviderProbe.nv_calls); // AMD bytes never enter NVIDIA negotiation.
+    values[1] = amdgpu;
+    std.mem.writeInt(u32, values[1].profile.data[8..12], 0x10de, .little);
+    const amd_before = ProviderProbe.amd_calls;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_software, state.backend);
+    try t.expectEqual(amd_before, ProviderProbe.amd_calls);
+    values[1] = amdgpu; values[1].memory_generation = 0;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_software, state.backend);
+    values[1] = amdgpu; Model.reject_adapter = 3;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expect(state.backend == c.render_backend_software and state.gpu_operations == 0); // Raced loss on open.
+    Model.reject_adapter = 0;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_amd, state.backend);
+    try t.expectError(error.Unsupported, @import("native_resource.zig").Profile.query(storage)); // No NVIDIA VA/encoder profile.
+    // A changed protocol payload at the same adapter/memory/queue epoch
+    // cannot silently reclassify old native BOs as the new provider profile.
+    var obsolete = try providerImage(&handle);
+    const before_profile = storage.queue.timeline;
+    std.mem.writeInt(u32, values[1].profile.data[12..16], 0x15d9, .little);
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expect(state.backend == c.render_backend_amd and storage.queue.timeline != before_profile);
+    var discarded: c.R4GfxJob = undefined;
+    try t.expectEqual(c.status_stale, api.copy_submit(&handle, &.{ .source = obsolete, .target = obsolete,
+        .source_offset = 0, .target_offset = 0, .byte_length = 64, .deadline_ns = 99999999 }, &discarded));
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &obsolete));
+    var resources: [2]c.R4GfxResource = undefined;
+    for (&resources) |*resource| resource.* = try providerImage(&handle);
+    const request: c.R4GfxCopyRequest = .{ .source = resources[0], .target = resources[1], .source_offset = 0, .target_offset = 0, .byte_length = 64, .deadline_ns = 99999999 };
+    var job: c.R4GfxJob = undefined;
+    try t.expectEqual(c.status_ok, api.copy_submit(&handle, &request, &job));
+    var receipt: c.R4GfxJobInfo = undefined;
+    try t.expectEqual(c.status_ok, api.job_info(&handle, &job, &receipt));
+    try t.expectEqual(c.render_backend_amd, receipt.backend);
+    const old_timeline = receipt.timeline;
+    // Loss preserves the pending AMD receipt and BO loans until retirement.
+    values[1].profile.revision = 2;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_software, state.backend);
+    Model.complete();
+    try t.expectEqual(c.status_ok, api.job_info(&handle, &job, &receipt));
+    try t.expect(receipt.backend == c.render_backend_amd and receipt.timeline == old_timeline);
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expectEqual(c.status_ok, api.device_info(&handle, &state));
+    try t.expectEqual(@as(u64, 64), state.gpu_copy_bytes);
+    try t.expectEqual(@as(u64, 0), state.cpu_write_bytes);
+    try t.expectEqual(c.status_stale, api.copy_submit(&handle, &request, &job));
+    for (&resources) |*resource| try t.expectEqual(c.status_ok, api.resource_release(&handle, resource));
+    try t.expectEqual(nv_before, ProviderProbe.nv_calls);
+    try t.expectEqual(@as(usize, 0), Model.premature_closes);
+    values[1] = amdgpu;
+    storage.flags = c.device_software_only;
+    const reads = Model.inventory_reads;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_software, state.backend);
+    try t.expectEqual(reads, Model.inventory_reads);
+}
+
 fn checkAdapterSelection(storage: *d.Device, handle: *const c.R4GfxDevice) !void {
     var first: a.GfxBackendInfo = .{};
     try t.expectEqual(@as(i32, 1), Model.backendInfo(1, &first));
@@ -576,6 +732,7 @@ pub fn check() !void {
         .{ .group_id = @intFromEnum(a.R4LGroup.r4draw), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&draw) },
         .{ .module_name = @intFromPtr("R4NV"), .symbol_name = @intFromPtr("BACKEND_V1"), .min_version = nv.backend_v1_revision },
         .{ .module_name = @intFromPtr("R4NV"), .symbol_name = @intFromPtr("RENDER_V1"), .min_version = nv.render_v1_revision },
+        .{ .module_name = @intFromPtr("R4AMD"), .symbol_name = @intFromPtr("BACKEND_V1"), .min_version = amd.backend_v1_revision },
     };
     const raw: a.R4XStartContext = .{ .flags = a.r4xstart_flag_imports_valid, .imports = @intFromPtr(&imports), .import_count = imports.len, .instance_id = 7 };
     var config: c.R4GfxDeviceConfig = .{ .version = 1, .size = @sizeOf(c.R4GfxDeviceConfig), .storage_address = @intFromPtr(storage),
@@ -634,6 +791,7 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expect(state.backend == c.render_backend_software);
     draw.size = @sizeOf(a.R4XStartR4Draw);
+    try checkProviders(&raw, &imports);
     try checkAdapterSelection(storage, &handle);
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expect(state.backend == c.render_backend_nvidia and state.gpu_operations == c.device_gpu_copy and state.reset_generation == Model.binding.reset_generation);

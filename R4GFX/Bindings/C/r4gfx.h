@@ -1297,6 +1297,7 @@ _Static_assert(offsetof(R4GfxYuvRenderRequest, dependencies) == 336u, "R4GfxYuvR
 #define R4GFX_YUV_FORMAT_NV12 ((uint32_t)1)
 #define R4GFX_YUV_FORMAT_P010 ((uint32_t)2)
 #define R4GFX_YUV_FORMAT_YUV420P ((uint32_t)3)
+#define R4GFX_RENDER_BACKEND_AMD ((uint32_t)3)
 #define R4GFX_STATUS_INVALID ((int32_t)-1)
 #define R4GFX_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4GFX_STATUS_OVERFLOW ((int32_t)-3)

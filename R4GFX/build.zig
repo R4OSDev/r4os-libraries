@@ -4,10 +4,14 @@ pub fn build(b: *std.Build) void {
     const sdk = sdk_build.sdk(b, b.dependencyFromBuildZig(sdk_build, .{}), .{});
     const nv_package = b.dependency("r4nv", .{});
     const nv_path = nv_package.namedLazyPath("binding");
-    const artifact = sdk.addR4MFWithOptions(b.path("module.R4MF"), .{ .zig_module_roots = &.{nv_path} });
+    const amd_package = b.dependency("r4amd", .{});
+    const amd_path = amd_package.namedLazyPath("binding");
+    const artifact = sdk.addR4MFWithOptions(b.path("module.R4MF"), .{ .zig_module_roots = &.{ nv_path, amd_path } });
     const host = sdk.createR4osModule(b.graph.host, .Debug);
     const nv = b.createModule(.{ .root_source_file = nv_path, .target = b.graph.host });
     nv.addImport("r4os", host);
+    const amd = b.createModule(.{ .root_source_file = amd_path, .target = b.graph.host });
+    amd.addImport("r4os", host);
     const implementation = b.createModule(.{ .root_source_file = b.path("Contract/Generated/implementation_abi.zig"), .target = b.graph.host });
     implementation.addImport("r4os", host);
     const binding = b.createModule(.{ .root_source_file = b.path("Bindings/Zig/r4gfx_abi.zig"), .target = b.graph.host });
@@ -16,6 +20,12 @@ pub fn build(b: *std.Build) void {
     provider.addImport("r4os", host);
     provider.addImport("r4l_contract", implementation);
     provider.addImport("r4nv_binding", nv);
+    provider.addImport("r4amd_binding", amd);
+    const amd_implementation = b.createModule(.{ .root_source_file = amd_package.namedLazyPath("implementation"), .target = b.graph.host });
+    amd_implementation.addImport("r4os", host);
+    const amd_backend = b.createModule(.{ .root_source_file = amd_package.namedLazyPath("backend"), .target = b.graph.host });
+    amd_backend.addImport("r4l_contract", amd_implementation);
+    provider.addImport("r4amd_backend", amd_backend);
     provider.addImport("r4gfx_binding", binding);
     const transfer = b.createModule(.{ .root_source_file = b.path("Display/transfer.zig"), .target = b.graph.host });
     transfer.addImport("r4os", host);

@@ -174,7 +174,7 @@ fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: b
     target.job_refs += 1;
     if (source) |value| value.job_refs += 1;
     device.jobs[index] = .{ .serial = serial, .source = request.source, .target = request.target,
-        .fence = status.fence, .backend = c.render_backend_nvidia, .render = true };
+        .fence = status.fence, .backend = device.backend(), .render = true };
     device.job_serial = serial;
     output.* = .{ .slot = @intCast(index + 1), .reserved = 0, .generation = serial, .device_generation = device.generation, .device_address = device.self_address };
     return c.status_ok;

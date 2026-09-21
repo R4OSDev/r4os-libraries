@@ -1,12 +1,13 @@
 R4OS_MODULE_MANIFEST=2
 KIND=R4L
 NAME=R4AMD
-VERSION=0.1.0
+VERSION=0.1.1
 LANGUAGE=Zig
 SOURCE=Source/main.zig
 TARGET=/R4OS/LIBS/R4AMD.R4L
 IMAGE_SCOPE=none
 EXPORT=INFO_V1:r4amd_info_v1:1
+EXPORT=BACKEND_V1:r4amd_backend_v1:1
 EXPORT=Query:r4amd_query:1
 CONTRACT=Contract/LibraryContract.json
 CONTRACT_BASELINE=Contract/LibraryContract.baseline.json

@@ -8,7 +8,7 @@ pub const c = @import("r4l_contract");
 pub const swapchain = @import("device_swapchain.zig");
 pub const color_api = @import("color_api.zig");
 pub const color_resource = @import("color_resource.zig");
-const nv = @import("r4nv_binding");
+const providers = @import("providers.zig");
 const live_magic: u64 = 0x5234474658444556;
 const closed_magic: u64 = 0x5234474658434c53;
 pub const Error = error{ Invalid, Unsupported, Overflow, Limit, Alias, Busy, Stale, Unavailable, Occluded, Suboptimal, Lost };
@@ -115,6 +115,7 @@ pub const Device = struct {
     residency_order: u64 = 0,
     residency_pending: u32 = 0,
     selected: a.GfxBackendInfo = .{ .binding = .{ .device_generation = 1, .reset_generation = 1 } },
+    selected_backend: u32 = c.render_backend_software,
     queue: a.GfxQueueHandle = .{},
     software_queue: a.GfxQueueHandle = .{},
     gpu_operations: u32 = 0,
@@ -133,7 +134,7 @@ pub const Device = struct {
     pub fn base(self: *Device) r4os.program.Context { return .initBundle(&self.bundle); }
     pub fn buffers(self: *Device) r4os.gfx_buffers.Context { return .{ .base = self.base() }; }
     pub fn queues(self: *Device) r4os.gfx_queue.Context { return .{ .base = self.base() }; }
-    pub fn backend(self: *const Device) u32 { return if (self.selected.binding.adapter_id == 0) c.render_backend_software else c.render_backend_nvidia; }
+    pub fn backend(self: *const Device) u32 { return self.selected_backend; }
     pub fn resource(self: *Device, handle: c.R4GfxResource, public: bool) Error!*Resource {
         if (handle.device_address != self.self_address or handle.device_generation != self.generation or handle.slot == 0 or handle.slot > self.resources.len) return error.Stale;
         const item = &self.resources[handle.slot - 1];
@@ -227,8 +228,9 @@ pub const Device = struct {
     pub fn selectBackend(self: *Device) Error!void {
         var candidate: a.GfxBackendInfo = .{ .binding = .{ .device_generation = 1, .reset_generation = 1 } };
         var gpu_operations: u32 = 0;
-        const backend_client: ?nv.BackendV1Client = if (self.flags & c.device_software_only != 0) null else nv.BackendV1Client.init(self.bundle.raw) catch null;
-        if (backend_client) |client| {
+        var candidate_backend: u32 = c.render_backend_software;
+        const registry = providers.Registry.init(self.bundle.raw, self.flags & c.device_software_only != 0);
+        if (registry.available()) {
             const queue_api = self.queues();
             var primary: a.DisplayPresentationInfo = .{};
             const base_context = self.base();
@@ -238,61 +240,47 @@ pub const Device = struct {
             for (1..a.gfx_queue_backend_capacity) |index| {
                 var snapshot: a.GfxBackendInfo = .{};
                 if (queue_api.backendInfo(@intCast(index), &snapshot) != a.gfx_queue_ok) continue;
-                const profile = snapshot.profile;
                 const binding = snapshot.binding;
                 if (snapshot.version != 1 or snapshot.size < @offsetOf(a.GfxBackendInfo, "operations") or binding.version != 1 or binding.size < @sizeOf(a.GfxBackendBinding) or
                     binding.adapter_id == 0 or binding.device_generation == 0 or binding.reset_generation == 0 or binding.milestone != a.gfx_queue_milestone_device_execution or
-                    (self.preferred_adapter != 0 and binding.adapter_id != self.preferred_adapter) or
-                    profile.version != 1 or profile.size < @sizeOf(a.GfxBackendProfile) or profile.interface_id_lo != nv.backend_v1_header.interface_id_lo or
-                    profile.interface_id_hi != nv.backend_v1_header.interface_id_hi or profile.revision != 1 or profile.data_bytes != @sizeOf(nv.R4NvDriverProfile)) continue;
-                const details = std.mem.bytesToValue(nv.R4NvDriverProfile, profile.data[0..@sizeOf(nv.R4NvDriverProfile)]);
-                if (details.version != 1 or details.size != @sizeOf(nv.R4NvDriverProfile) or details.reserved0 != 0 or details.reserved1 != 0) continue;
-                var features: nv.R4NvFeatures = undefined;
-                if (client.negotiate(&.{ .version = 1, .size = @sizeOf(nv.R4NvDeviceProfile), .vendor_id = details.vendor_id,
-                    .copy_class = details.copy_class, .rm_release = details.rm_release, .command_abi = details.command_abi,
-                    .adapter_id = binding.adapter_id, .flags = 0, .device_generation = binding.device_generation, .reset_generation = binding.reset_generation }, &features) != nv.status_ok or
-                    features.version != 1 or features.size != @sizeOf(nv.R4NvFeatures) or features.features & nv.feature_copy_linear == 0 or features.reserved != 0) continue;
-                // Queue instances and driver-owned memory have independent
-                // generations. Older kernels supplied only the queue epoch.
+                    (self.preferred_adapter != 0 and binding.adapter_id != self.preferred_adapter)) continue;
+                const negotiated = registry.negotiate(snapshot) orelse continue;
+                // Only NVIDIA's pre-memory-epoch ABI has a legacy fallback.
                 if (snapshot.size < @sizeOf(a.GfxBackendInfo)) snapshot.memory_generation = binding.device_generation;
                 if (snapshot.memory_generation == 0) continue;
-                if (!preferBackend(snapshot, candidate, boot_adapter)) continue;
+                if (!preferBackend(snapshot, candidate, boot_adapter, negotiated.operations, gpu_operations)) continue;
                 candidate = snapshot;
-                gpu_operations = c.device_gpu_copy;
-                if (snapshot.size >= @offsetOf(a.GfxBackendInfo, "memory_generation") and snapshot.operations & 8 != 0 and features.features & nv.feature_copy_rows != 0) {
-                    gpu_operations |= c.device_gpu_copy_rows;
-                    if (features.features & nv.feature_copy_layout != 0) gpu_operations |= c.device_gpu_copy_layout;
-                }
-                if (snapshot.operations & 16 != 0) gpu_operations |= c.device_gpu_render;
-                if (snapshot.operations & 64 != 0) gpu_operations |= c.device_gpu_render_list;
-                if (snapshot.operations & 256 != 0) gpu_operations |= c.device_gpu_grid;
-                if (snapshot.operations & 512 != 0) gpu_operations |= c.device_gpu_color;
-                if (snapshot.operations & (@as(u64, 1) << a.gfx_queue_operation_render_color_grid_list) != 0) gpu_operations |= c.device_gpu_color_grid;
-                if (snapshot.operations & 32 != 0) gpu_operations |= c.device_gpu_present;
-                if (snapshot.operations & 128 != 0) gpu_operations |= c.device_gpu_direct;
+                candidate_backend = negotiated.backend;
+                gpu_operations = negotiated.operations;
             }
         }
-        self.gpu_operations = gpu_operations;
-        if (std.meta.eql(self.selected, candidate)) return;
-        if (std.meta.eql(self.selected.binding, candidate.binding) and self.selected.memory_generation == candidate.memory_generation) {
-            // An engine becoming ready changes capabilities, not queue or
-            // allocation identity. Existing dependent jobs keep their timeline.
+        const same_provider = self.selected_backend == candidate_backend and std.meta.eql(self.selected.profile, candidate.profile);
+        if (std.meta.eql(self.selected, candidate) and same_provider) {
+            self.gpu_operations = gpu_operations;
+            return;
+        }
+        if (same_provider and std.meta.eql(self.selected.binding, candidate.binding) and self.selected.memory_generation == candidate.memory_generation) {
+            // Capability changes alone preserve existing queues and resources.
             self.selected = candidate;
+            self.gpu_operations = gpu_operations;
             return;
         }
         const previous = self.selected.binding;
         _ = self.drainQueues();
         try self.closeQueue();
         self.selected = candidate;
+        self.selected_backend = candidate_backend;
+        self.gpu_operations = gpu_operations;
         // The exact returned generation must still be openable. A raced reset
         // gives software fallback; no cached profile alone authorizes work.
         if (candidate.binding.adapter_id != 0) self.ensureQueue() catch {
             self.selected = .{ .binding = .{ .device_generation = 1, .reset_generation = 1 } };
             self.gpu_operations = 0;
+            self.selected_backend = c.render_backend_software;
         };
         const current = self.selected.binding;
         for (&self.resources) |*item| if (item.serial != 0 and item.descriptor.location == a.gfx_buffer_location_device_local) {
-            if (item.descriptor.adapter_id != current.adapter_id or item.descriptor.device_generation != self.selected.memory_generation or
+            if (!same_provider or item.descriptor.adapter_id != current.adapter_id or item.descriptor.device_generation != self.selected.memory_generation or
                 (item.descriptor.adapter_id == previous.adapter_id and previous.reset_generation != current.reset_generation)) item.invalidated = true;
         };
         self.counters.backend_changes +|= 1;
@@ -313,10 +301,10 @@ pub const Device = struct {
 // Prefer a working render engine, then avoid interadapter presentation when
 // capabilities are equal. PCI adapter identity breaks ties independently of
 // driver registration order. No unmeasured performance score is invented.
-fn preferBackend(next: a.GfxBackendInfo, current: a.GfxBackendInfo, boot_adapter: u32) bool {
+fn preferBackend(next: a.GfxBackendInfo, current: a.GfxBackendInfo, boot_adapter: u32, next_operations: u32, current_operations: u32) bool {
     if (current.binding.adapter_id == 0) return true;
-    const next_render = next.operations & 16 != 0;
-    const current_render = current.operations & 16 != 0;
+    const next_render = next_operations & c.device_gpu_render != 0;
+    const current_render = current_operations & c.device_gpu_render != 0;
     if (next_render != current_render) return next_render;
     const next_boot = next.binding.adapter_id == boot_adapter;
     const current_boot = current.binding.adapter_id == boot_adapter;

@@ -1,7 +1,11 @@
 ﻿# R4AMD
 
-R4AMD is the AMD render/layout/media library owner. Version 0.1.0 provides a generated
-`INFO_V1:1` ABI with immutable build identity and **zero GPU capabilities**.
+R4AMD is the AMD render/layout/media library owner. Version 0.1.1 provides generated
+`INFO_V1:1` and `BACKEND_V1:1` ABIs with **zero GPU capabilities**.
+BACKEND_V1 validates a separately tagged AMD GC9.1/SDMA4.1 command profile
+and the exact common adapter/device/reset identity. Recognizing a protocol
+returns zero encoder features until the matching code is integrated.
+It never admits an AMD object through NVIDIA negotiation or encoding.
 It does not yet expose rendering or shader compilation to applications.
 AMDGPU.R4D owns all physical device access.
 

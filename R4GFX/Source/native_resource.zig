@@ -15,7 +15,7 @@ pub const Profile = struct {
     graphics_class: u32,
     pub fn query(device: *d.Device) d.Error!Profile {
         const selected = device.selected;
-        if (selected.binding.adapter_id == 0 or selected.operations & 16 == 0 or
+        if (device.backend() != d.c.render_backend_nvidia or selected.binding.adapter_id == 0 or selected.operations & 16 == 0 or
             selected.operations & (@as(u64,1) << a.gfx_queue_operation_native) == 0) return error.Unsupported;
         var properties: a.GfxBackendProperties = .{};
         try d.platform(device.queues().backendProperties(&selected.binding, &properties));

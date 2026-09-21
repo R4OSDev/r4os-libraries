@@ -88,6 +88,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
         @memcpy(dependencies[0..request.dependency_count], @as([*]const a.GfxFence,@ptrFromInt(request.dependencies))[0..request.dependency_count]);
     }
     try device.selectBackend();
+    if (device.backend() != c.render_backend_nvidia) return error.Unsupported;
     const target = try device.resource(request.target, true);
     if (target.invalidated) return error.Stale;
     if (target.kind != c.resource_image or target.flags & c.image_target == 0 or target.backing.reference.id == 0 or
@@ -176,7 +177,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
     try d.platform(device.queues().submitNative(&device.queue, &submission, &native, &status));
     owner.hold(indices[0..from.plane_count+1]);
     target.job_refs += 1;
-    device.jobs[slot] = .{ .serial = serial, .target = request.target, .fence = status.fence, .backend = c.render_backend_nvidia,
+    device.jobs[slot] = .{ .serial = serial, .target = request.target, .fence = status.fence, .backend = device.backend(),
         .render = true, .native_yuv_count = @intCast(from.plane_count + 1), .native_yuv_indices = indices };
     device.job_serial = serial;
     output.* = .{ .slot = @intCast(slot + 1), .reserved = 0, .generation = serial, .device_generation = device.generation, .device_address = device.self_address };

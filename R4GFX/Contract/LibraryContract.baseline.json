@@ -9690,6 +9690,13 @@
       "type": "u32",
       "value": 3,
       "description": "Three-plane8-bit4:2:0."
+    },
+    {
+      "zig_name": "render_backend_amd",
+      "c_name": "R4GFX_RENDER_BACKEND_AMD",
+      "type": "u32",
+      "value": 3,
+      "description": "AMD provider, selected only after exact AMD negotiation. Backend IDs 1=software and 2=NVIDIA retain their meanings."
     }
   ],
   "errors": [

@@ -12,7 +12,7 @@ pub export fn r4amd_get_info_impl(output: *c.R4AmdInfo, output_bytes: u32) callc
         .mesa_major = 26,
         .mesa_minor = 2,
         .mesa_patch = 2,
-        .implementation_stage = 2,
+        .implementation_stage = 3,
         .capability_flags = 0,
         .reserved = 0,
     };
@@ -23,6 +23,15 @@ pub export var r4amd_info_v1: c.InfoV1 align(8) linksection(".data.r4l_exports")
     .header = c.info_v1_header,
     .get_info = r4amd_get_info_impl,
 };
+
+pub export var r4amd_backend_v1: c.BackendV1 align(8) linksection(".data.r4l_exports") = .{
+    .header = c.backend_v1_header,
+    .negotiate = r4amd_negotiate_impl,
+};
+
+pub export fn r4amd_negotiate_impl(profile: *const c.R4AmdDeviceProfile, output: *c.R4AmdFeatures) callconv(.c) i32 {
+    return @import("backend.zig").negotiate(profile, output);
+}
 
 pub export var r4amd_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
     .magic = r4os.abi.r4l_abi_magic,

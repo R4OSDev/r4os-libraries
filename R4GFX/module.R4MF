@@ -1,7 +1,7 @@
 R4OS_MODULE_MANIFEST=2
 KIND=R4L
 NAME=R4GFX
-VERSION=0.1.18
+VERSION=0.1.19
 LANGUAGE=Zig
 SOURCE=Source/main.zig
 SOURCE=Source/color_icc.c
@@ -47,6 +47,7 @@ EXPORT=DEVICE_V1:r4gfx_device_v1:10
 EXPORT=COLOR_V1:r4gfx_color_v1:4
 EXPORT=Query:r4gfx_query:1
 ZIG_MODULE=r4nv_binding:../R4NV/Bindings/Zig/r4nv.zig
+ZIG_MODULE=r4amd_binding:../R4AMD/Bindings/Zig/r4amd.zig
 CONTRACT=Contract/LibraryContract.json
 CONTRACT_BASELINE=Contract/LibraryContract.baseline.json
 IMPLEMENTATION_ZIG=Contract/Generated/implementation_abi.zig

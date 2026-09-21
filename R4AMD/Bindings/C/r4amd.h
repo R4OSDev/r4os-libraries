@@ -26,9 +26,86 @@ _Static_assert(offsetof(R4AmdInfo, implementation_stage) == 20u, "R4AmdInfo.impl
 _Static_assert(offsetof(R4AmdInfo, capability_flags) == 24u, "R4AmdInfo.capability_flags offset mismatch");
 _Static_assert(offsetof(R4AmdInfo, reserved) == 28u, "R4AmdInfo.reserved offset mismatch");
 
+typedef struct R4AmdDriverProfile {
+    uint32_t version;
+    uint32_t size;
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t gc_version;
+    uint32_t sdma_version;
+    uint32_t command_abi;
+    uint32_t reserved;
+} R4AmdDriverProfile;
+_Static_assert(sizeof(R4AmdDriverProfile) == 32u, "R4AmdDriverProfile size mismatch");
+_Static_assert(offsetof(R4AmdDriverProfile, version) == 0u, "R4AmdDriverProfile.version offset mismatch");
+_Static_assert(offsetof(R4AmdDriverProfile, size) == 4u, "R4AmdDriverProfile.size offset mismatch");
+_Static_assert(offsetof(R4AmdDriverProfile, vendor_id) == 8u, "R4AmdDriverProfile.vendor_id offset mismatch");
+_Static_assert(offsetof(R4AmdDriverProfile, device_id) == 12u, "R4AmdDriverProfile.device_id offset mismatch");
+_Static_assert(offsetof(R4AmdDriverProfile, gc_version) == 16u, "R4AmdDriverProfile.gc_version offset mismatch");
+_Static_assert(offsetof(R4AmdDriverProfile, sdma_version) == 20u, "R4AmdDriverProfile.sdma_version offset mismatch");
+_Static_assert(offsetof(R4AmdDriverProfile, command_abi) == 24u, "R4AmdDriverProfile.command_abi offset mismatch");
+_Static_assert(offsetof(R4AmdDriverProfile, reserved) == 28u, "R4AmdDriverProfile.reserved offset mismatch");
+
+typedef struct R4AmdDeviceProfile {
+    uint32_t version;
+    uint32_t size;
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t gc_version;
+    uint32_t sdma_version;
+    uint32_t command_abi;
+    uint32_t flags;
+    uint32_t adapter_id;
+    uint32_t reserved;
+    uint64_t device_generation;
+    uint64_t reset_generation;
+} R4AmdDeviceProfile;
+_Static_assert(sizeof(R4AmdDeviceProfile) == 56u, "R4AmdDeviceProfile size mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, version) == 0u, "R4AmdDeviceProfile.version offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, size) == 4u, "R4AmdDeviceProfile.size offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, vendor_id) == 8u, "R4AmdDeviceProfile.vendor_id offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, device_id) == 12u, "R4AmdDeviceProfile.device_id offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, gc_version) == 16u, "R4AmdDeviceProfile.gc_version offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, sdma_version) == 20u, "R4AmdDeviceProfile.sdma_version offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, command_abi) == 24u, "R4AmdDeviceProfile.command_abi offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, flags) == 28u, "R4AmdDeviceProfile.flags offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, adapter_id) == 32u, "R4AmdDeviceProfile.adapter_id offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, reserved) == 36u, "R4AmdDeviceProfile.reserved offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, device_generation) == 40u, "R4AmdDeviceProfile.device_generation offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceProfile, reset_generation) == 48u, "R4AmdDeviceProfile.reset_generation offset mismatch");
+
+typedef struct R4AmdFeatures {
+    uint32_t version;
+    uint32_t size;
+    uint32_t command_abi;
+    uint32_t features;
+    uint32_t gpu_address_bits;
+    uint32_t max_command_words;
+    uint32_t reserved0;
+    uint32_t reserved1;
+} R4AmdFeatures;
+_Static_assert(sizeof(R4AmdFeatures) == 32u, "R4AmdFeatures size mismatch");
+_Static_assert(offsetof(R4AmdFeatures, version) == 0u, "R4AmdFeatures.version offset mismatch");
+_Static_assert(offsetof(R4AmdFeatures, size) == 4u, "R4AmdFeatures.size offset mismatch");
+_Static_assert(offsetof(R4AmdFeatures, command_abi) == 8u, "R4AmdFeatures.command_abi offset mismatch");
+_Static_assert(offsetof(R4AmdFeatures, features) == 12u, "R4AmdFeatures.features offset mismatch");
+_Static_assert(offsetof(R4AmdFeatures, gpu_address_bits) == 16u, "R4AmdFeatures.gpu_address_bits offset mismatch");
+_Static_assert(offsetof(R4AmdFeatures, max_command_words) == 20u, "R4AmdFeatures.max_command_words offset mismatch");
+_Static_assert(offsetof(R4AmdFeatures, reserved0) == 24u, "R4AmdFeatures.reserved0 offset mismatch");
+_Static_assert(offsetof(R4AmdFeatures, reserved1) == 28u, "R4AmdFeatures.reserved1 offset mismatch");
+
 #define R4AMD_INFO_VERSION ((uint32_t)1)
 #define R4AMD_STATUS_OK ((int32_t)0)
+#define R4AMD_PROFILE_VERSION ((uint32_t)1)
+#define R4AMD_COMMAND_ABI ((uint32_t)1)
+#define R4AMD_VENDOR_ID ((uint32_t)4098)
+#define R4AMD_GC_9_1_0 ((uint32_t)590080)
+#define R4AMD_SDMA_4_1_0 ((uint32_t)262400)
+#define R4AMD_FEATURE_COPY_LINEAR ((uint32_t)1)
+#define R4AMD_FEATURE_COPY_ROWS ((uint32_t)2)
+#define R4AMD_FEATURE_COPY_LAYOUT ((uint32_t)4)
 #define R4AMD_STATUS_INVALID ((int32_t)-1)
+#define R4AMD_STATUS_UNSUPPORTED ((int32_t)-2)
 
 #define R4AMD_INFO_V1_EXPORT_NAME "INFO_V1"
 #define R4AMD_INFO_V1_ABI_MAJOR 1u
@@ -62,6 +139,40 @@ static inline int32_t r4amd_info_v1_init(const R4XStartContext *ctx, R4AmdInfoV1
 static inline int32_t r4amd_get_info(R4AmdInfoV1Client *client, R4AmdInfo * output, uint32_t output_bytes) {
     R4AmdInfoV1GetInfoFn function = (R4AmdInfoV1GetInfoFn)r4l_slot_address(client->header, 32u);
     return function(output, output_bytes);
+}
+
+#define R4AMD_BACKEND_V1_EXPORT_NAME "BACKEND_V1"
+#define R4AMD_BACKEND_V1_ABI_MAJOR 1u
+#define R4AMD_BACKEND_V1_REVISION 1u
+#define R4AMD_BACKEND_V1_INTERFACE_ID_LO 0x414d4432ull
+#define R4AMD_BACKEND_V1_INTERFACE_ID_HI 0x52344f53ull
+#define R4AMD_BACKEND_V1_TABLE_SIZE 40u
+#define R4AMD_BACKEND_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4AMD_BACKEND_V1_TABLE_SIZE, R4AMD_BACKEND_V1_ABI_MAJOR, R4AMD_BACKEND_V1_REVISION, R4AMD_BACKEND_V1_INTERFACE_ID_LO, R4AMD_BACKEND_V1_INTERFACE_ID_HI }
+typedef int32_t (*R4AmdBackendV1NegotiateFn)(const R4AmdDeviceProfile * profile, R4AmdFeatures * output);
+typedef struct R4AmdBackendV1 {
+    R4LInterfaceHeader header;
+    R4AmdBackendV1NegotiateFn negotiate;
+} R4AmdBackendV1;
+_Static_assert(sizeof(R4AmdBackendV1) == 40u, "R4AmdBackendV1 size mismatch");
+_Static_assert(offsetof(R4AmdBackendV1, negotiate) == 32u, "R4AmdBackendV1.negotiate offset mismatch");
+typedef struct R4AmdBackendV1Client { const R4LInterfaceHeader *header; } R4AmdBackendV1Client;
+
+static inline int32_t r4amd_backend_v1_init(const R4XStartContext *ctx, R4AmdBackendV1Client *out_client) {
+    if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4AMD", "BACKEND_V1");
+    const R4LInterfaceExpectation expected = { 0x414d4432ull, 0x52344f53ull, 1u, 1u, 40u, 0u, 0u };
+    const R4LInterfaceHeader *header = 0;
+    int32_t status = r4l_validate_import(item, &expected, &header);
+    if (status != R4L_BINDING_OK) return status;
+    if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    out_client->header = header;
+    return R4L_BINDING_OK;
+}
+
+static inline int32_t r4amd_negotiate(R4AmdBackendV1Client *client, const R4AmdDeviceProfile * profile, R4AmdFeatures * output) {
+    R4AmdBackendV1NegotiateFn function = (R4AmdBackendV1NegotiateFn)r4l_slot_address(client->header, 32u);
+    return function(profile, output);
 }
 
 #endif

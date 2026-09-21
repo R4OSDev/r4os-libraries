@@ -69,6 +69,70 @@
         }
       ],
       "description": "Independent immutable library identity, append-only interface."
+    },
+    {
+      "export_name": "BACKEND_V1",
+      "symbol": "r4amd_backend_v1",
+      "zig_name": "backend_v1",
+      "zig_type": "BackendV1",
+      "c_type": "R4AmdBackendV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 1095582770,
+      "interface_id_hi": 1379159891,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "negotiate",
+          "c_name": "r4amd_negotiate",
+          "symbol": "r4amd_negotiate_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "profile",
+              "type": {
+                "name": "R4AmdDeviceProfile",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Exact AMD profile and canonical device binding; never retained."
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4AmdFeatures",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Unchanged on failure; disjoint from profile."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Pure bounded negotiation; no device access, allocations or pointers retained."
+          },
+          "description": "Validate the AMD-specific versioned protocol and report only implemented command capabilities. Zero features is a valid foundation result; it cannot select an accelerated provider."
+        }
+      ],
+      "description": "AMD-only negotiation; separate from NVIDIA BACKEND_V1 even if individual payload sizes coincide."
     }
   ],
   "types": [
@@ -167,6 +231,338 @@
         }
       ],
       "description": "Fixed ABI1 source/build identity, not a measured hardware profile."
+    },
+    {
+      "name": "R4AmdDriverProfile",
+      "size": 32,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Profile ABI version, exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact structure size."
+        },
+        {
+          "name": "vendor_id",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "PCI vendor, exactly 0x1002."
+        },
+        {
+          "name": "device_id",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "PCI device ID; identity only, not device admission."
+        },
+        {
+          "name": "gc_version",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "IP_VERSION: major << 16 | minor << 8 | revision."
+        },
+        {
+          "name": "sdma_version",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "SDMA IP_VERSION, independently versioned."
+        },
+        {
+          "name": "command_abi",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "R4OS AMD command ABI version."
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        }
+      ],
+      "description": "Opaque AMD payload in common GfxBackendProfile; tagged by this BACKEND_V1 interface ID, profile revision 1."
+    },
+    {
+      "name": "R4AmdDeviceProfile",
+      "size": 56,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Profile ABI version, exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact structure size."
+        },
+        {
+          "name": "vendor_id",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "PCI vendor, exactly 0x1002."
+        },
+        {
+          "name": "device_id",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "PCI device ID; identity only, not device admission."
+        },
+        {
+          "name": "gc_version",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "IP_VERSION: major << 16 | minor << 8 | revision."
+        },
+        {
+          "name": "sdma_version",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "SDMA IP_VERSION, independently versioned."
+        },
+        {
+          "name": "command_abi",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "R4OS AMD command ABI version."
+        },
+        {
+          "name": "flags",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        },
+        {
+          "name": "adapter_id",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Canonical nonzero PCI adapter identity."
+        },
+        {
+          "name": "reserved",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        },
+        {
+          "name": "device_generation",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact nonzero common queue device generation."
+        },
+        {
+          "name": "reset_generation",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact nonzero common queue reset generation."
+        }
+      ],
+      "description": "Negotiation binds an AMD IP/command profile to one common device/reset epoch; memory generation remains a separate common owner field."
+    },
+    {
+      "name": "R4AmdFeatures",
+      "size": 32,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact structure size."
+        },
+        {
+          "name": "command_abi",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Accepted AMD command ABI."
+        },
+        {
+          "name": "features",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Only implemented encoder operations; zero until the corresponding roadmap integration."
+        },
+        {
+          "name": "gpu_address_bits",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Usable GPU address width, zero without an encoder."
+        },
+        {
+          "name": "max_command_words",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Bounded command capacity, zero without an encoder."
+        },
+        {
+          "name": "reserved0",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        },
+        {
+          "name": "reserved1",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        }
+      ],
+      "description": "A compatible profile is not an active GPU: effective operations are the intersection with actual common driver capabilities."
     }
   ],
   "constants": [
@@ -183,6 +579,62 @@
       "type": "i32",
       "value": 0,
       "description": "Success."
+    },
+    {
+      "zig_name": "profile_version",
+      "c_name": "R4AMD_PROFILE_VERSION",
+      "type": "u32",
+      "value": 1,
+      "description": "AMD provider protocol constant; no feature is implied by its declaration."
+    },
+    {
+      "zig_name": "command_abi",
+      "c_name": "R4AMD_COMMAND_ABI",
+      "type": "u32",
+      "value": 1,
+      "description": "AMD provider protocol constant; no feature is implied by its declaration."
+    },
+    {
+      "zig_name": "vendor_id",
+      "c_name": "R4AMD_VENDOR_ID",
+      "type": "u32",
+      "value": 4098,
+      "description": "AMD provider protocol constant; no feature is implied by its declaration."
+    },
+    {
+      "zig_name": "gc_9_1_0",
+      "c_name": "R4AMD_GC_9_1_0",
+      "type": "u32",
+      "value": 590080,
+      "description": "AMD provider protocol constant; no feature is implied by its declaration."
+    },
+    {
+      "zig_name": "sdma_4_1_0",
+      "c_name": "R4AMD_SDMA_4_1_0",
+      "type": "u32",
+      "value": 262400,
+      "description": "AMD provider protocol constant; no feature is implied by its declaration."
+    },
+    {
+      "zig_name": "feature_copy_linear",
+      "c_name": "R4AMD_FEATURE_COPY_LINEAR",
+      "type": "u32",
+      "value": 1,
+      "description": "AMD provider protocol constant; no feature is implied by its declaration."
+    },
+    {
+      "zig_name": "feature_copy_rows",
+      "c_name": "R4AMD_FEATURE_COPY_ROWS",
+      "type": "u32",
+      "value": 2,
+      "description": "AMD provider protocol constant; no feature is implied by its declaration."
+    },
+    {
+      "zig_name": "feature_copy_layout",
+      "c_name": "R4AMD_FEATURE_COPY_LAYOUT",
+      "type": "u32",
+      "value": 4,
+      "description": "AMD provider protocol constant; no feature is implied by its declaration."
     }
   ],
   "errors": [
@@ -192,6 +644,13 @@
       "type": "i32",
       "value": -1,
       "description": "Insufficient output capacity; output unchanged."
+    },
+    {
+      "zig_name": "status_unsupported",
+      "c_name": "R4AMD_STATUS_UNSUPPORTED",
+      "type": "i32",
+      "value": -2,
+      "description": "Vendor, IP profile or command ABI is unsupported; output unchanged."
     }
   ],
   "ownership_rules": [

@@ -71,7 +71,7 @@ fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, outpu
         else queues.submit(&device.queue, &submission, &accepted));
     source.job_refs += 1;
     device.jobs[index] = .{ .serial = serial, .source = request.source, .fence = accepted.fence,
-        .backend = if (source.descriptor.location == a.gfx_buffer_location_device_local) c.render_backend_nvidia else c.render_backend_software,
+        .backend = if (source.descriptor.location == a.gfx_buffer_location_device_local) device.backend() else c.render_backend_software,
         .bytes = submission.byte_length * source.image.height };
     device.job_serial = serial;
     output.* = .{ .slot = @intCast(index + 1), .reserved = 0, .generation = serial, .device_generation = device.generation, .device_address = device.self_address };

@@ -1,6 +1,8 @@
 const std = @import("std");
 pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("binding", b.path("Bindings/Zig/r4amd.zig"));
+    b.addNamedLazyPath("implementation", b.path("Contract/Generated/implementation_abi.zig"));
+    b.addNamedLazyPath("backend", b.path("Source/backend.zig"));
     const sdk_build = b.lazyImport(@This(), "r4os_sdk") orelse return;
     const sdk = sdk_build.sdk(b, b.dependencyFromBuildZig(sdk_build, .{}), .{});
     const artifact = sdk.addR4MF(b.path("module.R4MF"));
@@ -17,12 +19,17 @@ pub fn build(b: *std.Build) void {
     conformance.addIncludePath(sdk.profile.contract_c_include_root);
     conformance.addCSourceFile(.{ .file = b.path("Tests/Generated/contract_conformance.c"), .flags = &.{ "-std=c11", "-Werror" } });
     const abi_check = b.addRunArtifact(b.addTest(.{ .root_module = conformance }));
+    const backend = b.createModule(.{ .root_source_file = b.path("Source/backend.zig"), .target = b.graph.host });
+    backend.addImport("r4l_contract", implementation);
+    const backend_check = b.addRunArtifact(b.addTest(.{ .root_module = backend }));
     const native = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });
     native.addFileArg(b.path("Tools/Build.ps1"));
     native.has_side_effects = true;
     artifact.output.generated.file.step.dependOn(&native.step);
     b.getInstallStep().dependOn(&abi_check.step);
+    b.getInstallStep().dependOn(&backend_check.step);
     const test_step = b.step("test", "R4AMD contract and real upstream portability");
     test_step.dependOn(&abi_check.step);
+    test_step.dependOn(&backend_check.step);
     test_step.dependOn(&native.step);
 }

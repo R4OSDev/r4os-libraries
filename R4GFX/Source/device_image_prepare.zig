@@ -29,6 +29,7 @@ fn negotiation(device: *d.Device, source: *d.Resource, request: c.R4GfxImagePrep
     }
     if (source.backing.reference.id == 0) return error.Unsupported;
     const descriptor = source.descriptor;
+    if (device.backend() != c.render_backend_nvidia) return error.Unsupported;
     const client = nv.BackendV1Client.init(device.bundle.raw) catch return error.Unsupported;
     const profile = std.mem.bytesToValue(nv.R4NvDriverProfile,device.selected.profile.data[0..@sizeOf(nv.R4NvDriverProfile)]);
     var input: nv.R4NvImageRequest = .{ .view = .{ .version = 1, .size = @sizeOf(nv.R4NvImageView),

@@ -776,6 +776,7 @@ pub const color_transfer_bt1886: u32 = 6;
 pub const yuv_format_nv12: u32 = 1;
 pub const yuv_format_p010: u32 = 2;
 pub const yuv_format_yuv420p: u32 = 3;
+pub const render_backend_amd: u32 = 3;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_overflow: i32 = -3;

@@ -28,8 +28,12 @@ Bindings and API documentation are generated from `Contract/LibraryContract.json
 Use `ApiV1Client.init` or `RenderV1Client.init` with the app start context. The
 generated clients check interface identity, revision, size and required slots.
 RENDER_V1 reports software rendering. DEVICE_V1 selects a compatible native
-backend when the caller also imports `R4NV:BACKEND_V1:3:1`; a missing or incompatible
-R4NV keeps software rendering and copying available.
+backend through the matching optional `R4NV:BACKEND_V1:3:1` or
+`R4AMD:BACKEND_V1:1:1` import. Their interface IDs and vendor payloads are
+validated separately; missing/incompatible tables preserve software rendering
+and copying. Backend IDs are 1=software, 2=NVIDIA, 3=AMD. R4AMD 0.1.1
+recognizes the AMD protocol but advertises no executable encoder features,
+so it cannot enable an accelerated backend yet.
 
 ## Device resources
 
@@ -215,3 +219,21 @@ software evidence: Docs/Desktop/GrafikVRR07926.txt and GrafikVRR07926.json.
 Small public resource/import and compositor-output examples are available in
 Examples/. Integration, measured software costs and lifecycle guidance:
 Docs/Desktop/GrafikIntegration07944.txt in the workspace Docs repository.
+
+## Provider identity (0.80.3)
+
+`Source/providers.zig` negotiates each vendor independently. Effective
+capabilities, then the active display adapter, then canonical adapter ID
+determine selection. An explicit preferred adapter never borrows another GPU.
+AMD requires a real common memory generation; the older queue-generation
+fallback remains confined to the NVIDIA protocol. Profile changes invalidate
+native BOs even when an erroneous producer reuses adapter/generation values.
+Pending jobs retain their original backend ID and exact fence until physical
+retirement; AMD copies count as GPU traffic without acquiring NVIDIA labels.
+
+The native NVIDIA layout and YUV/VA helpers require the NVIDIA provider
+explicitly. AMD layouts/render/presentation follow 0.80.12/14/18; unknown
+operations do not inherit NVIDIA capability bits. Generic BO descriptors,
+queues, fences and budgets remain with their common owners. Opaque modifiers
+are passed only to the selected driver, never interpreted as NVIDIA layouts
+for an AMD resource. Existing software/Virtio presentation stays independent.
