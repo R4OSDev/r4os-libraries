@@ -1,7 +1,7 @@
 ﻿# R4OS Runtime Libraries
 
 This repository contains the independent Runtime-R4L units R4STD, R4IMG, R4GFX, R4NV,
-R4NAK, R4VK, R4GL, R4VIDEO, and R4FONT. Each library owns its implementation, contract, baseline, Zig and C
+R4NAK, R4VK, R4GL, R4VIDEO, R4ENC, R4FONT, R4AMD, and R4ACO. Each library owns its implementation, contract, baseline, Zig and C
 bindings, manifest, and tests.
 
 ## Build and validation
@@ -32,6 +32,10 @@ Mesa software EGL/OpenGL without a GPU or host Rust compiler; see
 R4VIDEO provides bounded H.264 software decoding through VIDEO_V1. Its pinned
 FFmpeg build uses clang/NASM; offline builds require the cached archive. It is
 included in normal profiles with corresponding sources; see `R4VIDEO/README.md`.
+
+R4AMD and R4ACO provide the AMD foundation and compile genuine pinned
+AddrLib/ACO/NIR sources during their normal build. They currently expose
+only build identity and remain outside normal image profiles; see their READMEs.
 
 Both `Build.bat` and `./Build.sh` use the shared PowerShell 7 `Build.ps1`. Dependency paths are mapped by
 `Settings.R4S`.

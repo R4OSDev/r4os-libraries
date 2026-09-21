@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "module_name": "R4ACO",
+  "zig_client": "R4Aco",
+  "c_prefix": "r4aco",
+  "c_header": "r4aco.h",
+  "description": "AMD ACO compiler library foundation. INFO_V1 reports the built source profile; runtime shader compilation is not exposed yet.",
+  "interfaces": [
+    {
+      "export_name": "INFO_V1",
+      "symbol": "r4aco_info_v1",
+      "zig_name": "info_v1",
+      "zig_type": "InfoV1",
+      "c_type": "R4AcoInfoV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 1094930225,
+      "interface_id_hi": 1379159891,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "get_info",
+          "c_name": "r4aco_get_info",
+          "symbol": "r4aco_get_info_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "output",
+              "type": {
+                "name": "R4AcoInfo",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Caller buffer; changed only on success."
+            },
+            {
+              "name": "output_bytes",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Allocated output bytes, at least the fixed structure size."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4ACO_STATUS",
+            "ownership": "No retained memory, allocation, hardware access or shared mutable state."
+          },
+          "description": "Return source/build identity. Zero capabilities is deliberate until real implementation; source compatibility is not device admission."
+        }
+      ],
+      "description": "Independent immutable library identity, append-only interface."
+    }
+  ],
+  "types": [
+    {
+      "name": "R4AcoInfo",
+      "size": 32,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "mesa_major",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "mesa_major"
+        },
+        {
+          "name": "mesa_minor",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "mesa_minor"
+        },
+        {
+          "name": "mesa_patch",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "mesa_patch"
+        },
+        {
+          "name": "implementation_stage",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "implementation_stage"
+        },
+        {
+          "name": "capability_flags",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero in 0.80.2; does not advertise GPU execution or runtime compilation."
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Fixed ABI1 source/build identity, not a measured hardware profile."
+    }
+  ],
+  "constants": [
+    {
+      "zig_name": "info_version",
+      "c_name": "R4ACO_INFO_VERSION",
+      "type": "u32",
+      "value": 1,
+      "description": "Fixed info structure version."
+    },
+    {
+      "zig_name": "status_ok",
+      "c_name": "R4ACO_STATUS_OK",
+      "type": "i32",
+      "value": 0,
+      "description": "Success."
+    }
+  ],
+  "errors": [
+    {
+      "zig_name": "status_invalid",
+      "c_name": "R4ACO_STATUS_INVALID",
+      "type": "i32",
+      "value": -1,
+      "description": "Insufficient output capacity; output unchanged."
+    }
+  ],
+  "ownership_rules": [
+    {
+      "name": "hardware",
+      "text": "Only AMDGPU.R4D owns hardware. The foundation interface touches no device."
+    },
+    {
+      "name": "provider",
+      "text": "Table pointers live for the loaded provider generation. No pointer is retained from the caller."
+    }
+  ]
+}

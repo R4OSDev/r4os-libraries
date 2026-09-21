@@ -1,0 +1,762 @@
+{
+  "schema": 1,
+  "upstream_version": "26.2.2",
+  "url": "https://archive.mesa3d.org/mesa-26.2.2.tar.xz",
+  "archive_sha256": "eeb29ca7e56cfaa8e8a79538dcf834e3b18e501c31bef5145e959ea437cc4216",
+  "original_root": "ThirdParty/Mesa26.2.2/Original",
+  "files": [
+    {
+      "path": "VERSION",
+      "sha256": "b8a6ba78eed1a56618f65da8d5a65f0fc90b59ada87d73de553d06c927d7cb33",
+      "bytes": 7,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "docs/license.rst",
+      "sha256": "0d1a0472ecc81830e75c20d59b0ea02841e3db21255e0ebad97ab682c54d6615",
+      "bytes": 1816,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "include/c99_alloca.h",
+      "sha256": "96ffde34c6cabd17e41df0ea8b79b034ce8f406a60ef58fe8f068af406d8b194",
+      "bytes": 1608,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "include/c99_compat.h",
+      "sha256": "92445314d5fb3eff3a12eaf4cc864f9b459862a99594403b36ea79dfe149d267",
+      "bytes": 2754,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "include/no_extern_c.h",
+      "sha256": "60883a8d2b2978b861ef686c5a9afb41cf91ffec7c56baca89c626e7fea2d385",
+      "bytes": 2051,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "licenses/Apache-2.0",
+      "sha256": "7e4d3fba250d15e9e0afa380d4b611828fa2560cc8fdebe95bcf2f01a487de12",
+      "bytes": 10045,
+      "license": "License text only: Apache-2.0",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/BSL-1.0",
+      "sha256": "9b9fea7520a816107fcac2598b7c0155222f16bc430e989706b22f4367f1df7d",
+      "bytes": 1649,
+      "license": "License text only: BSL-1.0",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/GPL-1.0-or-later",
+      "sha256": "8ff76f1528e6e4e9400c0f6b1f2d19d4979aaac3bcc44bb707a55389132825c4",
+      "bytes": 13047,
+      "license": "License text only: GPL-1.0-or-later",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/GPL-2.0-only",
+      "sha256": "6667ad4063569cd53b13500550d93fcd3dc11bcf82c5514296af013a0b720ba5",
+      "bytes": 18424,
+      "license": "License text only: GPL-2.0-only",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/MIT",
+      "sha256": "323c587d0ccf10e376f8bf9a7f31fb4ca6078105194b42e0b1e0ee2bc9bde71f",
+      "bytes": 1372,
+      "license": "License text only: MIT",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/SGI-B-2.0",
+      "sha256": "686bf035a1fd22076416fd3b90370ac67771e884bf57f55693d51f8ce7c710a7",
+      "bytes": 1822,
+      "license": "License text only: SGI-B-2.0",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/exceptions/Linux-Syscall-Note",
+      "sha256": "9b4084655174654608fd037e9ddb4feeadfada01cd042e9c17b05aa7105b2b9f",
+      "bytes": 1257,
+      "license": "License text only: Linux-Syscall-Note",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "src/amd/common/ac_binary.h",
+      "sha256": "6c6cdb69cefcde2798cb36e22a8b4e41daa34a39d6ca484a6a2bc9dc9bf589db",
+      "bytes": 1390,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/ac_gpu_info.h",
+      "sha256": "bb082f1b5fd7d2245648441fed02f3cce22fdd6f9ba03d4ce35b3a0d8e70f9da",
+      "bytes": 23994,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/ac_hw_stage.h",
+      "sha256": "2f5bc3d8bbb77e4de5edf210e593098c9f360003571576103bc8fbbf0da38c3b",
+      "bytes": 3513,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/ac_shader_args.h",
+      "sha256": "9e74817e89a8d4353fa446a55576414a9ae926f07aeab121a2fa49b7c3ce3ad8",
+      "bytes": 6925,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/ac_shader_debug_info.h",
+      "sha256": "445fc19362abc7046501e75d001493f7ff218e16b4b9f1b1b1827b640c93129c",
+      "bytes": 881,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/ac_shader_util.h",
+      "sha256": "c911fc892f9a995570ba14287f98eb3c9ef3d5348130221054cd5b71382191ba",
+      "bytes": 13198,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/ac_surface.h",
+      "sha256": "89fa017fe1271c5b4551437401af31126c69f78f477631bc333417451772909a",
+      "bytes": 21881,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/ac_video.h",
+      "sha256": "519c263bc1330730e84a11bef8fe01a7ad42d4b67ba8dff7f7af8c3148f491e9",
+      "bytes": 5574,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/amd_family.h",
+      "sha256": "5a625359004ecc38bc8e6ac663fed6d2cc3ed037f975ca9b6b28b63e152a21c7",
+      "bytes": 6339,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/meson.build",
+      "sha256": "bb8e5bf76f739b1f524f7bd3c725ac10eb69a22b011412a7f9ab0519ae2068b5",
+      "bytes": 8848,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/compiler/aco_assembler.cpp",
+      "sha256": "0c091c76905d639c478c6606658bc05f0f2d485d28a7d5fa73e235818424734b",
+      "bytes": 66645,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/compiler/aco_builder_h.py",
+      "sha256": "fbcc0bbb6cfb1fc331f0adf568915535a2b220f80c038dce5116aef1b2616732",
+      "bytes": 23871,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/compiler/aco_ir.h",
+      "sha256": "c495e6dd08d4fe1ac5984ccbd21c6f194ac24c1de3e725e92953eafd18c65ee3",
+      "bytes": 89131,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/compiler/aco_live_var_analysis.cpp",
+      "sha256": "c01e39fcea9a7cdf8716e5970da1f32c98e70100f1c96c4191470cf35414b80e",
+      "bytes": 28079,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/compiler/aco_opcodes.py",
+      "sha256": "21d9c086dd32b0dbe094f1523ac337d350258a3fb973a510a46fbea85a56bee1",
+      "bytes": 139502,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/compiler/aco_opcodes_h.py",
+      "sha256": "a40ebaa4a24c0d571a231397bd072d87bc4f354b8f0a8f61afbf851471db57a3",
+      "bytes": 1123,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/compiler/aco_shader_info.h",
+      "sha256": "96c26dd20277c32bd3416da2c63373f6cc2b1aac957f6968ac29f638eb17e357",
+      "bytes": 5634,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/compiler/aco_util.h",
+      "sha256": "79810b19057f89e8bee79ede89edc0b0d841a12fcba168b6a821f43ce0994cf8",
+      "bytes": 38340,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/compiler/meson.build",
+      "sha256": "e23012e3c2548d8557e787b88634fd9e2c71b55691198061decaa70dde51a4ca",
+      "bytes": 2919,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/registers/gfx10-rsrc.json",
+      "sha256": "ab6deb6cea2daf6ef546b8ae5eff105d5939c9d8cd76a710f9f8064e6a2cf820",
+      "bytes": 19795,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx10.json",
+      "sha256": "f3435695c47c3c3b1d8329a96b098452d5909944ca2c99995520c22614617d48",
+      "bytes": 402500,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx103.json",
+      "sha256": "781f3d4aa1e4d00c15fc67db21732521a4619a66480a704fbdbee9f97b0cdfff",
+      "bytes": 400899,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx11-rsrc.json",
+      "sha256": "838e540d6adcb58f3fce9e561d38dc727563102bd02d47938fc6e170db46c164",
+      "bytes": 15007,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx11.json",
+      "sha256": "304b57f399534febbd2b055067b81c2652c700eaea88526a7d10c6bb889bf2fb",
+      "bytes": 372700,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx115.json",
+      "sha256": "3d8ba0bb99dc326271b5bc213d1891e0983f1dfdf1f4eaef636c4fe035f365f2",
+      "bytes": 370883,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx12-rsrc.json",
+      "sha256": "3cfef958a39875c6a1b341afb55082a4ffc571ff34dbd651456dc4f846fdddd0",
+      "bytes": 12969,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx12.json",
+      "sha256": "e75a0a16f6c10fb27a02a29644307e949ab78042c76ea62509d9236d7e7e8bc1",
+      "bytes": 372733,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx6.json",
+      "sha256": "38b492cf4211615934372777c55381ba21e448d3f199ddf1394def62446ce1a1",
+      "bytes": 285433,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx7.json",
+      "sha256": "22fdc2fa9ceb139b6c9ecdff4ed5e90d2b42f7c700ab4d18f3d742996b506af8",
+      "bytes": 309435,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx8.json",
+      "sha256": "225dcbb9c4d16cc4c79d48e1b91d19ab71afa24f6a14e3613ddc49379c08d1bb",
+      "bytes": 320092,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx81.json",
+      "sha256": "851c3eb49a3933730520efcfb680ae756d7cf2c746c00e65e1b12c1dd35e8161",
+      "bytes": 327988,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx9.json",
+      "sha256": "081fbfd1251fb5c6f4b7b6a218ba217e21346e824a04ec8146ab0d1d389ddb06",
+      "bytes": 361872,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/gfx940.json",
+      "sha256": "c97ebc6b44f20cddce9d3900f53755596aa0928c0ccc843e06203d56eecc705f",
+      "bytes": 97171,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/makeregheader.py",
+      "sha256": "7e3a8a87a7bf6a8752990f3ff4013d4dd06c8522cb4d4af04e785c94b381d509",
+      "bytes": 15290,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/registers/pkt3.json",
+      "sha256": "af35bfe7b665dbe5794416602c2ad03bfb9417f080b0d99e7aa094b2519f365d",
+      "bytes": 9381,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/registers/regdb.py",
+      "sha256": "e524f45b0304396c3a8694631fec5db485938731a901a47d36279418934f1e83",
+      "bytes": 31116,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/registers/registers-manually-defined.json",
+      "sha256": "0e1f10a943eeb840fb55d1f1fb89e1a998893659f14195b6c0ca9869cdc9e83a",
+      "bytes": 5922,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/amd/vulkan/meson.build",
+      "sha256": "96199abeb5a57f3abac9c7e38834e2df4d02bc6e66a705e23a80c856c2a39708",
+      "bytes": 10637,
+      "license": "MIT"
+    },
+    {
+      "path": "src/compiler/builtin_types.py",
+      "sha256": "27da11ba307da3c0c9d235815e5dafe9c17be7e99c19f6be76ca5c1b05863369",
+      "bytes": 28179,
+      "license": "MIT"
+    },
+    {
+      "path": "src/compiler/builtin_types_h.py",
+      "sha256": "13d2d66c5b9c7a7f3299c4ab4c0047ee3cb639190f440e8e68b320d4ccb2714a",
+      "bytes": 707,
+      "license": "MIT"
+    },
+    {
+      "path": "src/compiler/glsl_types.h",
+      "sha256": "6973693bb2160ca20b8a6781364b224e9e318615bcc6d983b7f4dd79389e5832",
+      "bytes": 45457,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/list.h",
+      "sha256": "9fd48602bc7237c32d2ecb2af1f9ea7138d3ec0fb2e6b6b280596536cc22a352",
+      "bytes": 12923,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/meson.build",
+      "sha256": "93441c7367a77859be8f191775d19b8863addc26c5effd3a2a1b5821109ccb94",
+      "bytes": 14808,
+      "license": "MIT"
+    },
+    {
+      "path": "src/compiler/nir/nir.h",
+      "sha256": "a326344d86757863d0999984fdb6c6a48f110567c6f2582b9a517514a44bdb3c",
+      "bytes": 254175,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_builder.h",
+      "sha256": "f50f0ab2c9ec39de8e34a95f54cbe5bb1b6b749fe984a515aa2386c0dc5962fe",
+      "bytes": 74762,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_builder_opcodes_h.py",
+      "sha256": "57a9693c5f82b7f4fc5f95b98b1f598d7a615af1392c3b88d5836b49089d37d7",
+      "bytes": 8873,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_control_flow.h",
+      "sha256": "9537767714139e2661ce59b9de194167f483149ace1634eae7e68f90791bd275",
+      "bytes": 7435,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_defines.h",
+      "sha256": "d9787982a506c51386743b23b39735dc674d86a0fcf12b25bd1372181fbbac35",
+      "bytes": 9817,
+      "license": "MIT"
+    },
+    {
+      "path": "src/compiler/nir/nir_deref.h",
+      "sha256": "f81adaf9d7e3de4a4b6b4112a9669f08b63f25e3f6f13ab554c8cd414231e8b1",
+      "bytes": 3056,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_inline_helpers.h",
+      "sha256": "ff6173c3c080ab67d015e7f33569becae29046cbc7de00d5a95fe6fd2775f0f6",
+      "bytes": 4160,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/compiler/nir/nir_intrinsics.py",
+      "sha256": "7633856b0cd1cf7ab5c4e16d35ffb7185c41cca06d4efc0447aaa3d4c9955665",
+      "bytes": 148524,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_intrinsics_h.py",
+      "sha256": "dac1cce28f9d706e5d9019778c4c493b57e0730f93491d2d0740c372169bb4a3",
+      "bytes": 2216,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_intrinsics_indices_h.py",
+      "sha256": "016f05308ea76e67cd6183bffe098cdce1eae8c97cf1f10e5244ec4fba9f93de",
+      "bytes": 3536,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_lower_vars_to_ssa.c",
+      "sha256": "a3fcecec91b1dd84fa27b2b4dc9760626c5ba92079302f43f8dbc1a6ddb89261",
+      "bytes": 30324,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_opcodes.py",
+      "sha256": "c8ed942f9c130627f79109228980f232ffc0259ae6d1f6a26a17443fe1f7bfd8",
+      "bytes": 87677,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_opcodes_h.py",
+      "sha256": "a0ccc45ab6c58d7bf5bf7b06508efa924cffb3011ec60294de790633e87667b9",
+      "bytes": 1635,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_phi_builder.h",
+      "sha256": "7c9a7445b9c803e7d9d8287fe32782b53e479540d1cf32f3f5bfbc597480a28c",
+      "bytes": 4851,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/nir/nir_shader_compiler_options.h",
+      "sha256": "b5570da381b4e6e672fa032428101f998bca8468ad748fda2f9df4dd0d7ed78b",
+      "bytes": 32070,
+      "license": "MIT"
+    },
+    {
+      "path": "src/compiler/nir/nir_vla.h",
+      "sha256": "ba736ab99c1969e07fb28259d0d13540e741bc0c685d61d38bcb6cbc98732a0b",
+      "bytes": 2132,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/shader_enums.h",
+      "sha256": "a206b036c26034242d09568ffd95f9e881d73bea22fb02d50ee1fab3aba64241",
+      "bytes": 55656,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/compiler/shader_info.h",
+      "sha256": "b7c0ffcdc60db695854fa596171c8bffe7928598fe93d1cb17939114b7f4e74b",
+      "bytes": 23123,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/bitscan.h",
+      "sha256": "f7ac55be1a19f7a7bad10b64d16861a37b0e239d147a083612875c929a0bc2b5",
+      "bytes": 10889,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/bitset.h",
+      "sha256": "80cc8ca72cb4bfb862f9fe4bdaf679db632b82bfcf9a1c5f35c07d2e699bb179",
+      "bytes": 22119,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/blake3/blake3.h",
+      "sha256": "875039b6a5dc3a7529e704a07c961c508db2c2f6559a59d0e00ea0dce237f0f7",
+      "bytes": 1999,
+      "license": "Apache-2.0 (selected from upstream Apache-2.0 OR CC0-1.0 offer)",
+      "license_evidence": "ThirdParty/Blake3-1.8.2/LICENSE_A2"
+    },
+    {
+      "path": "src/util/blob.h",
+      "sha256": "f102f88a8363f799d1a4553b1494ac19482ccb4763eea31f648291fe8ae9420d",
+      "bytes": 13479,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/compiler.h",
+      "sha256": "919661909955445d4a0858f56e0ebaabbcaf8b694f5be8906c987979eeaa4fd0",
+      "bytes": 3520,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/detect.h",
+      "sha256": "a8ea16b111b4e89830aa9084b7915760e13c8be1e96bc240ae31edab2395439a",
+      "bytes": 2141,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/detect_arch.h",
+      "sha256": "0b4d0d2f98057061e755e7c9af449425a76f5ad7fd76054671b866a3c03e39e5",
+      "bytes": 4953,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/detect_cc.h",
+      "sha256": "bffcab52c836d510782f872e26055f0ca93562378fccbd5ecdb436a90fdca573",
+      "bytes": 2519,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/detect_os.h",
+      "sha256": "20ef7b831320956ac6ac44b96b20d2b47be6d2df945439acf90ef27b1c1ee7ea",
+      "bytes": 2903,
+      "license": "MIT"
+    },
+    {
+      "path": "src/util/enum_operators.h",
+      "sha256": "a67abf8ffd599b72b2f2936492a002f73b352bd4e4fac45b33e75232e6493b06",
+      "bytes": 3321,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/format/meson.build",
+      "sha256": "1ab070b7227492327d48bdfc0d524a4af742c257a00c72994803724bca2f64f6",
+      "bytes": 1282,
+      "license": "MIT"
+    },
+    {
+      "path": "src/util/format/u_format.h",
+      "sha256": "531ae7074955f5b96de1cdeb53df8417bfd2b4dcdfc915b7d4a0c4555b53c67f",
+      "bytes": 44411,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/format/u_format.yaml",
+      "sha256": "f0fef33544456468def10d5dffc72a61e8b0e7acc599b700fc65366e6f495a10",
+      "bytes": 80486,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/util/format/u_format_pack.py",
+      "sha256": "a4a2510d443c84059d25f2346c521d28d503c1744b76b2aa3079198ecc33f2bc",
+      "bytes": 28355,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/format/u_format_parse.py",
+      "sha256": "d523a751f6a3334f7cbe2e5bdede1065c3629390cdbbe98e5d41109e3cf63ebb",
+      "bytes": 20503,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/format/u_format_table.py",
+      "sha256": "5a68041e209731c2d69802af2562c1d61e4c99024fdcaf1a7c116e73d143d809",
+      "bytes": 27760,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/format/u_formats.h",
+      "sha256": "c1e04fd9d1c1e5d53786387339024436dbadab5ce172176366bf443c34278b81",
+      "bytes": 2266,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/futex.h",
+      "sha256": "acd349682b307cf44957e027f4e3f03f9d4dbdc304e6e588721b748273a9e75e",
+      "bytes": 1911,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/half_float.h",
+      "sha256": "fd9f262c6674b4688d83d2151433980437cbba494035152c505733b8c1b455f3",
+      "bytes": 8046,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/hash_table.h",
+      "sha256": "2c5d9cdbf9ae86a5b202c14719c5a32a0b19d5c47d1ebffcd45fd52c945aa29d",
+      "bytes": 11002,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/list.h",
+      "sha256": "230917903d976629b78c3460f9af36aed1a1e5855b4c6609b8d3a3f9ef735e8e",
+      "bytes": 11377,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/log.h",
+      "sha256": "73ddc3d866ddfba5ec7351a08aa97561b8b3e90703f87992fb8533a00173f32a",
+      "bytes": 4644,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/macros.h",
+      "sha256": "f965ee46d99dcd390d49c86aa9df63bc62ad706ab13d8e3e2ae1b4db57afb238",
+      "bytes": 18232,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/memstream.h",
+      "sha256": "2fe3691c7f616e76469d541bf8a2a4c12a643acc5050db2d2c545864afa53a6e",
+      "bytes": 2062,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/mesa-blake3.h",
+      "sha256": "abe40b32adcee7e10c08ccb9158ba55fe7b0e7fae7e5161966555a53b3483b6a",
+      "bytes": 2483,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/meson.build",
+      "sha256": "a2708cc654ab709ee8729920e06b3f859591531d6668bfdadea63930a151d70f",
+      "bytes": 14774,
+      "license": "MIT"
+    },
+    {
+      "path": "src/util/os_misc.h",
+      "sha256": "721cec97e4a28c372cbdaf272e3f1c3cde045778da0e174ebb46e01ec57eb719",
+      "bytes": 6683,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/process_shader_stats.py",
+      "sha256": "b31ca8266004621f7d59abf63954f2b652d51ee7abf1cd1e0e7e3946154da922",
+      "bytes": 8127,
+      "license": "MIT"
+    },
+    {
+      "path": "src/util/ralloc.h",
+      "sha256": "367cc4b53d8d2a97135e7a443cba670fc0af450ee9026cd21ec47bc517155cec",
+      "bytes": 28160,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/range_minimum_query.h",
+      "sha256": "a2ca6ff344045dc82237c2db6161f951ee8b8b300c762b2700693bac9fb752f7",
+      "bytes": 1575,
+      "license": "MIT"
+    },
+    {
+      "path": "src/util/rb_tree.h",
+      "sha256": "4894e87eb11f38cb3d0b73aef82a81121899b38e6cdc1f71e41fba47cc3e45d8",
+      "bytes": 15787,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/set.h",
+      "sha256": "6c70555c9e3da96c4450b922f9de40f3ecc99630a49ed83d1fd6293ece7eb5ca",
+      "bytes": 5516,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/shader_stats.rnc",
+      "sha256": "e381b682635d209ac03c1584b0be4b1b4149c5218218398dde61805b22df5bdf",
+      "bytes": 691,
+      "license": "MIT"
+    },
+    {
+      "path": "src/util/shader_stats.xml",
+      "sha256": "9efabef78f422abef0327eff8fd61935c72fef81ad9505fb813db501c6b289ed",
+      "bytes": 14008,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "src/util/simple_mtx.h",
+      "sha256": "e0efe2ae0e27477ab412fe62b80dab64d22a8a9e96d9abb59a52dbba2b01241b",
+      "bytes": 5405,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/sparse_bitset.h",
+      "sha256": "5c21a15f47236377ce6caafd3768ab21258b6d0c54b3e3b6a960216715b0c3d7",
+      "bytes": 11208,
+      "license": "MIT"
+    },
+    {
+      "path": "src/util/u_atomic.h",
+      "sha256": "81bf636924f9c049606ed8d0be2e01cc7b9facc963955efc1faec2140b510960",
+      "bytes": 16578,
+      "license": "No copyright claimed (embedded original notice)"
+    },
+    {
+      "path": "src/util/u_call_once.h",
+      "sha256": "c9413af6e96b3ad1bb5e684c0b3c15be635f47774d4eb63ff7f273676fab7a58",
+      "bytes": 1755,
+      "license": "MIT"
+    },
+    {
+      "path": "src/util/u_cpu_detect.h",
+      "sha256": "b6a693586cc2aabef5a56ddff1a4745e83680e457bb83d70addb4612a80591f9",
+      "bytes": 4886,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/u_debug.h",
+      "sha256": "3fc8d2dc29445c3a5643f10d44dca126e0c0e71d5e6d5051ce73aa646257b7d6",
+      "bytes": 11600,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/u_dynarray.h",
+      "sha256": "c03eeb512b590743a0355669f93e50919aabe4a4f92ffcc00d60d9441426ae53",
+      "bytes": 9519,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/u_endian.h",
+      "sha256": "bf02a7d0e9984cf41e046e559e6c343b972031abaa8ecc253e4c641caa2112ea",
+      "bytes": 3349,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/u_math.h",
+      "sha256": "f9f80af6f6c28aa684d5987d1edfb3cd2e958f64dbfd95e41230026cbef98d99",
+      "bytes": 19385,
+      "license": "MIT (embedded notice)"
+    },
+    {
+      "path": "src/util/u_thread.h",
+      "sha256": "70b79a3a2727e587f8d3e20ceaa0866e8cbe04b1b0f683be32b1129975fc3039",
+      "bytes": 5343,
+      "license": "MIT (embedded notice)"
+    }
+  ],
+  "patches": [],
+  "source_boundary": {
+    "compiled_originals": [
+      "src/amd/compiler/aco_live_var_analysis.cpp",
+      "src/amd/compiler/aco_assembler.cpp",
+      "src/compiler/nir/nir_lower_vars_to_ssa.c"
+    ],
+    "selection": "Exact source/header/generator dependency closure for the portability proof. AddrLib retains its complete upstream directory; only GFX9 is compiled. No unsupported backend is enabled.",
+    "future_owners": {
+      "RADV": "R4VK, 0.80.23-25",
+      "ACO/NIR": "R4ACO, 0.80.13",
+      "AddrLib": "R4AMD, 0.80.12"
+    }
+  },
+  "additional_licenses": [
+    {
+      "path": "ThirdParty/Blake3-1.8.2/LICENSE_A2",
+      "sha256": "00fcc7a934ddbc9ece2a7cc063ac788e284b703b1d705ccbba72d462aa97921e",
+      "url": "https://raw.githubusercontent.com/BLAKE3-team/BLAKE3/1.8.2/LICENSE_A2",
+      "version": "1.8.2"
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "module": "R4ACO",
+  "profile": "mesa",
+  "generators": [
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/util/process_shader_stats.py",
+        "${source}/src/util/shader_stats.rnc",
+        "${source}/src/util/shader_stats.xml"
+      ],
+      "outputs": [
+        "src/util/shader_stats.h"
+      ],
+      "capture": "src/util/shader_stats.h"
+    },
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/util/format/u_format_table.py",
+        "${source}/src/util/format/u_format.yaml",
+        "--enums"
+      ],
+      "outputs": [
+        "src/util/format/u_format_gen.h"
+      ],
+      "capture": "src/util/format/u_format_gen.h"
+    },
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/compiler/builtin_types_h.py",
+        "src/compiler/builtin_types.h"
+      ],
+      "outputs": [
+        "src/compiler/builtin_types.h"
+      ]
+    },
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/compiler/nir/nir_builder_opcodes_h.py"
+      ],
+      "outputs": [
+        "src/compiler/nir/nir_builder_opcodes.h"
+      ],
+      "capture": "src/compiler/nir/nir_builder_opcodes.h"
+    },
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/compiler/nir/nir_opcodes_h.py"
+      ],
+      "outputs": [
+        "src/compiler/nir/nir_opcodes.h"
+      ],
+      "capture": "src/compiler/nir/nir_opcodes.h"
+    },
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/compiler/nir/nir_intrinsics_h.py",
+        "--out",
+        "src/compiler/nir/nir_intrinsics.h"
+      ],
+      "outputs": [
+        "src/compiler/nir/nir_intrinsics.h"
+      ]
+    },
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/compiler/nir/nir_intrinsics_indices_h.py",
+        "--out",
+        "src/compiler/nir/nir_intrinsics_indices.h"
+      ],
+      "outputs": [
+        "src/compiler/nir/nir_intrinsics_indices.h"
+      ]
+    },
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/amd/compiler/aco_opcodes_h.py"
+      ],
+      "outputs": [
+        "src/amd/compiler/aco_opcodes.h"
+      ],
+      "capture": "src/amd/compiler/aco_opcodes.h"
+    },
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/amd/compiler/aco_builder_h.py"
+      ],
+      "outputs": [
+        "src/amd/compiler/aco_builder.h"
+      ],
+      "capture": "src/amd/compiler/aco_builder.h"
+    },
+    {
+      "tool": "python",
+      "arguments": [
+        "${source}/src/amd/registers/makeregheader.py",
+        "${source}/src/amd/registers/gfx6.json",
+        "${source}/src/amd/registers/gfx7.json",
+        "${source}/src/amd/registers/gfx8.json",
+        "${source}/src/amd/registers/gfx81.json",
+        "${source}/src/amd/registers/gfx9.json",
+        "${source}/src/amd/registers/gfx940.json",
+        "${source}/src/amd/registers/gfx10.json",
+        "${source}/src/amd/registers/gfx103.json",
+        "${source}/src/amd/registers/gfx11.json",
+        "${source}/src/amd/registers/gfx115.json",
+        "${source}/src/amd/registers/gfx12.json",
+        "${source}/src/amd/registers/pkt3.json",
+        "${source}/src/amd/registers/gfx10-rsrc.json",
+        "${source}/src/amd/registers/gfx11-rsrc.json",
+        "${source}/src/amd/registers/gfx12-rsrc.json",
+        "${source}/src/amd/registers/registers-manually-defined.json",
+        "--sort",
+        "address",
+        "--guard",
+        "AMDGFXREGS_H"
+      ],
+      "outputs": [
+        "src/amd/common/amdgfxregs.h"
+      ],
+      "capture": "src/amd/common/amdgfxregs.h"
+    }
+  ],
+  "flags": [
+    "-I${source}/src/amd",
+    "-I${generated}/src/amd",
+    "-I${source}/src/amd/compiler",
+    "-I${generated}/src/amd/compiler",
+    "-I${source}/src/amd/common"
+  ],
+  "units": [
+    {
+      "name": "aco_live",
+      "source": "src/amd/compiler/aco_live_var_analysis.cpp",
+      "language": "cpp"
+    },
+    {
+      "name": "aco_assembler",
+      "source": "src/amd/compiler/aco_assembler.cpp",
+      "language": "cpp"
+    },
+    {
+      "name": "nir_vars",
+      "source": "src/compiler/nir/nir_lower_vars_to_ssa.c",
+      "language": "c"
+    }
+  ],
+  "followup": "0.80.13",
+  "scope": "Real ACO liveness, assembler and NIR source TUs; unresolved symbols are reported, not stubbed or linked into R4ACO.R4L yet."
+}

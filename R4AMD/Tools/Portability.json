@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "module": "R4AMD",
+  "profile": "mesa",
+  "generators": [],
+  "flags": [
+    "-I${source}/src/amd/addrlib/inc",
+    "-I${source}/src/amd/addrlib/src",
+    "-I${source}/src/amd/addrlib/src/core",
+    "-I${source}/src/amd/addrlib/src/chip/gfx9",
+    "-DLITTLEENDIAN_CPU",
+    "-DDEBUG=0",
+    "-DADDR_FASTCALL="
+  ],
+  "units": [
+    {
+      "name": "addr_gfx9",
+      "source": "src/amd/addrlib/src/gfx9/gfx9addrlib.cpp",
+      "language": "cpp"
+    }
+  ],
+  "followup": "0.80.12",
+  "scope": "Real GFX9 AddrLib source TU; not linked into R4AMD.R4L until the layout/allocator integration."
+}

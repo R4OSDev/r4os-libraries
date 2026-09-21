@@ -1,0 +1,360 @@
+{
+  "schema": 1,
+  "upstream_version": "26.2.2",
+  "url": "https://archive.mesa3d.org/mesa-26.2.2.tar.xz",
+  "archive_sha256": "eeb29ca7e56cfaa8e8a79538dcf834e3b18e501c31bef5145e959ea437cc4216",
+  "original_root": "ThirdParty/Mesa26.2.2/Original",
+  "files": [
+    {
+      "path": "VERSION",
+      "sha256": "b8a6ba78eed1a56618f65da8d5a65f0fc90b59ada87d73de553d06c927d7cb33",
+      "bytes": 7,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "docs/license.rst",
+      "sha256": "0d1a0472ecc81830e75c20d59b0ea02841e3db21255e0ebad97ab682c54d6615",
+      "bytes": 1816,
+      "license": "MIT (Mesa/AMD/NIR component default; file has no separate license notice)",
+      "license_evidence": "Original/docs/license.rst; Original/licenses/MIT; adjacent component source notices"
+    },
+    {
+      "path": "licenses/Apache-2.0",
+      "sha256": "7e4d3fba250d15e9e0afa380d4b611828fa2560cc8fdebe95bcf2f01a487de12",
+      "bytes": 10045,
+      "license": "License text only: Apache-2.0",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/BSL-1.0",
+      "sha256": "9b9fea7520a816107fcac2598b7c0155222f16bc430e989706b22f4367f1df7d",
+      "bytes": 1649,
+      "license": "License text only: BSL-1.0",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/GPL-1.0-or-later",
+      "sha256": "8ff76f1528e6e4e9400c0f6b1f2d19d4979aaac3bcc44bb707a55389132825c4",
+      "bytes": 13047,
+      "license": "License text only: GPL-1.0-or-later",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/GPL-2.0-only",
+      "sha256": "6667ad4063569cd53b13500550d93fcd3dc11bcf82c5514296af013a0b720ba5",
+      "bytes": 18424,
+      "license": "License text only: GPL-2.0-only",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/MIT",
+      "sha256": "323c587d0ccf10e376f8bf9a7f31fb4ca6078105194b42e0b1e0ee2bc9bde71f",
+      "bytes": 1372,
+      "license": "License text only: MIT",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/SGI-B-2.0",
+      "sha256": "686bf035a1fd22076416fd3b90370ac67771e884bf57f55693d51f8ce7c710a7",
+      "bytes": 1822,
+      "license": "License text only: SGI-B-2.0",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "licenses/exceptions/Linux-Syscall-Note",
+      "sha256": "9b4084655174654608fd037e9ddb4feeadfada01cd042e9c17b05aa7105b2b9f",
+      "bytes": 1257,
+      "license": "License text only: Linux-Syscall-Note",
+      "role": "upstream license documentation, not compiled code"
+    },
+    {
+      "path": "src/amd/addrlib/inc/addrinterface.h",
+      "sha256": "8237c6bb94b2620b096d91d0c39e27f228b7ece185fe28d00d0f1d9f3a7ac5b0",
+      "bytes": 213492,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/inc/addrtypes.h",
+      "sha256": "d41c87ee27dc65a3ae9f3393e222af6bac25805632b92c0fd6e0b3811346b45b",
+      "bytes": 30488,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/meson.build",
+      "sha256": "d850cabb95d3575ef9ce2a4af8cd6399c9ed51961495065b064e57ab94c73568",
+      "bytes": 2487,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/addrinterface.cpp",
+      "sha256": "a545efd85c88b0de73f4864b69546d9823698d37f3174f4fc74dcff6d098116a",
+      "bytes": 72835,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/amdgpu_asic_addr.h",
+      "sha256": "51ef026655bcbf56a09502cd37b18d202fe3c5e51a17c08dc6fad6bcee0f6535",
+      "bytes": 9310,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/chip/gfx10/gfx10_gb_reg.h",
+      "sha256": "10185e96f02221d8601e34fa309bb1c374b8c7fdf5adaca0554943053529d6e2",
+      "bytes": 1490,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/chip/gfx11/gfx11_gb_reg.h",
+      "sha256": "1433bcb10ca4dbdbd67d89e8bea7d5f3a1a189145b54f226438edcbdcb64ad57",
+      "bytes": 1916,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/chip/gfx12/gfx12_gb_reg.h",
+      "sha256": "2fd7cab8f6652a75ed19e1cced31064425f5312d84006ee655b916f6c2d4f1f5",
+      "bytes": 1946,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/chip/gfx9/gfx9_gb_reg.h",
+      "sha256": "22c450c78dd1255f9b5dbc469a561eaf03f92d8fcec37b874abd339e4f5889cc",
+      "bytes": 2645,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/chip/r800/si_gb_reg.h",
+      "sha256": "c6511f3baad8a2838a6841dafa95eece54fee4710289dcf86f0561ea0da0b0f9",
+      "bytes": 8032,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrcommon.h",
+      "sha256": "2754429c97e2a1163f081a05cfc8ce2b6cae4ffd370903690573a0916715c543",
+      "bytes": 38712,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrelemlib.cpp",
+      "sha256": "08529d0a0c104e2579e26450e74aab479622fe2179954bff24447936ee7fbb21",
+      "bytes": 56977,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrelemlib.h",
+      "sha256": "7f7b814a774335f30947ccf58c1f8a104a051806d9a13f5fac32ff578ea405e4",
+      "bytes": 11045,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrlib.cpp",
+      "sha256": "12c739a1a89badb82307020edbac69d11a7debf653dda272ece36b5b42995970",
+      "bytes": 23704,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrlib.h",
+      "sha256": "12b8287fde7fdb5ecd8b3516729e45e6a3728bbfe9c635834e0a8c3c962f4545",
+      "bytes": 16245,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrlib1.cpp",
+      "sha256": "667e59a5e7a0102800ff16f837b51020303276b29eb01ddcba6be034ac341cca",
+      "bytes": 129389,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrlib1.h",
+      "sha256": "0bed033ab97514b2160d07beb023f06dc77f1d00db9029b5bb982d1a614990d6",
+      "bytes": 20117,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrlib2.cpp",
+      "sha256": "2c774d80e13b155ace1d3b1c978572b9d4c0390eb979d7f7365c08e99ad9b278",
+      "bytes": 79453,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrlib2.h",
+      "sha256": "161416b11beb4b6f40edb5a45881d2da041f8fee84cbe20504cffbde8e3f204b",
+      "bytes": 30471,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrlib3.cpp",
+      "sha256": "91be9acf3dc6b7d39b38d4ceb9aac52cd4c41c0f4408fe2e848f0021b8078a89",
+      "bytes": 42468,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrlib3.h",
+      "sha256": "229af561070aa25cefffa97d2754907f7aeceaffb620e7d0a153a27016b182b6",
+      "bytes": 15643,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrobject.cpp",
+      "sha256": "f7f37326cd3250df76ba51f5de5437dd1a9a0cfd0bb1a62d30cf49049d2787b5",
+      "bytes": 7203,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrobject.h",
+      "sha256": "4561343e50348ab2b69e5ba51ab2c5148892981dcbf76fdfefb2e2e83b511bf0",
+      "bytes": 2588,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrswizzler.cpp",
+      "sha256": "00882520e0c637cdb658ec939a83566603201b4ada135554d2a81b124503a13c",
+      "bytes": 41231,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrswizzler.h",
+      "sha256": "de6da5c8af647ec07a74c13ab4b692da905005dcb72b154409e639e64bc8f6eb",
+      "bytes": 5685,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/addrswizzlersimd.h",
+      "sha256": "a8a64b334319eca97f67973067a82343ac38a7c49b3651414ddd357e3a9f2102",
+      "bytes": 120140,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/coord.cpp",
+      "sha256": "c3c92b960378e60a96396705065b8f6609b09e0c145acc09a5907ae0426a3cd2",
+      "bytes": 12041,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/core/coord.h",
+      "sha256": "22b2ed00a02ef1ebaa74fce75544562749432a5160ce8449f068824b659f1dd3",
+      "bytes": 3221,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx10/gfx10SwizzlePattern.h",
+      "sha256": "5029e548dd641742d4ef8fe6485f4433f9e3e44342c547daacb9e902c8aaebc3",
+      "bytes": 504619,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx10/gfx10addrlib.cpp",
+      "sha256": "983daa719befdbbcc3d8d38daba48294cf87fd6c16290e451dcf644c9a9c9d46",
+      "bytes": 204216,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx10/gfx10addrlib.h",
+      "sha256": "1eea56da2d7bb7d196d14a5959825ffef23a1b858ef44d1e89c17046e95a3267",
+      "bytes": 23248,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx11/gfx11SwizzlePattern.h",
+      "sha256": "23fed3308e968fbed87e148d25dbced97c55decc07baaa7695e3f5febc67d927",
+      "bytes": 263881,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx11/gfx11addrlib.cpp",
+      "sha256": "70ea7e98f0facd5e8f1d67ef11fac9945713796046b06f799d74217064f007e2",
+      "bytes": 186248,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx11/gfx11addrlib.h",
+      "sha256": "aa9444f6bedcf80cac0c45dd603dcf5c2939a4b121b4ef3e34c5c1eb2c009362",
+      "bytes": 20368,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx12/gfx12SwizzlePattern.h",
+      "sha256": "bf3eefc9088db04d6ef9aa844d012ec948ab37567d3e49309921b3b20fe98abf",
+      "bytes": 14649,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx12/gfx12addrlib.cpp",
+      "sha256": "90a676b2e1803a94885fb1e981587c8dd28d4bd9763d1bb4ae8017aec427a103",
+      "bytes": 81099,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx12/gfx12addrlib.h",
+      "sha256": "ea02a8fa7bcb34378a244ea41bc3ef1b42e170ff65a05112b79501a520e59497",
+      "bytes": 10249,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx9/gfx9addrlib.cpp",
+      "sha256": "cdb0ab5519e429e986ae77e50fce47c98906495d2388697379c01062dd712c9e",
+      "bytes": 187595,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/gfx9/gfx9addrlib.h",
+      "sha256": "edb276cede62e3db9cbddf79794323c0136a52a6936f81c60d0fc21caa83e6e6",
+      "bytes": 25169,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/r800/ciaddrlib.cpp",
+      "sha256": "9f1d2f694a353dfa179d19b1c42c7da119cbb30b11d0ddf0c6746781f91098b4",
+      "bytes": 78874,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/r800/ciaddrlib.h",
+      "sha256": "87fccb12b234f6de52a42472ab2e883df23c1152ad6739cc3a4fbe1f145486ab",
+      "bytes": 7018,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/r800/egbaddrlib.cpp",
+      "sha256": "77051137215514914a13e1b56cc46a810c3143179eb2e3583780f80faf7c6ef6",
+      "bytes": 144842,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/r800/egbaddrlib.h",
+      "sha256": "8467fa85ec842d4b1f6a525bf7c7a4faaa59dd5996a09b44f5f432c2843cb210",
+      "bytes": 16213,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/r800/siaddrlib.cpp",
+      "sha256": "fcba23953078535d78415c681a49278a7c93aaeb7e7389bfc9ae54c906dc8b6a",
+      "bytes": 125563,
+      "license": "MIT"
+    },
+    {
+      "path": "src/amd/addrlib/src/r800/siaddrlib.h",
+      "sha256": "cb76a1703699f96094ed14e351e0e22bb8b75a968cea241ed94812bf0c6d0c34",
+      "bytes": 12434,
+      "license": "MIT"
+    }
+  ],
+  "patches": [
+    {
+      "path": "ThirdParty/Patches/0001-release-without-posix-signal.patch",
+      "sha256": "6effb213c29e94b8fb2b19c15a381563bca8d7e957347d2e7224742ff87fa1eb",
+      "reason": "Do not require POSIX signal.h when upstream DEBUG is zero; no signal stubs."
+    }
+  ],
+  "source_boundary": {
+    "compiled_originals": [
+      "src/amd/addrlib/src/gfx9/gfx9addrlib.cpp"
+    ],
+    "selection": "Exact source/header/generator dependency closure for the portability proof. AddrLib retains its complete upstream directory; only GFX9 is compiled. No unsupported backend is enabled.",
+    "future_owners": {
+      "RADV": "R4VK, 0.80.23-25",
+      "ACO/NIR": "R4ACO, 0.80.13",
+      "AddrLib": "R4AMD, 0.80.12"
+    }
+  }
+}

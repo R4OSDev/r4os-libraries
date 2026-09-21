@@ -251,3 +251,27 @@ codec adapters are original Apache-2.0 material. Distribution stages
 R4NV NVENC status decoding follows NVIDIA open-gpu-doc nvenc_drv.h (MIT).
 Original-header fixture provenance is in R4NV/Source/nvenc_status_vectors.json;
 the full notice is retained in R4NV/ThirdParty/Nvidia/LICENSES.txt.
+
+## AMD source foundations (0.80.2)
+
+R4AMD and R4ACO preserve selected Mesa 26.2.2 originals under their
+`ThirdParty/Mesa26.2.2/Original` directories. `ThirdParty/Sources.json`
+records each file hash and license evidence. ACO, NIR, AMD register data,
+AddrLib and the selected Mesa utilities use their original MIT notices;
+`u_atomic.h` explicitly claims no copyright. Mesa's complete `licenses/`
+text collection is retained as context, including texts that do not apply
+to the selected code. It does not imply inclusion of GPL implementations.
+The BLAKE3 1.8.2 header follows the upstream Apache-2.0 option; its exact
+license is in `R4ACO/ThirdParty/Blake3-1.8.2/LICENSE_A2`.
+
+R4AMD's ordered patch disables the unused POSIX signal header in release
+AddrLib; originals are unchanged. R4ACO needs no source patch for the selected
+translation units. The shared R4OS C/C++ headers and Zig libc++ headers
+retain their existing provenance. No unresolved runtime symbol is replaced
+by a successful placeholder, and the proof objects are not linked into the
+foundation R4Ls yet.
+
+R4VK also preserves the original RADV directory as reference-only material
+in `R4VK/ThirdParty/AMDReference`. Its `Sources.json` lists all original
+file hashes and the exact Mesa archive. RADV and its Linux winsys are not
+compiled or enabled by 0.80.2. R4OS integration is assigned to 0.80.23-25.
