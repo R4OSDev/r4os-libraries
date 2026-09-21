@@ -30,6 +30,7 @@ R4IMG/ThirdParty/stb/** -text
 R4AMD/ThirdParty/Mesa26.2.2/Original/** -text
 R4ACO/ThirdParty/Mesa26.2.2/Original/** -text
 R4ACO/ThirdParty/Blake3-1.8.2/** -text
+R4ACO/Tests/Fixtures/*.spv -text
 R4VK/ThirdParty/AMDReference/** -text
 
 *.bat text eol=crlf

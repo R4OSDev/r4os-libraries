@@ -12,8 +12,8 @@ pub export fn r4aco_get_info_impl(output: *c.R4AcoInfo, output_bytes: u32) callc
         .mesa_major = 26,
         .mesa_minor = 2,
         .mesa_patch = 2,
-        .implementation_stage = 2,
-        .capability_flags = 0,
+        .implementation_stage = 13,
+        .capability_flags = c.capability_cpu_compile,
         .reserved = 0,
     };
     return c.status_ok;
@@ -22,6 +22,16 @@ pub export fn r4aco_get_info_impl(output: *c.R4AcoInfo, output_bytes: u32) callc
 pub export var r4aco_info_v1: c.InfoV1 align(8) linksection(".data.r4l_exports") = .{
     .header = c.info_v1_header,
     .get_info = r4aco_get_info_impl,
+};
+
+pub const r4aco_compile_impl = @import("runtime.zig").r4aco_compile_impl;
+pub const r4aco_cache_write_impl = @import("cache.zig").r4aco_cache_write_impl;
+pub const r4aco_cache_read_impl = @import("cache.zig").r4aco_cache_read_impl;
+pub export var r4aco_compiler_v1: c.CompilerV1 align(8) linksection(".data.r4l_exports") = .{
+    .header = c.compiler_v1_header,
+    .compile = r4aco_compile_impl,
+    .cache_write = r4aco_cache_write_impl,
+    .cache_read = r4aco_cache_read_impl,
 };
 
 pub export var r4aco_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{

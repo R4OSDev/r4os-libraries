@@ -33,10 +33,10 @@ R4VIDEO provides bounded H.264 software decoding through VIDEO_V1. Its pinned
 FFmpeg build uses clang/NASM; offline builds require the cached archive. It is
 included in normal profiles with corresponding sources; see `R4VIDEO/README.md`.
 
-R4AMD and R4ACO provide the AMD foundation and compile genuine pinned
-AddrLib/ACO/NIR sources during their normal build. They currently expose
-build identity (plus AMD protocol negotiation with zero encoder features)
-and remain outside normal image profiles; see their READMEs.
+R4AMD provides real AddrLib image layouts and bounded SDMA/PM4 encoders.
+R4ACO links Mesa SPIR-V/NIR/ACO for CPU compilation of the fixed Picasso
+GFX9 profile, isolated jobs and compiler-bound caches. Both remain outside
+normal image profiles until package integration; see their READMEs.
 
 Both `Build.bat` and `./Build.sh` use the shared PowerShell 7 `Build.ps1`. Dependency paths are mapped by
 `Settings.R4S`.

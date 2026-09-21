@@ -308,4 +308,26 @@ and gfx9.json generate register masks. drm_fourcc.h retains Intel's original
 notice. All 69 source identities and license evidence remain in the catalog.
 R4AMD-NOTICES.txt now includes all compiled AddrLib/header notices, source
 and generator notices and the complete MIT grant. The distribution includes
-the same export. R4ACO remains at its separately documented portability stage.
+the same export.
+
+## AMD linked SPIR-V/NIR/ACO compiler (0.80.13)
+
+R4ACO now links 373 original/generated Mesa compiler units, six pinned
+Zig-bundled libc++ units, the shared C/C++ runtime, native math/scan and R4OS
+adapters. ThirdParty/Sources.json pins 620 original files; Tools/CppSources.json
+pins the complete required libc++ selection, including functional.cpp.
+These runtime objects replace the earlier 0.80.2 portability-only state.
+
+The ordered Port/Jobs.patch applies to a private build copy. It isolates
+allocation-bearing Mesa globals per job, removes environment-selected shader
+replacement/disassembly paths and adds bounded ACO cancellation checkpoints.
+Original source bytes remain unchanged. Native opcode tables use constexpr
+initialization; no dynamic ELF constructor is required. The private new.cpp
+header adjustment disables unsupported ELF symbol interposition only.
+
+Mesa files preserve their original permissive notices; BLAKE3 uses the
+Apache-2.0 option, libc++ uses Apache-2.0 WITH LLVM-exception, and stb retains
+its MIT/public-domain choices. Math/scan retain their existing musl/other
+per-file terms. Tools/ExportLegal.ps1 exports original notices and complete
+applicable license texts as R4ACO-NOTICES.txt into the distribution.
+No Linux DRM binary, LLVM JIT or GPU firmware is linked into R4ACO.R4L.

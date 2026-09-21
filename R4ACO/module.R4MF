@@ -1,12 +1,17 @@
 R4OS_MODULE_MANIFEST=2
 KIND=R4L
 NAME=R4ACO
-VERSION=0.1.0
+VERSION=0.1.1
 LANGUAGE=Zig
 SOURCE=Source/main.zig
 TARGET=/R4OS/LIBS/R4ACO.R4L
 IMAGE_SCOPE=none
 EXPORT=INFO_V1:r4aco_info_v1:1
+EXPORT=COMPILER_V1:r4aco_compiler_v1:1
+NATIVE_ARCHIVE=AMD_ACO
+NATIVE_ARCHIVE=NATIVE_MATH
+NATIVE_ARCHIVE=NATIVE_SCAN
+ZIG_MODULE=r4native_math:../Shared/Native/math.zig
 EXPORT=Query:r4aco_query:1
 CONTRACT=Contract/LibraryContract.json
 CONTRACT_BASELINE=Contract/LibraryContract.baseline.json
@@ -20,4 +25,4 @@ META=module.name=R4ACO
 META=preload=optional
 META=feature=runtime-r4l
 META=source.owner=Repositories/Libraries/R4ACO
-META=scope=amd-foundation-no-native-capabilities
+META=scope=picasso-gfx9-cpu-shader-compiler
