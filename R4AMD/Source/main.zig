@@ -12,7 +12,7 @@ pub export fn r4amd_get_info_impl(output: *c.R4AmdInfo, output_bytes: u32) callc
         .mesa_major = 26,
         .mesa_minor = 2,
         .mesa_patch = 2,
-        .implementation_stage = 3,
+        .implementation_stage = 10,
         .capability_flags = 0,
         .reserved = 0,
     };
@@ -27,6 +27,8 @@ pub export var r4amd_info_v1: c.InfoV1 align(8) linksection(".data.r4l_exports")
 pub export var r4amd_backend_v1: c.BackendV1 align(8) linksection(".data.r4l_exports") = .{
     .header = c.backend_v1_header,
     .negotiate = r4amd_negotiate_impl,
+    .encode_copy = r4amd_encode_copy_impl,
+    .encode_fill = r4amd_encode_fill_impl,
 };
 
 pub export fn r4amd_negotiate_impl(profile: *const c.R4AmdDeviceProfile, output: *c.R4AmdFeatures) callconv(.c) i32 {
@@ -41,3 +43,10 @@ pub export var r4amd_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_ex
     .kernel_bridge = 0,
     .reserved = 0,
 };
+
+pub export fn r4amd_encode_copy_impl(request: *const c.R4AmdCopy, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
+    return @import("backend.zig").encodeCopy(request, commands, capacity, written);
+}
+pub export fn r4amd_encode_fill_impl(request: *const c.R4AmdFill, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
+    return @import("backend.zig").encodeFill(request, commands, capacity, written);
+}

@@ -52,6 +52,29 @@ pub const R4AmdFeatures = extern struct {
     reserved0: u32,
     reserved1: u32,
 };
+
+pub const R4AmdCopy = extern struct {
+    version: u32,
+    size: u32,
+    source: u64,
+    target: u64,
+    byte_length: u64,
+    source_pitch: u64,
+    target_pitch: u64,
+    source_modifier: u64,
+    target_modifier: u64,
+    row_count: u32,
+    reserved: u32,
+};
+
+pub const R4AmdFill = extern struct {
+    version: u32,
+    size: u32,
+    target: u64,
+    byte_length: u64,
+    value: u32,
+    reserved: u32,
+};
 pub const info_version: u32 = 1;
 pub const status_ok: i32 = 0;
 pub const profile_version: u32 = 1;
@@ -62,6 +85,7 @@ pub const sdma_4_1_0: u32 = 262400;
 pub const feature_copy_linear: u32 = 1;
 pub const feature_copy_rows: u32 = 2;
 pub const feature_copy_layout: u32 = 4;
+pub const feature_fill: u32 = 8;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 
@@ -84,19 +108,23 @@ pub const InfoV1 = extern struct {
 };
 
 pub const backend_v1_export_name = "BACKEND_V1";
-pub const backend_v1_revision: u16 = 1;
+pub const backend_v1_revision: u16 = 2;
 pub const backend_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 40,
+    .size = 56,
     .abi_major = 1,
-    .abi_minor = 1,
+    .abi_minor = 2,
     .interface_id_lo = 0x414d4432,
     .interface_id_hi = 0x52344f53,
 };
 pub const BackendV1NegotiateFn = *const fn (profile: *const R4AmdDeviceProfile, output: *R4AmdFeatures) callconv(.c) i32;
+pub const BackendV1EncodeCopyFn = *const fn (request: *const R4AmdCopy, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
+pub const BackendV1EncodeFillFn = *const fn (request: *const R4AmdFill, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
 pub const BackendV1 = extern struct {
     header: InterfaceHeader,
     negotiate: BackendV1NegotiateFn,
+    encode_copy: BackendV1EncodeCopyFn,
+    encode_fill: BackendV1EncodeFillFn,
 };

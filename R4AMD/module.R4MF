@@ -1,13 +1,13 @@
 R4OS_MODULE_MANIFEST=2
 KIND=R4L
 NAME=R4AMD
-VERSION=0.1.1
+VERSION=0.1.2
 LANGUAGE=Zig
 SOURCE=Source/main.zig
 TARGET=/R4OS/LIBS/R4AMD.R4L
 IMAGE_SCOPE=none
 EXPORT=INFO_V1:r4amd_info_v1:1
-EXPORT=BACKEND_V1:r4amd_backend_v1:1
+EXPORT=BACKEND_V1:r4amd_backend_v1:2
 EXPORT=Query:r4amd_query:1
 CONTRACT=Contract/LibraryContract.json
 CONTRACT_BASELINE=Contract/LibraryContract.baseline.json
@@ -21,4 +21,4 @@ META=module.name=R4AMD
 META=preload=optional
 META=feature=runtime-r4l
 META=source.owner=Repositories/Libraries/R4AMD
-META=scope=amd-foundation-no-native-capabilities
+META=scope=picasso-sdma4.1-copy-encoder

@@ -275,3 +275,13 @@ R4VK also preserves the original RADV directory as reference-only material
 in `R4VK/ThirdParty/AMDReference`. Its `Sources.json` lists all original
 file hashes and the exact Mesa archive. RADV and its Linux winsys are not
 compiled or enabled by 0.80.2. R4OS integration is assigned to 0.80.23-25.
+
+## AMD SDMA copy encoder (0.80.10)
+
+R4AMD's pure `Source/copy.zig`, also compiled into AMDGPU, follows Mesa 26.2.2
+`src/amd/common/ac_cmdbuf_sdma.c/.h` and `sid.h` (MIT). Unchanged originals,
+SHA256 and copyright notices remain in R4AMD/ThirdParty. The port preserves
+the full MIT grant and AMD/Valve copyrights. `R4AMD/Tools/ExportLegal.ps1`
+exports the original notices and complete MIT text to `R4AMD-NOTICES.txt`,
+which is mandatory in the distribution legal plan. AddrLib portability
+objects are still separate from this callable Zig SDMA implementation.

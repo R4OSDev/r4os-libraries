@@ -44,10 +44,31 @@ comptime {
     if (@offsetOf(implementation.R4AmdFeatures, "max_command_words") != 20 or @offsetOf(binding.R4AmdFeatures, "max_command_words") != 20) @compileError("R4AmdFeatures.max_command_words offset drift");
     if (@offsetOf(implementation.R4AmdFeatures, "reserved0") != 24 or @offsetOf(binding.R4AmdFeatures, "reserved0") != 24) @compileError("R4AmdFeatures.reserved0 offset drift");
     if (@offsetOf(implementation.R4AmdFeatures, "reserved1") != 28 or @offsetOf(binding.R4AmdFeatures, "reserved1") != 28) @compileError("R4AmdFeatures.reserved1 offset drift");
+    if (@sizeOf(implementation.R4AmdCopy) != 72 or @sizeOf(binding.R4AmdCopy) != 72) @compileError("R4AmdCopy size drift");
+    if (@offsetOf(implementation.R4AmdCopy, "version") != 0 or @offsetOf(binding.R4AmdCopy, "version") != 0) @compileError("R4AmdCopy.version offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "size") != 4 or @offsetOf(binding.R4AmdCopy, "size") != 4) @compileError("R4AmdCopy.size offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "source") != 8 or @offsetOf(binding.R4AmdCopy, "source") != 8) @compileError("R4AmdCopy.source offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "target") != 16 or @offsetOf(binding.R4AmdCopy, "target") != 16) @compileError("R4AmdCopy.target offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "byte_length") != 24 or @offsetOf(binding.R4AmdCopy, "byte_length") != 24) @compileError("R4AmdCopy.byte_length offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "source_pitch") != 32 or @offsetOf(binding.R4AmdCopy, "source_pitch") != 32) @compileError("R4AmdCopy.source_pitch offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "target_pitch") != 40 or @offsetOf(binding.R4AmdCopy, "target_pitch") != 40) @compileError("R4AmdCopy.target_pitch offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "source_modifier") != 48 or @offsetOf(binding.R4AmdCopy, "source_modifier") != 48) @compileError("R4AmdCopy.source_modifier offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "target_modifier") != 56 or @offsetOf(binding.R4AmdCopy, "target_modifier") != 56) @compileError("R4AmdCopy.target_modifier offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "row_count") != 64 or @offsetOf(binding.R4AmdCopy, "row_count") != 64) @compileError("R4AmdCopy.row_count offset drift");
+    if (@offsetOf(implementation.R4AmdCopy, "reserved") != 68 or @offsetOf(binding.R4AmdCopy, "reserved") != 68) @compileError("R4AmdCopy.reserved offset drift");
+    if (@sizeOf(implementation.R4AmdFill) != 32 or @sizeOf(binding.R4AmdFill) != 32) @compileError("R4AmdFill size drift");
+    if (@offsetOf(implementation.R4AmdFill, "version") != 0 or @offsetOf(binding.R4AmdFill, "version") != 0) @compileError("R4AmdFill.version offset drift");
+    if (@offsetOf(implementation.R4AmdFill, "size") != 4 or @offsetOf(binding.R4AmdFill, "size") != 4) @compileError("R4AmdFill.size offset drift");
+    if (@offsetOf(implementation.R4AmdFill, "target") != 8 or @offsetOf(binding.R4AmdFill, "target") != 8) @compileError("R4AmdFill.target offset drift");
+    if (@offsetOf(implementation.R4AmdFill, "byte_length") != 16 or @offsetOf(binding.R4AmdFill, "byte_length") != 16) @compileError("R4AmdFill.byte_length offset drift");
+    if (@offsetOf(implementation.R4AmdFill, "value") != 24 or @offsetOf(binding.R4AmdFill, "value") != 24) @compileError("R4AmdFill.value offset drift");
+    if (@offsetOf(implementation.R4AmdFill, "reserved") != 28 or @offsetOf(binding.R4AmdFill, "reserved") != 28) @compileError("R4AmdFill.reserved offset drift");
     if (@sizeOf(implementation.InfoV1) != 40 or @sizeOf(binding.InfoV1) != 40) @compileError("InfoV1 size drift");
     if (@offsetOf(implementation.InfoV1, "get_info") != 32 or @offsetOf(binding.InfoV1, "get_info") != 32) @compileError("InfoV1.get_info slot drift");
-    if (@sizeOf(implementation.BackendV1) != 40 or @sizeOf(binding.BackendV1) != 40) @compileError("BackendV1 size drift");
+    if (@sizeOf(implementation.BackendV1) != 56 or @sizeOf(binding.BackendV1) != 56) @compileError("BackendV1 size drift");
     if (@offsetOf(implementation.BackendV1, "negotiate") != 32 or @offsetOf(binding.BackendV1, "negotiate") != 32) @compileError("BackendV1.negotiate slot drift");
+    if (@offsetOf(implementation.BackendV1, "encode_copy") != 40 or @offsetOf(binding.BackendV1, "encode_copy") != 40) @compileError("BackendV1.encode_copy slot drift");
+    if (@offsetOf(implementation.BackendV1, "encode_fill") != 48 or @offsetOf(binding.BackendV1, "encode_fill") != 48) @compileError("BackendV1.encode_fill slot drift");
 }
 
 test "generated implementation and binding views are identical" {

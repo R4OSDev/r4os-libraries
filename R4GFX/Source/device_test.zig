@@ -427,25 +427,18 @@ fn cpuImage(bytes: []u8) c.R4GfxResourceDesc {
     value.image = .{ .cpu_address = @intFromPtr(bytes.ptr), .byte_length = bytes.len, .pitch = 16, .width = 4, .height = 4, .format = c.format_xrgb8888, .reserved = 0 };
     return value;
 }
-// This extends the existing device integration case. AMD's actual negotiation
-// is used first; an explicit test-only future encoder enables common-queue
-// routing/lifetime checks without claiming GPU support in R4AMD 0.1.1.
+// The actual AMD SDMA encoder participates in common queue routing/lifetime
+// checks. Effective capabilities still require a matching live driver profile.
 const ProviderProbe = struct {
     var nv_calls: usize = 0;
     var amd_calls: usize = 0;
-    var implemented: bool = false;
     fn nvidia(profile: *const nv.R4NvDeviceProfile, output: *nv.R4NvFeatures) callconv(.c) i32 {
         nv_calls += 1;
         return nv_provider.r4nv_negotiate_impl(@ptrCast(profile), @ptrCast(output));
     }
     fn amdgpu(profile: *const amd.R4AmdDeviceProfile, output: *amd.R4AmdFeatures) callconv(.c) i32 {
         amd_calls += 1;
-        const result = amd_provider.negotiate(@ptrCast(profile), @ptrCast(output));
-        if (result == amd.status_ok and implemented) {
-            output.features = amd.feature_copy_linear | amd.feature_copy_rows;
-            output.gpu_address_bits = 48; output.max_command_words = 64;
-        }
-        return result;
+        return amd_provider.negotiate(@ptrCast(profile), @ptrCast(output));
     }
 };
 fn providerImage(handle: *const c.R4GfxDevice) !c.R4GfxResource {
@@ -462,11 +455,12 @@ fn providerImage(handle: *const c.R4GfxDevice) !c.R4GfxResource {
 }
 fn checkProviders(raw: *const a.R4XStartContext, imports: *[5]a.R4XStartImport) !void {
     const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
-    var table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu };
+    var table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu,
+        .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill) };
     const old_nv = Model.nv_table.negotiate;
     const old_presentation = Model.presentation_info;
     Model.nv_table.negotiate = ProviderProbe.nvidia;
-    ProviderProbe.nv_calls = 0; ProviderProbe.amd_calls = 0; ProviderProbe.implemented = false;
+    ProviderProbe.nv_calls = 0; ProviderProbe.amd_calls = 0;
     defer {
         Model.adapters = null; Model.nv_table.negotiate = old_nv;
         Model.presentation_info = old_presentation; Model.reject_adapter = 0;
@@ -503,9 +497,10 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[5]a.R4XStartImport) 
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expectEqual(c.render_backend_nvidia, state.backend); // Incompatible optional table.
     table.header = amd.backend_v1_header;
+    values[1].operations = 0;
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
-    try t.expectEqual(c.render_backend_nvidia, state.backend); // Real AMD returns zero encoder capabilities.
-    ProviderProbe.implemented = true;
+    try t.expectEqual(c.render_backend_nvidia, state.backend); // Pure encoder does not bypass missing driver operations.
+    values[1].operations = amdgpu.operations;
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expectEqual(c.render_backend_amd, state.backend);
     try t.expectEqual(c.device_gpu_copy | c.device_gpu_copy_rows, state.gpu_operations);

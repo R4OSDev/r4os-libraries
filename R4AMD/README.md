@@ -1,12 +1,18 @@
 ﻿# R4AMD
 
-R4AMD is the AMD render/layout/media library owner. Version 0.1.1 provides generated
-`INFO_V1:1` and `BACKEND_V1:1` ABIs with **zero GPU capabilities**.
-BACKEND_V1 validates a separately tagged AMD GC9.1/SDMA4.1 command profile
-and the exact common adapter/device/reset identity. Recognizing a protocol
-returns zero encoder features until the matching code is integrated.
-It never admits an AMD object through NVIDIA negotiation or encoding.
-It does not yet expose rendering or shader compilation to applications.
+R4AMD is the AMD render/layout/media library owner. Version 0.1.2 provides
+`INFO_V1:1` and append-only `BACKEND_V1:2`. The existing negotiation slot
+remains unchanged; copy and 32-bit fill encoders are appended. GC9.1/SDMA4.1
+profiles expose implemented linear/row/fill encoding, 48-bit addresses and a
+2048-dword output bound. Actual GPU capabilities additionally require the
+matching live AMDGPU common backend and its ring self-test.
+
+`Source/copy.zig` is also compiled into AMDGPU through the Libraries package.
+It implements linear copies split at 4 MB, rectangular pitched copies,
+bounded odd-pitch row fallback and 32-bit constant fills. Validation precedes
+output writes; overlaps, overflowing ranges, insufficient capacity and tiled
+modifiers are rejected. Caller pointers are never retained. Shader/render,
+media and tiled layout operations belong to subsequent milestones.
 AMDGPU.R4D owns all physical device access.
 
 Build from the Libraries repository with `./Build.sh R4AMD` on Linux or

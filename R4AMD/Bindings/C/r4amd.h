@@ -94,6 +94,48 @@ _Static_assert(offsetof(R4AmdFeatures, max_command_words) == 20u, "R4AmdFeatures
 _Static_assert(offsetof(R4AmdFeatures, reserved0) == 24u, "R4AmdFeatures.reserved0 offset mismatch");
 _Static_assert(offsetof(R4AmdFeatures, reserved1) == 28u, "R4AmdFeatures.reserved1 offset mismatch");
 
+typedef struct R4AmdCopy {
+    uint32_t version;
+    uint32_t size;
+    uint64_t source;
+    uint64_t target;
+    uint64_t byte_length;
+    uint64_t source_pitch;
+    uint64_t target_pitch;
+    uint64_t source_modifier;
+    uint64_t target_modifier;
+    uint32_t row_count;
+    uint32_t reserved;
+} R4AmdCopy;
+_Static_assert(sizeof(R4AmdCopy) == 72u, "R4AmdCopy size mismatch");
+_Static_assert(offsetof(R4AmdCopy, version) == 0u, "R4AmdCopy.version offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, size) == 4u, "R4AmdCopy.size offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, source) == 8u, "R4AmdCopy.source offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, target) == 16u, "R4AmdCopy.target offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, byte_length) == 24u, "R4AmdCopy.byte_length offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, source_pitch) == 32u, "R4AmdCopy.source_pitch offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, target_pitch) == 40u, "R4AmdCopy.target_pitch offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, source_modifier) == 48u, "R4AmdCopy.source_modifier offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, target_modifier) == 56u, "R4AmdCopy.target_modifier offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, row_count) == 64u, "R4AmdCopy.row_count offset mismatch");
+_Static_assert(offsetof(R4AmdCopy, reserved) == 68u, "R4AmdCopy.reserved offset mismatch");
+
+typedef struct R4AmdFill {
+    uint32_t version;
+    uint32_t size;
+    uint64_t target;
+    uint64_t byte_length;
+    uint32_t value;
+    uint32_t reserved;
+} R4AmdFill;
+_Static_assert(sizeof(R4AmdFill) == 32u, "R4AmdFill size mismatch");
+_Static_assert(offsetof(R4AmdFill, version) == 0u, "R4AmdFill.version offset mismatch");
+_Static_assert(offsetof(R4AmdFill, size) == 4u, "R4AmdFill.size offset mismatch");
+_Static_assert(offsetof(R4AmdFill, target) == 8u, "R4AmdFill.target offset mismatch");
+_Static_assert(offsetof(R4AmdFill, byte_length) == 16u, "R4AmdFill.byte_length offset mismatch");
+_Static_assert(offsetof(R4AmdFill, value) == 24u, "R4AmdFill.value offset mismatch");
+_Static_assert(offsetof(R4AmdFill, reserved) == 28u, "R4AmdFill.reserved offset mismatch");
+
 #define R4AMD_INFO_VERSION ((uint32_t)1)
 #define R4AMD_STATUS_OK ((int32_t)0)
 #define R4AMD_PROFILE_VERSION ((uint32_t)1)
@@ -104,6 +146,7 @@ _Static_assert(offsetof(R4AmdFeatures, reserved1) == 28u, "R4AmdFeatures.reserve
 #define R4AMD_FEATURE_COPY_LINEAR ((uint32_t)1)
 #define R4AMD_FEATURE_COPY_ROWS ((uint32_t)2)
 #define R4AMD_FEATURE_COPY_LAYOUT ((uint32_t)4)
+#define R4AMD_FEATURE_FILL ((uint32_t)8)
 #define R4AMD_STATUS_INVALID ((int32_t)-1)
 #define R4AMD_STATUS_UNSUPPORTED ((int32_t)-2)
 
@@ -143,29 +186,37 @@ static inline int32_t r4amd_get_info(R4AmdInfoV1Client *client, R4AmdInfo * outp
 
 #define R4AMD_BACKEND_V1_EXPORT_NAME "BACKEND_V1"
 #define R4AMD_BACKEND_V1_ABI_MAJOR 1u
-#define R4AMD_BACKEND_V1_REVISION 1u
+#define R4AMD_BACKEND_V1_REVISION 2u
 #define R4AMD_BACKEND_V1_INTERFACE_ID_LO 0x414d4432ull
 #define R4AMD_BACKEND_V1_INTERFACE_ID_HI 0x52344f53ull
-#define R4AMD_BACKEND_V1_TABLE_SIZE 40u
+#define R4AMD_BACKEND_V1_TABLE_SIZE 56u
 #define R4AMD_BACKEND_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4AMD_BACKEND_V1_TABLE_SIZE, R4AMD_BACKEND_V1_ABI_MAJOR, R4AMD_BACKEND_V1_REVISION, R4AMD_BACKEND_V1_INTERFACE_ID_LO, R4AMD_BACKEND_V1_INTERFACE_ID_HI }
 typedef int32_t (*R4AmdBackendV1NegotiateFn)(const R4AmdDeviceProfile * profile, R4AmdFeatures * output);
+typedef int32_t (*R4AmdBackendV1EncodeCopyFn)(const R4AmdCopy * request, uint32_t * commands, uint32_t capacity, uint32_t * written);
+typedef int32_t (*R4AmdBackendV1EncodeFillFn)(const R4AmdFill * request, uint32_t * commands, uint32_t capacity, uint32_t * written);
 typedef struct R4AmdBackendV1 {
     R4LInterfaceHeader header;
     R4AmdBackendV1NegotiateFn negotiate;
+    R4AmdBackendV1EncodeCopyFn encode_copy;
+    R4AmdBackendV1EncodeFillFn encode_fill;
 } R4AmdBackendV1;
-_Static_assert(sizeof(R4AmdBackendV1) == 40u, "R4AmdBackendV1 size mismatch");
+_Static_assert(sizeof(R4AmdBackendV1) == 56u, "R4AmdBackendV1 size mismatch");
 _Static_assert(offsetof(R4AmdBackendV1, negotiate) == 32u, "R4AmdBackendV1.negotiate offset mismatch");
+_Static_assert(offsetof(R4AmdBackendV1, encode_copy) == 40u, "R4AmdBackendV1.encode_copy offset mismatch");
+_Static_assert(offsetof(R4AmdBackendV1, encode_fill) == 48u, "R4AmdBackendV1.encode_fill offset mismatch");
 typedef struct R4AmdBackendV1Client { const R4LInterfaceHeader *header; } R4AmdBackendV1Client;
 
 static inline int32_t r4amd_backend_v1_init(const R4XStartContext *ctx, R4AmdBackendV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4AMD", "BACKEND_V1");
-    const R4LInterfaceExpectation expected = { 0x414d4432ull, 0x52344f53ull, 1u, 1u, 40u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x414d4432ull, 0x52344f53ull, 1u, 2u, 56u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
     if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -173,6 +224,16 @@ static inline int32_t r4amd_backend_v1_init(const R4XStartContext *ctx, R4AmdBac
 static inline int32_t r4amd_negotiate(R4AmdBackendV1Client *client, const R4AmdDeviceProfile * profile, R4AmdFeatures * output) {
     R4AmdBackendV1NegotiateFn function = (R4AmdBackendV1NegotiateFn)r4l_slot_address(client->header, 32u);
     return function(profile, output);
+}
+
+static inline int32_t r4amd_encode_copy(R4AmdBackendV1Client *client, const R4AmdCopy * request, uint32_t * commands, uint32_t capacity, uint32_t * written) {
+    R4AmdBackendV1EncodeCopyFn function = (R4AmdBackendV1EncodeCopyFn)r4l_slot_address(client->header, 40u);
+    return function(request, commands, capacity, written);
+}
+
+static inline int32_t r4amd_encode_fill(R4AmdBackendV1Client *client, const R4AmdFill * request, uint32_t * commands, uint32_t capacity, uint32_t * written) {
+    R4AmdBackendV1EncodeFillFn function = (R4AmdBackendV1EncodeFillFn)r4l_slot_address(client->header, 48u);
+    return function(request, commands, capacity, written);
 }
 
 #endif

@@ -4,7 +4,7 @@
   "zig_client": "R4Amd",
   "c_prefix": "r4amd",
   "c_header": "r4amd.h",
-  "description": "AMD rendering and media library foundation. INFO_V1 reports the built source profile; no active GPU backend is exposed yet.",
+  "description": "AMD command encoding and rendering/media library. Only AMDGPU owns hardware; encoder capabilities are intersected with the active common backend.",
   "interfaces": [
     {
       "export_name": "INFO_V1",
@@ -77,7 +77,7 @@
       "zig_type": "BackendV1",
       "c_type": "R4AmdBackendV1",
       "abi_major": 1,
-      "revision": 1,
+      "revision": 2,
       "interface_id_lo": 1095582770,
       "interface_id_hi": 1379159891,
       "known_required_flags": 0,
@@ -130,6 +130,158 @@
             "ownership": "Pure bounded negotiation; no device access, allocations or pointers retained."
           },
           "description": "Validate the AMD-specific versioned protocol and report only implemented command capabilities. Zero features is a valid foundation result; it cannot select an accelerated provider."
+        },
+        {
+          "name": "encode_copy",
+          "c_name": "r4amd_encode_copy",
+          "symbol": "r4amd_encode_copy_impl",
+          "slot": 1,
+          "since_revision": 2,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4AmdCopy",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "commands",
+              "type": {
+                "name": "u32",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "capacity",
+              "description": "commands"
+            },
+            {
+              "name": "capacity",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "capacity"
+            },
+            {
+              "name": "written",
+              "type": {
+                "name": "u32",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "written"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
+          },
+          "description": "Bounded SDMA4.1 packets into disjoint caller memory; failure changes neither commands nor written count. No fence or device access is implied."
+        },
+        {
+          "name": "encode_fill",
+          "c_name": "r4amd_encode_fill",
+          "symbol": "r4amd_encode_fill_impl",
+          "slot": 2,
+          "since_revision": 2,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4AmdFill",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "commands",
+              "type": {
+                "name": "u32",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "capacity",
+              "description": "commands"
+            },
+            {
+              "name": "capacity",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "capacity"
+            },
+            {
+              "name": "written",
+              "type": {
+                "name": "u32",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "written"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
+          },
+          "description": "Bounded SDMA4.1 packets into disjoint caller memory; failure changes neither commands nor written count. No fence or device access is implied."
         }
       ],
       "description": "AMD-only negotiation; separate from NVIDIA BACKEND_V1 even if individual payload sizes coincide."
@@ -563,6 +715,209 @@
         }
       ],
       "description": "A compatible profile is not an active GPU: effective operations are the intersection with actual common driver capabilities."
+    },
+    {
+      "name": "R4AmdCopy",
+      "size": 72,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact structure size."
+        },
+        {
+          "name": "source",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GPU virtual source address."
+        },
+        {
+          "name": "target",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GPU virtual target address."
+        },
+        {
+          "name": "byte_length",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Bytes per row."
+        },
+        {
+          "name": "source_pitch",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Source row pitch; zero for one row."
+        },
+        {
+          "name": "target_pitch",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Target row pitch; zero for one row."
+        },
+        {
+          "name": "source_modifier",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Only linear zero is implemented."
+        },
+        {
+          "name": "target_modifier",
+          "offset": 56,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Only linear zero is implemented."
+        },
+        {
+          "name": "row_count",
+          "offset": 64,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Nonzero bounded row count."
+        },
+        {
+          "name": "reserved",
+          "offset": 68,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        }
+      ],
+      "description": "Fixed SDMA4.1 request; all reserved fields and unsupported modifiers must be zero. Validation precedes output writes."
+    },
+    {
+      "name": "R4AmdFill",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact size."
+        },
+        {
+          "name": "target",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Four-byte-aligned GPU virtual destination."
+        },
+        {
+          "name": "byte_length",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Nonzero multiple of four."
+        },
+        {
+          "name": "value",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Repeated 32-bit value."
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        }
+      ],
+      "description": "Fixed SDMA4.1 request; all reserved fields and unsupported modifiers must be zero. Validation precedes output writes."
     }
   ],
   "constants": [
@@ -635,6 +990,13 @@
       "type": "u32",
       "value": 4,
       "description": "AMD provider protocol constant; no feature is implied by its declaration."
+    },
+    {
+      "zig_name": "feature_fill",
+      "c_name": "R4AMD_FEATURE_FILL",
+      "type": "u32",
+      "value": 8,
+      "description": "Implemented 32-bit constant-fill encoder, independent of driver operation admission."
     }
   ],
   "errors": [

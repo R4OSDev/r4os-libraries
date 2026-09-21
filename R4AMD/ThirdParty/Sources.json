@@ -337,6 +337,30 @@
       "sha256": "cb76a1703699f96094ed14e351e0e22bb8b75a968cea241ed94812bf0c6d0c34",
       "bytes": 12434,
       "license": "MIT"
+    },
+    {
+      "path": "src/amd/common/ac_cmdbuf_sdma.c",
+      "sha256": "c2093df1a94d2fe71d7c62805c4c67b04355a099e438d31fb2639c264f05e75e",
+      "bytes": 17643,
+      "license": "MIT",
+      "license_evidence": "Original source notice and upstream MIT license",
+      "role": "SDMA4.1 copy packet reference"
+    },
+    {
+      "path": "src/amd/common/ac_cmdbuf_sdma.h",
+      "sha256": "45f5ad8e6f75136a7ebdd20c435a690bfda45a5ad13084f975b6c944856bb554",
+      "bytes": 2788,
+      "license": "MIT",
+      "license_evidence": "Original source notice and upstream MIT license",
+      "role": "SDMA4.1 copy packet reference"
+    },
+    {
+      "path": "src/amd/common/sid.h",
+      "sha256": "1b84022bc866fd083cbebb5ffa76a80e0b414829917a3597d637c104b390c77b",
+      "bytes": 22557,
+      "license": "MIT",
+      "license_evidence": "Original source notice and upstream MIT license",
+      "role": "SDMA4.1 copy packet reference"
     }
   ],
   "patches": [
