@@ -293,3 +293,19 @@ AMD gfx_v9_0.c/soc15d.h and Mesa 26.2.2 ac_cmdbuf_cp.c/.h. The driver retains
 unchanged Linux sources; R4AMD retains unchanged Mesa sources. Full MIT
 notices accompany both source catalogs and distribution legal exports.
 The new encoder preserves AMD 2012/2016 and Valve 2024 copyright notices.
+
+## AMD linked AddrLib and image descriptors (0.80.12)
+
+R4AMD now links all sixteen original Mesa 26.2.2 AddrLib C++ units and two
+R4OS bridges. Earlier portability-only statements describe 0.80.2, not this
+runtime. The runtime admits only Picasso GC9.1. The ordered signal.h patch
+is applied to a build copy. No original source is modified.
+
+The modifier specialization in images.zig follows ac_surface.c (Red Hat
+2011 and AMD 2017, MIT). image_descriptors.cpp follows ac_descriptors.c and
+ac_formats.c (AMD 2015, Valve 2024, MIT). Original makeregheader.py/regdb.py
+and gfx9.json generate register masks. drm_fourcc.h retains Intel's original
+notice. All 69 source identities and license evidence remain in the catalog.
+R4AMD-NOTICES.txt now includes all compiled AddrLib/header notices, source
+and generator notices and the complete MIT grant. The distribution includes
+the same export. R4ACO remains at its separately documented portability stage.

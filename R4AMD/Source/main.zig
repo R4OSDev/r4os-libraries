@@ -12,7 +12,7 @@ pub export fn r4amd_get_info_impl(output: *c.R4AmdInfo, output_bytes: u32) callc
         .mesa_major = 26,
         .mesa_minor = 2,
         .mesa_patch = 2,
-        .implementation_stage = 11,
+        .implementation_stage = 12,
         .capability_flags = 0,
         .reserved = 0,
     };
@@ -55,3 +55,26 @@ pub export fn r4amd_encode_fill_impl(request: *const c.R4AmdFill, commands: [*]u
 pub export fn r4amd_encode_pm4_frame_impl(request: *const c.R4AmdPm4Frame, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
     return @import("backend.zig").encodePm4Frame(request, commands, capacity, written);
 }
+
+pub export var r4amd_image_v1: c.ImageV1 align(8) linksection(".data.r4l_exports") = .{
+    .header = c.image_v1_header,
+    .calculate = r4amd_image_calculate_impl,
+    .address = r4amd_image_address_impl,
+    .metadata = r4amd_image_metadata_impl,
+    .import_image = r4amd_image_import_image_impl,
+    .descriptors = r4amd_image_descriptors_impl,
+};
+pub export fn r4amd_image_calculate_impl(r: *const c.R4AmdImageRequest, workspace: [*]u8, bytes: u32,
+    out: *c.R4AmdImageLayout, mips: [*]c.R4AmdMip, capacity: u32) callconv(.c) i32 {
+    return @import("images.zig").calculate(r,workspace,bytes,out,mips,capacity);
+}
+pub export fn r4amd_image_address_impl(r: *const c.R4AmdImageRequest, coord: *const c.R4AmdCoordinate, workspace: [*]u8,
+    bytes: u32, out: *c.R4AmdImageAddress) callconv(.c) i32 { return @import("images.zig").address(r,coord,workspace,bytes,out); }
+pub export fn r4amd_image_metadata_impl(r: *const c.R4AmdImageRequest, workspace: [*]u8,
+    bytes: u32, out: *c.R4AmdMetadata) callconv(.c) i32 { return @import("images.zig").metadata(r,workspace,bytes,out); }
+pub export fn r4amd_image_import_image_impl(r: *const c.R4AmdImageRequest, imported: *const c.R4AmdImageImport, workspace: [*]u8,
+    bytes: u32, out: *c.R4AmdImageLayout, mips: [*]c.R4AmdMip, capacity: u32) callconv(.c) i32 {
+    return @import("images.zig").importImage(r,imported,workspace,bytes,out,mips,capacity);
+}
+pub export fn r4amd_image_descriptors_impl(r: *const c.R4AmdImageRequest, view: *const c.R4AmdImageView, workspace: [*]u8,
+    bytes: u32, out: *c.R4AmdImageDescriptors) callconv(.c) i32 { return @import("images.zig").descriptors(r,view,workspace,bytes,out); }

@@ -5,7 +5,14 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("backend", b.path("Source/backend.zig"));
     const sdk_build = b.lazyImport(@This(), "r4os_sdk") orelse return;
     const sdk = sdk_build.sdk(b, b.dependencyFromBuildZig(sdk_build, .{}), .{});
-    const artifact = sdk.addR4MF(b.path("module.R4MF"));
+    const native = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });
+    native.addFileArg(b.path("Tools/Build.ps1"));
+    native.addArg("-OutputRoot");
+    const archives = native.addOutputDirectoryArg("native");
+    native.has_side_effects = true;
+    b.addNamedLazyPath("image_host_archive", archives.path(b, "R4AMD-Addr-Host.a"));
+    b.addNamedLazyPath("images", b.path("Source/images.zig"));
+    const artifact = sdk.addR4MFWithOptions(b.path("module.R4MF"), .{ .native_archives = &.{ archives.path(b, "R4AMD-Addr.a") } });
     const host = sdk.createR4osModule(b.graph.host, .ReleaseSafe);
     const implementation = b.createModule(.{ .root_source_file = b.path("Contract/Generated/implementation_abi.zig"), .target = b.graph.host });
     implementation.addImport("r4os", host);
@@ -22,14 +29,17 @@ pub fn build(b: *std.Build) void {
     const backend = b.createModule(.{ .root_source_file = b.path("Source/backend.zig"), .target = b.graph.host });
     backend.addImport("r4l_contract", implementation);
     const backend_check = b.addRunArtifact(b.addTest(.{ .root_module = backend }));
-    const native = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });
-    native.addFileArg(b.path("Tools/Build.ps1"));
-    native.has_side_effects = true;
-    artifact.output.generated.file.step.dependOn(&native.step);
+    _ = artifact;
+    const images = b.createModule(.{ .root_source_file = b.path("Source/images_test.zig"), .target = b.graph.host, .optimize = .Debug });
+    images.addImport("r4l_contract", implementation);
+    images.addIncludePath(archives);
+    images.addObjectFile(archives.path(b, "R4AMD-Addr-Host.a"));
+    const image_check = b.addRunArtifact(b.addTest(.{ .root_module = images }));
+    b.getInstallStep().dependOn(&image_check.step);
     b.getInstallStep().dependOn(&abi_check.step);
     b.getInstallStep().dependOn(&backend_check.step);
     const test_step = b.step("test", "R4AMD contract and real upstream portability");
     test_step.dependOn(&abi_check.step);
     test_step.dependOn(&backend_check.step);
-    test_step.dependOn(&native.step);
+    test_step.dependOn(&image_check.step);
 }

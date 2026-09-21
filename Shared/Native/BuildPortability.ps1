@@ -37,7 +37,9 @@ if ($LASTEXITCODE -or !$version.Count -or $version[0] -notmatch ('(?<![0-9.])' +
 $resource = [string](& $clang -print-resource-dir)
 if ($LASTEXITCODE -or !$resource) { throw 'Clang resource headers unavailable.' }
 $hostName = if ($IsWindows) { 'Windows-x64' } else { 'Linux-x64' }
-$output = Join-Path $artifacts ("Native/$($plan.module)/$hostName/Portability-$($sources.upstream_version)")
+$stage = if ($plan.PSObject.Properties['output_stage']) { [string]$plan.output_stage } else { 'Portability' }
+if ($stage -notmatch '^[A-Za-z0-9_-]+$') { throw 'Invalid native output stage.' }
+$output = Join-Path $artifacts ("Native/$($plan.module)/$hostName/$stage-$($sources.upstream_version)")
 [IO.Directory]::CreateDirectory($output) | Out-Null
 # No cache reuse: every build verifies original inputs and regenerates/recompiles.
 # Namespaces are per owner, host and upstream version, separate from NAK/NVK/GL.
@@ -118,7 +120,8 @@ try {
         }
         if ($entry.language -eq 'c') { $flags = @($flags | Where-Object { $_ -notmatch '^-std=|^-fno-(exceptions|rtti)$|^-nostdinc\+\+$' }) + '-std=c11' }
         $object = Join-Path $objects ($entry.name + '.o')
-        $arguments = @($flags + $plan.flags | ForEach-Object { Expand $_ }) + @('-MD','-MF',($object + '.d'),'-c',(Join-Path $source $entry.source),'-o',$object)
+        $sourceRoot = if ($entry.PSObject.Properties['owner_source'] -and $entry.owner_source) { $unit } else { $source }
+        $arguments = @($flags + $plan.flags | ForEach-Object { Expand $_ }) + @('-MD','-MF',($object + '.d'),'-c',(Join-Path $sourceRoot $entry.source),'-o',$object)
         $response = $object + '.rsp'
         [IO.File]::WriteAllLines($response, @($arguments | ForEach-Object { '"' + $_.Replace('\','\\').Replace('"','\"') + '"' }), [Text.UTF8Encoding]::new($false))
         & $clang ('@' + $response)
@@ -129,7 +132,7 @@ try {
         $undefined = @(& $nm --undefined-only --demangle $object)
         if ($LASTEXITCODE) { throw 'Cannot audit unresolved symbols.' }
         $symbols = @($undefined | ForEach-Object { $_.Trim() -replace '^U\s+', '' } | Where-Object { $_ } | Sort-Object -Unique)
-        [ordered]@{name=$entry.name; source=$entry.source; object=('Objects/'+$entry.name+'.o'); sha256=(Hash $object); bytes=$bytes.Length; target='ELF64 x86_64 ET_REL'; undefined_symbols=$symbols; required_followup=$plan.followup}
+        [ordered]@{name=$entry.name; source=$entry.source; object=('Objects/'+$entry.name+'.o'); sha256=(Hash $object); bytes=$bytes.Length; target='ELF64 x86_64 ET_REL'; undefined_symbols=$symbols; compiler_arguments=$arguments; required_followup=$plan.followup}
     })
     # Record all shared/toolchain header inputs as well as the original/patch plan.
     $inputs = @($PSCommandPath,$planPath,$sourcesPath,$profilePath,$clang,$nm)

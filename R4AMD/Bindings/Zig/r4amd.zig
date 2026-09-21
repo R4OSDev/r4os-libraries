@@ -89,6 +89,195 @@ pub const R4AmdPm4Frame = extern struct {
     reserved0: u32,
     reserved1: u64,
 };
+
+pub const R4AmdImageRequest = extern struct {
+    version: u32,
+    size: u32,
+    gb_addr_config: u32,
+    chip_revision: u32,
+    device_id: u32,
+    gc_version: u32,
+    resource_type: u32,
+    format: u32,
+    width: u32,
+    height: u32,
+    depth: u32,
+    mip_count: u32,
+    samples: u32,
+    usage: u32,
+    swizzle: u32,
+    pipe_xor: u32,
+    pitch: u32,
+    reserved: u32,
+    modifier: u64,
+};
+
+pub const R4AmdImageLayout = extern struct {
+    version: u32,
+    size: u32,
+    byte_length: u64,
+    slice_bytes: u64,
+    alignment: u64,
+    modifier: u64,
+    pitch: u32,
+    height: u32,
+    depth: u32,
+    epitch: u32,
+    block_width: u32,
+    block_height: u32,
+    block_depth: u32,
+    first_mip_tail: u32,
+    mip_count: u32,
+    pixel_bits: u32,
+    element_bits: u32,
+    resource_type: u32,
+    swizzle: u32,
+    flags: u32,
+    gb_addr_config: u32,
+    reserved: u32,
+};
+
+pub const R4AmdMip = extern struct {
+    pitch: u32,
+    height: u32,
+    depth: u32,
+    pixel_pitch: u32,
+    pixel_height: u32,
+    equation_index: u32,
+    offset: u64,
+    macro_offset: u64,
+    tail_offset: u32,
+    tail_x: u32,
+    tail_y: u32,
+    tail_z: u32,
+    reserved: u64,
+};
+
+pub const R4AmdCoordinate = extern struct {
+    version: u32,
+    size: u32,
+    x: u32,
+    y: u32,
+    slice: u32,
+    sample: u32,
+    mip: u32,
+    reserved: u32,
+};
+
+pub const R4AmdImageAddress = extern struct {
+    version: u32,
+    size: u32,
+    offset: u64,
+    bit_position: u32,
+    prt_block: u32,
+};
+
+pub const R4AmdMetadata = extern struct {
+    version: u32,
+    size: u32,
+    kind: u32,
+    flags: u32,
+    byte_length: u64,
+    alignment: u64,
+    slice_bytes: u64,
+    block_width: u32,
+    block_height: u32,
+    block_depth: u32,
+    compress_width: u32,
+    compress_height: u32,
+    compress_depth: u32,
+    fast_clear_bytes: u64,
+};
+
+pub const R4AmdImageImport = extern struct {
+    version: u32,
+    size: u32,
+    byte_length: u64,
+    alignment: u64,
+    offset: u64,
+    modifier: u64,
+    adapter_id: u32,
+    reserved: u32,
+    memory_generation: u64,
+    expected_adapter: u32,
+    metadata_state: u32,
+    expected_memory_generation: u64,
+    pitch: u32,
+    usage: u32,
+};
+
+pub const R4AmdImageView = extern struct {
+    version: u32,
+    size: u32,
+    address: u64,
+    byte_length: u64,
+    offset: u64,
+    first_layer: u32,
+    last_layer: u32,
+    first_mip: u32,
+    last_mip: u32,
+    sampler: u32,
+    min_lod: u32,
+    max_lod: u32,
+    lod_bias: i32,
+    wrap_u: u32,
+    wrap_v: u32,
+    wrap_w: u32,
+    compare: u32,
+    aniso: u32,
+    border: u32,
+    flags: u32,
+    reserved: u32,
+};
+
+pub const R4AmdImageDescriptors = extern struct {
+    version: u32,
+    size: u32,
+    texture0: u32,
+    texture1: u32,
+    texture2: u32,
+    texture3: u32,
+    texture4: u32,
+    texture5: u32,
+    texture6: u32,
+    texture7: u32,
+    sampler0: u32,
+    sampler1: u32,
+    sampler2: u32,
+    sampler3: u32,
+    color0: u32,
+    color1: u32,
+    color2: u32,
+    color3: u32,
+    color4: u32,
+    color5: u32,
+    color6: u32,
+    color7: u32,
+    color8: u32,
+    color9: u32,
+    color10: u32,
+    color11: u32,
+    color12: u32,
+    color13: u32,
+    color14: u32,
+    color15: u32,
+};
+
+pub const R4AmdArchitecture = extern struct {
+    version: u32,
+    size: u32,
+    vendor_id: u32,
+    device_id: u32,
+    gc_version: u32,
+    sdma_version: u32,
+    gb_addr_config: u32,
+    chip_revision: u32,
+    bind_alignment: u64,
+    memory_generation: u64,
+    flags: u32,
+    reserved: u32,
+    max_image_bytes: u64,
+};
 pub const info_version: u32 = 1;
 pub const status_ok: i32 = 0;
 pub const profile_version: u32 = 1;
@@ -101,8 +290,20 @@ pub const feature_copy_rows: u32 = 2;
 pub const feature_copy_layout: u32 = 4;
 pub const feature_fill: u32 = 8;
 pub const feature_pm4: u32 = 16;
+pub const image_workspace_bytes: u32 = 65536;
+pub const image_max_mips: u32 = 15;
+pub const image_usage_texture: u32 = 1;
+pub const image_usage_color: u32 = 2;
+pub const image_usage_storage: u32 = 4;
+pub const image_usage_scanout: u32 = 8;
+pub const image_usage_depth: u32 = 16;
+pub const image_flag_scanout: u32 = 1;
+pub const image_flag_tiled: u32 = 2;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
+pub const status_stale: i32 = -3;
+pub const status_oom: i32 = -4;
+pub const status_limit: i32 = -5;
 
 pub const info_v1_export_name = "INFO_V1";
 pub const info_v1_revision: u16 = 1;
@@ -144,6 +345,32 @@ pub const BackendV1 = extern struct {
     encode_copy: BackendV1EncodeCopyFn,
     encode_fill: BackendV1EncodeFillFn,
     encode_pm4_frame: BackendV1EncodePm4FrameFn,
+};
+
+pub const image_v1_export_name = "IMAGE_V1";
+pub const image_v1_revision: u16 = 1;
+pub const image_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 72,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x414d4433,
+    .interface_id_hi = 0x52344f53,
+};
+pub const ImageV1CalculateFn = *const fn (request: *const R4AmdImageRequest, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdImageLayout, mips: [*]R4AmdMip, mip_capacity: u32) callconv(.c) i32;
+pub const ImageV1AddressFn = *const fn (request: *const R4AmdImageRequest, coordinate: *const R4AmdCoordinate, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdImageAddress) callconv(.c) i32;
+pub const ImageV1MetadataFn = *const fn (request: *const R4AmdImageRequest, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdMetadata) callconv(.c) i32;
+pub const ImageV1ImportImageFn = *const fn (request: *const R4AmdImageRequest, imported: *const R4AmdImageImport, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdImageLayout, mips: [*]R4AmdMip, mip_capacity: u32) callconv(.c) i32;
+pub const ImageV1DescriptorsFn = *const fn (request: *const R4AmdImageRequest, view: *const R4AmdImageView, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdImageDescriptors) callconv(.c) i32;
+pub const ImageV1 = extern struct {
+    header: InterfaceHeader,
+    calculate: ImageV1CalculateFn,
+    address: ImageV1AddressFn,
+    metadata: ImageV1MetadataFn,
+    import_image: ImageV1ImportImageFn,
+    descriptors: ImageV1DescriptorsFn,
 };
 
 pub const InfoV1Client = struct {
@@ -207,5 +434,52 @@ pub const BackendV1Client = struct {
     pub fn encode_pm4_frame(self: *const BackendV1Client, request: *const R4AmdPm4Frame, commands: [*]u32, capacity: u32, written: *u32) i32 {
         const function = r4os.runtime_r4l.functionAt(BackendV1EncodePm4FrameFn, self.header, 56) orelse unreachable;
         return function(request, commands, capacity, written);
+    }
+};
+
+pub const ImageV1Client = struct {
+    header: *const InterfaceHeader,
+
+    pub fn init(raw: *const r4os.abi.R4XStartContext) !ImageV1Client {
+        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, image_v1_export_name) orelse return error.MissingImport;
+        const header = try r4os.runtime_r4l.validateImport(item, .{
+            .interface_id_lo = 0x414d4433,
+            .interface_id_hi = 0x52344f53,
+            .abi_major = 1,
+            .min_revision = 1,
+            .required_size = 72,
+            .known_required_flags = 0,
+        });
+        if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 40) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 48) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 56) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 64) == null) return error.MissingSlot;
+        return .{ .header = header };
+    }
+
+    pub fn calculate(self: *const ImageV1Client, request: *const R4AmdImageRequest, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdImageLayout, mips: [*]R4AmdMip, mip_capacity: u32) i32 {
+        const function = r4os.runtime_r4l.functionAt(ImageV1CalculateFn, self.header, 32) orelse unreachable;
+        return function(request, workspace, workspace_bytes, output, mips, mip_capacity);
+    }
+
+    pub fn address(self: *const ImageV1Client, request: *const R4AmdImageRequest, coordinate: *const R4AmdCoordinate, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdImageAddress) i32 {
+        const function = r4os.runtime_r4l.functionAt(ImageV1AddressFn, self.header, 40) orelse unreachable;
+        return function(request, coordinate, workspace, workspace_bytes, output);
+    }
+
+    pub fn metadata(self: *const ImageV1Client, request: *const R4AmdImageRequest, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdMetadata) i32 {
+        const function = r4os.runtime_r4l.functionAt(ImageV1MetadataFn, self.header, 48) orelse unreachable;
+        return function(request, workspace, workspace_bytes, output);
+    }
+
+    pub fn import_image(self: *const ImageV1Client, request: *const R4AmdImageRequest, imported: *const R4AmdImageImport, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdImageLayout, mips: [*]R4AmdMip, mip_capacity: u32) i32 {
+        const function = r4os.runtime_r4l.functionAt(ImageV1ImportImageFn, self.header, 56) orelse unreachable;
+        return function(request, imported, workspace, workspace_bytes, output, mips, mip_capacity);
+    }
+
+    pub fn descriptors(self: *const ImageV1Client, request: *const R4AmdImageRequest, view: *const R4AmdImageView, workspace: [*]u8, workspace_bytes: u32, output: *R4AmdImageDescriptors) i32 {
+        const function = r4os.runtime_r4l.functionAt(ImageV1DescriptorsFn, self.header, 64) orelse unreachable;
+        return function(request, view, workspace, workspace_bytes, output);
     }
 };

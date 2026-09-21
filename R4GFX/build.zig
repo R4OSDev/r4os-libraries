@@ -26,6 +26,10 @@ pub fn build(b: *std.Build) void {
     const amd_backend = b.createModule(.{ .root_source_file = amd_package.namedLazyPath("backend"), .target = b.graph.host });
     amd_backend.addImport("r4l_contract", amd_implementation);
     provider.addImport("r4amd_backend", amd_backend);
+    const amd_images = b.createModule(.{ .root_source_file = amd_package.namedLazyPath("images"), .target = b.graph.host });
+    amd_images.addImport("r4l_contract", amd_implementation);
+    provider.addImport("r4amd_images", amd_images);
+    provider.addObjectFile(amd_package.namedLazyPath("image_host_archive"));
     provider.addImport("r4gfx_binding", binding);
     const transfer = b.createModule(.{ .root_source_file = b.path("Display/transfer.zig"), .target = b.graph.host });
     transfer.addImport("r4os", host);

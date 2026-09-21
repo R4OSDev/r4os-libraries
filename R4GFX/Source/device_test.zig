@@ -8,6 +8,7 @@ const nv = @import("r4nv_binding");
 const nv_provider = @import("r4nv_backend");
 const amd = @import("r4amd_binding");
 const amd_provider = @import("r4amd_backend");
+const amd_images = @import("r4amd_images");
 const d = @import("device.zig");
 const c = d.c;
 const api = &@import("main.zig").r4gfx_device_v1;
@@ -71,6 +72,14 @@ const Model = struct {
     var virtual_ack = false;
     var retire_ack = false;
     fn properties(input: *const a.GfxBackendBinding, out: *a.GfxBackendProperties) callconv(.c) i32 {
+        if (input.adapter_id == 3) {
+            const arch: amd.R4AmdArchitecture = .{ .version=1,.size=@sizeOf(amd.R4AmdArchitecture),.vendor_id=amd.vendor_id,.device_id=0x15d8,
+                .gc_version=amd.gc_9_1_0,.sdma_version=amd.sdma_4_1_0,.gb_addr_config=0x24000042,.chip_revision=0x41,
+                .bind_alignment=4096,.memory_generation=97,.flags=0,.reserved=0,.max_image_bytes=64*1024*1024 };
+            out.*=.{ .interface_id_lo=amd.image_v1_header.interface_id_lo,.interface_id_hi=amd.image_v1_header.interface_id_hi,
+                .revision=1,.data_bytes=@sizeOf(amd.R4AmdArchitecture) };
+            @memcpy(out.data[0..@sizeOf(amd.R4AmdArchitecture)],std.mem.asBytes(&arch)); return 1;
+        }
         std.debug.assert(std.meta.eql(input.*, binding));
         var arch = std.mem.zeroes(nv.R4NvArchitecture);
         arch.version = nv.architecture_version; arch.size = @sizeOf(nv.R4NvArchitecture);
@@ -443,9 +452,9 @@ const ProviderProbe = struct {
 };
 fn providerImage(handle: *const c.R4GfxDevice) !c.R4GfxResource {
     var loan: a.GfxBufferReference = .{};
-    try t.expectEqual(@as(i32, 1), Model.create(&.{ .byte_length = 64, .alignment = 4096, .width = 4, .height = 4,
-        .format = a.gfx_buffer_format_xrgb8888, .plane_count = 1, .plane_pitches = .{ 16, 0, 0, 0 },
-        .location = a.gfx_buffer_location_device_local, .adapter_id = 3, .driver_owner = 80, .device_generation = 97 }, &loan));
+    try t.expectEqual(@as(i32, 1), Model.create(&.{ .byte_length = 4096, .alignment = 4096, .width = 4, .height = 4,
+        .format = a.gfx_buffer_format_xrgb8888, .plane_count = 1, .plane_pitches = .{ 256, 0, 0, 0 },
+        .location = a.gfx_buffer_location_device_local, .adapter_id = 3, .driver_owner = 80, .device_generation = 97, .usage = 28 }, &loan));
     var desc = descriptor(c.resource_image); desc.flags = c.image_target; desc.source_kind = c.source_import_buffer;
     desc.source_address = @intFromPtr(&loan.reference);
     var resource: c.R4GfxResource = undefined;
@@ -453,10 +462,14 @@ fn providerImage(handle: *const c.R4GfxDevice) !c.R4GfxResource {
     try t.expectEqual(@as(i32, 1), Model.release(&loan.reference));
     return resource;
 }
-fn checkProviders(raw: *const a.R4XStartContext, imports: *[5]a.R4XStartImport) !void {
+fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) !void {
     const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
     var table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu,
         .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill), .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame) };
+    var images_table: amd.ImageV1 = .{ .header=amd.image_v1_header,
+        .calculate=@ptrCast(&amd_images.calculate), .address=@ptrCast(&amd_images.address), .metadata=@ptrCast(&amd_images.metadata),
+        .import_image=@ptrCast(&amd_images.importImage), .descriptors=@ptrCast(&amd_images.descriptors) };
+    imports[5].table=@intFromPtr(&images_table); imports[5].resolved_version=amd.image_v1_revision;
     const old_nv = Model.nv_table.negotiate;
     const old_presentation = Model.presentation_info;
     Model.nv_table.negotiate = ProviderProbe.nvidia;
@@ -465,6 +478,7 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[5]a.R4XStartImport) 
         Model.adapters = null; Model.nv_table.negotiate = old_nv;
         Model.presentation_info = old_presentation; Model.reject_adapter = 0;
         imports[4].table = 0; imports[4].resolved_version = 0;
+        imports[5].table = 0; imports[5].resolved_version = 0;
     }
     var nvidia: a.GfxBackendInfo = .{};
     try t.expectEqual(@as(i32, 1), Model.backendInfo(1, &nvidia));
@@ -531,6 +545,21 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[5]a.R4XStartImport) 
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expectEqual(c.render_backend_amd, state.backend);
     try t.expectError(error.Unsupported, @import("native_resource.zig").Profile.query(storage)); // No NVIDIA VA/encoder profile.
+    var image_desc: a.GfxBufferDescriptor = .{ .byte_length=4096, .alignment=4096, .width=4, .height=4,
+        .format=a.gfx_buffer_format_xrgb8888, .plane_count=1, .plane_pitches=.{256,0,0,0},
+        .location=a.gfx_buffer_location_device_local, .adapter_id=3, .driver_owner=80, .device_generation=97, .usage=28 };
+    const image_provider = @import("amd_images.zig");
+    const image_layout = try image_provider.query(storage,image_desc);
+    try t.expectEqual(@as(u64,1024),image_layout.layout.byte_length);
+    image_desc.modifier = 0x0200000000401a01 | (1<<13); // DCC requires implemented transitions.
+    try t.expectError(error.Unsupported,image_provider.query(storage,image_desc));
+    image_desc.modifier = 0;
+    image_desc.device_generation += 1;
+    try t.expectError(error.Stale,image_provider.query(storage,image_desc));
+    image_desc.device_generation -= 1;
+    imports[5].table = 0;
+    try t.expectError(error.Unsupported,image_provider.query(storage,image_desc));
+    imports[5].table = @intFromPtr(&images_table);
     // A changed protocol payload at the same adapter/memory/queue epoch
     // cannot silently reclassify old native BOs as the new provider profile.
     var obsolete = try providerImage(&handle);
@@ -542,6 +571,8 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[5]a.R4XStartImport) 
     try t.expectEqual(c.status_stale, api.copy_submit(&handle, &.{ .source = obsolete, .target = obsolete,
         .source_offset = 0, .target_offset = 0, .byte_length = 64, .deadline_ns = 99999999 }, &discarded));
     try t.expectEqual(c.status_ok, api.resource_release(&handle, &obsolete));
+    values[1] = amdgpu;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     var resources: [2]c.R4GfxResource = undefined;
     for (&resources) |*resource| resource.* = try providerImage(&handle);
     const request: c.R4GfxCopyRequest = .{ .source = resources[0], .target = resources[1], .source_offset = 0, .target_offset = 0, .byte_length = 64, .deadline_ns = 99999999 };
@@ -721,6 +752,7 @@ pub fn check() !void {
         .gfx_queue_submit_render_color_grid_list = @intFromPtr(&Model.submitColorGridList),
         .display_presentation_info = @intFromPtr(&Model.presentInfo), .display_presentation_feedback = @intFromPtr(&Model.presentFeedback),
         .display_present_regions = @intFromPtr(&Model.presentPixels),
+        .gfx_queue_backend_properties = @intFromPtr(&Model.properties),
         .gfx_fence_query = @intFromPtr(&Model.query), .gfx_fence_cancel = @intFromPtr(&Model.cancel), .gfx_fence_release = @intFromPtr(&Model.drop) };
     var imports = [_]a.R4XStartImport{
         .{ .group_id = @intFromEnum(a.R4LGroup.r4sys), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&sys) },
@@ -728,6 +760,7 @@ pub fn check() !void {
         .{ .module_name = @intFromPtr("R4NV"), .symbol_name = @intFromPtr("BACKEND_V1"), .min_version = nv.backend_v1_revision },
         .{ .module_name = @intFromPtr("R4NV"), .symbol_name = @intFromPtr("RENDER_V1"), .min_version = nv.render_v1_revision },
         .{ .module_name = @intFromPtr("R4AMD"), .symbol_name = @intFromPtr("BACKEND_V1"), .min_version = amd.backend_v1_revision },
+        .{ .module_name = @intFromPtr("R4AMD"), .symbol_name = @intFromPtr("IMAGE_V1"), .min_version = amd.image_v1_revision },
     };
     const raw: a.R4XStartContext = .{ .flags = a.r4xstart_flag_imports_valid, .imports = @intFromPtr(&imports), .import_count = imports.len, .instance_id = 7 };
     var config: c.R4GfxDeviceConfig = .{ .version = 1, .size = @sizeOf(c.R4GfxDeviceConfig), .storage_address = @intFromPtr(storage),

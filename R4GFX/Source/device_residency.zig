@@ -20,6 +20,7 @@ pub const Work = struct {
     request: a.GfxBufferHandle = .{},
     other: a.GfxBufferReference = .{},
     descriptor: a.GfxBufferDescriptor = .{},
+    amd_image: ?@import("amd_images.zig").Result = null,
     image: c.R4GfxCpuImage = std.mem.zeroes(c.R4GfxCpuImage),
     fence: a.GfxFence = .{},
     commit: bool = false,
@@ -206,6 +207,7 @@ pub fn step(device: *d.Device) void {
         },
         .describe => {
             d.platform(memory.describe(&work.other.reference, &work.descriptor)) catch |err| { fail(work, err); return; };
+            work.amd_image = resources.validateDescriptor(device,work.descriptor) catch |err| { fail(work,err); return; };
             work.image = resources.descriptorImage(work.descriptor) catch |err| { fail(work, err); return; };
             if (work.image.width != item.image.width or work.image.height != item.image.height or work.image.format != item.image.format or
                 (work.restore and (work.descriptor.location != a.gfx_buffer_location_device_local or work.descriptor.adapter_id != work.binding.adapter_id or
@@ -255,7 +257,8 @@ pub fn step(device: *d.Device) void {
             if (work.commit) {
                 if (memory.release(&item.backing.reference) != a.gfx_buffer_result_ok) return;
                 if (!work.restore) item.native_bytes = item.descriptor.byte_length;
-                item.backing = work.other; item.descriptor = work.descriptor; item.image = work.image;
+                item.backing = work.other; item.descriptor = work.descriptor;
+                item.amd_image = work.amd_image; item.image = work.image;
                 item.evicted = !work.restore;
                 if (work.restore) device.residency_restores +|= 1 else device.residency_evictions +|= 1;
             } else {

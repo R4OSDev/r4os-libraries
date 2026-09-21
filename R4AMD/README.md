@@ -1,48 +1,53 @@
 ﻿# R4AMD
 
-R4AMD is the AMD render/layout/media library owner. Version 0.1.3 provides
-`INFO_V1:1` and append-only `BACKEND_V1:3`. Existing negotiation, copy and fill
-slots remain stable; `encode_pm4_frame` appends the GC9.1 frame encoder.
+R4AMD 0.1.4 owns AMD image geometry, descriptors and command encoders.
+`INFO_V1:1` and `BACKEND_V1:3` retain their layouts and slots; `IMAGE_V1:1`
+adds stateless image layout, address, metadata, import and descriptor calls.
+AMDGPU.R4D owns devices and publishes measured architecture and memory
+versions through the common graphics backend properties.
 
-`Source/copy.zig` and `Source/pm4.zig` are shared with AMDGPU through the
-Libraries package. They emit bounded SDMA linear/row/fill commands and PM4
-HDP/pipeline/cache/IB/fence frames, including GFX9's EOP workaround. GC9.1
-profiles expose encoder flags 27, 48-bit addresses and at most 2048 dwords.
-The PM4 ABI requires disjoint input/output/count buffers and an exact 64-byte
-request. Errors preserve outputs; encoding never retains pointers or submits
-work. Scratch/LDS/GDS sizes use Picasso/GFX9 limits and units.
+The R4L links all sixteen original Mesa 26.2.2 AddrLib translation units,
+including factory dependencies, plus two private R4OS C++ bridges. Runtime
+admission is limited to Picasso 1002:15D8 / GC9.1. No AddrLib or C++ type
+crosses the fixed Zig/C interface. Each call constructs and destroys AddrLib
+in disjoint caller scratch (16-byte aligned, at most 64 KB). No heap, TLS,
+OS allocator, exceptions or RTTI is required. The pure-virtual failure
+helper traps; memory operations use the compiler runtime. Outputs are
+unchanged on errors.
 
-Actual device capabilities additionally require the matching AMDGPU backend
-and its successful hardware prerequisites. Shader compilation, rendering,
-Vulkan, tiled layout and media admission belong to subsequent milestones.
-Compute packet encoding does not imply an OpenCL, HIP or ROCm runtime.
-AMDGPU.R4D owns every physical device operation.
+Images support bounded linear/tiled surfaces, mips, arrays, volumes, MSAA,
+selected color/depth/BC formats and real Addr2 coordinate calculations.
+Size, pitch, alignment and topology are checked before import. GFX9 texture,
+sampler and color state follows original Mesa descriptors and generated
+register masks. DCC/HTILE queries describe geometry only: compression stays
+disabled and unknown/compressed modifiers cannot be imported as linear.
+Scanout admission uses the DCN1 32-bit standard-swizzle restrictions.
+See workspace Docs/Drivers/AMDImageLayouts08012.txt for limits and units.
 
-Build from the Libraries repository with `./Build.sh R4AMD` on Linux or
-`Build.bat R4AMD` on Windows. Both use PowerShell 7 and the workspace
-`Settings.R4S`. The normal build runs C/Zig ABI conformance and translates
-real Mesa 26.2.2 GFX9 AddrLib sources for
-`x86_64-unknown-none-elf`. Use the same starter with `test` for those checks.
+Source/copy.zig and Source/pm4.zig remain shared with AMDGPU. They emit
+bounded SDMA linear/row/fill commands and GC9.1 PM4 frames, with exact fences
+and the GFX9 EOP workaround. Encoder flags 27 do not advertise tiled copies,
+render execution, Vulkan, media or a compute-language runtime. Native GPU
+capabilities require confirmed driver prerequisites. Render execution follows
+in 0.80.14; physical laptop validation exclusively in 0.80.39.
 
-The native proof requires Clang/LLVM 19.1.7 and Zig 0.16.0 headers;
-R4ACO additionally needs Python 3, Mako and PyYAML. These are the existing
-Mesa toolchain prerequisites. Build orchestration is shared at
-`Shared/Native/BuildPortability.ps1`; output is isolated by module, host
-and upstream version under `Artifacts/Native`. Every invocation rebuilds;
-no NAK/NVK cache entry or prepared source is modified or reused.
+Build with ./Build.sh R4AMD or Build.bat R4AMD from Libraries. Both use
+PowerShell 7 and workspace-relative Settings.R4S paths. The normal build
+checks source/patch hashes, compiles the genuine C++ closure, creates
+runtime/host archives, checks C/Zig ABI conformance and exercises the linked
+library on the host. Linux uses ELF; Windows also builds COFF objects for
+host tests. The Windows path is implemented but not yet tested.
 
-The genuine native objects are currently portability evidence, not linked
-into the R4L. `portability.json` records object hashes, compiler/header
-inputs and every unresolved symbol. Runtime/link integration belongs to
-0.80.12; see `Docs/Drivers/AMDModulgrundlage08002.txt` in the workspace.
-`IMAGE_SCOPE=none` keeps this foundation out of normal system profiles.
+Clang/LLVM 19.1.7, Python 3 and configured Zig 0.16.0 headers are required.
+Shared/Native/BuildPortability.ps1 isolates output by module/host/version
+under Artifacts/Native. portability.json records object hashes and inputs;
+the native archive manifest records archive hashes. No prepared NAK/NVK
+source or cache is reused. DISPLAYD /AMDIMAGE checks the loaded R4L on the
+CPU, including C++ vtables/relocations, without GPU access. IMAGE_SCOPE=none
+keeps the provider out of ordinary profiles until its consumers are ready.
 
-`ThirdParty/Sources.json` pins original bytes and patch order. Originals
-and full license notices are preserved beside the source. The AddrLib
-release patch avoids including POSIX `signal.h` with `DEBUG=0`. It does
-not implement signals. C++ exceptions and RTTI are disabled; allocation,
-assertions, stream helpers, atomics and FPU context must be supplied by the
-R4OS runtime/worker owners before any callable backend is admitted.
-
-Original R4OS code: Apache License 2.0. Third-party material keeps its
-own license; see the repository `THIRD_PARTY_NOTICES.md`.
+ThirdParty/Sources.json pins 69 original files and the release patch
+avoiding unused POSIX signal.h when DEBUG=0. Original bytes stay unchanged.
+Adapted Mesa code retains MIT notices; original R4OS code is Apache-2.0.
+Tools/ExportLegal.ps1 exports all compiled AddrLib and image/encoder notices
+plus the complete MIT grant to the distribution.

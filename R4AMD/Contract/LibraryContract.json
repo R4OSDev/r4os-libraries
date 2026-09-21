@@ -361,6 +361,494 @@
         }
       ],
       "description": "AMD-only negotiation; separate from NVIDIA BACKEND_V1 even if individual payload sizes coincide."
+    },
+    {
+      "export_name": "IMAGE_V1",
+      "symbol": "r4amd_image_v1",
+      "zig_name": "image_v1",
+      "zig_type": "ImageV1",
+      "c_type": "R4AmdImageV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 1095582771,
+      "interface_id_hi": 1379159891,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "calculate",
+          "c_name": "r4amd_image_calculate",
+          "symbol": "r4amd_image_calculate_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4AmdImageRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "workspace",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "inout",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "workspace_bytes",
+              "description": "workspace"
+            },
+            {
+              "name": "workspace_bytes",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "workspace bytes"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4AmdImageLayout",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            },
+            {
+              "name": "mips",
+              "type": {
+                "name": "R4AmdMip",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "mip_capacity",
+              "description": "mips"
+            },
+            {
+              "name": "mip_capacity",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "mip capacity"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Caller-owned disjoint inputs, outputs and 16-byte-aligned workspace. No heap, globals, hardware I/O or retained pointers. Do not reuse workspace concurrently."
+          },
+          "description": "Calculate real GFX9 Addr2 surface and mip geometry. Outputs unchanged on failure; scratch may change. At most64KB scratch,15mips,64MB image. No retained allocations."
+        },
+        {
+          "name": "address",
+          "c_name": "r4amd_image_address",
+          "symbol": "r4amd_image_address_impl",
+          "slot": 1,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4AmdImageRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "coordinate",
+              "type": {
+                "name": "R4AmdCoordinate",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "coordinate"
+            },
+            {
+              "name": "workspace",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "inout",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "workspace_bytes",
+              "description": "workspace"
+            },
+            {
+              "name": "workspace_bytes",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "workspace bytes"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4AmdImageAddress",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Caller-owned disjoint inputs, outputs and 16-byte-aligned workspace. No heap, globals, hardware I/O or retained pointers. Do not reuse workspace concurrently."
+          },
+          "description": "Actual Addr2 coordinate calculation including tiled/mip/MSAA addressing."
+        },
+        {
+          "name": "metadata",
+          "c_name": "r4amd_image_metadata",
+          "symbol": "r4amd_image_metadata_impl",
+          "slot": 2,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4AmdImageRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "workspace",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "inout",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "workspace_bytes",
+              "description": "workspace"
+            },
+            {
+              "name": "workspace_bytes",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "workspace bytes"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4AmdMetadata",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Caller-owned disjoint inputs, outputs and 16-byte-aligned workspace. No heap, globals, hardware I/O or retained pointers. Do not reuse workspace concurrently."
+          },
+          "description": "Reference-only DCC/HTILE geometry from Addr2. Never enables compression or accepts unknown metadata states."
+        },
+        {
+          "name": "import_image",
+          "c_name": "r4amd_image_import_image",
+          "symbol": "r4amd_image_import_image_impl",
+          "slot": 3,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4AmdImageRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "imported",
+              "type": {
+                "name": "R4AmdImageImport",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "imported"
+            },
+            {
+              "name": "workspace",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "inout",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "workspace_bytes",
+              "description": "workspace"
+            },
+            {
+              "name": "workspace_bytes",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "workspace bytes"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4AmdImageLayout",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            },
+            {
+              "name": "mips",
+              "type": {
+                "name": "R4AmdMip",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "mip_capacity",
+              "description": "mips"
+            },
+            {
+              "name": "mip_capacity",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "mip capacity"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Caller-owned disjoint inputs, outputs and 16-byte-aligned workspace. No heap, globals, hardware I/O or retained pointers. Do not reuse workspace concurrently."
+          },
+          "description": "Recompute and validate BO import. Exact modifier/topology/epoch; insufficient or misaligned backing rejected. No BO retain or mapping: owner must retain it separately."
+        },
+        {
+          "name": "descriptors",
+          "c_name": "r4amd_image_descriptors",
+          "symbol": "r4amd_image_descriptors_impl",
+          "slot": 4,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4AmdImageRequest",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "view",
+              "type": {
+                "name": "R4AmdImageView",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "view"
+            },
+            {
+              "name": "workspace",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "inout",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "workspace_bytes",
+              "description": "workspace"
+            },
+            {
+              "name": "workspace_bytes",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "workspace bytes"
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4AmdImageDescriptors",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "output"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Caller-owned disjoint inputs, outputs and 16-byte-aligned workspace. No heap, globals, hardware I/O or retained pointers. Do not reuse workspace concurrently."
+          },
+          "description": "Recompute image layout before building uncompressed GFX9 texture/sampler/color resource descriptors; no caller-forged internal layout."
+        }
+      ],
+      "description": "GFX9 source-backed image layout and immutable provider descriptors, separate from active driver operations."
     }
   ],
   "types": [
@@ -1123,6 +1611,1835 @@
         }
       ],
       "description": "Bounded GC9.1 outer ring frame: HDP, pipeline/cache barriers, VMID1 IB, EOP workaround and exact 64-bit fence. No device completion or shader/API capability is implied."
+    },
+    {
+      "name": "R4AmdImageRequest",
+      "size": 80,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact byte size of this fixed structure."
+        },
+        {
+          "name": "gb_addr_config",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Actual post-initialization GB_ADDR_CONFIG: geometry and modifier topology."
+        },
+        {
+          "name": "chip_revision",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Confirmed external ASIC revision 0x41..0x48, not PCI revision."
+        },
+        {
+          "name": "device_id",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Picasso PCI device 0x15D8."
+        },
+        {
+          "name": "gc_version",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GC9.1.0."
+        },
+        {
+          "name": "resource_type",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0=1D, 1=2D, 2=3D."
+        },
+        {
+          "name": "format",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "format"
+        },
+        {
+          "name": "width",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Width in pixels, 1..16384."
+        },
+        {
+          "name": "height",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Height in pixels, 1..16384."
+        },
+        {
+          "name": "depth",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Array layers or 3D depth, 1..2048."
+        },
+        {
+          "name": "mip_count",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "mip count"
+        },
+        {
+          "name": "samples",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "1/2/4/8; MSAA requires one mip and 2D."
+        },
+        {
+          "name": "usage",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Bits: texture1, color2, storage4, scanout8, depth16."
+        },
+        {
+          "name": "swizzle",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Original GFX9 AddrSwizzleMode, checked by AddrLib."
+        },
+        {
+          "name": "pipe_xor",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero in V1."
+        },
+        {
+          "name": "pitch",
+          "offset": 64,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Requested pitch in bytes; zero lets AddrLib choose."
+        },
+        {
+          "name": "reserved",
+          "offset": 68,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        },
+        {
+          "name": "modifier",
+          "offset": 72,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact DRM modifier, including topology bits; zero only for linear."
+        }
+      ],
+      "description": "Immutable GFX9 image request. Measured GB_ADDR_CONFIG and external ASIC revision, never PCI revision. Dimensions <=16384, mips<=15, samples1/2/4/8, 64MB owner bound. No compression state is accepted."
+    },
+    {
+      "name": "R4AmdImageLayout",
+      "size": 104,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact byte size of this fixed structure."
+        },
+        {
+          "name": "byte_length",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Backing size in bytes, including padding."
+        },
+        {
+          "name": "slice_bytes",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "slice bytes"
+        },
+        {
+          "name": "alignment",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Nonzero power-of-two byte alignment."
+        },
+        {
+          "name": "modifier",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "modifier"
+        },
+        {
+          "name": "pitch",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Padded pitch in bytes."
+        },
+        {
+          "name": "height",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "depth",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "depth"
+        },
+        {
+          "name": "epitch",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Hardware EPITCH from mip-chain pitch/height per epitchIsHeight."
+        },
+        {
+          "name": "block_width",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "block width"
+        },
+        {
+          "name": "block_height",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "block height"
+        },
+        {
+          "name": "block_depth",
+          "offset": 64,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "block depth"
+        },
+        {
+          "name": "first_mip_tail",
+          "offset": 68,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "first mip tail"
+        },
+        {
+          "name": "mip_count",
+          "offset": 72,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "mip count"
+        },
+        {
+          "name": "pixel_bits",
+          "offset": 76,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "pixel bits"
+        },
+        {
+          "name": "element_bits",
+          "offset": 80,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Storage element bits; 64/128 for BC blocks."
+        },
+        {
+          "name": "resource_type",
+          "offset": 84,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0=1D, 1=2D, 2=3D."
+        },
+        {
+          "name": "swizzle",
+          "offset": 88,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Original GFX9 AddrSwizzleMode, checked by AddrLib."
+        },
+        {
+          "name": "flags",
+          "offset": 92,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Output bits: scanout1, tiled2. No compression."
+        },
+        {
+          "name": "gb_addr_config",
+          "offset": 96,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Actual post-initialization GB_ADDR_CONFIG: geometry and modifier topology."
+        },
+        {
+          "name": "reserved",
+          "offset": 100,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        }
+      ],
+      "description": "Stable derived surface description. Pitch is bytes; mip records distinguish elements/pixels and macro-block/tail positions. No upstream pointers or C++ layouts cross the interface."
+    },
+    {
+      "name": "R4AmdMip",
+      "size": 64,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "pitch",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Padded pitch in storage elements, not bytes."
+        },
+        {
+          "name": "height",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "depth",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "depth"
+        },
+        {
+          "name": "pixel_pitch",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Padded mip pitch in pixels."
+        },
+        {
+          "name": "pixel_height",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Padded mip height in pixels."
+        },
+        {
+          "name": "equation_index",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "equation index"
+        },
+        {
+          "name": "offset",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "AddrLib offset, not a swizzle coordinate."
+        },
+        {
+          "name": "macro_offset",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Actual macro-block offset."
+        },
+        {
+          "name": "tail_offset",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "tail offset"
+        },
+        {
+          "name": "tail_x",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "tail x"
+        },
+        {
+          "name": "tail_y",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "tail y"
+        },
+        {
+          "name": "tail_z",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "tail z"
+        },
+        {
+          "name": "reserved",
+          "offset": 56,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        }
+      ],
+      "description": "One AddrLib mip record; pitch in elements. Caller supplies at most15 records."
+    },
+    {
+      "name": "R4AmdCoordinate",
+      "size": 32,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact byte size of this fixed structure."
+        },
+        {
+          "name": "x",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Element X at selected mip; BC uses blocks."
+        },
+        {
+          "name": "y",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Element Y at selected mip; BC uses blocks."
+        },
+        {
+          "name": "slice",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Array layer or mip-reduced 3D Z."
+        },
+        {
+          "name": "sample",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Index smaller than request.samples."
+        },
+        {
+          "name": "mip",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Index smaller than request.mip_count."
+        },
+        {
+          "name": "reserved",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        }
+      ],
+      "description": "Coordinates in format elements; bounded to the selected logical mip/slice/sample."
+    },
+    {
+      "name": "R4AmdImageAddress",
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact byte size of this fixed structure."
+        },
+        {
+          "name": "offset",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact Addr2 byte offset; not a CPU pointer."
+        },
+        {
+          "name": "bit_position",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "bit position"
+        },
+        {
+          "name": "prt_block",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "prt block"
+        }
+      ],
+      "description": "Actual coordinate-to-byte result."
+    },
+    {
+      "name": "R4AmdMetadata",
+      "size": 72,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact byte size of this fixed structure."
+        },
+        {
+          "name": "kind",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "1=DCC, 2=HTILE. Geometry only."
+        },
+        {
+          "name": "flags",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero: no compression/metadata initialization."
+        },
+        {
+          "name": "byte_length",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Backing size in bytes, including padding."
+        },
+        {
+          "name": "alignment",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Nonzero power-of-two byte alignment."
+        },
+        {
+          "name": "slice_bytes",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "HTILE slice allocation bytes. Zero for GFX9 DCC, whose API exposes only the separate fast-clear extent."
+        },
+        {
+          "name": "block_width",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "block width"
+        },
+        {
+          "name": "block_height",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "block height"
+        },
+        {
+          "name": "block_depth",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "block depth"
+        },
+        {
+          "name": "compress_width",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "compress width"
+        },
+        {
+          "name": "compress_height",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "compress height"
+        },
+        {
+          "name": "compress_depth",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "compress depth"
+        },
+        {
+          "name": "fast_clear_bytes",
+          "offset": 64,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 DCC fast-clear bytes per slice; distinct from full slice storage. Zero for HTILE."
+        }
+      ],
+      "description": "Reference-only DCC or HTILE geometry. Flags stay zero: transitions/initialization are not enabled and this is not a usable compressed image."
+    },
+    {
+      "name": "R4AmdImageImport",
+      "size": 80,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact byte size of this fixed structure."
+        },
+        {
+          "name": "byte_length",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Backing size in bytes, including padding."
+        },
+        {
+          "name": "alignment",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Nonzero power-of-two byte alignment."
+        },
+        {
+          "name": "offset",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Aligned image byte offset within backing."
+        },
+        {
+          "name": "modifier",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "modifier"
+        },
+        {
+          "name": "adapter_id",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Canonical owning adapter, must match expected_adapter."
+        },
+        {
+          "name": "reserved",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        },
+        {
+          "name": "memory_generation",
+          "offset": 48,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Canonical memory generation, independent of queue generation."
+        },
+        {
+          "name": "expected_adapter",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Selected current nonzero adapter ID."
+        },
+        {
+          "name": "metadata_state",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly zero; compression transitions are not implemented."
+        },
+        {
+          "name": "expected_memory_generation",
+          "offset": 64,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Current canonical adapter memory epoch."
+        },
+        {
+          "name": "pitch",
+          "offset": 72,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact imported pitch in bytes."
+        },
+        {
+          "name": "usage",
+          "offset": 76,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Bits: texture1, color2, storage4, scanout8, depth16."
+        }
+      ],
+      "description": "Import from the common BO descriptor. Metadata state must be zero; adapter/epoch, alignment, offset, pitch, size and modifier must exactly support the derived image."
+    },
+    {
+      "name": "R4AmdImageView",
+      "size": 96,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact byte size of this fixed structure."
+        },
+        {
+          "name": "address",
+          "offset": 8,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "48-bit GPU VA of retained backing, aligned to layout alignment."
+        },
+        {
+          "name": "byte_length",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Backing size in bytes, including padding."
+        },
+        {
+          "name": "offset",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Aligned image byte offset within backing."
+        },
+        {
+          "name": "first_layer",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "First included layer; zero for a full 3D volume."
+        },
+        {
+          "name": "last_layer",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Last included layer; depth minus one for 3D."
+        },
+        {
+          "name": "first_mip",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "First included mip; 3D color requires zero."
+        },
+        {
+          "name": "last_mip",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Last included mip."
+        },
+        {
+          "name": "sampler",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0=nearest, 1=bilinear."
+        },
+        {
+          "name": "min_lod",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Unsigned fixed point with 8 fractional bits."
+        },
+        {
+          "name": "max_lod",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Unsigned fixed point with 8 fractional bits, at most 15*256."
+        },
+        {
+          "name": "lod_bias",
+          "offset": 60,
+          "type": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Signed fixed point with 8 fractional bits; -4096..4095."
+        },
+        {
+          "name": "wrap_u",
+          "offset": 64,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0=wrap, 1=mirror, 2=clamp."
+        },
+        {
+          "name": "wrap_v",
+          "offset": 68,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0=wrap, 1=mirror, 2=clamp."
+        },
+        {
+          "name": "wrap_w",
+          "offset": 72,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0=wrap, 1=mirror, 2=clamp."
+        },
+        {
+          "name": "compare",
+          "offset": 76,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GPU comparison function 0..7."
+        },
+        {
+          "name": "aniso",
+          "offset": 80,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "log2 of anisotropic ratio, 0..4."
+        },
+        {
+          "name": "border",
+          "offset": 84,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Predefined colors0..2; register table3 unsupported."
+        },
+        {
+          "name": "flags",
+          "offset": 88,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        },
+        {
+          "name": "reserved",
+          "offset": 92,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        }
+      ],
+      "description": "GFX9 texture/sampler and color target descriptor request. Caller retains VA/backing through the associated queue fence. Uncompressed views only; no command submission."
+    },
+    {
+      "name": "R4AmdImageDescriptors",
+      "size": 120,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact byte size of this fixed structure."
+        },
+        {
+          "name": "texture0",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_RSRC_WORD0; compression stays disabled."
+        },
+        {
+          "name": "texture1",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_RSRC_WORD1; compression stays disabled."
+        },
+        {
+          "name": "texture2",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_RSRC_WORD2; compression stays disabled."
+        },
+        {
+          "name": "texture3",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_RSRC_WORD3; compression stays disabled."
+        },
+        {
+          "name": "texture4",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_RSRC_WORD4; compression stays disabled."
+        },
+        {
+          "name": "texture5",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_RSRC_WORD5; compression stays disabled."
+        },
+        {
+          "name": "texture6",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_RSRC_WORD6; compression stays disabled."
+        },
+        {
+          "name": "texture7",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_RSRC_WORD7; compression stays disabled."
+        },
+        {
+          "name": "sampler0",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_SAMP_WORD0."
+        },
+        {
+          "name": "sampler1",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_SAMP_WORD1."
+        },
+        {
+          "name": "sampler2",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_SAMP_WORD2."
+        },
+        {
+          "name": "sampler3",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GFX9 SQ_IMG_SAMP_WORD3."
+        },
+        {
+          "name": "color0",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_BASE."
+        },
+        {
+          "name": "color1",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_BASE_EXT."
+        },
+        {
+          "name": "color2",
+          "offset": 64,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_ATTRIB2."
+        },
+        {
+          "name": "color3",
+          "offset": 68,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_VIEW."
+        },
+        {
+          "name": "color4",
+          "offset": 72,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_INFO."
+        },
+        {
+          "name": "color5",
+          "offset": 76,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_ATTRIB."
+        },
+        {
+          "name": "color6",
+          "offset": 80,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_DCC_CONTROL (zero)."
+        },
+        {
+          "name": "color7",
+          "offset": 84,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_CMASK (zero)."
+        },
+        {
+          "name": "color8",
+          "offset": 88,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_CMASK_BASE_EXT (zero)."
+        },
+        {
+          "name": "color9",
+          "offset": 92,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_FMASK (zero)."
+        },
+        {
+          "name": "color10",
+          "offset": 96,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_FMASK_BASE_EXT (zero)."
+        },
+        {
+          "name": "color11",
+          "offset": 100,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_CLEAR_WORD0 (zero)."
+        },
+        {
+          "name": "color12",
+          "offset": 104,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_CLEAR_WORD1 (zero)."
+        },
+        {
+          "name": "color13",
+          "offset": 108,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_DCC_BASE (zero)."
+        },
+        {
+          "name": "color14",
+          "offset": 112,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "CB_COLOR0_DCC_BASE_EXT (zero)."
+        },
+        {
+          "name": "color15",
+          "offset": 116,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Separate CB_COLOR0_EPITCH at register 0x0287A0."
+        }
+      ],
+      "description": "GFX9 source-derived resource words; color words ordered as documented in the API. Immutable data, no live rendering capability."
+    },
+    {
+      "name": "R4AmdArchitecture",
+      "size": 64,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact byte size of this fixed structure."
+        },
+        {
+          "name": "vendor_id",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "AMD PCI vendor 0x1002."
+        },
+        {
+          "name": "device_id",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Picasso PCI device 0x15D8."
+        },
+        {
+          "name": "gc_version",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GC9.1.0."
+        },
+        {
+          "name": "sdma_version",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "SDMA4.1.0."
+        },
+        {
+          "name": "gb_addr_config",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Actual post-initialization GB_ADDR_CONFIG: geometry and modifier topology."
+        },
+        {
+          "name": "chip_revision",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Confirmed external ASIC revision 0x41..0x48, not PCI revision."
+        },
+        {
+          "name": "bind_alignment",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 4096 bytes."
+        },
+        {
+          "name": "memory_generation",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Canonical memory generation, independent of queue generation."
+        },
+        {
+          "name": "flags",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        },
+        {
+          "name": "reserved",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Must be zero."
+        },
+        {
+          "name": "max_image_bytes",
+          "offset": 56,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 64*1024*1024 bytes."
+        }
+      ],
+      "description": "Measured AMD image profile in common backend properties (IMAGE_V1 identity, revision1). Flags/reserved zero; describes geometry, not render/present capability. ASIC revision is external, not PCI revision."
     }
   ],
   "constants": [
@@ -1209,6 +3526,69 @@
       "type": "u32",
       "value": 16,
       "description": "GC9.1 graphics/compute frame encoder only, not a renderer or Vulkan/OpenCL/HIP runtime."
+    },
+    {
+      "zig_name": "image_workspace_bytes",
+      "c_name": "R4AMD_IMAGE_WORKSPACE_BYTES",
+      "type": "u32",
+      "value": 65536,
+      "description": "Caller-owned 16-byte-aligned scratch for exactly one call; never retained. Do not share between concurrent calls."
+    },
+    {
+      "zig_name": "image_max_mips",
+      "c_name": "R4AMD_IMAGE_MAX_MIPS",
+      "type": "u32",
+      "value": 15,
+      "description": "Maximum caller mip records."
+    },
+    {
+      "zig_name": "image_usage_texture",
+      "c_name": "R4AMD_IMAGE_USAGE_TEXTURE",
+      "type": "u32",
+      "value": 1,
+      "description": "Shader sampling."
+    },
+    {
+      "zig_name": "image_usage_color",
+      "c_name": "R4AMD_IMAGE_USAGE_COLOR",
+      "type": "u32",
+      "value": 2,
+      "description": "Color render target geometry."
+    },
+    {
+      "zig_name": "image_usage_storage",
+      "c_name": "R4AMD_IMAGE_USAGE_STORAGE",
+      "type": "u32",
+      "value": 4,
+      "description": "Shader storage geometry."
+    },
+    {
+      "zig_name": "image_usage_scanout",
+      "c_name": "R4AMD_IMAGE_USAGE_SCANOUT",
+      "type": "u32",
+      "value": 8,
+      "description": "Single-level/slice/sample display-compatible geometry; requires actual display admission separately."
+    },
+    {
+      "zig_name": "image_usage_depth",
+      "c_name": "R4AMD_IMAGE_USAGE_DEPTH",
+      "type": "u32",
+      "value": 16,
+      "description": "Depth geometry; no automatic HTILE allocation."
+    },
+    {
+      "zig_name": "image_flag_scanout",
+      "c_name": "R4AMD_IMAGE_FLAG_SCANOUT",
+      "type": "u32",
+      "value": 1,
+      "description": "AddrLib display-compatible geometry, not present capability."
+    },
+    {
+      "zig_name": "image_flag_tiled",
+      "c_name": "R4AMD_IMAGE_FLAG_TILED",
+      "type": "u32",
+      "value": 2,
+      "description": "Native AMD tiling; cannot be CPU mapped as rows."
     }
   ],
   "errors": [
@@ -1225,6 +3605,27 @@
       "type": "i32",
       "value": -2,
       "description": "Vendor, IP profile or command ABI is unsupported; output unchanged."
+    },
+    {
+      "zig_name": "status_stale",
+      "c_name": "R4AMD_STATUS_STALE",
+      "type": "i32",
+      "value": -3,
+      "description": "Import adapter or memory generation mismatch; output unchanged."
+    },
+    {
+      "zig_name": "status_oom",
+      "c_name": "R4AMD_STATUS_OOM",
+      "type": "i32",
+      "value": -4,
+      "description": "Caller scratch cannot satisfy the actual upstream allocator; output unchanged."
+    },
+    {
+      "zig_name": "status_limit",
+      "c_name": "R4AMD_STATUS_LIMIT",
+      "type": "i32",
+      "value": -5,
+      "description": "Bounded resource size or call limit exceeded; output unchanged."
     }
   ],
   "ownership_rules": [

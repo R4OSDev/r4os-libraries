@@ -27,6 +27,13 @@ pub fn validateImage(image: c.R4GfxCpuImage, borrowed: bool) d.Error!void {
     if (length > image.byte_length or (borrowed and image.cpu_address == 0) or (!borrowed and image.cpu_address != 0)) return error.Invalid;
     _ = std.math.add(u64, image.cpu_address, image.byte_length) catch return error.Overflow;
 }
+pub fn validateDescriptor(device: *d.Device, descriptor: a.GfxBufferDescriptor) d.Error!?@import("amd_images.zig").Result {
+    if (descriptor.location == a.gfx_buffer_location_device_local and device.backend() == c.render_backend_amd)
+        return try @import("amd_images.zig").query(device,descriptor);
+    if (descriptor.modifier != 0 and (device.backend() != c.render_backend_nvidia or
+        descriptor.modifier & ~@as(u64,15) != @import("native_resource.zig").modifier_base or descriptor.modifier & 15 > 5)) return error.Unsupported;
+    return null;
+}
 pub fn descriptorImage(descriptor: a.GfxBufferDescriptor) d.Error!c.R4GfxCpuImage {
     if (descriptor.version != 1 or descriptor.size < @sizeOf(a.GfxBufferDescriptor) or
         (descriptor.modifier != 0 and descriptor.location != a.gfx_buffer_location_device_local) or
@@ -189,6 +196,7 @@ pub fn createColoredWithUsage(device: *d.Device, input: *const c.R4GfxResourceDe
         try d.platform(memory.describe(&item.backing.reference, &item.descriptor));
         if (item.descriptor.location == a.gfx_buffer_location_device_local and
             (item.descriptor.adapter_id != device.selected.binding.adapter_id or item.descriptor.device_generation != device.selected.memory_generation)) return error.Stale;
+        item.amd_image = try validateDescriptor(device,item.descriptor);
         item.image = try descriptorImage(item.descriptor);
         try validateColor(item.image.format, color);
         if (request.source_kind == c.source_create_native_scanout and (item.descriptor.usage != 60 or item.descriptor.modifier != 0 or

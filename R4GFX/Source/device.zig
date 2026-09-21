@@ -68,6 +68,7 @@ pub const Resource = struct {
     evicted: bool = false,
     residency_busy: bool = false,
     native_layout: u32 = 0,
+    amd_image: ?@import("amd_images.zig").Result = null,
     native_bytes: u64 = 0,
     priority: u32 = 128,
     last_use: u64 = 0,
@@ -125,6 +126,7 @@ pub const Device = struct {
     jobs: [c.device_job_capacity]Job = @splat(.{}),
     native_yuv: @import("native_yuv_cache.zig").Owner = .{},
     chains: [c.swapchain_capacity]@import("device_swapchain.zig").Slot = @splat(.{}),
+    amd_image_scratch: [65551]u8 = undefined,
     // Per-device scratch avoids large render arrays on an application stack.
     images: [c.render_max_images]c.R4GfxCpuImage = undefined,
     image_slots: [c.render_max_images]u32 = undefined,
