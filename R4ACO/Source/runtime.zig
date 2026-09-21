@@ -173,7 +173,7 @@ pub export fn r4aco_port_log(bytes: [*]const u8, length: usize) callconv(.c) voi
 }
 
 const Native = extern struct { metadata: c.R4AcoBinary, code: [*]const u8 };
-extern fn r4aco_native_compile([*]const u32, usize, [*:0]const u8, u32, *Native) callconv(.c) i32;
+extern fn r4aco_native_compile([*]const u32, usize, [*:0]const u8, u32, u32, *Native) callconv(.c) i32;
 extern fn r4aco_fp_begin(*[2]u64) callconv(.c) void;
 extern fn r4aco_fp_end(*const [2]u64) callconv(.c) void;
 comptime {
@@ -184,7 +184,7 @@ fn span(address: u64, size: u64, alignment: u64) bool {
     return address != 0 and address % alignment == 0 and size != 0 and address <= std.math.maxInt(u64) - size;
 }
 fn inputValid(request: *const c.R4AcoRequest) bool {
-    if (request.version != 1 or request.size != @sizeOf(c.R4AcoRequest) or request.flags != 0 or
+    if (request.version != 1 or request.size != @sizeOf(c.R4AcoRequest) or request.flags & ~@as(u32, 1) != 0 or
         request.word_count < 5 or request.word_count > 16384 or
         !span(request.words, @as(u64, request.word_count) * 4, 4) or
         request.entry_length == 0 or request.entry_length > 63 or !span(request.entry, request.entry_length, 1) or
@@ -266,7 +266,7 @@ pub export fn r4aco_compile_impl(runtime: *const c.R4AcoRuntime, request: *const
     output.device_id = request.device_id;
     output.chip_revision = request.chip_revision;
     output.gfx_profile = 902;
-    output.resource_abi = 1;
+    output.resource_abi = 1 + request.flags;
     output.stage = request.stage;
     const clock: Clock = @ptrFromInt(runtime.clock_ns);
     var job: Job = .{ .runtime = runtime.*, .request = request.*, .output = output, .start = clock(runtime.user), .epoch = last_epoch };
@@ -279,7 +279,7 @@ pub export fn r4aco_compile_impl(runtime: *const c.R4AcoRuntime, request: *const
     r4aco_fp_begin(&fp);
     defer r4aco_fp_end(&fp);
     var native: Native = undefined;
-    const status = r4aco_native_compile(@ptrFromInt(request.words), request.word_count, &entry, request.stage, &native);
+    const status = r4aco_native_compile(@ptrFromInt(request.words), request.word_count, &entry, request.stage, request.flags, &native);
     job.check();
     if (status != c.status_ok) {
         job.finish(status);
@@ -298,7 +298,7 @@ pub export fn r4aco_compile_impl(runtime: *const c.R4AcoRuntime, request: *const
     output.chip_revision = request.chip_revision;
     output.stage = request.stage;
     output.gfx_profile = 902;
-    output.resource_abi = 1;
+    output.resource_abi = 1 + request.flags;
     output.source_hash = saved.source_hash;
     output.peak_bytes = saved.peak_bytes;
     output.log_length = saved.log_length;

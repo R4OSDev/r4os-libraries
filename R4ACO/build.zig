@@ -40,6 +40,12 @@ pub fn build(b: *std.Build) void {
         inline for (.{ "R4ACO.a", "R4NativeMath.a", "R4NativeScan.a" }) |name| checks.addObjectFile(archives.path(b, name));
         compiler_check = b.addRunArtifact(b.addTest(.{ .root_module = checks }));
         b.getInstallStep().dependOn(&compiler_check.?.step);
+        const cli = b.createModule(.{ .root_source_file = b.path("Tools/compiler.zig"), .target = b.graph.host, .optimize = .ReleaseSafe });
+        cli.addImport("r4l_contract", implementation); cli.addImport("compiler_runtime", runtime);
+        inline for (.{ "R4ACO.a", "R4NativeMath.a", "R4NativeScan.a" }) |name| cli.addObjectFile(archives.path(b, name));
+        const tool = b.addExecutable(.{ .name = "r4aco-compiler", .root_module = cli });
+        const install_tool = b.addInstallArtifact(tool, .{});
+        b.step("compiler", "Build the offline Linux compiler frontend").dependOn(&install_tool.step);
     }
     _ = artifact;
     b.getInstallStep().dependOn(&abi_check.step);

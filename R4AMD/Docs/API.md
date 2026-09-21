@@ -59,6 +59,24 @@ GFX9 source-backed image layout and immutable provider descriptors, separate fro
 - Slot 4, Offset 64: `descriptors` - Recompute image layout before building uncompressed GFX9 texture/sampler/color resource descriptors; no caller-forged internal layout.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4AMD_STATUS`; Besitz: Caller-owned disjoint inputs, outputs and 16-byte-aligned workspace. No heap, globals, hardware I/O or retained pointers. Do not reuse workspace concurrently..
 
+RENDER_V1
+---------
+
+Bounded native GFX9 shader profiles and real PM4 render encoding; active AMDGPU capabilities remain authoritative.
+
+- ELF-Symbol: `r4amd_render_v1`
+- ABI-Major: 1
+- Revision: 1
+- Interface-ID: `0x52344f53:0x414d4434`
+- Tabellengroesse: 56 Byte
+
+- Slot 0, Offset 32: `shader` - Copy a fixed shader and its measured R4ACO metadata. Profiles 0 fullscreen VS/1 vertex-pull VS/2 fill PS/3 sampled PS/4 color PS/5 YUV PS. Code_address is zero until caller uploads to retained executable GPU memory.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4AMD_STATUS`; Besitz: No allocation, retention, device access or submission; all buffers caller-owned and disjoint. Failure leaves outputs unchanged..
+- Slot 1, Offset 40: `encode_pipeline` - Emit complete GFX9 pipeline and attachment state; reserve at least384 DWORDs. Color descriptors come from IMAGE_V1. Shader addresses and every attachment must remain resident until exact GPU fence retirement.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4AMD_STATUS`; Besitz: No allocation, retention, device access or submission; all buffers caller-owned and disjoint. Failure leaves outputs unchanged..
+- Slot 2, Offset 48: `encode_draw` - Emit descriptor/push binding, viewport, clipped scissor and real DRAW_INDEX_2 or DRAW_INDEX_AUTO; reserve80 DWORDs. The preceding pipeline must use the same native shader ABI. Each complete job also requires queue cache barriers and its exact completion fence.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4AMD_STATUS`; Besitz: No allocation, retention, device access or submission; all buffers caller-owned and disjoint. Failure leaves outputs unchanged..
+
 Typen
 -----
 
@@ -79,6 +97,13 @@ Typen
 - `R4AmdImageView`: 96 Byte, Alignment 8. GFX9 texture/sampler and color target descriptor request. Caller retains VA/backing through the associated queue fence. Uncompressed views only; no command submission.
 - `R4AmdImageDescriptors`: 120 Byte, Alignment 4. GFX9 source-derived resource words; color words ordered as documented in the API. Immutable data, no live rendering capability.
 - `R4AmdArchitecture`: 64 Byte, Alignment 8. Measured AMD image profile in common backend properties (IMAGE_V1 identity, revision1). Flags/reserved zero; describes geometry, not render/present capability. ASIC revision is external, not PCI revision.
+- `R4AmdShader`: 64 Byte, Alignment 8. GFX902 wave64 native shader ABI. Code is immutable, 256-byte GPU aligned; no scratch, LDS or interpolated varyings in this renderer. Offline metadata originates in R4ACO; CPU encoding is not hardware admission.
+- `R4AmdPipeline`: 176 Byte, Alignment 4. Single-sample, one-color-target GFX9 pipeline. Hardware blend factors 0..10,13,14 (no dual-source export); combine 0 add/1 subtract/2 min/3 max/4 reverse-subtract. ROP is an eight-bit truth table. Compare/stencil operations follow Vulkan values. Primitive 0 point/1 line-list/2 line-strip/3 triangle-list/4 triangle-strip; polygon 0 point/1 line/2 fill. Cull front bit0/back bit1, front_face 0 CCW/1 CW. Depth range uses Vulkan 0..1; all floats finite.
+- `R4AmdDepth`: 72 Byte, Alignment 8. Retained separate depth and stencil planes, single sample/mip/layer. Depth format 0 none/1 D16/3 D32; optional stencil is S8. Addresses, sizes and epitches must originate in AddrLib. No HTILE or compression is enabled. Empty attachment has zero fields after size.
+- `R4AmdDraw`: 120 Byte, Alignment 8. Bounded direct draw. Descriptor table is 512 bytes (resource ABI2), push range 160 bytes. Index type 0 auto/1 uint16/2 uint32; index byte range covers first_index and count. Auto draws add first_vertex through native user SGPR6; indexed draws add base_vertex. Viewport and clipped scissor use the target coordinate system. Vertex pulling uses set0 binding2 with clip-space vec4 stride16.
+- `R4AmdRect`: 16 Byte, Alignment 4. Pixel rectangle in the image coordinate system.
+- `R4AmdYuvPlane`: 32 Byte, Alignment 8. Index into canonical native resource bindings; byte offset and pitch must match the referenced image plane. No CPU pointer or unretained GPU VA.
+- `R4AmdYuvHeader`: 200 Byte, Alignment 8. Native queue BACKEND_V1 profile revision1 command kind1: this 200-byte header followed by the common 256-byte color program and 48-byte YUV matrix (12 IEEE754 float32 bits), exactly504 bytes. Format1 NV12/2 P010/3 YUV420P, filter0 nearest/1 linear RGB after EOTF, blend0 replace/1 premultiplied over, opacity0..65535. Chroma origin uses float32 bits. Unused plane2 is zero. Driver binds its immutable ACO programs and retains all canonical mappings until actual completion.
 
 Besitzregeln
 ------------

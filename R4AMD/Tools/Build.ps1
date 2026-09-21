@@ -5,6 +5,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $unit = [IO.Path]::GetFullPath('..', $PSScriptRoot)
 $libraries = [IO.Path]::GetFullPath('..', $unit)
+& (Join-Path $PSScriptRoot 'Shaders.ps1')
 & (Join-Path $libraries 'Shared/Native/BuildPortability.ps1') -UnitRoot $unit
 $settings = @{}
 foreach ($line in Get-Content (Join-Path $libraries 'Settings.R4S')) {
@@ -15,7 +16,7 @@ $artifacts = [IO.Path]::GetFullPath($settings.ARTIFACTS_ROOT.Replace('\','/'), $
 $hostName = if ($IsWindows) { 'Windows-x64' } else { 'Linux-x64' }
 $native = Join-Path $artifacts "Native/R4AMD/$hostName/AddrLib-26.2.2"
 $record = Get-Content -Raw (Join-Path $native 'portability.json') | ConvertFrom-Json
-if ($record.objects.Count -ne 18) { throw 'Incomplete AddrLib object closure.' }
+if ($record.objects.Count -ne 19) { throw 'Incomplete image/render object closure.' }
 $output = if ($OutputRoot) { [IO.Path]::GetFullPath($OutputRoot, $workspace) } else { Join-Path $native 'Archives' }
 [IO.Directory]::CreateDirectory($output) | Out-Null
 $ar = (Get-Command $(if ($IsWindows) { 'llvm-ar.exe' } else { 'llvm-ar-19' }) -CommandType Application | Select-Object -First 1).Source
@@ -55,9 +56,9 @@ if ($IsWindows) {
 }
 $symbols = @(& $nm --defined-only (Join-Path $output 'R4AMD-Addr.a'))
 if ($LASTEXITCODE) { throw 'Cannot inspect AddrLib archive.' }
-foreach ($symbol in @('AddrCreate','AddrDestroy','Addr2ComputeSurfaceInfo','Addr2ComputeSurfaceAddrFromCoord','Addr2ComputeDccInfo','Addr2ComputeHtileInfo','r4amd_addr_compute','r4amd_addr_descriptors')) {
+foreach ($symbol in @('AddrCreate','AddrDestroy','Addr2ComputeSurfaceInfo','Addr2ComputeSurfaceAddrFromCoord','Addr2ComputeDccInfo','Addr2ComputeHtileInfo','r4amd_addr_compute','r4amd_addr_descriptors','r4amd_native_pipeline','r4amd_native_draw')) {
     if (!($symbols | Where-Object { $_ -match ('\b' + [regex]::Escape($symbol) + '$') })) { throw "Missing linked AddrLib function: $symbol" }
 }
 $files = @(foreach ($name in @('R4AMD-Addr.a','R4AMD-Addr-Host.a')) { [ordered]@{name=$name; sha256=(Get-FileHash (Join-Path $output $name)).Hash.ToLowerInvariant()} })
-[ordered]@{schema=1; module='R4AMD'; upstream='26.2.2'; scope=$record.scope; originals=16; bridge_units=2; native_record_sha256=(Get-FileHash (Join-Path $native 'portability.json')).Hash.ToLowerInvariant(); archives=$files} | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $output 'archives.json') -Encoding utf8NoBOM
-Write-Host 'R4AMD AddrLib: complete 16-original/2-bridge archives for runtime and host checks.'
+[ordered]@{schema=1; module='R4AMD'; upstream='26.2.2'; scope=$record.scope; originals=16; bridge_units=3; native_record_sha256=(Get-FileHash (Join-Path $native 'portability.json')).Hash.ToLowerInvariant(); archives=$files} | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $output 'archives.json') -Encoding utf8NoBOM
+Write-Host 'R4AMD: complete 16-original/3-bridge image/render archives for runtime and host checks.'

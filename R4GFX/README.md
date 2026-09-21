@@ -31,9 +31,9 @@ RENDER_V1 reports software rendering. DEVICE_V1 selects a compatible native
 backend through the matching optional `R4NV:BACKEND_V1:3:1` or
 `R4AMD:BACKEND_V1:1:1` import. Their interface IDs and vendor payloads are
 validated separately; missing/incompatible tables preserve software rendering
-and copying. Backend IDs are 1=software, 2=NVIDIA, 3=AMD. R4AMD 0.1.1
-recognizes the AMD protocol but advertises no executable encoder features,
-so it cannot enable an accelerated backend yet.
+and copying. Backend IDs are 1=software, 2=NVIDIA, 3=AMD. Native capabilities
+come from the selected driver's confirmed operations; loading R4AMD alone
+does not enable an accelerated backend.
 
 ## Device resources
 
@@ -231,9 +231,13 @@ native BOs even when an erroneous producer reuses adapter/generation values.
 Pending jobs retain their original backend ID and exact fence until physical
 retirement; AMD copies count as GPU traffic without acquiring NVIDIA labels.
 
-The native NVIDIA layout and YUV/VA helpers require the NVIDIA provider
-explicitly. AMD layouts/render/presentation follow 0.80.12/14/18; unknown
-operations do not inherit NVIDIA capability bits. Generic BO descriptors,
+AMD image admission (0.80.12) and native render/YUV transport (0.80.14) use
+the measured R4AMD architecture and explicit common driver operation bits.
+Native YUV submits a bounded description with deduplicated canonical BO/VA
+loans; AMDGPU owns ACO upload and PM4 encoding. Plane mappings are cached
+until retirement, without CPU pixel maps or per-frame shader compilation.
+Present follows 0.80.18; unknown operations receive no native capability.
+Generic BO descriptors,
 queues, fences and budgets remain with their common owners. Opaque modifiers
 are passed only to the selected driver, never interpreted as NVIDIA layouts
 for an AMD resource. Existing software/Virtio presentation stays independent.

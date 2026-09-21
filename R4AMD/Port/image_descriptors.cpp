@@ -48,6 +48,15 @@ extern "C" int32_t r4amd_addr_descriptors(const R4AmdImageRequest *r, const R4Am
     case 538982482:
         df = V_008F14_IMG_DATA_FORMAT_8; cf = V_028C70_COLOR_8;
         y = z = V_008F1C_SQ_SEL_0; force_alpha = true; break;
+    case 0x38385247:
+        df = V_008F14_IMG_DATA_FORMAT_8_8; cf = V_028C70_COLOR_8_8;
+        z = V_008F1C_SQ_SEL_0; force_alpha = true; break;
+    case 0x20363152:
+        df = V_008F14_IMG_DATA_FORMAT_16; cf = V_028C70_COLOR_16;
+        y = z = V_008F1C_SQ_SEL_0; force_alpha = true; break;
+    case 0x32335247:
+        df = V_008F14_IMG_DATA_FORMAT_16_16; cf = V_028C70_COLOR_16_16;
+        z = V_008F1C_SQ_SEL_0; force_alpha = true; break;
     case 0x01000001:
         df = V_008F14_IMG_DATA_FORMAT_32; nf = V_008F14_IMG_NUM_FORMAT_FLOAT;
         y = z = V_008F1C_SQ_SEL_0; force_alpha = true; break;
@@ -60,6 +69,8 @@ extern "C" int32_t r4amd_addr_descriptors(const R4AmdImageRequest *r, const R4Am
     default: return R4AMD_STATUS_UNSUPPORTED;
     }
     if (force_alpha) w = V_008F1C_SQ_SEL_1;
+    if (v->flags == 1) nf = V_008F14_IMG_NUM_FORMAT_UINT;
+    if (v->flags == 2) x = y = z = w = V_008F1C_SQ_SEL_X; // Premultiplied white mask.
     const uint64_t va = v->address + v->offset;
     const uint32_t samples_log2 = __builtin_ctz(r->samples);
     uint32_t type;

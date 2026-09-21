@@ -1,5 +1,5 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
-//! Native video composition uses public R4NV encoding and canonical queue loans.
+//! Native video composition uses vendor providers and canonical queue loans.
 //! Only bounded descriptors/commands are CPU-written; source/target pixels stay
 //! in their BOs. BUSY preparation keeps no decoder pointer or submitted draw.
 const std = @import("std");
@@ -88,7 +88,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
         @memcpy(dependencies[0..request.dependency_count], @as([*]const a.GfxFence,@ptrFromInt(request.dependencies))[0..request.dependency_count]);
     }
     try device.selectBackend();
-    if (device.backend() != c.render_backend_nvidia) return error.Unsupported;
+    if (device.backend() != c.render_backend_nvidia and device.backend() != c.render_backend_amd) return error.Unsupported;
     const target = try device.resource(request.target, true);
     if (target.invalidated) return error.Stale;
     if (target.kind != c.resource_image or target.flags & c.image_target == 0 or target.backing.reference.id == 0 or
@@ -103,6 +103,8 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
     const slot = for (&device.jobs, 0..) |*job, i| { if (job.serial == 0) break i; } else return error.Limit;
     const serial = std.math.add(u64, device.job_serial, 1) catch return error.Limit;
     if (target.job_refs == std.math.maxInt(u32)) return error.Limit;
+    if (device.backend() == c.render_backend_amd) return @import("native_yuv_amd.zig").submit(device,request,target,slot,serial,
+        program.words,matrix.rows,origin,dependencies[0..request.dependency_count],output);
     const owner = &device.native_yuv;
     const profile = try owner.ensure(device);
     const client = nv.RenderV1Client.init(device.bundle.raw) catch return error.Unsupported;

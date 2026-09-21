@@ -6,7 +6,7 @@ $catalog=Get-Content -Raw (Join-Path $unit 'ThirdParty/Sources.json')|ConvertFro
 $original=Join-Path $unit $catalog.original_root
 $sections=[Collections.Generic.List[string]]::new()
 $sections.Add("R4AMD AddrLib, image layout/descriptors and SDMA/PM4 encoder notices`nThe encoders are also compiled into AMDGPU. Mesa $($catalog.upstream_version); original identities in ThirdParty/Sources.json.`n")
-$names=@($catalog.files.path|Where-Object {$_ -match '^src/amd/(addrlib/.*\.(cpp|h)|common/.*\.(c|h))$' -or $_ -in @('include/drm-uapi/drm_fourcc.h','src/amd/registers/makeregheader.py','src/amd/registers/regdb.py','src/amd/registers/gfx9.json','licenses/MIT')})
+$names=@($catalog.files.path|Where-Object {$_ -match '^src/amd/(addrlib/.*\.(cpp|h)|common/.*\.(c|h)|vulkan/.*\.(c|h))$' -or $_ -in @('include/drm-uapi/drm_fourcc.h','src/amd/registers/makeregheader.py','src/amd/registers/regdb.py','src/amd/registers/gfx9.json','licenses/MIT')})
 foreach($name in $names){
     $entry=@($catalog.files|Where-Object {$_.path -ceq $name})
     if($entry.Count -ne 1){throw "Missing source $name"}

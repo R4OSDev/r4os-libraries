@@ -445,6 +445,34 @@
       "bytes": 2358,
       "license": "MIT (upstream component source/header notice; gfx9.json follows adjacent register generator)",
       "role": "GFX9 layout, modifier, descriptor and generator reference"
+    },
+    {
+      "path": "src/amd/vulkan/radv_cmd_buffer.c",
+      "sha256": "a256461f316fb3e71d1a17fef6682af64e432fbe8e3fc0eee276ef5b36d245e6",
+      "bytes": 713188,
+      "license": "MIT",
+      "role": "Original GFX9 render encoding/compiler integration reference; specialized in Port/render_state.cpp."
+    },
+    {
+      "path": "src/amd/vulkan/radv_shader.c",
+      "sha256": "b4ddf078ff17e4d0824cc2c90e1672448fdd2a62624b225c1488a695fcec5cdb",
+      "bytes": 156518,
+      "license": "MIT",
+      "role": "Original GFX9 render encoding/compiler integration reference; specialized in Port/render_state.cpp."
+    },
+    {
+      "path": "src/amd/common/ac_cmdbuf.c",
+      "sha256": "4e56542b21263b93f3283dac1df04671173ef3e3759ef165369ba2c180c4869b",
+      "bytes": 49698,
+      "license": "MIT",
+      "role": "Original GFX9 render encoding/compiler integration reference; specialized in Port/render_state.cpp."
+    },
+    {
+      "path": "src/amd/common/ac_cmdbuf.h",
+      "sha256": "d26c1e2e47410bc4641104cd8908edc01356952b228c9b4eac15ea45e61e2a2c",
+      "bytes": 43894,
+      "license": "MIT",
+      "role": "Original GFX9 render encoding/compiler integration reference; specialized in Port/render_state.cpp."
     }
   ],
   "patches": [

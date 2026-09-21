@@ -63,7 +63,7 @@ try {
         $inputs+=@($manifest.files|ForEach-Object {Join-Path $roots.zig $_.path})
     }
     $identities=@(foreach($file in $inputs|Sort-Object -Unique){[ordered]@{path=[IO.Path]::GetRelativePath($workspace,$file).Replace('\','/');sha256=(Hash $file)}})
-    $identity=[ordered]@{schema=1;host=$hostName;compiler=$version[0];profile='Picasso-GFX9-wave64-native-ABI1';inputs=$identities}
+    $identity=[ordered]@{schema=1;host=$hostName;compiler=$version[0];profile='Picasso-GFX9-wave64-native-resource-ABI1-2';inputs=$identities}
     $id=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes(($identity|ConvertTo-Json -Depth 6 -Compress)))).ToLowerInvariant()
     $recordPath=Join-Path $cache 'native.json'
     $valid=$false

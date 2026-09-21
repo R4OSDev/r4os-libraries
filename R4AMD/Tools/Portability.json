@@ -124,6 +124,12 @@
       "source": "Port/image_descriptors.cpp",
       "language": "cpp",
       "owner_source": true
+    },
+    {
+      "name": "render_state",
+      "source": "Port/render_state.cpp",
+      "language": "cpp",
+      "owner_source": true
     }
   ],
   "followup": "Physical validation only 0.80.39; renderer uses descriptors in 0.80.14.",

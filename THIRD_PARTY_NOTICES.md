@@ -331,3 +331,20 @@ its MIT/public-domain choices. Math/scan retain their existing musl/other
 per-file terms. Tools/ExportLegal.ps1 exports original notices and complete
 applicable license texts as R4ACO-NOTICES.txt into the distribution.
 No Linux DRM binary, LLVM JIT or GPU firmware is linked into R4ACO.R4L.
+
+## AMD native rendering (0.80.14)
+
+R4ACO/Source/textures.h specializes the original MIT RADV descriptor lowering
+for four directly bound 2D textures. Its unchanged source,
+src/amd/vulkan/nir/radv_nir_lower_descriptors.c (Valve 2020), is cataloged;
+R4ACO now preserves 621 original files. The compiler's normal NIR/ACO passes
+generate the native shader code; no foreign precompiled shader is substituted.
+
+R4AMD/Port/render_state.cpp specializes the GFX9 state from Mesa's
+radv_cmd_buffer.c, radv_shader.c and ac_descriptors.c. The 73-file catalog
+also retains ac_cmdbuf.c/.h and original MIT AMD/Valve copyrights.
+R4AMD/Tools/ExportLegal.ps1 includes these original notices and the complete
+MIT grant. The same archive is linked into R4AMD.R4L and AMDGPU.R4D.
+R4OS-authored GLSL, shader generation, resource owners, grid/color conversion
+and queue integration retain Apache-2.0. All required notices are exported
+to the distribution, including the new RADV reference files.

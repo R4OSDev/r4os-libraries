@@ -94,13 +94,15 @@ fn key(binary: c.R4AcoBinary) c.R4AcoCacheKey {
 }
 
 test "real GFX9 graphics, copy, fill and shared-memory compilation" {
-    inline for (.{ .{ "fullscreen.spv", @as(u32, 0) }, .{ "color.spv", @as(u32, 4) }, .{ "copy.spv", @as(u32, 5) }, .{ "fill.spv", @as(u32, 5) }, .{ "shared.spv", @as(u32, 5) } }) |item| {
+    inline for (.{ .{ "fullscreen.spv", @as(u32, 0) }, .{ "color.spv", @as(u32, 4) }, .{ "copy.spv", @as(u32, 5) }, .{ "fill.spv", @as(u32, 5) }, .{ "shared.spv", @as(u32, 5) }, .{ "sample.spv", @as(u32, 4) } }) |item| {
         const source = comptime words(item[0]);
         var state: State = .{};
         state.configure(&source, item[1]);
+        if (comptime std.mem.eql(u8, item[0], "sample.spv")) state.request.flags = c.request_textures;
         try state.run();
         try t.expectEqual(c.status_ok, state.return_status);
         try t.expect(!state.aborted);
+        try t.expectEqual(@as(u32, 1) + state.request.flags, state.result.resource_abi);
         try t.expect(state.result.code_bytes > 20 and state.result.exec_bytes > 4);
         try t.expect(state.result.sgprs >= 16 and state.result.vgprs >= 4);
         try t.expectEqual(@as(u64, 0), state.result.inputs_read);

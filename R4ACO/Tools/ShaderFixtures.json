@@ -45,6 +45,14 @@
       "source_sha256": "9fb29b8d5f2b3398536e40658ed802e162a408fceeea5e87e1cd686ff04bf334",
       "spirv_sha256": "304f1d4548d5dfbebdf65589933182c74b3903a01c5a2a268cc82302e0545163",
       "word_count": 321
+    },
+    {
+      "name": "sample",
+      "stage": 4,
+      "source": "sample.frag",
+      "source_sha256": "f019c9e371f84c0c7fbe3043709d71ce8b94459fa0a2e87a89a03e29d76bdd25",
+      "spirv_sha256": "6d6292e03068bb40a6f99fc8207a2d1f16bfc27d36596adfdc9339f92d521d9c",
+      "word_count": 291
     }
   ]
 }

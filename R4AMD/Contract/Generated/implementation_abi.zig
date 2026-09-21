@@ -278,6 +278,156 @@ pub const R4AmdArchitecture = extern struct {
     reserved: u32,
     max_image_bytes: u64,
 };
+
+pub const R4AmdShader = extern struct {
+    version: u32,
+    size: u32,
+    stage: u32,
+    resource_abi: u32,
+    code_address: u64,
+    code_bytes: u32,
+    exec_bytes: u32,
+    sgprs: u32,
+    vgprs: u32,
+    float_mode: u32,
+    user_sgprs: u32,
+    input_vgprs: u32,
+    spi_ps_input_ena: u32,
+    spi_ps_input_addr: u32,
+    reserved: u32,
+};
+
+pub const R4AmdPipeline = extern struct {
+    version: u32,
+    size: u32,
+    blend_enable: u32,
+    src_rgb: u32,
+    dst_rgb: u32,
+    rgb_func: u32,
+    src_alpha: u32,
+    dst_alpha: u32,
+    alpha_func: u32,
+    write_mask: u32,
+    rop: u32,
+    blend_r: u32,
+    blend_g: u32,
+    blend_b: u32,
+    blend_a: u32,
+    cull: u32,
+    front_face: u32,
+    polygon: u32,
+    primitive: u32,
+    depth_test: u32,
+    depth_write: u32,
+    depth_compare: u32,
+    depth_clip: u32,
+    depth_bounds: u32,
+    depth_min: u32,
+    depth_max: u32,
+    stencil_test: u32,
+    stencil_compare: u32,
+    stencil_fail: u32,
+    stencil_pass: u32,
+    stencil_depth_fail: u32,
+    stencil_read_mask: u32,
+    stencil_write_mask: u32,
+    stencil_ref: u32,
+    back_compare: u32,
+    back_fail: u32,
+    back_pass: u32,
+    back_depth_fail: u32,
+    back_read_mask: u32,
+    back_write_mask: u32,
+    back_ref: u32,
+    line_width: u32,
+    gb_addr_config: u32,
+    reserved1: u32,
+};
+
+pub const R4AmdDepth = extern struct {
+    version: u32,
+    size: u32,
+    depth_address: u64,
+    depth_bytes: u64,
+    stencil_address: u64,
+    stencil_bytes: u64,
+    width: u32,
+    height: u32,
+    depth_format: u32,
+    depth_swizzle: u32,
+    depth_epitch: u32,
+    stencil_swizzle: u32,
+    stencil_epitch: u32,
+    reserved: u32,
+};
+
+pub const R4AmdDraw = extern struct {
+    version: u32,
+    size: u32,
+    descriptors: u64,
+    push_constants: u64,
+    index_address: u64,
+    index_bytes: u64,
+    count: u32,
+    instances: u32,
+    first_instance: u32,
+    base_vertex: i32,
+    draw_id: u32,
+    index_type: u32,
+    first_index: u32,
+    first_vertex: u32,
+    viewport_x: u32,
+    viewport_y: u32,
+    viewport_width: u32,
+    viewport_height: u32,
+    depth_min: u32,
+    depth_max: u32,
+    scissor_x: u32,
+    scissor_y: u32,
+    scissor_end_x: u32,
+    scissor_end_y: u32,
+    reserved0: u32,
+    reserved1: u32,
+};
+
+pub const R4AmdRect = extern struct {
+    x: i32,
+    y: i32,
+    width: u32,
+    height: u32,
+};
+
+pub const R4AmdYuvPlane = extern struct {
+    binding: u32,
+    reserved: u32,
+    offset: u64,
+    byte_length: u64,
+    pitch: u32,
+    reserved1: u32,
+};
+
+pub const R4AmdYuvHeader = extern struct {
+    version: u32,
+    size: u32,
+    kind: u32,
+    format: u32,
+    filter: u32,
+    blend: u32,
+    opacity: u32,
+    width: u32,
+    height: u32,
+    target_binding: u32,
+    plane_count: u32,
+    reserved: u32,
+    source: R4AmdRect,
+    destination: R4AmdRect,
+    scissor: R4AmdRect,
+    plane0: R4AmdYuvPlane,
+    plane1: R4AmdYuvPlane,
+    plane2: R4AmdYuvPlane,
+    chroma_x: u32,
+    chroma_y: u32,
+};
 pub const info_version: u32 = 1;
 pub const status_ok: i32 = 0;
 pub const profile_version: u32 = 1;
@@ -299,6 +449,18 @@ pub const image_usage_scanout: u32 = 8;
 pub const image_usage_depth: u32 = 16;
 pub const image_flag_scanout: u32 = 1;
 pub const image_flag_tiled: u32 = 2;
+pub const view_uint: u32 = 1;
+pub const view_alpha: u32 = 2;
+pub const format_rg8: u32 = 943215175;
+pub const format_r16: u32 = 540422482;
+pub const format_rg16: u32 = 842224199;
+pub const render_pipeline_words: u32 = 384;
+pub const render_draw_words: u32 = 80;
+pub const format_s8: u32 = 16777219;
+pub const native_yuv_command_kind: u32 = 1;
+pub const native_yuv_command_bytes: u32 = 504;
+pub const native_va_start: u64 = 343597383680;
+pub const native_va_end: u64 = 345744867328;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_stale: i32 = -3;
@@ -371,4 +533,26 @@ pub const ImageV1 = extern struct {
     metadata: ImageV1MetadataFn,
     import_image: ImageV1ImportImageFn,
     descriptors: ImageV1DescriptorsFn,
+};
+
+pub const render_v1_export_name = "RENDER_V1";
+pub const render_v1_revision: u16 = 1;
+pub const render_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 56,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x414d4434,
+    .interface_id_hi = 0x52344f53,
+};
+pub const RenderV1ShaderFn = *const fn (profile: u32, code: [*]u8, capacity: u32, output: *R4AmdShader) callconv(.c) i32;
+pub const RenderV1EncodePipelineFn = *const fn (vertex: *const R4AmdShader, fragment: *const R4AmdShader, pipeline: *const R4AmdPipeline, color: *const R4AmdImageDescriptors, depth: *const R4AmdDepth, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
+pub const RenderV1EncodeDrawFn = *const fn (draw: *const R4AmdDraw, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
+pub const RenderV1 = extern struct {
+    header: InterfaceHeader,
+    shader: RenderV1ShaderFn,
+    encode_pipeline: RenderV1EncodePipelineFn,
+    encode_draw: RenderV1EncodeDrawFn,
 };

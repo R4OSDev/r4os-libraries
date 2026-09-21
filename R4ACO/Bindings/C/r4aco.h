@@ -276,6 +276,7 @@ _Static_assert(offsetof(R4AcoCacheKey, pipeline_hash) == 104u, "R4AcoCacheKey.pi
 #define R4ACO_STATUS_OK ((int32_t)0)
 #define R4ACO_COMPILER_REVISION ((uint32_t)1)
 #define R4ACO_CAPABILITY_CPU_COMPILE ((uint32_t)1)
+#define R4ACO_REQUEST_TEXTURES ((uint32_t)1)
 #define R4ACO_STATUS_INVALID ((int32_t)-1)
 #define R4ACO_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4ACO_STATUS_BUSY ((int32_t)-3)

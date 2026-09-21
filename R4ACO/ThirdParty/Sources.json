@@ -3724,6 +3724,12 @@
       "sha256": "17973c0dc49d9854ca26caa191f0e12f7a424b68858d9a78de3860d959d85e4b",
       "bytes": 268319,
       "license": "Original per-file terms and notices, preserved verbatim"
+    },
+    {
+      "path": "src/amd/vulkan/nir/radv_nir_lower_descriptors.c",
+      "sha256": "488f50cc81e9fe683aa49d6ba3c0343d331214fb2aab5cc3cd91cc2299a4d6fe",
+      "bytes": 27649,
+      "license": "MIT; original Valve 2020 notice retained; descriptor replacement reference only"
     }
   ],
   "patches": [

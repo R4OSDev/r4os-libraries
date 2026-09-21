@@ -39,8 +39,12 @@ AddrFormat format(uint32_t f) {
     case 808669784: case 808669761: return ADDR_FMT_2_10_10_10; // XR30/AR30
     case 1211384385: case 942948929: return ADDR_FMT_16_16_16_16; // AB4H/AB48
     case 538982482: return ADDR_FMT_8;
+    case 0x38385247: return ADDR_FMT_8_8;
+    case 0x20363152: return ADDR_FMT_16;
+    case 0x32335247: return ADDR_FMT_16_16;
     case 0x01000001: return ADDR_FMT_32; // D32_FLOAT
     case 0x01000002: return ADDR_FMT_16; // D16_UNORM
+    case 0x01000003: return ADDR_FMT_8; // Separate S8
     case 0x01000101: return ADDR_FMT_BC1;
     case 0x01000103: return ADDR_FMT_BC3;
     case 0x01000105: return ADDR_FMT_BC5;
@@ -86,12 +90,13 @@ extern "C" int32_t r4amd_addr_compute(const R4AmdImageRequest *r, void *workspac
     ADDR2_MIP_INFO mi[15] = {};
     si.size = sizeof(si); so.size = sizeof(so); so.pMipInfo = mi;
     si.flags = flags(r->usage); si.swizzleMode = static_cast<AddrSwizzleMode>(r->swizzle);
+    if (r->format == 0x01000003) { si.flags.depth = 0; si.flags.stencil = 1; }
     si.resourceType = static_cast<AddrResourceType>(r->resource_type); si.format = format(r->format);
     si.width = r->width; si.height = r->height; si.numSlices = r->depth;
     si.numMipLevels = r->mip_count; si.numSamples = r->samples; si.numFrags = r->samples;
     // Public pitch is bytes; all accepted formats have integral bytes/elements.
     const uint32_t elem = r->format >= 0x01000101 && r->format <= 0x01000107 ? (r->format == 0x01000101 ? 8 : 16) :
-                          (r->format == 538982482 ? 1 : r->format == 0x01000002 ? 2 :
+                          ((r->format == 538982482 || r->format == 0x01000003) ? 1 : (r->format == 0x01000002 || r->format == 0x38385247 || r->format == 0x20363152) ? 2 :
                            (r->format == 1211384385 || r->format == 942948929 ? 8 : 4));
     si.pitchInElement = r->pitch / elem;
     rc = Addr2ComputeSurfaceInfo(out.hLib, &si, &so);

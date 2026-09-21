@@ -32,6 +32,7 @@ pub fn build(b: *std.Build) void {
     _ = artifact;
     const images = b.createModule(.{ .root_source_file = b.path("Source/images_test.zig"), .target = b.graph.host, .optimize = .Debug });
     images.addImport("r4l_contract", implementation);
+    images.addImport("r4os", host);
     images.addIncludePath(archives);
     images.addObjectFile(archives.path(b, "R4AMD-Addr-Host.a"));
     const image_check = b.addRunArtifact(b.addTest(.{ .root_module = images }));

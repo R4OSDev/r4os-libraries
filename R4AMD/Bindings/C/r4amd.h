@@ -520,6 +520,292 @@ _Static_assert(offsetof(R4AmdArchitecture, flags) == 48u, "R4AmdArchitecture.fla
 _Static_assert(offsetof(R4AmdArchitecture, reserved) == 52u, "R4AmdArchitecture.reserved offset mismatch");
 _Static_assert(offsetof(R4AmdArchitecture, max_image_bytes) == 56u, "R4AmdArchitecture.max_image_bytes offset mismatch");
 
+typedef struct R4AmdShader {
+    uint32_t version;
+    uint32_t size;
+    uint32_t stage;
+    uint32_t resource_abi;
+    uint64_t code_address;
+    uint32_t code_bytes;
+    uint32_t exec_bytes;
+    uint32_t sgprs;
+    uint32_t vgprs;
+    uint32_t float_mode;
+    uint32_t user_sgprs;
+    uint32_t input_vgprs;
+    uint32_t spi_ps_input_ena;
+    uint32_t spi_ps_input_addr;
+    uint32_t reserved;
+} R4AmdShader;
+_Static_assert(sizeof(R4AmdShader) == 64u, "R4AmdShader size mismatch");
+_Static_assert(offsetof(R4AmdShader, version) == 0u, "R4AmdShader.version offset mismatch");
+_Static_assert(offsetof(R4AmdShader, size) == 4u, "R4AmdShader.size offset mismatch");
+_Static_assert(offsetof(R4AmdShader, stage) == 8u, "R4AmdShader.stage offset mismatch");
+_Static_assert(offsetof(R4AmdShader, resource_abi) == 12u, "R4AmdShader.resource_abi offset mismatch");
+_Static_assert(offsetof(R4AmdShader, code_address) == 16u, "R4AmdShader.code_address offset mismatch");
+_Static_assert(offsetof(R4AmdShader, code_bytes) == 24u, "R4AmdShader.code_bytes offset mismatch");
+_Static_assert(offsetof(R4AmdShader, exec_bytes) == 28u, "R4AmdShader.exec_bytes offset mismatch");
+_Static_assert(offsetof(R4AmdShader, sgprs) == 32u, "R4AmdShader.sgprs offset mismatch");
+_Static_assert(offsetof(R4AmdShader, vgprs) == 36u, "R4AmdShader.vgprs offset mismatch");
+_Static_assert(offsetof(R4AmdShader, float_mode) == 40u, "R4AmdShader.float_mode offset mismatch");
+_Static_assert(offsetof(R4AmdShader, user_sgprs) == 44u, "R4AmdShader.user_sgprs offset mismatch");
+_Static_assert(offsetof(R4AmdShader, input_vgprs) == 48u, "R4AmdShader.input_vgprs offset mismatch");
+_Static_assert(offsetof(R4AmdShader, spi_ps_input_ena) == 52u, "R4AmdShader.spi_ps_input_ena offset mismatch");
+_Static_assert(offsetof(R4AmdShader, spi_ps_input_addr) == 56u, "R4AmdShader.spi_ps_input_addr offset mismatch");
+_Static_assert(offsetof(R4AmdShader, reserved) == 60u, "R4AmdShader.reserved offset mismatch");
+
+typedef struct R4AmdPipeline {
+    uint32_t version;
+    uint32_t size;
+    uint32_t blend_enable;
+    uint32_t src_rgb;
+    uint32_t dst_rgb;
+    uint32_t rgb_func;
+    uint32_t src_alpha;
+    uint32_t dst_alpha;
+    uint32_t alpha_func;
+    uint32_t write_mask;
+    uint32_t rop;
+    uint32_t blend_r;
+    uint32_t blend_g;
+    uint32_t blend_b;
+    uint32_t blend_a;
+    uint32_t cull;
+    uint32_t front_face;
+    uint32_t polygon;
+    uint32_t primitive;
+    uint32_t depth_test;
+    uint32_t depth_write;
+    uint32_t depth_compare;
+    uint32_t depth_clip;
+    uint32_t depth_bounds;
+    uint32_t depth_min;
+    uint32_t depth_max;
+    uint32_t stencil_test;
+    uint32_t stencil_compare;
+    uint32_t stencil_fail;
+    uint32_t stencil_pass;
+    uint32_t stencil_depth_fail;
+    uint32_t stencil_read_mask;
+    uint32_t stencil_write_mask;
+    uint32_t stencil_ref;
+    uint32_t back_compare;
+    uint32_t back_fail;
+    uint32_t back_pass;
+    uint32_t back_depth_fail;
+    uint32_t back_read_mask;
+    uint32_t back_write_mask;
+    uint32_t back_ref;
+    uint32_t line_width;
+    uint32_t gb_addr_config;
+    uint32_t reserved1;
+} R4AmdPipeline;
+_Static_assert(sizeof(R4AmdPipeline) == 176u, "R4AmdPipeline size mismatch");
+_Static_assert(offsetof(R4AmdPipeline, version) == 0u, "R4AmdPipeline.version offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, size) == 4u, "R4AmdPipeline.size offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, blend_enable) == 8u, "R4AmdPipeline.blend_enable offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, src_rgb) == 12u, "R4AmdPipeline.src_rgb offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, dst_rgb) == 16u, "R4AmdPipeline.dst_rgb offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, rgb_func) == 20u, "R4AmdPipeline.rgb_func offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, src_alpha) == 24u, "R4AmdPipeline.src_alpha offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, dst_alpha) == 28u, "R4AmdPipeline.dst_alpha offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, alpha_func) == 32u, "R4AmdPipeline.alpha_func offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, write_mask) == 36u, "R4AmdPipeline.write_mask offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, rop) == 40u, "R4AmdPipeline.rop offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, blend_r) == 44u, "R4AmdPipeline.blend_r offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, blend_g) == 48u, "R4AmdPipeline.blend_g offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, blend_b) == 52u, "R4AmdPipeline.blend_b offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, blend_a) == 56u, "R4AmdPipeline.blend_a offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, cull) == 60u, "R4AmdPipeline.cull offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, front_face) == 64u, "R4AmdPipeline.front_face offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, polygon) == 68u, "R4AmdPipeline.polygon offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, primitive) == 72u, "R4AmdPipeline.primitive offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, depth_test) == 76u, "R4AmdPipeline.depth_test offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, depth_write) == 80u, "R4AmdPipeline.depth_write offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, depth_compare) == 84u, "R4AmdPipeline.depth_compare offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, depth_clip) == 88u, "R4AmdPipeline.depth_clip offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, depth_bounds) == 92u, "R4AmdPipeline.depth_bounds offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, depth_min) == 96u, "R4AmdPipeline.depth_min offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, depth_max) == 100u, "R4AmdPipeline.depth_max offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, stencil_test) == 104u, "R4AmdPipeline.stencil_test offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, stencil_compare) == 108u, "R4AmdPipeline.stencil_compare offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, stencil_fail) == 112u, "R4AmdPipeline.stencil_fail offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, stencil_pass) == 116u, "R4AmdPipeline.stencil_pass offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, stencil_depth_fail) == 120u, "R4AmdPipeline.stencil_depth_fail offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, stencil_read_mask) == 124u, "R4AmdPipeline.stencil_read_mask offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, stencil_write_mask) == 128u, "R4AmdPipeline.stencil_write_mask offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, stencil_ref) == 132u, "R4AmdPipeline.stencil_ref offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, back_compare) == 136u, "R4AmdPipeline.back_compare offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, back_fail) == 140u, "R4AmdPipeline.back_fail offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, back_pass) == 144u, "R4AmdPipeline.back_pass offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, back_depth_fail) == 148u, "R4AmdPipeline.back_depth_fail offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, back_read_mask) == 152u, "R4AmdPipeline.back_read_mask offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, back_write_mask) == 156u, "R4AmdPipeline.back_write_mask offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, back_ref) == 160u, "R4AmdPipeline.back_ref offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, line_width) == 164u, "R4AmdPipeline.line_width offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, gb_addr_config) == 168u, "R4AmdPipeline.gb_addr_config offset mismatch");
+_Static_assert(offsetof(R4AmdPipeline, reserved1) == 172u, "R4AmdPipeline.reserved1 offset mismatch");
+
+typedef struct R4AmdDepth {
+    uint32_t version;
+    uint32_t size;
+    uint64_t depth_address;
+    uint64_t depth_bytes;
+    uint64_t stencil_address;
+    uint64_t stencil_bytes;
+    uint32_t width;
+    uint32_t height;
+    uint32_t depth_format;
+    uint32_t depth_swizzle;
+    uint32_t depth_epitch;
+    uint32_t stencil_swizzle;
+    uint32_t stencil_epitch;
+    uint32_t reserved;
+} R4AmdDepth;
+_Static_assert(sizeof(R4AmdDepth) == 72u, "R4AmdDepth size mismatch");
+_Static_assert(offsetof(R4AmdDepth, version) == 0u, "R4AmdDepth.version offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, size) == 4u, "R4AmdDepth.size offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, depth_address) == 8u, "R4AmdDepth.depth_address offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, depth_bytes) == 16u, "R4AmdDepth.depth_bytes offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, stencil_address) == 24u, "R4AmdDepth.stencil_address offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, stencil_bytes) == 32u, "R4AmdDepth.stencil_bytes offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, width) == 40u, "R4AmdDepth.width offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, height) == 44u, "R4AmdDepth.height offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, depth_format) == 48u, "R4AmdDepth.depth_format offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, depth_swizzle) == 52u, "R4AmdDepth.depth_swizzle offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, depth_epitch) == 56u, "R4AmdDepth.depth_epitch offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, stencil_swizzle) == 60u, "R4AmdDepth.stencil_swizzle offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, stencil_epitch) == 64u, "R4AmdDepth.stencil_epitch offset mismatch");
+_Static_assert(offsetof(R4AmdDepth, reserved) == 68u, "R4AmdDepth.reserved offset mismatch");
+
+typedef struct R4AmdDraw {
+    uint32_t version;
+    uint32_t size;
+    uint64_t descriptors;
+    uint64_t push_constants;
+    uint64_t index_address;
+    uint64_t index_bytes;
+    uint32_t count;
+    uint32_t instances;
+    uint32_t first_instance;
+    int32_t base_vertex;
+    uint32_t draw_id;
+    uint32_t index_type;
+    uint32_t first_index;
+    uint32_t first_vertex;
+    uint32_t viewport_x;
+    uint32_t viewport_y;
+    uint32_t viewport_width;
+    uint32_t viewport_height;
+    uint32_t depth_min;
+    uint32_t depth_max;
+    uint32_t scissor_x;
+    uint32_t scissor_y;
+    uint32_t scissor_end_x;
+    uint32_t scissor_end_y;
+    uint32_t reserved0;
+    uint32_t reserved1;
+} R4AmdDraw;
+_Static_assert(sizeof(R4AmdDraw) == 120u, "R4AmdDraw size mismatch");
+_Static_assert(offsetof(R4AmdDraw, version) == 0u, "R4AmdDraw.version offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, size) == 4u, "R4AmdDraw.size offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, descriptors) == 8u, "R4AmdDraw.descriptors offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, push_constants) == 16u, "R4AmdDraw.push_constants offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, index_address) == 24u, "R4AmdDraw.index_address offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, index_bytes) == 32u, "R4AmdDraw.index_bytes offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, count) == 40u, "R4AmdDraw.count offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, instances) == 44u, "R4AmdDraw.instances offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, first_instance) == 48u, "R4AmdDraw.first_instance offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, base_vertex) == 52u, "R4AmdDraw.base_vertex offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, draw_id) == 56u, "R4AmdDraw.draw_id offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, index_type) == 60u, "R4AmdDraw.index_type offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, first_index) == 64u, "R4AmdDraw.first_index offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, first_vertex) == 68u, "R4AmdDraw.first_vertex offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, viewport_x) == 72u, "R4AmdDraw.viewport_x offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, viewport_y) == 76u, "R4AmdDraw.viewport_y offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, viewport_width) == 80u, "R4AmdDraw.viewport_width offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, viewport_height) == 84u, "R4AmdDraw.viewport_height offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, depth_min) == 88u, "R4AmdDraw.depth_min offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, depth_max) == 92u, "R4AmdDraw.depth_max offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, scissor_x) == 96u, "R4AmdDraw.scissor_x offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, scissor_y) == 100u, "R4AmdDraw.scissor_y offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, scissor_end_x) == 104u, "R4AmdDraw.scissor_end_x offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, scissor_end_y) == 108u, "R4AmdDraw.scissor_end_y offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, reserved0) == 112u, "R4AmdDraw.reserved0 offset mismatch");
+_Static_assert(offsetof(R4AmdDraw, reserved1) == 116u, "R4AmdDraw.reserved1 offset mismatch");
+
+typedef struct R4AmdRect {
+    int32_t x;
+    int32_t y;
+    uint32_t width;
+    uint32_t height;
+} R4AmdRect;
+_Static_assert(sizeof(R4AmdRect) == 16u, "R4AmdRect size mismatch");
+_Static_assert(offsetof(R4AmdRect, x) == 0u, "R4AmdRect.x offset mismatch");
+_Static_assert(offsetof(R4AmdRect, y) == 4u, "R4AmdRect.y offset mismatch");
+_Static_assert(offsetof(R4AmdRect, width) == 8u, "R4AmdRect.width offset mismatch");
+_Static_assert(offsetof(R4AmdRect, height) == 12u, "R4AmdRect.height offset mismatch");
+
+typedef struct R4AmdYuvPlane {
+    uint32_t binding;
+    uint32_t reserved;
+    uint64_t offset;
+    uint64_t byte_length;
+    uint32_t pitch;
+    uint32_t reserved1;
+} R4AmdYuvPlane;
+_Static_assert(sizeof(R4AmdYuvPlane) == 32u, "R4AmdYuvPlane size mismatch");
+_Static_assert(offsetof(R4AmdYuvPlane, binding) == 0u, "R4AmdYuvPlane.binding offset mismatch");
+_Static_assert(offsetof(R4AmdYuvPlane, reserved) == 4u, "R4AmdYuvPlane.reserved offset mismatch");
+_Static_assert(offsetof(R4AmdYuvPlane, offset) == 8u, "R4AmdYuvPlane.offset offset mismatch");
+_Static_assert(offsetof(R4AmdYuvPlane, byte_length) == 16u, "R4AmdYuvPlane.byte_length offset mismatch");
+_Static_assert(offsetof(R4AmdYuvPlane, pitch) == 24u, "R4AmdYuvPlane.pitch offset mismatch");
+_Static_assert(offsetof(R4AmdYuvPlane, reserved1) == 28u, "R4AmdYuvPlane.reserved1 offset mismatch");
+
+typedef struct R4AmdYuvHeader {
+    uint32_t version;
+    uint32_t size;
+    uint32_t kind;
+    uint32_t format;
+    uint32_t filter;
+    uint32_t blend;
+    uint32_t opacity;
+    uint32_t width;
+    uint32_t height;
+    uint32_t target_binding;
+    uint32_t plane_count;
+    uint32_t reserved;
+    R4AmdRect source;
+    R4AmdRect destination;
+    R4AmdRect scissor;
+    R4AmdYuvPlane plane0;
+    R4AmdYuvPlane plane1;
+    R4AmdYuvPlane plane2;
+    uint32_t chroma_x;
+    uint32_t chroma_y;
+} R4AmdYuvHeader;
+_Static_assert(sizeof(R4AmdYuvHeader) == 200u, "R4AmdYuvHeader size mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, version) == 0u, "R4AmdYuvHeader.version offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, size) == 4u, "R4AmdYuvHeader.size offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, kind) == 8u, "R4AmdYuvHeader.kind offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, format) == 12u, "R4AmdYuvHeader.format offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, filter) == 16u, "R4AmdYuvHeader.filter offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, blend) == 20u, "R4AmdYuvHeader.blend offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, opacity) == 24u, "R4AmdYuvHeader.opacity offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, width) == 28u, "R4AmdYuvHeader.width offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, height) == 32u, "R4AmdYuvHeader.height offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, target_binding) == 36u, "R4AmdYuvHeader.target_binding offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, plane_count) == 40u, "R4AmdYuvHeader.plane_count offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, reserved) == 44u, "R4AmdYuvHeader.reserved offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, source) == 48u, "R4AmdYuvHeader.source offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, destination) == 64u, "R4AmdYuvHeader.destination offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, scissor) == 80u, "R4AmdYuvHeader.scissor offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, plane0) == 96u, "R4AmdYuvHeader.plane0 offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, plane1) == 128u, "R4AmdYuvHeader.plane1 offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, plane2) == 160u, "R4AmdYuvHeader.plane2 offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, chroma_x) == 192u, "R4AmdYuvHeader.chroma_x offset mismatch");
+_Static_assert(offsetof(R4AmdYuvHeader, chroma_y) == 196u, "R4AmdYuvHeader.chroma_y offset mismatch");
+
 #define R4AMD_INFO_VERSION ((uint32_t)1)
 #define R4AMD_STATUS_OK ((int32_t)0)
 #define R4AMD_PROFILE_VERSION ((uint32_t)1)
@@ -541,6 +827,18 @@ _Static_assert(offsetof(R4AmdArchitecture, max_image_bytes) == 56u, "R4AmdArchit
 #define R4AMD_IMAGE_USAGE_DEPTH ((uint32_t)16)
 #define R4AMD_IMAGE_FLAG_SCANOUT ((uint32_t)1)
 #define R4AMD_IMAGE_FLAG_TILED ((uint32_t)2)
+#define R4AMD_VIEW_UINT ((uint32_t)1)
+#define R4AMD_VIEW_ALPHA ((uint32_t)2)
+#define R4AMD_FORMAT_RG8 ((uint32_t)943215175)
+#define R4AMD_FORMAT_R16 ((uint32_t)540422482)
+#define R4AMD_FORMAT_RG16 ((uint32_t)842224199)
+#define R4AMD_RENDER_PIPELINE_WORDS ((uint32_t)384)
+#define R4AMD_RENDER_DRAW_WORDS ((uint32_t)80)
+#define R4AMD_FORMAT_S8 ((uint32_t)16777219)
+#define R4AMD_NATIVE_YUV_COMMAND_KIND ((uint32_t)1)
+#define R4AMD_NATIVE_YUV_COMMAND_BYTES ((uint32_t)504)
+#define R4AMD_NATIVE_VA_START ((uint64_t)343597383680)
+#define R4AMD_NATIVE_VA_END ((uint64_t)345744867328)
 #define R4AMD_STATUS_INVALID ((int32_t)-1)
 #define R4AMD_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4AMD_STATUS_STALE ((int32_t)-3)
@@ -710,6 +1008,58 @@ static inline int32_t r4amd_image_import_image(R4AmdImageV1Client *client, const
 static inline int32_t r4amd_image_descriptors(R4AmdImageV1Client *client, const R4AmdImageRequest * request, const R4AmdImageView * view, uint8_t * workspace, uint32_t workspace_bytes, R4AmdImageDescriptors * output) {
     R4AmdImageV1DescriptorsFn function = (R4AmdImageV1DescriptorsFn)r4l_slot_address(client->header, 64u);
     return function(request, view, workspace, workspace_bytes, output);
+}
+
+#define R4AMD_RENDER_V1_EXPORT_NAME "RENDER_V1"
+#define R4AMD_RENDER_V1_ABI_MAJOR 1u
+#define R4AMD_RENDER_V1_REVISION 1u
+#define R4AMD_RENDER_V1_INTERFACE_ID_LO 0x414d4434ull
+#define R4AMD_RENDER_V1_INTERFACE_ID_HI 0x52344f53ull
+#define R4AMD_RENDER_V1_TABLE_SIZE 56u
+#define R4AMD_RENDER_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4AMD_RENDER_V1_TABLE_SIZE, R4AMD_RENDER_V1_ABI_MAJOR, R4AMD_RENDER_V1_REVISION, R4AMD_RENDER_V1_INTERFACE_ID_LO, R4AMD_RENDER_V1_INTERFACE_ID_HI }
+typedef int32_t (*R4AmdRenderV1ShaderFn)(uint32_t profile, uint8_t * code, uint32_t capacity, R4AmdShader * output);
+typedef int32_t (*R4AmdRenderV1EncodePipelineFn)(const R4AmdShader * vertex, const R4AmdShader * fragment, const R4AmdPipeline * pipeline, const R4AmdImageDescriptors * color, const R4AmdDepth * depth, uint32_t * commands, uint32_t capacity, uint32_t * written);
+typedef int32_t (*R4AmdRenderV1EncodeDrawFn)(const R4AmdDraw * draw, uint32_t * commands, uint32_t capacity, uint32_t * written);
+typedef struct R4AmdRenderV1 {
+    R4LInterfaceHeader header;
+    R4AmdRenderV1ShaderFn shader;
+    R4AmdRenderV1EncodePipelineFn encode_pipeline;
+    R4AmdRenderV1EncodeDrawFn encode_draw;
+} R4AmdRenderV1;
+_Static_assert(sizeof(R4AmdRenderV1) == 56u, "R4AmdRenderV1 size mismatch");
+_Static_assert(offsetof(R4AmdRenderV1, shader) == 32u, "R4AmdRenderV1.shader offset mismatch");
+_Static_assert(offsetof(R4AmdRenderV1, encode_pipeline) == 40u, "R4AmdRenderV1.encode_pipeline offset mismatch");
+_Static_assert(offsetof(R4AmdRenderV1, encode_draw) == 48u, "R4AmdRenderV1.encode_draw offset mismatch");
+typedef struct R4AmdRenderV1Client { const R4LInterfaceHeader *header; } R4AmdRenderV1Client;
+
+static inline int32_t r4amd_render_v1_init(const R4XStartContext *ctx, R4AmdRenderV1Client *out_client) {
+    if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4AMD", "RENDER_V1");
+    const R4LInterfaceExpectation expected = { 0x414d4434ull, 0x52344f53ull, 1u, 1u, 56u, 0u, 0u };
+    const R4LInterfaceHeader *header = 0;
+    int32_t status = r4l_validate_import(item, &expected, &header);
+    if (status != R4L_BINDING_OK) return status;
+    if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    out_client->header = header;
+    return R4L_BINDING_OK;
+}
+
+static inline int32_t r4amd_shader(R4AmdRenderV1Client *client, uint32_t profile, uint8_t * code, uint32_t capacity, R4AmdShader * output) {
+    R4AmdRenderV1ShaderFn function = (R4AmdRenderV1ShaderFn)r4l_slot_address(client->header, 32u);
+    return function(profile, code, capacity, output);
+}
+
+static inline int32_t r4amd_encode_pipeline(R4AmdRenderV1Client *client, const R4AmdShader * vertex, const R4AmdShader * fragment, const R4AmdPipeline * pipeline, const R4AmdImageDescriptors * color, const R4AmdDepth * depth, uint32_t * commands, uint32_t capacity, uint32_t * written) {
+    R4AmdRenderV1EncodePipelineFn function = (R4AmdRenderV1EncodePipelineFn)r4l_slot_address(client->header, 40u);
+    return function(vertex, fragment, pipeline, color, depth, commands, capacity, written);
+}
+
+static inline int32_t r4amd_encode_draw(R4AmdRenderV1Client *client, const R4AmdDraw * draw, uint32_t * commands, uint32_t capacity, uint32_t * written) {
+    R4AmdRenderV1EncodeDrawFn function = (R4AmdRenderV1EncodeDrawFn)r4l_slot_address(client->header, 48u);
+    return function(draw, commands, capacity, written);
 }
 
 #endif

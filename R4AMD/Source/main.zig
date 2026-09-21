@@ -12,7 +12,7 @@ pub export fn r4amd_get_info_impl(output: *c.R4AmdInfo, output_bytes: u32) callc
         .mesa_major = 26,
         .mesa_minor = 2,
         .mesa_patch = 2,
-        .implementation_stage = 12,
+        .implementation_stage = 14,
         .capability_flags = 0,
         .reserved = 0,
     };
@@ -78,3 +78,18 @@ pub export fn r4amd_image_import_image_impl(r: *const c.R4AmdImageRequest, impor
 }
 pub export fn r4amd_image_descriptors_impl(r: *const c.R4AmdImageRequest, view: *const c.R4AmdImageView, workspace: [*]u8,
     bytes: u32, out: *c.R4AmdImageDescriptors) callconv(.c) i32 { return @import("images.zig").descriptors(r,view,workspace,bytes,out); }
+
+const render = @import("render_impl.zig").Provider(c);
+pub export fn r4amd_shader_impl(profile: u32, code: [*]u8, capacity: u32, output: *c.R4AmdShader) callconv(.c) i32 {
+    return render.shader(profile,code,capacity,output);
+}
+pub export fn r4amd_encode_pipeline_impl(vs: *const c.R4AmdShader, ps: *const c.R4AmdShader, state: *const c.R4AmdPipeline,
+    color: *const c.R4AmdImageDescriptors, depth: *const c.R4AmdDepth, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
+    return render.pipeline(vs,ps,state,color,depth,commands,capacity,written);
+}
+pub export fn r4amd_encode_draw_impl(request: *const c.R4AmdDraw, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
+    return render.draw(request,commands,capacity,written);
+}
+pub export var r4amd_render_v1: c.RenderV1 align(8) linksection(".data.r4l_exports") = .{
+    .header=c.render_v1_header, .shader=r4amd_shader_impl, .encode_pipeline=r4amd_encode_pipeline_impl, .encode_draw=r4amd_encode_draw_impl,
+};

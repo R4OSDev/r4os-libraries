@@ -148,6 +148,7 @@ pub const info_version: u32 = 1;
 pub const status_ok: i32 = 0;
 pub const compiler_revision: u32 = 1;
 pub const capability_cpu_compile: u32 = 1;
+pub const request_textures: u32 = 1;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_busy: i32 = -3;

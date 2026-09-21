@@ -20,7 +20,7 @@ Independent immutable library identity, append-only interface.
 COMPILER_V1
 -----------
 
-Pinned Mesa26.2.2 SPIR-V/NIR/ACO for the fixed Picasso native shader ABI1. Vertex, fragment, compute. CPU compilation only.
+Pinned Mesa26.2.2 SPIR-V/NIR/ACO for Picasso native buffer ABI1 and combined 2D texture ABI2. Vertex, fragment, compute. CPU compilation only.
 
 - ELF-Symbol: `r4aco_compiler_v1`
 - ABI-Major: 1
@@ -41,7 +41,7 @@ Typen
 - `R4AcoInfo`: 32 Byte, Alignment 4. Fixed ABI1 source/build identity, not a measured hardware profile.
 - `R4AcoDigest`: 32 Byte, Alignment 8. SHA-256 bytes, no host pointer or padding.
 - `R4AcoRuntime`: 72 Byte, Alignment 8. Callbacks are borrowed for the entire compile. One isolated SIMD-capable worker; abort_worker must terminate it without unwinding or returning. owner_retired must prove exact program retirement before replacing a previous owner. Callbacks use the x86_64 C ABI; alloc(user,bytes,alignment)->address; release(user,address,bytes,alignment); clock(user)->ns; abort(user,status); retired(user,generation)->0/1; cancelled(user)->0/1.
-- `R4AcoRequest`: 88 Byte, Alignment 8. Picasso 1002:15D8, external ASIC revision 0x41..0x48, fixed GFX9 wave64 native resource ABI1. SPIR-V<=65536 bytes, entry1..63 UTF-8 bytes; budget1..256MB; code<=16MB, log<=1MB. Flags zero. All input/output spans disjoint. Deadline uses caller clock; allocation/pass checkpoints cooperate with cancellation; parent retains worker and buffers until join.
+- `R4AcoRequest`: 88 Byte, Alignment 8. Picasso 1002:15D8, external ASIC revision 0x41..0x48, fixed GFX9 wave64. Flags0 selects buffer resource ABI1; request_textures selects ABI2 with four combined 2D textures in set1. Other flags rejected. SPIR-V<=65536 bytes, entry1..63 UTF-8 bytes; budget1..256MB; code<=16MB, log<=1MB. All input/output spans disjoint. Deadline uses caller clock; allocation/pass checkpoints cooperate with cancellation; parent retains worker and buffers until join.
 - `R4AcoSymbols`: 256 Byte, Alignment 8. At most32 original ACO symbols, low32 kind and high32 code DWORD offset. Kinds1/2 identify scratch descriptor address words when present. Kind3 annotates a PC-relative constant-data offset already resolved by ACO fix_constaddrs; consumers MUST NOT add the load address again.
 - `R4AcoBinary`: 424 Byte, Alignment 8. Actual ACO code/configuration and complete bounded fixup list. No BO, GPU address or hardware capability. rsrc registers are encoded by R4AMD from this configuration. Failed compile initializes status/log only; code and successful metadata become valid only on status0.
 - `R4AcoCacheKey`: 136 Byte, Alignment 8. Exact compiler/profile/ASIC/driver/command/resource/pipeline/generation identity. Compiler identity is embedded and verified by the cache implementation; no user-provided compiler digest is trusted.

@@ -22,7 +22,8 @@ static const struct ac_compiler_info picasso = {
    .has_packed_math_16bit=true, .has_fmask=true,
    .has_3d_cube_border_color_mipmap=true, .has_ls_vgpr_init_bug=true,
 };
-struct binding { struct ac_shader_args args; struct ac_arg descriptors; bool unsupported; };
+struct binding { struct ac_shader_args args; struct ac_arg descriptors; bool unsupported, textures; };
+#include "textures.h"
 extern void r4aco_port_check(void);
 static void shared_type(const struct glsl_type *type,unsigned *size,unsigned *alignment)
 {
@@ -142,7 +143,7 @@ static void binary(void **data,const struct ac_shader_config *config,const char 
    memcpy(out->code,code,m->code_bytes);
    m->status=0;
 }
-int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,uint32_t stage,struct r4aco_native *out)
+int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,uint32_t stage,uint32_t flags,struct r4aco_native *out)
 {
    memset(out,0,sizeof(*out));
    out->metadata.status=R4ACO_STATUS_COMPILER;
@@ -154,6 +155,8 @@ int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,ui
    memset(&fail_dump_mutex,0,sizeof(fail_dump_mutex));
    r4aco_port_check();
    nir_shader_compiler_options nir_options={0}; ac_nir_set_options(&picasso,false,&nir_options);
+   /* Match RADV's GFX9 system-value form; hardware supplies reciprocal W. */
+   nir_options.frag_coord_form=nir_frag_coord_xy_z_w_separate|nir_frag_coord_use_w_rcp;
    const struct spirv_capabilities caps={.Shader=true,.Matrix=true};
    const struct spirv_to_nir_options options={.environment=NIR_SPIRV_VULKAN,.capabilities=&caps,
       .ubo_addr_format=nir_address_format_32bit_index_offset,.ssbo_addr_format=nir_address_format_32bit_index_offset,
@@ -162,9 +165,9 @@ int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,ui
    nir_shader *nir=spirv_to_nir(words,count,NULL,stage,entry,&options,&nir_options);
    if(!nir) { glsl_type_singleton_decref(); return R4ACO_STATUS_INVALID; }
    int status=R4ACO_STATUS_UNSUPPORTED;
-   if(nir->info.num_textures || nir->info.num_images || nir->info.workgroup_size_variable)goto done;
+   if((!flags && nir->info.num_textures) || nir->info.num_images || nir->info.workgroup_size_variable)goto done;
    nir_foreach_variable_in_shader(var,nir) {
-      if(var->data.mode==nir_var_uniform || var->data.mode==nir_var_image || var->data.mode==nir_var_mem_global ||
+      if((var->data.mode==nir_var_uniform && (!flags || !glsl_type_is_sampler(var->type))) || var->data.mode==nir_var_image || var->data.mode==nir_var_mem_global ||
          var->data.mode==nir_var_mem_constant || var->data.mode==nir_var_mem_task_payload)goto done;
    }
    frontend(nir); optimize(nir);
@@ -179,7 +182,7 @@ int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,ui
    if(stage==MESA_SHADER_FRAGMENT && nir->info.inputs_read & ~(((UINT64_C(1)<<16)-1)<<VARYING_SLOT_VAR0))goto done;
    /* Preserve logical linkage masks before hardware exports replace NIR I/O. */
    const uint64_t inputs_read=nir->info.inputs_read, outputs_written=nir->info.outputs_written;
-   struct binding binding={0}; struct ac_shader_args *a=&binding.args;
+   struct binding binding={.textures=flags!=0}; struct ac_shader_args *a=&binding.args;
    ac_add_arg(a,AC_ARG_SGPR,2,AC_ARG_CONST_ADDR,&a->ring_offsets);
    ac_add_arg(a,AC_ARG_SGPR,2,AC_ARG_CONST_ADDR,&binding.descriptors);
    ac_add_arg(a,AC_ARG_SGPR,2,AC_ARG_CONST_ADDR,&a->push_constants);
@@ -233,17 +236,36 @@ int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,ui
       info.ps.num_inputs=util_bitcount64(nir->info.inputs_read);
    }
    nir_shader_intrinsics_pass(nir,resources,nir_metadata_control_flow,&binding);
+   nir_shader_instructions_pass(nir,texture_resources,nir_metadata_control_flow,&binding);
    if(binding.unsupported)goto done;
+   if(flags) {
+      const ac_nir_lower_tex_coords_options tex={.gfx_level=GFX9,.lower_array_layer_round_even=true};
+      NIR_PASS(_,nir,ac_nir_lower_tex_coords,&tex);
+   }
    const ac_nir_lower_intrinsics_to_args_options lower={.gfx_level=GFX9,.has_ls_vgpr_init_bug=true,
       .hw_stage=hw,.wave_size=64,.workgroup_size=info.workgroup_size,.load_grid_size_from_user_sgpr=true};
    NIR_PASS(_,nir,ac_nir_lower_intrinsics_to_args,a,&lower);
    NIR_PASS(_,nir,nir_lower_alu_to_scalar,NULL,NULL);
    NIR_PASS(_,nir,nir_lower_phis_to_scalar,ac_nir_lower_phis_to_scalar_cb,NULL);
    NIR_PASS(_,nir,nir_lower_load_const_to_scalar);
+   const nir_lower_idiv_options idiv={.allow_fp16=false};
+   NIR_PASS(_,nir,nir_lower_idiv,&idiv);
+   NIR_PASS(_,nir,nir_lower_flrp,16|32|64,false);
    optimize(nir);
    NIR_PASS(_,nir,ac_nir_lower_global_access,GFX9);
+   /* ACO consumes the late algebraic form (not NIR's canonical ineg/idiv).
+    * Cleanup cannot re-run the early algebraic pass and undo that lowering. */
+   bool late;
+   do {
+      r4aco_port_check(); late=false;
+      NIR_PASS(late,nir,nir_opt_algebraic_late);
+      NIR_PASS(_,nir,nir_opt_constant_folding);
+      NIR_PASS(_,nir,nir_opt_copy_prop);
+      NIR_PASS(_,nir,nir_opt_dce);
+      NIR_PASS(_,nir,nir_opt_cse);
+   } while(late);
    nir_shader_gather_info(nir,nir_shader_get_entrypoint(nir));
-   nir_validate_shader(nir,"R4ACO native ABI1");
+   nir_validate_shader(nir,"R4ACO native resource ABI1/2");
    r4aco_port_check();
    R4AcoBinary *m=&out->metadata;
    m->user_sgprs=stage==MESA_SHADER_COMPUTE?9:stage==MESA_SHADER_VERTEX?9:6;

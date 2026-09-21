@@ -70,8 +70,11 @@ pub const Registry = struct {
                 result |= c.device_gpu_copy_rows;
                 if (features.features & amd.feature_copy_layout != 0) result |= c.device_gpu_copy_layout;
             }
-            // AMD render/layout/presentation admission follows its actual
-            // implementations; NVIDIA command capability bits are not reused.
+            if (operations & (@as(u64, 1) << a.gfx_queue_operation_render) != 0) result |= c.device_gpu_render;
+            if (operations & (@as(u64, 1) << a.gfx_queue_operation_render_list) != 0) result |= c.device_gpu_render_list;
+            if (operations & (@as(u64, 1) << a.gfx_queue_operation_render_grid_list) != 0) result |= c.device_gpu_grid;
+            if (operations & (@as(u64, 1) << a.gfx_queue_operation_render_color_list) != 0) result |= c.device_gpu_color;
+            if (operations & (@as(u64, 1) << a.gfx_queue_operation_render_color_grid_list) != 0) result |= c.device_gpu_color_grid;
             return .{ .backend = c.render_backend_amd, .operations = result };
         }
         return null;

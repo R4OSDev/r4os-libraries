@@ -364,7 +364,7 @@
           "description": "Validate the complete cache identity, metadata and digest before publishing any code. Corruption, old compiler, wrong ASIC/layout/epoch are cache misses; never GPU submissions."
         }
       ],
-      "description": "Pinned Mesa26.2.2 SPIR-V/NIR/ACO for the fixed Picasso native shader ABI1. Vertex, fragment, compute. CPU compilation only."
+      "description": "Pinned Mesa26.2.2 SPIR-V/NIR/ACO for Picasso native buffer ABI1 and combined 2D texture ABI2. Vertex, fragment, compute. CPU compilation only."
     }
   ],
   "types": [
@@ -816,7 +816,7 @@
           "description": "log"
         }
       ],
-      "description": "Picasso 1002:15D8, external ASIC revision 0x41..0x48, fixed GFX9 wave64 native resource ABI1. SPIR-V<=65536 bytes, entry1..63 UTF-8 bytes; budget1..256MB; code<=16MB, log<=1MB. Flags zero. All input/output spans disjoint. Deadline uses caller clock; allocation/pass checkpoints cooperate with cancellation; parent retains worker and buffers until join."
+      "description": "Picasso 1002:15D8, external ASIC revision 0x41..0x48, fixed GFX9 wave64. Flags0 selects buffer resource ABI1; request_textures selects ABI2 with four combined 2D textures in set1. Other flags rejected. SPIR-V<=65536 bytes, entry1..63 UTF-8 bytes; budget1..256MB; code<=16MB, log<=1MB. All input/output spans disjoint. Deadline uses caller clock; allocation/pass checkpoints cooperate with cancellation; parent retains worker and buffers until join."
     },
     {
       "name": "R4AcoSymbols",
@@ -1762,6 +1762,13 @@
       "type": "u32",
       "value": 1,
       "description": "CPU shader compilation. No hardware rendering or device admission."
+    },
+    {
+      "zig_name": "request_textures",
+      "c_name": "R4ACO_REQUEST_TEXTURES",
+      "type": "u32",
+      "value": 1,
+      "description": "Request flag bit0 selects native resource ABI2: unchanged sixteen set0 buffer descriptors plus four set1 combined 2D image/sampler records at byte256+64*binding. Each record contains eight image DWORDs, four sampler DWORDs and sixteen reserved bytes. Supports sample, explicit-LOD sample and texel fetch; no arrays, shadow, MSAA or nonuniform descriptors. Flag0 retains resource ABI1."
     }
   ],
   "errors": [

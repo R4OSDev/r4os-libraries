@@ -12,7 +12,7 @@ pub export fn r4aco_get_info_impl(output: *c.R4AcoInfo, output_bytes: u32) callc
         .mesa_major = 26,
         .mesa_minor = 2,
         .mesa_patch = 2,
-        .implementation_stage = 13,
+        .implementation_stage = 14,
         .capability_flags = c.capability_cpu_compile,
         .reserved = 0,
     };

@@ -71,6 +71,8 @@ const Model = struct {
     var virtual_closes: usize = 0;
     var virtual_ack = false;
     var retire_ack = false;
+    const AmdPacket = extern struct { header: amd.R4AmdYuvHeader, color: [64]u32, matrix: [3][4]f32 };
+    var amd_packet: AmdPacket = undefined;
     fn properties(input: *const a.GfxBackendBinding, out: *a.GfxBackendProperties) callconv(.c) i32 {
         if (input.adapter_id == 3) {
             const arch: amd.R4AmdArchitecture = .{ .version=1,.size=@sizeOf(amd.R4AmdArchitecture),.vendor_id=amd.vendor_id,.device_id=0x15d8,
@@ -96,11 +98,11 @@ const Model = struct {
         unreachable;
     }
     fn virtualStart(input: *const a.GfxVirtualRequest, out: *a.GfxVirtualStatus) callconv(.c) i32 {
-        std.debug.assert(input.adapter_id == binding.adapter_id and input.memory_generation == 73 and input.kind >= 1 and input.kind <= 2);
+        std.debug.assert(input.adapter_id == binding.adapter_id and input.memory_generation == @as(u64, if (binding.adapter_id == 3) 97 else 73) and input.kind >= 1 and input.kind <= 2);
         for (&virtuals, 0..) |*entry, i| if (entry.handle.id == 0) {
             serial += 1; virtual_starts += 1;
             entry.* = .{ .request = input.*, .handle = .{ .id = @intCast(1000+i), .generation = serial },
-                .address = if (input.kind == 1) 0x10000000 + i * 0x20000 else virtualNode(input.parent).address };
+                .address = if (input.kind == 1) (if (binding.adapter_id == 3) amd.native_va_start + i * 64 * 1024 * 1024 else 0x10000000 + i * 0x20000) else virtualNode(input.parent).address };
             if (input.kind == 2) _ = ref(input.reference);
             return virtualQuery(&entry.handle, out);
         };
@@ -129,6 +131,23 @@ const Model = struct {
         return rc;
     }
     fn submitNative(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, native: *const a.GfxNativeSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        if (binding.adapter_id == 3) {
+            // The real canonical queue compares its registered BACKEND profile,
+            // not the unrelated R4L encoder interface identity.
+            std.debug.assert(input.operation == a.gfx_queue_operation_native and native.resource_count == 2 and native.command_bytes == 504);
+            var backend: a.GfxBackendInfo = .{};
+            std.debug.assert(backendInfo(1, &backend) == 1);
+            if (native.interface_id_lo != backend.profile.interface_id_lo or native.interface_id_hi != backend.profile.interface_id_hi or native.revision != backend.profile.revision)
+                return a.gfx_queue_error_unsupported;
+            amd_packet = @as(*const AmdPacket, @ptrFromInt(native.commands)).*;
+            const loans = @as([*]const a.GfxNativeResource, @ptrFromInt(native.resources))[0..native.resource_count];
+            for (loans, 0..) |loan, i| {
+                const entry = virtualNode(loan.binding);
+                std.debug.assert(entry.request.kind == 2 and !entry.closing and entry.request.flags == 0 and loan.access == @intFromBool(i == 1));
+                _ = ref(entry.request.reference);
+            }
+            return submit(queue, input, out);
+        }
         std.debug.assert(input.operation == a.gfx_queue_operation_native and native.resource_count == 3 and native.command_bytes == 48);
         const header: *const nv.R4NvNativeSubmitHeader = @ptrFromInt(native.commands);
         const push: *const nv.R4NvNativePush = @ptrFromInt(native.commands + 32);
@@ -485,7 +504,7 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) 
     var amdgpu = nvidia;
     amdgpu.binding.adapter_id = 3;
     amdgpu.memory_generation = 97; // Deliberately not the queue generation.
-    amdgpu.operations = 0xfff; // Unimplemented render bits must not be admitted.
+    amdgpu.operations = 0xfff; // Only the implemented AMD render subset is admitted.
     amdgpu.profile = .{ .interface_id_lo = amd.backend_v1_header.interface_id_lo,
         .interface_id_hi = amd.backend_v1_header.interface_id_hi, .revision = 1, .data_bytes = @sizeOf(amd.R4AmdDriverProfile) };
     const details: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile),
@@ -517,7 +536,9 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) 
     values[1].operations = amdgpu.operations;
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expectEqual(c.render_backend_amd, state.backend);
-    try t.expectEqual(c.device_gpu_copy | c.device_gpu_copy_rows, state.gpu_operations);
+    const amd_operations = c.device_gpu_copy | c.device_gpu_copy_rows | c.device_gpu_render | c.device_gpu_render_list |
+        c.device_gpu_grid | c.device_gpu_color | c.device_gpu_color_grid;
+    try t.expectEqual(amd_operations, state.gpu_operations);
     std.mem.swap(a.GfxBackendInfo, &values[0], &values[2]);
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expectEqual(c.render_backend_amd, state.backend); // Registration order irrelevant.
@@ -544,7 +565,10 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) 
     Model.reject_adapter = 0;
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expectEqual(c.render_backend_amd, state.backend);
-    try t.expectError(error.Unsupported, @import("native_resource.zig").Profile.query(storage)); // No NVIDIA VA/encoder profile.
+    const native_profile = try @import("native_resource.zig").Profile.query(storage);
+    try t.expectEqual(c.render_backend_amd,native_profile.backend);
+    try t.expectEqual(amd.native_va_start,native_profile.va_start);
+    try t.expectEqual(amd.native_va_end,native_profile.va_end);
     var image_desc: a.GfxBufferDescriptor = .{ .byte_length=4096, .alignment=4096, .width=4, .height=4,
         .format=a.gfx_buffer_format_xrgb8888, .plane_count=1, .plane_pitches=.{256,0,0,0},
         .location=a.gfx_buffer_location_device_local, .adapter_id=3, .driver_owner=80, .device_generation=97, .usage=28 };
@@ -967,6 +991,97 @@ pub fn check() !void {
     draw.gfx_queue_submit_native = @intFromPtr(&Model.submitNative);
     imports[3].table = @intFromPtr(&Model.nv_render); imports[3].resolved_version = nv.render_v1_revision;
     try checkNativeYuv(&config);
+    try checkAmdYuv(&config, &imports);
+}
+
+fn checkAmdYuv(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport) !void {
+    Model.reset(); Model.binding.adapter_id = 3;
+    var table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu,
+        .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill), .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame) };
+    var image_table: amd.ImageV1 = .{ .header = amd.image_v1_header, .calculate = @ptrCast(&amd_images.calculate), .address = @ptrCast(&amd_images.address),
+        .metadata = @ptrCast(&amd_images.metadata), .import_image = @ptrCast(&amd_images.importImage), .descriptors = @ptrCast(&amd_images.descriptors) };
+    imports[4].table = @intFromPtr(&table); imports[4].resolved_version = amd.backend_v1_revision;
+    imports[5].table = @intFromPtr(&image_table); imports[5].resolved_version = amd.image_v1_revision;
+    defer {
+        imports[4].table = 0; imports[4].resolved_version = 0;
+        imports[5].table = 0; imports[5].resolved_version = 0;
+        Model.adapters = null;
+    }
+    var backend = [_]a.GfxBackendInfo{.{ .binding = Model.binding, .operations = (@as(u64, 1) << a.gfx_queue_operation_native) | 29, .memory_generation = 97,
+        .profile = .{ .interface_id_lo = amd.backend_v1_header.interface_id_lo, .interface_id_hi = amd.backend_v1_header.interface_id_hi,
+            .revision = 1, .data_bytes = @sizeOf(amd.R4AmdDriverProfile) } }};
+    const details: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile), .vendor_id = amd.vendor_id, .device_id = 0x15d8,
+        .gc_version = amd.gc_9_1_0, .sdma_version = amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
+    @memcpy(backend[0].profile.data[0..@sizeOf(amd.R4AmdDriverProfile)], std.mem.asBytes(&details));
+    Model.adapters = &backend;
+    const colors = &@import("main.zig").r4gfx_color_v1;
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    var source: a.GfxBufferReference = .{}; var destination: a.GfxBufferReference = .{};
+    try t.expectEqual(@as(i32, 1), Model.create(&.{ .byte_length = 131072, .alignment = 4096, .width = 4, .height = 4,
+        .format = a.gfx_buffer_format_nv12, .plane_count = 2, .plane_offsets = .{ 0, 65536, 0, 0 }, .plane_pitches = .{ 256, 256, 0, 0 },
+        .usage = 28, .location = 1, .adapter_id = 3, .device_generation = 97, .driver_owner = 80 }, &source));
+    try t.expectEqual(@as(i32, 1), Model.create(&.{ .byte_length = 4096, .alignment = 4096, .width = 4, .height = 4,
+        .format = c.format_abgr16161616f, .plane_count = 1, .plane_pitches = .{ 256, 0, 0, 0 },
+        .usage = 28, .location = 1, .adapter_id = 3, .device_generation = 97, .driver_owner = 80 }, &destination));
+    var desc: c.R4GfxColorResourceDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxColorResourceDesc), .resource = descriptor(c.resource_image),
+        .description = .{ .version = 1, .size = @sizeOf(c.R4GfxColorDescription), .primaries = c.color_primaries_srgb, .transfer = c.color_transfer_linear,
+            .range = c.color_range_full, .alpha = c.color_alpha_optical, .precision = c.color_precision_float16, .flags = 0,
+            .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 } };
+    desc.resource.flags = c.image_target; desc.resource.source_kind = c.source_import_buffer; desc.resource.source_address = @intFromPtr(&destination.reference);
+    var target: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, colors.color_resource_create(&handle, &desc, &target));
+    try t.expectEqual(@as(i32, 1), Model.release(&destination.reference));
+    var request = std.mem.zeroes(c.R4GfxYuvRenderRequest);
+    request.version = 1; request.size = @sizeOf(c.R4GfxYuvRenderRequest); request.target = target; request.deadline_ns = 99999999;
+    request.source = .{ .version = 1, .size = @sizeOf(c.R4GfxYuvBufferImage), .format = c.yuv_format_nv12, .width = 4, .height = 4, .plane_count = 2, .reserved = 0,
+        .crop = .{ .x = 1, .y = 1, .width = 3, .height = 3 },
+        .description = .{ .version = 1, .size = @sizeOf(c.R4GfxYuvDescription), .primaries = 1, .transfer = 1, .matrix = 1, .range = 2,
+            .chroma_location = 1, .flags = 0, .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 },
+        .plane0 = .{ .reference_id = source.reference.id, .reference_generation = source.reference.generation, .reserved = 0, .offset = 0, .byte_length = 65536, .pitch = 256 },
+        .plane1 = .{ .reference_id = source.reference.id, .reference_generation = source.reference.generation, .reserved = 0, .offset = 65536, .byte_length = 65536, .pitch = 256 },
+        .plane2 = std.mem.zeroes(c.R4GfxYuvBufferPlane) };
+    request.transform = .{ .version = 1, .size = @sizeOf(c.R4GfxColorTransform), .source_rect = request.source.crop, .target_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 },
+        .sampler = 1, .operation = c.render_operation_over, .opacity = 32768, .flags = 0, .pixel_budget = 16 };
+    var job = std.mem.zeroes(c.R4GfxJob);
+    try t.expectEqual(c.status_busy, colors.color_yuv_render_submit(&handle, &request, &job));
+    try t.expect(job.slot == 0 and !Model.job_live and Model.maps == 0);
+    Model.virtual_ack = true;
+    for (0..8) |_| {
+        const rc = colors.color_yuv_render_submit(&handle, &request, &job);
+        if (rc == c.status_ok) break;
+        try t.expectEqual(c.status_busy, rc);
+    }
+    try t.expect(job.slot != 0 and Model.job_live and Model.maps == 0 and Model.virtual_starts == 4);
+    try t.expect(Model.amd_packet.header.target_binding == 1 and Model.amd_packet.header.plane0.binding == 0 and Model.amd_packet.header.plane1.binding == 0);
+    try t.expect(Model.amd_packet.header.plane1.offset == 65536 and Model.amd_packet.header.source.x == 1 and Model.amd_packet.header.opacity == 32768);
+    const retained = Model.referenceCount();
+    var dependency: c.R4GfxCopyFence = undefined;
+    try t.expectEqual(c.status_ok, api.job_fence(&handle, &job, &dependency));
+    request.dependency_count = 1; request.dependencies = @intFromPtr(&dependency);
+    var pending = std.mem.zeroes(c.R4GfxJob);
+    try t.expectEqual(c.status_busy, colors.color_yuv_render_submit(&handle, &request, &pending));
+    try t.expect(Model.dependency_seen and pending.slot == 0 and Model.referenceCount() == retained);
+    request.dependency_count = 0; request.dependencies = 0;
+    try t.expectEqual(c.status_busy, api.job_release(&handle, &job));
+    try t.expect(Model.referenceCount() == retained and Model.virtual_closes == 0);
+    Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_complete; Model.status.flags = 0;
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expectEqual(c.status_ok, colors.color_yuv_render_submit(&handle, &request, &job));
+    try t.expect(Model.virtual_starts == 4 and Model.maps == 0);
+    Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_failed; Model.status.flags = 0;
+    var failed: c.R4GfxJobInfo = undefined;
+    try t.expectEqual(c.status_ok, api.job_info(&handle, &job, &failed));
+    try t.expect(failed.result == a.gfx_queue_result_failed and failed.backend == c.render_backend_amd);
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &target));
+    try t.expectEqual(@as(i32, 1), Model.release(&source.reference));
+    try t.expectEqual(c.status_busy, api.device_close(&handle));
+    try t.expect(Model.virtual_closes == 2 and Model.referenceCount() == 2);
+    Model.retire_ack = true;
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and Model.maps == 0 and Model.premature_closes == 0);
+    std.debug.print("AMD native YUV: canonical profile, deduplicated planes, no pixel maps, cached VA, retained fences and retirement: OK\n", .{});
 }
 
 fn checkNativeYuv(config: *const c.R4GfxDeviceConfig) !void {

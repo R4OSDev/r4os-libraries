@@ -37,6 +37,10 @@ test "real linked AddrLib surface, coordinates and bounded callback allocation" 
 const regs = @cImport({
     @cInclude("amdgfx9regs.h");
 });
+test "real GFX9 shader/attachment/PM4 integration, indexed range and failure atomicity" {
+    try @import("render_checks.zig").run();
+    try @import("render_batch_checks.zig").run();
+}
 test "AddrLib mips, arrays, volumes, MSAA, block formats and descriptor reference fields" {
     var scratch: [65536]u8 align(16) = undefined;
     var layout: c.R4AmdImageLayout = undefined;
