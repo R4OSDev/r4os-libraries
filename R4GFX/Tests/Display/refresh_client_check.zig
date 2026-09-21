@@ -20,6 +20,7 @@ const Fake = struct {
     }
 };
 pub fn check() !void {
+    try brightnessCheck();
     var saved: prefs.Config = .{};
     saved = try saved.change(key, 2, false);
     var other = key; other.connector += 1;
@@ -77,4 +78,40 @@ pub fn check() !void {
     client.step(&draw, target, 12 + 4*presentation.renew_ns, 2, true);
     const missing_calls = draw.calls;
     client.step(&draw, target, 13 + 5*presentation.renew_ns, 2, true); try t.expect(draw.calls == missing_calls);
+}
+
+const brightness_prefs = @import("../../Display/brightness_preferences.zig");
+const BrightnessFake = struct {
+    calls: u64 = 0,
+    value: a.GfxOutputBrightness = .{},
+    pub fn gfxOutputBrightness(self: *BrightnessFake, _: *const a.GfxOutputId, output: *a.GfxOutputBrightness) i32 { output.* = self.value; return 1; }
+    pub fn gfxBrightnessRequest(self: *BrightnessFake, input: *const a.GfxBrightnessRequest, output: *a.GfxBrightnessRequest) i32 {
+        self.calls += 1; output.* = input.*; output.sequence = self.calls;
+        std.debug.assert(input.level >= self.value.minimum and input.level <= self.value.maximum);
+        return 1;
+    }
+};
+fn brightnessCheck() !void {
+    var saved: brightness_prefs.Config = .{};
+    saved = try saved.change(key, 0);
+    var bytes: [brightness_prefs.max_bytes]u8 = undefined;
+    try t.expectEqualDeep(saved, try brightness_prefs.Config.parse(try saved.encode(&bytes)));
+    try t.expectError(error.Invalid, saved.change(.{}, 100));
+    try t.expectError(error.Invalid, saved.change(key, 65536));
+    var invalid = saved; invalid.count = 2; invalid.choices[1] = invalid.choices[0];
+    try t.expectError(error.Duplicate, invalid.encode(&bytes));
+    var draw: BrightnessFake = .{ .value = .{ .identity = .{ .adapter_id = 1, .connector_id = 2,
+        .device_generation = 3, .connection_generation = 4 }, .path = 1, .phase = 1, .minimum = 1024, .maximum = 65535, .current = 40000, .flags = 1 } };
+    var client: @import("../../Display/brightness_client.zig").Client = .{};
+    client.select(saved.find(key));
+    client.step(&draw, draw.value.identity, 1, false); try t.expect(draw.calls == 0);
+    client.step(&draw, draw.value.identity, 2, true); try t.expect(draw.calls == 1 and client.accepted == 1);
+    draw.value.phase = a.gfx_brightness_phase_failed; draw.value.flags = 0;
+    client.step(&draw, draw.value.identity, 2 * std.time.ns_per_s, true); try t.expect(draw.calls == 1);
+    saved = try saved.change(key, 0); client.select(saved.find(key));
+    client.step(&draw, draw.value.identity, 3 * std.time.ns_per_s, true); try t.expect(draw.calls == 2);
+    draw.value.identity.connection_generation += 1;
+    client.step(&draw, draw.value.identity, 4 * std.time.ns_per_s, true); try t.expect(draw.calls == 3);
+    client.select(null);
+    client.step(&draw, draw.value.identity, 5 * std.time.ns_per_s, true); try t.expect(draw.calls == 3);
 }
