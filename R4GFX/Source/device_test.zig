@@ -456,7 +456,7 @@ fn providerImage(handle: *const c.R4GfxDevice) !c.R4GfxResource {
 fn checkProviders(raw: *const a.R4XStartContext, imports: *[5]a.R4XStartImport) !void {
     const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
     var table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu,
-        .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill) };
+        .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill), .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame) };
     const old_nv = Model.nv_table.negotiate;
     const old_presentation = Model.presentation_info;
     Model.nv_table.negotiate = ProviderProbe.nvidia;

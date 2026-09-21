@@ -5,8 +5,8 @@ $unit=[IO.Path]::GetFullPath('..',$PSScriptRoot)
 $catalog=Get-Content -Raw (Join-Path $unit 'ThirdParty/Sources.json')|ConvertFrom-Json
 $original=Join-Path $unit $catalog.original_root
 $sections=[Collections.Generic.List[string]]::new()
-$sections.Add("R4AMD SDMA encoder notices (also compiled into AMDGPU)`nMesa $($catalog.upstream_version); original identities in ThirdParty/Sources.json.`n")
-foreach($name in @('src/amd/common/ac_cmdbuf_sdma.c','src/amd/common/ac_cmdbuf_sdma.h','src/amd/common/sid.h','licenses/MIT')){
+$sections.Add("R4AMD SDMA/PM4 encoder notices (also compiled into AMDGPU)`nMesa $($catalog.upstream_version); original identities in ThirdParty/Sources.json.`n")
+foreach($name in @('src/amd/common/ac_cmdbuf_cp.c','src/amd/common/ac_cmdbuf_cp.h','src/amd/common/ac_cmdbuf_sdma.c','src/amd/common/ac_cmdbuf_sdma.h','src/amd/common/sid.h','licenses/MIT')){
     $entry=@($catalog.files|Where-Object {$_.path -ceq $name})
     if($entry.Count -ne 1){throw "Missing source $name"}
     $path=Join-Path $original $name
@@ -20,4 +20,4 @@ foreach($name in @('src/amd/common/ac_cmdbuf_sdma.c','src/amd/common/ac_cmdbuf_s
 }
 [IO.Directory]::CreateDirectory($OutputDirectory)|Out-Null
 [IO.File]::WriteAllText((Join-Path $OutputDirectory 'R4AMD-NOTICES.txt'),($sections -join "`n"),[Text.UTF8Encoding]::new($true))
-Write-Host 'R4AMD original SDMA source notices and complete MIT text exported.'
+Write-Host 'R4AMD original SDMA/PM4 source notices and complete MIT text exported.'

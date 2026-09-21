@@ -361,6 +361,20 @@
       "license": "MIT",
       "license_evidence": "Original source notice and upstream MIT license",
       "role": "SDMA4.1 copy packet reference"
+    },
+    {
+      "path": "src/amd/common/ac_cmdbuf_cp.c",
+      "sha256": "3ddb884fa300d8f1688e139bfeeb71bef29b00950089acd122a103982ec3806b",
+      "bytes": 24859,
+      "license": "MIT (embedded notice)",
+      "role": "GFX9 CP/MEC/RLC, context and packet reference"
+    },
+    {
+      "path": "src/amd/common/ac_cmdbuf_cp.h",
+      "sha256": "beacb5d3b6d16e8aee6d8c72656849b86e7e750f7e879eda4ba29ddccd1009b6",
+      "bytes": 4375,
+      "license": "MIT (embedded notice)",
+      "role": "GFX9 CP/MEC/RLC, context and packet reference"
     }
   ],
   "patches": [

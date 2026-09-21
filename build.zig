@@ -9,6 +9,7 @@ pub const addR4gfxHostColor = @import("R4GFX/color_build.zig").addAt;
 /// bleibt in ihrer eigenen Einheit baubar und getestet.
 pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4amd_copy", b.path("R4AMD/Source/copy.zig"));
+    b.addNamedLazyPath("r4amd_pm4", b.path("R4AMD/Source/pm4.zig"));
     b.addNamedLazyPath("r4amd_zig_binding", b.path("R4AMD/Bindings/Zig/r4amd.zig"));
     b.addNamedLazyPath("r4amd_c_include", b.path("R4AMD/Bindings/C"));
     b.addNamedLazyPath("r4aco_zig_binding", b.path("R4ACO/Bindings/Zig/r4aco.zig"));

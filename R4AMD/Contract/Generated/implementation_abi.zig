@@ -75,6 +75,20 @@ pub const R4AmdFill = extern struct {
     value: u32,
     reserved: u32,
 };
+
+pub const R4AmdPm4Frame = extern struct {
+    version: u32,
+    size: u32,
+    engine: u32,
+    flags: u32,
+    indirect_address: u64,
+    fence_address: u64,
+    eop_scratch: u64,
+    fence_sequence: u64,
+    command_dwords: u32,
+    reserved0: u32,
+    reserved1: u64,
+};
 pub const info_version: u32 = 1;
 pub const status_ok: i32 = 0;
 pub const profile_version: u32 = 1;
@@ -86,6 +100,7 @@ pub const feature_copy_linear: u32 = 1;
 pub const feature_copy_rows: u32 = 2;
 pub const feature_copy_layout: u32 = 4;
 pub const feature_fill: u32 = 8;
+pub const feature_pm4: u32 = 16;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 
@@ -108,23 +123,25 @@ pub const InfoV1 = extern struct {
 };
 
 pub const backend_v1_export_name = "BACKEND_V1";
-pub const backend_v1_revision: u16 = 2;
+pub const backend_v1_revision: u16 = 3;
 pub const backend_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 56,
+    .size = 64,
     .abi_major = 1,
-    .abi_minor = 2,
+    .abi_minor = 3,
     .interface_id_lo = 0x414d4432,
     .interface_id_hi = 0x52344f53,
 };
 pub const BackendV1NegotiateFn = *const fn (profile: *const R4AmdDeviceProfile, output: *R4AmdFeatures) callconv(.c) i32;
 pub const BackendV1EncodeCopyFn = *const fn (request: *const R4AmdCopy, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
 pub const BackendV1EncodeFillFn = *const fn (request: *const R4AmdFill, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
+pub const BackendV1EncodePm4FrameFn = *const fn (request: *const R4AmdPm4Frame, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
 pub const BackendV1 = extern struct {
     header: InterfaceHeader,
     negotiate: BackendV1NegotiateFn,
     encode_copy: BackendV1EncodeCopyFn,
     encode_fill: BackendV1EncodeFillFn,
+    encode_pm4_frame: BackendV1EncodePm4FrameFn,
 };

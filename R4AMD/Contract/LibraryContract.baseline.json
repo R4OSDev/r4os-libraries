@@ -77,7 +77,7 @@
       "zig_type": "BackendV1",
       "c_type": "R4AmdBackendV1",
       "abi_major": 1,
-      "revision": 2,
+      "revision": 3,
       "interface_id_lo": 1095582770,
       "interface_id_hi": 1379159891,
       "known_required_flags": 0,
@@ -282,6 +282,82 @@
             "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
           },
           "description": "Bounded SDMA4.1 packets into disjoint caller memory; failure changes neither commands nor written count. No fence or device access is implied."
+        },
+        {
+          "name": "encode_pm4_frame",
+          "c_name": "r4amd_encode_pm4_frame",
+          "symbol": "r4amd_encode_pm4_frame_impl",
+          "slot": 3,
+          "since_revision": 3,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "request",
+              "type": {
+                "name": "R4AmdPm4Frame",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "commands",
+              "type": {
+                "name": "u32",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "capacity",
+              "description": "commands"
+            },
+            {
+              "name": "capacity",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "capacity"
+            },
+            {
+              "name": "written",
+              "type": {
+                "name": "u32",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "written"
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
+          },
+          "description": "Emit 48 graphics or 32 compute PM4 dwords; disjoint buffers and all fields are validated before output writes. No allocation, retention, submission or hardware access."
         }
       ],
       "description": "AMD-only negotiation; separate from NVIDIA BACKEND_V1 even if individual payload sizes coincide."
@@ -918,6 +994,135 @@
         }
       ],
       "description": "Fixed SDMA4.1 request; all reserved fields and unsupported modifiers must be zero. Validation precedes output writes."
+    },
+    {
+      "name": "R4AmdPm4Frame",
+      "size": 64,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 64 bytes."
+        },
+        {
+          "name": "engine",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0 graphics, 1 compute, GC9.1 only."
+        },
+        {
+          "name": "flags",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Bit 0 requests an EOP interrupt; all others zero."
+        },
+        {
+          "name": "indirect_address",
+          "offset": 16,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "32-byte-aligned VMID1 address of a retained IB."
+        },
+        {
+          "name": "fence_address",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "8-byte-aligned VMID0 address of a retained fence."
+        },
+        {
+          "name": "eop_scratch",
+          "offset": 32,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Graphics: separate 256-byte-aligned/256-byte GFX9 EOP workaround storage in VMID0. Compute: zero."
+        },
+        {
+          "name": "fence_sequence",
+          "offset": 40,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact nonzero token; all-ones poison is forbidden."
+        },
+        {
+          "name": "command_dwords",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "1..2048 dwords; IB contents and resource retention remain with their owner."
+        },
+        {
+          "name": "reserved0",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        },
+        {
+          "name": "reserved1",
+          "offset": 56,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        }
+      ],
+      "description": "Bounded GC9.1 outer ring frame: HDP, pipeline/cache barriers, VMID1 IB, EOP workaround and exact 64-bit fence. No device completion or shader/API capability is implied."
     }
   ],
   "constants": [
@@ -997,6 +1202,13 @@
       "type": "u32",
       "value": 8,
       "description": "Implemented 32-bit constant-fill encoder, independent of driver operation admission."
+    },
+    {
+      "zig_name": "feature_pm4",
+      "c_name": "R4AMD_FEATURE_PM4",
+      "type": "u32",
+      "value": 16,
+      "description": "GC9.1 graphics/compute frame encoder only, not a renderer or Vulkan/OpenCL/HIP runtime."
     }
   ],
   "errors": [

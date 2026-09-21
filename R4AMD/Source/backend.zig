@@ -2,6 +2,42 @@
 const std = @import("std");
 const c = @import("r4l_contract");
 const copy = @import("copy.zig");
+const pm4 = @import("pm4.zig");
+
+pub fn encodePm4Frame(request: *const c.R4AmdPm4Frame, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
+    if (!disjoint(c.R4AmdPm4Frame, request, commands, capacity, written)) return c.status_invalid;
+    if (request.version != 1 or request.size != @sizeOf(c.R4AmdPm4Frame) or request.engine > 1 or request.flags & ~@as(u32, 1) != 0 or
+        request.reserved0 != 0 or request.reserved1 != 0) return c.status_invalid;
+    const count = pm4.encodeFrame(commands[0..capacity], .{ .engine = @enumFromInt(request.engine), .ib = request.indirect_address,
+        .words = request.command_dwords, .fence = request.fence_address, .sequence = request.fence_sequence,
+        .eop_scratch = request.eop_scratch, .interrupt = request.flags & 1 != 0 }) catch return c.status_invalid;
+    written.* = @intCast(count); return c.status_ok;
+}
+
+test "AMD PM4 ABI preserves failure outputs, packet bounds, reserved fields and disjoint ownership" {
+    const t = std.testing;
+    var request: c.R4AmdPm4Frame = .{ .version = 1, .size = @sizeOf(c.R4AmdPm4Frame), .engine = 0, .flags = 1,
+        .indirect_address = 0x8000080000, .fence_address = 0x120010100, .eop_scratch = 0x120075000,
+        .fence_sequence = 0x123400000001, .command_dwords = 16, .reserved0 = 0, .reserved1 = 0 };
+    var words: [48]u32 = @splat(0xdeadbeef); var written: u32 = 77;
+    try t.expectEqual(c.status_ok, encodePm4Frame(&request, &words, words.len, &written));
+    try t.expectEqual(@as(u32, 48), written); try pm4.packetBoundaries(&words);
+    const original = words; const count = written;
+    try t.expectEqual(c.status_invalid, encodePm4Frame(&request, &words, 47, &written));
+    try t.expectEqual(c.status_invalid, encodePm4Frame(&request, &words, 48, &words[0]));
+    inline for (.{ "version", "size", "engine", "flags", "reserved0", "reserved1" }) |field| {
+        const saved = @field(request, field); @field(request, field) = 0xffffffff;
+        try t.expectEqual(c.status_invalid, encodePm4Frame(&request, &words, 48, &written)); @field(request, field) = saved;
+    }
+    try t.expectEqualDeep(original, words); try t.expectEqual(count, written);
+    const input = request;
+    try t.expectEqual(c.status_invalid, encodePm4Frame(&request, @ptrCast(&request), 1, &written)); try t.expectEqualDeep(input, request);
+    request.engine = 1; request.eop_scratch = 0;
+    try t.expectEqual(c.status_ok, encodePm4Frame(&request, &words, 32, &written));
+    try t.expectEqual(@as(u32, 32), written); try pm4.packetBoundaries(words[0..32]);
+    request.fence_sequence = 0;
+    try t.expectEqual(c.status_invalid, encodePm4Frame(&request, &words, 48, &written));
+}
 
 pub fn negotiate(profile: *const c.R4AmdDeviceProfile, output: *c.R4AmdFeatures) callconv(.c) i32 {
     if (@intFromPtr(profile) == 0 or @intFromPtr(output) == 0 or
@@ -19,18 +55,18 @@ pub fn negotiate(profile: *const c.R4AmdDeviceProfile, output: *c.R4AmdFeatures)
     // These are pure encoder operations. Actual device admission additionally
     // requires AMDGPU ring self-test and common backend capabilities.
     output.* = .{ .version = 1, .size = @sizeOf(c.R4AmdFeatures), .command_abi = c.command_abi,
-        .features = c.feature_copy_linear | c.feature_copy_rows | c.feature_fill, .gpu_address_bits = 48, .max_command_words = copy.max_words, .reserved0 = 0, .reserved1 = 0 };
+        .features = c.feature_copy_linear | c.feature_copy_rows | c.feature_fill | c.feature_pm4, .gpu_address_bits = 48, .max_command_words = copy.max_words, .reserved0 = 0, .reserved1 = 0 };
     return c.status_ok;
 }
 
-test "AMD negotiation preserves failures and exposes only implemented SDMA operations" {
+test "AMD negotiation preserves failures and exposes only implemented SDMA and PM4 encoders" {
     const t = std.testing;
     var profile: c.R4AmdDeviceProfile = .{ .version = 1, .size = @sizeOf(c.R4AmdDeviceProfile),
         .vendor_id = c.vendor_id, .device_id = 0x15d8, .gc_version = c.gc_9_1_0, .sdma_version = c.sdma_4_1_0,
         .command_abi = c.command_abi, .flags = 0, .adapter_id = 7, .reserved = 0, .device_generation = 11, .reset_generation = 13 };
     var result = std.mem.zeroes(c.R4AmdFeatures);
     try t.expectEqual(c.status_ok, negotiate(&profile, &result));
-    try t.expect(result.features == c.feature_copy_linear | c.feature_copy_rows | c.feature_fill and result.max_command_words == copy.max_words and result.gpu_address_bits == 48);
+    try t.expect(result.features == c.feature_copy_linear | c.feature_copy_rows | c.feature_fill | c.feature_pm4 and result.max_command_words == copy.max_words and result.gpu_address_bits == 48);
     const original = result;
     profile.vendor_id = 0x10de;
     try t.expectEqual(c.status_unsupported, negotiate(&profile, &result));

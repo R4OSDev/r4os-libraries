@@ -285,3 +285,11 @@ the full MIT grant and AMD/Valve copyrights. `R4AMD/Tools/ExportLegal.ps1`
 exports the original notices and complete MIT text to `R4AMD-NOTICES.txt`,
 which is mandatory in the distribution legal plan. AddrLib portability
 objects are still separate from this callable Zig SDMA implementation.
+
+## AMD GFX9 PM4 encoder (0.80.11)
+
+R4AMD/Source/pm4.zig derives GC9 command framing/cache/fence behavior from
+AMD gfx_v9_0.c/soc15d.h and Mesa 26.2.2 ac_cmdbuf_cp.c/.h. The driver retains
+unchanged Linux sources; R4AMD retains unchanged Mesa sources. Full MIT
+notices accompany both source catalogs and distribution legal exports.
+The new encoder preserves AMD 2012/2016 and Valve 2024 copyright notices.

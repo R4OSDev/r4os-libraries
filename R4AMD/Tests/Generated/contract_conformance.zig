@@ -63,12 +63,25 @@ comptime {
     if (@offsetOf(implementation.R4AmdFill, "byte_length") != 16 or @offsetOf(binding.R4AmdFill, "byte_length") != 16) @compileError("R4AmdFill.byte_length offset drift");
     if (@offsetOf(implementation.R4AmdFill, "value") != 24 or @offsetOf(binding.R4AmdFill, "value") != 24) @compileError("R4AmdFill.value offset drift");
     if (@offsetOf(implementation.R4AmdFill, "reserved") != 28 or @offsetOf(binding.R4AmdFill, "reserved") != 28) @compileError("R4AmdFill.reserved offset drift");
+    if (@sizeOf(implementation.R4AmdPm4Frame) != 64 or @sizeOf(binding.R4AmdPm4Frame) != 64) @compileError("R4AmdPm4Frame size drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "version") != 0 or @offsetOf(binding.R4AmdPm4Frame, "version") != 0) @compileError("R4AmdPm4Frame.version offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "size") != 4 or @offsetOf(binding.R4AmdPm4Frame, "size") != 4) @compileError("R4AmdPm4Frame.size offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "engine") != 8 or @offsetOf(binding.R4AmdPm4Frame, "engine") != 8) @compileError("R4AmdPm4Frame.engine offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "flags") != 12 or @offsetOf(binding.R4AmdPm4Frame, "flags") != 12) @compileError("R4AmdPm4Frame.flags offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "indirect_address") != 16 or @offsetOf(binding.R4AmdPm4Frame, "indirect_address") != 16) @compileError("R4AmdPm4Frame.indirect_address offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "fence_address") != 24 or @offsetOf(binding.R4AmdPm4Frame, "fence_address") != 24) @compileError("R4AmdPm4Frame.fence_address offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "eop_scratch") != 32 or @offsetOf(binding.R4AmdPm4Frame, "eop_scratch") != 32) @compileError("R4AmdPm4Frame.eop_scratch offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "fence_sequence") != 40 or @offsetOf(binding.R4AmdPm4Frame, "fence_sequence") != 40) @compileError("R4AmdPm4Frame.fence_sequence offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "command_dwords") != 48 or @offsetOf(binding.R4AmdPm4Frame, "command_dwords") != 48) @compileError("R4AmdPm4Frame.command_dwords offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "reserved0") != 52 or @offsetOf(binding.R4AmdPm4Frame, "reserved0") != 52) @compileError("R4AmdPm4Frame.reserved0 offset drift");
+    if (@offsetOf(implementation.R4AmdPm4Frame, "reserved1") != 56 or @offsetOf(binding.R4AmdPm4Frame, "reserved1") != 56) @compileError("R4AmdPm4Frame.reserved1 offset drift");
     if (@sizeOf(implementation.InfoV1) != 40 or @sizeOf(binding.InfoV1) != 40) @compileError("InfoV1 size drift");
     if (@offsetOf(implementation.InfoV1, "get_info") != 32 or @offsetOf(binding.InfoV1, "get_info") != 32) @compileError("InfoV1.get_info slot drift");
-    if (@sizeOf(implementation.BackendV1) != 56 or @sizeOf(binding.BackendV1) != 56) @compileError("BackendV1 size drift");
+    if (@sizeOf(implementation.BackendV1) != 64 or @sizeOf(binding.BackendV1) != 64) @compileError("BackendV1 size drift");
     if (@offsetOf(implementation.BackendV1, "negotiate") != 32 or @offsetOf(binding.BackendV1, "negotiate") != 32) @compileError("BackendV1.negotiate slot drift");
     if (@offsetOf(implementation.BackendV1, "encode_copy") != 40 or @offsetOf(binding.BackendV1, "encode_copy") != 40) @compileError("BackendV1.encode_copy slot drift");
     if (@offsetOf(implementation.BackendV1, "encode_fill") != 48 or @offsetOf(binding.BackendV1, "encode_fill") != 48) @compileError("BackendV1.encode_fill slot drift");
+    if (@offsetOf(implementation.BackendV1, "encode_pm4_frame") != 56 or @offsetOf(binding.BackendV1, "encode_pm4_frame") != 56) @compileError("BackendV1.encode_pm4_frame slot drift");
 }
 
 test "generated implementation and binding views are identical" {

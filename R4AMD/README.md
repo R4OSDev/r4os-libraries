@@ -1,19 +1,22 @@
 ﻿# R4AMD
 
-R4AMD is the AMD render/layout/media library owner. Version 0.1.2 provides
-`INFO_V1:1` and append-only `BACKEND_V1:2`. The existing negotiation slot
-remains unchanged; copy and 32-bit fill encoders are appended. GC9.1/SDMA4.1
-profiles expose implemented linear/row/fill encoding, 48-bit addresses and a
-2048-dword output bound. Actual GPU capabilities additionally require the
-matching live AMDGPU common backend and its ring self-test.
+R4AMD is the AMD render/layout/media library owner. Version 0.1.3 provides
+`INFO_V1:1` and append-only `BACKEND_V1:3`. Existing negotiation, copy and fill
+slots remain stable; `encode_pm4_frame` appends the GC9.1 frame encoder.
 
-`Source/copy.zig` is also compiled into AMDGPU through the Libraries package.
-It implements linear copies split at 4 MB, rectangular pitched copies,
-bounded odd-pitch row fallback and 32-bit constant fills. Validation precedes
-output writes; overlaps, overflowing ranges, insufficient capacity and tiled
-modifiers are rejected. Caller pointers are never retained. Shader/render,
-media and tiled layout operations belong to subsequent milestones.
-AMDGPU.R4D owns all physical device access.
+`Source/copy.zig` and `Source/pm4.zig` are shared with AMDGPU through the
+Libraries package. They emit bounded SDMA linear/row/fill commands and PM4
+HDP/pipeline/cache/IB/fence frames, including GFX9's EOP workaround. GC9.1
+profiles expose encoder flags 27, 48-bit addresses and at most 2048 dwords.
+The PM4 ABI requires disjoint input/output/count buffers and an exact 64-byte
+request. Errors preserve outputs; encoding never retains pointers or submits
+work. Scratch/LDS/GDS sizes use Picasso/GFX9 limits and units.
+
+Actual device capabilities additionally require the matching AMDGPU backend
+and its successful hardware prerequisites. Shader compilation, rendering,
+Vulkan, tiled layout and media admission belong to subsequent milestones.
+Compute packet encoding does not imply an OpenCL, HIP or ROCm runtime.
+AMDGPU.R4D owns every physical device operation.
 
 Build from the Libraries repository with `./Build.sh R4AMD` on Linux or
 `Build.bat R4AMD` on Windows. Both use PowerShell 7 and the workspace
