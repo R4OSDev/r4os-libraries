@@ -984,7 +984,8 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
     try checkNativeRender(&config);
-    try checkResidency(&config);
+    try checkResidency(&config, &imports, false);
+    try checkResidency(&config, &imports, true);
     try checkNativeColor(&config);
     try checkNativeGrid(&config);
     try checkNativePresent(&config, &imports, false);
@@ -1184,9 +1185,13 @@ fn checkNativeYuv(config: *const c.R4GfxDeviceConfig) !void {
     std.debug.print("native YUV: public encoder, one upload/no pixel maps, cached BO/VA reuse, reset and separate engine/map retirement: OK\n", .{});
 }
 
-fn checkResidency(config: *const c.R4GfxDeviceConfig) !void {
+fn checkResidency(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport, use_amd: bool) !void {
     const residency = @import("device_residency.zig");
+    const native_bytes: u64 = if (use_amd) 4096 else 65536;
     Model.reset(); Model.operations = 15;
+    var amd_fixture: AmdFixture = .{};
+    if (use_amd) amd_fixture.bind(imports, Model.operations);
+    defer if (use_amd) amd_fixture.close(imports);
     var handle: c.R4GfxDevice = undefined;
     try t.expectEqual(c.status_ok, api.device_open(config, &handle));
     const device = try d.get(&handle, false);
@@ -1215,7 +1220,7 @@ fn checkResidency(config: *const c.R4GfxDeviceConfig) !void {
     var alias: c.R4GfxResource = undefined;
     try t.expectEqual(c.status_ok, api.resource_create(&handle, &alias_desc, &alias));
     try t.expectEqual(c.status_limit, api.memory_trim(&handle, native.deadline_ns));
-    try t.expect(residency.snapshot(device).resident_bytes == 2 * 65536); // Shared BO counted once.
+    try t.expect(residency.snapshot(device).resident_bytes == 2 * native_bytes); // Shared BO counted once.
     try t.expectEqual(c.status_ok, api.resource_release(&handle, &alias));
     try t.expectEqual(c.status_ok, api.memory_trim(&handle, native.deadline_ns));
     try t.expect(item.residency_busy and item.job_refs == 1 and device.residency_work.?.index == first.slot - 1);
@@ -1230,11 +1235,11 @@ fn checkResidency(config: *const c.R4GfxDeviceConfig) !void {
     const saved = Model.ref(item.backing.reference).object.?;
     for (0..64) |index| try t.expect(Model.objects[saved].bytes[index] == index);
     const snapshot = residency.snapshot(device);
-    try t.expect(snapshot.evicted_bytes == 65536 and snapshot.system_bytes == 64 and snapshot.pinned_bytes == 65536);
+    try t.expect(snapshot.evicted_bytes == native_bytes and snapshot.system_bytes == 64 and snapshot.pinned_bytes == native_bytes);
     var memory_info: c.R4GfxMemoryInfo = undefined;
     try t.expectEqual(c.status_ok, api.memory_info(&handle, &memory_info));
     try t.expect(memory_info.version == 1 and memory_info.size == 104 and memory_info.phase == c.memory_phase_idle and
-        memory_info.evicted_bytes == 65536 and memory_info.evictions == 1 and memory_info.memory_generation == 73);
+        memory_info.evicted_bytes == native_bytes and memory_info.evictions == 1 and memory_info.memory_generation == @as(u64, if (use_amd) 97 else 73));
     // Two requests wait behind an actual readback. The higher-priority image
     // reconstructs first; equal-priority order is the retained request order.
     try t.expectEqual(c.status_ok, api.resource_priority(&handle, &pinned, 200));
@@ -1259,6 +1264,7 @@ fn checkResidency(config: *const c.R4GfxDeviceConfig) !void {
     // RAM contents survive a backend reset. Only still-native resources lose
     // their generation; reconstruction must bind the current backend anew.
     Model.binding.reset_generation += 1;
+    if (use_amd) amd_fixture.backend[0].binding = Model.binding;
     var state: c.R4GfxDeviceInfo = undefined;
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expect(!item.invalidated and protected.invalidated);
