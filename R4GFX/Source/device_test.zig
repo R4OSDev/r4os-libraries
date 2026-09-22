@@ -271,7 +271,8 @@ const Model = struct {
         out.* = objects[ref(input.*).object.?].descriptor; return 1;
     }
     fn nativeStart(input: *const a.GfxNativeAllocation, out: *a.GfxNativeStatus) callconv(.c) i32 {
-        std.debug.assert(native_handle.id == 0 and input.adapter_id == binding.adapter_id and input.memory_generation == 73 and input.kind == 1);
+        std.debug.assert(native_handle.id == 0 and input.adapter_id == binding.adapter_id and
+            input.memory_generation == @as(u64, if (binding.adapter_id == 3) 97 else 73) and input.kind == 1);
         serial += 1;
         native_starts += 1;
         native_request = input.*; native_handle = .{ .id = 1, .generation = serial };
@@ -288,6 +289,14 @@ const Model = struct {
     }
     fn nativeReceive(input: *const a.GfxBufferHandle, out: *a.GfxBufferReference) callconv(.c) i32 {
         std.debug.assert(std.meta.eql(input.*, native_handle) and native_result == 1);
+        if (binding.adapter_id == 3) {
+            std.debug.assert(native_request.width == 4 and native_request.height == 4 and native_request.layout == 0);
+            const rc = create(&.{ .byte_length = 4096, .alignment = 4096, .width = 4, .height = 4,
+                .format = native_request.format, .plane_count = 1, .plane_pitches = .{256,0,0,0}, .usage = native_request.usage,
+                .location = 1, .adapter_id = 3, .device_generation = 97, .driver_owner = 80 }, out);
+            if (rc == 1) native_handle = .{};
+            return rc;
+        }
         // This bounded fixture uses4x4 images with the actual native storage
         // geometry. A tiled view is one GOB; the image allocation is64KB.
         std.debug.assert(native_request.width == 4 and native_request.height == 4 and native_request.layout <= 1);
@@ -504,7 +513,7 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) 
     var amdgpu = nvidia;
     amdgpu.binding.adapter_id = 3;
     amdgpu.memory_generation = 97; // Deliberately not the queue generation.
-    amdgpu.operations = 0xfff; // Only the implemented AMD render subset is admitted.
+    amdgpu.operations = 0xfff; // Direct/overlay stays absent even with all raw bits set.
     amdgpu.profile = .{ .interface_id_lo = amd.backend_v1_header.interface_id_lo,
         .interface_id_hi = amd.backend_v1_header.interface_id_hi, .revision = 1, .data_bytes = @sizeOf(amd.R4AmdDriverProfile) };
     const details: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile),
@@ -537,7 +546,7 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) 
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expectEqual(c.render_backend_amd, state.backend);
     const amd_operations = c.device_gpu_copy | c.device_gpu_copy_rows | c.device_gpu_render | c.device_gpu_render_list |
-        c.device_gpu_grid | c.device_gpu_color | c.device_gpu_color_grid;
+        c.device_gpu_grid | c.device_gpu_color | c.device_gpu_color_grid | c.device_gpu_present;
     try t.expectEqual(amd_operations, state.gpu_operations);
     std.mem.swap(a.GfxBackendInfo, &values[0], &values[2]);
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
@@ -975,10 +984,11 @@ pub fn check() !void {
     try checkResidency(&config);
     try checkNativeColor(&config);
     try checkNativeGrid(&config);
-    try checkNativePresent(&config);
+    try checkNativePresent(&config, &imports, false);
+    try checkNativePresent(&config, &imports, true);
     try checkImagePreparation(&config);
     try checkTiledPreparation(&config);
-    try checkSwapchains(&config);
+    try checkSwapchains(&config, &imports);
     draw.display_output_target = @intFromPtr(&Model.outputTarget);
     draw.display_output_presentation_info = @intFromPtr(&Model.outputInfo);
     draw.gfx_queue_submit_output = @intFromPtr(&Model.submitOutput);
@@ -1434,7 +1444,7 @@ fn presentRequest(frame: c.R4GfxSwapchainFrame) c.R4GfxSwapchainPresent {
     return .{ .version = 1, .size = @sizeOf(c.R4GfxSwapchainPresent), .frame = frame, .render_job = std.mem.zeroes(c.R4GfxJob),
         .deadline_ns = 100000, .intent = 0, .blockers = 0 };
 }
-fn checkSwapchains(config: *const c.R4GfxDeviceConfig) !void {
+fn checkSwapchains(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport) !void {
     Model.reset();
     var handle: c.R4GfxDevice = undefined;
     try t.expectEqual(c.status_ok, api.device_open(config, &handle));
@@ -1505,7 +1515,11 @@ fn checkSwapchains(config: *const c.R4GfxDeviceConfig) !void {
 
     // Actual provider jobs and exact delayed feedback, with native execution
     // deliberately supplied by the existing queue transport fixture.
+    for ([_]bool{false, true}) |use_amd| {
     Model.reset(); Model.operations = 61;
+    var amd_fixture: AmdFixture = .{};
+    if (use_amd) amd_fixture.bind(imports, Model.operations);
+    defer if (use_amd) amd_fixture.close(imports);
     Model.presentation_info.backend = Model.binding; Model.presentation_info.path = 1; Model.presentation_info.policies = 3;
     Model.presentation_info.flags = a.display_presentation_info_active | a.display_presentation_info_native |
         a.display_presentation_info_synchronized | a.display_presentation_info_visibility;
@@ -1556,6 +1570,7 @@ fn checkSwapchains(config: *const c.R4GfxDeviceConfig) !void {
     Model.status.flags = 0;
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and !Model.job_live and Model.premature_closes == 0);
+    }
 }
 
 fn checkTiledPreparation(config: *const c.R4GfxDeviceConfig) !void {
@@ -2003,14 +2018,46 @@ fn checkNativeColorMode(config: *const c.R4GfxDeviceConfig, combined: bool) !voi
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
 }
 
-fn checkNativePresent(config: *const c.R4GfxDeviceConfig) !void {
+const AmdFixture = struct {
+    table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu,
+        .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill),
+        .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame) },
+    images: amd.ImageV1 = .{ .header = amd.image_v1_header, .calculate = @ptrCast(&amd_images.calculate),
+        .address = @ptrCast(&amd_images.address), .metadata = @ptrCast(&amd_images.metadata),
+        .import_image = @ptrCast(&amd_images.importImage), .descriptors = @ptrCast(&amd_images.descriptors) },
+    backend: [1]a.GfxBackendInfo = undefined,
+    fn bind(self: *AmdFixture, imports: *[6]a.R4XStartImport, operations: u64) void {
+        Model.binding.adapter_id = 3;
+        self.backend[0] = .{ .binding = Model.binding, .operations = operations, .memory_generation = 97,
+            .profile = .{ .interface_id_lo = amd.backend_v1_header.interface_id_lo,
+                .interface_id_hi = amd.backend_v1_header.interface_id_hi, .revision = 1,
+                .data_bytes = @sizeOf(amd.R4AmdDriverProfile) } };
+        const profile: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile),
+            .vendor_id = amd.vendor_id, .device_id = 0x15d8, .gc_version = amd.gc_9_1_0,
+            .sdma_version = amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
+        @memcpy(self.backend[0].profile.data[0..@sizeOf(amd.R4AmdDriverProfile)], std.mem.asBytes(&profile));
+        Model.adapters = &self.backend;
+        imports[4].table = @intFromPtr(&self.table); imports[4].resolved_version = amd.backend_v1_revision;
+        imports[5].table = @intFromPtr(&self.images); imports[5].resolved_version = amd.image_v1_revision;
+    }
+    fn close(_: *AmdFixture, imports: *[6]a.R4XStartImport) void {
+        Model.adapters = null;
+        imports[4].table = 0; imports[4].resolved_version = 0;
+        imports[5].table = 0; imports[5].resolved_version = 0;
+    }
+};
+
+fn checkNativePresent(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport, use_amd: bool) !void {
     Model.reset(); Model.operations = 29;
+    var amd_fixture: AmdFixture = .{};
+    if (use_amd) amd_fixture.bind(imports, Model.operations);
+    defer if (use_amd) amd_fixture.close(imports);
     var handle: c.R4GfxDevice = undefined;
     try t.expectEqual(c.status_ok, api.device_open(config, &handle));
     const device = try d.get(&handle, false);
     const timeline = device.queue.timeline;
     const native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999,
-        .width = 4, .height = 4, .format = c.format_xrgb8888, .layout = 1 };
+        .width = 4, .height = 4, .format = c.format_xrgb8888, .layout = if (use_amd) 0 else 1 };
     var desc = descriptor(c.resource_image);
     desc.flags = c.image_target; desc.source_kind = c.source_create_native; desc.source_address = @intFromPtr(&native);
     var image: c.R4GfxResource = undefined;
@@ -2022,6 +2069,7 @@ fn checkNativePresent(config: *const c.R4GfxDeviceConfig) !void {
     try t.expectEqual(c.status_unsupported, api.image_present(&handle, &request, &job));
     try t.expectEqualDeep(original, job);
     Model.operations = 61;
+    if (use_amd) amd_fixture.backend[0].operations = Model.operations;
     var info: c.R4GfxDeviceInfo = undefined;
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &info));
     try t.expect(info.gpu_operations & c.device_gpu_present != 0 and device.queue.timeline == timeline);
@@ -2032,7 +2080,8 @@ fn checkNativePresent(config: *const c.R4GfxDeviceConfig) !void {
     try t.expectEqual(c.status_ok, api.image_present(&handle, &request, &job));
     try t.expect(Model.maps == 0 and Model.job_request.operation == a.gfx_queue_operation_present and
         Model.job_request.target.id == 0 and Model.job_request.source_offset == 0 and Model.job_request.target_offset == 0 and
-        Model.job_request.byte_length == 16 and Model.job_request.row_count == 4 and Model.job_request.source_pitch == 64 and Model.job_request.target_pitch == 0);
+        Model.job_request.byte_length == 16 and Model.job_request.row_count == 4 and
+        Model.job_request.source_pitch == @as(u64, if (use_amd) 256 else 64) and Model.job_request.target_pitch == 0);
     request.frame_key = 8;
     try t.expect(Model.job_request.frame_key == 7);
     var dependency: c.R4GfxCopyFence = undefined;

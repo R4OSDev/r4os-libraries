@@ -75,6 +75,7 @@ pub const Registry = struct {
             if (operations & (@as(u64, 1) << a.gfx_queue_operation_render_grid_list) != 0) result |= c.device_gpu_grid;
             if (operations & (@as(u64, 1) << a.gfx_queue_operation_render_color_list) != 0) result |= c.device_gpu_color;
             if (operations & (@as(u64, 1) << a.gfx_queue_operation_render_color_grid_list) != 0) result |= c.device_gpu_color_grid;
+            if (operations & (@as(u64, 1) << a.gfx_queue_operation_present) != 0) result |= c.device_gpu_present;
             return .{ .backend = c.render_backend_amd, .operations = result };
         }
         return null;

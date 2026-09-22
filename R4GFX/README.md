@@ -236,7 +236,11 @@ the measured R4AMD architecture and explicit common driver operation bits.
 Native YUV submits a bounded description with deduplicated canonical BO/VA
 loans; AMDGPU owns ACO upload and PM4 encoding. Plane mappings are cached
 until retirement, without CPU pixel maps or per-frame shader compilation.
-Present follows 0.80.18; unknown operations receive no native capability.
+Since 0.80.19, confirmed AMD Present operations also enable the common
+image-present and FIFO swapchain paths. Native XR24 composition images use
+AMD-owned UMA storage and SDMA-to-DCN presentation without CPU pixel maps.
+The same Desktop, WINSVC and app/subsystem transports remain in use.
+Direct scanout and unknown operations receive no AMD capability.
 Generic BO descriptors,
 queues, fences and budgets remain with their common owners. Opaque modifiers
 are passed only to the selected driver, never interpreted as NVIDIA layouts
