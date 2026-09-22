@@ -11,12 +11,16 @@ $hostBuild = Join-Path $output 'TableHost'
 $record = Join-Path $output 'tables.json'
 $tables = @(
     @{name='cavlc'; generator='CavlcTables'; sources=@('libavcodec/vlc.c','libavutil/reverse.c')},
-    @{name='h274'; generator='H274Tables'; sources=@()}
+    @{name='h274'; generator='H274Tables'; sources=@()},
+    @{name='mpeg12'; generator='Mpeg12Tables'; sources=@('libavcodec/vlc.c','libavutil/reverse.c','libavcodec/mpeg12data.c')},
+    @{name='msmp4'; generator='Msmp4Tables'; sources=@('libavcodec/vlc.c','libavutil/reverse.c')},
+    @{name='intrax8'; generator='Intrax8Tables'; sources=@('libavcodec/vlc.c','libavutil/reverse.c')},
+    @{name='vc1'; generator='Vc1Tables'; sources=@('libavcodec/vlc.c','libavutil/reverse.c','libavcodec/vc1data.c','libavcodec/msmpeg4_vc1_data.c')}
 )
 $provider = (Get-Content -Raw -LiteralPath (Join-Path $paths.unit 'ThirdParty/Sources.json') | ConvertFrom-Json).sources[0]
 $zig = Join-Path $paths.zig $(if ($IsWindows) { 'zig.exe' } else { 'zig' })
 $inputs = @($PSCommandPath, (Join-Path $PSScriptRoot 'Common.ps1'),
-    (Join-Path $paths.cache 'prepare.json'), (Join-Path $paths.unit 'Port/Config/config.h'), $zig)
+    (Join-Path $paths.cache 'prepare.json'), (Join-Path $paths.unit 'Port/Config/config.h'), (Join-Path $PSScriptRoot 'VlcTableHost.h'), $zig)
 foreach ($table in $tables) {
     $pinPath = Join-Path $PSScriptRoot ($table.generator+'.json')
     $table.pin = Get-Content -Raw -LiteralPath $pinPath | ConvertFrom-Json
@@ -33,7 +37,7 @@ if (Test-Path -LiteralPath $record) {
         foreach ($table in $tables) {
             if ((Get-R4VideoHash $table.header) -ne $table.pin.sha256 -or (Get-Item -LiteralPath $table.header).Length -ne $table.pin.bytes) { throw "Generated $($table.name) tables changed." }
         }
-        Write-Host 'Verified immutable H.264 CAVLC and H.274 tables.'
+        Write-Host 'Verified immutable H.264/H.274/MPEG2/VC1 tables.'
         return
     }
     [IO.File]::Delete($record)
@@ -71,4 +75,4 @@ foreach ($table in $tables) {
 }
 [ordered]@{schema=1; identity=$id; inputs=$identity; outputs=$outputs} |
     ConvertTo-Json -Depth 7 | Set-Content -LiteralPath $record -Encoding utf8NoBOM
-Write-Host 'Generated immutable H.264 CAVLC and H.274 tables.'
+Write-Host 'Generated immutable H.264/H.274/MPEG2/VC1 tables.'

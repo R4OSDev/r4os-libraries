@@ -569,6 +569,7 @@ pub const vcn_1_0_0: u32 = 65536;
 pub const picasso_vcn_firmware: u32 = 51441669;
 pub const device_fact_vcn1_ready: u32 = 4;
 pub const media_caps_source_profile: u32 = 1;
+pub const device_fact_jpeg1_submit: u32 = 8;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_stale: i32 = -3;

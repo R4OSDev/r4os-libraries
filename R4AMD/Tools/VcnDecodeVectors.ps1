@@ -87,3 +87,17 @@ if($Write){Copy-Item $out $target -Force}
 if(!(Test-Path $target) -or (Get-FileHash $out).Hash -ne (Get-FileHash $target).Hash){throw 'VCN H264 vector drift'}
 [ordered]@{schema=1;mesa='26.2.2';profiles=@(66,77,100);bytes=(Get-Item $out).Length;sha256=(Get-FileHash $out).Hash.ToLowerInvariant();oracle_sha256=(Get-FileHash $c).Hash.ToLowerInvariant();basis='Original Mesa AVC structs and build_avc_msg; named common fields; R4OS pending feedback canaries'}|ConvertTo-Json|Set-Content (Join-Path $temp 'oracle.json') -Encoding utf8NoBOM
 Write-Host 'VCN1 H264: three original-C profile vectors verified.'
+# Reuse the same pinned originals for the additional VCN1/JPEG codec checks.
+$jpegStart=$implementation.IndexOf('#define RDECODE_JPEG_VER_1')
+$jpegEnd=$implementation.IndexOf('static void', $jpegStart)
+if($jpegStart -lt 0 -or $jpegEnd -lt 0){throw 'Missing original JPEG command builder'}
+[IO.File]::WriteAllText((Join-Path $temp 'jpeg_original.inc'),$implementation.Substring($jpegStart,$jpegEnd-$jpegStart),[Text.UTF8Encoding]::new($false))
+$create=$implementation.Substring($implementation.IndexOf('ac_vcn_create_jpeg_decoder('))
+$registers=[regex]::Match($create,'if \(dec->jpeg_version == RDECODE_JPEG_VER_1\) \{(.*?)\n   } else','Singleline')
+if(!$registers.Success){throw 'Missing original JPEG1 registers'}
+[IO.File]::WriteAllText((Join-Path $temp 'jpeg_registers.inc'),$registers.Groups[1].Value,[Text.UTF8Encoding]::new($false))
+$exe=Join-Path $temp $(if($IsWindows){'codecs.exe'}else{'codecs'})
+& $compiler -std=c11 -Wall -Wextra -Werror -Wno-unused-parameter ('-I'+$temp) ('-I'+(Join-Path $unit 'Port')) (Join-Path $unit 'Tools/VcnCodecOracle.c') (Join-Path $unit 'Port/vcn_codecs.c') -o $exe
+if($LASTEXITCODE){throw 'VCN codec oracle compilation failed'}
+& $exe
+if($LASTEXITCODE){throw 'VCN codec oracle mismatch'}

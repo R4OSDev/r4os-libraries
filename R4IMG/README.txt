@@ -37,3 +37,22 @@ math. Untagged sRGB is an explicit application policy; unknown/linked/CMYK
 source descriptions are never silently relabeled. API_V1 remains unchanged.
 See Docs/API.md for layouts and workspace Docs/Desktop/GrafikFarbe07925.txt
 for pipeline ownership, display profiles and output limitations.
+
+Optional native JPEG consumer (0.80.30)
+-------------------------------------
+The compiled Zig binding exports NativeJpeg.Consumer(video), instantiated
+with the R4VIDEO binding. capabilities checks the real VIDEO_V1 AMD/JPEG
+provider and source dimensions; start/advance return one canonical NV12
+image lease. The encoded baseline 8-bit 4:2:0 image remains borrowed until
+send succeeds or close completes. Even dimensions 64..4096 and packets up
+to 8 MB are accepted; the decoder validates a single complete SOI..EOI scan.
+
+The caller retains RASTER_V1 ICC/Exif characterization, orientation and
+R4GFX color policy. NativeJpeg performs no CPU pixel map, RGB conversion or
+implicit fallback. release retries the exact caller-supplied consumer receipt
+until acknowledged. close may begin with a held image and waits for that
+release and decoder resource retirement before destroy. One extra receive
+slot lets drain observe EOS while the image is held. Runtime/API_V1 and the
+R4IMG module version remain unchanged; this is an optional compiled facade.
+The 0.80.30 SMP4 probe uses the actual facade and R4VIDEO with modeled GPU
+responses. Physical JPEG pixels and color qualification remain in 0.80.39.

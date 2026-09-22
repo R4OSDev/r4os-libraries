@@ -11,6 +11,7 @@ struct r4video_codec_config {
     uint32_t profile, max_width, max_height, threads;
     uint64_t max_packet_bytes;
     const struct r4video_nvdec_ops *nvdec; /* NULL selects software. */
+    uint32_t codec, bit_depth;
 };
 struct r4video_codec_packet {
     const uint8_t *bytes;

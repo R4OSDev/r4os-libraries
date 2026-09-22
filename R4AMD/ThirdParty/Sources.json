@@ -515,6 +515,12 @@
       "bytes": 69753,
       "license": "MIT",
       "license_evidence": "Original/src/gallium/drivers/radeonsi/mm/si_video_dec.c; Original/licenses/MIT"
+    },
+    {
+      "path": "src/amd/common/ac_vcn_vp9_default.h",
+      "sha256": "a36be42ce8fc52bac507fb8036dfbbbab5d889c3e98f78946c228e7a70f456b9",
+      "bytes": 22731,
+      "license": "MIT"
     }
   ],
   "patches": [

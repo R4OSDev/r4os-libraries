@@ -60,7 +60,7 @@ VkResult r4vk_radv_query_architecture(const R4Draw *draw, const R4Dev *devices,
        f.pci_domain || f.pci_bus > 255 || f.pci_device > 31 || f.pci_function > 7 || f.pci_revision > 255 || f.asic_revision > 7 ||
        a->chip_revision != 0x41 + f.asic_revision || !f.cu_mask || (f.cu_mask & ~0x7ffu) || !f.rb_mask || (f.rb_mask & ~3u) ||
        !f.pfp_fw || !f.me_fw || !f.mec_fw || !f.ce_fw || !f.me_feature || !f.mec_feature || !f.smu_fw ||
-       (f.flags & 3) != 3 || (f.flags & ~7u) || f.reserved || !f.uma_bytes || !f.native_budget || f.native_budget > f.uma_bytes ||
+       (f.flags & 3) != 3 || (f.flags & ~15u) || f.reserved || !f.uma_bytes || !f.native_budget || f.native_budget > f.uma_bytes ||
        f.va_start != R4AMD_NATIVE_VA_START || f.va_end != R4AMD_NATIVE_VA_END || f.max_allocation_bytes != a->max_image_bytes ||
        f.max_se != 1 || f.max_sh_per_se != 1 || f.max_cu_per_sh != 11 || f.max_rb_per_se != 2 ||
        f.wave_size != 64 || !f.num_tccs || !f.num_gprs || !f.max_waves_per_simd || !f.lds_bytes)

@@ -16,6 +16,7 @@
  * more details. A copy is in ../ThirdParty/COPYING.LGPLv2.1.
  */
 #include "codec_internal.h"
+#include "hardware_private.h"
 #include "r4video.h"
 #include "libavcodec/h264dec.h"
 #include "libavcodec/hwaccel_internal.h"
@@ -44,6 +45,7 @@ static int error(AVCodecContext *context, int result)
 
 static int sequence(AVCodecContext *context, struct r4video_nvdec_sequence *out)
 {
+    if (context->codec_id != AV_CODEC_ID_H264) return r4video_vcn_sequence(context, out);
     int rc = r4video_codec_admitted(context);
     if (rc) return rc;
     const H264Context *h = context->priv_data;
@@ -211,6 +213,41 @@ static int init(AVCodecContext *context)
     const struct r4video_codec *codec = context->opaque;
     return codec && codec->config.nvdec && context->thread_count == 1 &&
         context->active_thread_type == 0 ? 0 : AVERROR(ENOSYS);
+}
+
+int r4video_hw_error(AVCodecContext *context, int result) { return error(context,result); }
+int r4video_hw_init(AVCodecContext *context) { return init(context); }
+void *r4video_hw_reference(AVCodecContext *context, const AVFrame *frame)
+{
+    struct image *value=image(frame);
+    struct r4video_codec *codec=context->opaque;
+    return value && value->state==IMAGE_COMPLETE && value->ops.owner==codec->nvdec.owner ? value->surface : NULL;
+}
+int r4video_hw_begin(AVCodecContext *context, AVFrame *frame, const struct r4video_nvdec_picture *p)
+{
+    struct image *value=image(frame);
+    if (!value || value->state!=IMAGE_ALLOCATED) return error(context,R4VIDEO_ERROR_DECODE);
+    int rc=value->ops.begin(value->ops.owner,value->surface,p);
+    if (rc) { abort_image(value); return error(context,rc); }
+    value->state=IMAGE_BEGUN;
+    return 0;
+}
+int r4video_hw_slice(AVCodecContext *context, AVFrame *frame, const uint8_t *bytes, uint32_t size)
+{
+    struct image *value=image(frame);
+    if (!value || value->state!=IMAGE_BEGUN) return error(context,R4VIDEO_ERROR_DECODE);
+    int rc=value->ops.slice(value->ops.owner,value->surface,bytes,size);
+    if (rc) { abort_image(value); return error(context,rc); }
+    return 0;
+}
+int r4video_hw_end(AVCodecContext *context, AVFrame *frame)
+{
+    struct image *value=image(frame);
+    if (!value || value->state!=IMAGE_BEGUN) return error(context,R4VIDEO_ERROR_DECODE);
+    int rc=value->ops.end(value->ops.owner,value->surface);
+    if (rc) { abort_image(value); return error(context,rc); }
+    value->state=IMAGE_COMPLETE;
+    return 0;
 }
 
 const FFHWAccel ff_h264_r4os_nvdec_hwaccel = {

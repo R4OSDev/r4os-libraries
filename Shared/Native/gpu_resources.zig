@@ -18,11 +18,12 @@ pub const Clock = *const fn () ?a.MonotonicClockInfo;
 pub const Engine = enum {
     decode,
     encode,
+    jpeg,
     graphics,
 
     pub fn mask(self: Engine) u32 {
         return switch (self) {
-            .decode => nv.native_engine_video,
+            .decode, .jpeg => nv.native_engine_video,
             .encode => nv.native_engine_encode,
             .graphics => nv.native_engine_graphics,
         };
@@ -107,8 +108,8 @@ pub const Device = struct {
         for (properties.data[properties.data_bytes..]) |byte| if (byte != 0) return error.Invalid;
         const arch = std.mem.bytesToValue(nv.R4NvArchitecture, properties.data[0..@sizeOf(nv.R4NvArchitecture)]);
         const class: u32 = switch (arch.chipset) {
-            0x172, 0x173, 0x174, 0x176, 0x177 => switch (engine) { .decode => 0xc7b0, .encode => 0xc7b7, .graphics => 0xc797 },
-            0x192, 0x193, 0x194, 0x196, 0x197 => switch (engine) { .decode => 0xc9b0, .encode => 0xc9b7, .graphics => 0xc997 },
+            0x172, 0x173, 0x174, 0x176, 0x177 => switch (engine) { .decode => 0xc7b0, .encode => 0xc7b7, .graphics => 0xc797, .jpeg => return error.Unsupported },
+            0x192, 0x193, 0x194, 0x196, 0x197 => switch (engine) { .decode => 0xc9b0, .encode => 0xc9b7, .graphics => 0xc997, .jpeg => return error.Unsupported },
             else => return error.Unsupported,
         };
         // This path uses persistent write-back system BOs. Require the driver's
@@ -156,11 +157,12 @@ pub const Device = struct {
         const facts = value.facts; const arch = facts.architecture;
         if (!payload(facts) or !payload(arch) or arch.vendor_id != amd.vendor_id or arch.device_id != 0x15d8 or
             arch.gc_version != amd.gc_9_1_0 or arch.sdma_version != amd.sdma_4_1_0 or arch.flags != 0 or arch.reserved != 0 or
-            arch.bind_alignment != 4096 or facts.flags & ~@as(u32, 7) != 0 or facts.flags & 3 != 3 or facts.reserved != 0 or
+            arch.bind_alignment != 4096 or facts.flags & ~@as(u32, 15) != 0 or facts.flags & 3 != 3 or facts.reserved != 0 or
             facts.va_start != amd.native_va_start or facts.va_end != amd.native_va_end or value.native_binding_capacity < 24 or
             value.max_backing_bytes == 0) return error.Unsupported;
         if (arch.memory_generation != info.memory_generation) return error.Stale;
         if (engine != .graphics and facts.flags & amd.device_fact_vcn1_ready == 0) return error.Unsupported;
+        if (engine == .jpeg and facts.flags & amd.device_fact_jpeg1_submit == 0) return error.Unsupported;
         return .{ .binding = info.binding, .memory_generation = arch.memory_generation, .va_start = facts.va_start,
             .va_end = facts.va_end, .class = if (engine == .graphics) amd.gc_9_1_0 else amd.vcn_1_0_0, .engine = engine, .provider = .amd };
     }
@@ -234,6 +236,9 @@ pub const Context = struct {
             }
         }
         if (self.device.provider == .amd and (self.device.engine == .graphics or command_bytes % 64 != 0 or command_bytes > 8192 or count > 32)) return error.Unsupported;
+        // JPEG1's kernel worker reads/copies the system IB into VMID0. Its
+        // ordinary CPU read cannot coexist with a producer's persistent write.
+        if (self.device.provider == .amd and self.device.engine == .jpeg and valid(commands.mapping.lease)) return error.Busy;
         const until = try self.deadline();
         if (self.queue.timeline == 0) {
             const binding = self.device.binding;
@@ -248,7 +253,7 @@ pub const Context = struct {
             .push = .{ .address = commands.address, .byte_length = command_bytes, .flags = 0 },
         };
         const amd_packet = extern struct { header: amd.R4AmdNativeSubmit, ib: amd.R4AmdNativeIb }{
-            .header = .{ .version = 1, .size = @sizeOf(amd.R4AmdNativeSubmit), .engine = if (self.device.engine == .decode) 2 else 3,
+            .header = .{ .version = 1, .size = @sizeOf(amd.R4AmdNativeSubmit), .engine = if (self.device.engine == .jpeg) 4 else if (self.device.engine == .decode) 2 else 3,
                 .ib_count = 1, .flags = 0, .reserved0 = 0, .reserved1 = 0 },
             .ib = .{ .address = commands.address, .dwords = command_bytes / 4, .binding_index = 0 },
         };
@@ -511,6 +516,27 @@ pub const Resource = struct {
         if (!self.ready or self.owner == null or self.owner.?.poisoned or self.owner.?.fence.timeline != 0 or
             !valid(self.mapping.lease)) return error.Busy;
         return @as([*]u8, @ptrFromInt(self.mapping.cpu_address))[0..@intCast(self.mapping.byte_length)];
+    }
+    /// Explicit CPU ownership handoff for a driver-copied system IB. The BO
+    /// and GPU address remain retained; only the CPU write lease is removed.
+    pub fn suspendCpu(self: *Resource) Error!void {
+        const ctx = self.owner orelse return error.Invalid;
+        if (!self.ready or ctx.poisoned or ctx.fence.timeline != 0) return error.Busy;
+        if (!valid(self.mapping.lease)) return;
+        try result(ctx.buffers().unmap(&self.mapping.lease));
+        self.mapping = .{};
+    }
+    pub fn resumeCpu(self: *Resource) Error!void {
+        const ctx = self.owner orelse return error.Invalid;
+        if (!self.ready or ctx.poisoned or ctx.fence.timeline != 0) return error.Busy;
+        if (valid(self.mapping.lease)) return;
+        const size = self.descriptor.byte_length;
+        if (self.descriptor.location != a.gfx_buffer_location_system or self.descriptor.format != a.gfx_buffer_format_bytes) return error.Unsupported;
+        errdefer self.ready = false; // A partial/invalid map is retained for close only.
+        try result(ctx.buffers().mapPersistent(&self.backing.reference, a.gfx_buffer_map_write, 0, size, &self.mapping));
+        if (!payload(self.mapping) or !valid(self.mapping.lease) or self.mapping.cpu_address == 0 or
+            self.mapping.byte_length != size or self.mapping.cpu_address > std.math.maxInt(usize) - size or
+            self.mapping.cache_policy != a.gfx_buffer_cache_write_back or self.mapping.reserved0 != 0) return error.Unsupported;
     }
     // Used only by the codec worker when replacing sequence scratch. All
     // resources share one deadline; the GUI-facing retirement path uses close.

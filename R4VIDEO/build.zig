@@ -65,6 +65,8 @@ pub fn build(b: *std.Build) void {
     resources.addImport("amd_decoder", amd_decoder);
     resources.addImport("r4amd_decode", vcn);
     resources.addIncludePath(b.path("Port"));
+    resources.addCSourceFile(.{ .file = b.path("../R4AMD/Port/vcn_codecs.c"), .flags = &.{"-std=c17"} });
+    resources.link_libc = true;
     const check = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });
     check.addFileArg(b.path("Tools/Contract.ps1"));
     check.has_side_effects = true;

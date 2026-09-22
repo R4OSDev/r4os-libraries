@@ -5744,7 +5744,7 @@
             "is_const": false,
             "nullable": false
           },
-          "description": "0 graphics, 1 compute, 2 VCN1 decode, 3 VCN1 encode. Media requires device_fact_vcn1_ready and one 16-dword-aligned IB of at most 2048 dwords."
+          "description": "0 graphics, 1 compute, 2 VCN1 decode, 3 VCN1 encode, 4 JPEG1. Media requires device_fact_vcn1_ready and one 16-dword-aligned IB of at most 2048 dwords. JPEG additionally requires device_fact_jpeg1_submit; its system-memory IB is copied into driver-owned VMID0 storage."
         },
         {
           "name": "ib_count",
@@ -6514,6 +6514,13 @@
       "type": "u32",
       "value": 1,
       "description": "Pure hardware/firmware source-profile eligibility; not device-executed evidence."
+    },
+    {
+      "zig_name": "device_fact_jpeg1_submit",
+      "c_name": "R4AMD_DEVICE_FACT_JPEG1_SUBMIT",
+      "type": "u32",
+      "value": 8,
+      "description": "DeviceFacts.flags: native engine 4 accepts JPEG1 IBs copied into timeline-owned VMID0 storage; JPEG/video mutual exclusion and exact fence retirement implemented. Requires device_fact_vcn1_ready."
     }
   ],
   "errors": [

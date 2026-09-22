@@ -216,19 +216,50 @@ pub fn Implementation(comptime ff: type) type {
         fn caps(input: c.R4VideoCapsQuery, output: *c.R4VideoCaps) i32 {
             var query = input;
             if (!payload(query)) return c.error_invalid;
-            if (query.profile == c.profile_default) query.profile = c.profile_h264_baseline;
-            if (query.codec != c.codec_h264 or
-                query.bit_depth != 8 or query.chroma != c.chroma_420 or
-                (query.profile != c.profile_h264_baseline and query.profile != c.profile_h264_main and query.profile != c.profile_h264_high)) return c.error_unsupported;
+            if (query.profile == c.profile_default) query.profile = switch (query.codec) {
+                c.codec_h264 => c.profile_h264_baseline,
+                c.codec_hevc => if (query.bit_depth == 10) 2 else 1,
+                c.codec_vp9 => if (query.bit_depth == 10) 2 else 0,
+                c.codec_mpeg2 => 4,
+                c.codec_vc1 => 3,
+                c.codec_jpeg => 0,
+                else => return c.error_unsupported,
+            };
+            if (query.chroma != c.chroma_420) return c.error_unsupported;
+            if (query.codec == c.codec_h264) {
+                if (query.bit_depth != 8 or (query.profile != c.profile_h264_baseline and query.profile != c.profile_h264_main and query.profile != c.profile_h264_high)) return c.error_unsupported;
+            } else {
+                if (query.backend != c.backend_amd) return c.error_unsupported;
+                const supported = switch (query.codec) {
+                    c.codec_hevc => (query.profile == 1 and query.bit_depth == 8) or (query.profile == 2 and query.bit_depth == 10),
+                    c.codec_vp9 => (query.profile == 0 and query.bit_depth == 8) or (query.profile == 2 and query.bit_depth == 10),
+                    c.codec_mpeg2 => (query.profile == 4 or query.profile == 5) and query.bit_depth == 8,
+                    c.codec_vc1 => query.profile == 3 and query.bit_depth == 8,
+                    c.codec_jpeg => query.profile == 0 and query.bit_depth == 8,
+                    else => false,
+                };
+                if (!supported) return c.error_unsupported;
+            }
             var device: ?gpu.Device = null;
             if (query.backend == c.backend_nvidia or query.backend == c.backend_amd) {
-                device = gpuDevice(query.adapter_id, if (query.backend == c.backend_amd) .amd else .nvidia) catch |err| return gpuCode(err);
+                device = gpuDevice(query.adapter_id, if (query.backend == c.backend_amd) .amd else .nvidia, query.codec) catch |err| return gpuCode(err);
                 if (query.backend == c.backend_amd) _ = device.?.mediaCaps(query.codec, query.profile, query.bit_depth, query.chroma) catch |err| return gpuCode(err);
             } else if (query.backend != c.backend_software or query.adapter_id != 0) return c.error_unsupported;
             output.* = .{ .version = 1, .size = @sizeOf(c.R4VideoCaps), .query = query, .min_width = 16, .min_height = 16, .max_width = 4096, .max_height = 4096, .max_level = 51, .output_formats = c.formats_yuv420p, .max_packet_bytes = max_packet_bytes, .max_pending_packets = max_packets, .max_frame_leases = max_frames, .device_generation = 0, .reset_generation = 0, .flags = 0, .reserved = 0 };
             if (device) |value| {
-                output.output_formats = c.formats_nv12;
-                if (value.provider == .amd) { output.min_width = 64; output.min_height = 64; }
+                output.output_formats = if (query.bit_depth == 10) c.formats_p010 else c.formats_nv12;
+                if (value.provider == .amd) {
+                    output.min_width = if (query.codec == c.codec_vp9) 16 else 64;
+                    output.min_height = output.min_width;
+                    output.max_level = switch (query.codec) {
+                        c.codec_h264 => 51,
+                        c.codec_hevc => 186,
+                        c.codec_vp9 => 62,
+                        c.codec_mpeg2 => 0, // MPEG2 level codes are not monotonically ordered.
+                        c.codec_vc1 => 4,
+                        else => 0,
+                    };
+                }
                 output.device_generation = value.binding.device_generation;
                 output.reset_generation = value.binding.reset_generation;
             }
@@ -243,19 +274,15 @@ pub fn Implementation(comptime ff: type) type {
                 else => c.error_invalid,
             };
         }
-        fn gpuDevice(adapter: u32, provider: gpu.Provider) !gpu.Device {
+        fn gpuDevice(adapter: u32, provider: gpu.Provider, codec: u32) !gpu.Device {
             if (adapter == 0) return error.Unsupported;
             const bundle = native.application.bundle() orelse return error.Unsupported;
             const base = r.program.Context.initBundle(bundle);
             const draw = bundle.draw orelse return error.Unsupported;
             if (draw.abi_version < a.gfx_virtual_layout_api_version) return error.Unsupported;
-            inline for (.{ "gfx_queue_backend_info", "gfx_queue_backend_properties", "gfx_queue_open", "gfx_queue_close",
-                "gfx_queue_submit_native", "gfx_fence_query", "gfx_fence_wait", "gfx_fence_cancel", "gfx_fence_release",
-                "gfx_buffer_create", "gfx_buffer_describe", "gfx_buffer_release", "gfx_buffer_map_persistent", "gfx_buffer_unmap",
-                "gfx_native_start", "gfx_native_wait", "gfx_native_receive", "gfx_native_close",
-                "gfx_virtual_start", "gfx_virtual_query", "gfx_virtual_close", "gfx_virtual_wait" }) |field|
+            inline for (.{ "gfx_queue_backend_info", "gfx_queue_backend_properties", "gfx_queue_open", "gfx_queue_close", "gfx_queue_submit_native", "gfx_fence_query", "gfx_fence_wait", "gfx_fence_cancel", "gfx_fence_release", "gfx_buffer_create", "gfx_buffer_describe", "gfx_buffer_release", "gfx_buffer_map_persistent", "gfx_buffer_unmap", "gfx_native_start", "gfx_native_wait", "gfx_native_receive", "gfx_native_close", "gfx_virtual_start", "gfx_virtual_query", "gfx_virtual_close", "gfx_virtual_wait" }) |field|
                 if (!base.hasDrawFn(field)) return error.Unsupported;
-            return gpu.Device.queryProvider(base, adapter, .decode, provider);
+            return gpu.Device.queryProvider(base, adapter, if (codec == c.codec_jpeg) .jpeg else .decode, provider);
         }
 
         pub fn open(input: *const c.R4VideoStartup, output: *c.R4VideoRuntime) callconv(.c) i32 {
@@ -420,13 +447,12 @@ pub fn Implementation(comptime ff: type) type {
             if (host().create(&d.event) != a.notification_ok) return c.error_no_memory;
             var callbacks: ff.struct_r4video_nvdec_ops = undefined;
             if (hardware) {
-                const device = gpuDevice(config.query.adapter_id, if (config.query.backend == c.backend_amd) .amd else .nvidia) catch |err| return gpuCode(err);
+                const device = gpuDevice(config.query.adapter_id, if (config.query.backend == c.backend_amd) .amd else .nvidia, config.query.codec) catch |err| return gpuCode(err);
                 if (device.binding.device_generation != supported.device_generation or device.binding.reset_generation != supported.reset_generation) return c.error_stale;
-                d.gpu_decoder = GpuDecoder.init(.{ .base = buffers().base, .device = device,
-                    .budget = &slot.owner.memory, .clock = native.time.read });
+                d.gpu_decoder = GpuDecoder.init(.{ .base = buffers().base, .device = device, .budget = &slot.owner.memory, .clock = native.time.read });
                 callbacks = d.gpu_decoder.?.ops();
             }
-            const codec_config: ff.struct_r4video_codec_config = .{ .profile = config.query.profile, .max_width = config.max_width, .max_height = config.max_height, .threads = if (config.threads <= 2) 1 else config.threads - 1, .max_packet_bytes = max_packet_bytes, .nvdec = if (hardware) &callbacks else null };
+            const codec_config: ff.struct_r4video_codec_config = .{ .profile = config.query.profile, .max_width = config.max_width, .max_height = config.max_height, .threads = if (config.threads <= 2) 1 else config.threads - 1, .max_packet_bytes = max_packet_bytes, .nvdec = if (hardware) &callbacks else null, .codec = config.query.codec, .bit_depth = config.query.bit_depth };
             const opened = ff.r4video_codec_open(&codec_config, &d.codec);
             if (opened != c.ok) return opened;
             ff.r4video_codec_set_notify(d.codec, codecNotify, d);
@@ -1088,15 +1114,13 @@ pub fn Implementation(comptime ff: type) type {
             result.sar_den = frame.sar_den;
             result.format = c.format_yuv420p;
             result.plane_count = 3;
-            result.color = .{ .version = 1, .size = @sizeOf(c.R4VideoColor), .primaries = frame.primaries, .transfer = frame.transfer, .range = frame.range, .matrix = frame.matrix, .chroma_location = frame.chroma_location, .bit_depth = 8, .reference_white = 0, .peak = 0, .black = 0, .flags = 0 };
+            result.color = .{ .version = 1, .size = @sizeOf(c.R4VideoColor), .primaries = frame.primaries, .transfer = frame.transfer, .range = frame.range, .matrix = frame.matrix, .chroma_location = frame.chroma_location, .bit_depth = d.config.query.bit_depth, .reference_white = 0, .peak = 0, .black = 0, .flags = 0 };
             if (frame.hardware_image != null) {
                 const buffer = d.gpu_decoder.?.describe(frame.hardware_image).?;
-                result.format = c.format_nv12;
+                result.format = if (d.config.query.bit_depth == 10) c.format_p010 else c.format_nv12;
                 result.plane_count = 2;
                 inline for (.{ "plane0", "plane1" }, 0..) |field, index| {
-                    @field(result, field) = .{ .buffer = @bitCast(buffer.backing.buffer), .reference = @bitCast(buffer.backing.reference),
-                        .offset = buffer.descriptor.plane_offsets[index], .pitch = buffer.descriptor.plane_pitches[index],
-                        .row_bytes = frame.width, .rows = if (index == 0) frame.height else (frame.height + 1) / 2, .reserved = 0 };
+                    @field(result, field) = .{ .buffer = @bitCast(buffer.backing.buffer), .reference = @bitCast(buffer.backing.reference), .offset = buffer.descriptor.plane_offsets[index], .pitch = buffer.descriptor.plane_pitches[index], .row_bytes = @as(u64, frame.width) * @as(u64, if (d.config.query.bit_depth == 10) 2 else 1), .rows = if (index == 0) frame.height else (frame.height + 1) / 2, .reserved = 0 };
                 }
             } else inline for (.{ "plane0", "plane1", "plane2" }, 0..) |field, index| {
                 const plane = &image.surface.planes[index];

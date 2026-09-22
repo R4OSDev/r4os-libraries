@@ -9,6 +9,8 @@ pub const import_raster_v1 = "R4IMG:RASTER_V1:1";
 /// Shared image/color orchestration. Pass the imported R4GFX binding type;
 /// neither decoder ABI nor codec implementation acquires a color dependency.
 pub const ColorDecoder = @import("color.zig").Decoder;
+/// Optional AMD baseline JPEG -> canonical NV12 consumer over VIDEO_V1.
+pub const NativeJpeg = @import("native_jpeg.zig").Consumer;
 pub const max_dimension: u32 = abi.max_dimension;
 pub const max_pixels: usize = @intCast(abi.max_pixels);
 pub const max_scratch_bytes: usize = @intCast(abi.max_scratch_bytes);

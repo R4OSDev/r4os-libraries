@@ -347,13 +347,44 @@ fn amdChecks(base: r.program.Context) !void {
     try t.expectEqual(@as(usize, 0), budget.liveBytes());
     try state.clean();
 
-    for ([_]gpu.Engine{ .decode, .encode }) |engine| {
+    // JPEG1 copies the IB on the driver CPU before VMID0 dispatch. A producer
+    // write lease must be acknowledged away, including failed unmap retries.
+    state = .{ .provider = .amd, .next_va = amd.native_va_start, .push_bytes = 512, .engine = .jpeg };
+    ctx = .{ .base = base, .device = try gpu.Device.queryFor(base, 9, .jpeg), .budget = &budget, .clock = clock };
+    state.jpeg_ready = false;
+    try t.expectError(error.Unsupported, gpu.Device.queryFor(base, 9, .jpeg));
+    state.jpeg_ready = true;
+    try commands.system(&ctx, 512);
+    try t.expectError(error.Busy, ctx.submit(&commands, 512, &.{}));
+    state.unmap_busy = true;
+    try t.expectError(error.Busy, commands.suspendCpu());
+    try t.expect((try commands.mappedBytes()).len >= 512);
+    try t.expectError(error.Busy, ctx.submit(&commands, 512, &.{}));
+    state.unmap_busy = false;
+    for (0..2) |_| {
+        try commands.resumeCpu();
+        (try commands.mappedBytes())[0] = 0xa5;
+        try commands.suspendCpu();
+        try t.expectError(error.Busy, commands.mappedBytes());
+        try ctx.submit(&commands, 512, &.{});
+    }
+    state.map_invalid = true;
+    try t.expectError(error.Unsupported, commands.resumeCpu());
+    try t.expectError(error.Busy, commands.mappedBytes());
+    try commands.close();
+    try ctx.close();
+    try state.clean();
+    try t.expectEqual(@as(usize, 0), budget.liveBytes());
+
+    for ([_]gpu.Engine{ .decode, .encode, .jpeg }) |engine| {
         state = .{ .provider = .amd, .next_va = amd.native_va_start, .push_bytes = 64, .engine = engine, .queue_timeout = true };
         ctx = .{ .base = base, .device = try gpu.Device.queryFor(base, 9, engine), .budget = &budget, .clock = clock };
         pool = .{};
         try commands.system(&ctx, 64);
+        if (engine == .jpeg) try commands.suspendCpu();
         const token = try pool.allocate(&ctx, 64, 64, 8, 3);
         try t.expectError(error.Timeout, ctx.submit(&commands, 64, &.{.{ .resource = try pool.resource(token), .write = true }}));
+        try t.expectError(error.Busy, commands.resumeCpu());
         try t.expectError(error.Busy, pool.finish(token, true));
         try pool.abort(token);
         try pool.release(token, .codec);
@@ -376,5 +407,5 @@ fn amdChecks(base: r.program.Context) !void {
     try pool.close();
     try t.expectEqual(@as(usize, 0), budget.liveBytes());
     try state.clean();
-    std.debug.print("AMD media owners: NV12/P010, DPB/consumer holds, provider admission, codec rejection and both engine timeout retirements: OK\n", .{});
+    std.debug.print("AMD media owners: NV12/P010, DPB/consumer holds, JPEG CPU handoff, provider admission and three engine timeout retirements: OK\n", .{});
 }

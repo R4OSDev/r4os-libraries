@@ -68,7 +68,7 @@ checks loaded shader bytes, native pipeline/draw calls and failure output
 integrity. IMAGE_SCOPE=none
 keeps the provider out of ordinary profiles until its consumers are ready.
 
-ThirdParty/Sources.json pins 79 original files and the release patch
+ThirdParty/Sources.json pins 80 original files and the release patch
 avoiding unused POSIX signal.h when DEBUG=0. Original bytes stay unchanged.
 Adapted Mesa code retains MIT notices; original R4OS code is Apache-2.0.
 Tools/ExportLegal.ps1 exports all compiled AddrLib and image/encoder notices
@@ -113,3 +113,20 @@ generate three independent binary profile vectors via
 The R4AMD runtime artifact and public ABI remain 0.1.6/BACKEND_V1:4 because
 this source component is consumed by the R4VIDEO artifact. Physical proof
 and verification of the exact pinned firmware feedback are reserved for /39.
+
+## VCN1 additional codec sources (0.80.30)
+
+`Port/vcn_codecs.c` is compiled into R4VIDEO, keeping the R4AMD runtime at
+0.1.6/BACKEND_V1:4. `Tools/VcnCodecs.ps1` verifies the unchanged original
+HEVC/VP9/MPEG2/VC1 structures/builders and VP9 default probabilities against
+the pinned Mesa originals. The generated files retain their MIT notices.
+The adapter provides bounded internal DPB/context planning, reference-slot
+mapping, NV12/P010 target geometry and fresh decode feedback. Baseline JPEG
+uses the separate VCN1 register command path. `VcnDecodeVectors.ps1` compares
+four JPEG dimensions bytewise against the original Mesa command function,
+alongside existing H.264 vectors and HEVC/VP9 storage/reference checks.
+
+DeviceFacts bit 3 (`device_fact_jpeg1_submit`) advertises the driver's copied
+VMID0 JPEG IB and cross-engine exclusion. NativeSubmit engine 4 selects JPEG;
+wire sizes and function-table layouts are unchanged. Source eligibility alone
+does not promise an implemented public profile or physical qualification.

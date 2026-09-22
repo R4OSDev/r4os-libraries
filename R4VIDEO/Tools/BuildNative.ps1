@@ -6,6 +6,8 @@ $ErrorActionPreference = 'Stop'
 if (!$IsWindows -and !$IsLinux) { throw 'Supported build hosts: Windows and Linux.' }
 . (Join-Path $PSScriptRoot 'Common.ps1')
 $paths = Get-R4VideoPaths
+& pwsh -NoLogo -NoProfile -File (Join-Path $paths.libraries 'R4AMD/Tools/VcnCodecs.ps1')
+if ($LASTEXITCODE) { throw 'VCN source verification failed.' }
 $options = @()
 if ($Offline) { $options += '-Offline' }
 & pwsh -NoLogo -NoProfile -File (Join-Path $PSScriptRoot 'Prepare.ps1') @options
@@ -39,7 +41,7 @@ $record = Join-Path $output 'native.json'
 $inputs = @($PSCommandPath, (Join-Path $PSScriptRoot 'Common.ps1'), $planPath, (Join-Path $paths.cache 'prepare.json'),
     (Join-Path $generated 'tables.json'), (Join-Path $generated 'r4video_cavlc_tables.h'),
     (Join-Path $generated 'r4video_h274_tables.h'), $clang, $nasm, $ar)
-foreach ($directory in @((Join-Path $paths.unit 'Port'), (Join-Path $paths.unit 'Bindings/C'), $shared,
+foreach ($directory in @((Join-Path $paths.unit 'Port'), (Join-Path $paths.libraries 'R4AMD/Port'), (Join-Path $paths.unit 'Bindings/C'), $shared,
         (Join-Path $paths.libraries 'R4NAK/ThirdParty/stb'),
         (Join-Path $paths.sdk 'Shared/C/include'), (Join-Path $paths.contract 'Generated/SDK/C/include'),
         (Join-Path $resource.Trim() 'include'))) {
@@ -57,7 +59,7 @@ $id = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Enco
 if (Test-Path -LiteralPath $record) {
     $previous = Get-Content -Raw -LiteralPath $record | ConvertFrom-Json
     if ($previous.identity -eq $id) {
-        if ($previous.outputs.Count -ne $plan.units.Count + $sharedC.Count + 7) { throw 'Incomplete native FFmpeg output inventory.' }
+        if ($previous.outputs.Count -ne $plan.units.Count + $sharedC.Count + 9) { throw 'Incomplete native FFmpeg output inventory.' }
         foreach ($entry in $previous.outputs) {
             if ((Get-R4VideoHash (Join-Path $output $entry.path)) -ne $entry.sha256) { throw "Native FFmpeg cache changed: $($entry.path)" }
         }
@@ -84,6 +86,8 @@ $units = @(foreach ($unit in $plan.units) {
 $units += [pscustomobject]@{name='r4video_pthread.o'; source=(Join-Path $paths.unit 'Port/pthread.c'); kind='c'}
 $units += [pscustomobject]@{name='r4video_codec.o'; source=(Join-Path $paths.unit 'Port/codec.c'); kind='c'}
 $units += [pscustomobject]@{name='r4video_nvdec.o'; source=(Join-Path $paths.unit 'Port/nvdec.c'); kind='c'}
+$units += [pscustomobject]@{name='r4video_vcn.o'; source=(Join-Path $paths.unit 'Port/vcn.c'); kind='c'}
+$units += [pscustomobject]@{name='r4amd_vcn_codecs.o'; source=(Join-Path $paths.libraries 'R4AMD/Port/vcn_codecs.c'); kind='c'}
 $units += [pscustomobject]@{name='r4video_state.o'; source=(Join-Path $paths.unit 'Port/state.c'); kind='c'}
 foreach ($name in $sharedC) {
     $units += [pscustomobject]@{name=('r4video_native_'+$name+'.o'); source=(Join-Path $shared ($name+'.c')); kind='c'}

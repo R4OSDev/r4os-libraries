@@ -7,12 +7,12 @@ C/Zig ABI, canonical graphics identities and concurrent allocation budgets.
 
 `Tools/BuildNative.ps1` builds pinned FFmpeg 9.0.1 for freestanding x86_64 with
 PowerShell 7, clang 19.1.7, NASM >= 2.16 and bundled Zig. It generates immutable
-CAVLC/H.274 tables with the original upstream initializers and uses FFmpeg's
+CAVLC/H.274/MPEG2/MSMPEG4/IntraX8/VC1 tables with the original upstream initializers and uses FFmpeg's
 constant CRC tables. Linux execution and Windows cross-compilation of these
 generators were checked; the complete PowerShell build was run on Linux.
 `-Offline` requires the checksum-verified archive. See ThirdParty/Sources.json.
 
-The archive has 143 objects (132 upstream, four adapters, seven shared C
+The archive has 277 objects (264 upstream, six adapters, seven shared C
 helpers), plus separately built shared Math/Scan archives. SIMD dispatch uses
 actual CPUID/XCR0; AVX512 remains masked under the current SDK contract.
 Native process settings, bounded allocation ownership, worker admission/join,
@@ -66,7 +66,7 @@ Finish permanently closes the process-local runtime. Fixed tombstone metadata,
 including its owner mutex, follows process lifetime for safe stale/idempotent calls.
 
 H.264 profile zero resolves to Baseline; Main/High require explicit selection.
-Only progressive 8-bit 4:2:0 is admitted. Unsupported codecs/profiles/devices
+The H.264 path admits progressive 8-bit 4:2:0. Unsupported codecs/profiles/devices
 return UNSUPPORTED without implicit substitution;
 a media owner can explicitly open the software backend. Errors from asynchronous
 FFmpeg admission wake the coordinator even if no further packet arrives.
@@ -223,8 +223,8 @@ no signature or modification lock prevents using a compatible rebuilt module.
 R4VIDEO 0.1.4 admits explicit AMD backend 2 for progressive H.264 Baseline,
 Main and High, 8-bit 4:2:0, one slice group, up to level 5.1, coded dimensions
 64..4096, at most 36,864 macroblocks per picture. Admission intersects the actual Picasso/VCN1 driver epoch and
-firmware-ready facts with R4AMD's source limits. Other AMD codecs remain
-unsupported until their implementations enter in 0.80.30. Software fallback
+firmware-ready facts with R4AMD's source limits. The additional AMD codecs
+implemented in 0.80.30 are described below. Software fallback
 requires the caller's explicit playback policy before backend selection.
 
 `Source/amd_decoder.zig` consumes the same real FFmpeg parser callbacks as
@@ -248,3 +248,45 @@ checks are recorded in Docs/Drivers/AMDH26408029.txt/.json. The guest models
 VCN feedback; it does not decode or qualify AMD pixels. Physical firmware,
 feedback values, image quality, audio and laptop qualification are /39.
 The corresponding source package includes R4AMD and this entire port.
+
+## Additional AMD codecs (0.80.30)
+
+R4VIDEO 0.1.5 adds progressive 4:2:0 HEVC Main/Main10, VP9 profiles 0/2,
+MPEG2 Main/Simple, VC1 Advanced and baseline JPEG. Eight-bit output is native
+NV12, ten-bit output is P010. Coded dimensions are even, 64..4096 per axis
+(VP9: 16..4096), subject to caller memory and binding capacity. HEVC admits
+levels through 186, VP9 through 62 and VC1 through 4. MPEG2 level codes are
+not ordered numerically; max_level is zero instead of a misleading maximum.
+AV1, MPEG4 Part 2, VC1 Simple/Main, interlace, other chroma formats, HEVC
+range/SCC extensions and progressive/lossless/multiscan JPEG are unsupported.
+The software and NVIDIA paths keep their existing H.264 limits.
+
+`Port/vcn.c` translates real FFmpeg metadata and retained reference images
+to pinned Mesa codec structures. `R4AMD/Port/vcn_codecs.c` compiles the
+unchanged upstream payload builders and VP9 probability defaults. HEVC uses
+tier-0 internal DPB/context, VP9 a tier-1 linear NV12/P010 DPB, MPEG2/VC1
+the firmware-managed tier-0 picture slots. Decode results require fresh
+firmware feedback plus native retirement. VC1 Advanced sequence/entry headers
+must precede the first frame in the first access unit; opening is deferred
+until those bounded headers are present.
+
+JPEG consumes one complete baseline SOI..EOI image per packet, at most 8 MB.
+FFmpeg's post-SOI callback buffer is reconstructed without duplicating scans.
+The worker explicitly unmaps its command CPU write lease before the driver
+reads/copies that IB into VMID0; re-mapping waits for acknowledged retirement.
+AMDGPU serializes JPEG against decode/encode through resource retirement,
+following the VCN1 workaround. JPEG has no VCN decode-message feedback;
+its native fence/error IRQ is the completion source. Capability admission
+requires the driver's separate JPEG submit bit, not just VCN ring readiness.
+
+The optional `R4IMG.NativeJpeg.Consumer(video)` facade owns this bounded
+VIDEO_V1 image/lease lifecycle while callers retain ICC/Exif characterization
+and explicit R4GFX color policy. It does not map GPU pixels or change R4IMG's
+loaded API. Existing media-host timing/audio/consumer rules remain applicable.
+
+Docs/Drivers/AMDCodecs08030.txt/.json record original-Mesa JPEG command
+comparisons, codec storage/reference checks and a public SMP4 integration
+probe with 99 parser/output frames over eight profiles plus the R4IMG image
+consumer. The probe models GPU replies and proves no physical decoded pixels.
+Actual firmware results, pixels, throughput and laptop operation are /39.
+All port changes and original sources accompany the replaceable LGPL module.

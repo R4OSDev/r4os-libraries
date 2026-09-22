@@ -1039,6 +1039,7 @@ _Static_assert(offsetof(R4AmdMediaCaps, rate_controls) == 60u, "R4AmdMediaCaps.r
 #define R4AMD_PICASSO_VCN_FIRMWARE ((uint32_t)51441669)
 #define R4AMD_DEVICE_FACT_VCN1_READY ((uint32_t)4)
 #define R4AMD_MEDIA_CAPS_SOURCE_PROFILE ((uint32_t)1)
+#define R4AMD_DEVICE_FACT_JPEG1_SUBMIT ((uint32_t)8)
 #define R4AMD_STATUS_INVALID ((int32_t)-1)
 #define R4AMD_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4AMD_STATUS_STALE ((int32_t)-3)

@@ -1,6 +1,7 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "codec.h"
 #include "codec_internal.h"
+#include "hardware_private.h"
 #include "r4video.h"
 #include "libavcodec/avcodec.h"
 #include "libavcodec/h264dec.h"
@@ -45,6 +46,11 @@ int r4video_codec_error(const struct r4video_codec *codec)
 int r4video_codec_admitted(AVCodecContext *context)
 {
     struct r4video_codec *codec = context->opaque;
+    if (context->codec_id != AV_CODEC_ID_H264) {
+        /* Exact sequence/profile admission runs before image allocation. The
+         * format callback may run before the parser installs its new PPS. */
+        return codec->config.nvdec ? R4VIDEO_OK : R4VIDEO_ERROR_UNSUPPORTED;
+    }
     H264Context *h264 = context->priv_data;
     const SPS *sps = h264->ps.sps;
     const PPS *pps = h264->ps.pps;
@@ -94,16 +100,32 @@ int r4video_codec_open(const struct r4video_codec_config *config, struct r4video
         config->max_width > 4096 || config->max_height > 4096 || !config->threads || config->threads > 16 ||
         !config->max_packet_bytes || config->max_packet_bytes > INT_MAX - AV_INPUT_BUFFER_PADDING_SIZE)
         return R4VIDEO_ERROR_INVALID;
-    if (config->profile != R4VIDEO_PROFILE_H264_BASELINE && config->profile != R4VIDEO_PROFILE_H264_MAIN &&
+    uint32_t kind=config->codec?config->codec:R4VIDEO_CODEC_H264;
+    if (kind!=R4VIDEO_CODEC_H264 && !config->nvdec) return R4VIDEO_ERROR_UNSUPPORTED;
+    if (kind==R4VIDEO_CODEC_H264 && config->profile != R4VIDEO_PROFILE_H264_BASELINE && config->profile != R4VIDEO_PROFILE_H264_MAIN &&
         config->profile != R4VIDEO_PROFILE_H264_HIGH) return R4VIDEO_ERROR_UNSUPPORTED;
+    enum AVCodecID codec_id;
+    switch (kind) {
+    case R4VIDEO_CODEC_H264: codec_id=AV_CODEC_ID_H264; break;
+    case R4VIDEO_CODEC_HEVC: codec_id=AV_CODEC_ID_HEVC; break;
+    case R4VIDEO_CODEC_VP9: codec_id=AV_CODEC_ID_VP9; break;
+    case R4VIDEO_CODEC_MPEG2: codec_id=AV_CODEC_ID_MPEG2VIDEO; break;
+    case R4VIDEO_CODEC_VC1:
+        if (config->profile!=3) return R4VIDEO_ERROR_UNSUPPORTED;
+        codec_id=AV_CODEC_ID_VC1; break;
+    case R4VIDEO_CODEC_JPEG: codec_id=AV_CODEC_ID_MJPEG; break;
+    default: return R4VIDEO_ERROR_UNSUPPORTED;
+    }
     if (config->nvdec && (!config->nvdec->owner || !config->nvdec->allocate || !config->nvdec->begin ||
         !config->nvdec->slice || !config->nvdec->end || !config->nvdec->abort || !config->nvdec->release))
         return R4VIDEO_ERROR_INVALID;
-    const AVCodec *implementation = avcodec_find_decoder(AV_CODEC_ID_H264);
+    const AVCodec *implementation = avcodec_find_decoder(codec_id);
     if (!implementation) return R4VIDEO_ERROR_UNSUPPORTED;
     struct r4video_codec *codec = av_mallocz(sizeof(*codec));
     if (!codec) return R4VIDEO_ERROR_NO_MEMORY;
     codec->config = *config;
+    codec->config.codec=kind;
+    codec->config.bit_depth=config->bit_depth?config->bit_depth:8;
     if (config->nvdec) {
         codec->nvdec = *config->nvdec;
         codec->config.nvdec = &codec->nvdec;
@@ -126,10 +148,52 @@ int r4video_codec_open(const struct r4video_codec_config *config, struct r4video
     context->err_recognition = AV_EF_CRCCHECK | AV_EF_BITSTREAM | AV_EF_BUFFER | AV_EF_EXPLODE;
     context->error_concealment = 0;
     context->pkt_timebase = (AVRational){1, 1000000000};
-    int opened = result(codec, avcodec_open2(context, implementation, NULL));
+    /* Advanced VC1 carries the sequence and entry-point headers in its first
+     * access unit. Delay the original decoder's extradata-dependent init until
+     * that bounded packet is owned by this worker. */
+    int opened = codec_id==AV_CODEC_ID_VC1 ? 0 : result(codec, avcodec_open2(context, implementation, NULL));
     if (opened) { avcodec_free_context(&codec->context); av_free(codec); return opened; }
     *output = codec;
     return R4VIDEO_OK;
+}
+/* Exactly one baseline interleaved 4:2:0 image. Tables remain in the original
+ * parser; multi-scan/progressive/extended JPEG and concatenated images have no
+ * native claim. Do this before FFmpeg can start the JPEG hardware callback. */
+static int jpeg_packet(const uint8_t *p, size_t size)
+{
+    if (size<4 || p[0]!=0xff || p[1]!=0xd8) return R4VIDEO_ERROR_DECODE;
+    size_t at=2;
+    int sof=0;
+    while (at<size) {
+        if (p[at++]!=0xff) return R4VIDEO_ERROR_DECODE;
+        while (at<size && p[at]==0xff) at++;
+        if (at>=size) return R4VIDEO_ERROR_DECODE;
+        const unsigned marker=p[at++];
+        if (at+2>size) return R4VIDEO_ERROR_DECODE;
+        const size_t n=(size_t)p[at]*256+p[at+1];
+        if (n<2 || n>size-at) return R4VIDEO_ERROR_DECODE;
+        if (marker==0xc0) {
+            if (sof || n!=17 || p[at+2]!=8 || p[at+7]!=3 || p[at+9]!=0x22 || p[at+12]!=0x11 || p[at+15]!=0x11)
+                return R4VIDEO_ERROR_UNSUPPORTED;
+            sof=1;
+        } else if (marker==0xda) {
+            if (!sof || n!=12 || p[at+2]!=3 || p[at+9]!=0 || p[at+10]!=63 || p[at+11]!=0)
+                return R4VIDEO_ERROR_UNSUPPORTED;
+            at+=n;
+            while (at<size) {
+                if (p[at++]!=0xff) continue;
+                while (at<size && p[at]==0xff) at++;
+                if (at>=size) break;
+                unsigned code=p[at++];
+                if (!code || (code>=0xd0 && code<=0xd7)) continue;
+                return code==0xd9 && at==size?0:R4VIDEO_ERROR_UNSUPPORTED;
+            }
+            return R4VIDEO_ERROR_DECODE;
+        } else if (marker!=0xc4 && marker!=0xdb && marker!=0xdd && marker!=0xfe && (marker<0xe0 || marker>0xef))
+            return R4VIDEO_ERROR_UNSUPPORTED;
+        at+=n;
+    }
+    return R4VIDEO_ERROR_DECODE;
 }
 int r4video_codec_send(struct r4video_codec *codec, const struct r4video_codec_packet *input)
 {
@@ -137,6 +201,29 @@ int r4video_codec_send(struct r4video_codec *codec, const struct r4video_codec_p
         input->size > UINTPTR_MAX - (uintptr_t)input->bytes ||
         input->flags & ~(R4VIDEO_PACKET_PTS | R4VIDEO_PACKET_DTS | R4VIDEO_PACKET_DURATION))
         return R4VIDEO_ERROR_INVALID;
+    if (codec->config.codec==R4VIDEO_CODEC_JPEG) {
+        int rc=jpeg_packet(input->bytes,(size_t)input->size);
+        if (rc) return rc;
+    }
+    if (!avcodec_is_open(codec->context)) {
+        if (codec->config.codec!=R4VIDEO_CODEC_VC1) return R4VIDEO_ERROR_DECODE;
+        size_t prefix=0;
+        int sequence=0, entry=0;
+        const size_t limit=input->size<65536?input->size:65536;
+        for (size_t i=0;i+4<=limit;i++) if (!input->bytes[i] && !input->bytes[i+1] && input->bytes[i+2]==1) {
+            const uint8_t type=input->bytes[i+3];
+            if (type==0x0f) sequence=1;
+            if (type==0x0e && sequence) entry=1;
+            if (type==0x0d) { prefix=i; break; }
+        }
+        if (!sequence || !entry || prefix<16) return R4VIDEO_ERROR_UNSUPPORTED;
+        AVCodecContext *context=codec->context;
+        context->extradata=av_mallocz(prefix+AV_INPUT_BUFFER_PADDING_SIZE);
+        if (!context->extradata) return R4VIDEO_ERROR_NO_MEMORY;
+        memcpy(context->extradata,input->bytes,prefix); context->extradata_size=(int)prefix;
+        int rc=result(codec,avcodec_open2(context,avcodec_find_decoder(AV_CODEC_ID_VC1),NULL));
+        if (rc) return rc;
+    }
     AVPacket *packet = av_packet_alloc();
     if (!packet) return R4VIDEO_ERROR_NO_MEMORY;
     int sent = av_new_packet(packet, (int)input->size);
@@ -160,6 +247,7 @@ int r4video_codec_send(struct r4video_codec *codec, const struct r4video_codec_p
 int r4video_codec_receive(struct r4video_codec *codec, struct r4video_codec_frame *output)
 {
     if (!codec || !output) return R4VIDEO_ERROR_INVALID;
+    if (!avcodec_is_open(codec->context)) return R4VIDEO_AGAIN;
     AVFrame *frame = av_frame_alloc();
     if (!frame) return R4VIDEO_ERROR_NO_MEMORY;
     int received = result(codec, avcodec_receive_frame(codec->context, frame));
@@ -204,7 +292,7 @@ int r4video_codec_receive(struct r4video_codec *codec, struct r4video_codec_fram
     return R4VIDEO_OK;
 }
 int r4video_codec_drain(struct r4video_codec *codec)
-{ return codec ? result(codec, avcodec_send_packet(codec->context, NULL)) : R4VIDEO_ERROR_INVALID; }
+{ return !codec ? R4VIDEO_ERROR_INVALID : !avcodec_is_open(codec->context) ? R4VIDEO_EOS : result(codec, avcodec_send_packet(codec->context, NULL)); }
 void r4video_codec_release(struct r4video_codec_frame *frame)
 {
     if (!frame || !frame->image) return;
@@ -214,7 +302,7 @@ void r4video_codec_release(struct r4video_codec_frame *frame)
 }
 void r4video_codec_flush(struct r4video_codec *codec)
 {
-    avcodec_flush_buffers(codec->context);
+    if (avcodec_is_open(codec->context)) avcodec_flush_buffers(codec->context);
     atomic_store_explicit(&codec->admission_error, 0, memory_order_relaxed);
 }
 void r4video_codec_close(struct r4video_codec **owner)

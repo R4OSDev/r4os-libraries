@@ -2,8 +2,8 @@
 const std = @import("std");
 const gpu = @import("gpu_resources");
 const v = @import("r4amd_decode");
-// FFmpeg's historical nvdec-named private bridge carries resolved H.264
-// metadata only. This owner emits VCN1 messages; no NVIDIA or CPU decode runs.
+// One VCN owner for resolved FFmpeg pictures, canonical image leases and DPB.
+// The historical nvdec callback names are private and provider independent.
 pub fn Implementation(comptime ff: type) type {
     return struct {
         const Self = @This();
@@ -21,6 +21,12 @@ pub fn Implementation(comptime ff: type) type {
         active: ?*Image = null,
         sequence: ?v.Sequence = null,
         picture: v.Picture = undefined,
+        extra: [4096]u8 align(8) = @splat(0),
+        extra_bytes: u32 = 0,
+        current_slot: u32 = 0,
+        reference_slots: [16]u32 = @splat(0),
+        reference_count: u32 = 0,
+        embedded: [ff.R4AMD_VCN_EMBEDDED]u8 align(8) = @splat(0),
         stream: v.AccessUnit = .{ .storage = &.{} },
         epoch: u64 = 0,
         serial: u32 = 0,
@@ -40,10 +46,45 @@ pub fn Implementation(comptime ff: type) type {
             };
         }
         fn convert(s: ff.struct_r4video_nvdec_sequence) v.Sequence {
-            return .{ .profile = s.profile, .level = s.level, .width_mbs = s.width_mbs, .height_mbs = s.height_mbs, .max_refs = s.max_refs, .log2_frame_num = s.log2_frame_num, .poc_type = s.poc_type, .log2_poc_lsb = s.log2_poc_lsb, .delta_poc_always_zero = s.delta_poc_always_zero != 0, .direct_8x8 = s.direct_8x8 != 0, .gaps_allowed = s.gaps_allowed != 0 };
+            return .{ .codec = if (s.codec == 0) 1 else s.codec, .depth = if (s.bit_depth == 0) 8 else s.bit_depth, .width = if (s.width == 0) s.width_mbs * 16 else s.width, .height = if (s.height == 0) s.height_mbs * 16 else s.height, .profile = s.profile, .level = s.level, .width_mbs = s.width_mbs, .height_mbs = s.height_mbs, .max_refs = s.max_refs, .log2_frame_num = s.log2_frame_num, .poc_type = s.poc_type, .log2_poc_lsb = s.log2_poc_lsb, .delta_poc_always_zero = s.delta_poc_always_zero != 0, .direct_8x8 = s.direct_8x8 != 0, .gaps_allowed = s.gaps_allowed != 0 };
         }
         fn sameStorage(a: v.Sequence, b: v.Sequence) bool {
-            return a.width_mbs == b.width_mbs and a.height_mbs == b.height_mbs and a.max_refs == b.max_refs;
+            return a.codec == b.codec and a.depth == b.depth and a.width == b.width and a.height == b.height and a.max_refs == b.max_refs;
+        }
+        fn nativeSequence(s: v.Sequence) ff.struct_r4amd_vcn_sequence {
+            return .{ .codec = s.codec, .profile = s.profile, .level = s.level, .width = s.width, .height = s.height, .depth = s.depth, .refs = s.max_refs };
+        }
+        fn check(rc: c_int) !void {
+            if (rc != 0) return if (rc == -2) error.Unsupported else error.Invalid;
+        }
+        fn requirements(s: v.Sequence) !v.Requirements {
+            if (s.codec == 1) return v.requirements(s);
+            var req: ff.struct_r4amd_vcn_requirements = undefined;
+            try check(ff.r4amd_vcn_plan(&nativeSequence(s), &req));
+            return .{ .dpb = req.dpb, .context = req.context, .session = req.session, .pitch = req.pitch, .height = req.height };
+        }
+        fn commands(self: *Self, image: ?*Image, s: v.Sequence, creating: bool) ![64]u32 {
+            if (s.codec == 1) return v.commands(s, self.buffers(image), creating);
+            const req = try requirements(s);
+            var words: [64]u32 = @splat(0x80000000);
+            var at: usize = 0;
+            emit(&words, &at, 5, self.span(.session).address);
+            emit(&words, &at, 0, self.span(.embedded).address);
+            if (!creating) {
+                emit(&words, &at, 1, self.span(.dpb).address);
+                if (req.context != 0) emit(&words, &at, 0x206, self.span(.session).address + v.session_context_bytes);
+                if (s.codec == 2 or s.codec == 3) emit(&words, &at, if (s.codec == 2) 0x204 else 4, self.span(.embedded).address + ff.R4AMD_VCN_ITS);
+                emit(&words, &at, 3, self.span(.embedded).address + ff.R4AMD_VCN_FEEDBACK);
+                emit(&words, &at, 0x100, self.span(.bitstream).address);
+                emit(&words, &at, 2, image.?.resource.address);
+                words[at] = 0x20718 / 4;
+                words[at + 1] = 1;
+            }
+            return words;
+        }
+        fn emit(words: []u32, at: *usize, cmd: u32, va: u64) void {
+            @memcpy(words[at.*..][0..6], &[_]u32{ 0x20710 / 4, @truncate(va), 0x20714 / 4, @truncate(va >> 32), 0x2070c / 4, cmd << 1 });
+            at.* += 6;
         }
         fn find(self: *Self, ptr: ?*anyopaque) ?*Image {
             for (&self.images) |*i| if (ptr == @as(*anyopaque, @ptrCast(i)) and i.state != .empty and i.state != .released) return i;
@@ -78,12 +119,12 @@ pub fn Implementation(comptime ff: type) type {
             if (self.failed or self.closing) return -7;
             self.reap() catch |err| if (err != error.Busy) return self.reject(err);
             const seq = convert(input.*);
-            _ = v.requirements(seq) catch |err| return self.reject(err);
+            _ = requirements(seq) catch |err| return self.reject(err);
             for (&self.images) |*i| if (i.state == .empty) {
                 i.state = .allocated;
                 i.sequence = seq;
                 out.* = i;
-                i.resource.yuv(&self.ctx, seq.width_mbs * 16, seq.height_mbs * 16, 8) catch |err| return self.reject(err);
+                i.resource.yuv(&self.ctx, seq.width, seq.height, seq.depth) catch |err| return self.reject(err);
                 return 0;
             };
             return self.reject(error.NoMemory);
@@ -95,14 +136,29 @@ pub fn Implementation(comptime ff: type) type {
             self.slots = @splat(null);
             const until = try self.ctx.deadline();
             for (&self.work) |*b| try b.closeUntil(until);
-            const req = try v.requirements(s);
-            try self.resource(.embedded).system(&self.ctx, v.embedded_bytes);
+            const req = try requirements(s);
+            if (s.codec == 6) {
+                if (self.ctx.device.engine != .jpeg) return error.Unsupported;
+                try self.resource(.bitstream).system(&self.ctx, v.max_stream);
+                try self.resource(.commands).system(&self.ctx, 512);
+                self.epoch += 1;
+                self.sequence = s;
+                return;
+            }
+            try self.resource(.embedded).system(&self.ctx, if (s.codec == 1) v.embedded_bytes else ff.R4AMD_VCN_EMBEDDED);
             try self.resource(.session).system(&self.ctx, req.session);
             try self.resource(.dpb).video(&self.ctx, req.dpb);
             try self.resource(.bitstream).system(&self.ctx, v.max_stream);
             try self.resource(.commands).system(&self.ctx, 256);
-            try self.upload(.embedded, &try v.create(s, self.handle()));
-            const words = try v.commands(s, self.buffers(null), true);
+            if (s.codec == 1) {
+                try self.upload(.embedded, &try v.create(s, self.handle()));
+            } else {
+                const session = try self.resource(.session).mappedBytes();
+                try check(ff.r4amd_vcn_context(&nativeSequence(s), session.ptr, @intCast(session.len)));
+                try check(ff.r4amd_vcn_create(&nativeSequence(s), self.handle(), &self.embedded));
+                try self.upload(.embedded, &self.embedded);
+            }
+            const words = try self.commands(null, s, true);
             try self.upload(.commands, std.mem.sliceAsBytes(&words));
             try self.ctx.submit(self.resource(.commands), 256, &.{ .{ .resource = self.resource(.embedded), .write = false }, .{ .resource = self.resource(.session), .write = true } });
             self.epoch += 1;
@@ -144,9 +200,17 @@ pub fn Implementation(comptime ff: type) type {
                 break;
             };
             const slot = free orelse return self.reject(error.NoMemory);
+            self.current_slot = slot;
+            self.reference_count = p.reference_count;
+            for (self.references[0..p.reference_count], 0..) |ref, i| self.reference_slots[i] = ref.slot;
+            if (image.sequence.codec != 1) {
+                if (p.codec_parameters == null or p.codec_parameter_bytes == 0 or p.codec_parameter_bytes > self.extra.len) return self.reject(error.Invalid);
+                self.extra_bytes = p.codec_parameter_bytes;
+                @memcpy(self.extra[0..self.extra_bytes], @as([*]const u8, @ptrCast(p.codec_parameters))[0..self.extra_bytes]);
+            }
             self.picture = .{ .sequence = image.sequence, .slot = slot, .frame_num = p.frame_num, .poc = p.poc, .references = self.references[0..p.reference_count], .parameters = .{ .entropy_coding = p.entropy_coding != 0, .bottom_field_poc_present = p.bottom_field_poc_present != 0, .l0_default_minus1 = p.l0_default_minus1, .l1_default_minus1 = p.l1_default_minus1, .deblocking_control = p.deblocking_control != 0, .redundant_pic_cnt = p.redundant_pic_cnt != 0, .transform_8x8 = p.transform_8x8 != 0, .weighted_pred = p.weighted_pred != 0, .constrained_intra_pred = p.constrained_intra_pred != 0, .weighted_bipred = p.weighted_bipred, .initial_qp_minus26 = p.initial_qp_minus26, .initial_qs_minus26 = p.initial_qs_minus26, .chroma_qp_offset = p.chroma_qp_offset, .second_chroma_qp_offset = p.second_chroma_qp_offset, .scaling4 = @bitCast(p.scaling4), .scaling8 = @bitCast(p.scaling8) } };
-            _ = v.decode(self.picture, target(image), self.handle(), 1, 128) catch |err| return self.reject(err);
-            self.stream = .{ .storage = self.resource(.bitstream).mappedBytes() catch |err| return self.reject(err) };
+            if (image.sequence.codec == 1) _ = v.decode(self.picture, target(image), self.handle(), 1, 128) catch |err| return self.reject(err);
+            self.stream = .{ .codec = image.sequence.codec, .storage = self.resource(.bitstream).mappedBytes() catch |err| return self.reject(err) };
             self.slots[slot] = image;
             self.active = image;
             image.epoch = self.epoch;
@@ -171,15 +235,35 @@ pub fn Implementation(comptime ff: type) type {
             const bytes = try self.stream.finish();
             if (self.serial == std.math.maxInt(u32)) return error.Invalid;
             self.serial += 1;
-            try self.upload(.embedded, &try v.decode(self.picture, target(image), self.handle(), self.serial, bytes));
-            const words = try v.commands(image.sequence, self.buffers(image), false);
+            if (image.sequence.codec == 6) {
+                const t = target(image);
+                const native_target: ff.struct_r4amd_vcn_target = .{ .pitch = t.pitch, .chroma_offset = t.chroma_offset, .bytes = t.bytes };
+                var jpeg_words: [128]u32 = undefined;
+                try check(ff.r4amd_vcn_jpeg(&nativeSequence(image.sequence), &native_target,
+                    self.span(.bitstream).address, bytes, image.resource.address, &jpeg_words));
+                try self.resource(.commands).resumeCpu();
+                try self.upload(.commands, std.mem.sliceAsBytes(&jpeg_words));
+                try self.resource(.commands).suspendCpu();
+                try self.ctx.submit(self.resource(.commands), 512, &.{
+                    .{ .resource = self.resource(.bitstream), .write = false }, .{ .resource = &image.resource, .write = true } });
+                return;
+            }
+            if (image.sequence.codec == 1) {
+                try self.upload(.embedded, &try v.decode(self.picture, target(image), self.handle(), self.serial, bytes));
+            } else {
+                const t = target(image);
+                const native_target: ff.struct_r4amd_vcn_target = .{ .pitch = t.pitch, .chroma_offset = t.chroma_offset, .bytes = t.bytes };
+                try check(ff.r4amd_vcn_message(&nativeSequence(image.sequence), &native_target, &self.extra, self.extra_bytes, &self.reference_slots, self.reference_count, self.current_slot, self.handle(), self.serial, bytes, &self.embedded));
+                try self.upload(.embedded, &self.embedded);
+            }
+            const words = try self.commands(image, image.sequence, false);
             try self.upload(.commands, std.mem.sliceAsBytes(&words));
             var loans: [6]gpu.Context.Loan = undefined;
             for (kinds, 0..) |kind, i| loans[i] = .{ .resource = self.resource(kind), .write = kind == .embedded or kind == .session or kind == .dpb };
             loans[5] = .{ .resource = &image.resource, .write = true };
             try self.ctx.submit(self.resource(.commands), 256, &loans);
             const mapped = try self.resource(.embedded).mappedBytes();
-            const src: [*]const volatile u8 = @ptrCast(mapped.ptr + v.feedback_offset);
+            const src: [*]const volatile u8 = @ptrCast(mapped.ptr + @as(usize, if (image.sequence.codec == 1) v.feedback_offset else ff.R4AMD_VCN_FEEDBACK));
             var status: [v.feedback_bytes]u8 = undefined;
             for (&status, 0..) |*b, i| b.* = src[i];
             try v.feedback(&status, self.serial);

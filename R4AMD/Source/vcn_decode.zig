@@ -13,6 +13,10 @@ pub const feedback_bytes = 44;
 pub const session_context_bytes = 128 * 1024;
 pub const Error = error{ Unsupported, Invalid, Capacity, MissingStatus, Decode };
 pub const Sequence = struct {
+    codec: u32 = 1,
+    depth: u32 = 8,
+    width: u32 = 0,
+    height: u32 = 0,
     profile: u32,
     level: u32,
     width_mbs: u32,
@@ -201,20 +205,27 @@ fn emit(b: []u32, at: *usize, cmd: u32, va: u64) void {
 }
 pub const AccessUnit = struct {
     storage: []u8,
+    codec: u32 = 1,
     length: u32 = 0,
     slices: u32 = 0,
     finished: bool = false,
     pub fn append(self: *AccessUnit, nal: []const u8) Error!void {
-        if (self.finished or nal.len == 0 or nal.len > max_stream - 3 or nal[0] & 128 != 0 or self.slices == 65535) return error.Invalid;
-        if (nal[0] & 31 != 1 and nal[0] & 31 != 5) return error.Unsupported;
-        const end = @as(u64, self.length) + nal.len + 3;
+        if (self.finished or nal.len == 0 or nal.len > max_stream - 3 or self.slices == 65535) return error.Invalid;
+        const prefix: usize = if (self.codec == 1 or self.codec == 2) 3 else 0;
+        if (self.codec == 1) {
+            if (nal[0] & 128 != 0) return error.Invalid;
+            if (nal[0] & 31 != 1 and nal[0] & 31 != 5) return error.Unsupported;
+        } else if (self.codec == 2) {
+            if (nal.len < 2 or nal[0] & 128 != 0 or nal[1] & 7 == 0 or (nal[0] >> 1) & 63 > 31) return error.Unsupported;
+        } else if (self.codec < 3 or self.codec > 6) return error.Unsupported;
+        const end = @as(u64, self.length) + nal.len + prefix;
         if (end > max_stream or end > self.storage.len or std.mem.alignForward(u64, end, 128) > self.storage.len) return error.Capacity;
         // memmove semantics are not allowed: original escaped NAL storage is
         // owned by FFmpeg and must be disjoint from the GPU upload buffer.
         if (@intFromPtr(nal.ptr) < @intFromPtr(self.storage.ptr) + self.storage.len and
             @intFromPtr(self.storage.ptr) < @intFromPtr(nal.ptr) + nal.len) return error.Invalid;
-        @memcpy(self.storage[self.length..][0..3], &[_]u8{ 0, 0, 1 });
-        @memcpy(self.storage[self.length + 3 ..][0..nal.len], nal);
+        if (prefix != 0) @memcpy(self.storage[self.length..][0..3], &[_]u8{ 0, 0, 1 });
+        @memcpy(self.storage[self.length + prefix ..][0..nal.len], nal);
         self.length = @intCast(end);
         self.slices += 1;
     }

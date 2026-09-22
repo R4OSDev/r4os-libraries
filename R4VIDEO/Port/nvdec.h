@@ -2,6 +2,7 @@
 #ifndef R4VIDEO_NVDEC_H
 #define R4VIDEO_NVDEC_H
 #include <stdint.h>
+#include "../../R4AMD/Port/vcn_codecs.h"
 
 /* Private codec/worker bridge. No FFmpeg pointers or CPU addresses are exposed
  * through VIDEO_V1. All callbacks run on the single decoder coordinator. */
@@ -9,6 +10,8 @@ struct r4video_nvdec_sequence {
     uint32_t profile, level, width_mbs, height_mbs, max_refs;
     uint32_t log2_frame_num, poc_type, log2_poc_lsb;
     uint32_t delta_poc_always_zero, direct_8x8, gaps_allowed;
+    /* Zero means legacy H.264/8-bit. Other codecs use exact coded samples. */
+    uint32_t codec, bit_depth, width, height;
 };
 struct r4video_nvdec_reference {
     void *image;
@@ -27,6 +30,8 @@ struct r4video_nvdec_picture {
     /* Fully resolved, raster-order matrices. 8x8 contains intra-Y/inter-Y. */
     uint8_t scaling4[6][16], scaling8[2][64];
     struct r4video_nvdec_reference references[16];
+    const void *codec_parameters;
+    uint32_t codec_parameter_bytes;
 };
 struct r4video_nvdec_ops {
     void *owner;

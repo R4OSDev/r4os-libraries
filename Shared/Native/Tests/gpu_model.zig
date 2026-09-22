@@ -16,6 +16,9 @@ const Va = struct { request: a.GfxVirtualRequest = .{}, status: a.GfxVirtualStat
 pub const Model = struct {
     provider: gpu.Provider = .nvidia,
     media_ready: bool = true,
+    jpeg_ready: bool = true,
+    unmap_busy: bool = false,
+    map_invalid: bool = false,
     bos: [64]Bo = @splat(.{}),
     vas: [128]Va = @splat(.{}),
     pending: a.GfxNativeAllocation = .{},
@@ -93,7 +96,7 @@ fn properties(input: *const a.GfxBackendBinding, output: *a.GfxBackendProperties
             .device_id = 0x15d8, .gc_version = amd.gc_9_1_0, .sdma_version = amd.sdma_4_1_0,
             .gb_addr_config = 0x24000042, .chip_revision = 0xc8, .bind_alignment = 4096, .memory_generation = 31,
             .flags = 0, .reserved = 0, .max_image_bytes = 64 * 1024 * 1024 };
-        facts.flags = 1 | @as(u32, if (model.coherent) 2 else 0) | @as(u32, if (model.media_ready) 4 else 0);
+        facts.flags = 1 | @as(u32, if (model.coherent) 2 else 0) | @as(u32, if (model.media_ready) 4 else 0) | @as(u32, if (model.jpeg_ready) 8 else 0);
         facts.va_start = amd.native_va_start; facts.va_end = amd.native_va_end;
         value.native_binding_capacity = 32; value.max_backing_bytes = 1024 * 1024 * 1024;
         output.* = .{ .interface_id_lo = amd.image_v1_header.interface_id_lo, .interface_id_hi = amd.image_v1_header.interface_id_hi,
@@ -159,11 +162,13 @@ fn map(input: *const a.GfxBufferHandle, access: u32, offset: u64, bytes: u64, ou
     std.debug.assert(bo.live and !bo.mapped and access == 1 and offset == 0 and bytes == bo.descriptor.byte_length);
     bo.mapped = true;
     output.* = .{ .lease = input.*, .cpu_address = @intFromPtr(bo.data.?.ptr), .byte_length = bytes, .cache_policy = a.gfx_buffer_cache_write_back };
+    if (model.map_invalid) output.byte_length -= 1;
     return 1;
 }
 fn unmap(input: *const a.GfxBufferHandle) callconv(.c) i32 {
     const bo = &model.bos[index(input, model.bos.len) orelse return -3];
     std.debug.assert(bo.mapped);
+    if (model.unmap_busy) return a.gfx_buffer_error_busy;
     bo.mapped = false;
     return 1;
 }
@@ -274,7 +279,7 @@ fn submit(input: *const a.GfxQueueHandle, common: *const a.GfxSubmission, native
         const ib: *const amd.R4AmdNativeIb = @ptrFromInt(native.commands + 32);
         std.debug.assert(native.interface_id_lo == amd.backend_v1_header.interface_id_lo and
             native.interface_id_hi == amd.backend_v1_header.interface_id_hi and native.resource_count <= 32 and
-            header.engine == @as(u32, if (model.engine == .decode) 2 else 3) and header.ib_count == 1 and
+            header.engine == @as(u32, if (model.engine == .jpeg) 4 else if (model.engine == .decode) 2 else 3) and header.ib_count == 1 and
             ib.binding_index == 0 and ib.dwords > 0 and ib.dwords % 16 == 0 and ib.dwords <= 2048);
         push_address = ib.address; push_bytes = ib.dwords * 4;
     } else {
@@ -291,6 +296,10 @@ fn submit(input: *const a.GfxQueueHandle, common: *const a.GfxSubmission, native
     for (model.loans[0..model.loan_count]) |loan| {
         const va = &model.vas[index(&loan.binding, model.vas.len).?];
         std.debug.assert(va.live and va.request.kind == 2 and va.status.flags == 1);
+    }
+    if (model.provider == .amd and model.engine == .jpeg) {
+        const va = &model.vas[index(&loans[0].binding, model.vas.len).?];
+        std.debug.assert(!model.bos[index(&va.request.reference, model.bos.len).?].mapped);
     }
     if (model.on_submit) |inspect| inspect(virtualBytes(push_address)[0..push_bytes]);
     model.fence = .{ .adapter_id = 9, .timeline = input.timeline, .point = 1, .device_generation = 23, .reset_generation = 7 };
