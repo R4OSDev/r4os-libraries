@@ -494,6 +494,44 @@ pub const R4AmdDeviceFactsV3 = extern struct {
     native_binding_capacity: u32,
     max_backing_bytes: u64,
 };
+
+pub const R4AmdMediaQuery = extern struct {
+    version: u32,
+    size: u32,
+    vendor_id: u32,
+    device_id: u32,
+    gc_version: u32,
+    vcn_version: u32,
+    firmware_version: u32,
+    operation: u32,
+    codec: u32,
+    profile: u32,
+    bit_depth: u32,
+    chroma: u32,
+    width: u32,
+    height: u32,
+    flags: u32,
+    reserved: u32,
+};
+
+pub const R4AmdMediaCaps = extern struct {
+    version: u32,
+    size: u32,
+    flags: u32,
+    format: u32,
+    min_width: u32,
+    min_height: u32,
+    max_width: u32,
+    max_height: u32,
+    max_level: u32,
+    dpb_slots: u32,
+    active_references: u32,
+    width_alignment: u32,
+    height_alignment: u32,
+    bitstream_alignment: u32,
+    max_slices: u32,
+    rate_controls: u32,
+};
 pub const info_version: u32 = 1;
 pub const status_ok: i32 = 0;
 pub const profile_version: u32 = 1;
@@ -527,6 +565,10 @@ pub const native_yuv_command_kind: u32 = 1;
 pub const native_yuv_command_bytes: u32 = 504;
 pub const native_va_start: u64 = 343597383680;
 pub const native_va_end: u64 = 345744867328;
+pub const vcn_1_0_0: u32 = 65536;
+pub const picasso_vcn_firmware: u32 = 51441669;
+pub const device_fact_vcn1_ready: u32 = 4;
+pub const media_caps_source_profile: u32 = 1;
 pub const status_invalid: i32 = -1;
 pub const status_unsupported: i32 = -2;
 pub const status_stale: i32 = -3;
@@ -552,14 +594,14 @@ pub const InfoV1 = extern struct {
 };
 
 pub const backend_v1_export_name = "BACKEND_V1";
-pub const backend_v1_revision: u16 = 3;
+pub const backend_v1_revision: u16 = 4;
 pub const backend_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 64,
+    .size = 72,
     .abi_major = 1,
-    .abi_minor = 3,
+    .abi_minor = 4,
     .interface_id_lo = 0x414d4432,
     .interface_id_hi = 0x52344f53,
 };
@@ -567,12 +609,14 @@ pub const BackendV1NegotiateFn = *const fn (profile: *const R4AmdDeviceProfile, 
 pub const BackendV1EncodeCopyFn = *const fn (request: *const R4AmdCopy, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
 pub const BackendV1EncodeFillFn = *const fn (request: *const R4AmdFill, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
 pub const BackendV1EncodePm4FrameFn = *const fn (request: *const R4AmdPm4Frame, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32;
+pub const BackendV1MediaCapsFn = *const fn (query: *const R4AmdMediaQuery, output: *R4AmdMediaCaps) callconv(.c) i32;
 pub const BackendV1 = extern struct {
     header: InterfaceHeader,
     negotiate: BackendV1NegotiateFn,
     encode_copy: BackendV1EncodeCopyFn,
     encode_fill: BackendV1EncodeFillFn,
     encode_pm4_frame: BackendV1EncodePm4FrameFn,
+    media_caps: BackendV1MediaCapsFn,
 };
 
 pub const image_v1_export_name = "IMAGE_V1";
@@ -655,14 +699,15 @@ pub const BackendV1Client = struct {
             .interface_id_lo = 0x414d4432,
             .interface_id_hi = 0x52344f53,
             .abi_major = 1,
-            .min_revision = 3,
-            .required_size = 64,
+            .min_revision = 4,
+            .required_size = 72,
             .known_required_flags = 0,
         });
         if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 40) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 48) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 56) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 64) == null) return error.MissingSlot;
         return .{ .header = header };
     }
 
@@ -684,6 +729,11 @@ pub const BackendV1Client = struct {
     pub fn encode_pm4_frame(self: *const BackendV1Client, request: *const R4AmdPm4Frame, commands: [*]u32, capacity: u32, written: *u32) i32 {
         const function = r4os.runtime_r4l.functionAt(BackendV1EncodePm4FrameFn, self.header, 56) orelse unreachable;
         return function(request, commands, capacity, written);
+    }
+
+    pub fn media_caps(self: *const BackendV1Client, query: *const R4AmdMediaQuery, output: *R4AmdMediaCaps) i32 {
+        const function = r4os.runtime_r4l.functionAt(BackendV1MediaCapsFn, self.header, 64) orelse unreachable;
+        return function(query, output);
     }
 };
 

@@ -92,7 +92,7 @@ pub const Session = struct {
         var chosen = config.decoder;
         var caps: v.R4VideoCaps = undefined;
         var rc = api.query_caps(&runtime, &chosen.query, &caps);
-        if (rc == v.error_unsupported and config.allow_software_fallback and chosen.query.backend == v.backend_nvidia) {
+        if (rc == v.error_unsupported and config.allow_software_fallback and (chosen.query.backend == v.backend_nvidia or chosen.query.backend == v.backend_amd)) {
             chosen.query.backend = v.backend_software; chosen.query.adapter_id = 0;
             rc = api.query_caps(&runtime, &chosen.query, &caps);
         }

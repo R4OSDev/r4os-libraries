@@ -7,11 +7,15 @@ const t = std.testing;
 const r = @import("r4os");
 const a = r.abi;
 const nv = @import("r4nv_binding");
+const amd = @import("r4amd");
+const media = @import("r4amd_media");
 const gpu = @import("gpu_resources");
 pub var model: *Model = undefined;
 const Bo = struct { descriptor: a.GfxBufferDescriptor = .{}, data: ?[]align(65536) u8 = null, live: bool = false, mapped: bool = false, references: u32 = 0 };
 const Va = struct { request: a.GfxVirtualRequest = .{}, status: a.GfxVirtualStatus = .{}, live: bool = false };
 pub const Model = struct {
+    provider: gpu.Provider = .nvidia,
+    media_ready: bool = true,
     bos: [64]Bo = @splat(.{}),
     vas: [128]Va = @splat(.{}),
     pending: a.GfxNativeAllocation = .{},
@@ -60,6 +64,16 @@ fn binding() a.GfxBackendBinding {
 }
 fn backend(which: u32, output: *a.GfxBackendInfo) callconv(.c) i32 {
     if (which != 0) return 0;
+    if (model.provider == .amd) {
+        const protocol: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile),
+            .vendor_id = amd.vendor_id, .device_id = 0x15d8, .gc_version = amd.gc_9_1_0,
+            .sdma_version = amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
+        output.* = .{ .binding = binding(), .memory_generation = 31, .operations = 1 << a.gfx_queue_operation_native,
+            .profile = .{ .interface_id_lo = amd.backend_v1_header.interface_id_lo, .interface_id_hi = amd.backend_v1_header.interface_id_hi,
+                .revision = 1, .data_bytes = @sizeOf(amd.R4AmdDriverProfile) } };
+        @memcpy(output.profile.data[0..@sizeOf(amd.R4AmdDriverProfile)], std.mem.asBytes(&protocol));
+        return 1;
+    }
     const protocol: nv.R4NvDriverProfile = .{ .version = 1, .size = @sizeOf(nv.R4NvDriverProfile),
         .vendor_id = 0x10de, .copy_class = 0xc6b5, .rm_release = nv.rm_release, .command_abi = nv.command_abi,
         .reserved0 = 0, .reserved1 = 0 };
@@ -71,6 +85,22 @@ fn backend(which: u32, output: *a.GfxBackendInfo) callconv(.c) i32 {
 }
 fn properties(input: *const a.GfxBackendBinding, output: *a.GfxBackendProperties) callconv(.c) i32 {
     std.debug.assert(std.meta.eql(input.*, binding()));
+    if (model.provider == .amd) {
+        var value = std.mem.zeroes(amd.R4AmdDeviceFactsV3);
+        const facts = &value.facts;
+        facts.version = 1; facts.size = @sizeOf(amd.R4AmdDeviceFacts);
+        facts.architecture = .{ .version = 1, .size = @sizeOf(amd.R4AmdArchitecture), .vendor_id = amd.vendor_id,
+            .device_id = 0x15d8, .gc_version = amd.gc_9_1_0, .sdma_version = amd.sdma_4_1_0,
+            .gb_addr_config = 0x24000042, .chip_revision = 0xc8, .bind_alignment = 4096, .memory_generation = 31,
+            .flags = 0, .reserved = 0, .max_image_bytes = 64 * 1024 * 1024 };
+        facts.flags = 1 | @as(u32, if (model.coherent) 2 else 0) | @as(u32, if (model.media_ready) 4 else 0);
+        facts.va_start = amd.native_va_start; facts.va_end = amd.native_va_end;
+        value.native_binding_capacity = 32; value.max_backing_bytes = 1024 * 1024 * 1024;
+        output.* = .{ .interface_id_lo = amd.image_v1_header.interface_id_lo, .interface_id_hi = amd.image_v1_header.interface_id_hi,
+            .revision = 3, .data_bytes = @sizeOf(amd.R4AmdDeviceFactsV3) };
+        @memcpy(output.data[0..@sizeOf(amd.R4AmdDeviceFactsV3)], std.mem.asBytes(&value));
+        return 1;
+    }
     var arch = std.mem.zeroes(nv.R4NvArchitecture);
     arch.version = nv.architecture_version;
     arch.size = @sizeOf(nv.R4NvArchitecture);
@@ -158,10 +188,12 @@ fn nativeReceive(input: *const a.GfxBufferHandle, output: *a.GfxBufferReference)
         .adapter_id = 9, .driver_owner = 2, .device_generation = 31, .alignment = 65536,
         .byte_length = request.byte_length, .usage = request.usage };
     if (request.kind == 1) {
-        const pitch = std.mem.alignForward(u64, request.width, 64);
+        const amd_layout = if (model.provider == .amd) media.Surface.plan(request.width, request.height,
+            if (request.format == a.gfx_buffer_format_p010) 10 else 8) catch return -2 else null;
+        const pitch: u64 = if (amd_layout) |layout| layout.pitch else std.mem.alignForward(u64, request.width, 64);
         const luma = pitch * std.mem.alignForward(u64, request.height, 16);
         const offset = std.mem.alignForward(u64, luma, 65536);
-        descriptor.modifier = 0x0300000000606011;
+        descriptor.modifier = if (amd_layout != null) 0 else 0x0300000000606011;
         descriptor.width = request.width;
         descriptor.height = request.height;
         descriptor.format = request.format;
@@ -235,11 +267,24 @@ fn fenceStatus() a.GfxFenceStatus {
 fn submit(input: *const a.GfxQueueHandle, common: *const a.GfxSubmission, native: *const a.GfxNativeSubmission, output: *a.GfxFenceStatus) callconv(.c) i32 {
     std.debug.assert(input.timeline >= 91 and input.timeline < model.next_timeline and common.operation == a.gfx_queue_operation_native and
         native.command_bytes == 48 and native.resource_count > 0 and native.resource_count <= 64 and model.fence_released);
-    const header: *const nv.R4NvNativeSubmitHeader = @ptrFromInt(native.commands);
-    const push: *const nv.R4NvNativePush = @ptrFromInt(native.commands + 32);
-    const engine_matches = if (model.mixed_engines) header.engine_mask == 1 or header.engine_mask == 16 else header.engine_mask == model.engine.mask();
-    std.debug.assert(engine_matches and header.push_count == 1 and
-        (model.push_bytes == 0 or push.byte_length == model.push_bytes));
+    var push_address: u64 = undefined;
+    var push_bytes: u32 = undefined;
+    if (model.provider == .amd) {
+        const header: *const amd.R4AmdNativeSubmit = @ptrFromInt(native.commands);
+        const ib: *const amd.R4AmdNativeIb = @ptrFromInt(native.commands + 32);
+        std.debug.assert(native.interface_id_lo == amd.backend_v1_header.interface_id_lo and
+            native.interface_id_hi == amd.backend_v1_header.interface_id_hi and native.resource_count <= 32 and
+            header.engine == @as(u32, if (model.engine == .decode) 2 else 3) and header.ib_count == 1 and
+            ib.binding_index == 0 and ib.dwords > 0 and ib.dwords % 16 == 0 and ib.dwords <= 2048);
+        push_address = ib.address; push_bytes = ib.dwords * 4;
+    } else {
+        const header: *const nv.R4NvNativeSubmitHeader = @ptrFromInt(native.commands);
+        const push: *const nv.R4NvNativePush = @ptrFromInt(native.commands + 32);
+        const engine_matches = if (model.mixed_engines) header.engine_mask == 1 or header.engine_mask == 16 else header.engine_mask == model.engine.mask();
+        std.debug.assert(engine_matches and header.push_count == 1);
+        push_address = push.address; push_bytes = push.byte_length;
+    }
+    std.debug.assert(model.push_bytes == 0 or push_bytes == model.push_bytes);
     const loans: [*]const a.GfxNativeResource = @ptrFromInt(native.resources);
     model.loan_count = native.resource_count;
     @memcpy(model.loans[0..model.loan_count], loans[0..model.loan_count]);
@@ -247,7 +292,7 @@ fn submit(input: *const a.GfxQueueHandle, common: *const a.GfxSubmission, native
         const va = &model.vas[index(&loan.binding, model.vas.len).?];
         std.debug.assert(va.live and va.request.kind == 2 and va.status.flags == 1);
     }
-    if (model.on_submit) |inspect| inspect(virtualBytes(push.address)[0..push.byte_length]);
+    if (model.on_submit) |inspect| inspect(virtualBytes(push_address)[0..push_bytes]);
     model.fence = .{ .adapter_id = 9, .timeline = input.timeline, .point = 1, .device_generation = 23, .reset_generation = 7 };
     model.fence_released = false;
     model.queue_released = !model.queue_timeout;

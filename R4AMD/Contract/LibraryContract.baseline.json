@@ -77,7 +77,7 @@
       "zig_type": "BackendV1",
       "c_type": "R4AmdBackendV1",
       "abi_major": 1,
-      "revision": 3,
+      "revision": 4,
       "interface_id_lo": 1095582770,
       "interface_id_hi": 1379159891,
       "known_required_flags": 0,
@@ -358,6 +358,55 @@
             "ownership": "Pure encoding into caller-owned output. No allocation, hardware access or retained pointers."
           },
           "description": "Emit 48 graphics or 32 compute PM4 dwords; disjoint buffers and all fields are validated before output writes. No allocation, retention, submission or hardware access."
+        },
+        {
+          "name": "media_caps",
+          "c_name": "r4amd_media_caps",
+          "symbol": "r4amd_media_caps_impl",
+          "slot": 4,
+          "since_revision": 4,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "query",
+              "type": {
+                "name": "R4AmdMediaQuery",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Exact AMD profile and canonical device binding; never retained."
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4AmdMediaCaps",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Unchanged on failure; disjoint from profile."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4AMD_STATUS",
+            "ownership": "Pure bounded negotiation; no device access, allocations or pointers retained."
+          },
+          "description": "Query bounded Picasso VCN1 hardware/firmware eligibility. No GPU or codec execution is claimed; reject unsupported codec/profile/depth combinations transactionally."
         }
       ],
       "description": "AMD-only negotiation; separate from NVIDIA BACKEND_V1 even if individual payload sizes coincide."
@@ -5423,7 +5472,7 @@
             "is_const": false,
             "nullable": false
           },
-          "description": "Bit0 native PM4 transport, bit1 coherent system BOs; others zero."
+          "description": "Bit0 native PM4 transport, bit1 coherent system BOs, bit2 admitted VCN1 firmware/rings/workspace; other bits zero. Bit2 alone does not advertise codecs."
         },
         {
           "name": "uma_bytes",
@@ -5695,7 +5744,7 @@
             "is_const": false,
             "nullable": false
           },
-          "description": "0 graphics or 1 compute."
+          "description": "0 graphics, 1 compute, 2 VCN1 decode, 3 VCN1 encode. Media requires device_fact_vcn1_ready and one 16-dword-aligned IB of at most 2048 dwords."
         },
         {
           "name": "ib_count",
@@ -5836,6 +5885,374 @@
         }
       ],
       "description": "IMAGE_V1 backend properties revision3, exactly256 bytes. Preserves the complete revision2 facts prefix and adds actual clock and memory-owner limits. The consuming runtime owns Vulkan profile admission."
+    },
+    {
+      "name": "R4AmdMediaQuery",
+      "size": 64,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "vendor_id",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "vendor_id"
+        },
+        {
+          "name": "device_id",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "device_id"
+        },
+        {
+          "name": "gc_version",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "gc_version"
+        },
+        {
+          "name": "vcn_version",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "vcn_version"
+        },
+        {
+          "name": "firmware_version",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "firmware_version"
+        },
+        {
+          "name": "operation",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "operation"
+        },
+        {
+          "name": "codec",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "codec"
+        },
+        {
+          "name": "profile",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "profile"
+        },
+        {
+          "name": "bit_depth",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "bit_depth"
+        },
+        {
+          "name": "chroma",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "chroma"
+        },
+        {
+          "name": "width",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width"
+        },
+        {
+          "name": "height",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height"
+        },
+        {
+          "name": "flags",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "reserved",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "reserved"
+        }
+      ],
+      "description": "Pure VCN source-profile query; does not bind hardware or allocate codec state. Operation 0 decode / 1 encode; codec IDs match R4VIDEO/R4ENC."
+    },
+    {
+      "name": "R4AmdMediaCaps",
+      "size": 64,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "version"
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "size"
+        },
+        {
+          "name": "flags",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "flags"
+        },
+        {
+          "name": "format",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "format"
+        },
+        {
+          "name": "min_width",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "min_width"
+        },
+        {
+          "name": "min_height",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "min_height"
+        },
+        {
+          "name": "max_width",
+          "offset": 24,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "max_width"
+        },
+        {
+          "name": "max_height",
+          "offset": 28,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "max_height"
+        },
+        {
+          "name": "max_level",
+          "offset": 32,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "max_level"
+        },
+        {
+          "name": "dpb_slots",
+          "offset": 36,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "dpb_slots"
+        },
+        {
+          "name": "active_references",
+          "offset": 40,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "active_references"
+        },
+        {
+          "name": "width_alignment",
+          "offset": 44,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "width_alignment"
+        },
+        {
+          "name": "height_alignment",
+          "offset": 48,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "height_alignment"
+        },
+        {
+          "name": "bitstream_alignment",
+          "offset": 52,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "bitstream_alignment"
+        },
+        {
+          "name": "max_slices",
+          "offset": 56,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "max_slices"
+        },
+        {
+          "name": "rate_controls",
+          "offset": 60,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "rate_controls"
+        }
+      ],
+      "description": "Source-profile limits only (flags=1), not a running R4VIDEO/R4ENC codec advertisement. Intersect with its implemented codec and actual device before use."
     }
   ],
   "constants": [
@@ -6069,6 +6486,34 @@
       "type": "u64",
       "value": 345744867328,
       "description": "End of AMD common virtual-resource aperture (exclusive)."
+    },
+    {
+      "zig_name": "vcn_1_0_0",
+      "c_name": "R4AMD_VCN_1_0_0",
+      "type": "u32",
+      "value": 65536,
+      "description": "Picasso VCN1 IP version."
+    },
+    {
+      "zig_name": "picasso_vcn_firmware",
+      "c_name": "R4AMD_PICASSO_VCN_FIRMWARE",
+      "type": "u32",
+      "value": 51441669,
+      "description": "Authenticated linux-firmware Picasso VCN payload version pinned by AMDGPU."
+    },
+    {
+      "zig_name": "device_fact_vcn1_ready",
+      "c_name": "R4AMD_DEVICE_FACT_VCN1_READY",
+      "type": "u32",
+      "value": 4,
+      "description": "DeviceFacts.flags: VCN1 PSP image, all three ring writeback self-tests and held engine/workspace lifetime confirmed. Does not imply a media codec implementation."
+    },
+    {
+      "zig_name": "media_caps_source_profile",
+      "c_name": "R4AMD_MEDIA_CAPS_SOURCE_PROFILE",
+      "type": "u32",
+      "value": 1,
+      "description": "Pure hardware/firmware source-profile eligibility; not device-executed evidence."
     }
   ],
   "errors": [

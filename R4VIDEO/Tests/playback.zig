@@ -161,7 +161,7 @@ const Model = struct {
         submit_busy = 0; receive_error = 0; maps_ever = 0;
     }
     fn query(_: *const v.R4VideoRuntime, input: *const v.R4VideoCapsQuery, _: *v.R4VideoCaps) callconv(.c) i32 {
-        return if (input.backend == v.backend_nvidia) v.error_unsupported else v.ok;
+        return if (input.backend != v.backend_software) v.error_unsupported else v.ok;
     }
     fn create(_: *const v.R4VideoRuntime, input: *const v.R4VideoConfig, output: *v.R4VideoDecoder) callconv(.c) i32 {
         std.debug.assert(input.query.backend == v.backend_software);
@@ -282,6 +282,13 @@ const Model = struct {
             .query = .{ .version = 1, .size = @sizeOf(v.R4VideoCapsQuery), .backend = v.backend_nvidia, .adapter_id = 1,
                 .codec = v.codec_h264, .profile = 66, .bit_depth = 8, .chroma = v.chroma_420 },
             .memory_limit = 1024*1024, .max_width = 64, .max_height = 48, .pending_packets = 3, .frame_leases = 3, .threads = 1, .flags = 0 }, .color = policy };
+        var amd_config = config;
+        amd_config.decoder.query.backend = v.backend_amd;
+        amd_config.allow_software_fallback = false;
+        try t.expectError(error.Unsupported, p.Session.init(.{ .header = &video_table.header }, .{ .address = 1, .generation = 1 }, &compositor, null, amd_config, 100, 0));
+        amd_config.allow_software_fallback = true;
+        const amd_fallback = try p.Session.init(.{ .header = &video_table.header }, .{ .address = 1, .generation = 1 }, &compositor, null, amd_config, 100, 0);
+        try t.expectEqual(v.backend_software, amd_fallback.backend);
         var session = try p.Session.init(.{ .header = &video_table.header }, .{ .address = 1, .generation = 1 }, &compositor, null, config, 100, 0);
         try t.expect(session.backend == v.backend_software);
         var target = std.mem.zeroes(g.R4GfxColorImage);

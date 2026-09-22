@@ -12,7 +12,7 @@ pub export fn r4amd_get_info_impl(output: *c.R4AmdInfo, output_bytes: u32) callc
         .mesa_major = 26,
         .mesa_minor = 2,
         .mesa_patch = 2,
-        .implementation_stage = 14,
+        .implementation_stage = 28,
         .capability_flags = 0,
         .reserved = 0,
     };
@@ -30,6 +30,7 @@ pub export var r4amd_backend_v1: c.BackendV1 align(8) linksection(".data.r4l_exp
     .encode_copy = r4amd_encode_copy_impl,
     .encode_fill = r4amd_encode_fill_impl,
     .encode_pm4_frame = r4amd_encode_pm4_frame_impl,
+    .media_caps = r4amd_media_caps_impl,
 };
 
 pub export fn r4amd_negotiate_impl(profile: *const c.R4AmdDeviceProfile, output: *c.R4AmdFeatures) callconv(.c) i32 {
@@ -93,3 +94,7 @@ pub export fn r4amd_encode_draw_impl(request: *const c.R4AmdDraw, commands: [*]u
 pub export var r4amd_render_v1: c.RenderV1 align(8) linksection(".data.r4l_exports") = .{
     .header=c.render_v1_header, .shader=r4amd_shader_impl, .encode_pipeline=r4amd_encode_pipeline_impl, .encode_draw=r4amd_encode_draw_impl,
 };
+
+pub export fn r4amd_media_caps_impl(query: *const c.R4AmdMediaQuery, output: *c.R4AmdMediaCaps) callconv(.c) i32 {
+    return @import("media.zig").Provider(c).caps(query, output);
+}

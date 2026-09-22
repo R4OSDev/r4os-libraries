@@ -153,6 +153,13 @@ pub fn Implementation(comptime codec: type) type {
         }
         fn caps(query: c.R4EncCapsQuery, output: *c.R4EncCaps) i32 {
             if (!payload(query)) return c.error_invalid;
+            if (query.backend == c.backend_amd) {
+                if (!runtime.applicationBound()) return c.error_unsupported;
+                const device = @import("gpu_resources").Device.queryProvider(buffers().base, query.adapter_id, .encode, .amd) catch |err| return code(err);
+                _ = device.mediaCaps(query.codec, query.profile, query.bit_depth, query.chroma) catch |err| return code(err);
+                // Firmware rate-control/session packets are the 0.80.31 owner.
+                return c.error_unsupported;
+            }
             if (query.codec != c.codec_h264 or
                 (query.profile != c.profile_default and query.profile != c.profile_h264_baseline) or
                 query.bit_depth != 8 or query.chroma != c.chroma_420) return c.error_unsupported;

@@ -3,6 +3,9 @@ const std = @import("std");
 const r = @import("r4os");
 const a = r.abi;
 const nv = @import("r4nv_binding");
+const amd = @import("r4amd");
+const amd_media = @import("r4amd_media");
+pub const Provider = enum { nvidia, amd };
 const Budget = @import("native_allocation").Budget;
 
 pub const Error = error{ Invalid, Unsupported, NoMemory, Busy, Stale, Timeout, Internal };
@@ -62,6 +65,7 @@ pub const Device = struct {
     va_end: u64,
     class: u32,
     engine: Engine = .decode,
+    provider: Provider = .nvidia,
 
     // Architecture selects a packet format. Actual engine/class admission is
     // performed by the native queue on submission; no GR template is required.
@@ -85,6 +89,7 @@ pub const Device = struct {
         }
         const info = found orelse return error.Unsupported;
         const profile = info.profile;
+        if (profile.interface_id_lo == amd.backend_v1_header.interface_id_lo and profile.interface_id_hi == amd.backend_v1_header.interface_id_hi) return queryAmd(q, info, engine);
         if (info.binding.milestone != a.gfx_queue_milestone_device_execution or
             info.binding.device_generation == 0 or info.binding.reset_generation == 0 or info.memory_generation == 0 or
             info.operations & (@as(u64, 1) << a.gfx_queue_operation_native) == 0 or
@@ -119,6 +124,45 @@ pub const Device = struct {
             arch.shader_model != (if (class == 0xc797) @as(u32, 86) else 89))) return error.Unsupported;
         return .{ .binding = info.binding, .memory_generation = arch.memory_generation,
             .va_start = arch.va_start, .va_end = @min(arch.va_end, address_limit), .class = class, .engine = engine };
+    }
+    pub fn queryProvider(base: r.program.Context, adapter: u32, engine: Engine, provider: Provider) Error!Device {
+        const device = try queryFor(base, adapter, engine);
+        if (device.provider != provider) return error.Unsupported;
+        return device;
+    }
+    /// Eligibility is deliberately separate from each library's implemented
+    /// codec set. A valid source profile alone must never start a decoder.
+    pub fn mediaCaps(self: Device, codec: u32, profile: u32, depth: u32, chroma: u32) Error!amd.R4AmdMediaCaps {
+        if (self.provider != .amd or self.engine == .graphics) return error.Unsupported;
+        return amd_media.Provider(amd).limits(.{ .version = 1, .size = @sizeOf(amd.R4AmdMediaQuery), .vendor_id = amd.vendor_id,
+            .device_id = 0x15d8, .gc_version = amd.gc_9_1_0, .vcn_version = amd.vcn_1_0_0, .firmware_version = amd.picasso_vcn_firmware,
+            .operation = @intFromBool(self.engine == .encode), .codec = codec, .profile = profile, .bit_depth = depth, .chroma = chroma,
+            .width = 0, .height = 0, .flags = 0, .reserved = 0 });
+    }
+    fn queryAmd(q: r.gfx_queue.Context, info: a.GfxBackendInfo, engine: Engine) Error!Device {
+        const profile = info.profile;
+        if (info.binding.milestone != a.gfx_queue_milestone_device_execution or info.binding.device_generation == 0 or
+            info.binding.reset_generation == 0 or info.memory_generation == 0 or info.operations & (@as(u64, 1) << a.gfx_queue_operation_native) == 0 or
+            !payload(profile) or profile.revision != 1 or profile.data_bytes != @sizeOf(amd.R4AmdDriverProfile)) return error.Unsupported;
+        const protocol = std.mem.bytesToValue(amd.R4AmdDriverProfile, profile.data[0..@sizeOf(amd.R4AmdDriverProfile)]);
+        if (!payload(protocol) or protocol.vendor_id != amd.vendor_id or protocol.device_id != 0x15d8 or protocol.gc_version != amd.gc_9_1_0 or
+            protocol.sdma_version != amd.sdma_4_1_0 or protocol.command_abi != amd.command_abi or protocol.reserved != 0) return error.Unsupported;
+        var properties: a.GfxBackendProperties = .{};
+        try result(q.backendProperties(&info.binding, &properties));
+        if (!payload(properties) or properties.interface_id_lo != amd.image_v1_header.interface_id_lo or
+            properties.interface_id_hi != amd.image_v1_header.interface_id_hi or properties.revision != 3 or
+            properties.data_bytes != @sizeOf(amd.R4AmdDeviceFactsV3)) return error.Unsupported;
+        const value = std.mem.bytesToValue(amd.R4AmdDeviceFactsV3, properties.data[0..@sizeOf(amd.R4AmdDeviceFactsV3)]);
+        const facts = value.facts; const arch = facts.architecture;
+        if (!payload(facts) or !payload(arch) or arch.vendor_id != amd.vendor_id or arch.device_id != 0x15d8 or
+            arch.gc_version != amd.gc_9_1_0 or arch.sdma_version != amd.sdma_4_1_0 or arch.flags != 0 or arch.reserved != 0 or
+            arch.bind_alignment != 4096 or facts.flags & ~@as(u32, 7) != 0 or facts.flags & 3 != 3 or facts.reserved != 0 or
+            facts.va_start != amd.native_va_start or facts.va_end != amd.native_va_end or value.native_binding_capacity < 24 or
+            value.max_backing_bytes == 0) return error.Unsupported;
+        if (arch.memory_generation != info.memory_generation) return error.Stale;
+        if (engine != .graphics and facts.flags & amd.device_fact_vcn1_ready == 0) return error.Unsupported;
+        return .{ .binding = info.binding, .memory_generation = arch.memory_generation, .va_start = facts.va_start,
+            .va_end = facts.va_end, .class = if (engine == .graphics) amd.gc_9_1_0 else amd.vcn_1_0_0, .engine = engine, .provider = .amd };
     }
 };
 
@@ -189,6 +233,7 @@ pub const Context = struct {
                 count += 1;
             }
         }
+        if (self.device.provider == .amd and (self.device.engine == .graphics or command_bytes % 64 != 0 or command_bytes > 8192 or count > 32)) return error.Unsupported;
         const until = try self.deadline();
         if (self.queue.timeline == 0) {
             const binding = self.device.binding;
@@ -202,11 +247,20 @@ pub const Context = struct {
                 .engine_mask = self.device.engine.mask(), .push_count = 1, .reserved0 = 0, .reserved1 = 0 },
             .push = .{ .address = commands.address, .byte_length = command_bytes, .flags = 0 },
         };
+        const amd_packet = extern struct { header: amd.R4AmdNativeSubmit, ib: amd.R4AmdNativeIb }{
+            .header = .{ .version = 1, .size = @sizeOf(amd.R4AmdNativeSubmit), .engine = if (self.device.engine == .decode) 2 else 3,
+                .ib_count = 1, .flags = 0, .reserved0 = 0, .reserved1 = 0 },
+            .ib = .{ .address = commands.address, .dwords = command_bytes / 4, .binding_index = 0 },
+        };
         const submission: a.GfxSubmission = .{ .operation = a.gfx_queue_operation_native, .deadline_ns = until };
-        const native: a.GfxNativeSubmission = .{ .interface_id_lo = nv.backend_v1_header.interface_id_lo,
+        var native: a.GfxNativeSubmission = .{ .interface_id_lo = nv.backend_v1_header.interface_id_lo,
             .interface_id_hi = nv.backend_v1_header.interface_id_hi, .revision = 1,
             .command_bytes = @sizeOf(@TypeOf(packet)), .commands = @intFromPtr(&packet),
             .resource_count = @intCast(count), .resources = @intFromPtr(&bindings) };
+        if (self.device.provider == .amd) {
+            native.interface_id_lo = amd.backend_v1_header.interface_id_lo; native.interface_id_hi = amd.backend_v1_header.interface_id_hi;
+            native.command_bytes = @sizeOf(@TypeOf(amd_packet)); native.commands = @intFromPtr(&amd_packet);
+        }
         // WB stores precede the doorbell; the driver owns HOST WFI/SYS_MEMBAR
         // and semaphore completion. No MMIO or private physical pinning here.
         asm volatile ("mfence" ::: .{ .memory = true });
@@ -287,13 +341,14 @@ pub const Resource = struct {
         var d: a.GfxBufferDescriptor = .{};
         try result(ctx.buffers().describe(&backing.reference, &d));
         if (!payload(d) or d.reserved0 != 0 or d.byte_length == 0 or d.byte_length >= address_limit or
-            d.byte_length % granule != 0 or d.alignment < granule or !std.math.isPowerOfTwo(d.alignment) or
+            d.byte_length % granule != 0 or d.alignment < @as(u64, if (ctx.device.provider == .amd) 4096 else granule) or !std.math.isPowerOfTwo(d.alignment) or
             d.usage & a.gfx_buffer_usage_transfer_source == 0) return error.Unsupported;
         if (d.location == a.gfx_buffer_location_device_local) {
             if (d.adapter_id != ctx.device.binding.adapter_id or d.device_generation != ctx.device.memory_generation or
                 d.driver_owner == 0) return error.Stale;
         } else if (d.location != a.gfx_buffer_location_system or d.modifier != 0 or d.adapter_id != 0 or
             d.device_generation != 0 or d.driver_owner != 0) return error.Unsupported;
+        if (ctx.device.provider == .amd and d.modifier != 0) return error.Unsupported;
         if (d.modifier != 0 and (d.modifier & ~@as(u64, 15) != modifier_base or d.modifier & 15 > 5)) return error.Unsupported;
         const until = try ctx.deadline();
         self.owner = ctx;
@@ -338,7 +393,25 @@ pub const Resource = struct {
             self.descriptor.modifier != 0 or self.descriptor.byte_length != size) return error.Invalid;
         try self.bind(until);
     }
+    pub fn yuv(self: *Resource, ctx: *Context, width: u32, height: u32, depth: u32) Error!void {
+        if (ctx.device.provider != .amd) {
+            if (depth != 8) return error.Unsupported;
+            return self.nv12(ctx, width, height);
+        }
+        const layout = amd_media.Surface.plan(width, height, depth) catch return error.Unsupported;
+        const until = try self.begin(ctx, @intCast(layout.bytes));
+        const format: u32 = if (depth == 8) a.gfx_buffer_format_nv12 else a.gfx_buffer_format_p010;
+        try self.native(.{ .kind = 1, .width = width, .height = height, .format = format, .usage = 28, .layout = 0 }, until);
+        try self.describe(true);
+        const d = self.descriptor;
+        if (d.format != format or d.plane_count != 2 or d.width != width or d.height != height or d.modifier != 0 or
+            d.byte_length != layout.bytes or d.plane_offsets[0] != 0 or d.plane_offsets[1] != layout.chroma_offset or
+            d.plane_pitches[0] != layout.pitch or d.plane_pitches[1] != layout.pitch or d.plane_offsets[2] != 0 or d.plane_offsets[3] != 0 or
+            d.plane_pitches[2] != 0 or d.plane_pitches[3] != 0) return error.Unsupported;
+        try self.bind(until);
+    }
     pub fn nv12(self: *Resource, ctx: *Context, width: u32, height: u32) Error!void {
+        if (ctx.device.provider == .amd) return self.yuv(ctx, width, height, 8);
         if (width == 0 or height == 0 or width > 4096 or height > 4096 or (width | height) % 16 != 0) return error.Invalid;
         // Native allocation chooses an authenticated modifier. At least 32
         // storage rows guarantee >=2 GOBs for NVDEC even for a 16-row picture.
@@ -387,7 +460,7 @@ pub const Resource = struct {
         try result(ctx.buffers().describe(&self.backing.reference, &self.descriptor));
         const d = self.descriptor;
         if (!payload(d) or d.reserved0 != 0 or d.byte_length == 0 or d.byte_length > self.charged or
-            d.byte_length % granule != 0 or d.alignment < granule or !std.math.isPowerOfTwo(d.alignment) or
+            d.byte_length % granule != 0 or d.alignment < @as(u64, if (ctx.device.provider == .amd) 4096 else granule) or !std.math.isPowerOfTwo(d.alignment) or
             d.usage & 12 != 12) return error.Invalid;
         if (device_local) {
             if (d.location != a.gfx_buffer_location_device_local or d.adapter_id != ctx.device.binding.adapter_id or
@@ -487,3 +560,119 @@ pub const Resource = struct {
         self.* = .{};
     }
 };
+
+/// Codec-worker-owned YUV images. Codec, DPB and presentation holds are
+/// independent; neither a flush nor a cancelled fence releases consumer data.
+/// The broker remains authoritative for the adapter's shared binding budget.
+pub fn ImagePool(comptime capacity: usize) type {
+    if (capacity == 0 or capacity > 24) @compileError("bounded media image pool");
+    return struct {
+        const Self = @This();
+        pub const Token = struct { slot: u32, serial: u64 };
+        pub const Hold = enum { codec, reference, consumer };
+        const State = enum { empty, writing, complete, aborted };
+        const Image = struct {
+            resource: Resource = .{},
+            serial: u64 = 0,
+            epoch: u64 = 0,
+            state: State = .empty,
+            holds: [3]u32 = @splat(0),
+        };
+        images: [capacity]Image = @splat(.{}),
+        serial: u64 = 0,
+        closing: bool = false,
+
+        fn get(self: *Self, token: Token) Error!*Image {
+            if (token.slot >= capacity or token.serial == 0) return error.Stale;
+            const image = &self.images[token.slot];
+            if (image.serial != token.serial or image.state == .empty) return error.Stale;
+            return image;
+        }
+        pub fn allocate(self: *Self, ctx: *Context, width: u32, height: u32, depth: u32, epoch: u64) Error!Token {
+            if (self.closing or ctx.poisoned) return error.Stale;
+            if (epoch == 0 or ctx.device.provider != .amd) return error.Invalid;
+            try self.reap();
+            const slot = for (&self.images, 0..) |*image, i| {
+                if (image.state == .empty) break i;
+            } else return error.Busy;
+            const serial = std.math.add(u64, self.serial, 1) catch return error.NoMemory;
+            const image = &self.images[slot];
+            image.* = .{ .serial = serial, .epoch = epoch, .state = .writing, .holds = .{ 1, 0, 0 } };
+            self.serial = serial;
+            image.resource.yuv(ctx, width, height, depth) catch |err| {
+                image.state = .aborted;
+                image.holds = @splat(0);
+                // Even a failed allocation owns its late request until reap.
+                self.reap() catch {};
+                return err;
+            };
+            return .{ .slot = @intCast(slot), .serial = serial };
+        }
+        pub fn resource(self: *Self, token: Token) Error!*const Resource {
+            const image = try self.get(token);
+            if (image.state != .writing and image.state != .complete) return error.Invalid;
+            return &image.resource;
+        }
+        /// Call only with a freshly read codec feedback result. Fence success
+        /// proves retirement, never that a bitstream produced a valid picture.
+        pub fn finish(self: *Self, token: Token, codec_succeeded: bool) Error!void {
+            const image = try self.get(token);
+            if (image.state != .writing) return error.Invalid;
+            const ctx = image.resource.owner orelse return error.Stale;
+            if (ctx.fence.timeline != 0) return error.Busy;
+            if (ctx.poisoned) return error.Stale;
+            image.state = if (codec_succeeded) .complete else .aborted;
+        }
+        pub fn abort(self: *Self, token: Token) Error!void {
+            const image = try self.get(token);
+            if (image.state != .writing) return error.Invalid;
+            image.state = .aborted;
+        }
+        pub fn retain(self: *Self, token: Token, hold: Hold) Error!void {
+            const image = try self.get(token);
+            if (image.state != .complete or self.closing) return error.Invalid;
+            const count = &image.holds[@intFromEnum(hold)];
+            count.* = std.math.add(u32, count.*, 1) catch return error.NoMemory;
+        }
+        pub fn release(self: *Self, token: Token, hold: Hold) Error!void {
+            const image = try self.get(token);
+            const count = &image.holds[@intFromEnum(hold)];
+            if (count.* == 0) return error.Invalid;
+            if (image.state == .writing) return error.Busy;
+            count.* -= 1;
+        }
+        pub fn references(self: *Self, tokens: []const Token, epoch: u64, loans: []Context.Loan) Error![]Context.Loan {
+            if (tokens.len > 17 or loans.len < tokens.len or epoch == 0) return error.Invalid;
+            var checked: [17]Context.Loan = undefined;
+            var ctx: ?*Context = null;
+            for (tokens, 0..) |token, i| {
+                const image = try self.get(token);
+                if (image.state != .complete or image.epoch != epoch or image.holds[@intFromEnum(Hold.reference)] == 0 or
+                    !image.resource.ready) return error.Stale;
+                if (ctx) |owner| { if (image.resource.owner != owner) return error.Invalid; }
+                ctx = image.resource.owner;
+                for (tokens[0..i]) |earlier| if (equal(earlier, token)) return error.Invalid;
+                checked[i] = .{ .resource = &image.resource, .write = false };
+            }
+            @memcpy(loans[0..tokens.len], checked[0..tokens.len]);
+            return loans[0..tokens.len];
+        }
+        pub fn published(self: *Self, token: Token) Error!*const Resource {
+            const image = try self.get(token);
+            if (image.state != .complete or image.holds[@intFromEnum(Hold.consumer)] == 0 or !image.resource.ready) return error.Invalid;
+            return &image.resource;
+        }
+        pub fn reap(self: *Self) Error!void {
+            for (&self.images) |*image| {
+                if (image.state == .empty or image.holds[0] != 0 or image.holds[1] != 0 or image.holds[2] != 0) continue;
+                image.resource.close() catch |err| { if (err == error.Busy) continue; return err; };
+                image.* = .{};
+            }
+        }
+        pub fn close(self: *Self) Error!void {
+            self.closing = true;
+            try self.reap();
+            for (&self.images) |*image| if (image.state != .empty) return error.Busy;
+        }
+    };
+}

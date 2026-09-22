@@ -2410,6 +2410,132 @@
       "type": "i32",
       "value": -10,
       "description": "Control request superseded by an explicitly accepted Abort/Close; no successful completion implied."
+    },
+    {
+      "zig_name": "backend_amd",
+      "c_name": "R4ENC_BACKEND_AMD",
+      "type": "u32",
+      "value": 2,
+      "description": "Explicit AMD provider. Query requires an implemented codec and an admitted VCN1 device; never silently selects software."
+    },
+    {
+      "zig_name": "codec_hevc",
+      "c_name": "R4ENC_CODEC_HEVC",
+      "type": "u32",
+      "value": 2,
+      "description": "Stable codec identity; availability is reported by QueryCaps, never inferred from the enum."
+    },
+    {
+      "zig_name": "codec_vp9",
+      "c_name": "R4ENC_CODEC_VP9",
+      "type": "u32",
+      "value": 3,
+      "description": "Stable codec identity; availability is reported by QueryCaps, never inferred from the enum."
+    },
+    {
+      "zig_name": "codec_mpeg2",
+      "c_name": "R4ENC_CODEC_MPEG2",
+      "type": "u32",
+      "value": 4,
+      "description": "Stable codec identity; availability is reported by QueryCaps, never inferred from the enum."
+    },
+    {
+      "zig_name": "codec_vc1",
+      "c_name": "R4ENC_CODEC_VC1",
+      "type": "u32",
+      "value": 5,
+      "description": "Stable codec identity; availability is reported by QueryCaps, never inferred from the enum."
+    },
+    {
+      "zig_name": "codec_jpeg",
+      "c_name": "R4ENC_CODEC_JPEG",
+      "type": "u32",
+      "value": 6,
+      "description": "Stable codec identity; availability is reported by QueryCaps, never inferred from the enum."
+    },
+    {
+      "zig_name": "codec_av1",
+      "c_name": "R4ENC_CODEC_AV1",
+      "type": "u32",
+      "value": 7,
+      "description": "Stable codec identity; availability is reported by QueryCaps, never inferred from the enum."
+    },
+    {
+      "zig_name": "codec_mpeg4_part2",
+      "c_name": "R4ENC_CODEC_MPEG4_PART2",
+      "type": "u32",
+      "value": 8,
+      "description": "Stable codec identity; availability is reported by QueryCaps, never inferred from the enum."
+    },
+    {
+      "zig_name": "profile_hevc_main",
+      "c_name": "R4ENC_PROFILE_HEVC_MAIN",
+      "type": "u32",
+      "value": 1,
+      "description": "Codec-scoped profile identity; no implicit support claim."
+    },
+    {
+      "zig_name": "profile_hevc_main10",
+      "c_name": "R4ENC_PROFILE_HEVC_MAIN10",
+      "type": "u32",
+      "value": 2,
+      "description": "Codec-scoped profile identity; no implicit support claim."
+    },
+    {
+      "zig_name": "profile_vp9_0",
+      "c_name": "R4ENC_PROFILE_VP9_0",
+      "type": "u32",
+      "value": 0,
+      "description": "Codec-scoped profile identity; no implicit support claim."
+    },
+    {
+      "zig_name": "profile_vp9_2",
+      "c_name": "R4ENC_PROFILE_VP9_2",
+      "type": "u32",
+      "value": 2,
+      "description": "Codec-scoped profile identity; no implicit support claim."
+    },
+    {
+      "zig_name": "profile_mpeg2_simple",
+      "c_name": "R4ENC_PROFILE_MPEG2_SIMPLE",
+      "type": "u32",
+      "value": 5,
+      "description": "Codec-scoped profile identity; no implicit support claim."
+    },
+    {
+      "zig_name": "profile_mpeg2_main",
+      "c_name": "R4ENC_PROFILE_MPEG2_MAIN",
+      "type": "u32",
+      "value": 4,
+      "description": "Codec-scoped profile identity; no implicit support claim."
+    },
+    {
+      "zig_name": "profile_vc1_simple",
+      "c_name": "R4ENC_PROFILE_VC1_SIMPLE",
+      "type": "u32",
+      "value": 0,
+      "description": "Codec-scoped profile identity; no implicit support claim."
+    },
+    {
+      "zig_name": "profile_vc1_main",
+      "c_name": "R4ENC_PROFILE_VC1_MAIN",
+      "type": "u32",
+      "value": 1,
+      "description": "Codec-scoped profile identity; no implicit support claim."
+    },
+    {
+      "zig_name": "profile_vc1_advanced",
+      "c_name": "R4ENC_PROFILE_VC1_ADVANCED",
+      "type": "u32",
+      "value": 3,
+      "description": "Codec-scoped profile identity; no implicit support claim."
+    },
+    {
+      "zig_name": "profile_jpeg_baseline",
+      "c_name": "R4ENC_PROFILE_JPEG_BASELINE",
+      "type": "u32",
+      "value": 0,
+      "description": "Codec-scoped profile identity; no implicit support claim."
     }
   ],
   "errors": [

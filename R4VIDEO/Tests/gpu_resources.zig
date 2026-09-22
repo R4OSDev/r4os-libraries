@@ -7,6 +7,7 @@ const r = @import("r4os");
 const a = r.abi;
 const nv = @import("r4nv_binding");
 const gpu = @import("gpu_resources");
+const amd = @import("r4amd");
 const Budget = @import("native_allocation").Budget;
 const ff = @cImport(@cInclude("nvdec.h"));
 const Decoder = @import("gpu_decoder").Implementation(ff);
@@ -149,6 +150,8 @@ pub fn run() !void {
     try t.expect(commands.owner == null);
     try t.expectEqual(@as(usize, 0), budget.liveBytes());
     try decoderChecks(base, device);
+    try amdChecks(base);
+    fixture.model = &state;
     // The shared owner must select only NVENC, without a GR or NVDEC channel.
     // Its submitted BOs remain resident across a logical encode timeout too.
     for ([_]bool{ false, true }) |timeout| {
@@ -265,4 +268,112 @@ fn decoderChecks(base: r.program.Context, device: gpu.Device) !void {
     try decoder.close();
     try t.expectEqual(@as(usize, 0), budget.liveBytes());
     try fixture.model.clean();
+}
+
+// Both media engines share these exact native BO/VA/fence owners. No modeled
+// codec completion is counted as decoded pixels or a hardware qualification.
+fn amdChecks(base: r.program.Context) !void {
+    var state: Model = .{ .provider = .amd, .next_va = amd.native_va_start, .push_bytes = 64 };
+    fixture.model = &state;
+    const device = try gpu.Device.queryProvider(base, 9, .decode, .amd);
+    try t.expectEqual(amd.vcn_1_0_0, device.class);
+    try t.expectError(error.Unsupported, gpu.Device.queryProvider(base, 9, .decode, .nvidia));
+    const h264 = try device.mediaCaps(1, 100, 8, 1);
+    try t.expect(h264.dpb_slots == 17 and h264.active_references == 16 and h264.flags == amd.media_caps_source_profile);
+    try t.expectEqual(@as(u32, 2), (try device.mediaCaps(2, 2, 10, 1)).format);
+    try t.expectError(error.Unsupported, device.mediaCaps(7, 0, 8, 1)); // AV1
+    try t.expectError(error.Unsupported, (try gpu.Device.queryFor(base, 9, .encode)).mediaCaps(2, 2, 10, 1));
+    state.media_ready = false;
+    try t.expectError(error.Unsupported, gpu.Device.queryFor(base, 9, .decode));
+    try t.expectEqual(amd.gc_9_1_0, (try gpu.Device.queryFor(base, 9, .graphics)).class);
+    state.media_ready = true;
+    state.coherent = false;
+    try t.expectError(error.Unsupported, gpu.Device.queryFor(base, 9, .encode));
+    state.coherent = true;
+
+    var budget: Budget = .{ .limit = 32 * 1024 * 1024 };
+    var ctx: gpu.Context = .{ .base = base, .device = device, .budget = &budget, .clock = clock };
+    var commands: gpu.Resource = .{};
+    try commands.system(&ctx, 64);
+    @memset((try commands.mappedBytes())[0..64], 0);
+    const Pool = gpu.ImagePool(4);
+    var pool: Pool = .{};
+    const first = try pool.allocate(&ctx, 1920, 1080, 8, 1);
+    try t.expectError(error.Invalid, pool.published(first));
+    try t.expectError(error.Busy, pool.release(first, .codec));
+    const first_resource = try pool.resource(first);
+    try t.expect(first_resource.descriptor.modifier == 0 and first_resource.descriptor.format == a.gfx_buffer_format_nv12 and
+        first_resource.descriptor.plane_pitches[0] == 2048 and first_resource.mapping.cpu_address == 0);
+    try t.expectError(error.Unsupported, ctx.submit(&commands, 60, &.{}));
+    try t.expectEqual(@as(u32, 0), state.queue_count); // rejected before opening anything
+    try ctx.submit(&commands, 64, &.{.{ .resource = first_resource, .write = true }});
+    try pool.finish(first, true);
+    try pool.retain(first, .reference);
+    try pool.retain(first, .consumer);
+    try pool.release(first, .codec);
+    const first_bo = (try pool.published(first)).backing;
+    const second = try pool.allocate(&ctx, 1920, 1080, 8, 1);
+    var references: [17]gpu.Context.Loan = undefined;
+    const refs = try pool.references(&.{first}, 1, &references);
+    try t.expectEqual(first_resource, refs[0].resource);
+    try t.expect(!refs[0].write);
+    try t.expectError(error.Stale, pool.references(&.{first}, 2, &references));
+    try t.expectError(error.Invalid, pool.references(&.{first,first}, 1, &references));
+    try ctx.submit(&commands, 64, &.{ .{ .resource = try pool.resource(second), .write = true }, refs[0], refs[0] });
+    try t.expectEqual(@as(usize, 3), state.loan_count); // duplicate DPB loans coalesce
+    try pool.finish(second, true);
+    try pool.release(first, .reference);
+    try pool.reap();
+    try t.expectEqual(first_bo, (try pool.published(first)).backing); // display outlives DPB
+    try pool.release(second, .codec);
+    try pool.reap();
+    const ten_bit = try pool.allocate(&ctx, 1280, 720, 10, 2);
+    const p010 = try pool.resource(ten_bit);
+    try t.expect(p010.descriptor.format == a.gfx_buffer_format_p010 and p010.descriptor.plane_pitches[0] == 2560 and
+        p010.descriptor.plane_offsets[1] % 65536 == 0 and p010.mapping.cpu_address == 0);
+    try t.expectError(error.Stale, pool.resource(second)); // generation/slot reuse
+    try ctx.submit(&commands, 64, &.{.{ .resource = p010, .write = true }});
+    try pool.finish(ten_bit, true);
+    try pool.retain(ten_bit, .consumer);
+    try pool.release(ten_bit, .codec);
+    try t.expectError(error.Busy, pool.close());
+    try t.expectEqual(first_bo, (try pool.published(first)).backing);
+    try pool.release(first, .consumer);
+    try pool.release(ten_bit, .consumer);
+    try pool.close();
+    try commands.close();
+    try ctx.close();
+    try t.expectEqual(@as(usize, 0), budget.liveBytes());
+    try state.clean();
+
+    for ([_]gpu.Engine{ .decode, .encode }) |engine| {
+        state = .{ .provider = .amd, .next_va = amd.native_va_start, .push_bytes = 64, .engine = engine, .queue_timeout = true };
+        ctx = .{ .base = base, .device = try gpu.Device.queryFor(base, 9, engine), .budget = &budget, .clock = clock };
+        pool = .{};
+        try commands.system(&ctx, 64);
+        const token = try pool.allocate(&ctx, 64, 64, 8, 3);
+        try t.expectError(error.Timeout, ctx.submit(&commands, 64, &.{.{ .resource = try pool.resource(token), .write = true }}));
+        try t.expectError(error.Busy, pool.finish(token, true));
+        try pool.abort(token);
+        try pool.release(token, .codec);
+        const held = budget.liveBytes();
+        try t.expectError(error.Busy, pool.close());
+        try t.expectEqual(held, budget.liveBytes());
+        try t.expectError(error.Busy, commands.close());
+        try t.expectError(error.Busy, ctx.close());
+        state.queue_released = true;
+        try ctx.close();
+        try pool.close();
+        try commands.close();
+        try t.expectEqual(@as(usize, 0), budget.liveBytes());
+        try state.clean();
+    }
+    state = .{ .provider = .amd, .next_va = amd.native_va_start, .native_timeout = true };
+    ctx = .{ .base = base, .device = device, .budget = &budget, .clock = clock };
+    pool = .{};
+    try t.expectError(error.Timeout, pool.allocate(&ctx, 64, 64, 8, 4));
+    try pool.close();
+    try t.expectEqual(@as(usize, 0), budget.liveBytes());
+    try state.clean();
+    std.debug.print("AMD media owners: NV12/P010, DPB/consumer holds, provider admission, codec rejection and both engine timeout retirements: OK\n", .{});
 }

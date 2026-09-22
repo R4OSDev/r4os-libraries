@@ -68,7 +68,7 @@ checks loaded shader bytes, native pipeline/draw calls and failure output
 integrity. IMAGE_SCOPE=none
 keeps the provider out of ordinary profiles until its consumers are ready.
 
-ThirdParty/Sources.json pins 73 original files and the release patch
+ThirdParty/Sources.json pins 75 original files and the release patch
 avoiding unused POSIX signal.h when DEBUG=0. Original bytes stay unchanged.
 Adapted Mesa code retains MIT notices; original R4OS code is Apache-2.0.
 Tools/ExportLegal.ps1 exports all compiled AddrLib and image/encoder notices
@@ -85,4 +85,19 @@ The 0.80.25 additive R4AmdDeviceFactsV3 type has a 256-byte wire layout: the
 unchanged 240-byte facts prefix plus timestamp clock in kHz (zero if unknown),
 native root-binding capacity and maximum backing bytes including SMEM padding.
 Backend-properties revision 3 is separate from every function-table revision.
-No existing type or runtime slot changes; the R4AMD artifact remains 0.1.5.
+No existing type or runtime slot changes; that earlier metadata-only step kept R4AMD at 0.1.5.
+
+## VCN1 source-profile contract (0.80.28)
+
+R4AMD 0.1.6 appends media_caps to BACKEND_V1 revision 4, preserving the
+existing slots. The exact Picasso/GC9.1/VCN1/firmware profile defines H.264,
+HEVC Main/Main10, VP9 profiles 0/2, MPEG2, VC1 and baseline JPEG decode
+eligibility, plus H.264/HEVC 8-bit encode eligibility. No AV1, MPEG4 Part 2
+or HEVC Main10 encode is admitted. Flags explicitly identify source-profile
+limits: R4VIDEO/R4ENC separately report only implemented codecs.
+
+DeviceFacts bit 2 signals the driver's completed VCN ring self-tests. Existing
+graphics flags retain their meaning. NV12/P010 use bounded, linear two-plane
+UMA surfaces with 256-byte pitch and 64 KB plane/storage alignment. Shared
+media owners retain decoder, DPB and presentation holds independently; no
+CPU RGB intermediate is required by R4GFX. Physical qualification is /39.

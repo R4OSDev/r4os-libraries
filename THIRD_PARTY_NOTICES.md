@@ -361,3 +361,12 @@ MIT grant. The same archive is linked into R4AMD.R4L and AMDGPU.R4D.
 R4OS-authored GLSL, shader generation, resource owners, grid/color conversion
 and queue integration retain Apache-2.0. All required notices are exported
 to the distribution, including the new RADV reference files.
+
+## AMD VCN1 source profile (0.80.28)
+
+R4AMD/Source/media.zig adapts codec eligibility from the pinned Mesa 26.2.2
+ac_video.c. Its AMD 2026 MIT notice is retained; unchanged ac_video.c/.h and
+SHA256 identities are in R4AMD/ThirdParty/Sources.json. The existing exporter
+includes both notices and the complete Mesa MIT text. The source profile is
+separate from implemented codec availability. The common native BO, DPB,
+consumer-hold and fence owners are original R4OS Apache-2.0 code.

@@ -930,6 +930,78 @@ _Static_assert(offsetof(R4AmdDeviceFactsV3, timestamp_clock_khz) == 240u, "R4Amd
 _Static_assert(offsetof(R4AmdDeviceFactsV3, native_binding_capacity) == 244u, "R4AmdDeviceFactsV3.native_binding_capacity offset mismatch");
 _Static_assert(offsetof(R4AmdDeviceFactsV3, max_backing_bytes) == 248u, "R4AmdDeviceFactsV3.max_backing_bytes offset mismatch");
 
+typedef struct R4AmdMediaQuery {
+    uint32_t version;
+    uint32_t size;
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t gc_version;
+    uint32_t vcn_version;
+    uint32_t firmware_version;
+    uint32_t operation;
+    uint32_t codec;
+    uint32_t profile;
+    uint32_t bit_depth;
+    uint32_t chroma;
+    uint32_t width;
+    uint32_t height;
+    uint32_t flags;
+    uint32_t reserved;
+} R4AmdMediaQuery;
+_Static_assert(sizeof(R4AmdMediaQuery) == 64u, "R4AmdMediaQuery size mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, version) == 0u, "R4AmdMediaQuery.version offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, size) == 4u, "R4AmdMediaQuery.size offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, vendor_id) == 8u, "R4AmdMediaQuery.vendor_id offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, device_id) == 12u, "R4AmdMediaQuery.device_id offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, gc_version) == 16u, "R4AmdMediaQuery.gc_version offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, vcn_version) == 20u, "R4AmdMediaQuery.vcn_version offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, firmware_version) == 24u, "R4AmdMediaQuery.firmware_version offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, operation) == 28u, "R4AmdMediaQuery.operation offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, codec) == 32u, "R4AmdMediaQuery.codec offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, profile) == 36u, "R4AmdMediaQuery.profile offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, bit_depth) == 40u, "R4AmdMediaQuery.bit_depth offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, chroma) == 44u, "R4AmdMediaQuery.chroma offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, width) == 48u, "R4AmdMediaQuery.width offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, height) == 52u, "R4AmdMediaQuery.height offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, flags) == 56u, "R4AmdMediaQuery.flags offset mismatch");
+_Static_assert(offsetof(R4AmdMediaQuery, reserved) == 60u, "R4AmdMediaQuery.reserved offset mismatch");
+
+typedef struct R4AmdMediaCaps {
+    uint32_t version;
+    uint32_t size;
+    uint32_t flags;
+    uint32_t format;
+    uint32_t min_width;
+    uint32_t min_height;
+    uint32_t max_width;
+    uint32_t max_height;
+    uint32_t max_level;
+    uint32_t dpb_slots;
+    uint32_t active_references;
+    uint32_t width_alignment;
+    uint32_t height_alignment;
+    uint32_t bitstream_alignment;
+    uint32_t max_slices;
+    uint32_t rate_controls;
+} R4AmdMediaCaps;
+_Static_assert(sizeof(R4AmdMediaCaps) == 64u, "R4AmdMediaCaps size mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, version) == 0u, "R4AmdMediaCaps.version offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, size) == 4u, "R4AmdMediaCaps.size offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, flags) == 8u, "R4AmdMediaCaps.flags offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, format) == 12u, "R4AmdMediaCaps.format offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, min_width) == 16u, "R4AmdMediaCaps.min_width offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, min_height) == 20u, "R4AmdMediaCaps.min_height offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, max_width) == 24u, "R4AmdMediaCaps.max_width offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, max_height) == 28u, "R4AmdMediaCaps.max_height offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, max_level) == 32u, "R4AmdMediaCaps.max_level offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, dpb_slots) == 36u, "R4AmdMediaCaps.dpb_slots offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, active_references) == 40u, "R4AmdMediaCaps.active_references offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, width_alignment) == 44u, "R4AmdMediaCaps.width_alignment offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, height_alignment) == 48u, "R4AmdMediaCaps.height_alignment offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, bitstream_alignment) == 52u, "R4AmdMediaCaps.bitstream_alignment offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, max_slices) == 56u, "R4AmdMediaCaps.max_slices offset mismatch");
+_Static_assert(offsetof(R4AmdMediaCaps, rate_controls) == 60u, "R4AmdMediaCaps.rate_controls offset mismatch");
+
 #define R4AMD_INFO_VERSION ((uint32_t)1)
 #define R4AMD_STATUS_OK ((int32_t)0)
 #define R4AMD_PROFILE_VERSION ((uint32_t)1)
@@ -963,6 +1035,10 @@ _Static_assert(offsetof(R4AmdDeviceFactsV3, max_backing_bytes) == 248u, "R4AmdDe
 #define R4AMD_NATIVE_YUV_COMMAND_BYTES ((uint32_t)504)
 #define R4AMD_NATIVE_VA_START ((uint64_t)343597383680)
 #define R4AMD_NATIVE_VA_END ((uint64_t)345744867328)
+#define R4AMD_VCN_1_0_0 ((uint32_t)65536)
+#define R4AMD_PICASSO_VCN_FIRMWARE ((uint32_t)51441669)
+#define R4AMD_DEVICE_FACT_VCN1_READY ((uint32_t)4)
+#define R4AMD_MEDIA_CAPS_SOURCE_PROFILE ((uint32_t)1)
 #define R4AMD_STATUS_INVALID ((int32_t)-1)
 #define R4AMD_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4AMD_STATUS_STALE ((int32_t)-3)
@@ -1005,34 +1081,37 @@ static inline int32_t r4amd_get_info(R4AmdInfoV1Client *client, R4AmdInfo * outp
 
 #define R4AMD_BACKEND_V1_EXPORT_NAME "BACKEND_V1"
 #define R4AMD_BACKEND_V1_ABI_MAJOR 1u
-#define R4AMD_BACKEND_V1_REVISION 3u
+#define R4AMD_BACKEND_V1_REVISION 4u
 #define R4AMD_BACKEND_V1_INTERFACE_ID_LO 0x414d4432ull
 #define R4AMD_BACKEND_V1_INTERFACE_ID_HI 0x52344f53ull
-#define R4AMD_BACKEND_V1_TABLE_SIZE 64u
+#define R4AMD_BACKEND_V1_TABLE_SIZE 72u
 #define R4AMD_BACKEND_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4AMD_BACKEND_V1_TABLE_SIZE, R4AMD_BACKEND_V1_ABI_MAJOR, R4AMD_BACKEND_V1_REVISION, R4AMD_BACKEND_V1_INTERFACE_ID_LO, R4AMD_BACKEND_V1_INTERFACE_ID_HI }
 typedef int32_t (*R4AmdBackendV1NegotiateFn)(const R4AmdDeviceProfile * profile, R4AmdFeatures * output);
 typedef int32_t (*R4AmdBackendV1EncodeCopyFn)(const R4AmdCopy * request, uint32_t * commands, uint32_t capacity, uint32_t * written);
 typedef int32_t (*R4AmdBackendV1EncodeFillFn)(const R4AmdFill * request, uint32_t * commands, uint32_t capacity, uint32_t * written);
 typedef int32_t (*R4AmdBackendV1EncodePm4FrameFn)(const R4AmdPm4Frame * request, uint32_t * commands, uint32_t capacity, uint32_t * written);
+typedef int32_t (*R4AmdBackendV1MediaCapsFn)(const R4AmdMediaQuery * query, R4AmdMediaCaps * output);
 typedef struct R4AmdBackendV1 {
     R4LInterfaceHeader header;
     R4AmdBackendV1NegotiateFn negotiate;
     R4AmdBackendV1EncodeCopyFn encode_copy;
     R4AmdBackendV1EncodeFillFn encode_fill;
     R4AmdBackendV1EncodePm4FrameFn encode_pm4_frame;
+    R4AmdBackendV1MediaCapsFn media_caps;
 } R4AmdBackendV1;
-_Static_assert(sizeof(R4AmdBackendV1) == 64u, "R4AmdBackendV1 size mismatch");
+_Static_assert(sizeof(R4AmdBackendV1) == 72u, "R4AmdBackendV1 size mismatch");
 _Static_assert(offsetof(R4AmdBackendV1, negotiate) == 32u, "R4AmdBackendV1.negotiate offset mismatch");
 _Static_assert(offsetof(R4AmdBackendV1, encode_copy) == 40u, "R4AmdBackendV1.encode_copy offset mismatch");
 _Static_assert(offsetof(R4AmdBackendV1, encode_fill) == 48u, "R4AmdBackendV1.encode_fill offset mismatch");
 _Static_assert(offsetof(R4AmdBackendV1, encode_pm4_frame) == 56u, "R4AmdBackendV1.encode_pm4_frame offset mismatch");
+_Static_assert(offsetof(R4AmdBackendV1, media_caps) == 64u, "R4AmdBackendV1.media_caps offset mismatch");
 typedef struct R4AmdBackendV1Client { const R4LInterfaceHeader *header; } R4AmdBackendV1Client;
 
 static inline int32_t r4amd_backend_v1_init(const R4XStartContext *ctx, R4AmdBackendV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
     const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4AMD", "BACKEND_V1");
-    const R4LInterfaceExpectation expected = { 0x414d4432ull, 0x52344f53ull, 1u, 3u, 64u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x414d4432ull, 0x52344f53ull, 1u, 4u, 72u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
@@ -1040,6 +1119,7 @@ static inline int32_t r4amd_backend_v1_init(const R4XStartContext *ctx, R4AmdBac
     if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 56u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 64u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -1062,6 +1142,11 @@ static inline int32_t r4amd_encode_fill(R4AmdBackendV1Client *client, const R4Am
 static inline int32_t r4amd_encode_pm4_frame(R4AmdBackendV1Client *client, const R4AmdPm4Frame * request, uint32_t * commands, uint32_t capacity, uint32_t * written) {
     R4AmdBackendV1EncodePm4FrameFn function = (R4AmdBackendV1EncodePm4FrameFn)r4l_slot_address(client->header, 56u);
     return function(request, commands, capacity, written);
+}
+
+static inline int32_t r4amd_media_caps(R4AmdBackendV1Client *client, const R4AmdMediaQuery * query, R4AmdMediaCaps * output) {
+    R4AmdBackendV1MediaCapsFn function = (R4AmdBackendV1MediaCapsFn)r4l_slot_address(client->header, 64u);
+    return function(query, output);
 }
 
 #define R4AMD_IMAGE_V1_EXPORT_NAME "IMAGE_V1"

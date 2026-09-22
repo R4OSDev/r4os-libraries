@@ -70,3 +70,14 @@ and RTTI; `-fcheck-new` preserves the codec's null-allocation checks.
 Source pins/license: `ThirdParty/Sources.json`, `ThirdParty/OpenH264-LICENSE.txt`.
 Workspace findings and proof limits: `Docs/Drivers/Videoencoding07941.txt`.
 Physical follow-up: `ExFiles/Reports/OssiGPU.txt`, section 0.79.41.
+
+## AMD provider foundation (0.80.28)
+
+ENCODE_V1 preserves existing slots and appends AMD backend ID 2 and common
+codec/profile constants. Canonical AMD native resources support an encode
+IB, coherent status/command BOs and exact fence/retirement ownership. Profile
+eligibility includes only VCN1 H.264/HEVC 8-bit; HEVC Main10, AV1 and unproven
+B-frame operation are excluded. QueryCaps remains unsupported for AMD until
+/31 implements its firmware session, feedback and rate-control packets.
+The NVIDIA path requires its own provider identity. Physical codec output
+and rate/quality tests belong to /39; AMDVCN08028 documents current evidence.

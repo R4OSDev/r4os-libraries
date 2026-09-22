@@ -473,6 +473,20 @@
       "bytes": 43894,
       "license": "MIT",
       "role": "Original GFX9 render encoding/compiler integration reference; specialized in Port/render_state.cpp."
+    },
+    {
+      "path": "src/amd/common/ac_video.c",
+      "sha256": "8174af60d49a4db18eefab8d2a82124053388b191f89100e7ad7396ab9d1f956",
+      "bytes": 27119,
+      "license": "MIT (AMD SPDX notice)",
+      "role": "VCN1 eligibility reference; no Gallium or DRM runtime linked"
+    },
+    {
+      "path": "src/amd/common/ac_video.h",
+      "sha256": "519c263bc1330730e84a11bef8fe01a7ad42d4b67ba8dff7f7af8c3148f491e9",
+      "bytes": 5574,
+      "license": "MIT (AMD SPDX notice)",
+      "role": "VCN1 eligibility reference; no Gallium or DRM runtime linked"
     }
   ],
   "patches": [

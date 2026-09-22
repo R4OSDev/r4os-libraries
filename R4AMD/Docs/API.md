@@ -24,9 +24,9 @@ AMD-only negotiation; separate from NVIDIA BACKEND_V1 even if individual payload
 
 - ELF-Symbol: `r4amd_backend_v1`
 - ABI-Major: 1
-- Revision: 3
+- Revision: 4
 - Interface-ID: `0x52344f53:0x414d4432`
-- Tabellengroesse: 64 Byte
+- Tabellengroesse: 72 Byte
 
 - Slot 0, Offset 32: `negotiate` - Validate the AMD-specific versioned protocol and report only implemented command capabilities. Zero features is a valid foundation result; it cannot select an accelerated provider.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4AMD_STATUS`; Besitz: Pure bounded negotiation; no device access, allocations or pointers retained..
@@ -36,6 +36,8 @@ AMD-only negotiation; separate from NVIDIA BACKEND_V1 even if individual payload
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4AMD_STATUS`; Besitz: Pure encoding into caller-owned output. No allocation, hardware access or retained pointers..
 - Slot 3, Offset 56: `encode_pm4_frame` - Emit 48 graphics or 32 compute PM4 dwords; disjoint buffers and all fields are validated before output writes. No allocation, retention, submission or hardware access.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4AMD_STATUS`; Besitz: Pure encoding into caller-owned output. No allocation, hardware access or retained pointers..
+- Slot 4, Offset 64: `media_caps` - Query bounded Picasso VCN1 hardware/firmware eligibility. No GPU or codec execution is claimed; reject unsupported codec/profile/depth combinations transactionally.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4AMD_STATUS`; Besitz: Pure bounded negotiation; no device access, allocations or pointers retained..
 
 IMAGE_V1
 --------
@@ -108,6 +110,8 @@ Typen
 - `R4AmdNativeSubmit`: 32 Byte, Alignment 8. BACKEND_V1 native command revision1: 32-byte header then exactly ib_count R4AmdNativeIb records. Device facts revision2 flags bit0 admits PM4; 32+16*N bytes cannot collide with the legacy 504-byte YUV packet. The canonical submit retains every resident binding through actual completion. Each IB is inside a retained binding, VMID1. Provider preambles supply complete shader context; no embedded CPU pointers.
 - `R4AmdNativeIb`: 16 Byte, Alignment 8. One immutable indirect-buffer descriptor. Driver validates address, length, binding identity and generation before publishing any commands.
 - `R4AmdDeviceFactsV3`: 256 Byte, Alignment 8. IMAGE_V1 backend properties revision3, exactly256 bytes. Preserves the complete revision2 facts prefix and adds actual clock and memory-owner limits. The consuming runtime owns Vulkan profile admission.
+- `R4AmdMediaQuery`: 64 Byte, Alignment 4. Pure VCN source-profile query; does not bind hardware or allocate codec state. Operation 0 decode / 1 encode; codec IDs match R4VIDEO/R4ENC.
+- `R4AmdMediaCaps`: 64 Byte, Alignment 4. Source-profile limits only (flags=1), not a running R4VIDEO/R4ENC codec advertisement. Intersect with its implemented codec and actual device before use.
 
 Besitzregeln
 ------------

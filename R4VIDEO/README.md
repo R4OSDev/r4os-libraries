@@ -217,3 +217,19 @@ clang19.1.7, NASM>=2.16, git, tar and a complete Zig0.16.0 installation under
 with PowerShell. The supplied FFmpeg archive allows an offline source rebuild
 and relink. Replace `C:\R4OS\LIBS\R4VIDEO.R4L` after consumers stop or on reboot;
 no signature or modification lock prevents using a compatible rebuilt module.
+
+## AMD provider foundation (0.80.28)
+
+VIDEO_V1 keeps its ABI and adds AMD backend ID 2 and stable codec/profile
+constants. Admission requires the exact AMD native profile, coherent memory,
+current generations and the driver's VCN-ready fact. AMD codec queries still
+return unsupported until the /29-/30 codec implementations are present.
+This avoids advertising a decoder from a hardware/source capability alone.
+
+The common owner supports NV12/P010 allocations, VCN decode IBs, independent
+DPB/presentation holds, generation checks and physical fence/map retirement.
+R4GFX composes those native planes without a CPU RGB conversion. Existing
+playback uses its explicit software-fallback preference for AMD as well.
+The corresponding source package includes the new R4AMD dependency.
+Software ownership and native ABI evidence: Docs/Drivers/AMDVCN08028.txt/.json;
+physical decoding and output are qualified only in 0.80.39.

@@ -496,7 +496,7 @@ fn providerImage(handle: *const c.R4GfxDevice) !c.R4GfxResource {
 fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) !void {
     const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
     var table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu,
-        .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill), .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame) };
+        .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill), .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame), .media_caps = @ptrCast(&amd_provider.mediaCaps) };
     var images_table: amd.ImageV1 = .{ .header=amd.image_v1_header,
         .calculate=@ptrCast(&amd_images.calculate), .address=@ptrCast(&amd_images.address), .metadata=@ptrCast(&amd_images.metadata),
         .import_image=@ptrCast(&amd_images.importImage), .descriptors=@ptrCast(&amd_images.descriptors) };
@@ -1004,16 +1004,16 @@ pub fn check() !void {
     draw.gfx_queue_submit_native = @intFromPtr(&Model.submitNative);
     imports[3].table = @intFromPtr(&Model.nv_render); imports[3].resolved_version = nv.render_v1_revision;
     try checkNativeYuv(&config);
-    try checkAmdYuv(&config, &imports);
+    try checkAmdYuv(&config, &imports, false);
     Model.amd_properties_revision = 2;
     defer Model.amd_properties_revision = 1;
-    try checkAmdYuv(&config, &imports);
+    try checkAmdYuv(&config, &imports, true);
 }
 
-fn checkAmdYuv(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport) !void {
+fn checkAmdYuv(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport, ten_bit: bool) !void {
     Model.reset(); Model.binding.adapter_id = 3;
     var table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu,
-        .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill), .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame) };
+        .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill), .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame), .media_caps = @ptrCast(&amd_provider.mediaCaps) };
     var image_table: amd.ImageV1 = .{ .header = amd.image_v1_header, .calculate = @ptrCast(&amd_images.calculate), .address = @ptrCast(&amd_images.address),
         .metadata = @ptrCast(&amd_images.metadata), .import_image = @ptrCast(&amd_images.importImage), .descriptors = @ptrCast(&amd_images.descriptors) };
     imports[4].table = @intFromPtr(&table); imports[4].resolved_version = amd.backend_v1_revision;
@@ -1035,7 +1035,7 @@ fn checkAmdYuv(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport
     try t.expectEqual(c.status_ok, api.device_open(config, &handle));
     var source: a.GfxBufferReference = .{}; var destination: a.GfxBufferReference = .{};
     try t.expectEqual(@as(i32, 1), Model.create(&.{ .byte_length = 131072, .alignment = 4096, .width = 4, .height = 4,
-        .format = a.gfx_buffer_format_nv12, .plane_count = 2, .plane_offsets = .{ 0, 65536, 0, 0 }, .plane_pitches = .{ 256, 256, 0, 0 },
+        .format = if (ten_bit) a.gfx_buffer_format_p010 else a.gfx_buffer_format_nv12, .plane_count = 2, .plane_offsets = .{ 0, 65536, 0, 0 }, .plane_pitches = .{ 256, 256, 0, 0 },
         .usage = 28, .location = 1, .adapter_id = 3, .device_generation = 97, .driver_owner = 80 }, &source));
     try t.expectEqual(@as(i32, 1), Model.create(&.{ .byte_length = 4096, .alignment = 4096, .width = 4, .height = 4,
         .format = c.format_abgr16161616f, .plane_count = 1, .plane_pitches = .{ 256, 0, 0, 0 },
@@ -1053,7 +1053,7 @@ fn checkAmdYuv(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport
     try t.expectEqual(@as(i32, 1), Model.release(&destination.reference));
     var request = std.mem.zeroes(c.R4GfxYuvRenderRequest);
     request.version = 1; request.size = @sizeOf(c.R4GfxYuvRenderRequest); request.target = target; request.deadline_ns = 99999999;
-    request.source = .{ .version = 1, .size = @sizeOf(c.R4GfxYuvBufferImage), .format = c.yuv_format_nv12, .width = 4, .height = 4, .plane_count = 2, .reserved = 0,
+    request.source = .{ .version = 1, .size = @sizeOf(c.R4GfxYuvBufferImage), .format = if (ten_bit) c.yuv_format_p010 else c.yuv_format_nv12, .width = 4, .height = 4, .plane_count = 2, .reserved = 0,
         .crop = .{ .x = 1, .y = 1, .width = 3, .height = 3 },
         .description = .{ .version = 1, .size = @sizeOf(c.R4GfxYuvDescription), .primaries = 1, .transfer = 1, .matrix = 1, .range = 2,
             .chroma_location = 1, .flags = 0, .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 },
@@ -1074,6 +1074,7 @@ fn checkAmdYuv(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport
     try t.expect(job.slot != 0 and Model.job_live and Model.maps == 0 and Model.virtual_starts == 4);
     try t.expect(Model.amd_packet.header.target_binding == 1 and Model.amd_packet.header.plane0.binding == 0 and Model.amd_packet.header.plane1.binding == 0);
     try t.expect(Model.amd_packet.header.plane1.offset == 65536 and Model.amd_packet.header.source.x == 1 and Model.amd_packet.header.opacity == 32768);
+    try t.expectEqual(@as(u32, if (ten_bit) 2 else 1), Model.amd_packet.header.format);
     const retained = Model.referenceCount();
     var dependency: c.R4GfxCopyFence = undefined;
     try t.expectEqual(c.status_ok, api.job_fence(&handle, &job, &dependency));
@@ -2030,7 +2031,7 @@ fn checkNativeColorMode(config: *const c.R4GfxDeviceConfig, combined: bool) !voi
 const AmdFixture = struct {
     table: amd.BackendV1 = .{ .header = amd.backend_v1_header, .negotiate = ProviderProbe.amdgpu,
         .encode_copy = @ptrCast(&amd_provider.encodeCopy), .encode_fill = @ptrCast(&amd_provider.encodeFill),
-        .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame) },
+        .encode_pm4_frame = @ptrCast(&amd_provider.encodePm4Frame), .media_caps = @ptrCast(&amd_provider.mediaCaps) },
     images: amd.ImageV1 = .{ .header = amd.image_v1_header, .calculate = @ptrCast(&amd_images.calculate),
         .address = @ptrCast(&amd_images.address), .metadata = @ptrCast(&amd_images.metadata),
         .import_image = @ptrCast(&amd_images.importImage), .descriptors = @ptrCast(&amd_images.descriptors) },

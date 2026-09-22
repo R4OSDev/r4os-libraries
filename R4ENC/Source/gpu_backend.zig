@@ -13,8 +13,8 @@ pub const Devices = struct {
     encode: gpu.Device,
     graphics: gpu.Device,
     pub fn query(base: r.program.Context, adapter: u32) Error!Devices {
-        const encode = try gpu.Device.queryFor(base, adapter, .encode);
-        const graphics = try gpu.Device.queryFor(base, adapter, .graphics);
+        const encode = try gpu.Device.queryProvider(base, adapter, .encode, .nvidia);
+        const graphics = try gpu.Device.queryProvider(base, adapter, .graphics, .nvidia);
         if (!std.meta.eql(encode.binding, graphics.binding) or encode.memory_generation != graphics.memory_generation) return error.Stale;
         return .{ .encode = encode, .graphics = graphics };
     }

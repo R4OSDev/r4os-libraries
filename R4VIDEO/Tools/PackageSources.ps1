@@ -22,7 +22,7 @@ function Add-Tree([string]$Relative){
     }
 }
 foreach($tree in @('Repositories/SDK','Repositories/Contract','Repositories/Libraries/R4VIDEO','Repositories/Libraries/Shared/Native',
-    'Repositories/Libraries/R4NV/Bindings','Repositories/Libraries/R4GFX/Bindings','Repositories/Libraries/R4NAK/ThirdParty/stb')){Add-Tree $tree}
+    'Repositories/Libraries/R4AMD','Repositories/Libraries/R4NV/Bindings','Repositories/Libraries/R4GFX/Bindings','Repositories/Libraries/R4NAK/ThirdParty/stb')){Add-Tree $tree}
 foreach($file in @('Repositories/Libraries/LICENSE','Repositories/Libraries/NOTICE','Repositories/Libraries/THIRD_PARTY_NOTICES.md',
     'Repositories/Libraries/Settings.R4S','Repositories/Libraries/Build.ps1','Repositories/Libraries/Build.sh','Repositories/Libraries/Build.bat',
     'Repositories/Libraries/R4STD/Source/date.zig','Repositories/Libraries/R4NV/Source/video.zig','Repositories/Libraries/R4NV/ThirdParty/Nvidia/LICENSES.txt')){$files.Add($file)}

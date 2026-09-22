@@ -3,6 +3,7 @@ const std = @import("std");
 const c = @import("r4l_contract");
 const copy = @import("copy.zig");
 const pm4 = @import("pm4.zig");
+pub const mediaCaps = @import("media.zig").Provider(c).caps;
 
 pub fn encodePm4Frame(request: *const c.R4AmdPm4Frame, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
     if (!disjoint(c.R4AmdPm4Frame, request, commands, capacity, written)) return c.status_invalid;
@@ -154,3 +155,5 @@ test "SDMA4 copies fills bounds overlap and ABI output transaction" {
     try t.expectEqual(@as(usize, 14), try copy.encodeCopy(&words, .{ .source = 0x1000, .target = 0x9000, .bytes = 3, .rows = 3, .source_pitch = 3, .target_pitch = 3 }));
     try t.expectError(error.Capacity, copy.encodeCopy(&words, .{ .source = 0x100000000, .target = 0x200000000, .bytes = 3, .rows = 300, .source_pitch = 5, .target_pitch = 7 }));
 }
+
+comptime { _ = @import("media_test.zig"); }
