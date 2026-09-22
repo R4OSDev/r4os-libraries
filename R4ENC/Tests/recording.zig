@@ -15,7 +15,8 @@ const Sink = struct {
         if (self.fail_after) |limit| if (self.writes >= limit) return false;
         if (bytes.len > self.data.len - self.count) return false;
         @memcpy(self.data[self.count..][0..bytes.len], bytes);
-        self.count += bytes.len; self.writes += 1;
+        self.count += bytes.len;
+        self.writes += 1;
         return true;
     }
 };
@@ -36,7 +37,7 @@ pub fn run() !void {
     const before = sink.count;
     try t.expectError(error.Invalid, writer.packet(&sink, &p, false, 1_033_000_000, 1));
     try t.expectError(error.Invalid, writer.packet(&sink, &p, true, 1_133_000_000, 1));
-    try t.expectError(error.Invalid, writer.packet(&sink, &.{0, 0, 1}, false, 1_133_000_000, 1));
+    try t.expectError(error.Invalid, writer.packet(&sink, &.{ 0, 0, 1 }, false, 1_133_000_000, 1));
     try t.expectError(error.Invalid, writer.packet(&sink, &p, false, 1_133_000_000, 0));
     try t.expectEqual(before, sink.count);
     raw[6] ^= 0x20; // A changed SPS must rotate the file before any write.
@@ -47,7 +48,8 @@ pub fn run() !void {
     try writer.packet(&sink, idr, true, 1_133_000_000, 500_000_000);
     // Partial sink effects cannot be rolled back; the caller must abort its
     // staged file. Retrying that writer is rejected without another write.
-    sink = .{ .fail_after = 1 }; writer = .{ .width = 64, .height = 64 };
+    sink = .{ .fail_after = 1 };
+    writer = .{ .width = 64, .height = 64 };
     try t.expectError(error.Write, writer.packet(&sink, idr, true, 0, 1));
     const partial = sink.count;
     try t.expect(partial != 0 and writer.failed and writer.frames == 0);
@@ -85,8 +87,7 @@ fn pixels() !void {
             for (0..3) |c| color[c] += p[c] * @as(f64, if (tap == 1) 2 else 1) / 8;
         };
         const luma = 0.2126 * color[0] + 0.7152 * color[1] + 0.0722 * color[2];
-        const expected = [_]f64{ 128 + (color[2] - luma) / 1.8556 * 224 / 255,
-            128 + (color[0] - luma) / 1.5748 * 224 / 255 };
+        const expected = [_]f64{ 128 + (color[2] - luma) / 1.8556 * 224 / 255, 128 + (color[0] - luma) / 1.5748 * 224 / 255 };
         for (expected, 0..) |v, c| try t.expect(@abs(@as(i32, bytes[layout.uv_offset + y * layout.pitch + x * 2 + c]) - @as(i32, @intFromFloat(@round(v)))) <= 1);
     };
     @memset(&rgb, 0xffffff);
@@ -99,6 +100,24 @@ fn pixels() !void {
     try t.expectError(error.Bounds, convert.rows(&rgb, 20, layout, &bytes, 1, 2));
     try t.expectError(error.Bounds, convert.rows(&rgb, 20, layout, bytes[0..100], 0, 2));
     try t.expectError(error.Bounds, convert.rows(rgb[0..18], 20, layout, &bytes, 0, 2));
+    const amd = try convert.Layout.initAmd(130, 130);
+    try t.expect(amd.pitch == 256 and amd.coded_rows == 144 and amd.uv_offset == 36864 and amd.bytes == 65536);
+    const captured = try t.allocator.alloc(u32, 130 * 130);
+    defer t.allocator.free(captured);
+    @memset(captured, 0xffffff);
+    @memset(&bytes, 0xdd);
+    try convert.rows(captured, 130, amd, &bytes, 0, 128);
+    try t.expectEqual(@as(u8, 0xdd), bytes[130 * amd.pitch]);
+    try convert.rows(captured, 130, amd, &bytes, 128, 2);
+    try t.expect(bytes[0] == 235 and bytes[129 * amd.pitch] == 235 and bytes[amd.uv_offset] == 128);
+    for (bytes[130 * amd.pitch .. amd.uv_offset]) |value| try t.expectEqual(@as(u8, 16), value);
+    for (bytes[amd.uv_offset .. amd.uv_offset + 72 * amd.pitch]) |value| try t.expectEqual(@as(u8, 128), value);
+    try t.expectEqual(@as(u8, 0xdd), bytes[amd.uv_offset + 72 * amd.pitch]);
+    var corrupted = amd;
+    corrupted.coded_rows = 130;
+    try t.expectError(error.Bounds, convert.rows(captured, 130, corrupted, &bytes, 0, 130));
     std.debug.print("recording pixels: sRGB/709 limited NV12, left chroma, partial rows and bounds: OK\n", .{});
 }
-fn channels(p: u32) [3]f64 { return .{ @floatFromInt((p >> 16) & 255), @floatFromInt((p >> 8) & 255), @floatFromInt(p & 255) }; }
+fn channels(p: u32) [3]f64 {
+    return .{ @floatFromInt((p >> 16) & 255), @floatFromInt((p >> 8) & 255), @floatFromInt(p & 255) };
+}

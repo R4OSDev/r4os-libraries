@@ -120,3 +120,11 @@ decode small software reference clips;
 the latter exercise Annex-B admission, not AMD output quality. Real VCN
 bitstreams, rates and laptop performance remain reserved for0.80.39.
 Provenance and limits: Docs/Drivers/AMDEncoding08031.txt/.json.
+
+The compiled `recording_pixels.Layout.initAmd` helper (0.80.32) retains visible
+dimensions and supplies 256-byte pitch, 16-row AVC coded extent, and neutral
+luma/chroma padding. The final row chunk initializes bottom padding. The
+generic helper retains its existing layout. Host ownership checks also cover
+130x130 canonical system input after producer CPU unmap for both AMD codecs.
+Desktop0.1.74 selects AMD through QueryCaps/Create and uses this AVC layout;
+R4ENC.R4L remains byte-identical0.1.3. Hardware pixel qualification remains39.

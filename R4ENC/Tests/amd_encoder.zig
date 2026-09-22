@@ -135,12 +135,28 @@ pub fn run() !void {
         state = .{ .provider = .amd, .next_va = 0x5000000000, .engine = .encode, .push_bytes = 0, .on_submit = &inspect };
         expected = .{ .codec = codec, .rate = @intCast(rate) };
         const device = try gpu.Device.queryProvider(base, 9, .encode, .amd);
-        var backend = enc.Backend.init(base, device, &budget, fixture.clock, try enc.Config.from(config(codec, @intCast(rate))));
+        var settings = config(codec, @intCast(rate));
+        if (rate == 0) {
+            settings.width = 130;
+            settings.height = 130;
+        }
+        var backend = enc.Backend.init(base, device, &budget, fixture.clock, try enc.Config.from(settings));
         var producer: gpu.Context = .{ .base = base, .device = device, .budget = &producer_budget, .clock = fixture.clock };
         var source: [1]gpu.Resource = @splat(.{});
-        try source[0].nv12(&producer, 320, 192);
+        if (rate == 0) {
+            // The recorder owns canonical system NV12, unmaps before Send,
+            // and passes coded padding separately from visible dimensions.
+            try source[0].system(&producer, 131072);
+            try source[0].suspendCpu();
+        } else try source[0].nv12(&producer, settings.width, settings.height);
         var owner: input.Input(c) = .{};
-        try owner.admit(&memory, &budget, @import("gpu_input.zig").frameFor(&source, 320, 192, false), 320, 192);
+        var image = @import("gpu_input.zig").frameFor(&source, settings.width, settings.height, false);
+        if (rate == 0) {
+            image.plane0.pitch = 256;
+            image.plane1.pitch = 256;
+            image.plane1.offset = 256 * std.mem.alignForward(u64, settings.height, if (codec == 1) 16 else 64);
+        }
+        try owner.admit(&memory, &budget, image, settings.width, settings.height);
         for (0..7) |frame| {
             expected.key = frame % 3 == 0;
             const packet = try backend.encode(&owner, false, &output, 5_001_000_000);
