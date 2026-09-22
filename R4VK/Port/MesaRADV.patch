@@ -20,6 +20,61 @@
          #define ADDR_DBG_BREAK()    { __debugbreak(); }
      #elif defined(__GNUC__)
          #define ADDR_DBG_BREAK()    { raise(SIGTRAP); }
+--- a/src/amd/common/ac_cmdbuf.h
++++ b/src/amd/common/ac_cmdbuf.h
+@@ -273,6 +273,30 @@
+    __cs_buf = __cs->buf;               \
+ } while (0)
+ 
++#ifdef R4OS_VULKAN
++#define ac_cmdbuf_emit(value) do { \
++   uint32_t __value = (value); \
++   if (!__cs->record_discard) { \
++      assert(!__cs_reserved_dw || __cs_num < __cs_reserved_dw); \
++      __cs_buf[__cs_num] = __value; \
++   } \
++   __cs_num++; \
++} while (0)
++#define ac_cmdbuf_packets_added() (__cs_num != __cs_num_initial)
++#define ac_cmdbuf_emit_array(values, num) do { \
++   unsigned __n = (num); \
++   if (!__cs->record_discard) { \
++      assert(!__cs_reserved_dw || (__cs_num <= __cs_reserved_dw && __n <= __cs_reserved_dw - __cs_num)); \
++      memcpy(__cs_buf + __cs_num, (values), (size_t)__n * 4); \
++   } \
++   __cs_num += __n; \
++} while (0)
++#define ac_cmdbuf_end() do { \
++   __cs->cdw = __cs_num; \
++   assert(__cs->record_discard || __cs->cdw <= __cs->max_dw); \
++   __cs = NULL; \
++} while (0)
++#else
+ #define ac_cmdbuf_emit(value)                                   \
+    do {                                                         \
+       assert(!__cs_reserved_dw || __cs_num < __cs_reserved_dw); \
+@@ -293,6 +317,8 @@
+    assert(__cs->cdw <= __cs->max_dw);  \
+    __cs = NULL;                        \
+ } while (0)
++
++#endif
+ 
+ /* Packet building helpers. Don't use directly. */
+ #define __ac_cmdbuf_set_reg_seq(reg, num, idx, prefix_name, packet, reset_filter_cam)     \
+--- a/src/amd/common/ac_cmdbuf_base.h
++++ b/src/amd/common/ac_cmdbuf_base.h
+@@ -15,6 +15,10 @@
+    uint32_t *buf;        /* The base pointer of the chunk. */
+ 
+    bool context_roll;
++#ifdef R4OS_VULKAN
++   /* Native bounded streams discard further emission after capacity failure. */
++   bool record_discard;
++#endif
+ };
+ 
+ #endif
 --- a/src/amd/common/ac_debug.c
 +++ b/src/amd/common/ac_debug.c
 @@ -103,7 +103,7 @@
@@ -273,6 +328,64 @@
  
     VkResult result = device->layer_dispatch.rra.QueuePresentKHR(_queue, pPresentInfo);
     if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+--- a/src/amd/vulkan/radv_cmd_buffer.c
++++ b/src/amd/vulkan/radv_cmd_buffer.c
+@@ -8,6 +8,9 @@
+  * SPDX-License-Identifier: MIT
+  */
+ 
++#ifdef R4OS_VULKAN
++#include "r4vk_radv_compile.h"
++#endif
+ #include "radv_cmd_buffer.h"
+ #include "meta/radv_meta.h"
+ #include "tools/radv_debug_hang.h"
+@@ -6349,9 +6352,16 @@
+       return;
+ 
+    uint32_t nontrivial_divisors;
++#ifdef R4OS_VULKAN
++   r4vk_radv_error_reset();
++#endif
+    struct radv_shader_part *prolog = lookup_vs_prolog(cmd_buffer, vs_shader, &nontrivial_divisors);
+    if (!prolog) {
++#ifdef R4OS_VULKAN
++      vk_command_buffer_set_error(&cmd_buffer->vk, r4vk_radv_error_result(VK_ERROR_OUT_OF_HOST_MEMORY));
++#else
+       vk_command_buffer_set_error(&cmd_buffer->vk, VK_ERROR_OUT_OF_HOST_MEMORY);
++#endif
+       return;
+    }
+    emit_prolog_regs(cmd_buffer, vs_shader, prolog);
+@@ -9137,9 +9147,16 @@
+    if (!ps || !ps->info.ps.has_epilog)
+       return;
+ 
++#ifdef R4OS_VULKAN
++   r4vk_radv_error_reset();
++#endif
+    ps_epilog = lookup_ps_epilog(cmd_buffer);
+    if (!ps_epilog) {
++#ifdef R4OS_VULKAN
++      vk_command_buffer_set_error(&cmd_buffer->vk, r4vk_radv_error_result(VK_ERROR_OUT_OF_HOST_MEMORY));
++#else
+       vk_command_buffer_set_error(&cmd_buffer->vk, VK_ERROR_OUT_OF_HOST_MEMORY);
++#endif
+       return;
+    }
+ 
+--- a/src/amd/vulkan/radv_cs.h
++++ b/src/amd/vulkan/radv_cs.h
+@@ -22,6 +22,9 @@
+ static inline unsigned
+ radeon_check_space(struct radeon_winsys *ws, struct ac_cmdbuf *cs, unsigned needed)
+ {
++#ifdef R4OS_VULKAN
++   if (cs->record_discard) cs->cdw = cs->reserved_dw = 0;
++#endif
+    assert(cs->cdw <= cs->reserved_dw);
+    if (cs->max_dw - cs->cdw < needed)
+       ws->cs_grow(cs, needed);
 --- a/src/amd/vulkan/radv_device.c
 +++ b/src/amd/vulkan/radv_device.c
 @@ -8,7 +8,9 @@
@@ -357,7 +470,17 @@
  
     return result;
  }
-@@ -1303,7 +1314,9 @@
+@@ -925,6 +936,9 @@
+    radv_emit_graphics(device, cs);
+ 
+    device->ws->cs_pad(cs->b, 0);
++#ifdef R4OS_VULKAN
++   if (cs->b->record_discard) goto fail;
++#endif
+ 
+    const uint32_t gfx_init_bo_flags = RADEON_FLAG_CPU_ACCESS | RADEON_FLAG_NO_INTERPROCESS_SHARING |
+                                       RADEON_FLAG_READ_ONLY | RADEON_FLAG_GTT_WC | RADEON_FLAG_GL2_BYPASS;
+@@ -1303,7 +1317,9 @@
  static VkResult
  radv_create_winsys(struct radv_device *device)
  {
@@ -880,6 +1003,140 @@
     int available_nodes;
     drmPciBusInfo bus_info;
  
+--- a/src/amd/vulkan/radv_pipeline_cache.c
++++ b/src/amd/vulkan/radv_pipeline_cache.c
+@@ -4,6 +4,10 @@
+  * SPDX-License-Identifier: MIT
+  */
+ 
++#ifdef R4OS_VULKAN
++#include "r4vk_radv_compile.h"
++#include "r4vk_state.h"
++#endif
+ #include "radv_pipeline_cache.h"
+ #include "util/macros.h"
+ #include "util/mesa-blake3.h"
+@@ -67,6 +71,11 @@
+ radv_shader_deserialize(struct radv_device *device, const void *key_data, size_t key_size, struct blob_reader *blob)
+ {
+    const struct radv_shader_binary *binary = blob_read_bytes(blob, sizeof(struct radv_shader_binary));
++#ifdef R4OS_VULKAN
++   if (blob->overrun || key_size != sizeof(blake3_hash) ||
++       !r4vk_radv_binary_valid(binary, sizeof(*binary) + (size_t)(blob->end - blob->current)))
++      return NULL;
++#endif
+ 
+    struct radv_shader *shader;
+    radv_shader_create_uncached(device, binary, false, NULL, NULL, &shader);
+@@ -203,6 +212,9 @@
+    if (radv_is_cache_disabled(&device->compiler_info, cache) || skip_cache || (dbg && dbg->dump_shader)) {
+       struct radv_shader *shader;
+       radv_shader_create_uncached(device, binary, false, NULL, dbg, &shader);
++#ifdef R4OS_VULKAN
++      if (!shader) return NULL;
++#endif
+       /* radv_parse_binary_debug_info() might have been done earlier by radv_shader_dump_asm(). Skip it in that case to
+        * avoid memory leaks. */
+       if (!dbg || (!dbg->statistics && !dbg->ir_string && !dbg->disasm_string && !dbg->debug_info_count))
+--- a/src/amd/vulkan/radv_pipeline_compute.c
++++ b/src/amd/vulkan/radv_pipeline_compute.c
+@@ -8,6 +8,10 @@
+  * SPDX-License-Identifier: MIT
+  */
+ 
++#ifdef R4OS_VULKAN
++#include "r4vk_radv_compile.h"
++#include "r4vk_state.h"
++#endif
+ #include "meta/radv_meta.h"
+ #include "nir/nir.h"
+ #include "nir/radv_nir.h"
+@@ -205,11 +209,26 @@
+    radv_pipeline_stage_init(pipeline->base.create_flags, pStage, pipeline_layout, &stage_key, &cs_stage);
+ 
+    struct radv_shader_debug_info cs_dbg = {0};
+-   struct radv_shader_binary *cs_binary =
+-      radv_compile_cs(compiler_info, &cs_stage, pipeline->base.is_internal, &cs_dbg);
++   struct radv_shader_binary *cs_binary = NULL;
++#ifdef R4OS_VULKAN
++   result = r4vk_radv_compile_compute(compiler_info, &cs_stage, pipeline->base.is_internal, &cs_dbg, &cs_binary);
++   if (result != VK_SUCCESS) {
++      radv_pipeline_stage_finish(&cs_stage);
++      return result;
++   }
++#else
++   cs_binary = radv_compile_cs(compiler_info, &cs_stage, pipeline->base.is_internal, &cs_dbg);
++#endif
+    pipeline->base.shaders[MESA_SHADER_COMPUTE] =
+       radv_shader_create(device, cache, cs_binary, skip_shaders_cache, &cs_dbg);
+ 
++#ifdef R4OS_VULKAN
++   if (!pipeline->base.shaders[MESA_SHADER_COMPUTE]) {
++      free(cs_binary);
++      radv_pipeline_stage_finish(&cs_stage);
++      return r4vk_radv_error_result(VK_ERROR_OUT_OF_HOST_MEMORY);
++   }
++#endif
+    cs_stage.feedback.duration += os_time_get_nano() - stage_start;
+ 
+    if (!skip_shaders_cache) {
+@@ -344,5 +363,8 @@
+                             const VkComputePipelineCreateInfo *pCreateInfos, const VkAllocationCallbacks *pAllocator,
+                             VkPipeline *pPipelines)
+ {
++#ifdef R4OS_VULKAN
++   r4vk_radv_error_reset();
++#endif
+    return radv_create_compute_pipelines(_device, pipelineCache, count, pCreateInfos, pAllocator, pPipelines);
+ }
+--- a/src/amd/vulkan/radv_pipeline_graphics.c
++++ b/src/amd/vulkan/radv_pipeline_graphics.c
+@@ -8,6 +8,10 @@
+  * SPDX-License-Identifier: MIT
+  */
+ 
++#ifdef R4OS_VULKAN
++#include "r4vk_radv_compile.h"
++#include "r4vk_state.h"
++#endif
+ #include "meta/radv_meta.h"
+ #include "nir/nir.h"
+ #include "nir/nir_serialize.h"
+@@ -2995,12 +2999,23 @@
+ 
+    struct radv_shader_debug_info debug[MESA_VULKAN_SHADER_STAGES] = {0};
+    struct radv_shader_debug_info gs_copy_debug = {0};
++#ifdef R4OS_VULKAN
++   result = r4vk_radv_compile_graphics(compiler_info, stages, &gfx_state->key.gfx_state, pipeline->base.is_internal,
++                                     retained_shaders, noop_fs, debug, binaries, &gs_copy_debug, &gs_copy_binary);
++   if (result != VK_SUCCESS) return result;
++#else
+    radv_graphics_shaders_compile(compiler_info, cache, stages, &gfx_state->key.gfx_state, pipeline->base.is_internal,
+                                  retained_shaders, noop_fs, debug, binaries, &gs_copy_debug, &gs_copy_binary);
++#endif
+    radv_graphics_shaders_create(device, cache, skip_shaders_cache, pipeline->base.shaders, binaries, debug,
+                                 &pipeline->base.gs_copy_shader, gs_copy_binary, &gs_copy_debug);
+ 
+-   if (!skip_shaders_cache) {
++#ifdef R4OS_VULKAN
++   for (unsigned i = 0; i < MESA_VULKAN_SHADER_STAGES; i++)
++      if (binaries[i] && !pipeline->base.shaders[i]) result = r4vk_radv_error_result(VK_ERROR_OUT_OF_HOST_MEMORY);
++   if (gs_copy_binary && !pipeline->base.gs_copy_shader) result = r4vk_radv_error_result(VK_ERROR_OUT_OF_HOST_MEMORY);
++#endif
++   if (result == VK_SUCCESS && !skip_shaders_cache) {
+       radv_pipeline_cache_insert(device, cache, &pipeline->base);
+    }
+ 
+@@ -3444,6 +3459,9 @@
+                              const VkGraphicsPipelineCreateInfo *pCreateInfos, const VkAllocationCallbacks *pAllocator,
+                              VkPipeline *pPipelines)
+ {
++#ifdef R4OS_VULKAN
++   r4vk_radv_error_reset();
++#endif
+    VkResult result = VK_SUCCESS;
+    unsigned i = 0;
+ 
 --- a/src/amd/vulkan/radv_query.c
 +++ b/src/amd/vulkan/radv_query.c
 @@ -7,7 +7,9 @@
@@ -892,6 +1149,261 @@
  #include <stdbool.h>
  #include <string.h>
  
+--- a/src/amd/vulkan/radv_shader.c
++++ b/src/amd/vulkan/radv_shader.c
+@@ -8,6 +8,10 @@
+  * SPDX-License-Identifier: MIT
+  */
+ 
++#ifdef R4OS_VULKAN
++#include "r4vk_radv_compile.h"
++#include "r4vk_state.h"
++#endif
+ #include "radv_shader.h"
+ #include "meta/radv_meta.h"
+ #include "nir/nir.h"
+@@ -153,6 +157,8 @@
+ bool
+ radv_can_dump_shader(const struct radv_compiler_info *compiler_info, nir_shader *nir)
+ {
++   if (!nir)
++      return false;
+    if (is_meta_shader(nir) && nir->info.stage != MESA_SHADER_INTERSECTION)
+       return compiler_info->debug.dump_meta_shaders;
+ 
+@@ -358,7 +364,13 @@
+ 
+    snprintf(buffer, sizeof(buffer), "SPIR-V offset %lu: %s", (unsigned long)spirv_offset, message);
+ 
++#ifdef R4OS_VULKAN
++   /* Isolated compiler callbacks do not enter application debug owners. */
++   extern void r4nak_port_log(const char *, size_t);
++   r4nak_port_log(buffer, strlen(buffer));
++#else
+    vk_debug_report(debug_data->debug_report, vk_flags[level], debug_data->object, 0, 0, "radv", buffer);
++#endif
+ }
+ 
+ static void
+@@ -530,6 +542,9 @@
+             },
+          .emit_debug_break = compiler_info->debug.trap_enabled,
+          .debug_info = compiler_info->key.nir_debug_info,
++#ifdef R4OS_VULKAN
++         .skip_os_break_in_debug_build = true,
++#endif
+          .printf = compiler_info->debug.printf_enabled,
+          .sampler_descriptor_size = compiler_info->sampler_descriptor_size,
+          .sampler_descriptor_alignment = compiler_info->sampler_descriptor_alignment,
+@@ -540,6 +555,9 @@
+       };
+       nir = spirv_to_nir(spirv, stage->spirv.size / 4, spec, stage->stage, stage->entrypoint, &spirv_options,
+                          &compiler_info->nir_options[stage->stage]);
++#ifdef R4OS_VULKAN
++      if (!nir) r4vk_compiler_fail(3);
++#endif
+       nir->info.internal |= is_internal;
+       assert(nir->info.stage == stage->stage);
+ 
+@@ -1083,7 +1101,11 @@
+       return block;
+    }
+ 
+-   return malloc(sizeof(union radv_shader_arena_block));
++   union radv_shader_arena_block *block = malloc(sizeof(*block));
++#ifdef R4OS_VULKAN
++   if (!block) r4vk_radv_error_record(VK_ERROR_OUT_OF_HOST_MEMORY);
++#endif
++   return block;
+ }
+ 
+ static void
+@@ -1115,8 +1137,12 @@
+    const struct radv_physical_device *pdev = radv_device_physical(device);
+    union radv_shader_arena_block *alloc = NULL;
+    struct radv_shader_arena *arena = calloc(1, sizeof(struct radv_shader_arena));
+-   if (!arena)
++   if (!arena) {
++#ifdef R4OS_VULKAN
++      r4vk_radv_error_record(VK_ERROR_OUT_OF_HOST_MEMORY);
++#endif
+       goto fail;
++   }
+ 
+    if (!arena_size)
+       arena_size = MAX2(
+@@ -1149,14 +1175,19 @@
+    alloc->offset = 0;
+    alloc->size = arena_size;
+    list_addtail(&alloc->list, &arena->entries);
++   if (!(flags & RADEON_FLAG_NO_CPU_ACCESS)) {
++      arena->ptr = (char *)radv_buffer_map(device->ws, arena->bo);
++      if (!arena->ptr) {
++#ifdef R4OS_VULKAN
++         r4vk_radv_error_record(VK_ERROR_MEMORY_MAP_FAILED);
++#endif
++         goto fail;
++      }
++   }
++
++   /* Publish the free-list entry only after all fallible setup completed. */
+    if (free_list)
+       add_hole(free_list, alloc);
+-
+-   if (!(flags & RADEON_FLAG_NO_CPU_ACCESS)) {
+-      arena->ptr = (char *)radv_buffer_map(device->ws, arena->bo);
+-      if (!arena->ptr)
+-         goto fail;
+-   }
+ 
+    if (replay_va)
+       arena->type = RADV_SHADER_ARENA_REPLAYED;
+@@ -1201,8 +1232,6 @@
+       left_hole->offset = hole->offset;
+       left_hole->size = offset_in_hole;
+ 
+-      if (free_list)
+-         add_hole(free_list, left_hole);
+    }
+ 
+    if (hole->size > offset_in_hole + size) {
+@@ -1221,6 +1250,8 @@
+    }
+ 
+    if (left_hole) {
++      if (free_list)
++         add_hole(free_list, left_hole);
+       hole->offset += left_hole->size;
+       hole->size -= left_hole->size;
+ 
+@@ -1311,6 +1342,8 @@
+ 
+    alloc =
+       insert_block(device, list_entry(arena->entries.next, union radv_shader_arena_block, list), 0, size, free_list);
++   if (!alloc)
++      goto fail;
+    alloc->freelist.prev = NULL;
+    alloc->freelist.next = ptr;
+ 
+@@ -1321,13 +1354,18 @@
+    return alloc;
+ 
+ fail:
++   if (arena) {
++      list_for_each_entry_safe(union radv_shader_arena_block, hole, &arena->entries, list) {
++         remove_hole(free_list, hole);
++         list_del(&hole->list);
++         free(hole);
++      }
++      if (arena->ptr)
++         device->ws->buffer_unmap(device->ws, arena->bo, false);
++      radv_bo_destroy(device, NULL, arena->bo);
++      free(arena);
++   }
+    mtx_unlock(&device->shader_arena_mutex);
+-   free(alloc);
+-   if (arena) {
+-      free(arena->list.next);
+-      radv_bo_destroy(device, NULL, arena->bo);
+-   }
+-   free(arena);
+    return NULL;
+ }
+ 
+@@ -2714,7 +2752,12 @@
+ {
+    shader->code = calloc(shader->code_size, 1);
+    if (!shader->code) {
++#ifdef R4OS_VULKAN
++      /* The caller still owns this unpublished object and its arena block. */
++      r4vk_radv_error_record(VK_ERROR_OUT_OF_HOST_MEMORY);
++#else
+       radv_shader_unref(device, shader);
++#endif
+       return false;
+    }
+ 
+@@ -3112,6 +3155,12 @@
+ 
+ out:
+    if (result != VK_SUCCESS) {
++#ifdef R4OS_VULKAN
++      result = r4vk_radv_error_result(result);
++      r4vk_radv_error_record(result);
++      if (shader && shader->alloc) radv_free_shader_memory(device, shader->alloc);
++      if (shader) free(shader->code);
++#endif
+       free(shader);
+       *out_shader = NULL;
+    }
+@@ -3174,8 +3223,12 @@
+    struct radv_shader_part *shader_part;
+ 
+    shader_part = calloc(1, sizeof(struct radv_shader_part));
+-   if (!shader_part)
++   if (!shader_part) {
++#ifdef R4OS_VULKAN
++      r4vk_radv_error_record(VK_ERROR_OUT_OF_HOST_MEMORY);
++#endif
+       return NULL;
++   }
+ 
+    shader_part->ref_count = 1;
+    shader_part->code_size = binary->code_size;
+@@ -3204,6 +3257,10 @@
+    return shader_part;
+ 
+ fail:
++#ifdef R4OS_VULKAN
++   r4vk_radv_error_record(VK_ERROR_OUT_OF_DEVICE_MEMORY);
++#endif
++   shader_part->ref_count = 0;
+    radv_shader_part_destroy(device, shader_part);
+    return NULL;
+ }
+@@ -3477,9 +3534,15 @@
+                          (void **)&binary);
+    }
+ 
++#ifdef R4OS_VULKAN
++   if (!binary) r4vk_compiler_fail(3);
++#endif
+    binary->info = *info;
+ 
+    if (!radv_postprocess_binary_config(compiler_info, binary, args)) {
++#ifdef R4OS_VULKAN
++      r4vk_compiler_fail(3);
++#endif
+       free(binary);
+       return NULL;
+    }
+@@ -3681,8 +3744,13 @@
+    radv_aco_convert_shader_info(&ac_info, &stage.info, &stage.args, compiler_info);
+    radv_aco_fill_compiler_options(&ac_opts, compiler_info, &stage_key, &gfx_state, false, dump_shader);
+    radv_aco_convert_vs_prolog_key(&ac_prolog_info, key, &stage.args);
++#ifdef R4OS_VULKAN
++   if (r4vk_radv_compile_part(false, &ac_opts, &ac_info, &ac_prolog_info, &stage.args.ac,
++                              &radv_aco_build_shader_part, &binary) != VK_SUCCESS) return NULL;
++#else
+    aco_compile_vs_prolog(&ac_opts, &ac_info, &ac_prolog_info, &stage.args.ac, &radv_aco_build_shader_part,
+                          (void **)&binary);
++#endif
+ 
+    prolog = radv_shader_part_create(device, binary, stage.info.wave_size);
+    if (!prolog)
+@@ -3739,7 +3807,12 @@
+    radv_aco_convert_shader_info(&ac_info, &info, &args, compiler_info);
+    radv_aco_fill_compiler_options(&ac_opts, compiler_info, &stage_key, NULL, false, dump_shader);
+    radv_aco_convert_ps_epilog_key(&ac_epilog_info, key, &args);
++#ifdef R4OS_VULKAN
++   if (r4vk_radv_compile_part(true, &ac_opts, &ac_info, &ac_epilog_info, &args.ac,
++                              &radv_aco_build_shader_part, &binary) != VK_SUCCESS) return NULL;
++#else
+    aco_compile_ps_epilog(&ac_opts, &ac_info, &ac_epilog_info, &args.ac, &radv_aco_build_shader_part, (void **)&binary);
++#endif
+ 
+    binary->info.spi_shader_col_format = key->spi_shader_col_format;
+    binary->info.cb_shader_mask = ac_get_cb_shader_mask(key->spi_shader_col_format);
 --- a/src/amd/vulkan/tools/radv_debug_hang.c
 +++ b/src/amd/vulkan/tools/radv_debug_hang.c
 @@ -10,7 +10,7 @@

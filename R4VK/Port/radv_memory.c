@@ -216,7 +216,7 @@ static void unmap_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buffer
    }
    simple_mtx_unlock(&bo->mutex);
 }
-static VkResult create_bo(struct radeon_winsys *base, uint64_t bytes, unsigned alignment,
+static VkResult allocate_bo(struct radeon_winsys *base, uint64_t bytes, unsigned alignment,
    enum radeon_bo_domain domain, enum radeon_bo_flag flags, unsigned priority,
    uint64_t address, struct radeon_winsys_bo **out)
 {
@@ -230,8 +230,10 @@ static VkResult create_bo(struct radeon_winsys *base, uint64_t bytes, unsigned a
        (domain != RADEON_DOMAIN_GTT && domain != RADEON_DOMAIN_VRAM && domain != RADEON_DOMAIN_VRAM_GTT))
       return VK_ERROR_FEATURE_NOT_PRESENT;
    if ((flags & RADEON_FLAG_CPU_ACCESS) && (flags & RADEON_FLAG_NO_CPU_ACCESS)) return VK_ERROR_FEATURE_NOT_PRESENT;
-   bool vram = domain == RADEON_DOMAIN_VRAM ||
-      (domain == RADEON_DOMAIN_VRAM_GTT && !(flags & RADEON_FLAG_CPU_ACCESS));
+   /* Internal RADV shader/descriptor arenas request VRAM but require CPU
+    * access. Their native placement is coherent system backing; explicit
+    * NO_CPU_ACCESS allocations retain device-local ownership. */
+   bool vram = (domain & RADEON_DOMAIN_VRAM) && (flags & RADEON_FLAG_NO_CPU_ACCESS);
    if (vram && (flags & (RADEON_FLAG_CPU_ACCESS | RADEON_FLAG_ZERO_VRAM))) return VK_ERROR_FEATURE_NOT_PRESENT;
    if (alignment && !power_of_two(alignment)) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
    if (!alignment) alignment = 4096;
@@ -297,6 +299,15 @@ fail:
    if (valid(bo->reference.reference)) drop(ws, bo->reference.reference);
    free(bo);
    return r4vk_radv_is_lost(ws) ? VK_ERROR_DEVICE_LOST : result;
+}
+static VkResult create_bo(struct radeon_winsys *base, uint64_t bytes, unsigned alignment,
+   enum radeon_bo_domain domain, enum radeon_bo_flag flags, unsigned priority,
+   uint64_t address, struct radeon_winsys_bo **out)
+{
+   extern void r4vk_radv_error_record(VkResult);
+   VkResult result = allocate_bo(base, bytes, alignment, domain, flags, priority, address, out);
+   r4vk_radv_error_record(result);
+   return result;
 }
 static VkResult from_ptr(struct radeon_winsys *ws, void *ptr, uint64_t size, unsigned priority, struct radeon_winsys_bo **out)
 { (void)ws; (void)ptr; (void)size; (void)priority; (void)out; return VK_ERROR_INVALID_EXTERNAL_HANDLE; }

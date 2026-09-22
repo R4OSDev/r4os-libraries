@@ -2,7 +2,7 @@
 #include "r4vk_radv_winsys.h"
 
 /* Bounded recording storage. Overflow invalidates the whole command buffer;
- * the existing storage is then a sink for subsequent bounded emit blocks. */
+ * the private Mesa emit macros stop writing until the next explicit reset. */
 #define RECORD_DWORDS (1u << 20)
 #define MAX_IB_DWORDS (RECORD_DWORDS - 8)
 #define NOP 0xffff1000u
@@ -31,6 +31,7 @@ static void reset_cs(struct ac_cmdbuf *base)
    base->max_dw = MAX_IB_DWORDS;
    base->cdw = base->reserved_dw = 0;
    base->context_roll = false;
+   base->record_discard = false;
    cs->result = VK_SUCCESS;
 }
 static void destroy_cs(struct ac_cmdbuf *base)
@@ -44,22 +45,14 @@ static void destroy_cs(struct ac_cmdbuf *base)
 static void grow(struct ac_cmdbuf *base, size_t needed)
 {
    struct r4vk_radv_cs *cs = native(base);
-   /* RADV requests bounded packet blocks. Secondary arrays are checked
-    * separately before copying; never let an oversized block enter the sink. */
-   if (needed > MAX_IB_DWORDS) {
-      /* Preserve enough writable recording memory for the current emit block
-       * even though finalization must report the command buffer overflow. */
-      if (needed > UINT32_MAX - 8 || needed > SIZE_MAX / 4) abort();
-      void *sink = realloc(base->buf, (needed + 8) * 4);
-      if (!sink) abort();
-      base->buf = sink;
-      base->max_dw = needed;
-   }
+   (void)needed;
+   base->record_discard = true;
    cs->result = VK_ERROR_OUT_OF_DEVICE_MEMORY;
    base->cdw = base->reserved_dw = 0;
 }
 static void pad(struct ac_cmdbuf *base, unsigned leave)
 {
+   if (native(base)->result != VK_SUCCESS) return;
    if (leave > 7 || base->cdw > MAX_IB_DWORDS) { native(base)->result = VK_ERROR_OUT_OF_DEVICE_MEMORY; return; }
    while ((base->cdw + leave) & 7) base->buf[base->cdw++] = NOP;
    base->reserved_dw = MAX2(base->reserved_dw, base->cdw);
@@ -107,8 +100,20 @@ static void execute_ib(struct ac_cmdbuf *base, struct radeon_winsys_bo *bo, uint
    struct r4vk_radv_cs *cs = native(base);
    if (cs->result != VK_SUCCESS) return;
    if (bo) { add(base, bo); va = bo->va; }
+   if (cs->result != VK_SUCCESS) return;
    if (cs->engine != AMD_IP_GFX || !va || (va & 31) || !dwords || dwords > MAX_IB_DWORDS ||
        base->cdw > MAX_IB_DWORDS - 4) { cs->result = VK_ERROR_FEATURE_NOT_PRESENT; return; }
+   bool backed = false;
+   simple_mtx_lock(&cs->ws->residency_mutex);
+   list_for_each_entry(struct r4vk_radv_bo, candidate, &cs->ws->residency, residency) {
+      if ((!bo || bo == &candidate->base) && va >= candidate->base.va &&
+          va - candidate->base.va < candidate->base.size &&
+          (uint64_t)dwords * 4 <= candidate->base.size - (va - candidate->base.va)) {
+         backed = true; break;
+      }
+   }
+   simple_mtx_unlock(&cs->ws->residency_mutex);
+   if (!backed) { cs->result = VK_ERROR_UNKNOWN; return; }
    base->buf[base->cdw++] = 0xc0023f00u | predicate;
    base->buf[base->cdw++] = va;
    base->buf[base->cdw++] = va >> 32;

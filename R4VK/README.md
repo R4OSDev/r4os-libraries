@@ -1,20 +1,28 @@
 ﻿# R4VK native Vulkan provider
 
-R4VK 0.1.18 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+R4VK 0.1.19 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
 runtime. Provider-specific constructors, revalidation and destruction select
 only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
 queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
 `IMAGE_SCOPE=slim` installs the module in normal images. Missing backends
 produce no device; the firmware-framebuffer renderer remains available.
 
-AMD 0.80.23 adds Picasso device facts, original RADV physical/logical device
-construction, native memory and binary/timeline sync. The SMP4 fixture uses
-the exact production archives and real R4OS resource brokers with modeled
-GPU receipts. Graphics/compute workload acceptance belongs to 0.80.24,
-Vulkan 1.3/WSI to 0.80.25, and physical qualification exclusively to 0.80.39.
-AMD is currently limited to API 1.0, 64 MB allocations and 32 resident
-bindings per submission; no conformance is claimed. See AMDRADV08023.txt/.json
-in Docs/Drivers. The native generators additionally require glslang 15.2.0.
+AMD 0.80.24 adds isolated original RADV/NIR/ACO pipeline compilation,
+CPU-mappable internal shader/descriptor backing, bounded command recording,
+and exact allocator/compiler failure propagation. The SMP4 acceptance uses
+the exact production archives with real R4OS resource brokers: compute with
+descriptors and push constants, secondary commands, optimal GFX9 images/views,
+a graphics render pass and draw, image-to-buffer transfer, binary cross-queue
+dependencies, pipeline-cache export/import and recovery after injected errors.
+GPU execution receipts are explicitly modeled; no resulting pixels or computed
+values are claimed. Physical qualification belongs exclusively to 0.80.39.
+
+AMD remains at API 1.0 until the 0.80.25 Vulkan 1.3/WSI acceptance. Limits are
+64 MB per backing allocation, 32 resident bindings per submission and bounded
+4 MB recording streams. Source-location debugging, EXT_shader_object and
+EXT_graphics_pipeline_library are not admitted. No conformance is claimed.
+See AMDRADV08023.txt/.json and AMDRADV08024.txt/.json in Docs/Drivers. The
+native generators additionally require glslang 15.2.0.
 
 Roadmap 0.79.38 accepts the software Vulkan 1.3 profile. Captured public
 queries for modeled GA106/AD106 backends pass selected unmodified Khronos

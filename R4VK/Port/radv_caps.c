@@ -20,6 +20,8 @@ void r4vk_radv_filter_physical(struct radv_physical_device *pdev)
    e->EXT_device_address_binding_report = e->EXT_device_fault = false;
    e->EXT_pipeline_properties = e->AMD_shader_info = false;
    e->EXT_debug_marker = false;
+   e->EXT_shader_object = e->EXT_graphics_pipeline_library = false;
+   f->shaderObject = f->graphicsPipelineLibrary = false;
    f->sparseBinding = f->sparseResidencyBuffer = f->sparseResidencyImage2D = f->sparseResidencyImage3D = false;
    f->sparseResidency2Samples = f->sparseResidency4Samples = f->sparseResidency8Samples = f->sparseResidency16Samples = f->sparseResidencyAliased = false;
    f->bufferDeviceAddressCaptureReplay = f->descriptorBufferCaptureReplay = false;
