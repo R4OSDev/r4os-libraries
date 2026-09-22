@@ -1,11 +1,11 @@
 ﻿# R4GL
 
 Native Mesa EGL/OpenGL runtime for R4OS. The initial software profile uses
-softpipe without LLVM/JIT and works independently of NVIDIA hardware.
-It currently negotiates EGL 1.5 and OpenGL 3.3 Core. Version 0.1.14 also
+softpipe without LLVM/JIT and works without a native GPU backend.
+It currently negotiates EGL 1.5 and OpenGL 3.3 Core. Version 0.1.15 also
 connects Zink directly to the native R4VK ICD. Its pbuffer and native window profiles
 have passed GLSL drawing submission, EGL fences, resize and buffer retirement
-with a modeled NVIDIA device. Physical GPU pixels remain unqualified.
+with modeled NVIDIA and AMD Picasso devices. Physical GPU pixels remain unqualified.
 
 Build from the workspace with `Repositories/Libraries/Build.sh R4GL`
 (Windows: `Repositories\Libraries\Build.bat R4GL`). Add `-Doffline=true`
@@ -89,6 +89,19 @@ share a complete allocation that stays stable across BaseLevel/MaxLevel changes.
 An existing complete allocation is reused. Evidence/EGLImageLevels covers both
 range changes, inactive mip exports and a non-power-of-two root. These focused
 proofs do not claim complete EGLImage conformance.
+
+AMD Picasso uses the same profile-1 Zink/R4VK path with the RADV provider.
+R4GL does not require a fabricated Vulkan border-color-swizzle extension:
+when it is absent, Vulkan sampler views retain identity component mappings
+and NIR applies the final GL mapping per stage and sampler binding. Float and
+integer constants, sampler arrays and gathers retain their types and texel
+order. Rebinding changes the shader key. Bindless textures are not offered
+on this fallback because their handles have no fixed per-binding key.
+Missing native stipple modes select Zink's existing geometry/fragment shader
+lowering when the actual geometry and sample-shading features support it.
+R4VK 0.1.21 pools small private AMD allocations and retains closed byte extents
+until all submissions using their native root have completed. The native
+32-root-binding limit remains unchanged. See AMDEGL08026.txt/.json in Docs.
 
 Choose profile 0 for software rendering, or profile 1 for Zink pbuffer/window rendering. Profile 1 additionally requires the application's ordinary
 `R4VK:VULKAN_V1:1` import; keep both library generations loaded through GL

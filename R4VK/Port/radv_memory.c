@@ -162,29 +162,79 @@ static VkResult create(struct r4vk_radv_ws *context,
 }
 
 static void unmap_bo(struct radeon_winsys *, struct radeon_winsys_bo *, bool);
+bool r4vk_radv_buffer_try_ref(struct radeon_winsys_bo *buffer)
+{
+   struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
+   uint32_t value = p_atomic_read(&bo->references);
+   while (value) {
+      assert(value != UINT32_MAX);
+      const uint32_t old = p_atomic_cmpxchg(&bo->references, value, value + 1);
+      if (old == value) return true;
+      value = old;
+   }
+   return false; /* A concurrent final release may still be removing its node. */
+}
+static void destroy_bo(struct radeon_winsys *, struct radeon_winsys_bo *);
+static void release_slab_child(struct r4vk_radv_bo *bo)
+{
+   struct r4vk_radv_ws *ws = bo->ws;
+   struct r4vk_radv_bo *root = bo->parent;
+   simple_mtx_lock(&ws->residency_mutex);
+   const uint32_t first = bo->offset / 4096, count = bo->base.size / 4096;
+   for (uint32_t i = first; i < first + count; i++) {
+      assert(root->slab_bitmap[i / 64] & (UINT64_C(1) << (i % 64)));
+      root->slab_bitmap[i / 64] &= ~(UINT64_C(1) << (i % 64));
+   }
+   assert(root->slab_children);
+   bool last = --root->slab_children == 0;
+   if (last) root->slab_retiring = true;
+   simple_mtx_unlock(&ws->residency_mutex);
+   simple_mtx_destroy(&bo->mutex); free(bo);
+   if (last) destroy_bo(&ws->base, &root->base);
+}
+void r4vk_radv_buffer_release_submission(struct radeon_winsys_bo *buffer)
+{
+   struct r4vk_radv_bo *root = (struct r4vk_radv_bo *)buffer;
+   struct r4vk_radv_ws *ws = root->ws;
+   struct r4vk_radv_bo *retired = NULL;
+   simple_mtx_lock(&ws->residency_mutex);
+   assert(!root->parent && root->submissions);
+   if (!--root->submissions) {
+      retired = root->retired_children;
+      root->retired_children = NULL;
+   }
+   simple_mtx_unlock(&ws->residency_mutex);
+   while (retired) {
+      struct r4vk_radv_bo *next = retired->retired_next;
+      release_slab_child(retired);
+      retired = next;
+   }
+   destroy_bo(&ws->base, buffer);
+}
 static void destroy_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buffer)
 {
    struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
    struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
    assert(bo->ws == ws);
+   if (!p_atomic_dec_zero(&bo->references)) return;
    if (bo->parent) {
       struct r4vk_radv_bo *root = bo->parent;
       while (bo->map_count) unmap_bo(base, buffer, false);
       simple_mtx_lock(&ws->residency_mutex);
-      const uint32_t first = bo->offset / 4096, count = bo->base.size / 4096;
-      for (uint32_t i = first; i < first + count; i++) {
-         assert(root->slab_bitmap[i / 64] & (UINT64_C(1) << (i % 64)));
-         root->slab_bitmap[i / 64] &= ~(UINT64_C(1) << (i % 64));
+      if (root->submissions) {
+         /* The root's native execution loan protects physical pages. Keep
+          * this logical extent occupied too, so an unrelated new allocation
+          * cannot overwrite a closed shader, upload or command buffer. */
+         bo->retired_next = root->retired_children;
+         root->retired_children = bo;
+         simple_mtx_unlock(&ws->residency_mutex);
+         return;
       }
-      assert(root->slab_children);
-      bool last = --root->slab_children == 0;
-      if (last) root->slab_retiring = true;
       simple_mtx_unlock(&ws->residency_mutex);
-      simple_mtx_destroy(&bo->mutex); free(bo);
-      if (last) destroy_bo(base, &root->base);
+      release_slab_child(bo);
       return;
    }
-   assert(!bo->slab_children);
+   assert(!bo->slab_children && !bo->submissions && !bo->retired_children);
    simple_mtx_lock(&ws->residency_mutex);
    list_del(&bo->residency);
    ws->allocated[buffer->initial_domain == RADEON_DOMAIN_VRAM] -= buffer->size;
@@ -254,7 +304,7 @@ static VkResult allocate_backing(struct radeon_winsys *base, uint64_t bytes,
    struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
    struct r4vk_radv_bo *bo = calloc(1, sizeof(*bo));
    if (!bo) return VK_ERROR_OUT_OF_HOST_MEMORY;
-   bo->ws = ws;
+   bo->ws = ws; bo->references = 1;
    VkResult result;
    if (vram) result = allocate_vram(ws, bytes, &bo->reference);
    else {
@@ -356,7 +406,7 @@ static VkResult allocate_slab(struct radeon_winsys *base, uint64_t bytes,
       assert(reserved);
       simple_mtx_unlock(&ws->residency_mutex);
    }
-   child->ws = ws; child->parent = root; child->offset = offset;
+   child->ws = ws; child->references = 1; child->parent = root; child->offset = offset;
    child->base = root->base;
    child->base.va += offset; child->base.size = bytes;
    child->reference = root->reference; child->range = root->range; child->binding = root->binding;
@@ -414,8 +464,11 @@ static VkResult allocate_bo(struct radeon_winsys *base, uint64_t bytes, unsigned
          return VK_ERROR_OUT_OF_DEVICE_MEMORY;
       bytes += 4096;
    }
-   const unsigned slab_flags = RADEON_FLAG_NO_INTERPROCESS_SHARING | RADEON_FLAG_PREFER_LOCAL_BO;
-   if ((flags & slab_flags) == slab_flags && bytes <= 1024*1024 && alignment <= 1024*1024)
+   /* Small private arenas and command streams share bounded root bindings
+    * with application allocations. Submission pins delay logical extent
+    * reuse until completion, independently of caller/command destruction. */
+   const bool pool = flags & RADEON_FLAG_NO_INTERPROCESS_SHARING;
+   if (pool && bytes <= 1024*1024 && alignment <= 1024*1024)
       return allocate_slab(base, bytes, alignment, vram, flags, out);
    return allocate_backing(base, bytes, alignment, vram, flags, out);
 }
@@ -436,7 +489,7 @@ VkResult r4vk_radv_import_buffer(struct r4vk_radv_ws *ws, const R4GfxBufferHandl
    if (result != VK_SUCCESS) return result;
    struct r4vk_radv_bo *bo = calloc(1, sizeof(*bo));
    if (!bo) return VK_ERROR_OUT_OF_HOST_MEMORY;
-   bo->ws = ws;
+   bo->ws = ws; bo->references = 1;
    /* The producer may release its own reference immediately after import.
     * Describe and bind only the independently retained canonical backing. */
    int32_t rc = r4draw_gfx_buffer_import(&ws->draw, source, &bo->reference);

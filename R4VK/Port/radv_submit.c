@@ -7,6 +7,8 @@ struct r4vk_radv_point {
    simple_mtx_t mutex;
    struct r4vk_radv_ws *resources;
    struct radeon_winsys_ctx *queue_owner;
+   struct radeon_winsys_bo *buffers[32];
+   uint32_t buffer_count;
    R4GfxFence fence;
    uint32_t exports;
    VkResult result;
@@ -55,6 +57,18 @@ void r4vk_radv_point_ref(struct r4vk_radv_point *point)
 {
    if (point) p_atomic_inc(&point->references);
 }
+static void release_buffers(struct r4vk_radv_point *point)
+{
+   struct radeon_winsys_bo *buffers[32];
+   simple_mtx_lock(&point->mutex);
+   const uint32_t count = point->buffer_count;
+   memcpy(buffers, point->buffers, count * sizeof(buffers[0]));
+   point->buffer_count = 0;
+   simple_mtx_unlock(&point->mutex);
+   /* Pool mutations and broker retirement never span the point mutex. */
+   for (uint32_t i = 0; i < count; i++)
+      r4vk_radv_buffer_release_submission(buffers[i]);
+}
 void r4vk_radv_point_unref(struct r4vk_radv_point *point)
 {
    if (!point || !p_atomic_dec_zero(&point->references)) return;
@@ -66,6 +80,7 @@ void r4vk_radv_point_unref(struct r4vk_radv_point *point)
       lost(point->resources);
    struct r4vk_radv_ws *resources = point->resources;
    struct radeon_winsys_ctx *queue_owner = point->queue_owner;
+   release_buffers(point);
    simple_mtx_destroy(&point->mutex);
    free(point);
    ctx_unref(queue_owner);
@@ -77,6 +92,7 @@ VkResult r4vk_radv_point_wait(struct r4vk_radv_point *point, uint64_t until)
    if (point->complete) {
       VkResult result = point->result;
       simple_mtx_unlock(&point->mutex);
+      release_buffers(point);
       return result;
    }
    R4GfxFence fence = point->fence;
@@ -107,6 +123,7 @@ VkResult r4vk_radv_point_wait(struct r4vk_radv_point *point, uint64_t until)
    release_fence(point);
    if (point->complete) result = point->result;
    simple_mtx_unlock(&point->mutex);
+   if (result != VK_TIMEOUT) release_buffers(point);
    return result;
 }
 VkResult r4vk_radv_point_export(struct r4vk_radv_point *point, R4GfxFence *out)
@@ -168,6 +185,10 @@ static void destroy_ctx(struct radeon_winsys_ctx *ctx)
 {
    while (ctx->pending) {
       struct r4vk_radv_point *point = ctx->pending;
+      /* Queue teardown must not return pooled command bytes while another
+       * context could still allocate from this winsys. Uncertain completion
+       * poisons it; the kernel continues retaining native execution loans. */
+      if (r4vk_radv_point_wait(point, UINT64_MAX) != VK_SUCCESS) lost(ctx->resources);
       ctx->pending = point->next; r4vk_radv_point_unref(point);
    }
    ctx_unref(ctx);
@@ -300,6 +321,10 @@ static VkResult submit(struct radeon_winsys_ctx *ctx, const struct radv_winsys_s
       result = VK_SUCCESS;
       list_for_each_entry(struct r4vk_radv_bo, bo, &ws->residency, residency) {
          if (num_resources == ARRAY_SIZE(resources)) { result = VK_ERROR_OUT_OF_DEVICE_MEMORY; break; }
+         if (!r4vk_radv_buffer_try_ref(&bo->base)) continue;
+         assert(!bo->parent && bo->submissions < UINT32_MAX);
+         bo->submissions++;
+         point->buffers[point->buffer_count++] = &bo->base;
          resources[num_resources++] = (R4GfxNativeResource){ .version = 1, .size = sizeof(R4GfxNativeResource), .binding = bo->binding, .access = 1 };
       }
       for (uint32_t i = 0; result == VK_SUCCESS && i < count; i++) {
@@ -335,6 +360,7 @@ static VkResult submit(struct radeon_winsys_ctx *ctx, const struct radv_winsys_s
       }
       if (previous) r4vk_radv_point_ref(previous);
       simple_mtx_unlock(&ws->submit_mutex);
+      if (result != VK_SUCCESS) release_buffers(point);
       if (result == VK_SUCCESS) r4vk_radv_point_unref(previous); /* Former tail ownership. */
       if (result == VK_NOT_READY && previous && exported) result = r4vk_radv_point_wait(previous, submission.deadline_ns);
       else if (result == VK_NOT_READY) result = VK_ERROR_OUT_OF_DEVICE_MEMORY;

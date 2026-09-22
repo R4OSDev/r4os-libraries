@@ -154,7 +154,7 @@ build orchestration and self-authored diagnostic shader remain original
 Apache-2.0 R4OS material. Upstream lowering algorithms retain their licenses.
 
 
-## R4GL native EGL/OpenGL provider (0.79.39, in progress)
+## R4GL native EGL/OpenGL provider (0.79.39 / 0.80.26)
 
 R4GL uses the same pinned Mesa 26.2.2 source. Its ordered patches, generator
 plan and native unit/flag selection live under `R4GL/Port` and `R4GL/Tools`.
@@ -167,8 +167,13 @@ are linked. Original Khronos EGL/GL/KHR headers in `Bindings/C` retain their
 notices and have exact source hashes in `ThirdParty/headers.json`.
 Distribution installs the byte-identical bundle as `R4GL-NOTICES.txt`.
 Shared native math/scanner notices remain with their existing owners.
+The AMD Zink patches preserve the original Mesa screen/context/compiler
+notices. They select the existing Mesa stipple lowering and add per-binding
+NIR component mapping for identity Vulkan views. Original NIR algorithms and
+generated compiler sources retain their existing Mesa license texts.
 
-## R4VK native Vulkan provider (0.79.35, in progress)
+
+## R4VK native Vulkan provider (0.79.35 / 0.80.26)
 
 R4VK uses the same checksum-pinned Mesa 26.2.2 source as R4NV/R4NAK.
 `R4VK/Tools/Prepare.ps1` verifies that source manifest before copying private

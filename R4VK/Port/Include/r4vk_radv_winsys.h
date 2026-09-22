@@ -21,6 +21,7 @@ struct r4vk_radv_ws {
 };
 struct r4vk_radv_bo {
    struct radeon_winsys_bo base;
+   uint32_t references;
    struct r4vk_radv_ws *ws;
    struct list_head residency;
    R4GfxBufferReference reference;
@@ -34,6 +35,8 @@ struct r4vk_radv_bo {
    uint64_t offset;
    uint64_t *slab_bitmap;
    uint32_t slab_children;
+   uint32_t submissions;
+   struct r4vk_radv_bo *retired_children, *retired_next;
    bool slab_retiring;
    struct radeon_bo_metadata metadata;
 };
@@ -63,6 +66,8 @@ void r4vk_radv_command_init(struct radeon_winsys *);
 void r4vk_radv_queue_init(struct radeon_winsys *);
 VkResult r4vk_radv_validate(struct r4vk_radv_ws *);
 VkResult r4vk_radv_status(struct r4vk_radv_ws *, int32_t);
+bool r4vk_radv_buffer_try_ref(struct radeon_winsys_bo *);
+void r4vk_radv_buffer_release_submission(struct radeon_winsys_bo *);
 void r4vk_radv_point_ref(struct r4vk_radv_point *);
 void r4vk_radv_point_unref(struct r4vk_radv_point *);
 VkResult r4vk_radv_point_wait(struct r4vk_radv_point *, uint64_t);

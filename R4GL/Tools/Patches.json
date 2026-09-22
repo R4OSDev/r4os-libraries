@@ -26,6 +26,8 @@
     "Port/MesaZinkWindow.patch",
     "Port/MesaSoftpipeViewCache.patch",
     "Port/MesaZinkSwap.patch",
-    "Port/MesaZinkDeviceLoss.patch"
+    "Port/MesaZinkDeviceLoss.patch",
+    "Port/MesaZinkLineStipple.patch",
+    "Port/MesaZinkBorderSwizzle.patch"
   ]
 }

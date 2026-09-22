@@ -1,6 +1,6 @@
 ﻿# R4VK native Vulkan provider
 
-R4VK 0.1.20 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+R4VK 0.1.21 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
 runtime. Provider-specific constructors, revalidation and destruction select
 only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
 queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
@@ -23,6 +23,18 @@ padded extents of native root BOs. The SMP4 acceptance maps 4096 allocations
 simultaneously and binds/maps/touches a real 1 GB buffer. Driver host checks
 cover the corresponding page tables and retained SG metadata. The 2 GB VA
 aperture, 32 root bindings and bounded 4 MB recording streams remain finite.
+
+AMD EGL integration in 0.80.26 extends this pool to small private shader,
+upload and command allocations. Each submission retains at most 32 native
+roots. Closing a pooled BO removes caller ownership but keeps its byte extent
+occupied while any submission still holds that root. Completion detaches
+retired children under the residency mutex; actual frees run outside the
+point mutex. Empty submissions retain their NOP storage by the same rule.
+Concurrent final release cannot resurrect a root with a zero reference count.
+A queue that cannot establish completion during teardown poisons its winsys;
+resident kernel loans continue protecting uncertain physical execution.
+This fixes Zink's exhaustion of native bindings without raising driver limits.
+See AMDEGL08026.txt/.json for the scoped queue and EGL evidence.
 
 Captured public Picasso queries pass selected unchanged Khronos CTS feature,
 limit, format and sample-count predicates. Timestamp query/reset/copy and
