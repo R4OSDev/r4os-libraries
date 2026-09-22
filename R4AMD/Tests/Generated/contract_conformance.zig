@@ -433,6 +433,11 @@ comptime {
     if (@offsetOf(implementation.R4AmdNativeIb, "address") != 0 or @offsetOf(binding.R4AmdNativeIb, "address") != 0) @compileError("R4AmdNativeIb.address offset drift");
     if (@offsetOf(implementation.R4AmdNativeIb, "dwords") != 8 or @offsetOf(binding.R4AmdNativeIb, "dwords") != 8) @compileError("R4AmdNativeIb.dwords offset drift");
     if (@offsetOf(implementation.R4AmdNativeIb, "binding_index") != 12 or @offsetOf(binding.R4AmdNativeIb, "binding_index") != 12) @compileError("R4AmdNativeIb.binding_index offset drift");
+    if (@sizeOf(implementation.R4AmdDeviceFactsV3) != 256 or @sizeOf(binding.R4AmdDeviceFactsV3) != 256) @compileError("R4AmdDeviceFactsV3 size drift");
+    if (@offsetOf(implementation.R4AmdDeviceFactsV3, "facts") != 0 or @offsetOf(binding.R4AmdDeviceFactsV3, "facts") != 0) @compileError("R4AmdDeviceFactsV3.facts offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceFactsV3, "timestamp_clock_khz") != 240 or @offsetOf(binding.R4AmdDeviceFactsV3, "timestamp_clock_khz") != 240) @compileError("R4AmdDeviceFactsV3.timestamp_clock_khz offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceFactsV3, "native_binding_capacity") != 244 or @offsetOf(binding.R4AmdDeviceFactsV3, "native_binding_capacity") != 244) @compileError("R4AmdDeviceFactsV3.native_binding_capacity offset drift");
+    if (@offsetOf(implementation.R4AmdDeviceFactsV3, "max_backing_bytes") != 248 or @offsetOf(binding.R4AmdDeviceFactsV3, "max_backing_bytes") != 248) @compileError("R4AmdDeviceFactsV3.max_backing_bytes offset drift");
     if (@sizeOf(implementation.InfoV1) != 40 or @sizeOf(binding.InfoV1) != 40) @compileError("InfoV1 size drift");
     if (@offsetOf(implementation.InfoV1, "get_info") != 32 or @offsetOf(binding.InfoV1, "get_info") != 32) @compileError("InfoV1.get_info slot drift");
     if (@sizeOf(implementation.BackendV1) != 64 or @sizeOf(binding.BackendV1) != 64) @compileError("BackendV1 size drift");

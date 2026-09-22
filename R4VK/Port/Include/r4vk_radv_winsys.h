@@ -14,7 +14,7 @@ struct r4vk_radv_ws {
    R4Draw draw;
    R4Dev devices;
    struct r4vk_radv_architecture facts;
-   simple_mtx_t residency_mutex, submit_mutex;
+   simple_mtx_t residency_mutex, submit_mutex, slab_mutex;
    struct list_head residency;
    struct r4vk_radv_point *submission_tail;
    uint64_t allocated[2], next_id;
@@ -28,6 +28,13 @@ struct r4vk_radv_bo {
    R4GfxBufferMap mapping;
    simple_mtx_t mutex;
    uint32_t map_count;
+   /* Only roots own broker resources and residency. Children retain one
+    * disjoint, padded byte extent; their VA and CPU map include this offset. */
+   struct r4vk_radv_bo *parent;
+   uint64_t offset;
+   uint64_t *slab_bitmap;
+   uint32_t slab_children;
+   bool slab_retiring;
    struct radeon_bo_metadata metadata;
 };
 struct radeon_winsys_ctx {
@@ -65,4 +72,8 @@ VkResult r4vk_radv_point_pin(struct r4vk_radv_point *, R4GfxFence *);
 bool r4vk_radv_sync_supported(const struct vk_sync *, uint64_t);
 VkResult r4vk_radv_sync_point(struct vk_sync *, struct r4vk_radv_ws *, struct r4vk_radv_point **);
 VkResult r4vk_radv_sync_assign(struct vk_sync *, struct r4vk_radv_point *);
+VkResult r4vk_radv_sync_prepare_present(struct vk_sync *);
+VkResult r4vk_radv_sync_take_present(struct vk_sync *, struct r4vk_radv_point **, R4GfxFence *);
+VkResult r4vk_radv_import_buffer(struct r4vk_radv_ws *, const R4GfxBufferHandle *,
+   struct radeon_winsys_bo **, R4GfxBufferDescriptor *);
 #endif

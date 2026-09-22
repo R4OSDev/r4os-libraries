@@ -6,6 +6,7 @@
 #include <r4os/r4dev.h>
 struct vk_instance;
 struct vk_physical_device;
+int r4vk_get_graphics_tables(R4Draw *draw, R4Dev *devices);
 
 /* One immutable table identifies the owner of a private Mesa device layout.
  * Its constructor owns any provider-private instance; the common instance

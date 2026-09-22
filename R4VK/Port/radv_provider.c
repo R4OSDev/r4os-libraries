@@ -23,6 +23,7 @@ static VkResult create(struct vk_instance *parent, const R4Draw *draw,
    /* Independent mutexes, compiler caches and immutable option ownership.
     * Parent enumerates/destroys the resulting physical device. The private
     * instance never enumerates its own inventory. */
+   instance->native_parent = parent;
    instance->vk.enabled_extensions = parent->enabled_extensions;
    instance->vk.physical_devices.try_create_for_drm = NULL;
    instance->vk.trace_mode = 0;
@@ -41,7 +42,7 @@ static VkResult revalidate(struct vk_physical_device *base)
    VkResult result = r4vk_radv_query_architecture(&pdev->native_draw, &pdev->native_devices,
       &pdev->native_facts.backend, &current);
    if (result != VK_SUCCESS) return VK_ERROR_DEVICE_LOST;
-   if (memcmp(&current.facts, &pdev->native_facts.facts, sizeof(current.facts))) return VK_ERROR_DEVICE_LOST;
+   if (!r4vk_radv_same_facts(&current, &pdev->native_facts)) return VK_ERROR_DEVICE_LOST;
    return VK_SUCCESS;
 }
 static void destroy(struct vk_physical_device *base)

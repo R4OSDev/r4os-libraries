@@ -48,7 +48,8 @@ pub const Profile = struct {
         if (!payload(properties) or properties.interface_id_lo != amd.image_v1_header.interface_id_lo or
             properties.interface_id_hi != amd.image_v1_header.interface_id_hi or
             ((properties.revision != 1 or properties.data_bytes != @sizeOf(amd.R4AmdArchitecture)) and
-             (properties.revision != 2 or properties.data_bytes != @sizeOf(amd.R4AmdDeviceFacts)))) return error.Unsupported;
+             (properties.revision != 2 or properties.data_bytes != @sizeOf(amd.R4AmdDeviceFacts)) and
+             (properties.revision != 3 or properties.data_bytes != @sizeOf(amd.R4AmdDeviceFactsV3)))) return error.Unsupported;
         for (properties.data[properties.data_bytes..]) |byte| if (byte != 0) return error.Invalid;
         const arch = std.mem.bytesToValue(amd.R4AmdArchitecture, properties.data[0..@sizeOf(amd.R4AmdArchitecture)]);
         if (arch.version != 1 or arch.size != @sizeOf(amd.R4AmdArchitecture) or arch.flags != 0 or arch.reserved != 0 or

@@ -4,14 +4,25 @@
 #include "ac_gpu_info.h"
 #include "r4vk_provider.h"
 #include <r4amd.h>
+#include <string.h>
 
 /* Native facts are separate from all NVK and libdrm private layouts. */
 struct r4vk_radv_architecture {
    struct radeon_info info;
    R4GfxBackendInfo backend;
    R4AmdDeviceFacts facts;
+   uint32_t timestamp_clock_khz, native_binding_capacity;
+   uint64_t max_backing_bytes;
    uint64_t system_heap_bytes;
 };
+static inline bool r4vk_radv_same_facts(const struct r4vk_radv_architecture *a,
+                                      const struct r4vk_radv_architecture *b)
+{
+   return !memcmp(&a->facts, &b->facts, sizeof(a->facts)) &&
+      a->timestamp_clock_khz == b->timestamp_clock_khz &&
+      a->native_binding_capacity == b->native_binding_capacity &&
+      a->max_backing_bytes == b->max_backing_bytes;
+}
 VkResult r4vk_radv_query_architecture(const R4Draw *, const R4Dev *,
    const R4GfxBackendInfo *, struct r4vk_radv_architecture *);
 struct radeon_winsys;

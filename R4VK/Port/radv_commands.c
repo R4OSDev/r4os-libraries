@@ -104,9 +104,15 @@ static void execute_ib(struct ac_cmdbuf *base, struct radeon_winsys_bo *bo, uint
    if (cs->engine != AMD_IP_GFX || !va || (va & 31) || !dwords || dwords > MAX_IB_DWORDS ||
        base->cdw > MAX_IB_DWORDS - 4) { cs->result = VK_ERROR_FEATURE_NOT_PRESENT; return; }
    bool backed = false;
+   const struct r4vk_radv_bo *owner = (const struct r4vk_radv_bo *)bo;
+   if (owner && (va < bo->va || va - bo->va >= bo->size ||
+       (uint64_t)dwords * 4 > bo->size - (va - bo->va))) {
+      cs->result = VK_ERROR_UNKNOWN; return;
+   }
+   if (owner && owner->parent) owner = owner->parent;
    simple_mtx_lock(&cs->ws->residency_mutex);
    list_for_each_entry(struct r4vk_radv_bo, candidate, &cs->ws->residency, residency) {
-      if ((!bo || bo == &candidate->base) && va >= candidate->base.va &&
+      if ((!owner || owner == candidate) && va >= candidate->base.va &&
           va - candidate->base.va < candidate->base.size &&
           (uint64_t)dwords * 4 <= candidate->base.size - (va - candidate->base.va)) {
          backed = true; break;

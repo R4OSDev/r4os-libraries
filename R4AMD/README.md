@@ -80,3 +80,9 @@ types, interface layouts and the R4AMD 0.1.5 runtime are unchanged. Backend
 properties revision 2 is distinct from the IMAGE_V1 library revision and
 retains the 64-byte R4AmdArchitecture prefix. Native driver profile/commands
 keep revision 1 and distinguish PM4 from legacy YUV by exact payload length.
+
+The 0.80.25 additive R4AmdDeviceFactsV3 type has a 256-byte wire layout: the
+unchanged 240-byte facts prefix plus timestamp clock in kHz (zero if unknown),
+native root-binding capacity and maximum backing bytes including SMEM padding.
+Backend-properties revision 3 is separate from every function-table revision.
+No existing type or runtime slot changes; the R4AMD artifact remains 0.1.5.

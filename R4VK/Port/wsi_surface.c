@@ -1,10 +1,7 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "r4vk_wsi.h"
-#include "r4vk_nvk_device.h"
+#include "r4vk_wsi_backend.h"
 #include "nvk_entrypoints.h"
-#include "nvk_format.h"
-#include "nvk_image.h"
-#include "nvk_physical_device.h"
 #include "vk_alloc.h"
 #include "vk_instance.h"
 #include <r4gfx.h>
@@ -49,12 +46,10 @@ nvk_DestroySurfaceKHR(VkInstance handle, VkSurfaceKHR surface,
    vk_free2(&instance->alloc, allocator, surface_from_handle(surface));
 }
 
-static VkImageUsageFlags format_usage(const struct nvk_physical_device *pdev, VkFormat format)
+static VkImageUsageFlags format_usage(struct vk_physical_device *pdev, VkFormat format)
 {
-   /* Swapchain imports use an uncompressed linear BO. Query the exact NIL
-    * modifier instead of advertising arbitrary optimal-tiled image features. */
-   VkFormatFeatureFlags2 f = nvk_get_image_format_features(pdev, format,
-      VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT, 0);
+   /* Advertise only features of the provider's actual imported layout. */
+   VkFormatFeatureFlags2 f = r4vk_wsi_backend(pdev)->features(pdev, format);
    VkImageUsageFlags usage = 0;
    if (f & VK_FORMAT_FEATURE_2_COLOR_ATTACHMENT_BIT)
       usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
@@ -146,12 +141,13 @@ uint32_t r4vk_surface_format(const R4WindowGraphicsConfig *config,
    return UINT32_MAX;
 }
 
-VkResult r4vk_surface_snapshot(struct nvk_physical_device *pdev, VkSurfaceKHR handle,
+VkResult r4vk_surface_snapshot(struct vk_physical_device *pdev, VkSurfaceKHR handle,
                          struct r4vk_surface_caps *caps)
 {
    *caps = (struct r4vk_surface_caps){0};
    struct r4vk_surface *surface = surface_from_handle(handle);
-   if (!surface || surface->instance != pdev->vk.instance) return VK_ERROR_SURFACE_LOST_KHR;
+   const struct r4vk_wsi_backend *ops = r4vk_wsi_backend(pdev);
+   if (!surface || !ops || surface->instance != ops->instance(pdev)) return VK_ERROR_SURFACE_LOST_KHR;
    R4WindowGraphicsReply reply;
    if (r4vk_window_query(surface->application, surface->identity.window_id,
                         &surface->identity, &reply) != R4OS_WINDOW_GRAPHICS_OK)
@@ -169,13 +165,14 @@ VkResult r4vk_surface_snapshot(struct nvk_physical_device *pdev, VkSurfaceKHR ha
        config->output.device_generation != config->backend.binding.device_generation)
       return VK_ERROR_SURFACE_LOST_KHR;
    caps->config = *config;
-   struct r4vk_nvk_architecture facts;
-   if (r4vk_nvk_query_pdev_architecture(pdev->nvkmd, &facts) != VK_SUCCESS)
+   R4GfxBackendBinding binding;
+   uint64_t generation;
+   if (ops->physical(pdev, &binding, &generation) != VK_SUCCESS)
       return VK_ERROR_SURFACE_LOST_KHR;
-   if (memcmp(&facts.binding, &config->backend.binding, sizeof(facts.binding)) ||
-       facts.memory_generation != config->backend.memory_generation ||
-       config->width > pdev->vk.properties.maxImageDimension2D ||
-       config->height > pdev->vk.properties.maxImageDimension2D)
+   if (memcmp(&binding, &config->backend.binding, sizeof(binding)) ||
+       generation != config->backend.memory_generation ||
+       config->width > pdev->properties.maxImageDimension2D ||
+       config->height > pdev->properties.maxImageDimension2D)
       return VK_SUCCESS; /* Another adapter/incarnation is not this surface's owner. */
 
    caps->usage = ~0u;
@@ -205,12 +202,12 @@ VKAPI_ATTR VkResult VKAPI_CALL
 nvk_GetPhysicalDeviceSurfaceSupportKHR(VkPhysicalDevice handle, uint32_t family,
    VkSurfaceKHR surface, VkBool32 *supported)
 {
-   VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
+   VK_FROM_HANDLE(vk_physical_device, pdev, handle);
    *supported = false;
    struct r4vk_surface_caps caps;
    VkResult result = r4vk_surface_snapshot(pdev, surface, &caps);
-   if (result == VK_SUCCESS && family < pdev->queue_family_count &&
-       (pdev->queue_families[family].queue_flags & VK_QUEUE_GRAPHICS_BIT))
+   if (result == VK_SUCCESS && r4vk_wsi_backend(pdev) &&
+       r4vk_wsi_backend(pdev)->can_present(pdev, family))
       *supported = caps.supported;
    return result;
 }
@@ -219,7 +216,7 @@ VKAPI_ATTR VkResult VKAPI_CALL
 nvk_GetPhysicalDeviceSurfaceCapabilitiesKHR(VkPhysicalDevice handle,
    VkSurfaceKHR surface, VkSurfaceCapabilitiesKHR *out)
 {
-   VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
+   VK_FROM_HANDLE(vk_physical_device, pdev, handle);
    struct r4vk_surface_caps caps;
    VkResult result = r4vk_surface_snapshot(pdev, surface, &caps);
    if (result != VK_SUCCESS) return result;
@@ -239,7 +236,7 @@ VKAPI_ATTR VkResult VKAPI_CALL
 nvk_GetPhysicalDeviceSurfaceFormatsKHR(VkPhysicalDevice handle,
    VkSurfaceKHR surface, uint32_t *count, VkSurfaceFormatKHR *out)
 {
-   VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
+   VK_FROM_HANDLE(vk_physical_device, pdev, handle);
    struct r4vk_surface_caps caps;
    VkResult result = r4vk_surface_snapshot(pdev, surface, &caps);
    if (result != VK_SUCCESS) return result;
@@ -255,7 +252,7 @@ VKAPI_ATTR VkResult VKAPI_CALL
 nvk_GetPhysicalDeviceSurfacePresentModesKHR(VkPhysicalDevice handle,
    VkSurfaceKHR surface, uint32_t *count, VkPresentModeKHR *out)
 {
-   VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
+   VK_FROM_HANDLE(vk_physical_device, pdev, handle);
    struct r4vk_surface_caps caps;
    VkResult result = r4vk_surface_snapshot(pdev, surface, &caps);
    if (result != VK_SUCCESS) return result;
@@ -282,7 +279,7 @@ nvk_GetPhysicalDeviceSurfaceFormats2KHR(VkPhysicalDevice handle,
 {
    /* One snapshot serves both enumeration and copy, including changing size
     * or visibility. Preserve the caller's sType/pNext on each output entry. */
-   VK_FROM_HANDLE(nvk_physical_device, pdev, handle);
+   VK_FROM_HANDLE(vk_physical_device, pdev, handle);
    struct r4vk_surface_caps caps;
    VkResult result = r4vk_surface_snapshot(pdev, info->surface, &caps);
    if (result != VK_SUCCESS) return result;

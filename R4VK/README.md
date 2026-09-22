@@ -1,28 +1,41 @@
 ﻿# R4VK native Vulkan provider
 
-R4VK 0.1.19 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+R4VK 0.1.20 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
 runtime. Provider-specific constructors, revalidation and destruction select
 only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
 queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
 `IMAGE_SCOPE=slim` installs the module in normal images. Missing backends
 produce no device; the firmware-framebuffer renderer remains available.
 
-AMD 0.80.24 adds isolated original RADV/NIR/ACO pipeline compilation,
-CPU-mappable internal shader/descriptor backing, bounded command recording,
-and exact allocator/compiler failure propagation. The SMP4 acceptance uses
-the exact production archives with real R4OS resource brokers: compute with
-descriptors and push constants, secondary commands, optimal GFX9 images/views,
-a graphics render pass and draw, image-to-buffer transfer, binary cross-queue
-dependencies, pipeline-cache export/import and recovery after injected errors.
-GPU execution receipts are explicitly modeled; no resulting pixels or computed
-values are claimed. Physical qualification belongs exclusively to 0.80.39.
+AMD 0.80.25 admits the software Vulkan 1.3 profile with actual RADV/NIR/ACO
+pipelines, dynamic rendering, synchronization2 and Mesa timeline semaphores
+over native binary points. Shared provider-specific WSI operations connect
+AMD window surfaces, FIFO/MAILBOX, fullscreen, resize and device loss to the
+existing WINSVC/Desktop transport. RADV images import the same canonical BO
+with checked linear GFX9 geometry; mutable UNORM/sRGB views and swapchain
+aliases retain the original backing without a private full-frame copy.
 
-AMD remains at API 1.0 until the 0.80.25 Vulkan 1.3/WSI acceptance. Limits are
-64 MB per backing allocation, 32 resident bindings per submission and bounded
-4 MB recording streams. Source-location debugging, EXT_shader_object and
-EXT_graphics_pipeline_library are not admitted. No conformance is claimed.
-See AMDRADV08023.txt/.json and AMDRADV08024.txt/.json in Docs/Drivers. The
-native generators additionally require glslang 15.2.0.
+Revision-3 AMD facts add the validated ATOM/SOC15 timestamp clock, 32 native
+root bindings and a 1 GB plus 4 KB backing limit. Unknown board clocks and
+legacy receipts retain API 1.0. Public Vulkan limits are 1 GB per allocation
+and buffer and 4096 allocations; small public memory objects share disjoint,
+padded extents of native root BOs. The SMP4 acceptance maps 4096 allocations
+simultaneously and binds/maps/touches a real 1 GB buffer. Driver host checks
+cover the corresponding page tables and retained SG metadata. The 2 GB VA
+aperture, 32 root bindings and bounded 4 MB recording streams remain finite.
+
+Captured public Picasso queries pass selected unchanged Khronos CTS feature,
+limit, format and sample-count predicates. Timestamp query/reset/copy and
+unavailable-result handling pass the public runtime probe. Targeted SMP4
+runs use real kernel BO/VA/queue/fence ownership and the exact production
+archives. Actual Desktop composition, output and capture consume AMD WSI
+images; a separate NVK run covers the shared WSI regression. GPU execution
+receipts remain modeled: no rendered pixels, computed values or physical
+GPU timestamps are inferred. Physical qualification is exclusively 0.80.39.
+Source-location debugging, EXT_shader_object and EXT_graphics_pipeline_library
+remain disabled; no official Vulkan conformance is claimed.
+See AMDRADV08023.txt/.json through AMDRADV08025.txt/.json in Docs/Drivers.
+Native generators additionally require glslang 15.2.0.
 
 Roadmap 0.79.38 accepts the software Vulkan 1.3 profile. Captured public
 queries for modeled GA106/AD106 backends pass selected unmodified Khronos
@@ -65,7 +78,7 @@ structure type, ICD platform number or R4L table revision is invented.
 Surfaces pin the process, Desktop and service generations. Queries take fresh
 WINSVC snapshots; resize/DPI changes update the exact extent, hiding preserves
 the surface, and service replacement requires explicit recreation. Supported
-formats are the intersection of published color contracts and actual NVK/NIL
+formats are the intersection of published color contracts and selected native provider's
 linear-image capabilities: B8G8R8A8 UNORM/sRGB, with supported opaque or
 electrically premultiplied alpha. Image counts, FIFO/MAILBOX and output binding
 come from Desktop; image usage and alpha flags must work for all enumerated

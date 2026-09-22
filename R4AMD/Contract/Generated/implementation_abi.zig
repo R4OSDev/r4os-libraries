@@ -487,6 +487,13 @@ pub const R4AmdNativeIb = extern struct {
     dwords: u32,
     binding_index: u32,
 };
+
+pub const R4AmdDeviceFactsV3 = extern struct {
+    facts: R4AmdDeviceFacts,
+    timestamp_clock_khz: u32,
+    native_binding_capacity: u32,
+    max_backing_bytes: u64,
+};
 pub const info_version: u32 = 1;
 pub const status_ok: i32 = 0;
 pub const profile_version: u32 = 1;

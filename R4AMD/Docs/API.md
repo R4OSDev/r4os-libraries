@@ -107,6 +107,7 @@ Typen
 - `R4AmdDeviceFacts`: 240 Byte, Alignment 8. IMAGE_V1 backend properties revision2. Retains the exact 64-byte revision1 architecture prefix, followed by bound native device facts. No Mesa structures, pointers, feature or Vulkan admission claims. Never manufacture facts for an absent backend.
 - `R4AmdNativeSubmit`: 32 Byte, Alignment 8. BACKEND_V1 native command revision1: 32-byte header then exactly ib_count R4AmdNativeIb records. Device facts revision2 flags bit0 admits PM4; 32+16*N bytes cannot collide with the legacy 504-byte YUV packet. The canonical submit retains every resident binding through actual completion. Each IB is inside a retained binding, VMID1. Provider preambles supply complete shader context; no embedded CPU pointers.
 - `R4AmdNativeIb`: 16 Byte, Alignment 8. One immutable indirect-buffer descriptor. Driver validates address, length, binding identity and generation before publishing any commands.
+- `R4AmdDeviceFactsV3`: 256 Byte, Alignment 8. IMAGE_V1 backend properties revision3, exactly256 bytes. Preserves the complete revision2 facts prefix and adds actual clock and memory-owner limits. The consuming runtime owns Vulkan profile admission.
 
 Besitzregeln
 ------------

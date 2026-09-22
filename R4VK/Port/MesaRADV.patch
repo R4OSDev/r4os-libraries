@@ -398,8 +398,13 @@
  #include <stdbool.h>
  #include <string.h>
  
-@@ -27,11 +29,14 @@
+@@ -25,13 +27,19 @@
+ #include "util/u_debug.h"
+ #include "radv_cs.h"
  #include "radv_entrypoints.h"
++#ifdef R4OS_VULKAN
++#include "r4vk_wsi_backend.h"
++#endif
  #include "radv_formats.h"
  #include "radv_physical_device.h"
 +#ifdef R4OS_VULKAN
@@ -414,7 +419,7 @@
  #include "winsys/amdgpu/radv_amdgpu_winsys_public.h"
  #endif
  #include "util/mesa-blake3.h"
-@@ -781,7 +786,7 @@
+@@ -781,7 +789,7 @@
  
  #define SET_ENTRYPOINT(app_layer, entrypoint) table.entrypoint = app_layer##_##entrypoint;
     if (!strcmp(instance->drirc.debug.app_layer, "metroexodus")) {
@@ -423,7 +428,7 @@
     } else if (!strcmp(instance->drirc.debug.app_layer, "rage2")) {
        SET_ENTRYPOINT(rage2, CmdBeginRenderPass);
     } else if (!strcmp(instance->drirc.debug.app_layer, "quanticdream")) {
-@@ -827,7 +832,7 @@
+@@ -827,7 +835,7 @@
     if (radv_bvh_dumping_enabled(instance) && radv_enable_rt(pdev))
        add_entrypoints(&b, &rra_device_entrypoints, RADV_RRA_DISPATCH_TABLE);
  
@@ -432,17 +437,19 @@
     if (instance->vk.trace_mode & VK_TRACE_MODE_RMV)
        add_entrypoints(&b, &rmv_device_entrypoints, RADV_RMV_DISPATCH_TABLE);
  #endif
-@@ -839,7 +844,9 @@
+@@ -839,7 +847,11 @@
        add_entrypoints(&b, &ctx_roll_device_entrypoints, RADV_CTX_ROLL_DISPATCH_TABLE);
  
     add_entrypoints(&b, &radv_device_entrypoints, RADV_DISPATCH_TABLE_COUNT);
 +#ifndef R4OS_VULKAN
     add_entrypoints(&b, &wsi_device_entrypoints, RADV_DISPATCH_TABLE_COUNT);
++#else
++   add_entrypoints(&b, &r4vk_wsi_device_entrypoints, RADV_DISPATCH_TABLE_COUNT);
 +#endif
     add_entrypoints(&b, &vk_common_device_entrypoints, RADV_DISPATCH_TABLE_COUNT);
  }
  
-@@ -864,16 +871,19 @@
+@@ -864,16 +876,19 @@
     if (instance->vk.trace_mode & (RADV_TRACE_MODE_RRA | RADV_TRACE_MODE_GAMMA))
        device->rra_trace.triggered = true;
  
@@ -462,7 +469,7 @@
     if (instance->vk.trace_mode & RADV_TRACE_MODE_CTX_ROLLS) {
        char filename[2048];
        time_t t = time(NULL);
-@@ -889,6 +899,7 @@
+@@ -889,6 +904,7 @@
  
        simple_mtx_unlock(&device->ctx_roll_mtx);
     }
@@ -470,7 +477,7 @@
  
     return result;
  }
-@@ -925,6 +936,9 @@
+@@ -925,6 +941,9 @@
     radv_emit_graphics(device, cs);
  
     device->ws->cs_pad(cs->b, 0);
@@ -480,7 +487,7 @@
  
     const uint32_t gfx_init_bo_flags = RADEON_FLAG_CPU_ACCESS | RADEON_FLAG_NO_INTERPROCESS_SHARING |
                                        RADEON_FLAG_READ_ONLY | RADEON_FLAG_GTT_WC | RADEON_FLAG_GL2_BYPASS;
-@@ -1303,7 +1317,9 @@
+@@ -1303,7 +1322,9 @@
  static VkResult
  radv_create_winsys(struct radv_device *device)
  {
@@ -505,18 +512,46 @@
  
 --- a/src/amd/vulkan/radv_image.c
 +++ b/src/amd/vulkan/radv_image.c
-@@ -1777,7 +1777,11 @@
+@@ -9,6 +9,9 @@
+  */
+ 
+ #include "radv_image.h"
++#ifdef R4OS_VULKAN
++#include "r4vk_wsi.h"
++#endif
+ #include "tools/radv_debug.h"
+ #include "tools/radv_rmv.h"
+ #include "util/u_atomic.h"
+@@ -1777,7 +1780,11 @@
     const struct radv_physical_device *pdev = radv_device_physical(device);
  
     if (wsi_common_is_swapchain_image(pCreateInfo))
 +#ifdef R4OS_VULKAN
-+      return VK_ERROR_FEATURE_NOT_PRESENT;
++      return r4vk_create_swapchain_alias(_device, pCreateInfo, pAllocator, pImage);
 +#else
        return wsi_common_create_swapchain_image(pdev->vk.wsi_device, pCreateInfo, pImage);
 +#endif
  
     const struct wsi_image_create_info *wsi_info = vk_find_struct_const(pCreateInfo->pNext, WSI_IMAGE_CREATE_INFO_MESA);
     bool scanout = wsi_info && wsi_info->scanout;
+@@ -1840,6 +1847,17 @@
+       if (status)
+          *status->pResult = VK_SUCCESS;
+ 
++#ifdef R4OS_VULKAN
++      if (!mem) {
++         const VkBindImageMemorySwapchainInfoKHR *alias =
++            vk_find_struct_const(pBindInfos[i].pNext, BIND_IMAGE_MEMORY_SWAPCHAIN_INFO_KHR);
++         if (!alias || offset || !(mem = radv_device_memory_from_handle(
++               r4vk_swapchain_memory(_device, alias->swapchain, alias->imageIndex)))) {
++            if (status) *status->pResult = VK_ERROR_INITIALIZATION_FAILED;
++            return VK_ERROR_INITIALIZATION_FAILED;
++         }
++      }
++#endif
+       /* Ignore this struct on Android, we cannot access swapchain structures there. */
+ #ifdef RADV_USE_WSI_PLATFORM
+       if (!mem) {
 --- a/src/amd/vulkan/radv_instance.c
 +++ b/src/amd/vulkan/radv_instance.c
 @@ -187,6 +187,14 @@
@@ -576,6 +611,18 @@
  }
 +
 +#endif
+--- a/src/amd/vulkan/radv_instance.h
++++ b/src/amd/vulkan/radv_instance.h
+@@ -166,6 +166,9 @@
+ 
+ struct radv_instance {
+    struct vk_instance vk;
++#ifdef R4OS_VULKAN
++   struct vk_instance *native_parent;
++#endif
+ 
+    VkAllocationCallbacks alloc;
+ 
 --- a/src/amd/vulkan/radv_physical_device.c
 +++ b/src/amd/vulkan/radv_physical_device.c
 @@ -8,7 +8,9 @@
@@ -588,7 +635,16 @@
  #include "util/os_file.h"
  #include "util/os_misc.h"
  #include "vulkan/vulkan_core.h"
-@@ -34,7 +36,7 @@
+@@ -28,13 +30,16 @@
+ #include "radv_android.h"
+ #include "radv_device.h"
+ #include "radv_entrypoints.h"
++#ifdef R4OS_VULKAN
++#include "r4vk_wsi_backend.h"
++#endif
+ #include "radv_instance.h"
+ #include "radv_physical_device.h"
+ #include "radv_pipeline_rt.h"
  #include "radv_video.h"
  #include "radv_wsi.h"
  
@@ -597,7 +653,7 @@
  typedef void *drmDevicePtr;
  #else
  #include "drm-uapi/amdgpu_drm.h"
-@@ -47,7 +49,7 @@
+@@ -47,7 +52,7 @@
  #include <llvm-c/TargetMachine.h>
  #endif
  
@@ -606,7 +662,7 @@
  #define RADV_SUPPORT_CALIBRATED_TIMESTAMPS 0
  #else
  #define RADV_SUPPORT_CALIBRATED_TIMESTAMPS 1
-@@ -333,7 +335,16 @@
+@@ -333,7 +338,16 @@
     memset(uuid, 0, VK_UUID_SIZE);
     _mesa_blake3_init(&ctx);
  
@@ -624,7 +680,7 @@
     {
        unsigned size = strlen(RADV_BUILD_ID_OVERRIDE) / 2;
        char *data = alloca(size);
-@@ -469,6 +480,7 @@
+@@ -469,6 +483,7 @@
     pdev->memory_properties.memoryHeapCount = 0;
     pdev->heaps = 0;
  
@@ -632,7 +688,7 @@
     if (!pdev->info.has_dedicated_vram) {
        const uint64_t total_size = gtt_size + visible_vram_size;
  
-@@ -494,6 +506,7 @@
+@@ -494,6 +509,7 @@
           visible_vram_size = carveout_size;
        }
     }
@@ -640,7 +696,7 @@
  
     /* Only get a VRAM heap if it is significant, not if it is a 16 MiB
      * remainder above visible VRAM. */
-@@ -904,7 +917,7 @@
+@@ -904,7 +920,7 @@
        .EXT_nested_command_buffer = true,
        .EXT_non_seamless_cube_map = true,
        .EXT_pci_bus_info = true,
@@ -649,7 +705,7 @@
        .EXT_physical_device_drm = true,
  #endif
        .EXT_pipeline_creation_cache_control = true,
-@@ -2135,7 +2148,7 @@
+@@ -2135,7 +2151,7 @@
            */
           pdev->info.family != CHIP_NAVI21 && pdev->info.family != CHIP_NAVI22 && pdev->info.family != CHIP_VANGOGH,
  
@@ -658,7 +714,7 @@
        /* VK_EXT_pci_bus_info */
        .pciDomain = pdev->bus_info.domain,
        .pciBus = pdev->bus_info.bus,
-@@ -2473,7 +2486,7 @@
+@@ -2473,7 +2489,7 @@
     p->identicalMemoryTypeRequirements = false;
  
     /* VK_EXT_physical_device_drm */
@@ -667,7 +723,7 @@
     if (pdev->available_nodes & (1 << DRM_NODE_PRIMARY)) {
        p->drmHasPrimary = true;
        p->drmPrimaryMajor = (int64_t)major(pdev->primary_devid);
-@@ -2518,7 +2531,7 @@
+@@ -2518,7 +2534,7 @@
  radv_physical_device_try_create(struct radv_instance *instance, drmDevicePtr drm_device,
                                  struct radv_physical_device **pdev_out)
  {
@@ -676,7 +732,7 @@
     assert(drm_device == NULL);
     return VK_ERROR_INCOMPATIBLE_DRIVER;
  #else
-@@ -2875,10 +2888,220 @@
+@@ -2875,10 +2891,221 @@
  #endif
  }
  
@@ -693,6 +749,7 @@
 +   if (!pdev) return VK_ERROR_OUT_OF_HOST_MEMORY;
 +   struct vk_physical_device_dispatch_table dispatch;
 +   vk_physical_device_dispatch_table_from_entrypoints(&dispatch, &radv_physical_device_entrypoints, true);
++   vk_physical_device_dispatch_table_from_entrypoints(&dispatch, &r4vk_wsi_physical_entrypoints, false);
 +   VkResult result = vk_physical_device_init(&pdev->vk, &instance->vk, NULL, NULL, NULL, &dispatch);
 +   if (result != VK_SUCCESS) { vk_free(&instance->vk.alloc, pdev); return result; }
 +   pdev->native_facts = *facts;
@@ -898,7 +955,7 @@
     bool supported_device = false;
  
     if (!(device->available_nodes & (1 << DRM_NODE_RENDER)))
-@@ -2907,19 +3130,23 @@
+@@ -2907,19 +3134,23 @@
     struct radv_physical_device *pdev = container_of(vk_device, struct radv_physical_device, vk);
     const struct radv_instance *instance = radv_physical_device_instance(pdev);
  
@@ -923,7 +980,7 @@
     if (pdev->drm_device)
        ac_drm_device_deinitialize(pdev->drm_device);
  #endif
-@@ -2984,9 +3211,9 @@
+@@ -2984,9 +3215,9 @@
           VkQueueFlags gfx_flags =
              VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT | VK_QUEUE_SPARSE_BINDING_BIT;
           *pQueueFamilyProperties[idx] = (VkQueueFamilyProperties){
@@ -935,7 +992,7 @@
              .minImageTransferGranularity = (VkExtent3D){1, 1, 1},
           };
           idx++;
-@@ -2997,9 +3224,9 @@
+@@ -2997,9 +3228,9 @@
        VkQueueFlags compute_flags = VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT | VK_QUEUE_SPARSE_BINDING_BIT;
        if (*pCount > idx) {
           *pQueueFamilyProperties[idx] = (VkQueueFamilyProperties){
@@ -947,7 +1004,7 @@
              .minImageTransferGranularity = (VkExtent3D){1, 1, 1},
           };
           idx++;
-@@ -3024,7 +3251,7 @@
+@@ -3024,7 +3255,7 @@
              .queueFlags = VK_QUEUE_TRANSFER_BIT | VK_QUEUE_SPARSE_BINDING_BIT |
                            radv_queue_family_protected_flag(pdev, RADV_QUEUE_TRANSFER),
              .queueCount = pdev->info.ip[AMD_IP_SDMA].num_queues,
@@ -956,7 +1013,7 @@
              .minImageTransferGranularity = (VkExtent3D){1, 1, 1},
           };
           idx++;
-@@ -3149,7 +3376,7 @@
+@@ -3149,7 +3380,7 @@
     }
  }
  

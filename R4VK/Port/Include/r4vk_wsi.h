@@ -5,7 +5,7 @@
 #include "../../Bindings/C/r4vk_wsi.h"
 #include <r4os/r4draw.h>
 struct vk_instance;
-struct nvk_physical_device;
+struct vk_physical_device;
 struct r4vk_surface {
    struct vk_instance *instance;
    const R4XStartContext *application;
@@ -20,7 +20,7 @@ struct r4vk_surface_caps {
    VkCompositeAlphaFlagsKHR common_alpha;
    bool supported;
 };
-VkResult r4vk_surface_snapshot(struct nvk_physical_device *pdev,
+VkResult r4vk_surface_snapshot(struct vk_physical_device *pdev,
    VkSurfaceKHR surface, struct r4vk_surface_caps *caps);
 uint32_t r4vk_surface_format(const R4WindowGraphicsConfig *config,
    VkFormat format, VkColorSpaceKHR space, VkCompositeAlphaFlagBitsKHR alpha);

@@ -6,7 +6,11 @@ void r4vk_radv_filter_physical(struct radv_physical_device *pdev)
    struct vk_device_extension_table *e = &pdev->vk.supported_extensions;
    struct vk_features *f = &pdev->vk.supported_features;
    struct vk_properties *p = &pdev->vk.properties;
-   e->KHR_swapchain = e->KHR_swapchain_mutable_format = false;
+   e->KHR_swapchain = e->KHR_swapchain_mutable_format = true;
+   /* Mesa's timeline implementation is installed over our native binary
+    * points. Its availability is independent of Linux syncobj support. */
+   e->KHR_timeline_semaphore = true;
+   f->timelineSemaphore = true;
    e->KHR_external_memory_fd = e->KHR_external_semaphore_fd = e->KHR_external_fence_fd = false;
    e->EXT_external_memory_dma_buf = e->EXT_external_memory_host = e->EXT_image_drm_format_modifier = false;
    e->EXT_physical_device_drm = e->EXT_queue_family_foreign = false;
@@ -30,12 +34,18 @@ void r4vk_radv_filter_physical(struct radv_physical_device *pdev)
    f->swapchainMaintenance1 = f->presentId = f->presentWait = f->presentId2 = f->presentWait2 = false;
    f->memoryMapPlaced = f->memoryMapRangePlaced = f->memoryUnmapReserve = false;
    f->globalPriorityQuery = false;
-   p->maxMemoryAllocationCount = 32;
-   p->maxMemoryAllocationSize = pdev->native_facts.facts.max_allocation_bytes;
-   p->maxBufferSize = pdev->native_facts.facts.max_allocation_bytes;
-   p->timestampComputeAndGraphics = false;
-   p->timestampPeriod = 0.0f;
+   p->maxMemoryAllocationCount = 4096;
+   /* Public memory objects share disjoint padded extents of canonical BOs.
+    * The driver limit includes the real GFX9 SMEM page, Vulkan's size does not. */
+   p->maxMemoryAllocationSize = pdev->native_facts.max_backing_bytes - 4096;
+   p->maxBufferSize = p->maxMemoryAllocationSize;
+   if (!pdev->native_facts.timestamp_clock_khz) {
+      p->timestampComputeAndGraphics = false;
+      p->timestampPeriod = 0.0f;
+   }
    p->conformanceVersion = (VkConformanceVersion){0};
-   /* API 1.3/WSI admission has its own roadmap acceptance in 0.80.25. */
-   p->apiVersion = VK_API_VERSION_1_0;
+   /* A legacy receipt or missing board clock retains basic native admission.
+    * Conformance remains undeclared; this is the implemented API profile. */
+   p->apiVersion = pdev->native_facts.timestamp_clock_khz &&
+      p->maxMemoryAllocationSize >= UINT64_C(1024)*1024*1024 ? VK_API_VERSION_1_3 : VK_API_VERSION_1_0;
 }

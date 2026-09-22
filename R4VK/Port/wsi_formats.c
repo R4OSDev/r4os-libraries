@@ -1,5 +1,5 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
-#include "r4vk_nvk_wsi_image.h"
+#include "r4vk_wsi_image.h"
 #include "vk_format_info.h"
 
 VkResult r4vk_wsi_validate_formats(VkFormat base, VkSwapchainCreateFlagsKHR flags,

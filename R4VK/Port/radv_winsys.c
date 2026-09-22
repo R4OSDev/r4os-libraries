@@ -6,14 +6,14 @@ void r4vk_radv_ws_unref(struct r4vk_radv_ws *ws)
 {
    if (!p_atomic_dec_zero(&ws->references)) return;
    assert(list_is_empty(&ws->residency) && !ws->submission_tail);
-   simple_mtx_destroy(&ws->submit_mutex); simple_mtx_destroy(&ws->residency_mutex); free(ws);
+   simple_mtx_destroy(&ws->slab_mutex); simple_mtx_destroy(&ws->submit_mutex); simple_mtx_destroy(&ws->residency_mutex); free(ws);
 }
 VkResult r4vk_radv_validate(struct r4vk_radv_ws *ws)
 {
    if (r4vk_radv_is_lost(ws)) return VK_ERROR_DEVICE_LOST;
    struct r4vk_radv_architecture current;
    if (r4vk_radv_query_architecture(&ws->draw, &ws->devices, &ws->facts.backend, &current) != VK_SUCCESS ||
-       memcmp(&current.facts, &ws->facts.facts, sizeof(current.facts))) return r4vk_radv_lost(ws);
+       !r4vk_radv_same_facts(&current, &ws->facts)) return r4vk_radv_lost(ws);
    return VK_SUCCESS;
 }
 static void destroy(struct radeon_winsys *base)
@@ -72,7 +72,7 @@ VkResult r4vk_radv_create_winsys(const R4Draw *draw, const R4Dev *devices,
    struct r4vk_radv_ws *ws = calloc(1, sizeof(*ws));
    if (!ws) return VK_ERROR_OUT_OF_HOST_MEMORY;
    ws->references = 1; ws->draw = *draw; ws->devices = *devices; ws->facts = *facts;
-   list_inithead(&ws->residency); simple_mtx_init(&ws->residency_mutex, mtx_plain); simple_mtx_init(&ws->submit_mutex, mtx_plain);
+   list_inithead(&ws->residency); simple_mtx_init(&ws->residency_mutex, mtx_plain); simple_mtx_init(&ws->submit_mutex, mtx_plain); simple_mtx_init(&ws->slab_mutex, mtx_plain);
    ws->base.destroy = destroy; ws->base.query_value = query; ws->base.read_registers = registers; ws->base.query_gpuvm_fault = fault;
    ws->base.get_fd = fd; ws->base.get_sync_provider = sync_provider; ws->base.reserve_vmid = reserve; ws->base.unreserve_vmid = unreserve;
    ws->base.dump_bo_ranges = ws->base.dump_bo_log = dump; ws->base.bo_wait_for_idle = idle;

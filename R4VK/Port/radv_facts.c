@@ -37,12 +37,20 @@ VkResult r4vk_radv_query_architecture(const R4Draw *draw, const R4Dev *devices,
    if (properties.version != 1 || properties.size < sizeof(properties) ||
        properties.interface_id_lo != R4AMD_IMAGE_V1_INTERFACE_ID_LO ||
        properties.interface_id_hi != R4AMD_IMAGE_V1_INTERFACE_ID_HI ||
-       properties.revision != 2 || properties.data_bytes != sizeof(R4AmdDeviceFacts))
+       !((properties.revision == 2 && properties.data_bytes == sizeof(R4AmdDeviceFacts)) ||
+         (properties.revision == 3 && properties.data_bytes == sizeof(R4AmdDeviceFactsV3))))
       return VK_ERROR_INCOMPATIBLE_DRIVER;
    for (size_t i = properties.data_bytes; i < sizeof(properties.data); i++)
       if (properties.data[i]) return VK_ERROR_INITIALIZATION_FAILED;
    R4AmdDeviceFacts f;
    memcpy(&f, properties.data, sizeof(f));
+   R4AmdDeviceFactsV3 extended = {0};
+   if (properties.revision == 3) {
+      memcpy(&extended, properties.data, sizeof(extended));
+      if ((extended.timestamp_clock_khz && (extended.timestamp_clock_khz < 6000 || extended.timestamp_clock_khz > 25000)) ||
+          extended.native_binding_capacity != 32 || extended.max_backing_bytes != UINT64_C(1024)*1024*1024 + 4096)
+         return VK_ERROR_INITIALIZATION_FAILED;
+   }
    const R4AmdArchitecture *a = &f.architecture;
    if (a->memory_generation != backend->memory_generation) return VK_ERROR_DEVICE_LOST;
    if (a->version != 1 || a->size != sizeof(*a) || a->vendor_id != protocol.vendor_id ||
@@ -67,7 +75,10 @@ VkResult r4vk_radv_query_architecture(const R4Draw *draw, const R4Dev *devices,
    const uint64_t system = (memory.total_physical_bytes - memory.app_system_reserve_bytes) & ~UINT64_C(4095);
    if (!system || (system >> 10) > UINT32_MAX || (f.native_budget >> 10) > UINT32_MAX)
       return VK_ERROR_INITIALIZATION_FAILED;
-   struct r4vk_radv_architecture value = { .backend = *backend, .facts = f, .system_heap_bytes = system };
+   struct r4vk_radv_architecture value = { .backend = *backend, .facts = f, .system_heap_bytes = system,
+      .timestamp_clock_khz = extended.timestamp_clock_khz,
+      .native_binding_capacity = extended.native_binding_capacity ? extended.native_binding_capacity : 32,
+      .max_backing_bytes = extended.max_backing_bytes ? extended.max_backing_bytes : f.max_allocation_bytes };
    struct radeon_info *info = &value.info;
    /* These declaration structs feed Mesa's pure hardware helpers. They are
     * never a libdrm device, ioctl response or published kernel ABI. */
@@ -113,7 +124,7 @@ VkResult r4vk_radv_query_architecture(const R4Draw *draw, const R4Dev *devices,
    info->has_sparse = false; info->has_sparse_image_3d = false;
    info->has_sparse_image_standard_3d = false; info->has_sparse_unaligned_mip_size = false; info->has_kernelq_reg_shadowing = false;
    info->has_l2_uncached = false; info->kernel_has_modifiers = false;
-   info->clock_crystal_freq = 0; /* Timestamp admission requires its own measured clock. */
+   info->clock_crystal_freq = value.timestamp_clock_khz;
    *out = value;
    return VK_SUCCESS;
 }

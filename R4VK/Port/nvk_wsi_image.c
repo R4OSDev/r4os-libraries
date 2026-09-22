@@ -108,12 +108,12 @@ VkResult r4vk_nvk_import_wsi_image(VkDevice device,
                                   VkImageCreateFlags flags,
                                   const VkImageFormatListCreateInfo *formats,
                                   const VkAllocationCallbacks *allocator,
-                                  struct r4vk_nvk_wsi_image *out)
+                                  struct r4vk_wsi_image *out)
 {
    if (!device || !out) return VK_ERROR_INITIALIZATION_FAILED;
    VK_FROM_HANDLE(nvk_device, dev, device);
    struct nvk_physical_device *pdev = nvk_device_physical_mut(dev);
-   struct r4vk_nvk_wsi_image candidate = {0};
+   struct r4vk_wsi_image candidate = {0};
    struct nvkmd_mem *backing;
    VkResult result = r4vk_nvk_import_buffer(dev->nvkmd, &dev->vk.base,
       source, &backing, &candidate.descriptor);
@@ -198,10 +198,10 @@ fail_backing:
 
 void r4vk_nvk_finish_wsi_image(VkDevice device,
                               const VkAllocationCallbacks *allocator,
-                              struct r4vk_nvk_wsi_image *image)
+                              struct r4vk_wsi_image *image)
 {
    if (!image) return;
    nvk_DestroyImage(device, image->image, allocator);
    nvk_FreeMemory(device, image->memory, allocator);
-   *image = (struct r4vk_nvk_wsi_image){0};
+   *image = (struct r4vk_wsi_image){0};
 }

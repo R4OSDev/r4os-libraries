@@ -5784,6 +5784,58 @@
         }
       ],
       "description": "One immutable indirect-buffer descriptor. Driver validates address, length, binding identity and generation before publishing any commands."
+    },
+    {
+      "name": "R4AmdDeviceFactsV3",
+      "size": 256,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "facts",
+          "offset": 0,
+          "type": {
+            "name": "R4AmdDeviceFacts",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Unchanged 240-byte IMAGE_V1 properties revision2 prefix."
+        },
+        {
+          "name": "timestamp_clock_khz",
+          "offset": 240,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "GPU timestamp scale from validated ATOM SMU reference clock and chip divider, in kHz. Zero means unavailable; no CPU-clock substitution."
+        },
+        {
+          "name": "native_binding_capacity",
+          "offset": 244,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Maximum simultaneous canonical native bindings in this driver incarnation. Not a Vulkan allocation count."
+        },
+        {
+          "name": "max_backing_bytes",
+          "offset": 248,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Maximum page-aligned native byte backing and VA extent, including any caller-required padding. Physical budgets still apply."
+        }
+      ],
+      "description": "IMAGE_V1 backend properties revision3, exactly256 bytes. Preserves the complete revision2 facts prefix and adds actual clock and memory-owner limits. The consuming runtime owns Vulkan profile admission."
     }
   ],
   "constants": [

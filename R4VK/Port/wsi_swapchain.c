@@ -1,14 +1,12 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "r4vk_wsi.h"
+#include "r4vk_wsi_backend.h"
+#include "r4vk_provider.h"
+#include "util/log.h"
+#include "vk_queue.h"
+#include "vk_image.h"
 #include "r4vk_state.h"
-#include "r4vk_nvk_physical.h"
-#include "r4vk_nvk_submit.h"
-#include "r4vk_nvk_wsi_image.h"
-#include "nvk_device.h"
 #include "nvk_entrypoints.h"
-#include "nvk_physical_device.h"
-#include "nvk_queue.h"
-#include "nvk_image.h"
 #include "vk_common_entrypoints.h"
 #include "vk_fence.h"
 #include "vk_semaphore.h"
@@ -36,7 +34,8 @@ struct native_chain {
    R4WindowGraphicsConfig config;
    uint32_t count, attached, acquired;
    uint64_t tokens[3];
-   struct r4vk_nvk_point *points[3];
+   void *points[3];
+   const struct r4vk_wsi_backend *ops;
    R4Draw draw;
    R4GfxBufferReference sources[3];
    VkResult error;
@@ -46,10 +45,10 @@ struct native_chain {
  * The independent record retains only native point pins and broker identity. */
 struct r4vk_swapchain {
    struct vk_object_base base;
-   struct nvk_device *device;
+   struct vk_device *device;
    struct native_chain *record;
    uint32_t count;
-   struct r4vk_nvk_wsi_image images[3];
+   struct r4vk_wsi_image images[3];
    VkImageFormatListCreateInfo format_list;
    VkFormat view_formats[]; /* owned copy; application arrays may expire */
 };
@@ -124,8 +123,8 @@ static void wake_worker(struct wsi_state *s)
 static void release_point(struct native_chain *chain, uint32_t slot)
 {
    if (!chain->points[slot]) return;
-   r4vk_nvk_point_unexport(chain->points[slot]);
-   r4vk_nvk_point_unref(chain->points[slot]);
+   chain->ops->unpin(chain->points[slot]);
+   chain->ops->unref(chain->points[slot]);
    chain->points[slot] = NULL;
 }
 static VkResult vk_result(int32_t status)
@@ -315,8 +314,8 @@ VkResult r4vk_create_swapchain_alias(VkDevice device, const VkImageCreateInfo *i
 {
    const VkImageSwapchainCreateInfoKHR *alias = vk_find_struct_const(info->pNext, IMAGE_SWAPCHAIN_CREATE_INFO_KHR);
    struct r4vk_swapchain *sc = alias ? swapchain(alias->swapchain) : NULL;
-   if (!sc || sc->device != nvk_device_from_handle(device)) return VK_ERROR_INITIALIZATION_FAILED;
-   const struct vk_image *original = &nvk_image_from_handle(sc->images[0].image)->vk;
+   if (!sc || sc->device != vk_device_from_handle(device)) return VK_ERROR_INITIALIZATION_FAILED;
+   const struct vk_image *original = sc->record->ops->image(sc->images[0].image);
    if (info->imageType != VK_IMAGE_TYPE_2D || info->format != original->format ||
        info->extent.width != original->extent.width || info->extent.height != original->extent.height ||
        info->extent.depth != 1 || info->mipLevels != 1 || info->arrayLayers != 1 ||
@@ -340,13 +339,13 @@ VkResult r4vk_create_swapchain_alias(VkDevice device, const VkImageCreateInfo *i
    native.tiling = VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT;
    /* The alias owns an ordinary VkImage. Binding selects an existing BO;
     * neither allocation nor publication creates another native image. */
-   return nvk_CreateImage(device, &native, allocator, out);
+   return sc->record->ops->create_image(device, &native, allocator, out);
 }
 
 VkDeviceMemory r4vk_swapchain_memory(VkDevice device, VkSwapchainKHR handle, uint32_t index)
 {
    struct r4vk_swapchain *sc = swapchain(handle);
-   return sc && sc->device == nvk_device_from_handle(device) && index < sc->count ?
+   return sc && sc->device == vk_device_from_handle(device) && index < sc->count ?
       sc->images[index].memory : VK_NULL_HANDLE;
 }
 static VkResult allocation_result(int32_t rc)
@@ -397,7 +396,9 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
                       const VkAllocationCallbacks *allocator, VkSwapchainKHR *out)
 {
    *out = VK_NULL_HANDLE;
-   VK_FROM_HANDLE(nvk_device, dev, device);
+   VK_FROM_HANDLE(vk_device, dev, device);
+   const struct r4vk_wsi_backend *ops = r4vk_wsi_backend(dev->physical);
+   if (!ops) return VK_ERROR_FEATURE_NOT_PRESENT;
    struct r4vk_surface *surface = (struct r4vk_surface *)(uintptr_t)info->surface;
    struct wsi_state *s = state();
    if (!s) return VK_ERROR_OUT_OF_HOST_MEMORY;
@@ -417,10 +418,10 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
    } else if (w->active) {
       result = VK_ERROR_NATIVE_WINDOW_IN_USE_KHR; goto fail_window;
    }
-   result = r4vk_nvk_check_device(dev->nvkmd);
+   result = ops->check(dev);
    if (result != VK_SUCCESS) goto fail_window;
    struct r4vk_surface_caps caps;
-   result = r4vk_surface_snapshot(nvk_device_physical_mut(dev), info->surface, &caps);
+   result = r4vk_surface_snapshot(dev->physical, info->surface, &caps);
    if (result != VK_SUCCESS) goto fail_window;
    if (!caps.supported) { result = VK_ERROR_SURFACE_LOST_KHR; goto fail_window; }
    bool advertised = false;
@@ -438,7 +439,7 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
    if (result != VK_SUCCESS) goto fail_window;
    const VkImageCreateFlags image_flags = info->flags & VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR ?
       VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT | VK_IMAGE_CREATE_EXTENDED_USAGE_BIT : 0;
-   if (image_flags && !dev->vk.enabled_extensions.KHR_swapchain_mutable_format) {
+   if (image_flags && !dev->enabled_extensions.KHR_swapchain_mutable_format) {
       result = VK_ERROR_EXTENSION_NOT_PRESENT; goto fail_window;
    }
    if (info->imageArrayLayers != 1 || !info->imageUsage ||
@@ -465,22 +466,22 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
    const uint32_t format_count = formats ? formats->viewFormatCount : 0;
    const uint64_t bytes = sizeof(struct r4vk_swapchain) + (uint64_t)format_count * sizeof(VkFormat);
    if (bytes > SIZE_MAX) { result = VK_ERROR_OUT_OF_HOST_MEMORY; goto fail_window; }
-   struct r4vk_swapchain *sc = vk_zalloc2(&dev->vk.alloc, allocator,
+   struct r4vk_swapchain *sc = vk_zalloc2(&dev->alloc, allocator,
       (size_t)bytes, 8, VK_SYSTEM_ALLOCATION_SCOPE_OBJECT);
    if (!sc) { result = VK_ERROR_OUT_OF_HOST_MEMORY; goto fail_window; }
    struct native_chain *chain = calloc(1, sizeof(*chain));
    if (!chain) {
-      vk_free2(&dev->vk.alloc, allocator, sc);
+      vk_free2(&dev->alloc, allocator, sc);
       result = VK_ERROR_OUT_OF_HOST_MEMORY; goto fail_window;
    }
-   vk_object_base_init(&dev->vk, &sc->base, VK_OBJECT_TYPE_SWAPCHAIN_KHR);
+   vk_object_base_init(dev, &sc->base, VK_OBJECT_TYPE_SWAPCHAIN_KHR);
    sc->device = dev; sc->record = chain; sc->count = info->minImageCount;
    if (format_count) memcpy(sc->view_formats, formats->pViewFormats, format_count * sizeof(VkFormat));
    sc->format_list = (VkImageFormatListCreateInfo) {
       .sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO,
       .viewFormatCount = format_count, .pViewFormats = sc->view_formats,
    };
-   chain->window = w; chain->config = caps.config; chain->count = sc->count; chain->live = true;
+   chain->ops = ops; chain->window = w; chain->config = caps.config; chain->count = sc->count; chain->live = true;
    chain->next = w->chains; w->chains = chain; /* Takes window_get reference. */
    R4Dev devices;
    if (!r4vk_get_graphics_tables(&chain->draw, &devices)) {
@@ -495,7 +496,7 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
    for (uint32_t i = 0; i < sc->count; i++) {
       result = source_image(chain, caps.config.formats[format].format, &chain->sources[i]);
       if (result != VK_SUCCESS) goto fail_chain;
-      result = r4vk_nvk_import_wsi_image(device, &chain->sources[i].reference,
+      result = ops->import(device, &chain->sources[i].reference,
          info->imageFormat, info->imageUsage, image_flags,
          format_count ? &sc->format_list : NULL, allocator, &sc->images[i]);
       if (result != VK_SUCCESS) goto fail_chain;
@@ -515,9 +516,9 @@ nvk_CreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info,
    return VK_SUCCESS;
 fail_chain:
    fail(chain, result); chain->live = false;
-   for (uint32_t i = 0; i < sc->count; i++) r4vk_nvk_finish_wsi_image(device, allocator, &sc->images[i]);
+   for (uint32_t i = 0; i < sc->count; i++) chain->ops->finish(device, allocator, &sc->images[i]);
    vk_object_base_finish(&sc->base);
-   vk_free2(&dev->vk.alloc, allocator, sc);
+   vk_free2(&dev->alloc, allocator, sc);
    unlock(&w->mutex);
    wake_worker(s);
    return result;
@@ -536,14 +537,14 @@ nvk_DestroySwapchainKHR(VkDevice device, VkSwapchainKHR handle,
    struct native_chain *chain = sc->record;
    struct native_window *w = chain->window;
    struct wsi_state *s = state();
-   assert(s && sc->device == nvk_device_from_handle(device));
+   assert(s && sc->device == vk_device_from_handle(device));
    lock(&w->mutex);
    chain->live = false; chain->closing = true;
    if (w->active == chain) w->active = NULL;
    unlock(&w->mutex);
-   for (uint32_t i = 0; i < sc->count; i++) r4vk_nvk_finish_wsi_image(device, allocator, &sc->images[i]);
+   for (uint32_t i = 0; i < sc->count; i++) chain->ops->finish(device, allocator, &sc->images[i]);
    vk_object_base_finish(&sc->base);
-   vk_free2(&nvk_device_from_handle(device)->vk.alloc, allocator, sc);
+   vk_free2(&vk_device_from_handle(device)->alloc, allocator, sc);
    wake_worker(s);
 }
 
@@ -563,7 +564,7 @@ VKAPI_ATTR VkResult VKAPI_CALL
 r4vkDrainWindowSwapchain(VkDevice device, VkSwapchainKHR handle, uint64_t timeout_ns)
 {
    struct r4vk_swapchain *sc = swapchain(handle);
-   if (!sc || sc->device != nvk_device_from_handle(device)) return VK_ERROR_DEVICE_LOST;
+   if (!sc || sc->device != vk_device_from_handle(device)) return VK_ERROR_DEVICE_LOST;
    struct native_chain *chain = sc->record;
    struct native_window *w = chain->window;
    uint64_t start;
@@ -573,7 +574,7 @@ r4vkDrainWindowSwapchain(VkDevice device, VkSwapchainKHR handle, uint64_t timeou
       lock(&w->mutex);
       VkResult result = chain->error;
       bool queued = false;
-      if (result == VK_SUCCESS) result = r4vk_nvk_check_device(sc->device->nvkmd);
+      if (result == VK_SUCCESS) result = chain->ops->check(sc->device);
       if (result == VK_SUCCESS && !drain(w, NULL)) result = VK_NOT_READY;
       for (uint32_t slot = 0; result == VK_SUCCESS && slot < chain->count; slot++) {
          R4WindowGraphicsRequest query = request_for(chain, R4OS_WINDOW_GRAPHICS_CHAIN_STATUS);
@@ -626,7 +627,7 @@ nvk_AcquireNextImage2KHR(VkDevice device, const VkAcquireNextImageInfoKHR *info,
          unlock(&w->mutex);
          return VK_ERROR_OUT_OF_DATE_KHR;
       }
-      if (result == VK_SUCCESS) result = r4vk_nvk_check_device(sc->device->nvkmd);
+      if (result == VK_SUCCESS) result = chain->ops->check(sc->device);
       R4WindowGraphicsReply reply;
       if (result == VK_SUCCESS) {
          if (!request(s, chain, request_for(chain, R4OS_WINDOW_GRAPHICS_ACQUIRE), &reply))
@@ -634,9 +635,9 @@ nvk_AcquireNextImage2KHR(VkDevice device, const VkAcquireNextImageInfoKHR *info,
          else result = vk_result(reply.result);
       }
       if (result == VK_SUCCESS) {
-         if (info->semaphore) result = vk_sync_signal(&sc->device->vk,
+         if (info->semaphore) result = vk_sync_signal(sc->device,
             vk_semaphore_get_active_sync(vk_semaphore_from_handle(info->semaphore)), 0);
-         if (result == VK_SUCCESS && info->fence) result = vk_sync_signal(&sc->device->vk,
+         if (result == VK_SUCCESS && info->fence) result = vk_sync_signal(sc->device,
             vk_fence_get_active_sync(vk_fence_from_handle(info->fence)), 0);
          if (result == VK_SUCCESS) *index = reply.image_slot;
          else {
@@ -682,18 +683,23 @@ static VkResult present_result(VkResult previous, VkResult next)
 VKAPI_ATTR VkResult VKAPI_CALL
 nvk_QueuePresentKHR(VkQueue handle, const VkPresentInfoKHR *info)
 {
-   struct nvk_queue *queue = container_of(vk_queue_from_handle(handle), struct nvk_queue, vk);
-   struct nvk_device *dev = nvk_queue_device(queue);
-   VkDevice device = nvk_device_to_handle(dev);
+   struct vk_queue *queue = vk_queue_from_handle(handle);
+   struct vk_device *dev = queue->base.device;
+   const struct r4vk_wsi_backend *ops = r4vk_wsi_backend(dev->physical);
+   VkDevice device = vk_device_to_handle(dev);
    struct wsi_state *s = state();
    VkResult result = s ? VK_SUCCESS : VK_ERROR_OUT_OF_HOST_MEMORY;
    VkSemaphoreSubmitInfo *waits = NULL;
    VkFence fence = VK_NULL_HANDLE;
-   struct r4vk_nvk_point *point = NULL;
+   void *point = NULL;
    R4GfxFence native_fence;
    if (result != VK_SUCCESS) goto all_failed;
+   if (!ops) { result = VK_ERROR_FEATURE_NOT_PRESENT; goto all_failed; }
+   if (!ops->can_present(dev->physical, queue->queue_family_index)) {
+      result = VK_ERROR_DEVICE_LOST; goto all_failed;
+   }
    if (info->waitSemaphoreCount) {
-      waits = vk_alloc(&dev->vk.alloc, (size_t)info->waitSemaphoreCount * sizeof(*waits),
+      waits = vk_alloc(&dev->alloc, (size_t)info->waitSemaphoreCount * sizeof(*waits),
          8, VK_SYSTEM_ALLOCATION_SCOPE_COMMAND);
       if (!waits) { result = VK_ERROR_OUT_OF_HOST_MEMORY; goto all_failed; }
       for (uint32_t i = 0; i < info->waitSemaphoreCount; i++) waits[i] = (VkSemaphoreSubmitInfo) {
@@ -705,7 +711,7 @@ nvk_QueuePresentKHR(VkQueue handle, const VkPresentInfoKHR *info)
    result = vk_common_CreateFence(device, &create, NULL, &fence);
    if (result != VK_SUCCESS) goto all_failed;
    struct vk_sync *sync = vk_fence_get_active_sync(vk_fence_from_handle(fence));
-   result = r4vk_nvk_sync_prepare_present(sync);
+   result = ops->prepare(sync);
    if (result != VK_SUCCESS) goto all_failed;
    const VkSubmitInfo2 submit = {
       .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
@@ -716,10 +722,10 @@ nvk_QueuePresentKHR(VkQueue handle, const VkPresentInfoKHR *info)
     * survives Vulkan fence destruction and asynchronous Desktop consumption. */
    result = vk_common_QueueSubmit2(handle, 1, &submit, fence);
    if (result != VK_SUCCESS) { result = VK_ERROR_DEVICE_LOST; goto all_failed; }
-   result = r4vk_nvk_sync_take_present(sync, &point, &native_fence);
+   result = ops->take(sync, &point, &native_fence);
    if (result != VK_SUCCESS) { result = VK_ERROR_DEVICE_LOST; goto all_failed; }
    vk_common_DestroyFence(device, fence, NULL); fence = VK_NULL_HANDLE;
-   vk_free(&dev->vk.alloc, waits); waits = NULL;
+   vk_free(&dev->alloc, waits); waits = NULL;
    result = VK_SUCCESS;
    for (uint32_t i = 0; i < info->swapchainCount; i++) {
       struct r4vk_swapchain *sc = swapchain(info->pSwapchains[i]);
@@ -732,9 +738,9 @@ nvk_QueuePresentKHR(VkQueue handle, const VkPresentInfoKHR *info)
           !(chain->acquired & (1u << slot)))) one = VK_ERROR_SURFACE_LOST_KHR;
       if (one == VK_SUCCESS) {
          assert(!chain->points[slot]);
-         one = r4vk_nvk_point_pin(point, NULL);
+         one = ops->pin(point, NULL);
          if (one == VK_SUCCESS) {
-            r4vk_nvk_point_ref(point); chain->points[slot] = point;
+            ops->ref(point); chain->points[slot] = point;
             R4WindowGraphicsRequest command = request_for(chain, R4OS_WINDOW_GRAPHICS_PRESENT);
             command.image_slot = slot; command.acquire_token = chain->tokens[slot]; command.fence = native_fence;
             R4WindowGraphicsReply reply;
@@ -753,12 +759,12 @@ nvk_QueuePresentKHR(VkQueue handle, const VkPresentInfoKHR *info)
       if (info->pResults) info->pResults[i] = one;
       result = present_result(result, one);
    }
-   r4vk_nvk_point_unexport(point); r4vk_nvk_point_unref(point);
+   ops->unpin(point); ops->unref(point);
    if (result < 0) wake_worker(s);
    return result;
 all_failed:
    vk_common_DestroyFence(device, fence, NULL);
-   vk_free(&dev->vk.alloc, waits);
+   vk_free(&dev->alloc, waits);
    for (uint32_t i = 0; i < info->swapchainCount; i++) if (info->pResults) info->pResults[i] = result;
    return result;
 }
@@ -777,7 +783,7 @@ nvk_GetDeviceGroupSurfacePresentModesKHR(VkDevice device, VkSurfaceKHR surface,
                                        VkDeviceGroupPresentModeFlagsKHR *modes)
 {
    struct r4vk_surface_caps caps;
-   VkResult result = r4vk_surface_snapshot(nvk_device_physical_mut(nvk_device_from_handle(device)), surface, &caps);
+   VkResult result = r4vk_surface_snapshot(vk_device_from_handle(device)->physical, surface, &caps);
    if (result != VK_SUCCESS) return result;
    if (!caps.supported) return VK_ERROR_SURFACE_LOST_KHR;
    *modes = VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_BIT_KHR;
@@ -788,7 +794,7 @@ nvk_GetPhysicalDevicePresentRectanglesKHR(VkPhysicalDevice handle, VkSurfaceKHR 
                                         uint32_t *count, VkRect2D *rectangles)
 {
    struct r4vk_surface_caps caps;
-   VkResult result = r4vk_surface_snapshot(nvk_physical_device_from_handle(handle), surface, &caps);
+   VkResult result = r4vk_surface_snapshot(vk_physical_device_from_handle(handle), surface, &caps);
    if (result != VK_SUCCESS) return result;
    if (!caps.supported) return VK_ERROR_SURFACE_LOST_KHR;
    if (!rectangles) { *count = 1; return VK_SUCCESS; }

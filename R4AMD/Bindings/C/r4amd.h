@@ -918,6 +918,18 @@ _Static_assert(offsetof(R4AmdNativeIb, address) == 0u, "R4AmdNativeIb.address of
 _Static_assert(offsetof(R4AmdNativeIb, dwords) == 8u, "R4AmdNativeIb.dwords offset mismatch");
 _Static_assert(offsetof(R4AmdNativeIb, binding_index) == 12u, "R4AmdNativeIb.binding_index offset mismatch");
 
+typedef struct R4AmdDeviceFactsV3 {
+    R4AmdDeviceFacts facts;
+    uint32_t timestamp_clock_khz;
+    uint32_t native_binding_capacity;
+    uint64_t max_backing_bytes;
+} R4AmdDeviceFactsV3;
+_Static_assert(sizeof(R4AmdDeviceFactsV3) == 256u, "R4AmdDeviceFactsV3 size mismatch");
+_Static_assert(offsetof(R4AmdDeviceFactsV3, facts) == 0u, "R4AmdDeviceFactsV3.facts offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFactsV3, timestamp_clock_khz) == 240u, "R4AmdDeviceFactsV3.timestamp_clock_khz offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFactsV3, native_binding_capacity) == 244u, "R4AmdDeviceFactsV3.native_binding_capacity offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFactsV3, max_backing_bytes) == 248u, "R4AmdDeviceFactsV3.max_backing_bytes offset mismatch");
+
 #define R4AMD_INFO_VERSION ((uint32_t)1)
 #define R4AMD_STATUS_OK ((int32_t)0)
 #define R4AMD_PROFILE_VERSION ((uint32_t)1)

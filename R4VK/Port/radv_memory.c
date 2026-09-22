@@ -161,11 +161,30 @@ static VkResult create(struct r4vk_radv_ws *context,
    return VK_SUCCESS;
 }
 
+static void unmap_bo(struct radeon_winsys *, struct radeon_winsys_bo *, bool);
 static void destroy_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buffer)
 {
    struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
    struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
    assert(bo->ws == ws);
+   if (bo->parent) {
+      struct r4vk_radv_bo *root = bo->parent;
+      while (bo->map_count) unmap_bo(base, buffer, false);
+      simple_mtx_lock(&ws->residency_mutex);
+      const uint32_t first = bo->offset / 4096, count = bo->base.size / 4096;
+      for (uint32_t i = first; i < first + count; i++) {
+         assert(root->slab_bitmap[i / 64] & (UINT64_C(1) << (i % 64)));
+         root->slab_bitmap[i / 64] &= ~(UINT64_C(1) << (i % 64));
+      }
+      assert(root->slab_children);
+      bool last = --root->slab_children == 0;
+      if (last) root->slab_retiring = true;
+      simple_mtx_unlock(&ws->residency_mutex);
+      simple_mtx_destroy(&bo->mutex); free(bo);
+      if (last) destroy_bo(base, &root->base);
+      return;
+   }
+   assert(!bo->slab_children);
    simple_mtx_lock(&ws->residency_mutex);
    list_del(&bo->residency);
    ws->allocated[buffer->initial_domain == RADEON_DOMAIN_VRAM] -= buffer->size;
@@ -177,7 +196,7 @@ static void destroy_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buff
    if (valid(bo->mapping.lease) && r4draw_gfx_buffer_unmap(&ws->draw, &bo->mapping.lease) != 1) r4vk_radv_lost(ws);
    drop(ws, bo->reference.reference);
    simple_mtx_destroy(&bo->mutex);
-   free(bo);
+   free(bo->slab_bitmap); free(bo);
    r4vk_radv_ws_unref(ws);
 }
 static void *map_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buffer, bool fixed, void *address)
@@ -187,6 +206,12 @@ static void *map_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buffer,
    if (fixed || address || r4vk_radv_is_lost(ws) || buffer->initial_domain != RADEON_DOMAIN_GTT) return NULL;
    simple_mtx_lock(&bo->mutex);
    if (bo->map_count == UINT32_MAX) { simple_mtx_unlock(&bo->mutex); return NULL; }
+   if (bo->parent) {
+      void *mapped = map_bo(base, &bo->parent->base, false, NULL);
+      if (mapped) bo->map_count++;
+      simple_mtx_unlock(&bo->mutex);
+      return mapped ? (char *)mapped + bo->offset : NULL;
+   }
    if (!bo->map_count) {
       int32_t rc = r4draw_gfx_buffer_map_persistent(&ws->draw, &bo->reference.reference,
          R4OS_GFX_BUFFER_MAP_WRITE, 0, buffer->size, &bo->mapping);
@@ -210,47 +235,23 @@ static void unmap_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buffer
    struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
    simple_mtx_lock(&bo->mutex);
    if (replace || !bo->map_count) { r4vk_radv_lost(ws); simple_mtx_unlock(&bo->mutex); return; }
+   if (bo->parent) {
+      bo->map_count--;
+      unmap_bo(base, &bo->parent->base, false);
+      simple_mtx_unlock(&bo->mutex);
+      return;
+   }
    if (!--bo->map_count) {
       if (r4draw_gfx_buffer_unmap(&ws->draw, &bo->mapping.lease) != 1) r4vk_radv_lost(ws);
       memset(&bo->mapping, 0, sizeof(bo->mapping));
    }
    simple_mtx_unlock(&bo->mutex);
 }
-static VkResult allocate_bo(struct radeon_winsys *base, uint64_t bytes, unsigned alignment,
-   enum radeon_bo_domain domain, enum radeon_bo_flag flags, unsigned priority,
-   uint64_t address, struct radeon_winsys_bo **out)
+static VkResult allocate_backing(struct radeon_winsys *base, uint64_t bytes,
+   unsigned alignment, bool vram, enum radeon_bo_flag flags,
+   struct radeon_winsys_bo **out)
 {
    struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
-   if (r4vk_radv_is_lost(ws)) return VK_ERROR_DEVICE_LOST;
-   const unsigned supported = RADEON_FLAG_GTT_WC | RADEON_FLAG_CPU_ACCESS | RADEON_FLAG_NO_CPU_ACCESS |
-      RADEON_FLAG_NO_INTERPROCESS_SHARING | RADEON_FLAG_READ_ONLY | RADEON_FLAG_32BIT |
-      RADEON_FLAG_PREFER_LOCAL_BO | RADEON_FLAG_ZERO_VRAM | RADEON_FLAG_DISCARDABLE |
-      RADEON_FLAG_VM_PAD_1PAGE | RADEON_FLAG_VM_UPDATE_WAIT;
-   if ((flags & ~supported) || address || priority > 31 ||
-       (domain != RADEON_DOMAIN_GTT && domain != RADEON_DOMAIN_VRAM && domain != RADEON_DOMAIN_VRAM_GTT))
-      return VK_ERROR_FEATURE_NOT_PRESENT;
-   if ((flags & RADEON_FLAG_CPU_ACCESS) && (flags & RADEON_FLAG_NO_CPU_ACCESS)) return VK_ERROR_FEATURE_NOT_PRESENT;
-   /* Internal RADV shader/descriptor arenas request VRAM but require CPU
-    * access. Their native placement is coherent system backing; explicit
-    * NO_CPU_ACCESS allocations retain device-local ownership. */
-   bool vram = (domain & RADEON_DOMAIN_VRAM) && (flags & RADEON_FLAG_NO_CPU_ACCESS);
-   if (vram && (flags & (RADEON_FLAG_CPU_ACCESS | RADEON_FLAG_ZERO_VRAM))) return VK_ERROR_FEATURE_NOT_PRESENT;
-   if (alignment && !power_of_two(alignment)) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
-   if (!alignment) alignment = 4096;
-   alignment = MAX2(alignment, 4096);
-   if (!power_of_two(alignment) || alignment > ws->facts.facts.max_allocation_bytes ||
-       !bytes || bytes > ws->facts.facts.max_allocation_bytes) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
-   bytes = (bytes + 4095) & ~UINT64_C(4095);
-   /* GFX9 SMEM may fetch the page following an application allocation.
-    * Reserve real backing for that page within the same retained binding.
-    * Unlike the Linux read-only alias this consumes one additional page,
-    * which participates in the native budget and allocation-size checks.
-    * VM_UPDATE_WAIT is already satisfied by create()'s acknowledged bind. */
-   if (flags & RADEON_FLAG_VM_PAD_1PAGE) {
-      if (bytes > ws->facts.facts.max_allocation_bytes - 4096)
-         return VK_ERROR_OUT_OF_DEVICE_MEMORY;
-      bytes += 4096;
-   }
    struct r4vk_radv_bo *bo = calloc(1, sizeof(*bo));
    if (!bo) return VK_ERROR_OUT_OF_HOST_MEMORY;
    bo->ws = ws;
@@ -300,6 +301,124 @@ fail:
    free(bo);
    return r4vk_radv_is_lost(ws) ? VK_ERROR_DEVICE_LOST : result;
 }
+/* Public Vulkan memory objects suballocate ordinary canonical root BOs.
+ * Root bindings stay bounded; each logical allocation owns actual padding. */
+#define SLAB_BYTES (UINT64_C(64)*1024*1024)
+#define SLAB_PAGES (SLAB_BYTES / 4096)
+static bool slab_reserve(struct r4vk_radv_bo *root, uint64_t bytes,
+                         unsigned alignment, uint64_t *offset)
+{
+   const uint32_t count = bytes / 4096, step = MAX2(alignment, 65536) / 4096;
+   for (uint32_t start = 0; start + count <= SLAB_PAGES;) {
+      uint32_t i = start;
+      while (i < start + count && !(root->slab_bitmap[i / 64] & (UINT64_C(1) << (i % 64)))) i++;
+      if (i == start + count) {
+         for (i = start; i < start + count; i++) root->slab_bitmap[i / 64] |= UINT64_C(1) << (i % 64);
+         root->slab_children++;
+         *offset = (uint64_t)start * 4096;
+         return true;
+      }
+      start = (i + step) & ~(step - 1);
+   }
+   return false;
+}
+static VkResult allocate_slab(struct radeon_winsys *base, uint64_t bytes,
+   unsigned alignment, bool vram, enum radeon_bo_flag flags,
+   struct radeon_winsys_bo **out)
+{
+   struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
+   struct r4vk_radv_bo *child = calloc(1, sizeof(*child));
+   if (!child) return VK_ERROR_OUT_OF_HOST_MEMORY;
+   struct r4vk_radv_bo *root = NULL;
+   uint64_t offset = 0;
+   VkResult result = VK_SUCCESS;
+   /* Serialize pool growth independently from the short residency boundary.
+    * No heap or broker call spans residency_mutex. Destruction never takes
+    * slab_mutex, and the final-child mark prevents racing root reuse. */
+   simple_mtx_lock(&ws->slab_mutex);
+   simple_mtx_lock(&ws->residency_mutex);
+   list_for_each_entry(struct r4vk_radv_bo, candidate, &ws->residency, residency) {
+      if (candidate->slab_bitmap && !candidate->slab_retiring &&
+          candidate->base.initial_domain == (vram ? RADEON_DOMAIN_VRAM : RADEON_DOMAIN_GTT) &&
+          slab_reserve(candidate, bytes, alignment, &offset)) { root = candidate; break; }
+   }
+   simple_mtx_unlock(&ws->residency_mutex);
+   if (!root) {
+      uint64_t *bitmap = calloc(SLAB_PAGES / 64, sizeof(uint64_t));
+      if (!bitmap) { result = VK_ERROR_OUT_OF_HOST_MEMORY; goto fail; }
+      struct radeon_winsys_bo *allocated = NULL;
+      result = allocate_backing(base, SLAB_BYTES, 1024*1024, vram, 0, &allocated);
+      if (result != VK_SUCCESS) { free(bitmap); goto fail; }
+      root = (struct r4vk_radv_bo *)allocated;
+      simple_mtx_lock(&ws->residency_mutex);
+      root->slab_bitmap = bitmap;
+      bool reserved = slab_reserve(root, bytes, alignment, &offset);
+      assert(reserved);
+      simple_mtx_unlock(&ws->residency_mutex);
+   }
+   child->ws = ws; child->parent = root; child->offset = offset;
+   child->base = root->base;
+   child->base.va += offset; child->base.size = bytes;
+   child->reference = root->reference; child->range = root->range; child->binding = root->binding;
+   simple_mtx_init(&child->mutex, mtx_plain);
+   simple_mtx_lock(&ws->residency_mutex);
+   child->base.obj_id = ++ws->next_id;
+   simple_mtx_unlock(&ws->residency_mutex);
+   simple_mtx_unlock(&ws->slab_mutex);
+   if (flags & RADEON_FLAG_ZERO_VRAM) {
+      void *mapped = map_bo(base, &child->base, false, NULL);
+      if (!mapped) { destroy_bo(base, &child->base); return VK_ERROR_MEMORY_MAP_FAILED; }
+      memset(mapped, 0, bytes);
+      unmap_bo(base, &child->base, false);
+   }
+   *out = &child->base;
+   return VK_SUCCESS;
+fail:
+   simple_mtx_unlock(&ws->slab_mutex);
+   free(child);
+   return result;
+}
+
+static VkResult allocate_bo(struct radeon_winsys *base, uint64_t bytes, unsigned alignment,
+   enum radeon_bo_domain domain, enum radeon_bo_flag flags, unsigned priority,
+   uint64_t address, struct radeon_winsys_bo **out)
+{
+   struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
+   if (r4vk_radv_is_lost(ws)) return VK_ERROR_DEVICE_LOST;
+   const unsigned supported = RADEON_FLAG_GTT_WC | RADEON_FLAG_CPU_ACCESS | RADEON_FLAG_NO_CPU_ACCESS |
+      RADEON_FLAG_NO_INTERPROCESS_SHARING | RADEON_FLAG_READ_ONLY | RADEON_FLAG_32BIT |
+      RADEON_FLAG_PREFER_LOCAL_BO | RADEON_FLAG_ZERO_VRAM | RADEON_FLAG_DISCARDABLE |
+      RADEON_FLAG_VM_PAD_1PAGE | RADEON_FLAG_VM_UPDATE_WAIT;
+   if ((flags & ~supported) || address || priority > 31 ||
+       (domain != RADEON_DOMAIN_GTT && domain != RADEON_DOMAIN_VRAM && domain != RADEON_DOMAIN_VRAM_GTT))
+      return VK_ERROR_FEATURE_NOT_PRESENT;
+   if ((flags & RADEON_FLAG_CPU_ACCESS) && (flags & RADEON_FLAG_NO_CPU_ACCESS)) return VK_ERROR_FEATURE_NOT_PRESENT;
+   /* Internal RADV shader/descriptor arenas request VRAM but require CPU
+    * access. Their native placement is coherent system backing; explicit
+    * NO_CPU_ACCESS allocations retain device-local ownership. */
+   bool vram = (domain & RADEON_DOMAIN_VRAM) && (flags & RADEON_FLAG_NO_CPU_ACCESS);
+   if (vram && (flags & (RADEON_FLAG_CPU_ACCESS | RADEON_FLAG_ZERO_VRAM))) return VK_ERROR_FEATURE_NOT_PRESENT;
+   if (alignment && !power_of_two(alignment)) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+   if (!alignment) alignment = 4096;
+   alignment = MAX2(alignment, 4096);
+   if (!power_of_two(alignment) || alignment > ws->facts.max_backing_bytes ||
+       !bytes || bytes > ws->facts.max_backing_bytes) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+   bytes = (bytes + 4095) & ~UINT64_C(4095);
+   /* GFX9 SMEM may fetch the page following an application allocation.
+    * Reserve real backing for that page within the same retained binding.
+    * Unlike the Linux read-only alias this consumes one additional page,
+    * which participates in the native budget and allocation-size checks.
+    * VM_UPDATE_WAIT is already satisfied by create()'s acknowledged bind. */
+   if (flags & RADEON_FLAG_VM_PAD_1PAGE) {
+      if (bytes > ws->facts.max_backing_bytes - 4096)
+         return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+      bytes += 4096;
+   }
+   const unsigned slab_flags = RADEON_FLAG_NO_INTERPROCESS_SHARING | RADEON_FLAG_PREFER_LOCAL_BO;
+   if ((flags & slab_flags) == slab_flags && bytes <= 1024*1024 && alignment <= 1024*1024)
+      return allocate_slab(base, bytes, alignment, vram, flags, out);
+   return allocate_backing(base, bytes, alignment, vram, flags, out);
+}
 static VkResult create_bo(struct radeon_winsys *base, uint64_t bytes, unsigned alignment,
    enum radeon_bo_domain domain, enum radeon_bo_flag flags, unsigned priority,
    uint64_t address, struct radeon_winsys_bo **out)
@@ -308,6 +427,77 @@ static VkResult create_bo(struct radeon_winsys *base, uint64_t bytes, unsigned a
    VkResult result = allocate_bo(base, bytes, alignment, domain, flags, priority, address, out);
    r4vk_radv_error_record(result);
    return result;
+}
+VkResult r4vk_radv_import_buffer(struct r4vk_radv_ws *ws, const R4GfxBufferHandle *source,
+   struct radeon_winsys_bo **out, R4GfxBufferDescriptor *descriptor)
+{
+   if (!out || !descriptor || !source || !valid(*source)) return VK_ERROR_INVALID_EXTERNAL_HANDLE;
+   VkResult result = r4vk_radv_validate(ws);
+   if (result != VK_SUCCESS) return result;
+   struct r4vk_radv_bo *bo = calloc(1, sizeof(*bo));
+   if (!bo) return VK_ERROR_OUT_OF_HOST_MEMORY;
+   bo->ws = ws;
+   /* The producer may release its own reference immediately after import.
+    * Describe and bind only the independently retained canonical backing. */
+   int32_t rc = r4draw_gfx_buffer_import(&ws->draw, source, &bo->reference);
+   if (rc != 1) {
+      result = rc == R4OS_GFX_BUFFER_ERROR_INVALID || rc == R4OS_GFX_BUFFER_ERROR_STALE ||
+         rc == R4OS_GFX_BUFFER_ERROR_CLOSED ? VK_ERROR_INVALID_EXTERNAL_HANDLE : r4vk_radv_status(ws, rc);
+      goto fail;
+   }
+   const R4GfxBufferReference *ref = &bo->reference;
+   if (ref->version != 1 || ref->size < sizeof(*ref) || ref->reserved0 ||
+       !valid(ref->buffer) || !valid(ref->reference)) { result = r4vk_radv_lost(ws); goto fail; }
+   result = VK_ERROR_INVALID_EXTERNAL_HANDLE;
+   if (ref->flags) goto fail;
+   R4GfxBufferDescriptor desc;
+   rc = r4draw_gfx_buffer_describe(&ws->draw, &ref->reference, &desc);
+   if (rc != 1) { result = r4vk_radv_status(ws, rc); goto fail; }
+   if (desc.version != 1 || desc.size < sizeof(desc) || desc.reserved0) { result = r4vk_radv_lost(ws); goto fail; }
+   const uint32_t transfer = R4OS_GFX_BUFFER_USAGE_TRANSFER_SOURCE | R4OS_GFX_BUFFER_USAGE_TRANSFER_TARGET;
+   const uint32_t cpu = R4OS_GFX_BUFFER_USAGE_CPU_READ | R4OS_GFX_BUFFER_USAGE_CPU_WRITE;
+   if (!desc.byte_length || (desc.byte_length & 4095) ||
+       desc.byte_length > ws->facts.max_backing_bytes || !power_of_two(desc.alignment) ||
+       (desc.usage & transfer) != transfer ||
+       (desc.usage & ~(transfer | cpu | R4OS_GFX_BUFFER_USAGE_RENDER | R4OS_GFX_BUFFER_USAGE_SCANOUT))) goto fail;
+   bool vram = desc.location == R4OS_GFX_BUFFER_LOCATION_DEVICE_LOCAL;
+   if (vram) {
+      if (desc.adapter_id != ws->facts.backend.binding.adapter_id || !desc.driver_owner ||
+          desc.device_generation != ws->facts.backend.memory_generation || (desc.usage & cpu)) goto fail;
+   } else if (desc.location != R4OS_GFX_BUFFER_LOCATION_SYSTEM || desc.adapter_id ||
+              desc.driver_owner || desc.device_generation || desc.modifier || (desc.usage & cpu) != cpu) goto fail;
+   /* Imported extents are never padded or rounded into unowned bytes. WSI
+    * image layout admission follows in the VkImage owner before publication. */
+   R4GfxVirtualRequest request = {.kind = 1, .byte_length = desc.byte_length, .alignment = 4096, .location = vram};
+   R4GfxVirtualStatus ready;
+   result = create(ws, &request, 0, &ready);
+   if (result != VK_SUCCESS) goto fail;
+   bo->range = ready.resource; bo->base.va = ready.address;
+   request = (R4GfxVirtualRequest){.kind = 2, .byte_length = desc.byte_length,
+      .parent = bo->range, .reference = bo->reference.reference};
+   result = create(ws, &request, bo->base.va, &ready);
+   if (result != VK_SUCCESS) goto fail;
+   bo->binding = ready.resource;
+   bo->base.size = desc.byte_length;
+   bo->base.initial_domain = vram ? RADEON_DOMAIN_VRAM : RADEON_DOMAIN_GTT;
+   bo->base.use_global_list = true;
+   bo->base.is_local = false;
+   bo->base.vram_no_cpu_access = vram;
+   simple_mtx_init(&bo->mutex, mtx_plain);
+   r4vk_radv_ws_ref(ws);
+   simple_mtx_lock(&ws->residency_mutex);
+   bo->base.obj_id = ++ws->next_id;
+   ws->allocated[vram] += desc.byte_length;
+   list_addtail(&bo->residency, &ws->residency);
+   simple_mtx_unlock(&ws->residency_mutex);
+   *out = &bo->base; *descriptor = desc;
+   return VK_SUCCESS;
+fail:
+   if (valid(bo->binding)) abandon(ws, bo->binding);
+   if (valid(bo->range)) abandon(ws, bo->range);
+   if (valid(bo->reference.reference)) drop(ws, bo->reference.reference);
+   free(bo);
+   return r4vk_radv_is_lost(ws) ? VK_ERROR_DEVICE_LOST : result;
 }
 static VkResult from_ptr(struct radeon_winsys *ws, void *ptr, uint64_t size, unsigned priority, struct radeon_winsys_bo **out)
 { (void)ws; (void)ptr; (void)size; (void)priority; (void)out; return VK_ERROR_INVALID_EXTERNAL_HANDLE; }
