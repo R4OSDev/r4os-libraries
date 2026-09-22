@@ -154,7 +154,7 @@ build orchestration and self-authored diagnostic shader remain original
 Apache-2.0 R4OS material. Upstream lowering algorithms retain their licenses.
 
 
-## R4GL native EGL/OpenGL provider (0.79.39 / 0.80.26)
+## R4GL native EGL/OpenGL provider (0.79.39 / 0.80.27)
 
 R4GL uses the same pinned Mesa 26.2.2 source. Its ordered patches, generator
 plan and native unit/flag selection live under `R4GL/Port` and `R4GL/Tools`.
@@ -170,7 +170,10 @@ Shared native math/scanner notices remain with their existing owners.
 The AMD Zink patches preserve the original Mesa screen/context/compiler
 notices. They select the existing Mesa stipple lowering and add per-binding
 NIR component mapping for identity Vulkan views. Original NIR algorithms and
-generated compiler sources retain their existing Mesa license texts.
+generated compiler sources retain their existing Mesa license texts. The
+0.80.27 Core admission uses the pinned Zink requirements; the GL XML patch
+adds three Core aliases for existing bounded ARB query implementations.
+Original XML, generator and implementation notices remain intact.
 
 
 ## R4VK native Vulkan provider (0.79.35 / 0.80.26)

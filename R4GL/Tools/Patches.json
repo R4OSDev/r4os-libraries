@@ -28,6 +28,8 @@
     "Port/MesaZinkSwap.patch",
     "Port/MesaZinkDeviceLoss.patch",
     "Port/MesaZinkLineStipple.patch",
-    "Port/MesaZinkBorderSwizzle.patch"
+    "Port/MesaZinkBorderSwizzle.patch",
+    "Port/MesaZinkCore46.patch",
+    "Port/MesaCoreAliases.patch"
   ]
 }

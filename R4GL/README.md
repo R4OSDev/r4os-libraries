@@ -2,8 +2,9 @@
 
 Native Mesa EGL/OpenGL runtime for R4OS. The initial software profile uses
 softpipe without LLVM/JIT and works without a native GPU backend.
-It currently negotiates EGL 1.5 and OpenGL 3.3 Core. Version 0.1.15 also
-connects Zink directly to the native R4VK ICD. Its pbuffer and native window profiles
+Version 0.1.16 negotiates EGL 1.5, OpenGL 3.3 Core for Softpipe/NVK, and
+OpenGL 4.6 Core / GLSL 4.60 for the admitted AMD RADV profile. Zink connects
+directly to the native R4VK ICD. Its pbuffer and native window profiles
 have passed GLSL drawing submission, EGL fences, resize and buffer retirement
 with modeled NVIDIA and AMD Picasso devices. Physical GPU pixels remain unqualified.
 
@@ -113,7 +114,18 @@ usable without an R4VK import.
 
 The Zink path uses native ICD dispatch and process-owned instance/device caches.
 It has no host Vulkan loader or installed layers and does not read host drirc.
-GL up to 3.3 Core is currently offered. Native window configs additionally
+AMD Core admission checks the pinned Zink GL 4.0..4.6 baseline against actual
+RADV features, limits and eleven required formats. Mesa then computes the
+context version from its normal GL extension and limit requirements; a missing
+prerequisite retains the 3.3 ceiling and reports the failed condition. NVK and
+compatibility contexts retain their separately qualified 3.3 ceiling. Three
+promoted bounded-query Core names are generated as aliases of the existing
+ARB dispatch slots. Focused AMDOpenGL08027 evidence covers all 657 Core
+entrypoints, GLSL460 compute/tessellation/FP64, OpenGL SPIR-V specialization,
+persistent mappings/sync, bounded queries and production window retirement.
+The AMD target remains Vulkan 1.3 / GL 4.6 Core / EGL 1.5; raytracing,
+OpenCL/HIP/ROCm and later Vulkan versions are separate capabilities.
+Native window configs additionally
 require the real swapchain/mutable-format extensions and R4VK window entrypoint.
 The private Kopper platform copies the application and WINSVC identity; it uses
 R4VK's existing surface API and canonical GPU buffers. Zink interval 1 requires
