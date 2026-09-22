@@ -3,9 +3,12 @@
   "version": "26.2.2",
   "url": "https://archive.mesa3d.org/mesa-26.2.2.tar.xz",
   "archive_sha256": "eeb29ca7e56cfaa8e8a79538dcf834e3b18e501c31bef5145e959ea437cc4216",
-  "status": "reference-only; no RADV objects in R4VK.R4L yet",
-  "boundary": "src/amd/vulkan including its Linux winsys as reference, not a loadable Linux driver; replace OS/winsys paths through the R4OS BO/VA/queue/fence owners in 0.80.23-25.",
-  "patches": [],
+  "status": "Original RADV reference preserved; selected RADV/ACO/AddrLib and common runtime sources are now built by R4VK for 0.80.23.",
+  "boundary": "Original files remain unchanged. A single private Mesa build tree applies Port/MesaRuntime.patch and Port/MesaRADV.patch; the native R4DRAW/R4DEV winsys replaces Linux DRM discovery, BO/VA and queue/sync. Linux winsys sources remain reference-only. Graphics/compute, Vulkan 1.3 and WSI acceptance follow in 0.80.24-25; physical GPU acceptance only in 0.80.39.",
+  "patches": [
+    "Port/MesaRuntime.patch",
+    "Port/MesaRADV.patch"
+  ],
   "files": [
     {
       "path": "src/amd/vulkan/.clang-format",

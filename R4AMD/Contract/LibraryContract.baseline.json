@@ -5210,6 +5210,580 @@
         }
       ],
       "description": "Native queue BACKEND_V1 profile revision1 command kind1: this 200-byte header followed by the common 256-byte color program and 48-byte YUV matrix (12 IEEE754 float32 bits), exactly504 bytes. Format1 NV12/2 P010/3 YUV420P, filter0 nearest/1 linear RGB after EOTF, blend0 replace/1 premultiplied over, opacity0..65535. Chroma origin uses float32 bits. Unused plane2 is zero. Driver binds its immutable ACO programs and retains all canonical mappings until actual completion."
+    },
+    {
+      "name": "R4AmdDeviceFacts",
+      "size": 240,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "architecture",
+          "offset": 0,
+          "type": {
+            "name": "R4AmdArchitecture",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Unchanged fixed IMAGE_V1 revision1 prefix."
+        },
+        {
+          "name": "version",
+          "offset": 64,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 68,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 240 bytes."
+        },
+        {
+          "name": "pci_domain",
+          "offset": 72,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Canonical PCI domain; currently zero."
+        },
+        {
+          "name": "pci_bus",
+          "offset": 76,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Bound device BDF bus."
+        },
+        {
+          "name": "pci_device",
+          "offset": 80,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Bound device BDF slot."
+        },
+        {
+          "name": "pci_function",
+          "offset": 84,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Bound device BDF function."
+        },
+        {
+          "name": "pci_revision",
+          "offset": 88,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Captured PCI revision; distinct from ASIC revision."
+        },
+        {
+          "name": "asic_revision",
+          "offset": 92,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Measured strap ASIC revision."
+        },
+        {
+          "name": "cu_mask",
+          "offset": 96,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Measured active CUs, maximum eleven bits in one SE/SH."
+        },
+        {
+          "name": "rb_mask",
+          "offset": 100,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Measured active RBs, maximum two bits."
+        },
+        {
+          "name": "pfp_fw",
+          "offset": 104,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified loaded PFP firmware version."
+        },
+        {
+          "name": "me_fw",
+          "offset": 108,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified loaded ME firmware version."
+        },
+        {
+          "name": "mec_fw",
+          "offset": 112,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified loaded MEC firmware version."
+        },
+        {
+          "name": "me_feature",
+          "offset": 116,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified ME firmware feature version."
+        },
+        {
+          "name": "mec_feature",
+          "offset": 120,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified MEC firmware feature version."
+        },
+        {
+          "name": "ce_fw",
+          "offset": 124,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified loaded CE firmware version."
+        },
+        {
+          "name": "smu_fw",
+          "offset": 128,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Actual acknowledged SMU firmware version."
+        },
+        {
+          "name": "flags",
+          "offset": 132,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Bit0 native PM4 transport, bit1 coherent system BOs; others zero."
+        },
+        {
+          "name": "uma_bytes",
+          "offset": 136,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Measured stolen UMA extent, not host RAM."
+        },
+        {
+          "name": "native_budget",
+          "offset": 144,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Usable canonical native BO budget after driver reservations."
+        },
+        {
+          "name": "va_start",
+          "offset": 152,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Inclusive native VA aperture, identical high32 for all 32-bit descriptor addresses."
+        },
+        {
+          "name": "va_end",
+          "offset": 160,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exclusive native VA aperture."
+        },
+        {
+          "name": "max_allocation_bytes",
+          "offset": 168,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Driver bound for one BO and VA reservation."
+        },
+        {
+          "name": "max_se",
+          "offset": 176,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: max se. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "max_cu_per_sh",
+          "offset": 180,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: max cu per sh. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "max_sh_per_se",
+          "offset": 184,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: max sh per se. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "max_rb_per_se",
+          "offset": 188,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: max rb per se. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "num_tccs",
+          "offset": 192,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: num tccs. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "num_gprs",
+          "offset": 196,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: num gprs. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "max_gs_threads",
+          "offset": 200,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: max gs threads. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "gs_table_depth",
+          "offset": 204,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: gs table depth. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "gs_primitive_depth",
+          "offset": 208,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: gs primitive depth. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "parameter_cache_depth",
+          "offset": 212,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: parameter cache depth. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "double_offchip_lds",
+          "offset": 216,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: double offchip lds. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "wave_size",
+          "offset": 220,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: wave size. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "max_waves_per_simd",
+          "offset": 224,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: max waves per simd. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "max_scratch_slots_per_cu",
+          "offset": 228,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: max scratch slots per cu. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "lds_bytes",
+          "offset": 232,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Verified gpu_info firmware topology: lds bytes. Maximum hardware topology is distinct from measured active masks."
+        },
+        {
+          "name": "reserved",
+          "offset": 236,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        }
+      ],
+      "description": "IMAGE_V1 backend properties revision2. Retains the exact 64-byte revision1 architecture prefix, followed by bound native device facts. No Mesa structures, pointers, feature or Vulkan admission claims. Never manufacture facts for an absent backend."
+    },
+    {
+      "name": "R4AmdNativeSubmit",
+      "size": 32,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "version",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 1."
+        },
+        {
+          "name": "size",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exactly 32."
+        },
+        {
+          "name": "engine",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "0 graphics or 1 compute."
+        },
+        {
+          "name": "ib_count",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "1..32 ordered indirect buffers."
+        },
+        {
+          "name": "flags",
+          "offset": 16,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        },
+        {
+          "name": "reserved0",
+          "offset": 20,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        },
+        {
+          "name": "reserved1",
+          "offset": 24,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Zero."
+        }
+      ],
+      "description": "BACKEND_V1 native command revision1: 32-byte header then exactly ib_count R4AmdNativeIb records. Device facts revision2 flags bit0 admits PM4; 32+16*N bytes cannot collide with the legacy 504-byte YUV packet. The canonical submit retains every resident binding through actual completion. Each IB is inside a retained binding, VMID1. Provider preambles supply complete shader context; no embedded CPU pointers."
+    },
+    {
+      "name": "R4AmdNativeIb",
+      "size": 16,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "address",
+          "offset": 0,
+          "type": {
+            "name": "u64",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Aligned VMID1 address in one retained resource."
+        },
+        {
+          "name": "dwords",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Nonzero, multiple of8; maximum1048575 dwords after padding."
+        },
+        {
+          "name": "binding_index",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Exact index of the canonical retained native binding containing this IB."
+        }
+      ],
+      "description": "One immutable indirect-buffer descriptor. Driver validates address, length, binding identity and generation before publishing any commands."
     }
   ],
   "constants": [

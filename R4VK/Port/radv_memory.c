@@ -1,0 +1,336 @@
+/* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
+#include "r4vk_radv_winsys.h"
+#include <stdlib.h>
+static bool valid(R4GfxBufferHandle h) { return h.id && h.generation && !h.reserved0; }
+static bool equal(R4GfxBufferHandle a, R4GfxBufferHandle b) { return a.id == b.id && a.generation == b.generation && a.reserved0 == b.reserved0; }
+static bool power_of_two(uint64_t n) { return n && !(n & (n - 1)); }
+VkResult r4vk_radv_status(struct r4vk_radv_ws *ws, int32_t rc)
+{
+   switch (rc) {
+   case R4OS_GFX_BUFFER_ERROR_OOM: case R4OS_GFX_BUFFER_ERROR_CAPACITY: case R4OS_GFX_BUFFER_ERROR_BUDGET:
+      return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+   case R4OS_ERR_NO_FN: case R4OS_ERR_NO_GROUP: case R4OS_GFX_BUFFER_ERROR_UNSUPPORTED:
+   case R4OS_GFX_BUFFER_ERROR_UNAVAILABLE: return VK_ERROR_FEATURE_NOT_PRESENT;
+   case R4OS_GFX_BUFFER_ERROR_STALE: case R4OS_GFX_BUFFER_ERROR_CLOSED:
+   case R4OS_GFX_QUEUE_ERROR_WAIT_TIMEOUT: case R4OS_GFX_QUEUE_ERROR_WAIT_CANCELLED:
+   case R4OS_GFX_QUEUE_ERROR_DEVICE_LOST: return r4vk_radv_lost(ws);
+   default: return VK_ERROR_UNKNOWN;
+   }
+}
+static void drop(struct r4vk_radv_ws *context, R4GfxBufferHandle handle)
+{
+   if (r4draw_gfx_buffer_release(&context->draw, &handle) != 1)
+      r4vk_radv_lost(context); /* The resident BO owner retains uncertain cleanup. */
+}
+static void close_request(struct r4vk_radv_ws *context,
+                          R4GfxBufferHandle request)
+{
+   if (r4draw_gfx_native_close(&context->draw, &request) != 1)
+      r4vk_radv_lost(context);
+}
+static VkResult allocate_vram(struct r4vk_radv_ws *context,
+                              uint64_t bytes, R4GfxBufferReference *out)
+{
+   const struct r4vk_radv_ws *resources = context;
+   R4GfxNativeAllocation request = {
+      .version = 1, .size = sizeof(request), .adapter_id = resources->facts.backend.binding.adapter_id,
+      .memory_generation = resources->facts.backend.memory_generation,
+      .byte_length = bytes, .usage = R4OS_GFX_BUFFER_USAGE_TRANSFER_SOURCE |
+                                    R4OS_GFX_BUFFER_USAGE_TRANSFER_TARGET,
+   };
+   uint64_t ticks;
+   if (r4vk_operation_deadline(5000000000ull, &request.deadline_ns, &ticks) != 0)
+      return r4vk_radv_lost(context);
+   R4GfxNativeStatus initial;
+   int32_t rc = r4draw_gfx_native_start(&resources->draw, &request, &initial);
+   if (rc != 1) return r4vk_radv_status(context, rc);
+   if (!valid(initial.request)) return r4vk_radv_lost(context);
+   R4GfxNativeStatus ready;
+   rc = r4draw_gfx_native_wait(&resources->draw, &initial.request, ticks, &ready);
+   if (rc != 1) {
+      VkResult result = r4vk_radv_status(context, rc);
+      close_request(context, initial.request);
+      return r4vk_radv_is_lost(context) ? VK_ERROR_DEVICE_LOST : result;
+   }
+   if (ready.version != 1 || ready.size < sizeof(ready) || ready.reserved0 ||
+       !equal(ready.request, initial.request) || ready.phase != 2 ||
+       (ready.flags & ~1u) || ready.deadline_ns != request.deadline_ns ||
+       !ready.completed_ns) {
+      close_request(context, initial.request);
+      return r4vk_radv_lost(context);
+   }
+   if (ready.result != 1) {
+      VkResult result = r4vk_radv_status(context, ready.result);
+      close_request(context, initial.request);
+      return r4vk_radv_is_lost(context) ? VK_ERROR_DEVICE_LOST : result;
+   }
+   rc = r4draw_gfx_native_receive(&resources->draw, &initial.request, out);
+   if (rc == 1) return VK_SUCCESS; /* Receive consumes the request. */
+   VkResult result = r4vk_radv_status(context, rc);
+   close_request(context, initial.request);
+   return r4vk_radv_is_lost(context) ? VK_ERROR_DEVICE_LOST : result;
+}
+static VkResult check_backing(struct r4vk_radv_ws *context,
+                              const R4GfxBufferReference *ref, bool vram,
+                              uint64_t bytes)
+{
+   if (ref->version != 1 || ref->size < sizeof(*ref) || ref->flags ||
+       ref->reserved0 || !valid(ref->buffer) || !valid(ref->reference))
+      return r4vk_radv_lost(context);
+   R4GfxBufferDescriptor desc;
+   const struct r4vk_radv_ws *resources = context;
+   int32_t rc = r4draw_gfx_buffer_describe(&resources->draw, &ref->reference, &desc);
+   if (rc != 1) return r4vk_radv_status(context, rc);
+   if (desc.version != 1 || desc.size < sizeof(desc) || desc.reserved0 ||
+       desc.byte_length < bytes || !power_of_two(desc.alignment) ||
+       desc.format != R4OS_GFX_BUFFER_FORMAT_BYTES || desc.modifier ||
+       desc.width || desc.height || desc.plane_count ||
+       desc.location != (vram ? R4OS_GFX_BUFFER_LOCATION_DEVICE_LOCAL : R4OS_GFX_BUFFER_LOCATION_SYSTEM) ||
+       (desc.usage & (vram ? 12u : 15u)) != (vram ? 12u : 15u))
+      return r4vk_radv_lost(context);
+   for (unsigned i = 0; i < 4; i++)
+      if (desc.plane_offsets[i] || desc.plane_pitches[i]) return r4vk_radv_lost(context);
+   if (vram) {
+      if (desc.adapter_id != resources->facts.backend.binding.adapter_id || !desc.driver_owner ||
+          desc.device_generation != resources->facts.backend.memory_generation || (desc.usage & 3))
+         return r4vk_radv_lost(context);
+   } else if (desc.adapter_id || desc.driver_owner || desc.device_generation) {
+      return r4vk_radv_lost(context);
+   }
+   return VK_SUCCESS;
+}
+
+static void abandon(struct r4vk_radv_ws *context, R4GfxBufferHandle handle)
+{
+   if (r4draw_gfx_virtual_close(&context->draw, &handle, 1) != 1)
+      r4vk_radv_lost(context);
+}
+static bool matching_status(const R4GfxVirtualStatus *value,
+                            R4GfxBufferHandle handle,
+                            const R4GfxVirtualRequest *request)
+{
+   return value->version == 1 && value->size >= sizeof(*value) &&
+          equal(value->resource, handle) && value->reserved0 == 0 &&
+          value->kind == request->kind && value->byte_length == request->byte_length &&
+          equal(value->parent, request->parent) &&
+          value->deadline_ns == request->deadline_ns;
+}
+static VkResult create(struct r4vk_radv_ws *context,
+                       R4GfxVirtualRequest *request, uint64_t expected_address,
+                       R4GfxVirtualStatus *output)
+{
+   uint64_t ticks;
+   if (r4vk_radv_is_lost(context)) return VK_ERROR_DEVICE_LOST;
+   if (r4vk_operation_deadline(5000000000ull, &request->deadline_ns, &ticks) != 0)
+      return r4vk_radv_lost(context);
+   request->version = 1;
+   request->size = sizeof(*request);
+   request->adapter_id = context->facts.backend.binding.adapter_id;
+   request->memory_generation = context->facts.backend.memory_generation;
+   R4GfxVirtualStatus initial;
+   int32_t rc = r4draw_gfx_virtual_start(&context->draw, request, &initial);
+   if (rc != 1) return r4vk_radv_status(context, rc);
+   if (!valid(initial.resource)) return r4vk_radv_lost(context);
+   R4GfxVirtualStatus ready;
+   rc = r4draw_gfx_virtual_wait(&context->draw, &initial.resource, 0, ticks, &ready);
+   if (rc != 1) {
+      VkResult result = r4vk_radv_status(context, rc);
+      abandon(context, initial.resource);
+      return r4vk_radv_is_lost(context) ? VK_ERROR_DEVICE_LOST : result;
+   }
+   if (!matching_status(&ready, initial.resource, request) || !(ready.flags & 1) ||
+       (ready.flags & ~15u)) {
+      abandon(context, initial.resource);
+      return r4vk_radv_lost(context);
+   }
+   if (ready.result != 1) {
+      VkResult result = r4vk_radv_status(context, ready.result);
+      abandon(context, initial.resource);
+      return r4vk_radv_is_lost(context) ? VK_ERROR_DEVICE_LOST : result;
+   }
+   if ((ready.flags & 14) || !ready.address ||
+       ready.address > UINT64_MAX - ready.byte_length ||
+       (expected_address && ready.address != expected_address) ||
+       (request->kind == 1 && (ready.address % request->alignment ||
+          ready.address < context->facts.facts.va_start || ready.address >= context->facts.facts.va_end ||
+          ready.byte_length > context->facts.facts.va_end - ready.address))) {
+      abandon(context, initial.resource);
+      return r4vk_radv_lost(context);
+   }
+   *output = ready;
+   return VK_SUCCESS;
+}
+
+static void destroy_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buffer)
+{
+   struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
+   struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
+   assert(bo->ws == ws);
+   simple_mtx_lock(&ws->residency_mutex);
+   list_del(&bo->residency);
+   ws->allocated[buffer->initial_domain == RADEON_DOMAIN_VRAM] -= buffer->size;
+   simple_mtx_unlock(&ws->residency_mutex);
+   /* Broker loans survive public BO/VA handles. Destruction requests ordered
+    * retirement; it never treats logical closure as a physical unmap ACK. */
+   if (valid(bo->binding)) abandon(ws, bo->binding);
+   if (valid(bo->range)) abandon(ws, bo->range);
+   if (valid(bo->mapping.lease) && r4draw_gfx_buffer_unmap(&ws->draw, &bo->mapping.lease) != 1) r4vk_radv_lost(ws);
+   drop(ws, bo->reference.reference);
+   simple_mtx_destroy(&bo->mutex);
+   free(bo);
+   r4vk_radv_ws_unref(ws);
+}
+static void *map_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buffer, bool fixed, void *address)
+{
+   struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
+   struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
+   if (fixed || address || r4vk_radv_is_lost(ws) || buffer->initial_domain != RADEON_DOMAIN_GTT) return NULL;
+   simple_mtx_lock(&bo->mutex);
+   if (bo->map_count == UINT32_MAX) { simple_mtx_unlock(&bo->mutex); return NULL; }
+   if (!bo->map_count) {
+      int32_t rc = r4draw_gfx_buffer_map_persistent(&ws->draw, &bo->reference.reference,
+         R4OS_GFX_BUFFER_MAP_WRITE, 0, buffer->size, &bo->mapping);
+      if (rc != 1) { r4vk_radv_status(ws, rc); simple_mtx_unlock(&bo->mutex); return NULL; }
+      R4GfxBufferMap *m = &bo->mapping;
+      if (m->version != 1 || m->size < sizeof(*m) || m->reserved0 || !valid(m->lease) ||
+          !m->cpu_address || (m->cpu_address & 4095) || m->cpu_address > UINTPTR_MAX - buffer->size || m->byte_length != buffer->size ||
+          m->cache_policy != R4OS_GFX_BUFFER_CACHE_WRITE_BACK) {
+         if (valid(m->lease)) r4draw_gfx_buffer_unmap(&ws->draw, &m->lease);
+         memset(m, 0, sizeof(*m)); r4vk_radv_lost(ws); simple_mtx_unlock(&bo->mutex); return NULL;
+      }
+   }
+   bo->map_count++;
+   void *result = (void *)(uintptr_t)bo->mapping.cpu_address;
+   simple_mtx_unlock(&bo->mutex);
+   return result;
+}
+static void unmap_bo(struct radeon_winsys *base, struct radeon_winsys_bo *buffer, bool replace)
+{
+   struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
+   struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
+   simple_mtx_lock(&bo->mutex);
+   if (replace || !bo->map_count) { r4vk_radv_lost(ws); simple_mtx_unlock(&bo->mutex); return; }
+   if (!--bo->map_count) {
+      if (r4draw_gfx_buffer_unmap(&ws->draw, &bo->mapping.lease) != 1) r4vk_radv_lost(ws);
+      memset(&bo->mapping, 0, sizeof(bo->mapping));
+   }
+   simple_mtx_unlock(&bo->mutex);
+}
+static VkResult create_bo(struct radeon_winsys *base, uint64_t bytes, unsigned alignment,
+   enum radeon_bo_domain domain, enum radeon_bo_flag flags, unsigned priority,
+   uint64_t address, struct radeon_winsys_bo **out)
+{
+   struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
+   if (r4vk_radv_is_lost(ws)) return VK_ERROR_DEVICE_LOST;
+   const unsigned supported = RADEON_FLAG_GTT_WC | RADEON_FLAG_CPU_ACCESS | RADEON_FLAG_NO_CPU_ACCESS |
+      RADEON_FLAG_NO_INTERPROCESS_SHARING | RADEON_FLAG_READ_ONLY | RADEON_FLAG_32BIT |
+      RADEON_FLAG_PREFER_LOCAL_BO | RADEON_FLAG_ZERO_VRAM | RADEON_FLAG_DISCARDABLE |
+      RADEON_FLAG_VM_PAD_1PAGE | RADEON_FLAG_VM_UPDATE_WAIT;
+   if ((flags & ~supported) || address || priority > 31 ||
+       (domain != RADEON_DOMAIN_GTT && domain != RADEON_DOMAIN_VRAM && domain != RADEON_DOMAIN_VRAM_GTT))
+      return VK_ERROR_FEATURE_NOT_PRESENT;
+   if ((flags & RADEON_FLAG_CPU_ACCESS) && (flags & RADEON_FLAG_NO_CPU_ACCESS)) return VK_ERROR_FEATURE_NOT_PRESENT;
+   bool vram = domain == RADEON_DOMAIN_VRAM ||
+      (domain == RADEON_DOMAIN_VRAM_GTT && !(flags & RADEON_FLAG_CPU_ACCESS));
+   if (vram && (flags & (RADEON_FLAG_CPU_ACCESS | RADEON_FLAG_ZERO_VRAM))) return VK_ERROR_FEATURE_NOT_PRESENT;
+   if (alignment && !power_of_two(alignment)) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+   if (!alignment) alignment = 4096;
+   alignment = MAX2(alignment, 4096);
+   if (!power_of_two(alignment) || alignment > ws->facts.facts.max_allocation_bytes ||
+       !bytes || bytes > ws->facts.facts.max_allocation_bytes) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+   bytes = (bytes + 4095) & ~UINT64_C(4095);
+   /* GFX9 SMEM may fetch the page following an application allocation.
+    * Reserve real backing for that page within the same retained binding.
+    * Unlike the Linux read-only alias this consumes one additional page,
+    * which participates in the native budget and allocation-size checks.
+    * VM_UPDATE_WAIT is already satisfied by create()'s acknowledged bind. */
+   if (flags & RADEON_FLAG_VM_PAD_1PAGE) {
+      if (bytes > ws->facts.facts.max_allocation_bytes - 4096)
+         return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+      bytes += 4096;
+   }
+   struct r4vk_radv_bo *bo = calloc(1, sizeof(*bo));
+   if (!bo) return VK_ERROR_OUT_OF_HOST_MEMORY;
+   bo->ws = ws;
+   VkResult result;
+   if (vram) result = allocate_vram(ws, bytes, &bo->reference);
+   else {
+      R4GfxBufferDescriptor request = { .version = 1, .size = sizeof(request), .byte_length = bytes, .alignment = 4096, .usage = 15 };
+      int32_t rc = r4draw_gfx_buffer_create(&ws->draw, &request, &bo->reference);
+      result = rc == 1 ? VK_SUCCESS : r4vk_radv_status(ws, rc);
+   }
+   if (result != VK_SUCCESS) goto fail;
+   result = check_backing(ws, &bo->reference, vram, bytes);
+   if (result != VK_SUCCESS) goto fail;
+   R4GfxVirtualRequest request = { .kind = 1, .byte_length = bytes, .alignment = alignment, .location = vram };
+   R4GfxVirtualStatus ready;
+   result = create(ws, &request, 0, &ready);
+   if (result != VK_SUCCESS) goto fail;
+   bo->range = ready.resource;
+   bo->base.va = ready.address;
+   request = (R4GfxVirtualRequest){ .kind = 2, .byte_length = bytes, .parent = bo->range, .reference = bo->reference.reference };
+   result = create(ws, &request, bo->base.va, &ready);
+   if (result != VK_SUCCESS) goto fail;
+   bo->binding = ready.resource;
+   bo->base.size = bytes;
+   bo->base.initial_domain = vram ? RADEON_DOMAIN_VRAM : RADEON_DOMAIN_GTT;
+   bo->base.is_local = bo->base.use_global_list = true;
+   bo->base.vram_no_cpu_access = vram;
+   simple_mtx_init(&bo->mutex, mtx_plain);
+   r4vk_radv_ws_ref(ws);
+   simple_mtx_lock(&ws->residency_mutex);
+   bo->base.obj_id = ++ws->next_id;
+   ws->allocated[vram] += bytes;
+   list_addtail(&bo->residency, &ws->residency);
+   simple_mtx_unlock(&ws->residency_mutex);
+   if (flags & RADEON_FLAG_ZERO_VRAM) {
+      void *mapped = map_bo(base, &bo->base, false, NULL);
+      if (!mapped) { destroy_bo(base, &bo->base); return VK_ERROR_MEMORY_MAP_FAILED; }
+      memset(mapped, 0, bytes);
+      unmap_bo(base, &bo->base, false);
+   }
+   *out = &bo->base;
+   return VK_SUCCESS;
+fail:
+   if (valid(bo->binding)) abandon(ws, bo->binding);
+   if (valid(bo->range)) abandon(ws, bo->range);
+   if (valid(bo->reference.reference)) drop(ws, bo->reference.reference);
+   free(bo);
+   return r4vk_radv_is_lost(ws) ? VK_ERROR_DEVICE_LOST : result;
+}
+static VkResult from_ptr(struct radeon_winsys *ws, void *ptr, uint64_t size, unsigned priority, struct radeon_winsys_bo **out)
+{ (void)ws; (void)ptr; (void)size; (void)priority; (void)out; return VK_ERROR_INVALID_EXTERNAL_HANDLE; }
+static VkResult from_fd(struct radeon_winsys *ws, int fd, unsigned priority, struct radeon_winsys_bo **out, uint64_t *size)
+{ (void)ws; (void)fd; (void)priority; (void)out; (void)size; return VK_ERROR_INVALID_EXTERNAL_HANDLE; }
+static bool get_fd(struct radeon_winsys *ws, struct radeon_winsys_bo *bo, int *fd)
+{ (void)ws; (void)bo; (void)fd; return false; }
+static bool fd_flags(struct radeon_winsys *ws, int fd, enum radeon_bo_domain *d, enum radeon_bo_flag *f)
+{ (void)ws; (void)fd; (void)d; (void)f; return false; }
+static VkResult bind_virtual(struct radeon_winsys *ws, struct radeon_winsys_bo *parent, uint64_t off, uint64_t size, struct radeon_winsys_bo *bo, uint64_t bo_off)
+{ (void)ws; (void)parent; (void)off; (void)size; (void)bo; (void)bo_off; return VK_ERROR_FEATURE_NOT_PRESENT; }
+static VkResult resident(struct radeon_winsys *base, struct radeon_winsys_bo *buffer, bool enabled)
+{
+   (void)enabled;
+   struct r4vk_radv_ws *ws = (struct r4vk_radv_ws *)base;
+   struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
+   return bo->ws == ws && valid(bo->binding) && !r4vk_radv_is_lost(ws) ? VK_SUCCESS : VK_ERROR_DEVICE_LOST;
+}
+static void set_metadata(struct radeon_winsys *base, struct radeon_winsys_bo *buffer, struct radeon_bo_metadata *md)
+{
+   struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
+   if (md->size_metadata > sizeof(md->metadata)) { r4vk_radv_lost((struct r4vk_radv_ws *)base); return; }
+   simple_mtx_lock(&bo->mutex); bo->metadata = *md; simple_mtx_unlock(&bo->mutex);
+}
+static void get_metadata(struct radeon_winsys *base, struct radeon_winsys_bo *buffer, struct radeon_bo_metadata *md)
+{
+   (void)base; struct r4vk_radv_bo *bo = (struct r4vk_radv_bo *)buffer;
+   simple_mtx_lock(&bo->mutex); *md = bo->metadata; simple_mtx_unlock(&bo->mutex);
+}
+void r4vk_radv_memory_init(struct radeon_winsys *ws)
+{
+   ws->buffer_create = create_bo; ws->buffer_destroy = destroy_bo; ws->buffer_map = map_bo;
+   ws->buffer_unmap = unmap_bo; ws->buffer_from_ptr = from_ptr; ws->buffer_from_fd = from_fd;
+   ws->buffer_get_fd = get_fd; ws->buffer_get_flags_from_fd = fd_flags;
+   ws->buffer_virtual_bind = bind_virtual; ws->buffer_make_resident = resident;
+   ws->buffer_set_metadata = set_metadata; ws->buffer_get_metadata = get_metadata;
+}

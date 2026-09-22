@@ -19,3 +19,15 @@ void mesa_log(enum mesa_log_level level, const char *tag,
    mesa_log_v(level, tag, format, args);
    va_end(args);
 }
+void _mesa_log_multiline(enum mesa_log_level level, const char *tag, const char *text)
+{
+   if (level > MESA_DEFAULT_LOG_LEVEL) return;
+   while (*text) {
+      const char *end = strchr(text, '\n');
+      size_t bytes = end ? (size_t)(end - text) : strlen(text);
+      fprintf(stderr, "%s: ", tag);
+      fwrite(text, 1, bytes, stderr);
+      fputc('\n', stderr);
+      text += bytes + (end != NULL);
+   }
+}

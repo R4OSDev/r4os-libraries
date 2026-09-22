@@ -1,14 +1,20 @@
 ﻿# R4VK native Vulkan provider
 
-Roadmap 0.79.35 completes the native Vulkan resource/queue software integration.
-R4VK 0.1.17 provides Mesa's CPU runtime and NVK devices, memory/VA, descriptions,
-commands and submit/sync adapters through the standard ICD bootstrap.
-`IMAGE_SCOPE=slim` installs the module in every normal image. Without an
-admitted NVIDIA backend, Vulkan enumerates no device and the existing
-firmware-framebuffer renderer continues to work. This is not a software
-Vulkan renderer. Physical GPU qualification remains in OssiGPU.txt.
-The selected provider remains pinned Mesa NVK/NIL/NAK with R4OS resource
-contracts; NVIDIA.R4D remains the sole hardware owner.
+R4VK 0.1.18 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+runtime. Provider-specific constructors, revalidation and destruction select
+only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
+queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
+`IMAGE_SCOPE=slim` installs the module in normal images. Missing backends
+produce no device; the firmware-framebuffer renderer remains available.
+
+AMD 0.80.23 adds Picasso device facts, original RADV physical/logical device
+construction, native memory and binary/timeline sync. The SMP4 fixture uses
+the exact production archives and real R4OS resource brokers with modeled
+GPU receipts. Graphics/compute workload acceptance belongs to 0.80.24,
+Vulkan 1.3/WSI to 0.80.25, and physical qualification exclusively to 0.80.39.
+AMD is currently limited to API 1.0, 64 MB allocations and 32 resident
+bindings per submission; no conformance is claimed. See AMDRADV08023.txt/.json
+in Docs/Drivers. The native generators additionally require glslang 15.2.0.
 
 Roadmap 0.79.38 accepts the software Vulkan 1.3 profile. Captured public
 queries for modeled GA106/AD106 backends pass selected unmodified Khronos

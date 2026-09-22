@@ -428,6 +428,65 @@ pub const R4AmdYuvHeader = extern struct {
     chroma_x: u32,
     chroma_y: u32,
 };
+
+pub const R4AmdDeviceFacts = extern struct {
+    architecture: R4AmdArchitecture,
+    version: u32,
+    size: u32,
+    pci_domain: u32,
+    pci_bus: u32,
+    pci_device: u32,
+    pci_function: u32,
+    pci_revision: u32,
+    asic_revision: u32,
+    cu_mask: u32,
+    rb_mask: u32,
+    pfp_fw: u32,
+    me_fw: u32,
+    mec_fw: u32,
+    me_feature: u32,
+    mec_feature: u32,
+    ce_fw: u32,
+    smu_fw: u32,
+    flags: u32,
+    uma_bytes: u64,
+    native_budget: u64,
+    va_start: u64,
+    va_end: u64,
+    max_allocation_bytes: u64,
+    max_se: u32,
+    max_cu_per_sh: u32,
+    max_sh_per_se: u32,
+    max_rb_per_se: u32,
+    num_tccs: u32,
+    num_gprs: u32,
+    max_gs_threads: u32,
+    gs_table_depth: u32,
+    gs_primitive_depth: u32,
+    parameter_cache_depth: u32,
+    double_offchip_lds: u32,
+    wave_size: u32,
+    max_waves_per_simd: u32,
+    max_scratch_slots_per_cu: u32,
+    lds_bytes: u32,
+    reserved: u32,
+};
+
+pub const R4AmdNativeSubmit = extern struct {
+    version: u32,
+    size: u32,
+    engine: u32,
+    ib_count: u32,
+    flags: u32,
+    reserved0: u32,
+    reserved1: u64,
+};
+
+pub const R4AmdNativeIb = extern struct {
+    address: u64,
+    dwords: u32,
+    binding_index: u32,
+};
 pub const info_version: u32 = 1;
 pub const status_ok: i32 = 0;
 pub const profile_version: u32 = 1;

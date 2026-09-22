@@ -73,13 +73,16 @@ const Model = struct {
     var retire_ack = false;
     const AmdPacket = extern struct { header: amd.R4AmdYuvHeader, color: [64]u32, matrix: [3][4]f32 };
     var amd_packet: AmdPacket = undefined;
+    var amd_properties_revision: u32 = 1;
+    var amd_properties_short = false;
     fn properties(input: *const a.GfxBackendBinding, out: *a.GfxBackendProperties) callconv(.c) i32 {
         if (input.adapter_id == 3) {
             const arch: amd.R4AmdArchitecture = .{ .version=1,.size=@sizeOf(amd.R4AmdArchitecture),.vendor_id=amd.vendor_id,.device_id=0x15d8,
                 .gc_version=amd.gc_9_1_0,.sdma_version=amd.sdma_4_1_0,.gb_addr_config=0x24000042,.chip_revision=0x41,
                 .bind_alignment=4096,.memory_generation=97,.flags=0,.reserved=0,.max_image_bytes=64*1024*1024 };
             out.*=.{ .interface_id_lo=amd.image_v1_header.interface_id_lo,.interface_id_hi=amd.image_v1_header.interface_id_hi,
-                .revision=1,.data_bytes=@sizeOf(amd.R4AmdArchitecture) };
+                .revision=amd_properties_revision,.data_bytes=if (amd_properties_revision == 1) @sizeOf(amd.R4AmdArchitecture) else @sizeOf(amd.R4AmdDeviceFacts) };
+            if (amd_properties_short) out.data_bytes -= 1;
             @memcpy(out.data[0..@sizeOf(amd.R4AmdArchitecture)],std.mem.asBytes(&arch)); return 1;
         }
         std.debug.assert(std.meta.eql(input.*, binding));
@@ -1002,6 +1005,9 @@ pub fn check() !void {
     imports[3].table = @intFromPtr(&Model.nv_render); imports[3].resolved_version = nv.render_v1_revision;
     try checkNativeYuv(&config);
     try checkAmdYuv(&config, &imports);
+    Model.amd_properties_revision = 2;
+    defer Model.amd_properties_revision = 1;
+    try checkAmdYuv(&config, &imports);
 }
 
 fn checkAmdYuv(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport) !void {
@@ -1040,6 +1046,9 @@ fn checkAmdYuv(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport
             .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 } };
     desc.resource.flags = c.image_target; desc.resource.source_kind = c.source_import_buffer; desc.resource.source_address = @intFromPtr(&destination.reference);
     var target: c.R4GfxResource = undefined;
+    Model.amd_properties_short = true;
+    try t.expectEqual(c.status_unsupported, colors.color_resource_create(&handle, &desc, &target));
+    Model.amd_properties_short = false;
     try t.expectEqual(c.status_ok, colors.color_resource_create(&handle, &desc, &target));
     try t.expectEqual(@as(i32, 1), Model.release(&destination.reference));
     var request = std.mem.zeroes(c.R4GfxYuvRenderRequest);

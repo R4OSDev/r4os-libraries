@@ -806,6 +806,118 @@ _Static_assert(offsetof(R4AmdYuvHeader, plane2) == 160u, "R4AmdYuvHeader.plane2 
 _Static_assert(offsetof(R4AmdYuvHeader, chroma_x) == 192u, "R4AmdYuvHeader.chroma_x offset mismatch");
 _Static_assert(offsetof(R4AmdYuvHeader, chroma_y) == 196u, "R4AmdYuvHeader.chroma_y offset mismatch");
 
+typedef struct R4AmdDeviceFacts {
+    R4AmdArchitecture architecture;
+    uint32_t version;
+    uint32_t size;
+    uint32_t pci_domain;
+    uint32_t pci_bus;
+    uint32_t pci_device;
+    uint32_t pci_function;
+    uint32_t pci_revision;
+    uint32_t asic_revision;
+    uint32_t cu_mask;
+    uint32_t rb_mask;
+    uint32_t pfp_fw;
+    uint32_t me_fw;
+    uint32_t mec_fw;
+    uint32_t me_feature;
+    uint32_t mec_feature;
+    uint32_t ce_fw;
+    uint32_t smu_fw;
+    uint32_t flags;
+    uint64_t uma_bytes;
+    uint64_t native_budget;
+    uint64_t va_start;
+    uint64_t va_end;
+    uint64_t max_allocation_bytes;
+    uint32_t max_se;
+    uint32_t max_cu_per_sh;
+    uint32_t max_sh_per_se;
+    uint32_t max_rb_per_se;
+    uint32_t num_tccs;
+    uint32_t num_gprs;
+    uint32_t max_gs_threads;
+    uint32_t gs_table_depth;
+    uint32_t gs_primitive_depth;
+    uint32_t parameter_cache_depth;
+    uint32_t double_offchip_lds;
+    uint32_t wave_size;
+    uint32_t max_waves_per_simd;
+    uint32_t max_scratch_slots_per_cu;
+    uint32_t lds_bytes;
+    uint32_t reserved;
+} R4AmdDeviceFacts;
+_Static_assert(sizeof(R4AmdDeviceFacts) == 240u, "R4AmdDeviceFacts size mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, architecture) == 0u, "R4AmdDeviceFacts.architecture offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, version) == 64u, "R4AmdDeviceFacts.version offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, size) == 68u, "R4AmdDeviceFacts.size offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, pci_domain) == 72u, "R4AmdDeviceFacts.pci_domain offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, pci_bus) == 76u, "R4AmdDeviceFacts.pci_bus offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, pci_device) == 80u, "R4AmdDeviceFacts.pci_device offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, pci_function) == 84u, "R4AmdDeviceFacts.pci_function offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, pci_revision) == 88u, "R4AmdDeviceFacts.pci_revision offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, asic_revision) == 92u, "R4AmdDeviceFacts.asic_revision offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, cu_mask) == 96u, "R4AmdDeviceFacts.cu_mask offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, rb_mask) == 100u, "R4AmdDeviceFacts.rb_mask offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, pfp_fw) == 104u, "R4AmdDeviceFacts.pfp_fw offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, me_fw) == 108u, "R4AmdDeviceFacts.me_fw offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, mec_fw) == 112u, "R4AmdDeviceFacts.mec_fw offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, me_feature) == 116u, "R4AmdDeviceFacts.me_feature offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, mec_feature) == 120u, "R4AmdDeviceFacts.mec_feature offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, ce_fw) == 124u, "R4AmdDeviceFacts.ce_fw offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, smu_fw) == 128u, "R4AmdDeviceFacts.smu_fw offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, flags) == 132u, "R4AmdDeviceFacts.flags offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, uma_bytes) == 136u, "R4AmdDeviceFacts.uma_bytes offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, native_budget) == 144u, "R4AmdDeviceFacts.native_budget offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, va_start) == 152u, "R4AmdDeviceFacts.va_start offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, va_end) == 160u, "R4AmdDeviceFacts.va_end offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, max_allocation_bytes) == 168u, "R4AmdDeviceFacts.max_allocation_bytes offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, max_se) == 176u, "R4AmdDeviceFacts.max_se offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, max_cu_per_sh) == 180u, "R4AmdDeviceFacts.max_cu_per_sh offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, max_sh_per_se) == 184u, "R4AmdDeviceFacts.max_sh_per_se offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, max_rb_per_se) == 188u, "R4AmdDeviceFacts.max_rb_per_se offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, num_tccs) == 192u, "R4AmdDeviceFacts.num_tccs offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, num_gprs) == 196u, "R4AmdDeviceFacts.num_gprs offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, max_gs_threads) == 200u, "R4AmdDeviceFacts.max_gs_threads offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, gs_table_depth) == 204u, "R4AmdDeviceFacts.gs_table_depth offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, gs_primitive_depth) == 208u, "R4AmdDeviceFacts.gs_primitive_depth offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, parameter_cache_depth) == 212u, "R4AmdDeviceFacts.parameter_cache_depth offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, double_offchip_lds) == 216u, "R4AmdDeviceFacts.double_offchip_lds offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, wave_size) == 220u, "R4AmdDeviceFacts.wave_size offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, max_waves_per_simd) == 224u, "R4AmdDeviceFacts.max_waves_per_simd offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, max_scratch_slots_per_cu) == 228u, "R4AmdDeviceFacts.max_scratch_slots_per_cu offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, lds_bytes) == 232u, "R4AmdDeviceFacts.lds_bytes offset mismatch");
+_Static_assert(offsetof(R4AmdDeviceFacts, reserved) == 236u, "R4AmdDeviceFacts.reserved offset mismatch");
+
+typedef struct R4AmdNativeSubmit {
+    uint32_t version;
+    uint32_t size;
+    uint32_t engine;
+    uint32_t ib_count;
+    uint32_t flags;
+    uint32_t reserved0;
+    uint64_t reserved1;
+} R4AmdNativeSubmit;
+_Static_assert(sizeof(R4AmdNativeSubmit) == 32u, "R4AmdNativeSubmit size mismatch");
+_Static_assert(offsetof(R4AmdNativeSubmit, version) == 0u, "R4AmdNativeSubmit.version offset mismatch");
+_Static_assert(offsetof(R4AmdNativeSubmit, size) == 4u, "R4AmdNativeSubmit.size offset mismatch");
+_Static_assert(offsetof(R4AmdNativeSubmit, engine) == 8u, "R4AmdNativeSubmit.engine offset mismatch");
+_Static_assert(offsetof(R4AmdNativeSubmit, ib_count) == 12u, "R4AmdNativeSubmit.ib_count offset mismatch");
+_Static_assert(offsetof(R4AmdNativeSubmit, flags) == 16u, "R4AmdNativeSubmit.flags offset mismatch");
+_Static_assert(offsetof(R4AmdNativeSubmit, reserved0) == 20u, "R4AmdNativeSubmit.reserved0 offset mismatch");
+_Static_assert(offsetof(R4AmdNativeSubmit, reserved1) == 24u, "R4AmdNativeSubmit.reserved1 offset mismatch");
+
+typedef struct R4AmdNativeIb {
+    uint64_t address;
+    uint32_t dwords;
+    uint32_t binding_index;
+} R4AmdNativeIb;
+_Static_assert(sizeof(R4AmdNativeIb) == 16u, "R4AmdNativeIb size mismatch");
+_Static_assert(offsetof(R4AmdNativeIb, address) == 0u, "R4AmdNativeIb.address offset mismatch");
+_Static_assert(offsetof(R4AmdNativeIb, dwords) == 8u, "R4AmdNativeIb.dwords offset mismatch");
+_Static_assert(offsetof(R4AmdNativeIb, binding_index) == 12u, "R4AmdNativeIb.binding_index offset mismatch");
+
 #define R4AMD_INFO_VERSION ((uint32_t)1)
 #define R4AMD_STATUS_OK ((int32_t)0)
 #define R4AMD_PROFILE_VERSION ((uint32_t)1)

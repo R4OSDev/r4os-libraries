@@ -271,10 +271,15 @@ retain their existing provenance. No unresolved runtime symbol is replaced
 by a successful placeholder, and the proof objects are not linked into the
 foundation R4Ls yet.
 
-R4VK also preserves the original RADV directory as reference-only material
-in `R4VK/ThirdParty/AMDReference`. Its `Sources.json` lists all original
-file hashes and the exact Mesa archive. RADV and its Linux winsys are not
-compiled or enabled by 0.80.2. R4OS integration is assigned to 0.80.23-25.
+R4VK preserves the unchanged original RADV directory in
+`R4VK/ThirdParty/AMDReference`; its `Sources.json` pins all original files.
+Since 0.80.23 the native build selects RADV/ACO/AddrLib and common Vulkan/NIR
+from the same pinned Mesa archive and applies `Port/MesaRADV.patch` only in
+the private build tree. Linux winsys/DRM discovery remains reference-only.
+The expanded R4VK notice bundle retains AMD, Valve, Red Hat and all other
+original notices plus the full libc++ Apache-2.0 WITH LLVM-exception terms.
+`R4VK/Tools/CppSources.json` pins its eight selected libc++ units and headers.
+glslang 15.2.0 is a host generator, not part of the installed R4L.
 
 ## AMD SDMA copy encoder (0.80.10)
 

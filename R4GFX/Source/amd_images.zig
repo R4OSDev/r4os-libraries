@@ -22,7 +22,8 @@ pub fn query(device: *d.Device, desc: a.GfxBufferDescriptor) d.Error!Result {
     try d.platform(device.queues().backendProperties(&device.selected.binding, &properties));
     if (properties.version != 1 or properties.size < @sizeOf(a.GfxBackendProperties) or
         properties.interface_id_lo != amd.image_v1_header.interface_id_lo or properties.interface_id_hi != amd.image_v1_header.interface_id_hi or
-        properties.revision != 1 or properties.data_bytes != @sizeOf(amd.R4AmdArchitecture)) return error.Unsupported;
+        ((properties.revision != 1 or properties.data_bytes != @sizeOf(amd.R4AmdArchitecture)) and
+        (properties.revision != 2 or properties.data_bytes != @sizeOf(amd.R4AmdDeviceFacts)))) return error.Unsupported;
     for (properties.data[properties.data_bytes..]) |byte| if (byte != 0) return error.Invalid;
     const arch = std.mem.bytesToValue(amd.R4AmdArchitecture, properties.data[0..@sizeOf(amd.R4AmdArchitecture)]);
     return validate(client, arch, device.selected, desc, @ptrFromInt(std.mem.alignForward(usize, @intFromPtr(&device.amd_image_scratch), 16)));

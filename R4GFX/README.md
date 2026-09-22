@@ -245,3 +245,7 @@ Generic BO descriptors,
 queues, fences and budgets remain with their common owners. Opaque modifiers
 are passed only to the selected driver, never interpreted as NVIDIA layouts
 for an AMD resource. Existing software/Virtio presentation stays independent.
+
+AMD backend properties (0.80.23): the image/render consumers accept the exact
+revision/length pairs 1/64 and 2/240 with the unchanged architecture prefix
+and zero padding. Truncated or mismatched payloads remain unsupported.

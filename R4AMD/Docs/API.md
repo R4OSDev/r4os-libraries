@@ -104,6 +104,9 @@ Typen
 - `R4AmdRect`: 16 Byte, Alignment 4. Pixel rectangle in the image coordinate system.
 - `R4AmdYuvPlane`: 32 Byte, Alignment 8. Index into canonical native resource bindings; byte offset and pitch must match the referenced image plane. No CPU pointer or unretained GPU VA.
 - `R4AmdYuvHeader`: 200 Byte, Alignment 8. Native queue BACKEND_V1 profile revision1 command kind1: this 200-byte header followed by the common 256-byte color program and 48-byte YUV matrix (12 IEEE754 float32 bits), exactly504 bytes. Format1 NV12/2 P010/3 YUV420P, filter0 nearest/1 linear RGB after EOTF, blend0 replace/1 premultiplied over, opacity0..65535. Chroma origin uses float32 bits. Unused plane2 is zero. Driver binds its immutable ACO programs and retains all canonical mappings until actual completion.
+- `R4AmdDeviceFacts`: 240 Byte, Alignment 8. IMAGE_V1 backend properties revision2. Retains the exact 64-byte revision1 architecture prefix, followed by bound native device facts. No Mesa structures, pointers, feature or Vulkan admission claims. Never manufacture facts for an absent backend.
+- `R4AmdNativeSubmit`: 32 Byte, Alignment 8. BACKEND_V1 native command revision1: 32-byte header then exactly ib_count R4AmdNativeIb records. Device facts revision2 flags bit0 admits PM4; 32+16*N bytes cannot collide with the legacy 504-byte YUV packet. The canonical submit retains every resident binding through actual completion. Each IB is inside a retained binding, VMID1. Provider preambles supply complete shader context; no embedded CPU pointers.
+- `R4AmdNativeIb`: 16 Byte, Alignment 8. One immutable indirect-buffer descriptor. Driver validates address, length, binding identity and generation before publishing any commands.
 
 Besitzregeln
 ------------

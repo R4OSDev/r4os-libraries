@@ -18,6 +18,7 @@ pub fn bind(kernel: *const r4os.abi.R4XStartR4Sys) bool {
 }
 
 comptime {
+    _ = @import("cpp.zig");
     _ = memory;
     _ = time;
     _ = math;

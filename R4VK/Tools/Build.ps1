@@ -49,7 +49,10 @@ function PreparationCurrent([string]$Path, [string]$Script) {
         $record.source_helper_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot 'MesaSource.ps1')) -or
         $record.prepare_script_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot $Script))) { return $false }
     if ($Script -eq 'Prepare.ps1') {
-        if ($record.runtime_patch_sha256 -ne (Get-R4VKFileHash (Join-Path $mesa.unit 'Port/MesaRuntime.patch'))) { return $false }
+        if ($record.runtime_patch_sha256 -ne (Get-R4VKFileHash (Join-Path $mesa.unit 'Port/MesaRuntime.patch')) -or
+            $record.radv_patch_sha256 -ne (Get-R4VKFileHash (Join-Path $mesa.unit 'Port/MesaRADV.patch')) -or
+            $record.amd_prepare_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot 'PrepareAMD.ps1')) -or
+            $record.shader_tools_lock_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot 'ShaderTools.lock.json'))) { return $false }
     } else {
         if ($record.generator_patch_sha256 -ne (Get-R4VKFileHash (Join-Path $mesa.unit 'Port/MesaGenerators.patch')) -or
             $record.shader_tools_lock_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot 'ShaderTools.lock.json'))) { return $false }

@@ -48,6 +48,9 @@ foreach ($record in @($prepare, $shader)) {
         $record.source_helper_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot 'MesaSource.ps1'))) { throw 'Mesa input preparation is stale.' }
 }
 if ($prepare.runtime_patch_sha256 -ne (Get-R4VKFileHash (Join-Path $mesa.unit 'Port/MesaRuntime.patch')) -or
+    $prepare.radv_patch_sha256 -ne (Get-R4VKFileHash (Join-Path $mesa.unit 'Port/MesaRADV.patch')) -or
+    $prepare.amd_prepare_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot 'PrepareAMD.ps1')) -or
+    $prepare.shader_tools_lock_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot 'ShaderTools.lock.json')) -or
     $prepare.prepare_script_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot 'Prepare.ps1')) -or
     $shader.generator_patch_sha256 -ne (Get-R4VKFileHash (Join-Path $mesa.unit 'Port/MesaGenerators.patch')) -or
     $shader.prepare_script_sha256 -ne (Get-R4VKFileHash (Join-Path $PSScriptRoot 'PrepareShaders.ps1')) -or
@@ -61,29 +64,49 @@ foreach ($pair in @(@($prepared, $prepare), @($shaders, $shader))) {
     }
 }
 $inputs = Get-R4VKNativeCInputs -Mesa $mesa -CompilerRoot $compiler -MesaRoot $prepared -ShaderRoot $shaders -Clang $clang
+$cpp = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'CppSources.json') | ConvertFrom-Json
+foreach ($entry in $cpp.files) {
+    if ((Get-R4VKFileHash (Join-Path $zigRoot $entry.path)) -ne $entry.sha256) { throw "Pinned libc++ input changed: $($entry.path)" }
+}
+$cppPrivate = Join-Path $output 'Cpp'
+[IO.Directory]::CreateDirectory((Join-Path $cppPrivate 'include')) | Out-Null
+Copy-Item -LiteralPath (Join-Path $zigRoot 'lib/libcxx/src/new.cpp') -Destination (Join-Path $cppPrivate 'new.cpp') -Force
+$header = [IO.File]::ReadAllText((Join-Path $zigRoot 'lib/libcxx/src/include/overridable_function.h'))
+$needle = '#elif defined(_LIBCPP_OBJECT_FORMAT_ELF) && !defined(__NVPTX__)'
+if (!$header.Contains($needle)) { throw 'Pinned libc++ override template changed.' }
+[IO.File]::WriteAllText((Join-Path $cppPrivate 'include/overridable_function.h'),
+    $header.Replace($needle, $needle + ' && !defined(R4OS_NATIVE_R4M)'), [Text.UTF8Encoding]::new($false))
+$inputs.sources += @(foreach ($name in $cpp.units) {
+    if ($name -eq 'new') { Join-Path $cppPrivate 'new.cpp' } else { Join-Path $zigRoot "lib/libcxx/src/$name.cpp" }
+})
+$inputs.sources += Join-Path $mesa.libraries 'Shared/Native/cpp.cpp'
+$inputs.cpp_arguments += '-DR4OS_NATIVE_R4M=1'
 $paths = @($inputs.sources) + @($mesa.lock_path, $mesa.manifest_path, $zig, $clang,
     (Join-Path $compiler 'build.json'), (Join-Path $prepared 'prepare.json'), (Join-Path $shaders 'shaders.json'),
     (Join-Path $mesa.libraries 'R4NAK/Tools/CInputs.ps1'))
 foreach ($directory in @('Port', 'Tools', 'Source', 'Contract')) {
     $path = Join-Path $mesa.unit $directory
     if (Test-Path -LiteralPath $path) {
-        $paths += @(Get-ChildItem -LiteralPath $path -Recurse -File | Where-Object Extension -in '.c','.h','.zig','.json','.ps1','.patch' | ForEach-Object FullName)
+        $paths += @(Get-ChildItem -LiteralPath $path -Recurse -File | Where-Object Extension -in '.c','.cpp','.h','.zig','.json','.ps1','.patch' | ForEach-Object FullName)
     }
 }
 foreach ($directory in $inputs.header_roots) {
-    $paths += @(Get-ChildItem -LiteralPath $directory -Recurse -File -Filter '*.h' | ForEach-Object FullName)
+    $paths += @(Get-ChildItem -LiteralPath $directory -Recurse -File | Where-Object Extension -in '.h','.hpp','.inc','.inl','' | ForEach-Object FullName)
 }
 # These implementation sources are included by the thin Port C wrappers.
 # Hashing only the wrappers would silently accept stale native archives.
-foreach ($name in @('string.c', 'format.c', 'stdio.c', 'sort.c', 'numeric.c')) {
+foreach ($name in @('string.c', 'format.c', 'stdio.c', 'sort.c', 'numeric.c', 'errno.c')) {
     $paths += Join-Path $mesa.libraries ('Shared/Native/' + $name)
 }
+$paths += Join-Path $cppPrivate 'include/overridable_function.h'
+$paths += @($cpp.files | ForEach-Object { Join-Path $zigRoot $_.path })
 $records = @(foreach ($path in $paths | Sort-Object -Unique) {
     [ordered]@{path = [IO.Path]::GetRelativePath($mesa.workspace, $path).Replace('\', '/'); sha256 = (Get-R4VKFileHash $path)}
 })
 $identity = [ordered]@{schema = 1; host = $(if ($IsWindows) { 'Windows-x64' } else { 'Linux-x64' });
     compiler = [string]$reported[0]; nak = $nakRecord.identity; inputs = $records;
-    arguments = @($inputs.arguments | ForEach-Object { $_.Replace($mesa.workspace, '<workspace>') })}
+    arguments = @($inputs.arguments | ForEach-Object { $_.Replace($mesa.workspace, '<workspace>') });
+    cpp_arguments = @($inputs.cpp_arguments | ForEach-Object { $_.Replace($mesa.workspace, '<workspace>') })}
 $digest = [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes(($identity | ConvertTo-Json -Depth 8 -Compress)))
 $id = [Convert]::ToHexString($digest).ToLowerInvariant()
 $recordPath = Join-Path $output 'native.json'
@@ -111,6 +134,7 @@ $identitySource = Join-Path $output 'build_identity.c'
     (@($digest | ForEach-Object { [string]$_ }) -join ',') + "};`n", [Text.UTF8Encoding]::new($false))
 $sources = @($inputs.sources) + @($identitySource)
 $options = $inputs.arguments
+$cppOptions = $inputs.cpp_arguments
 $workspace = $mesa.workspace
 $results = @($sources | ForEach-Object -Parallel {
     $file = $_
@@ -119,6 +143,15 @@ $results = @($sources | ForEach-Object -Parallel {
     $object = Join-Path $using:objects ($name + '-' + [IO.Path]::GetFileName($file) + '.o')
     $log = $object + '.log'
     $compileOptions = $using:options
+    if ([IO.Path]::GetExtension($file) -eq '.cpp') {
+        $compileOptions = $using:cppOptions
+        if ([IO.Path]::GetFileName($file) -eq 'aco_opcodes.cpp') {
+            $compileOptions += @('-std=c++23', '-fconstexpr-steps=10000000')
+        } elseif ($file.StartsWith($using:zigRoot, [StringComparison]::OrdinalIgnoreCase) -or
+                  $file.StartsWith($using:cppPrivate, [StringComparison]::OrdinalIgnoreCase)) {
+            $compileOptions += @('-std=c++20', '-D_LIBCPP_BUILDING_LIBRARY')
+        }
+    }
     & $using:clang @compileOptions -c $file -o $object 2> $log
     [ordered]@{source = $relative; success = ($LASTEXITCODE -eq 0); object = $object; log = $log}
 } -ThrottleLimit $Jobs)

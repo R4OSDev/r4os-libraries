@@ -719,7 +719,7 @@
                                            uint32_t *pToolCount,
 --- a/src/nouveau/vulkan/nvk_instance.c
 +++ b/src/nouveau/vulkan/nvk_instance.c
-@@ -3,6 +3,10 @@
+@@ -3,10 +3,15 @@
   * SPDX-License-Identifier: MIT
   */
  #include "nvk_instance.h"
@@ -727,12 +727,17 @@
 +#include "r4vk_platform.h"
 +#include "r4vk_wsi.h"
 +#endif
-
+ 
  #include "nvk_entrypoints.h"
  #include "nvk_physical_device.h"
-@@ -27,6 +31,11 @@
+ #include "nvk_drirc.h"
++#include "r4vk_provider.h"
+ 
+ #include "vulkan/wsi/wsi_common.h"
+ 
+@@ -27,6 +32,11 @@
  }
-
+ 
  static const struct vk_instance_extension_table instance_extensions = {
 +#ifdef R4OS_VULKAN
 +   .KHR_surface = true,
@@ -742,7 +747,7 @@
  #ifdef NVK_USE_WSI_PLATFORM
     .KHR_get_surface_capabilities2 = true,
     .KHR_surface = true,
-@@ -54,7 +63,7 @@
+@@ -54,7 +64,7 @@
     .EXT_display_surface_counter = true,
     .EXT_acquire_drm_display = true,
  #endif
@@ -751,24 +756,24 @@
     .EXT_headless_surface = true,
  #endif
     .KHR_device_group_creation = true,
-@@ -78,6 +87,7 @@
+@@ -78,6 +88,7 @@
        &instance_extensions, pPropertyCount, pProperties);
  }
-
+ 
 +#ifndef R4OS_VULKAN
  static void
  nvk_init_debug_flags(struct nvk_instance *instance)
  {
-@@ -127,6 +137,8 @@
+@@ -127,6 +138,8 @@
        instance->debug_flags |= NVK_DEBUG_ZERO_MEMORY;
  }
-
+ 
 +#endif
 +
  VKAPI_ATTR VkResult VKAPI_CALL
  nvk_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
                     const VkAllocationCallbacks *pAllocator,
-@@ -147,23 +159,38 @@
+@@ -147,23 +160,42 @@
     vk_instance_dispatch_table_from_entrypoints(&dispatch_table,
                                                 &nvk_instance_entrypoints,
                                                 true);
@@ -777,12 +782,12 @@
                                                 &wsi_instance_entrypoints,
                                                 false);
 +#endif
-
+ 
     result = vk_instance_init(&instance->vk, &instance_extensions,
                               &dispatch_table, pCreateInfo, pAllocator);
     if (result != VK_SUCCESS)
        goto fail_alloc;
-
+ 
 +#ifdef R4OS_VULKAN
 +   r4vk_nvk_init_instance_options(instance);
 +#else
@@ -793,13 +798,18 @@
 +#endif
 +
 +#if defined(R4OS_VULKAN)
-+   instance->vk.physical_devices.enumerate = r4vk_nvk_enumerate_physical_devices;
++   instance->vk.physical_devices.enumerate = r4vk_enumerate_physical_devices;
 +#else
     instance->vk.physical_devices.try_create_for_drm =
        nvk_create_drm_physical_device;
 +#endif
++#ifdef R4OS_VULKAN
++   instance->vk.physical_devices.destroy = r4vk_destroy_physical_device;
++#else
     instance->vk.physical_devices.destroy = nvk_physical_device_destroy;
-
+-
++#endif
++
 +#if defined(R4OS_VULKAN)
 +   STATIC_ASSERT(sizeof(instance->driver_build_sha) == sizeof(r4vk_build_identity));
 +   memcpy(instance->driver_build_sha, r4vk_build_identity,
@@ -808,26 +818,26 @@
     const struct build_id_note *note =
        build_id_find_nhdr_for_addr(nvk_CreateInstance);
     if (!note) {
-@@ -181,6 +208,7 @@
-
+@@ -181,6 +213,7 @@
+ 
     STATIC_ASSERT(sizeof(instance->driver_build_sha) == BLAKE3_KEY_LEN);
     copy_build_id_to_sha1(instance->driver_build_sha, note);
 +#endif
-
+ 
     *pInstance = nvk_instance_to_handle(instance);
     return VK_SUCCESS;
-@@ -202,8 +230,10 @@
+@@ -202,8 +235,10 @@
     if (!instance)
        return;
-
+ 
 +#ifndef R4OS_VULKAN
     driDestroyOptionCache(&instance->drirc.options);
     driDestroyOptionInfo(&instance->drirc.available_options);
 +#endif
-
+ 
     vk_instance_finish(&instance->vk);
     vk_free(&instance->vk.alloc, instance);
-@@ -213,6 +243,14 @@
+@@ -213,6 +248,14 @@
  nvk_GetInstanceProcAddr(VkInstance _instance, const char *pName)
  {
     VK_FROM_HANDLE(nvk_instance, instance, _instance);
@@ -4684,3 +4694,16 @@
     if (mem_size > 0) {
        if (pCreateInfo->flags & VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_EXT) {
           pool->host_mem = vk_zalloc2(&dev->vk.alloc, pAllocator, mem_size,
+--- a/src/vulkan/runtime/vk_physical_device.h
++++ b/src/vulkan/runtime/vk_physical_device.h
+@@ -57,6 +57,10 @@
+ 
+    /** Instance which is the parent of this physical device */
+    struct vk_instance *instance;
++#ifdef R4OS_VULKAN
++   /* Native provider identity; never infer a private layout from PCI data. */
++   const struct r4vk_provider *r4os_provider;
++#endif
+ 
+    /** Table of all supported device extensions
+     *

@@ -73,3 +73,10 @@ avoiding unused POSIX signal.h when DEBUG=0. Original bytes stay unchanged.
 Adapted Mesa code retains MIT notices; original R4OS code is Apache-2.0.
 Tools/ExportLegal.ps1 exports all compiled AddrLib and image/encoder notices
 plus the complete MIT grant to the distribution.
+
+The 0.80.23 contract additionally defines the 240-byte R4AmdDeviceFacts,
+32-byte R4AmdNativeSubmit and 16-byte R4AmdNativeIb wire types. Existing
+types, interface layouts and the R4AMD 0.1.5 runtime are unchanged. Backend
+properties revision 2 is distinct from the IMAGE_V1 library revision and
+retains the 64-byte R4AmdArchitecture prefix. Native driver profile/commands
+keep revision 1 and distinguish PM4 from legacy YUV by exact payload length.

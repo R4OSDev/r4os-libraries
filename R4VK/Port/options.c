@@ -7,3 +7,4 @@
 const char *os_get_option(const char *name) { (void)name; return NULL; }
 const char *os_get_option_cached(const char *name) { return os_get_option(name); }
 const char *os_get_option_secure(const char *name) { return os_get_option(name); }
+char *getenv(const char *name) { return (char *)os_get_option(name); }

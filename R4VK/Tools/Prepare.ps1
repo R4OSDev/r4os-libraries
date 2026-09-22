@@ -31,15 +31,17 @@ $overlay = Join-Path $output 'CSource'
 [IO.File]::WriteAllText((Join-Path $generated 'git_sha1.h'), '#define MESA_GIT_SHA1 ""' + "`n", [Text.UTF8Encoding]::new($false))
 # Quoted includes must resolve one consistent private layout in every C unit.
 # Keep NVK and Vulkan runtime headers with their consuming C source files.
-foreach ($directory in @('src/nouveau/vulkan', 'src/vulkan/runtime', 'src/vulkan/util', 'src/compiler', 'src/util')) {
-    foreach ($file in Get-ChildItem -LiteralPath (Join-Path $source $directory) -File -Recurse | Where-Object Extension -in @('.c', '.h')) {
+foreach ($directory in @('src/nouveau/vulkan', 'src/vulkan/runtime', 'src/vulkan/util', 'src/compiler', 'src/util',
+                         'src/amd/vulkan', 'src/amd/common', 'src/amd/compiler', 'src/amd/addrlib')) {
+    foreach ($file in Get-ChildItem -LiteralPath (Join-Path $source $directory) -File -Recurse | Where-Object Extension -in @('.c', '.h', '.cpp')) {
         $relative = [IO.Path]::GetRelativePath($source, $file.FullName)
         $destination = Join-Path $overlay $relative
         [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($destination)) | Out-Null
         Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
     }
 }
-$patch = Join-Path $unit 'Port/MesaRuntime.patch'
+$patches = @((Join-Path $unit 'Port/MesaRuntime.patch'), (Join-Path $unit 'Port/MesaRADV.patch'))
+foreach ($patch in $patches) {
 $patchedFiles = @([regex]::Matches([IO.File]::ReadAllText($patch), '(?m)^--- a/(.+)$') | ForEach-Object { $_.Groups[1].Value.TrimEnd("`r") })
 foreach ($relative in $patchedFiles) {
     $destination = Join-Path $overlay $relative
@@ -52,6 +54,7 @@ try {
     Run $git @('apply', '--unsafe-paths', ('--directory=' + $overlay), '--check', $patch)
     Run $git @('apply', '--unsafe-paths', ('--directory=' + $overlay), $patch)
 } finally { Pop-Location }
+}
 
 $python = (Get-Command $(if ($IsWindows) { 'python.exe' } else { 'python3' }) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 $cbindgen = (Get-Command cbindgen -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
@@ -96,6 +99,8 @@ try {
     Run $python @((Join-Path $nilSource 'nil_format_table_gen.py'), '--csv', (Join-Path $nilSource 'nil_formats.csv'),
         '--out-h', (Join-Path $generated 'nil_format_table.h'), '--out-c', (Join-Path $generated 'nil_format_table.c'))
     Run $cbindgen @('-q', '--config', (Join-Path $nilSource 'cbindgen.toml'), '--lang', 'c', '--output', (Join-Path $generated 'nil.h'), '--', (Join-Path $nilSource 'lib.rs'))
+    . (Join-Path $PSScriptRoot 'PrepareAMD.ps1')
+    Initialize-R4VKAMD -Mesa $mesa -GeneratedRoot $generated
 } finally { [Environment]::SetEnvironmentVariable('PYTHONDONTWRITEBYTECODE', $oldBytecode, 'Process') }
 $outputs = @(foreach ($directory in @($generated, $overlay)) {
     Get-ChildItem -LiteralPath $directory -File -Recurse | Sort-Object FullName | ForEach-Object {
@@ -105,9 +110,11 @@ $outputs = @(foreach ($directory in @($generated, $overlay)) {
 [ordered]@{
     schema = 1; mesa = $lock.mesa.version; mesa_lock_sha256 = (Hash $lockPath)
     source_manifest_sha256 = (Hash $manifestPath); source_files_verified = $sourceFiles.Count
-    runtime_patch_sha256 = (Hash $patch); prepare_script_sha256 = (Hash $PSCommandPath)
+    runtime_patch_sha256 = (Hash $patches[0]); radv_patch_sha256 = (Hash $patches[1]); prepare_script_sha256 = (Hash $PSCommandPath)
+    amd_prepare_sha256 = (Hash (Join-Path $PSScriptRoot 'PrepareAMD.ps1'))
+    shader_tools_lock_sha256 = (Hash (Join-Path $PSScriptRoot 'ShaderTools.lock.json'))
     source_helper_sha256 = (Hash (Join-Path $PSScriptRoot 'MesaSource.ps1'))
     outputs = $outputs
-    scope = 'Generated Vulkan/NVK tables and private source overlays only; no provider binary or runtime capability claim.'
+    scope = 'Generated Vulkan/NVK/RADV/ACO tables and consistent private source overlays; no provider binary or runtime capability claim.'
 } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'prepare.json') -Encoding utf8NoBOM
 Write-Host "R4VK pinned Mesa preparation: $output ($($outputs.Count) outputs)"

@@ -27,6 +27,10 @@ enum { mtx_plain = 1, mtx_recursive = 2, mtx_timed = 4 };
 #define ONCE_FLAG_INIT {0}
 #define _MTX_INITIALIZER_NP {0}
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int mtx_init(mtx_t *, int);
 void mtx_destroy(mtx_t *);
 int mtx_lock(mtx_t *);
@@ -44,4 +48,7 @@ int thrd_equal(thrd_t, thrd_t);
 void thrd_yield(void);
 void thrd_exit(int) __attribute__((noreturn));
 void call_once(once_flag *, void (*)(void));
+#ifdef __cplusplus
+}
+#endif
 #endif
