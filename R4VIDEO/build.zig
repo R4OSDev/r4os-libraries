@@ -58,6 +58,12 @@ pub fn build(b: *std.Build) void {
     decoder.addImport("gpu_resources", gpu);
     decoder.addImport("r4nv_video", video);
     resources.addImport("gpu_decoder", decoder);
+    const vcn = b.createModule(.{ .root_source_file = b.path("../R4AMD/Source/vcn_decode.zig"), .target = b.graph.host });
+    const amd_decoder = b.createModule(.{ .root_source_file = b.path("Source/amd_decoder.zig"), .target = b.graph.host });
+    amd_decoder.addImport("gpu_resources", gpu);
+    amd_decoder.addImport("r4amd_decode", vcn);
+    resources.addImport("amd_decoder", amd_decoder);
+    resources.addImport("r4amd_decode", vcn);
     resources.addIncludePath(b.path("Port"));
     const check = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });
     check.addFileArg(b.path("Tools/Contract.ps1"));

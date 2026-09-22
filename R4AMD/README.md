@@ -68,7 +68,7 @@ checks loaded shader bytes, native pipeline/draw calls and failure output
 integrity. IMAGE_SCOPE=none
 keeps the provider out of ordinary profiles until its consumers are ready.
 
-ThirdParty/Sources.json pins 75 original files and the release patch
+ThirdParty/Sources.json pins 79 original files and the release patch
 avoiding unused POSIX signal.h when DEBUG=0. Original bytes stay unchanged.
 Adapted Mesa code retains MIT notices; original R4OS code is Apache-2.0.
 Tools/ExportLegal.ps1 exports all compiled AddrLib and image/encoder notices
@@ -101,3 +101,15 @@ graphics flags retain their meaning. NV12/P010 use bounded, linear two-plane
 UMA surfaces with 256-byte pitch and 64 KB plane/storage alignment. Shared
 media owners retain decoder, DPB and presentation holds independently; no
 CPU RGB intermediate is required by R4GFX. Physical qualification is /39.
+
+## VCN1 H.264 message encoder (0.80.29)
+
+The pure `Source/vcn_decode.zig` component is compiled into R4VIDEO. It
+implements bounded progressive AVC tier-0 create/decode messages, internal
+DPB/context sizing, native output geometry, slice collection and fresh
+firmware feedback validation. Original Mesa C structs and `build_avc_msg`
+generate three independent binary profile vectors via
+`Tools/VcnDecodeVectors.ps1`; existing backend tests compare every byte.
+The R4AMD runtime artifact and public ABI remain 0.1.6/BACKEND_V1:4 because
+this source component is consumed by the R4VIDEO artifact. Physical proof
+and verification of the exact pinned firmware feedback are reserved for /39.

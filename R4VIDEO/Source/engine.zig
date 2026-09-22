@@ -20,7 +20,7 @@ const poll_ns = 5_000_000;
 pub fn Implementation(comptime ff: type) type {
     return struct {
         const Self = @This();
-        const GpuDecoder = @import("gpu_decoder.zig").Implementation(ff);
+        const GpuDecoder = @import("hardware_decoder.zig").Implementation(ff);
         const Life = enum { empty, creating, active, reaping, closed, destroying };
         const RuntimePhase = enum { unopened, opening, ready, closing, closed };
         const PacketState = enum { free, queued, working };
@@ -216,24 +216,19 @@ pub fn Implementation(comptime ff: type) type {
         fn caps(input: c.R4VideoCapsQuery, output: *c.R4VideoCaps) i32 {
             var query = input;
             if (!payload(query)) return c.error_invalid;
-            if (query.backend == c.backend_amd) {
-                const admitted = gpuDevice(query.adapter_id, .amd) catch |err| return gpuCode(err);
-                _ = admitted.mediaCaps(query.codec, query.profile, query.bit_depth, query.chroma) catch |err| return gpuCode(err);
-                // 0.80.28 provides rings/resources. Codec-specific firmware
-                // messages enter in 0.80.29/30, so no native decoder is claimed.
-                return c.error_unsupported;
-            }
             if (query.profile == c.profile_default) query.profile = c.profile_h264_baseline;
             if (query.codec != c.codec_h264 or
                 query.bit_depth != 8 or query.chroma != c.chroma_420 or
                 (query.profile != c.profile_h264_baseline and query.profile != c.profile_h264_main and query.profile != c.profile_h264_high)) return c.error_unsupported;
             var device: ?gpu.Device = null;
-            if (query.backend == c.backend_nvidia) {
-                device = gpuDevice(query.adapter_id, .nvidia) catch |err| return gpuCode(err);
+            if (query.backend == c.backend_nvidia or query.backend == c.backend_amd) {
+                device = gpuDevice(query.adapter_id, if (query.backend == c.backend_amd) .amd else .nvidia) catch |err| return gpuCode(err);
+                if (query.backend == c.backend_amd) _ = device.?.mediaCaps(query.codec, query.profile, query.bit_depth, query.chroma) catch |err| return gpuCode(err);
             } else if (query.backend != c.backend_software or query.adapter_id != 0) return c.error_unsupported;
             output.* = .{ .version = 1, .size = @sizeOf(c.R4VideoCaps), .query = query, .min_width = 16, .min_height = 16, .max_width = 4096, .max_height = 4096, .max_level = 51, .output_formats = c.formats_yuv420p, .max_packet_bytes = max_packet_bytes, .max_pending_packets = max_packets, .max_frame_leases = max_frames, .device_generation = 0, .reset_generation = 0, .flags = 0, .reserved = 0 };
             if (device) |value| {
                 output.output_formats = c.formats_nv12;
+                if (value.provider == .amd) { output.min_width = 64; output.min_height = 64; }
                 output.device_generation = value.binding.device_generation;
                 output.reset_generation = value.binding.reset_generation;
             }
@@ -341,7 +336,8 @@ pub fn Implementation(comptime ff: type) type {
             const admitted = caps(config.query, &supported);
             if (admitted != c.ok) return admitted;
             config.query = supported.query;
-            const hardware = config.query.backend == c.backend_nvidia;
+            const hardware = config.query.backend == c.backend_nvidia or config.query.backend == c.backend_amd;
+            if (config.max_width < supported.min_width or config.max_height < supported.min_height) return c.error_unsupported;
             if (hardware) config.threads = 1;
             const p = process() orelse return c.error_stale;
             lock(&p.mutex);
@@ -424,10 +420,10 @@ pub fn Implementation(comptime ff: type) type {
             if (host().create(&d.event) != a.notification_ok) return c.error_no_memory;
             var callbacks: ff.struct_r4video_nvdec_ops = undefined;
             if (hardware) {
-                const device = gpuDevice(config.query.adapter_id, .nvidia) catch |err| return gpuCode(err);
+                const device = gpuDevice(config.query.adapter_id, if (config.query.backend == c.backend_amd) .amd else .nvidia) catch |err| return gpuCode(err);
                 if (device.binding.device_generation != supported.device_generation or device.binding.reset_generation != supported.reset_generation) return c.error_stale;
-                d.gpu_decoder = .{ .ctx = .{ .base = buffers().base, .device = device,
-                    .budget = &slot.owner.memory, .clock = native.time.read } };
+                d.gpu_decoder = GpuDecoder.init(.{ .base = buffers().base, .device = device,
+                    .budget = &slot.owner.memory, .clock = native.time.read });
                 callbacks = d.gpu_decoder.?.ops();
             }
             const codec_config: ff.struct_r4video_codec_config = .{ .profile = config.query.profile, .max_width = config.max_width, .max_height = config.max_height, .threads = if (config.threads <= 2) 1 else config.threads - 1, .max_packet_bytes = max_packet_bytes, .nvdec = if (hardware) &callbacks else null };

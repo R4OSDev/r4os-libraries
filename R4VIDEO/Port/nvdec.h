@@ -8,7 +8,7 @@
 struct r4video_nvdec_sequence {
     uint32_t profile, level, width_mbs, height_mbs, max_refs;
     uint32_t log2_frame_num, poc_type, log2_poc_lsb;
-    uint32_t delta_poc_always_zero, direct_8x8;
+    uint32_t delta_poc_always_zero, direct_8x8, gaps_allowed;
 };
 struct r4video_nvdec_reference {
     void *image;
@@ -21,7 +21,7 @@ struct r4video_nvdec_picture {
     uint32_t l0_default_minus1, l1_default_minus1;
     uint32_t deblocking_control, redundant_pic_cnt, transform_8x8;
     uint32_t weighted_pred, constrained_intra_pred, weighted_bipred;
-    int32_t initial_qp_minus26, chroma_qp_offset, second_chroma_qp_offset;
+    int32_t initial_qp_minus26, initial_qs_minus26, chroma_qp_offset, second_chroma_qp_offset;
     uint32_t frame_num, is_reference, reference_count;
     int32_t poc[2];
     /* Fully resolved, raster-order matrices. 8x8 contains intra-Y/inter-Y. */
@@ -37,7 +37,7 @@ struct r4video_nvdec_ops {
      * are borrowed until end/abort; retain canonical BO/VA loans for GPU work. */
     int (*begin)(void *, void *image, const struct r4video_nvdec_picture *);
     int (*slice)(void *, void *image, const uint8_t *escaped_nal, uint32_t bytes);
-    /* Return OK only after successful native queue completion AND NVDEC picture
+    /* Return OK only after successful native queue completion AND provider picture
      * status. This may wait on the worker; it must have a finite deadline. */
     int (*end)(void *, void *image);
     /* Idempotent retirement, also valid after partial allocation/begin/end.

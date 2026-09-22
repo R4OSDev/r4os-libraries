@@ -60,6 +60,7 @@ static int sequence(AVCodecContext *context, struct r4video_nvdec_sequence *out)
         .log2_poc_lsb=sps->poc_type == 0 ? sps->log2_max_poc_lsb : 4,
         .delta_poc_always_zero=sps->delta_pic_order_always_zero_flag,
         .direct_8x8=sps->direct_8x8_inference_flag,
+        .gaps_allowed=sps->gaps_in_frame_num_allowed_flag,
     };
     return R4VIDEO_OK;
 }
@@ -162,6 +163,7 @@ static int start(AVCodecContext *context, const AVBufferRef *buffer_ref, const u
     p.constrained_intra_pred = pps->constrained_intra_pred;
     p.weighted_bipred = pps->weighted_bipred_idc;
     p.initial_qp_minus26 = pps->init_qp - 26;
+    p.initial_qs_minus26 = pps->init_qs - 26;
     p.chroma_qp_offset = pps->chroma_qp_index_offset[0];
     p.second_chroma_qp_offset = pps->chroma_qp_index_offset[1];
     p.frame_num = h->poc.frame_num;

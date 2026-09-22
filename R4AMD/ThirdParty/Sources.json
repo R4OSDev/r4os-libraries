@@ -487,6 +487,34 @@
       "bytes": 5574,
       "license": "MIT (AMD SPDX notice)",
       "role": "VCN1 eligibility reference; no Gallium or DRM runtime linked"
+    },
+    {
+      "path": "src/amd/common/ac_vcn_dec.c",
+      "sha256": "57f3b267088d47de196098db0456b9fbb36091a124b4cc6c14ceaf0bb9e127f5",
+      "bytes": 133944,
+      "license": "MIT",
+      "license_evidence": "Original/src/amd/common/ac_vcn_dec.c; Original/licenses/MIT"
+    },
+    {
+      "path": "src/amd/common/ac_vcn_dec.h",
+      "sha256": "60f367e4eef967e6a2554f6f798b902e23d44ced929f6b577baef689a8990aa0",
+      "bytes": 51669,
+      "license": "MIT",
+      "license_evidence": "Original/src/amd/common/ac_vcn_dec.h; Original/licenses/MIT"
+    },
+    {
+      "path": "src/amd/common/ac_video_dec.h",
+      "sha256": "741c251e91467f4061cdfda2dd40627b71d430a1bab50f622029714e33ba8a7f",
+      "bytes": 21691,
+      "license": "MIT",
+      "license_evidence": "Original/src/amd/common/ac_video_dec.h; Original/licenses/MIT"
+    },
+    {
+      "path": "src/gallium/drivers/radeonsi/mm/si_video_dec.c",
+      "sha256": "bdd28e3f32745dcdc5d74d1b9e8b5ccd27c2d0928522b4e9d289d93fde87dde5",
+      "bytes": 69753,
+      "license": "MIT",
+      "license_evidence": "Original/src/gallium/drivers/radeonsi/mm/si_video_dec.c; Original/licenses/MIT"
     }
   ],
   "patches": [

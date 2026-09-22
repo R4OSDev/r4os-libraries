@@ -35,3 +35,5 @@ test "AMD native NV12 P010 geometry retains independent aligned luma and chroma 
     try t.expectError(error.Unsupported, media.Surface.plan(1921, 1080, 8));
     try t.expectError(error.Unsupported, media.Surface.plan(1920, 1080, 12));
 }
+
+comptime { _ = @import("vcn_decode_test.zig"); }

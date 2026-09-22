@@ -370,3 +370,14 @@ SHA256 identities are in R4AMD/ThirdParty/Sources.json. The existing exporter
 includes both notices and the complete Mesa MIT text. The source profile is
 separate from implemented codec availability. The common native BO, DPB,
 consumer-hold and fence owners are original R4OS Apache-2.0 code.
+
+## AMD VCN1 H.264 messages (0.80.29)
+
+R4AMD/Source/vcn_decode.zig derives firmware layouts and packet/message
+encoding from original Mesa 26.2.2 ac_vcn_dec.c/.h, ac_video_dec.h and
+si_video_dec.c. Original AMD MIT notices, full grant, hashes and untouched
+source files are retained in R4AMD/ThirdParty. ExportLegal.ps1 includes them.
+The original-C oracle extracts those definitions and build_avc_msg unchanged.
+The R4VIDEO callback adapter remains LGPL-2.1-or-later; its added SPS/PPS
+fields are included in the complete corresponding-source package. The AMD
+resource/worker/consumer integration is original R4OS Apache-2.0 material.

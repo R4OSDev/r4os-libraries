@@ -26,10 +26,10 @@ R4NAK is the freestanding C/Rust SPIR-V/NIR/NAK runtime compiler. Its first
 build needs the pinned host tools and sources described in `R4NAK/README.md`.
 R4VK is the native Mesa Vulkan provider under development. Its regular build
 prepares the matching NVK/NIL/NAK dependencies; see `R4VK/README.md`. It remains
-available as an optional runtime in slim/full images. R4GL provides native
-Mesa software EGL/OpenGL without a GPU or host Rust compiler; see
+available as an optional runtime in slim/full images. R4GL provides Mesa EGL/OpenGL with explicit graphics providers; see
 `R4GL/README.md` for the current profile and lifecycle contract.
-R4VIDEO provides bounded H.264 software decoding through VIDEO_V1. Its pinned
+R4VIDEO provides bounded H.264 software, NVIDIA NVDEC and AMD VCN1 decoding
+through explicit VIDEO_V1 backend selection. Its pinned
 FFmpeg build uses clang/NASM; offline builds require the cached archive. It is
 included in normal profiles with corresponding sources; see `R4VIDEO/README.md`.
 

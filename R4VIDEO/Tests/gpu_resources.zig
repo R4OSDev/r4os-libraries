@@ -151,6 +151,7 @@ pub fn run() !void {
     try t.expectEqual(@as(usize, 0), budget.liveBytes());
     try decoderChecks(base, device);
     try amdChecks(base);
+    try @import("amd_decoder.zig").run(base);
     fixture.model = &state;
     // The shared owner must select only NVENC, without a GR or NVDEC channel.
     // Its submitted BOs remain resident across a logical encode timeout too.

@@ -5,8 +5,8 @@ $unit=[IO.Path]::GetFullPath('..',$PSScriptRoot)
 $catalog=Get-Content -Raw (Join-Path $unit 'ThirdParty/Sources.json')|ConvertFrom-Json
 $original=Join-Path $unit $catalog.original_root
 $sections=[Collections.Generic.List[string]]::new()
-$sections.Add("R4AMD AddrLib, image layout/descriptors and SDMA/PM4 encoder notices`nThe encoders are also compiled into AMDGPU. Mesa $($catalog.upstream_version); original identities in ThirdParty/Sources.json.`n")
-$names=@($catalog.files.path|Where-Object {$_ -match '^src/amd/(addrlib/.*\.(cpp|h)|common/.*\.(c|h)|vulkan/.*\.(c|h))$' -or $_ -in @('include/drm-uapi/drm_fourcc.h','src/amd/registers/makeregheader.py','src/amd/registers/regdb.py','src/amd/registers/gfx9.json','licenses/MIT')})
+$sections.Add("R4AMD AddrLib, image layout/descriptors and SDMA/PM4/VCN encoder notices`nThe encoders are also compiled into AMDGPU. Mesa $($catalog.upstream_version); original identities in ThirdParty/Sources.json.`n")
+$names=@($catalog.files.path|Where-Object {$_ -match '^src/amd/(addrlib/.*\.(cpp|h)|common/.*\.(c|h)|vulkan/.*\.(c|h))$' -or $_ -in @('include/drm-uapi/drm_fourcc.h','src/amd/registers/makeregheader.py','src/amd/registers/regdb.py','src/amd/registers/gfx9.json','licenses/MIT','src/gallium/drivers/radeonsi/mm/si_video_dec.c')})
 foreach($name in $names){
     $entry=@($catalog.files|Where-Object {$_.path -ceq $name})
     if($entry.Count -ne 1){throw "Missing source $name"}
@@ -25,4 +25,4 @@ foreach($name in $names){
 }
 [IO.Directory]::CreateDirectory($OutputDirectory)|Out-Null
 [IO.File]::WriteAllText((Join-Path $OutputDirectory 'R4AMD-NOTICES.txt'),($sections -join "`n"),[Text.UTF8Encoding]::new($true))
-Write-Host 'R4AMD original AddrLib, image and SDMA/PM4 notices and complete MIT text exported.'
+Write-Host 'R4AMD original AddrLib, image and SDMA/PM4/VCN notices and complete MIT text exported.'
