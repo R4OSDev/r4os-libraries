@@ -71,6 +71,19 @@ fn checkColorMetadata() !void {
 }
 fn checkColorSignal(input: edid.Report) !void {
     const color = @import("Display/color_signal.zig");
+    try t.expectEqual(@as(u32, 0xff101010), color.limitedRgb8(0));
+    try t.expectEqual(@as(u32, 0xffebebeb), color.limitedRgb8(0xffffff));
+    try t.expectEqual(@as(u32, 0xffeb1010), color.limitedRgb8(0xff0000));
+    var previous: u32 = 16;
+    for (0..256) |value| {
+        const pixel = color.limitedRgb8(@intCast(value));
+        try t.expect(pixel >> 8 == 0xff1010 and pixel & 255 >= previous and pixel & 255 <= 235);
+        previous = pixel & 255;
+    }
+    var profile_signal = @import("Display/color_preferences.zig").sdr;
+    try t.expect(color.profileEncoding(profile_signal));
+    profile_signal.range = 2; try t.expect(color.profileEncoding(profile_signal));
+    profile_signal.transfer = 3; try t.expect(!color.profileEncoding(profile_signal));
     var receiver = input;
     receiver.bits_per_color = 10;
     const metadata: color.Metadata = .{ .max_mastering = 1000, .min_mastering = 50, .max_cll = 1000, .max_fall = 400 };

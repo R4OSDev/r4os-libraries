@@ -337,3 +337,20 @@ fn signalPlan(receiver: anytype, signal: Signal, source: Source, pipeline: Pipel
     } else if (signal.metadata != null) return error.Invalid;
     return .{ .bpp = signal.bpc * 3, .clear_hdr = !hdr };
 }
+
+/// Exact quantization of already encoded SDR RGB8. Apply once, after ICC/VCGT;
+/// this is not a transfer-function or primaries conversion.
+pub fn limitedRgb8(pixel: u32) u32 {
+    var result: u32 = 0xff000000;
+    inline for (.{ 0, 8, 16 }) |shift| {
+        const channel = (pixel >> shift) & 255;
+        result |= (16 + (channel * 219 + 127) / 255) << shift;
+    }
+    return result;
+}
+/// General display profiles currently operate on SDR RGB8, before final
+/// full/limited quantization. HDR and 10-bit profile processing are separate.
+pub fn profileEncoding(value: anytype) bool {
+    return value.format == 0x34325258 and value.bpc == 8 and value.primaries == 1 and value.transfer == 1 and
+        (value.range == 1 or value.range == 2) and value.reference_white == 1_000_000 and value.peak == 1_000_000 and value.black == 0;
+}

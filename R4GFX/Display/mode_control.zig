@@ -120,7 +120,7 @@ pub const Controller = struct {
         if (bytes > std.math.maxInt(usize)) { self.error_code = a.gfx_output_error_overflow; return false; }
         const descriptor: a.GfxBufferDescriptor = .{ .width = mode.width, .height = mode.height, .byte_length = bytes,
             .format = a.gfx_buffer_format_xrgb8888, .plane_count = 1, .plane_pitches = .{pitch,0,0,0},
-            .usage = a.gfx_buffer_usage_cpu_write | a.gfx_buffer_usage_transfer_source | a.gfx_buffer_usage_scanout };
+            .usage = a.gfx_buffer_usage_cpu_read | a.gfx_buffer_usage_cpu_write | a.gfx_buffer_usage_transfer_source | a.gfx_buffer_usage_scanout };
         var rc = draw.gfxBufferCreate(&descriptor, &self.buffer);
         if (rc != a.gfx_buffer_result_ok) { self.error_code = rc; return false; }
         defer _ = self.cleanup(draw);

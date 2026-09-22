@@ -77,6 +77,10 @@ pub const Report = struct {
         for (self.modes[0..self.mode_count]) |*existing| if (existing.sameMode(mode)) {
             const only420 = existing.flags & mode.flags & timing.y420_only;
             existing.flags = ((existing.flags | mode.flags) & ~timing.y420_only) | only420;
+            // A base DTD may precede its identical CTA timing. Retain the
+            // first explicit VIC so wire range/signaling does not treat that
+            // CTA mode as an unclassified full-range PC timing.
+            if (existing.vic == 0) existing.vic = mode.vic;
             return;
         };
         if (self.mode_count == self.modes.len) return error.Capacity;
