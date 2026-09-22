@@ -18,5 +18,6 @@ test "ENCODE_V1 retains canonical BO and queue-fence identities" {
     try @import("flow.zig").run();
     try @import("gpu_encoder.zig").run();
     try @import("gpu_input.zig").run();
+    try @import("amd_encoder.zig").run();
     try @import("recording.zig").run();
 }

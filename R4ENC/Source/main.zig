@@ -3,6 +3,7 @@ const r = @import("r4os");
 const c = @import("r4l_contract");
 const ff = @cImport({
     @cInclude("codec.h");
+    @cInclude("vcn_encode.h");
 });
 const engine = @import("engine.zig").Implementation(ff);
 export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}

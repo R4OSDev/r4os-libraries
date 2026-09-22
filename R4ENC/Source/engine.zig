@@ -7,7 +7,6 @@ const native = @import("r4native");
 const runtime = @import("runtime");
 const sync = native.threading;
 const input = @import("encode_input");
-const gpu_backend = @import("gpu_backend");
 const Flow = @import("flow.zig").Flow(c);
 const Input = input.Input(c);
 const limit = @import("flow.zig").limit;
@@ -15,6 +14,7 @@ const packet_limit = 8 * 1024 * 1024;
 const poll_ns = 5_000_000;
 
 pub fn Implementation(comptime codec: type) type {
+    const gpu_backend = @import("native_encoder").Implementation(codec);
     return struct {
         const Life = enum { empty, creating, live, destroying };
         const Slot = struct {
@@ -156,9 +156,11 @@ pub fn Implementation(comptime codec: type) type {
             if (query.backend == c.backend_amd) {
                 if (!runtime.applicationBound()) return c.error_unsupported;
                 const device = @import("gpu_resources").Device.queryProvider(buffers().base, query.adapter_id, .encode, .amd) catch |err| return code(err);
-                _ = device.mediaCaps(query.codec, query.profile, query.bit_depth, query.chroma) catch |err| return code(err);
-                // Firmware rate-control/session packets are the 0.80.31 owner.
-                return c.error_unsupported;
+                var actual = query;
+                if (actual.profile == c.profile_default) actual.profile = if (query.codec == c.codec_h264) c.profile_h264_baseline else c.profile_hevc_main;
+                const limits = device.mediaCaps(actual.codec, actual.profile, actual.bit_depth, actual.chroma) catch |err| return code(err);
+                output.* = .{ .version = 1, .size = @sizeOf(c.R4EncCaps), .query = actual, .min_width = limits.min_width, .min_height = limits.min_height, .max_width = limits.max_width, .max_height = limits.max_height, .max_level = if (actual.codec == c.codec_h264) 52 else 186, .input_formats = c.formats_nv12, .rate_modes = c.rates_cqp | c.rates_cbr | c.rates_vbr, .max_pending_frames = limit, .max_packet_leases = limit, .flags = 0, .max_packet_bytes = packet_limit, .device_generation = device.binding.device_generation, .reset_generation = device.binding.reset_generation };
+                return c.ok;
             }
             if (query.codec != c.codec_h264 or
                 (query.profile != c.profile_default and query.profile != c.profile_h264_baseline) or
@@ -169,9 +171,9 @@ pub fn Implementation(comptime codec: type) type {
                 if (query.adapter_id != 0) return c.error_unsupported;
             } else if (query.backend == c.backend_nvidia) {
                 if (query.adapter_id == 0 or !runtime.applicationBound()) return c.error_unsupported;
-                const devices = gpu_backend.Devices.query(buffers().base, query.adapter_id) catch |err| return code(err);
-                device_generation = devices.encode.binding.device_generation;
-                reset_generation = devices.encode.binding.reset_generation;
+                const devices = gpu_backend.Devices.query(buffers().base, query.adapter_id, query.backend) catch |err| return code(err);
+                device_generation = devices.nvidia.encode.binding.device_generation;
+                reset_generation = devices.nvidia.encode.binding.reset_generation;
             } else return c.error_unsupported;
             var actual = query;
             actual.profile = c.profile_h264_baseline;
@@ -230,10 +232,14 @@ pub fn Implementation(comptime codec: type) type {
             const supported_rc = caps(config.query, &supported);
             if (supported_rc != c.ok) return supported_rc;
             config.query = supported.query;
-            const native_config: ?gpu_backend.Config = if (config.query.backend == c.backend_nvidia)
-                gpu_backend.Config.from(config) catch |err| return code(err) else null;
+            const native_config: ?gpu_backend.Config = if (config.query.backend != c.backend_software)
+                gpu_backend.Config.from(config) catch |err| return code(err)
+            else
+                null;
             const devices: ?gpu_backend.Devices = if (native_config != null)
-                gpu_backend.Devices.query(buffers().base, config.query.adapter_id) catch |err| return code(err) else null;
+                gpu_backend.Devices.query(buffers().base, config.query.adapter_id, config.query.backend) catch |err| return code(err)
+            else
+                null;
             const p = process() orelse return c.error_stale;
             lock(&p.mutex);
             if (!runtimeMatches(p, handle.*)) {
@@ -281,8 +287,7 @@ pub fn Implementation(comptime codec: type) type {
             }
             const d: *Encoder = @ptrCast(@alignCast(runtime.memory.malloc(@sizeOf(Encoder)) orelse return c.error_no_memory));
             d.* = .{ .process = p, .slot = slot, .config = config, .flow = flow };
-            if (native_config) |settings| d.native_backend = gpu_backend.Backend.init(buffers().base, devices.?,
-                &slot.owner.memory, native.time.read, settings);
+            if (native_config) |settings| d.native_backend = gpu_backend.Backend.init(buffers().base, devices.?, &slot.owner.memory, native.time.read, settings);
             lock(&p.mutex);
             slot.body = d;
             unlock(&p.mutex);
@@ -525,8 +530,7 @@ pub fn Implementation(comptime codec: type) type {
                 if (d.active_result == null) {
                     if (now() >= d.active_deadline) d.active_result = c.error_encode else if (d.native_backend) |*backend| {
                         const data = d.output.? + claim.output * @as(usize, @intCast(d.config.max_packet_bytes));
-                        if (backend.encode(&d.inputs[claim.input], claim.force_idr or frame.flags & c.frame_force_idr != 0,
-                            data[0..@intCast(d.config.max_packet_bytes)], d.active_deadline)) |packet| {
+                        if (backend.encode(&d.inputs[claim.input], claim.force_idr or frame.flags & c.frame_force_idr != 0, data[0..@intCast(d.config.max_packet_bytes)], d.active_deadline)) |packet| {
                             d.active_bytes = packet.bytes;
                             d.active_flags = if (packet.key) c.packet_key | c.packet_config else 0;
                             d.active_result = if (now() >= d.active_deadline) c.error_encode else c.ok;
@@ -590,7 +594,9 @@ pub fn Implementation(comptime codec: type) type {
                     unlock(&d.mutex);
                     backend.close() catch |err| {
                         if (err != error.Busy) {
-                            lock(&d.mutex); d.flow.last_error = code(err); unlock(&d.mutex);
+                            lock(&d.mutex);
+                            d.flow.last_error = code(err);
+                            unlock(&d.mutex);
                         }
                         return .poll;
                     };

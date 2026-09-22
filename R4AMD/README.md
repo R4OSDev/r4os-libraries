@@ -130,3 +130,13 @@ DeviceFacts bit 3 (`device_fact_jpeg1_submit`) advertises the driver's copied
 VMID0 JPEG IB and cross-engine exclusion. NativeSubmit engine 4 selects JPEG;
 wire sizes and function-table layouts are unchanged. Source eligibility alone
 does not promise an implemented public profile or physical qualification.
+
+## VCN1 native encoding sources (0.80.31)
+
+The source catalog now contains90 original files. VcnEncode.ps1 verifies
+and extracts unchanged Mesa26.2.2 VCN1 session/header/packet functions and
+metadata. Port/vcn_encode.c provides bounded H.264/HEVC8 configuration,
+CQP/CBR/VBR, session/DPB planning and IDR/P templates. It is compiled into
+R4ENC0.1.3. R4AMD.R4L remains byte-identical0.1.6/BACKEND_V1:4. Original
+MIT notices and sources remain included by ExportLegal.ps1. Physical
+firmware/output qualification belongs to0.80.39.

@@ -7,6 +7,7 @@
 *.zon text eol=lf
 *.c text eol=lf
 *.h text eol=lf
+*.inc text eol=lf
 *.cin text eol=lf
 *.hin text eol=lf
 *.json text eol=lf

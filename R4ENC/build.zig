@@ -72,6 +72,15 @@ pub fn build(b: *std.Build) void {
     backend.addImport("gpu_input", preparer);
     backend.addImport("native_allocation", allocations);
     parity.addImport("gpu_backend", backend);
+    const amd_encoder = b.createModule(.{ .root_source_file = b.path("Source/amd_encoder.zig"), .target = b.graph.host });
+    amd_encoder.addImport("r4os", host);
+    amd_encoder.addImport("gpu_resources", gpu);
+    amd_encoder.addImport("native_allocation", allocations);
+    amd_encoder.addIncludePath(b.path("../R4AMD/Port"));
+    parity.addImport("amd_encoder", amd_encoder);
+    parity.addIncludePath(b.path("../R4AMD/Port"));
+    parity.addCSourceFile(.{ .file = b.path("../R4AMD/Port/vcn_encode.c"), .flags = &.{"-std=c17"} });
+    parity.link_libc = true;
     parity.addImport("recording_mux", b.createModule(.{ .root_source_file = b.path("Bindings/Zig/recording_mux.zig"), .target = b.graph.host }));
     parity.addImport("recording_pixels", b.createModule(.{ .root_source_file = b.path("Bindings/Zig/recording_pixels.zig"), .target = b.graph.host }));
     const check = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });
@@ -79,6 +88,10 @@ pub fn build(b: *std.Build) void {
     check.has_side_effects = true;
     const tests = b.step("test", "ENCODE_V1 ABI and canonical graphics identities");
     tests.dependOn(&check.step);
+    const vcn = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });
+    vcn.addFileArg(b.path("../R4AMD/Tools/VcnEncode.ps1"));
+    vcn.has_side_effects = true;
+    tests.dependOn(&vcn.step);
     for ([_]*std.Build.Module{ conformance, parity }) |module| {
         const run = b.addRunArtifact(b.addTest(.{ .root_module = module }));
         tests.dependOn(&run.step);

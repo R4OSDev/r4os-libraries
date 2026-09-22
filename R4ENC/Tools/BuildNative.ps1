@@ -6,6 +6,8 @@ $ErrorActionPreference = 'Stop'
 if (!$IsWindows -and !$IsLinux) { throw 'Supported build hosts: Windows and Linux.' }
 . (Join-Path $PSScriptRoot 'Common.ps1')
 $paths = Get-R4EncPaths
+& pwsh -NoLogo -NoProfile -File (Join-Path $paths.libraries 'R4AMD/Tools/VcnEncode.ps1')
+if ($LASTEXITCODE) { throw 'Original VCN1 encoder extraction differs.' }
 $options = @()
 if ($Offline) { $options += '-Offline' }
 & pwsh -NoLogo -NoProfile -File (Join-Path $PSScriptRoot 'Prepare.ps1') @options
@@ -34,7 +36,8 @@ $record = Join-Path $output 'native.json'
 $inputs = @($PSCommandPath, (Join-Path $PSScriptRoot 'Common.ps1'), $planPath,
     (Join-Path $paths.cache 'prepare.json'), $clang, $nasm, $ar)
 foreach ($directory in @((Join-Path $paths.unit 'Port'), (Join-Path $paths.unit 'Bindings/C'), $shared,
-        (Join-Path $paths.libraries 'R4NAK/ThirdParty/stb'),
+        (Join-Path $paths.libraries 'R4NAK/ThirdParty/stb'), (Join-Path $paths.libraries 'R4AMD/Port'),
+        (Join-Path $paths.libraries 'R4AMD/ThirdParty/Mesa26.2.2/Original/src/amd/common'),
         (Join-Path $paths.sdk 'Shared/C/include'), (Join-Path $paths.contract 'Generated/SDK/C/include'),
         (Join-Path $resource.Trim() 'include'))) {
     $inputs += @(Get-ChildItem -LiteralPath $directory -Recurse -File | ForEach-Object FullName)
@@ -57,6 +60,7 @@ foreach ($file in Get-ChildItem -LiteralPath (Join-Path $paths.unit 'Port') -Fil
 foreach ($name in @('string','format','stdio','errno')) {
     $units += [pscustomobject]@{name=('shared_'+$name+'.o');source=(Join-Path $shared ($name+'.c'));kind='c'}
 }
+$units += [pscustomobject]@{name='r4amd_vcn_encode.o';source=(Join-Path $paths.libraries 'R4AMD/Port/vcn_encode.c');kind='c'}
 if (@($units.name | Sort-Object -Unique).Count -ne $units.Count) { throw 'Duplicate encoder object name.' }
 if (Test-Path -LiteralPath $record) {
     $previous = Get-Content -Raw -LiteralPath $record | ConvertFrom-Json
@@ -76,7 +80,7 @@ $flags = @('-target','x86_64-unknown-none-elf','-O2','-ffreestanding','-fno-stac
     '-ffunction-sections','-fdata-sections','-fvisibility=hidden','-fno-math-errno','-fno-trapping-math',
     '-femulated-tls','-nostdinc','-ferror-limit=3','-DR4OS_ENCODE=1','-DX86_ASM','-DHAVE_AVX2',
     '-DGENERATED_VERSION_HEADER','-DNDEBUG','-isystem',(Join-Path $resource.Trim() 'include'),
-    ('-I'+$include),('-I'+$shared),('-I'+(Join-Path $paths.unit 'Port')),
+    ('-I'+$include),('-I'+$shared),('-I'+(Join-Path $paths.unit 'Port')),('-I'+(Join-Path $paths.libraries 'R4AMD/Port')),
     ('-I'+(Join-Path $paths.unit 'Bindings/C')),('-I'+(Join-Path $paths.sdk 'Shared/C/include')),
     ('-I'+(Join-Path $paths.contract 'Generated/SDK/C/include')))
 foreach ($path in @('codec/api/wels','codec/common/inc','codec/encoder/core/inc','codec/encoder/plus/inc',

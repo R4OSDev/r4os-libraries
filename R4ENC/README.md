@@ -77,7 +77,46 @@ ENCODE_V1 preserves existing slots and appends AMD backend ID 2 and common
 codec/profile constants. Canonical AMD native resources support an encode
 IB, coherent status/command BOs and exact fence/retirement ownership. Profile
 eligibility includes only VCN1 H.264/HEVC 8-bit; HEVC Main10, AV1 and unproven
-B-frame operation are excluded. QueryCaps remains unsupported for AMD until
-/31 implements its firmware session, feedback and rate-control packets.
+B-frame operation are excluded. The 0.80.31 implementation below resolves this foundation through the
+actual driver and its implemented session/rate-control profile.
 The NVIDIA path requires its own provider identity. Physical codec output
 and rate/quality tests belong to /39; AMDVCN08028 documents current evidence.
+
+## AMD VCN1 encoder (0.80.31)
+
+R4ENC 0.1.3 implements native H.264 Baseline/Main/High and HEVC Main8 via
+ENCODE_V1 backend2. It reuses the existing worker, queues, timestamps,
+immutable output leases, Abort/Drain/Close and budget ownership. Both native
+providers remain explicit; the software and NVIDIA profiles retain their
+previous behavior.
+
+Pinned Mesa 26.2.2 VCN1 session, header, slice-template and rate-control
+functions are extracted without changes by R4AMD/Tools/VcnEncode.ps1 and
+compiled into R4ENC. The bounded adapter owns two reconstructed surfaces,
+one previous reference and IDR/P sequencing. Firmware0x0310f005 selects
+session ABI1.9 and the extended per-picture controls. A fresh feedback
+record and retired native fence are both required before returning bytes.
+Timeouts retain input/session storage through retirement; Close requires
+its firmware command acknowledgement or a changed device epoch after the
+old queue has retired. Only commands, feedback and compressed bytes are
+mapped on the CPU. Source pixels remain native borrowed NV12 BOs.
+
+Configuration: even dimensions128x128..4096x2304 for AVC, width>=130 for
+HEVC; level5.2/6.2 and their sample-rate bounds, <=240fps, GOP1..65535,
+CQP/CBR/peak-constrained VBR, QP0..51, rate-controlled peak<=200Mbps.
+Color is BT.709 limited, transfer1 or13, default/left chroma. One contiguous
+linear NV12 BO uses 256-byte-aligned pitch, explicit plane offset, padded
+16-row AVC or64-row HEVC coded extent and sufficient initialized storage.
+Separate planes, tiled input, B pictures, Main10 encoding and AV1 are not
+implemented. Packet capacity is8192..8MB including up to1024 header bytes.
+
+Existing host cases cover GOP/reset, rate controls, fresh/invalid feedback,
+no input CPU mapping and late init/frame/close acknowledgements. A short
+SMP4 guest ran the actual R4L/ENCODE_V1 worker through13 sessions and73
+inputs, held-packet Drain, Abort/IDR, Close and exact worker joins. GPU
+completion and VCL data are modeled. Independent FFmpeg checks parse36
+production SPS/PPS/VPS vectors,24 reconstructed IDR/P slice headers and
+decode small software reference clips;
+the latter exercise Annex-B admission, not AMD output quality. Real VCN
+bitstreams, rates and laptop performance remain reserved for0.80.39.
+Provenance and limits: Docs/Drivers/AMDEncoding08031.txt/.json.
