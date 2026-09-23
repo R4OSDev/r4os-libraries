@@ -52,7 +52,7 @@ pub fn modifier(gb: u32, sw: u32) ?u64 {
 pub fn validate(r: c.R4AmdImageRequest) i32 {
     if (r.version != 1 or r.size != @sizeOf(c.R4AmdImageRequest) or r.reserved != 0 or r.usage == 0 or r.usage & ~@as(u32, 31) != 0 or
         r.width == 0 or r.height == 0 or r.depth == 0 or r.mip_count == 0 or r.samples == 0) return c.status_invalid;
-    if (r.device_id != 0x15d8 or r.gc_version != c.gc_9_1_0 or r.chip_revision < 0x41 or r.chip_revision > 0x48 or
+    if (@import("asic.zig").Profiles(c).image(r.device_id, r.gc_version, r.chip_revision) == null or
         r.resource_type > 2 or r.gb_addr_config == 0 or (r.gb_addr_config & 7) > 5 or
         ((r.gb_addr_config >> 3) & 7) != 0 or ((r.gb_addr_config >> 12) & 7) > 4 or
         ((r.gb_addr_config >> 26) & 3) > 2 or r.pipe_xor != 0) return c.status_unsupported;

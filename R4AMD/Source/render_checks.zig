@@ -66,6 +66,6 @@ pub fn run() !void {
     for(0..render.programs.len)|i|{
         try t.expectEqual(c.status_ok,render.shader(@intCast(i),&code,code.len,&metadata));
         try t.expectEqual(@as(u32,0xbf810000),std.mem.readInt(u32,code[metadata.exec_bytes-4..][0..4],.little));
-        try t.expect(metadata.code_address==0 and metadata.resource_abi==(if(i<3)@as(u32,1) else 2));
+        try t.expect(metadata.code_address==0 and metadata.resource_abi==(if(i%6<3)@as(u32,1) else 2));
     }
 }

@@ -30,13 +30,7 @@ pub fn query(device: *d.Device, desc: a.GfxBufferDescriptor) d.Error!Result {
     return validate(client, arch, device.selected, desc, @ptrFromInt(std.mem.alignForward(usize, @intFromPtr(&device.amd_image_scratch), 16)));
 }
 pub fn validate(client: amd.ImageV1Client, arch: amd.R4AmdArchitecture, selected: a.GfxBackendInfo, desc: a.GfxBufferDescriptor, scratch: *align(16) [65536]u8) d.Error!Result {
-    if (arch.version != 1 or arch.size != @sizeOf(amd.R4AmdArchitecture) or arch.vendor_id != amd.vendor_id or arch.device_id != 0x15d8 or
-        arch.gc_version != amd.gc_9_1_0 or arch.sdma_version != amd.sdma_4_1_0 or arch.flags != 0 or arch.reserved != 0 or
-        arch.bind_alignment != 4096 or arch.max_image_bytes != 64 * 1024 * 1024) return error.Unsupported;
-    if (selected.profile.interface_id_lo != amd.backend_v1_header.interface_id_lo or selected.profile.interface_id_hi != amd.backend_v1_header.interface_id_hi or
-        selected.profile.revision != 1 or selected.profile.data_bytes != @sizeOf(amd.R4AmdDriverProfile)) return error.Unsupported;
-    const profile = std.mem.bytesToValue(amd.R4AmdDriverProfile, selected.profile.data[0..@sizeOf(amd.R4AmdDriverProfile)]);
-    if (profile.vendor_id != arch.vendor_id or profile.device_id != arch.device_id or profile.gc_version != arch.gc_version or profile.sdma_version != arch.sdma_version) return error.Unsupported;
+    try validateArchitecture(arch, selected);
     if (selected.binding.adapter_id == 0 or selected.memory_generation == 0 or arch.memory_generation != selected.memory_generation or
         desc.adapter_id != selected.binding.adapter_id or desc.device_generation != selected.memory_generation) return error.Stale;
     if (desc.version != 1 or desc.size < @sizeOf(a.GfxBufferDescriptor) or desc.location != a.gfx_buffer_location_device_local or
@@ -53,4 +47,17 @@ pub fn validate(client: amd.ImageV1Client, arch: amd.R4AmdArchitecture, selected
     var mip: amd.R4AmdMip = undefined;
     try result(client.import_image(&request, &.{ .version = 1, .size = @sizeOf(amd.R4AmdImageImport), .byte_length = desc.byte_length, .alignment = desc.alignment, .offset = desc.plane_offsets[0], .modifier = desc.modifier, .adapter_id = desc.adapter_id, .reserved = 0, .memory_generation = desc.device_generation, .expected_adapter = selected.binding.adapter_id, .metadata_state = 0, .expected_memory_generation = selected.memory_generation, .pitch = pitch, .usage = usage }, scratch, scratch.len, &layout, @ptrCast(&mip), 1));
     return .{ .request = request, .layout = layout };
+}
+
+pub fn validateArchitecture(arch: amd.R4AmdArchitecture, selected: a.GfxBackendInfo) d.Error!void {
+    const raven2 = arch.gc_version == amd.gc_9_2_2 and arch.sdma_version == amd.sdma_4_1_1;
+    const picasso = arch.gc_version == amd.gc_9_1_0 and arch.sdma_version == amd.sdma_4_1_0;
+    if (arch.version != 1 or arch.size != @sizeOf(amd.R4AmdArchitecture) or arch.vendor_id != amd.vendor_id or arch.device_id != 0x15d8 or
+        (!picasso and !raven2) or
+        arch.chip_revision < (if (raven2) @as(u32, 0x81) else 0x41) or arch.chip_revision > (if (raven2) @as(u32, 0x88) else 0x48) or arch.flags != 0 or arch.reserved != 0 or
+        arch.bind_alignment != 4096 or arch.max_image_bytes != 64 * 1024 * 1024) return error.Unsupported;
+    if (selected.profile.interface_id_lo != amd.backend_v1_header.interface_id_lo or selected.profile.interface_id_hi != amd.backend_v1_header.interface_id_hi or
+        selected.profile.revision != 1 or selected.profile.data_bytes != @sizeOf(amd.R4AmdDriverProfile)) return error.Unsupported;
+    const profile = std.mem.bytesToValue(amd.R4AmdDriverProfile, selected.profile.data[0..@sizeOf(amd.R4AmdDriverProfile)]);
+    if (profile.vendor_id != arch.vendor_id or profile.device_id != arch.device_id or profile.gc_version != arch.gc_version or profile.sdma_version != arch.sdma_version) return error.Unsupported;
 }

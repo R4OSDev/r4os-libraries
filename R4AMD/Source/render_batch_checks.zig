@@ -33,7 +33,9 @@ fn draws(words: []const u32) usize {
     return count;
 }
 pub fn run() !void {
-    const arch: c.R4AmdArchitecture = .{ .version = 1, .size = @sizeOf(c.R4AmdArchitecture), .vendor_id = c.vendor_id, .device_id = 0x15d8, .gc_version = c.gc_9_1_0, .sdma_version = c.sdma_4_1_0, .gb_addr_config = 0x24000042, .chip_revision = 0x41, .bind_alignment = 4096, .memory_generation = 23, .flags = 0, .reserved = 0, .max_image_bytes = 64 * 1024 * 1024 };
+    for ([_]bool{ false, true }) |raven2| {
+    var arch: c.R4AmdArchitecture = .{ .version = 1, .size = @sizeOf(c.R4AmdArchitecture), .vendor_id = c.vendor_id, .device_id = 0x15d8, .gc_version = c.gc_9_1_0, .sdma_version = c.sdma_4_1_0, .gb_addr_config = 0x24000042, .chip_revision = 0x41, .bind_alignment = 4096, .memory_generation = 23, .flags = 0, .reserved = 0, .max_image_bytes = 64 * 1024 * 1024 };
+    if (raven2) { arch.gc_version = c.gc_9_2_2; arch.sdma_version = c.sdma_4_1_1; arch.chip_revision = 0x82; arch.gb_addr_config = 0x26013041; }
     var scratch: [65536]u8 align(16) = undefined;
     var desc: a.GfxBufferDescriptor = .{ .byte_length = 131072, .alignment = 4096, .width = 256, .height = 128, .format = a.gfx_buffer_format_argb8888, .plane_count = 1, .plane_pitches = .{ 1024, 0, 0, 0 }, .usage = a.gfx_buffer_usage_render | a.gfx_buffer_usage_transfer_source | a.gfx_buffer_usage_transfer_target, .location = a.gfx_buffer_location_device_local, .adapter_id = 7, .driver_owner = 9, .device_generation = 23 };
     const target = try b.image(arch, 7, desc, 0x5100000000, true, 0, &scratch);
@@ -60,6 +62,10 @@ pub fn run() !void {
     try t.expectApproxEqAbs(@as(f32, 0.5 / 256.0), transform.mapping[0], 0.0000001);
     try t.expectEqual(@as(u32, 1), transform.flags[0]);
     try t.expectEqual(source.descriptors.texture0, std.mem.readInt(u32, payload[256..260], .little));
+    const correct_gc = source.request.gc_version;
+    source.request.gc_version = if (raven2) c.gc_9_1_0 else c.gc_9_2_2;
+    try t.expectError(error.Unsupported, b.encode(source, target, commands[0..1], grids[0..1], null, 0x8100000000, 0x8100008000, &payload, &words));
+    source.request.gc_version = correct_gc;
     // Integer logical sampling is carried once as a fixed 64-byte GPU input.
     commands[0].filter = 0;
     commands[0].transfer = 0;
@@ -102,4 +108,5 @@ pub fn run() !void {
     }
     packet.header.plane1.offset = 131072;
     try t.expectError(error.Invalid, y.encode(arch, 7, packet, &bindings, 0x8100000000, 0x8100008000, &scratch, &payload, &words));
+    }
 }

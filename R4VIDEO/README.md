@@ -290,3 +290,30 @@ probe with 99 parser/output frames over eight profiles plus the R4IMG image
 consumer. The probe models GPU replies and proves no physical decoded pixels.
 Actual firmware results, pixels, throughput and laptop operation are /39.
 All port changes and original sources accompany the replaceable LGPL module.
+
+## Raven2 device selection (0.80.39)
+
+R4VIDEO0.1.6 uses the shared GPU resource owner with paired Picasso or
+Raven2 GC/SDMA identity and exact external-revision ranges. VCN capability
+queries retain the selected1.0.0/1.0.1 class; readiness, generation and queue
+ownership still come from the actual driver receipt. Host owner checks cover
+Raven2 and reject mixed profiles; codec/pixel hardware qualification is open.
+
+## Software multislice correction (0.80.39, candidate 0.1.7)
+
+The software H.264 path keeps FFmpeg error-resilience bookkeeping enabled.
+Forcing `error_concealment=0` left its per-macroblock table unmaintained and
+caused the sequential multislice check to reject valid pictures with
+`FF_DECODE_ERROR_DECODE_SLICES`. Hardware callbacks retain zero CPU concealment.
+Strict error detection including EXPLODE and rejection of corrupt/error-marked
+frames remain enabled. Bounded codec diagnostics preserve the original errors.
+
+The standard build passed all 16 steps and the existing three test groups.
+A targeted SMP4 run through public VIDEO_V1 compared 39 actual software frames
+across Baseline/Main/High at 64x64 and 96x64: all 248832 YUV samples matched.
+A truncated packet was rejected and Close/Destroy/Finish completed; requesting
+native AMD without an available backend was also rejected. The temporary probe
+imports R4DESK for native stdio diagnostics. These are software results, with
+separate sessions for each resolution, not native VCN/resize/seek qualification.
+The 13-clip native readback probe remains prepared but unexecuted on Lenovo.
+Evidence: Temp/AMD08039/VideoPhysical; this candidate is not installed there.

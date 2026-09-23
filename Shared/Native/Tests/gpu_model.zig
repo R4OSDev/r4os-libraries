@@ -15,6 +15,8 @@ const Bo = struct { descriptor: a.GfxBufferDescriptor = .{}, data: ?[]align(6553
 const Va = struct { request: a.GfxVirtualRequest = .{}, status: a.GfxVirtualStatus = .{}, live: bool = false };
 pub const Model = struct {
     provider: gpu.Provider = .nvidia,
+    raven2: bool = false,
+    wrong_amd_profile: bool = false,
     media_ready: bool = true,
     jpeg_ready: bool = true,
     unmap_busy: bool = false,
@@ -69,8 +71,8 @@ fn backend(which: u32, output: *a.GfxBackendInfo) callconv(.c) i32 {
     if (which != 0) return 0;
     if (model.provider == .amd) {
         const protocol: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile),
-            .vendor_id = amd.vendor_id, .device_id = 0x15d8, .gc_version = amd.gc_9_1_0,
-            .sdma_version = amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
+            .vendor_id = amd.vendor_id, .device_id = 0x15d8, .gc_version = if (model.raven2) amd.gc_9_2_2 else amd.gc_9_1_0,
+            .sdma_version = if (model.raven2) amd.sdma_4_1_1 else amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
         output.* = .{ .binding = binding(), .memory_generation = 31, .operations = 1 << a.gfx_queue_operation_native,
             .profile = .{ .interface_id_lo = amd.backend_v1_header.interface_id_lo, .interface_id_hi = amd.backend_v1_header.interface_id_hi,
                 .revision = 1, .data_bytes = @sizeOf(amd.R4AmdDriverProfile) } };
@@ -93,8 +95,10 @@ fn properties(input: *const a.GfxBackendBinding, output: *a.GfxBackendProperties
         const facts = &value.facts;
         facts.version = 1; facts.size = @sizeOf(amd.R4AmdDeviceFacts);
         facts.architecture = .{ .version = 1, .size = @sizeOf(amd.R4AmdArchitecture), .vendor_id = amd.vendor_id,
-            .device_id = 0x15d8, .gc_version = amd.gc_9_1_0, .sdma_version = amd.sdma_4_1_0,
-            .gb_addr_config = 0x24000042, .chip_revision = 0xc8, .bind_alignment = 4096, .memory_generation = 31,
+            .device_id = 0x15d8, .gc_version = if (model.raven2) amd.gc_9_2_2 else amd.gc_9_1_0,
+            .sdma_version = if (model.raven2 and !model.wrong_amd_profile) amd.sdma_4_1_1 else amd.sdma_4_1_0,
+            .gb_addr_config = if (model.raven2) 0x26013041 else 0x24000042,
+            .chip_revision = if (model.raven2) 0x82 else 0x42, .bind_alignment = 4096, .memory_generation = 31,
             .flags = 0, .reserved = 0, .max_image_bytes = 64 * 1024 * 1024 };
         facts.flags = 1 | @as(u32, if (model.coherent) 2 else 0) | @as(u32, if (model.media_ready) 4 else 0) | @as(u32, if (model.jpeg_ready) 8 else 0);
         facts.va_start = amd.native_va_start; facts.va_end = amd.native_va_end;

@@ -40,12 +40,13 @@ const Job = struct {
 };
 pub fn main(init: std.process.Init) !void {
     const args = try init.minimal.args.toSlice(init.arena.allocator());
-    if (args.len != 6) {
-        std.debug.print("Usage: r4aco-compiler <input.spv> <stage 0/4/5> <resource ABI 1/2> <output.bin> <output.json>\n", .{});
+    if (args.len != 6 and args.len != 7) {
+        std.debug.print("Usage: r4aco-compiler <input.spv> <stage 0/4/5> <resource ABI 1/2> <output.bin> <output.json> [external ASIC revision, default 0x41]\n", .{});
         return error.Arguments;
     }
     const stage = try std.fmt.parseInt(u32, args[2], 10);
     const resource_abi = try std.fmt.parseInt(u32, args[3], 10);
+    const revision = if (args.len == 7) try std.fmt.parseInt(u32, args[6], 0) else 0x41;
     if (resource_abi < 1 or resource_abi > 2) return error.Arguments;
     const cwd = std.Io.Dir.cwd();
     const bytes = try cwd.readFileAlloc(init.io, args[1], init.gpa, .limited(65536));
@@ -55,7 +56,7 @@ pub fn main(init: std.process.Init) !void {
     for (words, 0..) |*word, i| word.* = std.mem.readInt(u32, bytes[i * 4..][0..4], .little);
     const job = try init.gpa.create(Job); defer init.gpa.destroy(job); job.* = .{};
     job.request = .{ .version = 1, .size = @sizeOf(c.R4AcoRequest), .stage = stage, .device_id = 0x15d8,
-        .chip_revision = 0x41, .flags = resource_abi - 1, .word_count = @intCast(words.len), .entry_length = 4,
+        .chip_revision = revision, .flags = resource_abi - 1, .word_count = @intCast(words.len), .entry_length = 4,
         .words = @intFromPtr(words.ptr), .entry = @intFromPtr("main"), .budget_bytes = 256 * 1024 * 1024,
         .deadline_ns = Job.clock(0) + 30_000_000_000, .code = @intFromPtr(&job.code), .code_capacity = job.code.len,
         .log_capacity = job.log.len, .log = @intFromPtr(&job.log) };

@@ -22,8 +22,8 @@ pub fn Provider(comptime c: type) type {
         pub fn limits(query: c.R4AmdMediaQuery) error{ Invalid, Unsupported }!c.R4AmdMediaCaps {
             if (query.version != 1 or query.size != @sizeOf(c.R4AmdMediaQuery) or query.flags != 0 or query.reserved != 0 or
                 (query.width == 0) != (query.height == 0)) return error.Invalid;
-            if (query.vendor_id != c.vendor_id or query.device_id != 0x15d8 or query.gc_version != c.gc_9_1_0 or query.vcn_version != c.vcn_1_0_0 or
-                query.firmware_version != c.picasso_vcn_firmware or query.operation > 1 or query.chroma != 1 or
+            if (query.vendor_id != c.vendor_id or !@import("asic.zig").Profiles(c).media(query.device_id, query.gc_version, query.vcn_version, query.firmware_version) or
+                query.operation > 1 or query.chroma != 1 or
                 (query.bit_depth != 8 and query.bit_depth != 10)) return error.Unsupported;
             var out = std.mem.zeroes(c.R4AmdMediaCaps);
             out.version = 1; out.size = @sizeOf(c.R4AmdMediaCaps); out.flags = c.media_caps_source_profile;

@@ -7,8 +7,8 @@ const a = @import("r4os").abi;
 const nv = @import("r4nv_binding");
 const nv_provider = @import("r4nv_backend");
 const amd = @import("r4amd_binding");
-const amd_provider = @import("r4amd_backend");
-const amd_images = @import("r4amd_images");
+const amd_provider = @import("r4amd_providers").backend;
+const amd_images = @import("r4amd_providers").images;
 const d = @import("device.zig");
 const c = d.c;
 const api = &@import("main.zig").r4gfx_device_v1;
@@ -73,12 +73,14 @@ const Model = struct {
     var retire_ack = false;
     const AmdPacket = extern struct { header: amd.R4AmdYuvHeader, color: [64]u32, matrix: [3][4]f32 };
     var amd_packet: AmdPacket = undefined;
+    var raven2 = false;
     var amd_properties_revision: u32 = 1;
     var amd_properties_short = false;
     fn properties(input: *const a.GfxBackendBinding, out: *a.GfxBackendProperties) callconv(.c) i32 {
         if (input.adapter_id == 3) {
             const arch: amd.R4AmdArchitecture = .{ .version=1,.size=@sizeOf(amd.R4AmdArchitecture),.vendor_id=amd.vendor_id,.device_id=0x15d8,
-                .gc_version=amd.gc_9_1_0,.sdma_version=amd.sdma_4_1_0,.gb_addr_config=0x24000042,.chip_revision=0x41,
+                .gc_version=if (raven2) amd.gc_9_2_2 else amd.gc_9_1_0,.sdma_version=if (raven2) amd.sdma_4_1_1 else amd.sdma_4_1_0,
+                .gb_addr_config=if (raven2) 0x26013041 else 0x24000042,.chip_revision=if (raven2) 0x82 else 0x41,
                 .bind_alignment=4096,.memory_generation=97,.flags=0,.reserved=0,.max_image_bytes=64*1024*1024 };
             out.*=.{ .interface_id_lo=amd.image_v1_header.interface_id_lo,.interface_id_hi=amd.image_v1_header.interface_id_hi,
                 .revision=amd_properties_revision,.data_bytes=if (amd_properties_revision == 1) @sizeOf(amd.R4AmdArchitecture) else @sizeOf(amd.R4AmdDeviceFacts) };
@@ -520,8 +522,8 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) 
     amdgpu.profile = .{ .interface_id_lo = amd.backend_v1_header.interface_id_lo,
         .interface_id_hi = amd.backend_v1_header.interface_id_hi, .revision = 1, .data_bytes = @sizeOf(amd.R4AmdDriverProfile) };
     const details: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile),
-        .vendor_id = amd.vendor_id, .device_id = 0x15d8, .gc_version = amd.gc_9_1_0,
-        .sdma_version = amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
+        .vendor_id = amd.vendor_id, .device_id = 0x15d8, .gc_version = if (Model.raven2) amd.gc_9_2_2 else amd.gc_9_1_0,
+        .sdma_version = if (Model.raven2) amd.sdma_4_1_1 else amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
     @memcpy(amdgpu.profile.data[0..@sizeOf(amd.R4AmdDriverProfile)], std.mem.asBytes(&details));
     var unknown = amdgpu; unknown.binding.adapter_id = 1;
     unknown.profile.interface_id_lo = 0x1af4; // Unrecognized/Virtio profile retains its existing software path.
@@ -600,7 +602,9 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) 
     // cannot silently reclassify old native BOs as the new provider profile.
     var obsolete = try providerImage(&handle);
     const before_profile = storage.queue.timeline;
-    std.mem.writeInt(u32, values[1].profile.data[12..16], 0x15d9, .little);
+    var replacement = details;
+    replacement.gc_version = amd.gc_9_2_2; replacement.sdma_version = amd.sdma_4_1_1;
+    @memcpy(values[1].profile.data[0..@sizeOf(amd.R4AmdDriverProfile)], std.mem.asBytes(&replacement));
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
     try t.expect(state.backend == c.render_backend_amd and storage.queue.timeline != before_profile);
     var discarded: c.R4GfxJob = undefined;
@@ -990,6 +994,9 @@ pub fn check() !void {
     try checkNativeGrid(&config);
     try checkNativePresent(&config, &imports, false);
     try checkNativePresent(&config, &imports, true);
+    Model.raven2 = true;
+    try checkNativePresent(&config, &imports, true);
+    Model.raven2 = false;
     try checkImagePreparation(&config);
     try checkTiledPreparation(&config);
     try checkSwapchains(&config, &imports);
@@ -1008,6 +1015,10 @@ pub fn check() !void {
     try checkAmdYuv(&config, &imports, false);
     Model.amd_properties_revision = 2;
     defer Model.amd_properties_revision = 1;
+    try checkAmdYuv(&config, &imports, true);
+    Model.raven2 = true;
+    defer Model.raven2 = false;
+    try checkAmdYuv(&config, &imports, false);
     try checkAmdYuv(&config, &imports, true);
 }
 
@@ -1028,7 +1039,7 @@ fn checkAmdYuv(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport
         .profile = .{ .interface_id_lo = amd.backend_v1_header.interface_id_lo, .interface_id_hi = amd.backend_v1_header.interface_id_hi,
             .revision = 1, .data_bytes = @sizeOf(amd.R4AmdDriverProfile) } }};
     const details: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile), .vendor_id = amd.vendor_id, .device_id = 0x15d8,
-        .gc_version = amd.gc_9_1_0, .sdma_version = amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
+        .gc_version = if (Model.raven2) amd.gc_9_2_2 else amd.gc_9_1_0, .sdma_version = if (Model.raven2) amd.sdma_4_1_1 else amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
     @memcpy(backend[0].profile.data[0..@sizeOf(amd.R4AmdDriverProfile)], std.mem.asBytes(&details));
     Model.adapters = &backend;
     const colors = &@import("main.zig").r4gfx_color_v1;
@@ -2049,8 +2060,8 @@ const AmdFixture = struct {
                 .interface_id_hi = amd.backend_v1_header.interface_id_hi, .revision = 1,
                 .data_bytes = @sizeOf(amd.R4AmdDriverProfile) } };
         const profile: amd.R4AmdDriverProfile = .{ .version = 1, .size = @sizeOf(amd.R4AmdDriverProfile),
-            .vendor_id = amd.vendor_id, .device_id = 0x15d8, .gc_version = amd.gc_9_1_0,
-            .sdma_version = amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
+            .vendor_id = amd.vendor_id, .device_id = 0x15d8, .gc_version = if (Model.raven2) amd.gc_9_2_2 else amd.gc_9_1_0,
+            .sdma_version = if (Model.raven2) amd.sdma_4_1_1 else amd.sdma_4_1_0, .command_abi = amd.command_abi, .reserved = 0 };
         @memcpy(self.backend[0].profile.data[0..@sizeOf(amd.R4AmdDriverProfile)], std.mem.asBytes(&profile));
         Model.adapters = &self.backend;
         imports[4].table = @intFromPtr(&self.table); imports[4].resolved_version = amd.backend_v1_revision;

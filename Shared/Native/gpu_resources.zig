@@ -136,7 +136,9 @@ pub const Device = struct {
     pub fn mediaCaps(self: Device, codec: u32, profile: u32, depth: u32, chroma: u32) Error!amd.R4AmdMediaCaps {
         if (self.provider != .amd or self.engine == .graphics) return error.Unsupported;
         return amd_media.Provider(amd).limits(.{ .version = 1, .size = @sizeOf(amd.R4AmdMediaQuery), .vendor_id = amd.vendor_id,
-            .device_id = 0x15d8, .gc_version = amd.gc_9_1_0, .vcn_version = amd.vcn_1_0_0, .firmware_version = amd.picasso_vcn_firmware,
+            .device_id = 0x15d8, .gc_version = switch (self.class) {
+                amd.vcn_1_0_0 => amd.gc_9_1_0, amd.vcn_1_0_1 => amd.gc_9_2_2, else => return error.Unsupported },
+            .vcn_version = self.class, .firmware_version = if (self.class == amd.vcn_1_0_1) amd.raven2_vcn_firmware else amd.picasso_vcn_firmware,
             .operation = @intFromBool(self.engine == .encode), .codec = codec, .profile = profile, .bit_depth = depth, .chroma = chroma,
             .width = 0, .height = 0, .flags = 0, .reserved = 0 });
     }
@@ -146,8 +148,10 @@ pub const Device = struct {
             info.binding.reset_generation == 0 or info.memory_generation == 0 or info.operations & (@as(u64, 1) << a.gfx_queue_operation_native) == 0 or
             !payload(profile) or profile.revision != 1 or profile.data_bytes != @sizeOf(amd.R4AmdDriverProfile)) return error.Unsupported;
         const protocol = std.mem.bytesToValue(amd.R4AmdDriverProfile, profile.data[0..@sizeOf(amd.R4AmdDriverProfile)]);
-        if (!payload(protocol) or protocol.vendor_id != amd.vendor_id or protocol.device_id != 0x15d8 or protocol.gc_version != amd.gc_9_1_0 or
-            protocol.sdma_version != amd.sdma_4_1_0 or protocol.command_abi != amd.command_abi or protocol.reserved != 0) return error.Unsupported;
+        const raven2 = protocol.gc_version == amd.gc_9_2_2 and protocol.sdma_version == amd.sdma_4_1_1;
+        const picasso = protocol.gc_version == amd.gc_9_1_0 and protocol.sdma_version == amd.sdma_4_1_0;
+        if (!payload(protocol) or protocol.vendor_id != amd.vendor_id or protocol.device_id != 0x15d8 or (!picasso and !raven2) or
+            protocol.command_abi != amd.command_abi or protocol.reserved != 0) return error.Unsupported;
         var properties: a.GfxBackendProperties = .{};
         try result(q.backendProperties(&info.binding, &properties));
         if (!payload(properties) or properties.interface_id_lo != amd.image_v1_header.interface_id_lo or
@@ -156,7 +160,8 @@ pub const Device = struct {
         const value = std.mem.bytesToValue(amd.R4AmdDeviceFactsV3, properties.data[0..@sizeOf(amd.R4AmdDeviceFactsV3)]);
         const facts = value.facts; const arch = facts.architecture;
         if (!payload(facts) or !payload(arch) or arch.vendor_id != amd.vendor_id or arch.device_id != 0x15d8 or
-            arch.gc_version != amd.gc_9_1_0 or arch.sdma_version != amd.sdma_4_1_0 or arch.flags != 0 or arch.reserved != 0 or
+            arch.gc_version != protocol.gc_version or arch.sdma_version != protocol.sdma_version or arch.flags != 0 or arch.reserved != 0 or
+            arch.chip_revision < (if (raven2) @as(u32, 0x81) else 0x41) or arch.chip_revision > (if (raven2) @as(u32, 0x88) else 0x48) or
             arch.bind_alignment != 4096 or facts.flags & ~@as(u32, 15) != 0 or facts.flags & 3 != 3 or facts.reserved != 0 or
             facts.va_start != amd.native_va_start or facts.va_end != amd.native_va_end or value.native_binding_capacity < 24 or
             value.max_backing_bytes == 0) return error.Unsupported;
@@ -164,7 +169,8 @@ pub const Device = struct {
         if (engine != .graphics and facts.flags & amd.device_fact_vcn1_ready == 0) return error.Unsupported;
         if (engine == .jpeg and facts.flags & amd.device_fact_jpeg1_submit == 0) return error.Unsupported;
         return .{ .binding = info.binding, .memory_generation = arch.memory_generation, .va_start = facts.va_start,
-            .va_end = facts.va_end, .class = if (engine == .graphics) amd.gc_9_1_0 else amd.vcn_1_0_0, .engine = engine, .provider = .amd };
+            .va_end = facts.va_end, .class = if (engine == .graphics) arch.gc_version else if (raven2) amd.vcn_1_0_1 else amd.vcn_1_0_0,
+            .engine = engine, .provider = .amd };
     }
 };
 

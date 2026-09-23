@@ -292,6 +292,16 @@ fn amdChecks(base: r.program.Context) !void {
     try t.expectError(error.Unsupported, gpu.Device.queryFor(base, 9, .encode));
     state.coherent = true;
 
+    state.raven2 = true;
+    const rv = try gpu.Device.queryProvider(base, 9, .decode, .amd);
+    try t.expectEqual(amd.vcn_1_0_1, rv.class);
+    try t.expectEqual(amd.gc_9_2_2, (try gpu.Device.queryFor(base, 9, .graphics)).class);
+    try t.expectEqual(h264, try rv.mediaCaps(1, 100, 8, 1));
+    try t.expectEqual(@as(u32, 2), (try rv.mediaCaps(2, 2, 10, 1)).format);
+    state.wrong_amd_profile = true;
+    try t.expectError(error.Unsupported, gpu.Device.queryFor(base, 9, .decode));
+    state.wrong_amd_profile = false; state.raven2 = false;
+
     var budget: Budget = .{ .limit = 32 * 1024 * 1024 };
     var ctx: gpu.Context = .{ .base = base, .device = device, .budget = &budget, .clock = clock };
     var commands: gpu.Resource = .{};

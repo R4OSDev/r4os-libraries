@@ -1,9 +1,9 @@
 ﻿# R4ACO
 
-R4ACO 0.1.2 is the CPU shader compiler for the fixed Picasso GFX9 profile.
+R4ACO 0.1.3 is the CPU shader compiler for Picasso gfx902 and Raven2 gfx909.
 It links the real Mesa 26.2.2 SPIR-V frontend, NIR and ACO into R4ACO.R4L.
 `INFO_V1:1` reports CPU compilation; `COMPILER_V1:1` compiles and serializes
-shader caches. Physical device access belongs to AMDGPU.R4D.
+shader caches. Physical device access belongs to AMDGPU.R4D. External ASIC revisions select the exact Mesa family; Raven2 omits the Raven LS-VGPR initialization workaround. Cache identity and generated metadata distinguish gfx902/909. The offline compiler accepts an optional final external-revision argument (for example 0x82); omitted means Picasso 0x41.
 
 Build from Libraries with `./Build.sh R4ACO` or `Build.bat R4ACO`. Shared
 PowerShell 7 orchestration reads the workspace Settings.R4S. It requires

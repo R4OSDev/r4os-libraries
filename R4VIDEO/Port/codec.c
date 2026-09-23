@@ -10,6 +10,7 @@
 #include "libavutil/mem.h"
 #include <limits.h>
 #include <stdatomic.h>
+#include <stdio.h>
 #include <string.h>
 
 struct packet_identity {
@@ -18,15 +19,27 @@ struct packet_identity {
     uint64_t duration;
     uint32_t flags, reserved;
 };
+extern int32_t r4native_console_write(const char *, uint32_t);
+static void diagnostic(const char *stage, int value, int detail)
+{
+    char text[128];
+    int length = snprintf(text, sizeof(text), "R4VIDEO codec %s value=%d detail=%d\n", stage, value, detail);
+    if (length > 0 && (size_t)length < sizeof(text))
+        r4native_console_write(text, (uint32_t)length);
+}
 static int result(struct r4video_codec *codec, int code)
 {
     int rejected = atomic_load_explicit(&codec->admission_error, memory_order_acquire);
-    if (rejected) return rejected;
+    if (rejected) {
+        diagnostic("admission", rejected, code);
+        return rejected;
+    }
     if (code >= 0) return R4VIDEO_OK;
     if (code == AVERROR(EAGAIN)) return R4VIDEO_AGAIN;
     if (code == AVERROR_EOF) return R4VIDEO_EOS;
     if (code == AVERROR(ENOMEM)) return R4VIDEO_ERROR_NO_MEMORY;
     if (code == AVERROR_PATCHWELCOME || code == AVERROR(ENOSYS)) return R4VIDEO_ERROR_UNSUPPORTED;
+    diagnostic("error", code, 0);
     return R4VIDEO_ERROR_DECODE;
 }
 void r4video_codec_reject(struct r4video_codec *codec, int error)
@@ -146,7 +159,13 @@ int r4video_codec_open(const struct r4video_codec_config *config, struct r4video
     context->apply_cropping = 0;
     context->flags |= AV_CODEC_FLAG_COPY_OPAQUE;
     context->err_recognition = AV_EF_CRCCHECK | AV_EF_BITSTREAM | AV_EF_BUFFER | AV_EF_EXPLODE;
-    context->error_concealment = 0;
+    /* Software multi-slice decoding consults error_status_table between
+     * slices. FFmpeg leaves that table unmaintained when error_concealment
+     * is zero, producing FF_DECODE_ERROR_DECODE_SLICES on intact pictures.
+     * Keep its software accounting active; EXPLODE and the receive-side
+     * decode_error_flags/CORRUPT checks still reject repaired/broken output.
+     * Hardware decoding never executes the CPU slice/concealment path. */
+    context->error_concealment = config->nvdec ? 0 : FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
     context->pkt_timebase = (AVRational){1, 1000000000};
     /* Advanced VC1 carries the sequence and entry-point headers in its first
      * access unit. Delay the original decoder's extradata-dependent init until
@@ -254,6 +273,9 @@ int r4video_codec_receive(struct r4video_codec *codec, struct r4video_codec_fram
     if (received) { av_frame_free(&frame); return received; }
     if (frame->decode_error_flags || frame->flags & (AV_FRAME_FLAG_CORRUPT | AV_FRAME_FLAG_INTERLACED) ||
         !frame->opaque_ref || frame->opaque_ref->size != sizeof(struct packet_identity)) {
+        diagnostic("frame", frame->decode_error_flags, frame->flags);
+        diagnostic("identity", frame->opaque_ref ? (int)frame->opaque_ref->size : -1,
+                   (int)sizeof(struct packet_identity));
         av_frame_free(&frame); return R4VIDEO_ERROR_DECODE;
     }
     if ((codec->config.nvdec ? frame->format != AV_PIX_FMT_R4OS_NVDEC :

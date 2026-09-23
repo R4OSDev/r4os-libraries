@@ -1,6 +1,6 @@
 ﻿# R4VK native Vulkan provider
 
-R4VK 0.1.21 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+R4VK 0.1.24 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
 runtime. Provider-specific constructors, revalidation and destruction select
 only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
 queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
@@ -689,3 +689,12 @@ and GrafikVulkan07936.txt/.json under the workspace's Docs/Drivers directory.
 Physical GPU validation remains in `ExFiles/Reports/OssiGPU.txt`.
 
 A small public ICD consumer is available in Examples/Enumerate.zig.
+
+## Raven2 identity (0.80.39)
+
+RADV now accepts the paired Raven2 GC9.2.2/SDMA4.1.1 receipt and external
+revisions81..88, with ASIC revisions8..15 and measured CU/RB masks bounded
+by3/1. Picasso retains its11/2 maxima. Original Mesa helpers receive the
+actual IP and classify CHIP_RAVEN2, including compiler workaround selection.
+Generation, memory, timestamp and backing checks remain mandatory. This
+host-checked admission does not constitute physical GPU qualification.

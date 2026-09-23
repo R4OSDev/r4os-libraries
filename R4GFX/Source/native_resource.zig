@@ -52,10 +52,8 @@ pub const Profile = struct {
              (properties.revision != 3 or properties.data_bytes != @sizeOf(amd.R4AmdDeviceFactsV3)))) return error.Unsupported;
         for (properties.data[properties.data_bytes..]) |byte| if (byte != 0) return error.Invalid;
         const arch = std.mem.bytesToValue(amd.R4AmdArchitecture, properties.data[0..@sizeOf(amd.R4AmdArchitecture)]);
-        if (arch.version != 1 or arch.size != @sizeOf(amd.R4AmdArchitecture) or arch.flags != 0 or arch.reserved != 0 or
-            arch.vendor_id != amd.vendor_id or arch.device_id != 0x15d8 or arch.gc_version != amd.gc_9_1_0 or
-            arch.bind_alignment != 4096 or arch.max_image_bytes != 64 * 1024 * 1024 or arch.gb_addr_config == 0 or
-            arch.chip_revision < 0x41 or arch.chip_revision > 0x48) return error.Unsupported;
+        try @import("amd_images.zig").validateArchitecture(arch, selected);
+        if (arch.gb_addr_config == 0) return error.Unsupported;
         if (arch.memory_generation != selected.memory_generation) return error.Stale;
         return .{ .binding = selected.binding, .memory_generation = arch.memory_generation, .va_start = amd.native_va_start, .va_end = amd.native_va_end, .graphics_class = 0, .backend = d.c.render_backend_amd };
     }

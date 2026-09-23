@@ -7,8 +7,10 @@ fn request() c.R4AmdImageRequest {
     return .{ .version = 1, .size = @sizeOf(c.R4AmdImageRequest), .gb_addr_config = 0x24000042, .chip_revision = 0x41, .device_id = 0x15d8, .gc_version = c.gc_9_1_0, .resource_type = 1, .format = 875713112, .width = 257, .height = 129, .depth = 1, .mip_count = 1, .samples = 1, .usage = 3, .swizzle = 0, .pipe_xor = 0, .pitch = 0, .reserved = 0, .modifier = 0 };
 }
 test "real linked AddrLib surface, coordinates and bounded callback allocation" {
+    for ([_]bool{ false, true }) |raven2| {
     var scratch: [65536]u8 align(16) = undefined;
     var r = request();
+    if (raven2) { r.gc_version = c.gc_9_2_2; r.chip_revision = 0x82; r.gb_addr_config = 0x26013041; }
     var layout: c.R4AmdImageLayout = undefined;
     var mips: [15]c.R4AmdMip = undefined;
     const rc = image.calculate(&r, &scratch, scratch.len, &layout, &mips, 15);
@@ -33,6 +35,11 @@ test "real linked AddrLib surface, coordinates and bounded callback allocation" 
     var metadata: c.R4AmdMetadata = undefined;
     try t.expectEqual(c.status_ok, image.metadata(&r, &scratch, scratch.len, &metadata));
     try t.expect(metadata.kind == 1 and metadata.flags == 0 and metadata.byte_length > 0);
+    const original = layout;
+    r.chip_revision = if (raven2) 0x41 else 0x82;
+    try t.expectEqual(c.status_unsupported, image.calculate(&r, &scratch, scratch.len, &layout, &mips, 15));
+    try t.expectEqualDeep(original, layout);
+    }
 }
 const regs = @cImport({
     @cInclude("amdgfx9regs.h");

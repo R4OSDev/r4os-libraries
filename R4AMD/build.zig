@@ -3,6 +3,7 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("binding", b.path("Bindings/Zig/r4amd.zig"));
     b.addNamedLazyPath("implementation", b.path("Contract/Generated/implementation_abi.zig"));
     b.addNamedLazyPath("backend", b.path("Source/backend.zig"));
+    b.addNamedLazyPath("providers", b.path("Source/providers.zig"));
     const sdk_build = b.lazyImport(@This(), "r4os_sdk") orelse return;
     const sdk = sdk_build.sdk(b, b.dependencyFromBuildZig(sdk_build, .{}), .{});
     const native = b.addSystemCommand(&.{ "pwsh", "-NoLogo", "-NoProfile", "-File" });

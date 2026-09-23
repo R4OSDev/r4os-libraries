@@ -90,18 +90,22 @@ const State = struct {
     }
 };
 fn key(binary: c.R4AcoBinary) c.R4AcoCacheKey {
-    return .{ .version = 1, .size = @sizeOf(c.R4AcoCacheKey), .vendor_id = 0x1002, .device_id = 0x15d8, .chip_revision = 0x41, .gfx_profile = 902, .stage = binary.stage, .resource_abi = 1, .command_abi = 1, .driver_version = 1, .format = 875713112, .reserved = 0, .device_generation = 1, .reset_generation = 1, .pipeline_layout = 1, .source_hash = binary.source_hash, .pipeline_hash = .{ .h0 = 1, .h1 = 2, .h2 = 3, .h3 = 4 } };
+    return .{ .version = 1, .size = @sizeOf(c.R4AcoCacheKey), .vendor_id = 0x1002, .device_id = 0x15d8, .chip_revision = binary.chip_revision, .gfx_profile = binary.gfx_profile, .stage = binary.stage, .resource_abi = binary.resource_abi, .command_abi = 1, .driver_version = 1, .format = 875713112, .reserved = 0, .device_generation = 1, .reset_generation = 1, .pipeline_layout = 1, .source_hash = binary.source_hash, .pipeline_hash = .{ .h0 = 1, .h1 = 2, .h2 = 3, .h3 = 4 } };
 }
 
 test "real GFX9 graphics, copy, fill and shared-memory compilation" {
+    for ([_]u32{ 0x41, 0x82 }) |revision| {
     inline for (.{ .{ "fullscreen.spv", @as(u32, 0) }, .{ "color.spv", @as(u32, 4) }, .{ "copy.spv", @as(u32, 5) }, .{ "fill.spv", @as(u32, 5) }, .{ "shared.spv", @as(u32, 5) }, .{ "sample.spv", @as(u32, 4) } }) |item| {
         const source = comptime words(item[0]);
         var state: State = .{};
         state.configure(&source, item[1]);
+        state.request.chip_revision = revision;
         if (comptime std.mem.eql(u8, item[0], "sample.spv")) state.request.flags = c.request_textures;
         try state.run();
         try t.expectEqual(c.status_ok, state.return_status);
         try t.expect(!state.aborted);
+        try t.expectEqual(@as(u32, if (revision == 0x82) 909 else 902), state.result.gfx_profile);
+        try t.expectEqual(revision, state.result.chip_revision);
         try t.expectEqual(@as(u32, 1) + state.request.flags, state.result.resource_abi);
         try t.expect(state.result.code_bytes > 20 and state.result.exec_bytes > 4);
         try t.expect(state.result.sgprs >= 16 and state.result.vgprs >= 4);
@@ -125,6 +129,7 @@ test "real GFX9 graphics, copy, fill and shared-memory compilation" {
         std.crypto.hash.sha2.Sha256.hash(state.code[0..state.result.code_bytes], &digest, .{});
         std.debug.print("GFX9 SHA256 {s}: {s}\n", .{ item[0], std.fmt.bytesToHex(digest, .lower) });
         std.debug.print("GFX9 CODE {s}: {x}\n", .{ item[0], state.code[0..state.result.code_bytes] });
+    }
     }
 }
 
@@ -195,4 +200,29 @@ test "deterministic compiler output and cache identity, corruption and disjoint 
     invalid.request.code = invalid.request.words;
     const callbacks = invalid.callbacks();
     try t.expectEqual(c.status_invalid, compiler.r4aco_compile_impl(&callbacks, &invalid.request, &invalid.result));
+    var raven: State = .{};
+    raven.configure(&source, 5); raven.request.chip_revision = 0x82;
+    try raven.run(); try t.expectEqual(c.status_ok, raven.return_status);
+    var raven_key = key(raven.result);
+    try t.expectEqual(@as(u32, 909), raven_key.gfx_profile);
+    try t.expect(!std.meta.eql(first.result.source_hash, raven.result.source_hash));
+    // The Picasso artifact cannot satisfy a valid Raven2 request, even if
+    // some independently compiled instruction bytes happen to be identical.
+    try t.expect(cache.r4aco_cache_read_impl(&raven_key, &bytes, written, &output, &code, code.len) != c.status_ok);
+    try t.expectEqualDeep(saved, output);
+    try t.expectEqual(c.status_ok, cache.r4aco_cache_write_impl(&raven_key, &raven.result, &raven.code, raven.result.code_bytes, &bytes, bytes.len, &written));
+    try t.expectEqual(c.status_ok, cache.r4aco_cache_read_impl(&raven_key, &bytes, written, &output, &code, code.len));
+    try t.expectEqualSlices(u8, raven.code[0..raven.result.code_bytes], code[0..output.code_bytes]);
+    const raven_saved = output;
+    raven_key.gfx_profile = 902;
+    try t.expectEqual(c.status_invalid, cache.r4aco_cache_read_impl(&raven_key, &bytes, written, &output, &code, code.len));
+    try t.expectEqualDeep(raven_saved, output);
+    invalid.configure(&source, 5);
+    invalid.result = std.mem.zeroes(c.R4AcoBinary);
+    for ([_]u32{ 0x40, 0x49, 0x80, 0x89 }) |revision| {
+        invalid.request.chip_revision = revision;
+        try t.expectEqual(c.status_unsupported, compiler.r4aco_compile_impl(&callbacks, &invalid.request, &invalid.result));
+        try t.expectEqual(@as(usize, 0), invalid.allocations);
+        try t.expectEqualDeep(std.mem.zeroes(c.R4AcoBinary), invalid.result);
+    }
 }

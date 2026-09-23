@@ -114,8 +114,9 @@ pub fn Provider(comptime c: type, comptime a: type) type {
             push.bounds = .{ (bounds[0] + 0.5) / f(h.width), (bounds[1] + 0.5) / f(h.height), (bounds[2] + 0.5) / f(h.width), (bounds[3] + 0.5) / f(h.height) };
             store(payload, 1024, push);
             if (clipped.width == 0) return 0;
-            const vs = render.program(0, shader_address);
-            const ps = render.program(5, shader_address);
+            const shader_base = @import("asic.zig").Profiles(c).shaderBase(arch.device_id, arch.gc_version, arch.chip_revision) orelse return error.Unsupported;
+            const vs = render.program(shader_base, shader_address);
+            const ps = render.program(shader_base + 5, shader_address);
             const state = render.defaults(arch.gb_addr_config, h.blend == 1);
             var depth = std.mem.zeroes(c.R4AmdDepth);
             depth.version = 1;

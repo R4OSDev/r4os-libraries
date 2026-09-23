@@ -128,3 +128,11 @@ generic helper retains its existing layout. Host ownership checks also cover
 130x130 canonical system input after producer CPU unmap for both AMD codecs.
 Desktop0.1.74 selects AMD through QueryCaps/Create and uses this AVC layout;
 R4ENC.R4L remains byte-identical0.1.3. Hardware pixel qualification remains39.
+
+## Raven2 device selection (0.80.39)
+
+R4ENC0.1.4 uses the shared GPU resource owner with paired Picasso or
+Raven2 GC/SDMA identity and exact external-revision ranges. VCN capability
+queries retain the selected1.0.0/1.0.1 class; readiness, generation and queue
+ownership still come from the actual driver receipt. Host owner checks cover
+Raven2 and reject mixed profiles; codec/pixel hardware qualification is open.

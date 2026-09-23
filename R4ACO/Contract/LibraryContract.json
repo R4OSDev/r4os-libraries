@@ -4,7 +4,7 @@
   "zig_client": "R4Aco",
   "c_prefix": "r4aco",
   "c_header": "r4aco.h",
-  "description": "Pinned Mesa26.2.2 SPIR-V/NIR/ACO compiler and cache for Picasso GFX9, with bounded isolated jobs. CPU compilation never admits a GPU.",
+  "description": "Pinned Mesa26.2.2 SPIR-V/NIR/ACO compiler and cache for Picasso gfx902 and Raven2 gfx909, with bounded isolated jobs. CPU compilation never admits a GPU.",
   "interfaces": [
     {
       "export_name": "INFO_V1",
@@ -364,7 +364,7 @@
           "description": "Validate the complete cache identity, metadata and digest before publishing any code. Corruption, old compiler, wrong ASIC/layout/epoch are cache misses; never GPU submissions."
         }
       ],
-      "description": "Pinned Mesa26.2.2 SPIR-V/NIR/ACO for Picasso native buffer ABI1 and combined 2D texture ABI2. Vertex, fragment, compute. CPU compilation only."
+      "description": "Pinned Mesa26.2.2 SPIR-V/NIR/ACO for Picasso/Raven2 native buffer ABI1 and combined 2D texture ABI2. Vertex, fragment, compute. CPU compilation only."
     }
   ],
   "types": [
@@ -816,7 +816,7 @@
           "description": "log"
         }
       ],
-      "description": "Picasso 1002:15D8, external ASIC revision 0x41..0x48, fixed GFX9 wave64. Flags0 selects buffer resource ABI1; request_textures selects ABI2 with four combined 2D textures in set1. Other flags rejected. SPIR-V<=65536 bytes, entry1..63 UTF-8 bytes; budget1..256MB; code<=16MB, log<=1MB. All input/output spans disjoint. Deadline uses caller clock; allocation/pass checkpoints cooperate with cancellation; parent retains worker and buffers until join."
+      "description": "1002:15D8, external ASIC revision 0x41..0x48 selects Picasso gfx902; 0x81..0x88 selects Raven2 gfx909. Both use GFX9 wave64; native ACO receives the exact Mesa family and compiler errata. Cache keys and returned gfx_profile distinguish the families. Flags0 selects buffer resource ABI1; request_textures selects ABI2 with four combined 2D textures in set1. Other flags rejected. SPIR-V<=65536 bytes, entry1..63 UTF-8 bytes; budget1..256MB; code<=16MB, log<=1MB. All input/output spans disjoint. Deadline uses caller clock; allocation/pass checkpoints cooperate with cancellation; parent retains worker and buffers until join."
     },
     {
       "name": "R4AcoSymbols",

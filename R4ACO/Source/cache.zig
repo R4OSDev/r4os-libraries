@@ -21,7 +21,7 @@ fn nonzero(d: c.R4AcoDigest) bool {
 }
 fn validKey(key: *const c.R4AcoCacheKey) bool {
     return key.version == 1 and key.size == @sizeOf(c.R4AcoCacheKey) and key.vendor_id == 0x1002 and
-        key.device_id == 0x15d8 and key.chip_revision >= 0x41 and key.chip_revision <= 0x48 and key.gfx_profile == 902 and
+        key.gfx_profile == (@import("gpu_profile.zig").select(key.device_id, key.chip_revision) orelse return false) and
         (key.stage == 0 or key.stage == 4 or key.stage == 5) and (key.resource_abi == 1 or key.resource_abi == 2) and
         key.driver_version != 0 and key.command_abi != 0 and key.reserved == 0 and
         (key.stage == 5 or key.format != 0) and key.device_generation != 0 and key.reset_generation != 0 and key.pipeline_layout != 0 and
@@ -30,7 +30,7 @@ fn validKey(key: *const c.R4AcoCacheKey) bool {
 fn validBinary(key: *const c.R4AcoCacheKey, binary: *const c.R4AcoBinary, bytes: usize) bool {
     if (!(binary.version == 1 and binary.size == @sizeOf(c.R4AcoBinary) and binary.status == 0 and binary.reserved == 0 and
         binary.device_id == key.device_id and binary.chip_revision == key.chip_revision and binary.stage == key.stage and
-        binary.gfx_profile == 902 and binary.resource_abi == key.resource_abi and binary.sgprs >= 16 and binary.sgprs <= 112 and binary.sgprs % 16 == 0 and
+        binary.gfx_profile == key.gfx_profile and binary.resource_abi == key.resource_abi and binary.sgprs >= 16 and binary.sgprs <= 112 and binary.sgprs % 16 == 0 and
         binary.vgprs >= 4 and binary.vgprs <= 256 and binary.vgprs % 4 == 0 and binary.lds_bytes <= 65536 and
         binary.scratch_bytes_per_wave <= 64 * 1024 * 1024 and binary.float_mode <= 255 and
         bytes > 0 and bytes <= max_code_bytes and bytes % 4 == 0 and binary.code_bytes == bytes and

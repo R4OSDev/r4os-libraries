@@ -985,7 +985,7 @@
             "error_domain": "R4AMD_STATUS",
             "ownership": "No allocation, retention, device access or submission; all buffers caller-owned and disjoint. Failure leaves outputs unchanged."
           },
-          "description": "Copy a fixed shader and its measured R4ACO metadata. Profiles 0 fullscreen VS/1 vertex-pull VS/2 fill PS/3 sampled PS/4 color PS/5 YUV PS. Code_address is zero until caller uploads to retained executable GPU memory."
+          "description": "Copy a fixed shader and its measured R4ACO metadata. Profiles 0 fullscreen VS/1 vertex-pull VS/2 fill PS/3 sampled PS/4 color PS/5 YUV PS. Code_address is zero until caller uploads to retained executable GPU memory. IDs0..5 are Picasso gfx902; IDs6..11 are the same six shader roles compiled separately for Raven2 gfx909."
         },
         {
           "name": "encode_pipeline",
@@ -3956,7 +3956,7 @@
           "description": "reserved"
         }
       ],
-      "description": "GFX902 wave64 native shader ABI. Code is immutable, 256-byte GPU aligned; no scratch, LDS or interpolated varyings in this renderer. Offline metadata originates in R4ACO; CPU encoding is not hardware admission."
+      "description": "GFX902/GFX909 wave64 native shader ABI. Code is immutable, 256-byte GPU aligned; no scratch, LDS or interpolated varyings in this renderer. Offline metadata originates in R4ACO; CPU encoding is not hardware admission."
     },
     {
       "name": "R4AmdPipeline",
@@ -6521,6 +6521,41 @@
       "type": "u32",
       "value": 8,
       "description": "DeviceFacts.flags: native engine 4 accepts JPEG1 IBs copied into timeline-owned VMID0 storage; JPEG/video mutual exclusion and exact fence retirement implemented. Requires device_fact_vcn1_ready."
+    },
+    {
+      "zig_name": "gc_9_2_2",
+      "c_name": "R4AMD_GC_9_2_2",
+      "type": "u32",
+      "value": 590338,
+      "description": "Raven2 source profile constant; active hardware capabilities remain authoritative."
+    },
+    {
+      "zig_name": "sdma_4_1_1",
+      "c_name": "R4AMD_SDMA_4_1_1",
+      "type": "u32",
+      "value": 262401,
+      "description": "Raven2 source profile constant; active hardware capabilities remain authoritative."
+    },
+    {
+      "zig_name": "vcn_1_0_1",
+      "c_name": "R4AMD_VCN_1_0_1",
+      "type": "u32",
+      "value": 65537,
+      "description": "Raven2 source profile constant; active hardware capabilities remain authoritative."
+    },
+    {
+      "zig_name": "raven2_vcn_firmware",
+      "c_name": "R4AMD_RAVEN2_VCN_FIRMWARE",
+      "type": "u32",
+      "value": 51441669,
+      "description": "Raven2 source profile constant; active hardware capabilities remain authoritative."
+    },
+    {
+      "zig_name": "shader_raven2_base",
+      "c_name": "R4AMD_SHADER_RAVEN2_BASE",
+      "type": "u32",
+      "value": 6,
+      "description": "Raven2 source profile constant; active hardware capabilities remain authoritative."
     }
   ],
   "errors": [

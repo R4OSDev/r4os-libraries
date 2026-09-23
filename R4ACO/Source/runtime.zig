@@ -173,7 +173,7 @@ pub export fn r4aco_port_log(bytes: [*]const u8, length: usize) callconv(.c) voi
 }
 
 const Native = extern struct { metadata: c.R4AcoBinary, code: [*]const u8 };
-extern fn r4aco_native_compile([*]const u32, usize, [*:0]const u8, u32, u32, *Native) callconv(.c) i32;
+extern fn r4aco_native_compile([*]const u32, usize, [*:0]const u8, u32, u32, u32, *Native) callconv(.c) i32;
 extern fn r4aco_fp_begin(*[2]u64) callconv(.c) void;
 extern fn r4aco_fp_end(*const [2]u64) callconv(.c) void;
 comptime {
@@ -247,8 +247,8 @@ pub export fn r4aco_compile_impl(runtime: *const c.R4AcoRuntime, request: *const
     if (runtime.version != 1 or runtime.size != @sizeOf(c.R4AcoRuntime) or runtime.owner_generation == 0 or
         runtime.allocate == 0 or runtime.release == 0 or runtime.clock_ns == 0 or runtime.abort_worker == 0 or
         runtime.owner_retired == 0 or !inputValid(request) or !outputsDisjoint(runtime, request, output)) return c.status_invalid;
-    if (request.device_id != 0x15d8 or request.chip_revision < 0x41 or request.chip_revision > 0x48 or
-        (request.stage != 0 and request.stage != 4 and request.stage != 5)) return c.status_unsupported;
+    const gfx_profile = @import("gpu_profile.zig").select(request.device_id, request.chip_revision) orelse return c.status_unsupported;
+    if (request.stage != 0 and request.stage != 4 and request.stage != 5) return c.status_unsupported;
     if (owner.cmpxchgStrong(0, runtime.owner_generation, .acq_rel, .acquire)) |previous| {
         const retired: Retired = @ptrFromInt(runtime.owner_retired);
         if (retired(runtime.user, previous) != 1 or
@@ -265,7 +265,7 @@ pub export fn r4aco_compile_impl(runtime: *const c.R4AcoRuntime, request: *const
     output.status = c.status_compiler;
     output.device_id = request.device_id;
     output.chip_revision = request.chip_revision;
-    output.gfx_profile = 902;
+    output.gfx_profile = gfx_profile;
     output.resource_abi = 1 + request.flags;
     output.stage = request.stage;
     const clock: Clock = @ptrFromInt(runtime.clock_ns);
@@ -279,7 +279,7 @@ pub export fn r4aco_compile_impl(runtime: *const c.R4AcoRuntime, request: *const
     r4aco_fp_begin(&fp);
     defer r4aco_fp_end(&fp);
     var native: Native = undefined;
-    const status = r4aco_native_compile(@ptrFromInt(request.words), request.word_count, &entry, request.stage, request.flags, &native);
+    const status = r4aco_native_compile(@ptrFromInt(request.words), request.word_count, &entry, request.stage, request.flags, gfx_profile, &native);
     job.check();
     if (status != c.status_ok) {
         job.finish(status);
@@ -297,7 +297,7 @@ pub export fn r4aco_compile_impl(runtime: *const c.R4AcoRuntime, request: *const
     output.device_id = request.device_id;
     output.chip_revision = request.chip_revision;
     output.stage = request.stage;
-    output.gfx_profile = 902;
+    output.gfx_profile = gfx_profile;
     output.resource_abi = 1 + request.flags;
     output.source_hash = saved.source_hash;
     output.peak_bytes = saved.peak_bytes;

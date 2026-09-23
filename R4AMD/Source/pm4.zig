@@ -80,7 +80,7 @@ pub const Builder = struct {
         if (engine == .gfx) self.add(&.{ packet(0x46, 0), 0x0f | (4 << 8), packet(0x46, 0), 0x10 | (4 << 8) });
         self.add(&.{ packet(0x46, 0) | shader, 0x07 | (4 << 8) }); // CS_PARTIAL_FLUSH
         self.add(&.{ packet(0x58, 5) | shader, (1 << 18) | (1 << 22) | (1 << 23) | (1 << 27) | (1 << 29),
-            0xffffffff, 0xffffff, 0, 0, 10 });
+            0xffffffff, 0xff, 0, 0, 10 }); // 40-bit count of 256B blocks; upper bits reserved
     }
     pub fn release(self: *Builder, engine: Engine, fence: u64, sequence: u64, scratch: u64, interrupt: bool) void {
         if (engine == .gfx) self.add(&.{ packet(0x46, 2), 0x15 | (1 << 8), @truncate(scratch), @truncate(scratch >> 32) }); // ZPASS_DONE workaround

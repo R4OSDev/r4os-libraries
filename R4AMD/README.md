@@ -1,16 +1,23 @@
 ﻿# R4AMD
 
-R4AMD 0.1.5 owns AMD image geometry, descriptors and command encoders.
-`INFO_V1:1` and `BACKEND_V1:3` retain their layouts and slots; `IMAGE_V1:1`
+R4AMD 0.1.8 owns AMD image geometry, descriptors and command encoders.
+`INFO_V1:1` and `BACKEND_V1:4` retain their layouts and slots; `IMAGE_V1:1`
 provides stateless image layout, address, metadata, import and descriptor
-calls. `RENDER_V1:1` adds six actual ACO shader profiles and transactional
+calls. `RENDER_V1:1` provides six actual ACO shader roles per ASIC profile and transactional
 GFX9 pipeline/direct/indexed draw encoding.
 AMDGPU.R4D owns devices and publishes measured architecture and memory
 versions through the common graphics backend properties.
 
+GC9 ACQUIRE_MEM uses a 40-bit size in 256-byte blocks: the high size word
+contains only eight implemented bits. The PM4 encoder clears its reserved
+upper bits for both graphics and compute queues. Hardware completion remains
+the driver's responsibility; an encoded packet is not an execution receipt.
+
 The R4L links all sixteen original Mesa 26.2.2 AddrLib translation units,
 including factory dependencies, plus three private R4OS C++ bridges. Runtime
-admission is limited to Picasso 1002:15D8 / GC9.1. No AddrLib or C++ type
+admission pairs 1002:15D8 with Picasso GC9.1/SDMA4.1.0 (gfx902) or
+Raven2 GC9.2.2/SDMA4.1.1 (gfx909). External revision and image/render
+profile must match. Shader IDs0..5 retain Picasso; IDs6..11 are Raven2. No AddrLib or C++ type
 crosses the fixed Zig/C interface. Each call constructs and destroys AddrLib
 in disjoint caller scratch (16-byte aligned, at most 64 KB). No heap, TLS,
 OS allocator, exceptions or RTTI is required. The pure-virtual failure
@@ -27,7 +34,7 @@ Scanout admission uses the DCN1 32-bit standard-swizzle restrictions.
 See workspace Docs/Drivers/AMDImageLayouts08012.txt for limits and units.
 
 Source/copy.zig and Source/pm4.zig remain shared with AMDGPU. They emit
-bounded SDMA linear/row/fill commands and GC9.1 PM4 frames, with exact fences
+bounded SDMA linear/row/fill commands and GFX9 PM4 frames, with exact fences
 and the GFX9 EOP workaround. Encoder flags 27 do not advertise tiled copies,
 render execution, Vulkan, media or a compute-language runtime. The separate
 render owner provides one color target, vertex pulling, sampling, blending,
@@ -140,3 +147,13 @@ CQP/CBR/VBR, session/DPB planning and IDR/P templates. It is compiled into
 R4ENC0.1.3. R4AMD.R4L remains byte-identical0.1.6/BACKEND_V1:4. Original
 MIT notices and sources remain included by ExportLegal.ps1. Physical
 firmware/output qualification belongs to0.80.39.
+
+## Raven2 consumer profile (0.80.39)
+
+R4AMD0.1.7 adds paired GC9.2.2/SDMA4.1.1/VCN1.0.1 constants without
+changing wire layouts or function-table revisions. The firmware eligibility
+uses the independently verified Raven2 original (its VCN version equals the
+Picasso version). Image geometry, render state, YUV shader selection and
+media limits reject mixed profiles. The twelve fixed shader artifacts come
+from real R4ACO0.1.3 compilation with two reproducibility runs per profile.
+Existing host cases cover both families; physical qualification remains open.

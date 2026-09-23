@@ -22,9 +22,11 @@ VkResult r4vk_radv_query_architecture(const R4Draw *draw, const R4Dev *devices,
       return VK_ERROR_INCOMPATIBLE_DRIVER;
    R4AmdDriverProfile protocol;
    memcpy(&protocol, profile->data, sizeof(protocol));
+   const bool raven2 = protocol.gc_version == R4AMD_GC_9_2_2 && protocol.sdma_version == R4AMD_SDMA_4_1_1;
+   const bool picasso = protocol.gc_version == R4AMD_GC_9_1_0 && protocol.sdma_version == R4AMD_SDMA_4_1_0;
    if (protocol.version != 1 || protocol.size != sizeof(protocol) ||
        protocol.vendor_id != R4AMD_VENDOR_ID || protocol.device_id != 0x15d8 ||
-       protocol.gc_version != R4AMD_GC_9_1_0 || protocol.sdma_version != R4AMD_SDMA_4_1_0 ||
+       (!picasso && !raven2) ||
        protocol.command_abi != R4AMD_COMMAND_ABI || protocol.reserved)
       return VK_ERROR_INCOMPATIBLE_DRIVER;
    for (size_t i = sizeof(protocol); i < sizeof(profile->data); i++)
@@ -55,14 +57,17 @@ VkResult r4vk_radv_query_architecture(const R4Draw *draw, const R4Dev *devices,
    if (a->memory_generation != backend->memory_generation) return VK_ERROR_DEVICE_LOST;
    if (a->version != 1 || a->size != sizeof(*a) || a->vendor_id != protocol.vendor_id ||
        a->device_id != protocol.device_id || a->gc_version != protocol.gc_version || a->sdma_version != protocol.sdma_version ||
-       !a->gb_addr_config || a->chip_revision < 0x41 || a->chip_revision > 0x48 || a->bind_alignment != 4096 || a->flags || a->reserved ||
+       !a->gb_addr_config || a->chip_revision < (raven2 ? 0x81u : 0x41u) || a->chip_revision > (raven2 ? 0x88u : 0x48u) ||
+       a->bind_alignment != 4096 || a->flags || a->reserved ||
        a->max_image_bytes != UINT64_C(64)*1024*1024 || f.version != 1 || f.size != sizeof(f) ||
-       f.pci_domain || f.pci_bus > 255 || f.pci_device > 31 || f.pci_function > 7 || f.pci_revision > 255 || f.asic_revision > 7 ||
-       a->chip_revision != 0x41 + f.asic_revision || !f.cu_mask || (f.cu_mask & ~0x7ffu) || !f.rb_mask || (f.rb_mask & ~3u) ||
+       f.pci_domain || f.pci_bus > 255 || f.pci_device > 31 || f.pci_function > 7 || f.pci_revision > 255 ||
+       f.asic_revision < (raven2 ? 8u : 0u) || f.asic_revision > (raven2 ? 15u : 7u) ||
+       a->chip_revision != (raven2 ? 0x79u : 0x41u) + f.asic_revision ||
+       !f.cu_mask || (f.cu_mask & ~(raven2 ? 7u : 0x7ffu)) || !f.rb_mask || (f.rb_mask & ~(raven2 ? 1u : 3u)) ||
        !f.pfp_fw || !f.me_fw || !f.mec_fw || !f.ce_fw || !f.me_feature || !f.mec_feature || !f.smu_fw ||
        (f.flags & 3) != 3 || (f.flags & ~15u) || f.reserved || !f.uma_bytes || !f.native_budget || f.native_budget > f.uma_bytes ||
        f.va_start != R4AMD_NATIVE_VA_START || f.va_end != R4AMD_NATIVE_VA_END || f.max_allocation_bytes != a->max_image_bytes ||
-       f.max_se != 1 || f.max_sh_per_se != 1 || f.max_cu_per_sh != 11 || f.max_rb_per_se != 2 ||
+       f.max_se != 1 || f.max_sh_per_se != 1 || f.max_cu_per_sh != (raven2 ? 3u : 11u) || f.max_rb_per_se != (raven2 ? 1u : 2u) ||
        f.wave_size != 64 || !f.num_tccs || !f.num_gprs || !f.max_waves_per_simd || !f.lds_bytes)
       return VK_ERROR_INITIALIZATION_FAILED;
    R4ProgramMemoryPressureSnapshot memory;
@@ -94,10 +99,10 @@ VkResult r4vk_radv_query_architecture(const R4Draw *draw, const R4Dev *devices,
       .virtual_address_offset = f.va_start, .virtual_address_max = f.va_end,
       .virtual_address_alignment = 4096,
    };
-   info->ip[AMD_IP_GFX] = (struct amd_ip_info) {9, 1, 0, 1, 1, 32, 7};
+   info->ip[AMD_IP_GFX] = raven2 ? (struct amd_ip_info) {9, 2, 2, 1, 1, 32, 7} : (struct amd_ip_info) {9, 1, 0, 1, 1, 32, 7};
    info->ip[AMD_IP_COMPUTE] = info->ip[AMD_IP_GFX];
    info->has_graphics = true;
-   if (!ac_identify_chip(info, &hw) || info->family != CHIP_RAVEN || info->gfx_level != GFX9)
+   if (!ac_identify_chip(info, &hw) || info->family != (raven2 ? CHIP_RAVEN2 : CHIP_RAVEN) || info->gfx_level != GFX9)
       return VK_ERROR_INCOMPATIBLE_DRIVER;
    struct drm_amdgpu_memory_info heaps = {
       .vram = {f.native_budget}, .cpu_accessible_vram = {0}, .gtt = {system},
@@ -113,7 +118,8 @@ VkResult r4vk_radv_query_architecture(const R4Draw *draw, const R4Dev *devices,
    ac_fill_bug_info(info); ac_fill_tess_info(info); ac_fill_compiler_info(info, &hw, false);
    info->pci.domain = f.pci_domain; info->pci.bus = f.pci_bus;
    info->pci.dev = f.pci_device; info->pci.func = f.pci_function; info->pci.valid = true;
-   memcpy(info->marketing_name, "AMD Picasso", sizeof("AMD Picasso"));
+   if (raven2) memcpy(info->marketing_name, "AMD Raven2", sizeof("AMD Raven2"));
+   else memcpy(info->marketing_name, "AMD Picasso", sizeof("AMD Picasso"));
    info->address32_hi = f.va_start >> 32;
    info->max_submitted_ibs[AMD_IP_GFX] = 32; info->max_submitted_ibs[AMD_IP_COMPUTE] = 32;
    info->scratch_wavesize_granularity_shift = 10; info->scratch_wavesize_granularity = 1024;

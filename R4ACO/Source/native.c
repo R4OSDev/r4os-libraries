@@ -143,10 +143,16 @@ static void binary(void **data,const struct ac_shader_config *config,const char 
    memcpy(out->code,code,m->code_bytes);
    m->status=0;
 }
-int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,uint32_t stage,uint32_t flags,struct r4aco_native *out)
+int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,uint32_t stage,uint32_t flags,uint32_t gfx_profile,struct r4aco_native *out)
 {
    memset(out,0,sizeof(*out));
    out->metadata.status=R4ACO_STATUS_COMPILER;
+   if(gfx_profile!=902 && gfx_profile!=909)return R4ACO_STATUS_UNSUPPORTED;
+   const enum radeon_family family=gfx_profile==909?CHIP_RAVEN2:CHIP_RAVEN;
+   /* ac_gpu_info.c: the LS VGPR initialization erratum affects Raven, but
+    * not Raven2. Other compiler limits are the common GFX9 wave64 limits. */
+   struct ac_compiler_info gpu=picasso;
+   gpu.has_ls_vgpr_init_bug=family==CHIP_RAVEN;
    if(stage!=MESA_SHADER_COMPUTE && stage!=MESA_SHADER_VERTEX && stage!=MESA_SHADER_FRAGMENT)return R4ACO_STATUS_UNSUPPORTED;
    /* The job owns all allocation-bearing Mesa globals through Port/Jobs.patch.
     * Diagnostic gates are resident but cannot retain an abandoned worker lock. */
@@ -154,7 +160,7 @@ int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,ui
    memset(&nir_print_lock,0,sizeof(nir_print_lock));
    memset(&fail_dump_mutex,0,sizeof(fail_dump_mutex));
    r4aco_port_check();
-   nir_shader_compiler_options nir_options={0}; ac_nir_set_options(&picasso,false,&nir_options);
+   nir_shader_compiler_options nir_options={0}; ac_nir_set_options(&gpu,false,&nir_options);
    /* Match RADV's GFX9 system-value form; hardware supplies reciprocal W. */
    nir_options.frag_coord_form=nir_frag_coord_xy_z_w_separate|nir_frag_coord_use_w_rcp;
    const struct spirv_capabilities caps={.Shader=true,.Matrix=true};
@@ -242,7 +248,7 @@ int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,ui
       const ac_nir_lower_tex_coords_options tex={.gfx_level=GFX9,.lower_array_layer_round_even=true};
       NIR_PASS(_,nir,ac_nir_lower_tex_coords,&tex);
    }
-   const ac_nir_lower_intrinsics_to_args_options lower={.gfx_level=GFX9,.has_ls_vgpr_init_bug=true,
+   const ac_nir_lower_intrinsics_to_args_options lower={.gfx_level=GFX9,.has_ls_vgpr_init_bug=gpu.has_ls_vgpr_init_bug,
       .hw_stage=hw,.wave_size=64,.workgroup_size=info.workgroup_size,.load_grid_size_from_user_sgpr=true};
    NIR_PASS(_,nir,ac_nir_lower_intrinsics_to_args,a,&lower);
    NIR_PASS(_,nir,nir_lower_alu_to_scalar,NULL,NULL);
@@ -275,7 +281,7 @@ int r4aco_native_compile(const uint32_t *words,size_t count,const char *entry,ui
    m->workgroup_z=stage==MESA_SHADER_COMPUTE?nir->info.workgroup_size[2]:0;
    m->inputs_read=inputs_read; m->outputs_written=outputs_written;
    m->spi_shader_col_format=stage==MESA_SHADER_FRAGMENT?V_028714_SPI_SHADER_32_ABGR:0;
-   const struct aco_compiler_options aco={.compiler_info=&picasso,.family=CHIP_RAVEN,.gfx_level=GFX9,.record_ir=false};
+   const struct aco_compiler_options aco={.compiler_info=&gpu,.family=family,.gfx_level=GFX9,.record_ir=false};
    void *result=out;aco_compile_shader(&aco,&info,1,&nir,a,binary,&result);
    status=out->metadata.status;
 done:

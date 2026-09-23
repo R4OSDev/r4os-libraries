@@ -35,7 +35,7 @@ pub fn Provider(comptime c: type, comptime a: type) type {
         }
         pub fn image(arch: c.R4AmdArchitecture, adapter: u32, desc: a.GfxBufferDescriptor, address: u64, target: bool, filter: u32, scratch: *align(16) [65536]u8) Error!Image {
             if (arch.version != 1 or arch.size != @sizeOf(c.R4AmdArchitecture) or arch.flags != 0 or arch.reserved != 0 or
-                arch.vendor_id != c.vendor_id or arch.device_id != 0x15d8 or arch.gc_version != c.gc_9_1_0 or arch.bind_alignment != 4096 or
+                arch.vendor_id != c.vendor_id or @import("asic.zig").Profiles(c).engines(arch.device_id, arch.gc_version, arch.sdma_version) == null or arch.bind_alignment != 4096 or
                 desc.version != 1 or desc.size < @sizeOf(a.GfxBufferDescriptor) or desc.reserved0 != 0 or desc.plane_count != 1 or desc.plane_offsets[0] != 0 or
                 desc.location != a.gfx_buffer_location_device_local or desc.adapter_id != adapter or desc.driver_owner == 0 or
                 desc.device_generation != arch.memory_generation or desc.byte_length == 0 or desc.byte_length > 64 * 1024 * 1024 or desc.alignment < 4096 or
@@ -109,8 +109,11 @@ pub fn Provider(comptime c: type, comptime a: type) type {
                 store(payload, 256, [8]u32{ d.texture0, d.texture1, d.texture2, d.texture3, d.texture4, d.texture5, d.texture6, d.texture7 });
                 store(payload, 288, [4]u32{ d.sampler0, d.sampler1, d.sampler2, d.sampler3 });
             }
-            const vs = render.program(0, shader_address);
-            const ps = render.program(if (color != null) 4 else if (sampled) 3 else 2, shader_address);
+            const shader_base = @import("asic.zig").Profiles(c).shaderBase(target.request.device_id, target.request.gc_version, target.request.chip_revision) orelse return error.Unsupported;
+            if (source) |input| if (input.request.device_id != target.request.device_id or input.request.gc_version != target.request.gc_version or
+                input.request.chip_revision != target.request.chip_revision or input.request.gb_addr_config != target.request.gb_addr_config) return error.Unsupported;
+            const vs = render.program(shader_base, shader_address);
+            const ps = render.program(shader_base + @as(usize, if (color != null) 4 else if (sampled) 3 else 2), shader_address);
             const state = render.defaults(target.request.gb_addr_config, first.blend == a.gfx_render_blend_over);
             var depth = std.mem.zeroes(c.R4AmdDepth);
             depth.version = 1;

@@ -12,6 +12,11 @@ test "VCN1 codec profile intersection rejects AV1 MPEG4P2 and Main10 encode with
     var caps: c.R4AmdMediaCaps = undefined;
     try t.expectEqual(c.status_ok, impl.caps(&query, &caps)); try t.expectEqual(@as(u32, 17), caps.dpb_slots);
     const saved = caps;
+    query.gc_version = c.gc_9_2_2;
+    try t.expectEqual(c.status_unsupported, impl.caps(&query, &caps)); try t.expectEqualDeep(saved, caps);
+    query.vcn_version = c.vcn_1_0_1; query.firmware_version = c.raven2_vcn_firmware;
+    try t.expectEqual(c.status_ok, impl.caps(&query, &caps)); try t.expectEqualDeep(saved, caps);
+    query.gc_version = c.gc_9_1_0; query.vcn_version = c.vcn_1_0_0; query.firmware_version = c.picasso_vcn_firmware;
     for ([_]u32{ 7, 8, 0, 9 }) |codec| { query.codec = codec; try t.expectEqual(c.status_unsupported, impl.caps(&query, &caps)); try t.expectEqualDeep(saved, caps); }
     query.codec = 2; query.profile = 2; query.bit_depth = 10;
     try t.expectEqual(c.status_ok, impl.caps(&query, &caps)); try t.expectEqual(@as(u32, 2), caps.format);

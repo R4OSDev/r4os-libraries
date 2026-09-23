@@ -23,6 +23,7 @@ test "AMD PM4 ABI preserves failure outputs, packet bounds, reserved fields and 
     var words: [48]u32 = @splat(0xdeadbeef); var written: u32 = 77;
     try t.expectEqual(c.status_ok, encodePm4Frame(&request, &words, words.len, &written));
     try t.expectEqual(@as(u32, 48), written); try pm4.packetBoundaries(&words);
+    try t.expectEqual(@as(u32, 0xff), words[16]); // GC9 COHER_SIZE_HI: eight implemented bits
     const original = words; const count = written;
     try t.expectEqual(c.status_invalid, encodePm4Frame(&request, &words, 47, &written));
     try t.expectEqual(c.status_invalid, encodePm4Frame(&request, &words, 48, &words[0]));
@@ -36,6 +37,7 @@ test "AMD PM4 ABI preserves failure outputs, packet bounds, reserved fields and 
     request.engine = 1; request.eop_scratch = 0;
     try t.expectEqual(c.status_ok, encodePm4Frame(&request, &words, 32, &written));
     try t.expectEqual(@as(u32, 32), written); try pm4.packetBoundaries(words[0..32]);
+    try t.expectEqual(@as(u32, 0xff), words[12]); // Same range encoding on MEC
     request.fence_sequence = 0;
     try t.expectEqual(c.status_invalid, encodePm4Frame(&request, &words, 48, &written));
 }
@@ -50,8 +52,7 @@ pub fn negotiate(profile: *const c.R4AmdDeviceProfile, output: *c.R4AmdFeatures)
     if (profile.version != c.profile_version or profile.size != @sizeOf(c.R4AmdDeviceProfile) or
         profile.flags != 0 or profile.reserved != 0 or profile.adapter_id == 0 or
         profile.device_generation == 0 or profile.reset_generation == 0) return c.status_invalid;
-    if (profile.vendor_id != c.vendor_id or profile.device_id == 0 or profile.device_id >= 0xffff or
-        profile.gc_version != c.gc_9_1_0 or profile.sdma_version != c.sdma_4_1_0 or
+    if (profile.vendor_id != c.vendor_id or @import("asic.zig").Profiles(c).engines(profile.device_id, profile.gc_version, profile.sdma_version) == null or
         profile.command_abi != c.command_abi) return c.status_unsupported;
     // These are pure encoder operations. Actual device admission additionally
     // requires AMDGPU ring self-test and common backend capabilities.
@@ -69,6 +70,13 @@ test "AMD negotiation preserves failures and exposes only implemented SDMA and P
     try t.expectEqual(c.status_ok, negotiate(&profile, &result));
     try t.expect(result.features == c.feature_copy_linear | c.feature_copy_rows | c.feature_fill | c.feature_pm4 and result.max_command_words == copy.max_words and result.gpu_address_bits == 48);
     const original = result;
+    profile.gc_version = c.gc_9_2_2;
+    try t.expectEqual(c.status_unsupported, negotiate(&profile, &result));
+    try t.expectEqualDeep(original, result);
+    profile.sdma_version = c.sdma_4_1_1;
+    try t.expectEqual(c.status_ok, negotiate(&profile, &result));
+    try t.expectEqualDeep(original, result);
+    profile.gc_version = c.gc_9_1_0; profile.sdma_version = c.sdma_4_1_0;
     profile.vendor_id = 0x10de;
     try t.expectEqual(c.status_unsupported, negotiate(&profile, &result));
     try t.expectEqualDeep(original, result);

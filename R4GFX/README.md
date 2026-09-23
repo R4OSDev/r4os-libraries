@@ -249,3 +249,10 @@ for an AMD resource. Existing software/Virtio presentation stays independent.
 AMD backend properties (0.80.23): the image/render consumers accept the exact
 revision/length pairs 1/64 and 2/240 with the unchanged architecture prefix
 and zero padding. Truncated or mismatched payloads remain unsupported.
+
+
+R4GFX0.1.28 (0.80.39) pairs image/native upload admission with the actual
+Picasso or Raven2 GC/SDMA and external revision. Existing presentation and
+NV12/P010 YUV owner checks cover both families, plus profile replacement
+with retained old resources. Public ABI remains unchanged; physical
+Raven2 presentation is still awaiting qualification.
