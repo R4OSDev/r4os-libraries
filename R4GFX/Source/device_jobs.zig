@@ -52,7 +52,7 @@ fn submitRequest(device: *d.Device, request: c.R4GfxCopyRequest, rows: u32, sour
         source_bytes > source.image.byte_length - request.source_offset or target_bytes > target.image.byte_length - request.target_offset) return error.Invalid;
     const tiled = source.descriptor.modifier != 0 or target.descriptor.modifier != 0;
     if (tiled and (rows == 0 or device.gpu_operations & c.device_gpu_copy_layout == 0)) return error.Unsupported;
-    const index = for (&device.jobs, 0..) |*item, i| { if (item.serial == 0) break i; } else return error.Limit;
+    const index = for (&device.jobs, 0..) |*item, i| { if (item.serial == 0) break i; } else return error.Busy;
     const serial = std.math.add(u64, device.job_serial, 1) catch return error.Limit;
     if (source.job_refs == std.math.maxInt(u32) or target.job_refs == std.math.maxInt(u32)) return error.Limit;
     if (!device.cleanResources()) return error.Busy;
@@ -67,7 +67,7 @@ fn submitRequest(device: *d.Device, request: c.R4GfxCopyRequest, rows: u32, sour
         .source_offset = request.source_offset, .target_offset = request.target_offset, .byte_length = request.byte_length, .deadline_ns = request.deadline_ns,
         .row_count = rows, .source_pitch = source_pitch, .target_pitch = target_pitch, .dependency_count = @intCast(dependencies.len) };
     @memcpy(submission.dependencies[0..dependencies.len], dependencies);
-    try d.platform(queues.submit(queue, &submission, &status));
+    try d.queueAdmission(queues.submit(queue, &submission, &status));
     source.job_refs += 1; target.job_refs += 1;
     device.jobs[index] = .{ .serial = serial, .source = request.source, .target = request.target,
         .fence = status.fence, .backend = if (software) c.render_backend_software else device.backend(), .bytes = bytes };

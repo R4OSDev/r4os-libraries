@@ -14,7 +14,7 @@ pub const initialization_failed: i32 = -3;
 pub const compiler_failed: i32 = -13;
 pub const Callback = *const fn (?*anyopaque) callconv(.c) i32;
 const Block = struct { previous: ?*Block, next: ?*Block, arena: *Arena, raw: *anyopaque, bytes: usize };
-const Context = struct { mutex: sync.Mutex = .{}, calls: ?*Call = null, active_count: std.atomic.Value(usize) = .init(0) };
+const Context = struct { mutex: sync.Mutex = .{}, calls: ?*Call = null, active_count: std.atomic.Value(usize) = .init(0), trace: @import("compiler_trace.zig").State = .{}, pm4_trace: @import("pm4_trace.zig").State = .{} };
 const Call = struct {
     next: ?*Call = null,
     arena: *Arena,
@@ -29,9 +29,17 @@ const Call = struct {
 var context_key: u8 = 0;
 fn init(value: *Context) void {
     value.* = .{};
+    value.trace.init();
+    value.pm4_trace.init();
 }
 fn context() ?*Context {
     return local.getOrCreate(Context, &context_key, init);
+}
+// Internal diagnostic entry, never an exported public library contract.
+// The submit owner calls it before taking its residency/submission locks.
+pub export fn r4vk_pm4_trace(engine: u32, group: u32, index: u32, count: u32, address: u64, words: [*]const u32, dwords: u32) callconv(.c) void {
+    const ctx = context() orelse return;
+    ctx.pm4_trace.record(engine, group, index, count, address, words, dwords);
 }
 fn require(result: c_int) void {
     if (result != sync.success) @trap();
@@ -87,8 +95,11 @@ fn entry(argument: ?*anyopaque) callconv(.c) c_int {
     ctx.calls = call;
     _ = ctx.active_count.fetchAdd(1, .release);
     require(threads.mtx_unlock(&ctx.mutex));
+    ctx.trace.mark(call.arena.trace_job, "worker-enter", call.thread);
     call.status = call.callback(call.argument);
+    ctx.trace.mark(call.arena.trace_job, "worker-return", call.status);
     remove(call);
+    ctx.trace.mark(call.arena.trace_job, "worker-unlinked", call.status);
     return call.status;
 }
 
@@ -97,6 +108,7 @@ fn entry(argument: ?*anyopaque) callconv(.c) c_int {
 // and destruction of its compiler. One arena admits at most one worker.
 pub const Arena = struct {
     context: *Context,
+    trace_job: u32 = 0,
     running: std.atomic.Value(bool) = .init(false),
     poisoned: bool = false,
     head: ?*Block = null,
@@ -112,7 +124,7 @@ pub const Arena = struct {
     pub fn create(limit_bytes: usize) ?*Arena {
         const ctx = context() orelse return null;
         const result: *Arena = @ptrCast(@alignCast(memory.mallocUntracked(@sizeOf(Arena)) orelse return null));
-        result.* = .{ .context = ctx, .limit_bytes = limit_bytes, .c_scope = .{ .limit_bytes = limit_bytes } };
+        result.* = .{ .context = ctx, .trace_job = ctx.trace.nextJob(), .limit_bytes = limit_bytes, .c_scope = .{ .limit_bytes = limit_bytes } };
         return result;
     }
     pub fn run(self: *Arena, callback: Callback, argument: ?*anyopaque) i32 {
@@ -121,12 +133,17 @@ pub const Arena = struct {
         if (self.poisoned) return compiler_failed;
         var call: Call = .{ .arena = self, .callback = callback, .argument = argument };
         var thread: r4os.abi.ProgramJoinHandle = .{};
+        self.context.trace.mark(self.trace_job, "before-thread-create", 0);
         const created = threads.thrd_create(&thread, entry, &call);
+        self.context.trace.mark(self.trace_job, "after-thread-create", created);
         if (created != sync.success) return if (created == sync.nomem) out_of_memory else initialization_failed;
         var code: c_int = compiler_failed;
         // Stack arguments and arena storage remain live until exact join.
         // A violated join contract cannot permit their premature release.
-        require(threads.thrd_join(thread, &code));
+        self.context.trace.mark(self.trace_job, "before-thread-join", thread.thread_id);
+        const joined = threads.thrd_join(thread, &code);
+        self.context.trace.mark(self.trace_job, "after-thread-join", joined);
+        require(joined);
         remove(&call); // Also covers a worker retired without normal return.
         if (code != success or call.status != success) {
             self.poisoned = true;
@@ -136,12 +153,16 @@ pub const Arena = struct {
     }
     pub fn destroy(self: *Arena) void {
         if (self.running.load(.acquire)) @trap();
+        const ctx = self.context;
+        const trace_job = self.trace_job;
+        ctx.trace.mark(trace_job, "before-arena-destroy", @intCast(self.c_scope.live_bytes));
         self.c_scope.destroy();
         while (self.head) |block| {
             self.head = block.next;
             memory.free(block.raw);
         }
         memory.free(self);
+        ctx.trace.mark(trace_job, "after-arena-destroy", 0);
     }
 };
 

@@ -100,7 +100,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
     const target_color = try d.color_api.description(&(target.color orelse return error.Unsupported));
     const program = @import("color_gpu.zig").build(source_color, target_color, transform.flags, transform.operation == c.render_operation_over)
         catch |err| return if (err == error.Invalid) error.Invalid else error.Unsupported;
-    const slot = for (&device.jobs, 0..) |*job, i| { if (job.serial == 0) break i; } else return error.Limit;
+    const slot = for (&device.jobs, 0..) |*job, i| { if (job.serial == 0) break i; } else return error.Busy;
     const serial = std.math.add(u64, device.job_serial, 1) catch return error.Limit;
     if (target.job_refs == std.math.maxInt(u32)) return error.Limit;
     if (device.backend() == c.render_backend_amd) return @import("native_yuv_amd.zig").submit(device,request,target,slot,serial,
@@ -176,7 +176,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
     try device.ensureQueue();
     asm volatile ("mfence" ::: .{ .memory = true });
     var status: a.GfxFenceStatus = .{};
-    try d.platform(device.queues().submitNative(&device.queue, &submission, &native, &status));
+    try d.queueAdmission(device.queues().submitNative(&device.queue, &submission, &native, &status));
     owner.hold(indices[0..from.plane_count+1]);
     target.job_refs += 1;
     device.jobs[slot] = .{ .serial = serial, .target = request.target, .fence = status.fence, .backend = device.backend(),

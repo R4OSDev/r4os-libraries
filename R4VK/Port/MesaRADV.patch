@@ -22,17 +22,25 @@
          #define ADDR_DBG_BREAK()    { raise(SIGTRAP); }
 --- a/src/amd/common/ac_cmdbuf.h
 +++ b/src/amd/common/ac_cmdbuf.h
-@@ -273,6 +273,30 @@
+@@ -273,6 +273,38 @@
     __cs_buf = __cs->buf;               \
  } while (0)
  
 +#ifdef R4OS_VULKAN
++/* Keep argument evaluation outside macro-local declarations. The tracked
++ * register helpers already use __value; shadowing it here self-initializes
++ * an indeterminate word while the tracked cache records the correct value. */
++static inline void
++r4vk_cmdbuf_emit_word(struct ac_cmdbuf *cs, uint32_t *words, uint32_t index,
++                     uint32_t reserved, uint32_t value)
++{
++   if (!cs->record_discard) {
++      assert(!reserved || index < reserved);
++      words[index] = value;
++   }
++}
 +#define ac_cmdbuf_emit(value) do { \
-+   uint32_t __value = (value); \
-+   if (!__cs->record_discard) { \
-+      assert(!__cs_reserved_dw || __cs_num < __cs_reserved_dw); \
-+      __cs_buf[__cs_num] = __value; \
-+   } \
++   r4vk_cmdbuf_emit_word(__cs, __cs_buf, __cs_num, __cs_reserved_dw, (value)); \
 +   __cs_num++; \
 +} while (0)
 +#define ac_cmdbuf_packets_added() (__cs_num != __cs_num_initial)
@@ -53,7 +61,7 @@
  #define ac_cmdbuf_emit(value)                                   \
     do {                                                         \
        assert(!__cs_reserved_dw || __cs_num < __cs_reserved_dw); \
-@@ -293,6 +317,8 @@
+@@ -293,6 +325,8 @@
     assert(__cs->cdw <= __cs->max_dw);  \
     __cs = NULL;                        \
  } while (0)

@@ -29,6 +29,9 @@ const Model = struct {
     var reject_adapter: u32 = 0;
     var status: a.GfxFenceStatus = .{};
     var job_live = false;
+    var retain_completed = false;
+    var completed: [c.device_job_capacity]?a.GfxFenceStatus = @splat(null);
+    var submit_error: i32 = 0;
     var job_request: a.GfxSubmission = .{};
     var job_list: a.GfxRenderList = .{};
     var job_grid_list: a.GfxRenderGridList = .{};
@@ -177,6 +180,7 @@ const Model = struct {
     }
 
     fn reset() void {
+        retain_completed = false; completed = @splat(null); submit_error = 0;
         objects = @splat(.{}); references = @splat(.{}); queues = @splat(.{});
         serial = 0x100000000; exports = 0; maps = 0; fail_unmap = false; premature_closes = 0; inventory_reads = 0; job_live = false;
         binding = .{ .adapter_id = 9, .milestone = 1, .device_generation = 0x200000017, .reset_generation = 0x300000017 };
@@ -377,6 +381,7 @@ const Model = struct {
         return a.gfx_queue_error_stale;
     }
     fn submit(queue: *const a.GfxQueueHandle, input: *const a.GfxSubmission, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        if (submit_error != 0) return submit_error;
         std.debug.assert((input.operation == a.gfx_queue_operation_copy or input.operation == a.gfx_queue_operation_copy_rows or
             input.operation == a.gfx_queue_operation_render or input.operation == a.gfx_queue_operation_render_list or input.operation == a.gfx_queue_operation_present or
             input.operation == a.gfx_queue_operation_direct_present or input.operation == a.gfx_queue_operation_render_grid_list or input.operation == a.gfx_queue_operation_render_color_list or input.operation == a.gfx_queue_operation_render_color_grid_list or input.operation == a.gfx_queue_operation_native) and input.dependency_count <= 1);
@@ -387,7 +392,11 @@ const Model = struct {
         if (job_live) return a.gfx_queue_error_busy;
         const found = for (&queues) |*entry| { if (entry.handle.timeline == queue.timeline) break entry; } else unreachable;
         submit_serial += 1;
-        status = .{ .fence = .{ .slot = 1, .timeline = queue.timeline, .point = submit_serial, .adapter_id = found.config.adapter_id,
+        const receipt_slot: u32 = if (retain_completed) blk: {
+            for (completed, 0..) |entry, i| if (entry == null) break :blk @intCast(i + 1);
+            return a.gfx_queue_error_capacity;
+        } else 1;
+        status = .{ .fence = .{ .slot = receipt_slot, .timeline = queue.timeline, .point = submit_serial, .adapter_id = found.config.adapter_id,
             .device_generation = found.config.device_generation, .reset_generation = found.config.reset_generation },
             .phase = a.gfx_queue_phase_running, .flags = a.gfx_queue_flag_device_active | a.gfx_queue_flag_resources_held, .milestone = found.config.milestone };
         job_request = input.*; job_live = true; out.* = status; return 1;
@@ -420,6 +429,7 @@ const Model = struct {
         return rc;
     }
     fn query(input: *const a.GfxFence, out: *a.GfxFenceStatus) callconv(.c) i32 {
+        for (completed) |entry| if (entry) |value| if (std.meta.eql(input.*, value.fence)) { out.* = value; return a.gfx_queue_ok; };
         for (&outputs) |*output| if (output.live and std.meta.eql(input.*, output.status.fence)) { out.* = output.status; return a.gfx_queue_ok; };
         std.debug.assert(job_live and std.meta.eql(input.*, status.fence)); out.* = status; return 1;
     }
@@ -436,6 +446,7 @@ const Model = struct {
         status.phase = a.gfx_queue_phase_terminal; status.result = a.gfx_queue_result_cancelled; return 1;
     }
     fn drop(input: *const a.GfxFence) callconv(.c) i32 {
+        for (&completed) |*entry| if (entry.*) |value| if (std.meta.eql(input.*, value.fence)) { entry.* = null; return a.gfx_queue_ok; };
         for (&outputs) |*output| if (output.live and std.meta.eql(input.*, output.status.fence)) {
             std.debug.assert(output.status.phase == a.gfx_queue_phase_terminal and output.status.flags == 0);
             output.live = false; return a.gfx_queue_ok;
@@ -988,6 +999,7 @@ pub fn check() !void {
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
     try checkNativeRender(&config);
+    try checkReceiptPressure(&config);
     try checkResidency(&config, &imports, false);
     try checkResidency(&config, &imports, true);
     try checkNativeColor(&config);
@@ -1768,6 +1780,64 @@ fn checkImagePreparation(base_config: *const c.R4GfxDeviceConfig) !void {
         try t.expect(Model.referenceCount() == 0);
         try t.expectEqual(c.status_ok,api.device_close(&handle));
     }
+}
+
+fn checkReceiptPressure(config: *const c.R4GfxDeviceConfig) !void {
+    Model.reset(); Model.operations = 29; Model.retain_completed = true;
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    const native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999,
+        .width = 4, .height = 4, .format = c.format_argb8888, .layout = 0 };
+    var desc = descriptor(c.resource_image);
+    desc.flags = c.image_target; desc.source_kind = c.source_create_native; desc.source_address = @intFromPtr(&native);
+    var source: c.R4GfxResource = undefined; var target: c.R4GfxResource = undefined; var pipeline: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &desc, &source));
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &desc, &target));
+    var state = descriptor(c.resource_pipeline); state.operation = c.render_operation_fill;
+    try t.expectEqual(c.status_ok, api.resource_create(&handle, &state, &pipeline));
+    var request = std.mem.zeroes(c.R4GfxRenderRequest);
+    request.version = 1; request.size = @sizeOf(c.R4GfxRenderRequest); request.deadline_ns = 99999999;
+    request.target = target; request.pipeline = pipeline; request.opacity = 255; request.color = 0xff102030;
+    request.target_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 }; request.scissor = request.target_rect;
+    var retained: [c.device_job_capacity]c.R4GfxJob = undefined;
+    for (&retained) |*job| {
+        try t.expectEqual(c.status_ok, api.render_submit(&handle, &request, job));
+        // Model physical retirement while the caller still owns its receipt.
+        // No shader execution is simulated by this admission/lifetime test.
+        Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_complete; Model.status.flags = 0;
+        Model.completed[Model.status.fence.slot - 1] = Model.status; Model.job_live = false;
+    }
+    var rejected = std.mem.zeroes(c.R4GfxJob); rejected.generation = 0xfeed;
+    const untouched = rejected;
+    const serial = Model.submit_serial;
+    try t.expectEqual(c.status_busy, api.render_submit(&handle, &request, &rejected));
+    const copy: c.R4GfxCopyRequest = .{ .source = source, .target = target, .source_offset = 0, .target_offset = 0, .byte_length = 64, .deadline_ns = 99999999 };
+    try t.expectEqual(c.status_busy, api.copy_submit(&handle, &copy, &rejected));
+    try t.expectEqualDeep(untouched, rejected); try t.expectEqual(serial, Model.submit_serial);
+    for (&retained) |*job| {
+        var info: c.R4GfxJobInfo = undefined;
+        try t.expectEqual(c.status_ok, api.job_info(&handle, job, &info));
+        try t.expect(info.phase == a.gfx_queue_phase_terminal and info.flags == 0);
+    }
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &retained[0]));
+    // Common queue capacity is transient too; OOM and BO budget errors keep
+    // their existing Limit meaning. A rejected call never publishes a job.
+    for ([_]i32{ a.gfx_queue_error_capacity, a.gfx_buffer_error_oom, a.gfx_buffer_error_budget }) |rc| {
+        Model.submit_error = rc;
+        const expected = if (rc == a.gfx_queue_error_capacity) c.status_busy else c.status_limit;
+        try t.expectEqual(expected, api.render_submit(&handle, &request, &rejected));
+        try t.expectEqual(expected, api.copy_submit(&handle, &copy, &rejected));
+        try t.expectEqualDeep(untouched, rejected); try t.expectEqual(serial, Model.submit_serial);
+    }
+    Model.submit_error = 0;
+    try t.expectEqual(c.status_ok, api.render_submit(&handle, &request, &rejected));
+    Model.status.phase = a.gfx_queue_phase_terminal; Model.status.result = a.gfx_queue_result_complete; Model.status.flags = 0;
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &rejected));
+    for (retained[1..]) |*job| try t.expectEqual(c.status_ok, api.job_release(&handle, job));
+    for ([_]c.R4GfxResource{source, target, pipeline}) |resource| try t.expectEqual(c.status_ok, api.resource_release(&handle, &resource));
+    try t.expectEqual(c.status_ok, api.device_close(&handle));
+    try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
+    std.debug.print("[R4GFX-admission] full receipt pool retries after release; common capacity Busy; OOM/budget Limit; handles and resources preserved\n", .{});
 }
 
 fn checkNativeRender(config: *const c.R4GfxDeviceConfig) !void {

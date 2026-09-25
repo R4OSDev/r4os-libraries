@@ -120,6 +120,12 @@ VkResult r4vk_radv_query_architecture(const R4Draw *draw, const R4Dev *devices,
    info->pci.dev = f.pci_device; info->pci.func = f.pci_function; info->pci.valid = true;
    if (raven2) memcpy(info->marketing_name, "AMD Raven2", sizeof("AMD Raven2"));
    else memcpy(info->marketing_name, "AMD Picasso", sizeof("AMD Picasso"));
+   /* ac_query_gpu_info normally supplies this default after the pure fill
+    * helpers, in set_custom_cu_en_mask. R4OS has no AMD_CU_MASK override and
+    * constructs the hardware facts directly: preserve Mesa's all-CU default.
+    * A zero mask disables shader CUs in the generated graphics preamble. The
+    * independently reported hardware CU bitmap still describes harvesting. */
+   info->spi_cu_en = UINT32_MAX;
    info->address32_hi = f.va_start >> 32;
    info->max_submitted_ibs[AMD_IP_GFX] = 32; info->max_submitted_ibs[AMD_IP_COMPUTE] = 32;
    info->scratch_wavesize_granularity_shift = 10; info->scratch_wavesize_granularity = 1024;

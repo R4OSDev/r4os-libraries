@@ -99,10 +99,22 @@ static void execute_ib(struct ac_cmdbuf *base, struct radeon_winsys_bo *bo, uint
 {
    struct r4vk_radv_cs *cs = native(base);
    if (cs->result != VK_SUCCESS) return;
-   if (bo) { add(base, bo); va = bo->va; }
+   /* The native broker wraps this CS in its own context IB. A further IB
+    * here would require a third nesting level. Mesa's CPU-authored GFX
+    * preambles can instead be copied, just like secondary command streams.
+    * Anonymous/GPU-generated or predicated commands cannot be snapshotted
+    * with the same semantics; reject them rather than dropping predicates. */
+   if (!bo || predicate || cs->engine != AMD_IP_GFX) {
+      cs->result = VK_ERROR_FEATURE_NOT_PRESENT; return;
+   }
+   add(base, bo); va = bo->va;
    if (cs->result != VK_SUCCESS) return;
-   if (cs->engine != AMD_IP_GFX || !va || (va & 31) || !dwords || dwords > MAX_IB_DWORDS ||
-       base->cdw > MAX_IB_DWORDS - 4) { cs->result = VK_ERROR_FEATURE_NOT_PRESENT; return; }
+   if (!va || (va & 31) || !dwords || dwords > MAX_IB_DWORDS) {
+      cs->result = VK_ERROR_FEATURE_NOT_PRESENT; return;
+   }
+   if (base->cdw > MAX_IB_DWORDS - dwords) {
+      cs->result = VK_ERROR_OUT_OF_DEVICE_MEMORY; return;
+   }
    bool backed = false;
    const struct r4vk_radv_bo *owner = (const struct r4vk_radv_bo *)bo;
    if (owner && (va < bo->va || va - bo->va >= bo->size ||
@@ -120,10 +132,12 @@ static void execute_ib(struct ac_cmdbuf *base, struct radeon_winsys_bo *bo, uint
    }
    simple_mtx_unlock(&cs->ws->residency_mutex);
    if (!backed) { cs->result = VK_ERROR_UNKNOWN; return; }
-   base->buf[base->cdw++] = 0xc0023f00u | predicate;
-   base->buf[base->cdw++] = va;
-   base->buf[base->cdw++] = va >> 32;
-   base->buf[base->cdw++] = dwords;
+   const void *mapped = cs->ws->base.buffer_map(&cs->ws->base, bo, false, NULL);
+   if (!mapped) { cs->result = VK_ERROR_MEMORY_MAP_FAILED; return; }
+   memcpy(base->buf + base->cdw, mapped, (size_t)dwords * 4);
+   cs->ws->base.buffer_unmap(&cs->ws->base, bo, false);
+   if (r4vk_radv_is_lost(cs->ws)) { cs->result = VK_ERROR_DEVICE_LOST; return; }
+   base->cdw += dwords;
    base->reserved_dw = MAX2(base->reserved_dw, base->cdw);
 }
 static void dgc(struct ac_cmdbuf *cs, uint64_t va, uint32_t count, uint64_t trailer, bool predicate)

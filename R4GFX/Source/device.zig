@@ -37,6 +37,13 @@ pub fn platform(rc: i32) Error!void {
         else => error.Invalid,
     };
 }
+/// Completed or in-flight receipts can temporarily fill the common queue.
+/// Only queue admission maps that condition to Busy; BO quotas/OOM retain
+/// their Limit result, and the caller keeps every existing receipt alive.
+pub fn queueAdmission(rc: i32) Error!void {
+    if (rc == a.gfx_queue_error_capacity) return error.Busy;
+    return platform(rc);
+}
 pub fn pointer(comptime T: type, address: u64) Error!*T {
     if (address == 0 or address % @alignOf(T) != 0 or address > std.math.maxInt(u64) - @sizeOf(T)) return error.Invalid;
     return @ptrFromInt(address);

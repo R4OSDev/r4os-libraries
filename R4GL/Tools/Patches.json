@@ -22,6 +22,7 @@
     "Port/MesaImageLevels.patch",
     "Port/MesaEgl15.patch",
     "Port/MesaZinkNative.patch",
+    "Port/MesaZinkDescriptorMemory.patch",
     "Port/MesaQueueRetirement.patch",
     "Port/MesaZinkWindow.patch",
     "Port/MesaSoftpipeViewCache.patch",

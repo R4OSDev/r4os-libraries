@@ -56,7 +56,7 @@ fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, outpu
     if (direct and (source.descriptor.usage & a.gfx_buffer_usage_scanout == 0 or source.descriptor.modifier != 0 or
         source.descriptor.plane_count != 1 or source.descriptor.plane_offsets[0] != 0 or source.descriptor.plane_pitches[0] & 63 != 0)) return error.Unsupported;
     try @import("device_output_color.zig").validate(device, source, if (route) |selected| selected.target else null);
-    const index = for (&device.jobs, 0..) |*item, i| { if (item.serial == 0) break i; } else return error.Limit;
+    const index = for (&device.jobs, 0..) |*item, i| { if (item.serial == 0) break i; } else return error.Busy;
     const serial = std.math.add(u64, device.job_serial, 1) catch return error.Limit;
     if (source.job_refs == std.math.maxInt(u32)) return error.Limit;
     if (!device.cleanResources()) return error.Busy;
@@ -67,7 +67,7 @@ fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, outpu
     @memcpy(submission.dependencies[0..request.dependency_count], dependencies[0..request.dependency_count]);
     const queues = device.queues();
     var accepted: a.GfxFenceStatus = .{};
-    try d.platform(if (route) |selected| queues.submitOutput(&selected.queue, &submission, &selected.target, &accepted)
+    try d.queueAdmission(if (route) |selected| queues.submitOutput(&selected.queue, &submission, &selected.target, &accepted)
         else queues.submit(&device.queue, &submission, &accepted));
     source.job_refs += 1;
     device.jobs[index] = .{ .serial = serial, .source = request.source, .fence = accepted.fence,

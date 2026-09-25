@@ -1,6 +1,8 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "r4vk_radv_winsys.h"
 #include "vk_device.h"
+/* Internal CPU-only recorder; disabled unless the process opts in. */
+void r4vk_pm4_trace(uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, const uint32_t *, uint32_t);
 static void ctx_unref(struct radeon_winsys_ctx *);
 struct r4vk_radv_point {
    uint32_t references;
@@ -271,6 +273,15 @@ static VkResult submit(struct radeon_winsys_ctx *ctx, const struct radv_winsys_s
       streams[count++] = container_of(empty, struct r4vk_radv_cs, base);
    }
    struct r4vk_radv_point *dependencies[R4OS_GFX_QUEUE_MAX_DEPENDENCIES - 1];
+   /* Finalized immutable CPU streams, in their exact submission order.
+    * Diagnostic I/O runs outside submit/residency owners and before the
+    * device deadline starts. No device registers are accessed here. */
+   for (uint32_t i = 0; i < count; i++) {
+      const uint32_t group = empty ? 3 : i < info->initial_preamble_count ? 0 :
+         i < info->initial_preamble_count + info->cs_count ? 1 : 2;
+      r4vk_pm4_trace(info->ip_type == AMD_IP_COMPUTE, group, i, count,
+         streams[i]->buffer->base.va, streams[i]->base.buf, streams[i]->base.cdw);
+   }
    R4GfxFence fences[R4OS_GFX_QUEUE_MAX_DEPENDENCIES - 1];
    uint32_t dep_count = 0;
    for (uint32_t i = 0; i < wait_count; i++) {

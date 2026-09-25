@@ -143,7 +143,7 @@ fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: b
             .filter = filter, .transfer = if (color_program != null) a.gfx_render_transfer_color else item.transfer, .color = item.color, .opacity = item.opacity,
             .source_rect = @bitCast(item.source_rect), .target_rect = @bitCast(item.target_rect), .scissor = @bitCast(item.scissor) };
     }
-    const index = for (&device.jobs, 0..) |*item, i| { if (item.serial == 0) break i; } else return error.Limit;
+    const index = for (&device.jobs, 0..) |*item, i| { if (item.serial == 0) break i; } else return error.Busy;
     const serial = std.math.add(u64, device.job_serial, 1) catch return error.Limit;
     if (target.job_refs == std.math.maxInt(u32) or (source != null and source.?.job_refs == std.math.maxInt(u32))) return error.Limit;
     if (!device.cleanResources()) return error.Busy;
@@ -160,17 +160,17 @@ fn execute(device: *d.Device, requests: []const c.R4GfxRenderRequest, batched: b
         var mapped: a.GfxRenderColorGridList = .{ .count = list.count, .commands = list.commands, .program = color_program.? };
         for (grids.?, 0..) |grid, i| mapped.grids[i] = @bitCast(grid);
         submission.operation = a.gfx_queue_operation_render_color_grid_list;
-        try d.platform(queues.submitRenderColorGridList(&device.queue, &submission, &mapped, &status));
+        try d.queueAdmission(queues.submitRenderColorGridList(&device.queue, &submission, &mapped, &status));
     } else if (color_program) |program| {
         const mapped: a.GfxRenderColorList = .{ .count = list.count, .commands = list.commands, .program = program };
         submission.operation = a.gfx_queue_operation_render_color_list;
-        try d.platform(queues.submitRenderColorList(&device.queue, &submission, &mapped, &status));
+        try d.queueAdmission(queues.submitRenderColorList(&device.queue, &submission, &mapped, &status));
     } else if (grids) |values| {
         var mapped: a.GfxRenderGridList = .{ .count = list.count, .commands = list.commands };
         for (values, 0..) |grid, i| mapped.grids[i] = @bitCast(grid);
         submission.operation = a.gfx_queue_operation_render_grid_list;
-        try d.platform(queues.submitRenderGridList(&device.queue, &submission, &mapped, &status));
-    } else try d.platform(if (batched) queues.submitRenderList(&device.queue, &submission, &list, &status) else queues.submit(&device.queue, &submission, &status));
+        try d.queueAdmission(queues.submitRenderGridList(&device.queue, &submission, &mapped, &status));
+    } else try d.queueAdmission(if (batched) queues.submitRenderList(&device.queue, &submission, &list, &status) else queues.submit(&device.queue, &submission, &status));
     target.job_refs += 1;
     if (source) |value| value.job_refs += 1;
     device.jobs[index] = .{ .serial = serial, .source = request.source, .target = request.target,
