@@ -256,3 +256,15 @@ Picasso or Raven2 GC/SDMA and external revision. Existing presentation and
 NV12/P010 YUV owner checks cover both families, plus profile replacement
 with retained old resources. Public ABI remains unchanged; physical
 Raven2 presentation is still awaiting qualification.
+
+
+Bounded FP16 staging (0.81.23, R4GFX 0.1.30)
+------------------------------------------
+Complete operations of at most 64 pixels reuse the existing sample scratch
+for finite preflight and execution. Every sampled floating source and every
+floating OVER target is validated before the first store. Large operations
+retain whole-request preflight; no unchecked format or ABI flag was added.
+The existing numerical/color check can be selected with
+`test "-Dprovider-test-filter=bounded color conversion"`. It now also compares
+36 staged/unstaged format/sampler/alpha cases and 12 late NaN/Inf failures,
+including target bytes/padding and the reported physical image reads.

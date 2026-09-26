@@ -17,6 +17,7 @@ pub fn check(api: *const c.ColorV1) !void {
     try checkPixels();
     try checkLookup();
     try checkImages(api);
+    try checkSmallBatches(api);
     try checkGpu();
     try near(0, color.srgbDecode(0), 1e-8);
     try near(1, color.srgbDecode(1), 1e-7);
@@ -489,4 +490,58 @@ fn checkIcc() !void {
     }
     try t.expectError(error.Unsupported, icc.Profile.open(&a, fixtures.descending, .output, .relative, false, true));
     try t.expect(a.used == 0 and a.active == null);
+}
+
+fn checkSmallBatches(api: *const c.ColorV1) !void {
+    const pixels = @import("color_pixels.zig");
+    for ([_]bool{ false, true }) |source_float| for ([_]bool{ false, true }) |target_float| {
+        if (!source_float and !target_float) continue;
+        const sf: pixels.Format = if (source_float) .abgr16161616f else .argb8888;
+        const tf: pixels.Format = if (target_float) .abgr16161616f else .xrgb8888;
+        const sd = if (source_float) imageDescription(1, 2, 4, 16, 100, 100) else imageDescription(1, 1, 3, 8, 100, 100);
+        const td = if (target_float) imageDescription(1, 2, 4, 16, 100, 100) else imageDescription(1, 1, 1, 8, 100, 100);
+        var input: [16 * 18 * 8]u8 = @splat(0);
+        var short: [8 * 9 * 8]u8 = @splat(0);
+        var long: [8 * 9 * 8]u8 = @splat(0);
+        for (0..16 * 18) |i| pixels.store(sf, input[i * sf.bytes() ..].ptr,
+            .{ .rgb = .{ @as(f32, @floatFromInt(i % 13)) / 32, 0.2, 0.1 }, .alpha = 0.5 }, @intCast(i % 16), @intCast(i / 16), false);
+        for ([_]u32{ c.render_sampler_nearest, c.render_sampler_bilinear }) |sampler| for ([_]u32{ c.render_operation_blit, c.render_operation_over }) |operation| {
+            for ([_]u32{ 0, 32768, 65535 }) |opacity| {
+                for (0..8 * 9) |i| pixels.store(tf, short[i * tf.bytes() ..].ptr,
+                    .{ .rgb = .{ 0.2, 0.1, 0.05 }, .alpha = 1 }, @intCast(i % 8), @intCast(i / 8), false);
+                long = short;
+                var source = imageView(&input, 16, 18, 16 * sf.bytes(), @intFromEnum(sf), sd);
+                var small_target = imageView(&short, 8, 9, 8 * tf.bytes(), @intFromEnum(tf), td);
+                var big_target = imageView(&long, 8, 9, 8 * tf.bytes(), @intFromEnum(tf), td);
+                var small_request = imageRequest(16, 16, 8, 8);
+                small_request.sampler = sampler; small_request.operation = operation; small_request.opacity = opacity;
+                var big_request = imageRequest(16, 18, 8, 9);
+                big_request.sampler = sampler; big_request.operation = operation; big_request.opacity = opacity;
+                var small_stats: c.R4GfxCpuStats = undefined; var big_stats: c.R4GfxCpuStats = undefined;
+                try t.expectEqual(c.status_ok, api.color_image_transform(&source, &small_target, &small_request, &small_stats));
+                try t.expectEqual(c.status_ok, api.color_image_transform(&source, &big_target, &big_request, &big_stats));
+                try t.expectEqualSlices(u8, long[0 .. 64 * tf.bytes()], short[0 .. 64 * tf.bytes()]);
+                const across: u64 = if (sampler == c.render_sampler_bilinear) 4 else 1;
+                try t.expectEqual(@as(u64, 64) * (sf.bytes() * across + @as(u64, if (operation == c.render_operation_over) tf.bytes() else 0)), small_stats.read_bytes);
+                if (source_float or (target_float and operation == c.render_operation_over)) try t.expect(big_stats.read_bytes / 72 > small_stats.read_bytes / 64);
+            }
+        };
+    };
+    // Late FP16 source/target NaN and both infinities leave every byte intact,
+    // both below and above the complete-operation staging threshold.
+    for ([_]u32{ 8, 9 }) |height| for ([_]u16{ 0x7e00, 0x7c00, 0xfc00 }) |bad| for ([_]bool{ false, true }) |bad_target| {
+        var src: [8 * 9 * 8]u8 = @splat(0); var dst = src;
+        const bytes = @as(usize, height) * 8 * 8;
+        if (bad_target) std.mem.writeInt(u16, dst[bytes - 8 ..][0..2], bad, .little)
+        else std.mem.writeInt(u16, src[bytes - 8 ..][0..2], bad, .little);
+        const saved = dst;
+        const desc = imageDescription(1, 2, 4, 16, 100, 100);
+        var source = imageView(&src, 8, height, 64, c.format_abgr16161616f, desc);
+        var target = imageView(&dst, 8, height, 64, c.format_abgr16161616f, desc);
+        var request = imageRequest(8, height, 8, height); request.operation = c.render_operation_over;
+        var stats: c.R4GfxCpuStats = undefined;
+        try t.expectEqual(c.status_invalid, api.color_image_transform(&source, &target, &request, &stats));
+        try t.expectEqualSlices(u8, &saved, &dst);
+    };
+    std.debug.print("[color-batch] 36 staged/un-staged reference pairs and 12 late NaN/Inf source/target failures preserve bytes; small FP16 reads occur once\n", .{});
 }

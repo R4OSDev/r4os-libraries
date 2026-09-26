@@ -112,8 +112,10 @@ pub export var r4gfx_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_ex
     .kernel_bridge = 0,
     .reserved = 0,
 };
-test "layout overflow and rejected rectangles preserve bytes including padding" {
+test "bounded color conversion preserves reference and error semantics" {
     try @import("color_test.zig").check(&r4gfx_color_v1);
+}
+test "layout overflow and rejected rectangles preserve bytes including padding" {
     try @import("device_test.zig").check();
     try @import("swapchain_state_test.zig").check();
     try @import("cpu_render_test.zig").check();

@@ -193,9 +193,28 @@ fn executeInput(source: Input, target: Image, request: c.R4GfxColorTransform) d.
     var weights: [tile_width][2]f32 = undefined;
     var stats: c.R4GfxCpuStats = .{ .pixels = count, .commands = 1, .reserved = 0,
         .read_bytes = count * (source.readBytes() * across + @as(u64, if (blend) target.format.bytes() else 0)), .write_bytes = count * target.format.bytes() };
-    // Only sampled FP16 pixels require a preflight. This is bounded by the
-    // submitted pixel budget even when reducing a much larger source image.
-    if (source.floating() or (blend and target.format == .abgr16161616f)) {
+    // Complete small operations fit in the existing scratch. Gather and
+    // validate once before any store, then consume those stable samples.
+    // Larger operations keep the whole-request preflight (late NaN/Inf must
+    // never cause partial publication), followed by bounded execution chunks.
+    const needs_preflight = source.floating() or (blend and target.format == .abgr16161616f);
+    const staged = needs_preflight and count <= tile_width;
+    if (staged) {
+        for (0..request.target_rect.height) |row| {
+            const first = row * request.target_rect.width;
+            const last = first + request.target_rect.width;
+            gather(&source, request, 0, @intCast(row), samples[first * across .. last * across], weights[first..last]);
+            if (blend) for (destination[first..last], 0..) |*value, i| {
+                value.* = target.load(request.target_rect.x + @as(u32, @intCast(i)), request.target_rect.y + @as(u32, @intCast(row)));
+            };
+        }
+        if (source.floating()) for (samples[0..@as(usize, @intCast(count)) * across]) |value| {
+            if (!pixels.finite(value)) return error.Invalid;
+        };
+        if (blend and target.format == .abgr16161616f) for (destination[0..@intCast(count)]) |value| {
+            if (!pixels.finite(value)) return error.Invalid;
+        };
+    } else if (needs_preflight) {
         var y: u32 = 0;
         while (y < request.target_rect.height) : (y += 1) {
             var x: u32 = 0;
@@ -220,20 +239,26 @@ fn executeInput(source: Input, target: Image, request: c.R4GfxColorTransform) d.
         var x: u32 = 0;
         while (x < request.target_rect.width) {
             const n = @min(tile_width, request.target_rect.width - x);
-            gather(&source, request, x, y, samples[0 .. n * across], weights[0..n]);
-            try source.decode(samples[0 .. n * across]);
+            const first: usize = if (staged) @as(usize, y) * request.target_rect.width else 0;
+            const tile_samples = samples[first * across ..][0 .. n * across];
+            const tile_weights = weights[first..][0..n];
+            const tile_destination = destination[first..][0..n];
+            if (!staged) gather(&source, request, x, y, tile_samples, tile_weights);
+            try source.decode(tile_samples);
             if (blend) {
-                for (destination[0..n], 0..) |*value, i| value.* = target.load(request.target_rect.x + x + @as(u32, @intCast(i)), request.target_rect.y + y);
-                try target.decode(destination[0..n]);
+                if (!staged) for (tile_destination, 0..) |*value, i| {
+                    value.* = target.load(request.target_rect.x + x + @as(u32, @intCast(i)), request.target_rect.y + y);
+                };
+                try target.decode(tile_destination);
             }
             for (resolved[0..n], 0..) |*value, i| {
-                value.* = if (across == 1) samples[i] else color.interpolate(
-                    color.interpolate(samples[i * 4], samples[i * 4 + 1], weights[i][0]),
-                    color.interpolate(samples[i * 4 + 2], samples[i * 4 + 3], weights[i][0]), weights[i][1]);
+                value.* = if (across == 1) tile_samples[i] else color.interpolate(
+                    color.interpolate(tile_samples[i * 4], tile_samples[i * 4 + 1], tile_weights[i][0]),
+                    color.interpolate(tile_samples[i * 4 + 2], tile_samples[i * 4 + 3], tile_weights[i][0]), tile_weights[i][1]);
                 // Paper-white scaling belongs to source admission. Output
                 // tone mapping happens after this draw's linear blend.
                 value.rgb = scaled(value.rgb, tone.gain);
-                value.* = if (blend) color.over(value.*, destination[i], opacity) else .{ .rgb = scaled(value.rgb, opacity), .alpha = value.alpha * opacity };
+                value.* = if (blend) color.over(value.*, tile_destination[i], opacity) else .{ .rgb = scaled(value.rgb, opacity), .alpha = value.alpha * opacity };
                 if (output_mapping) {
                     value.* = mapper.apply(value.*);
                     if (target.encoding) |*encoding| {
