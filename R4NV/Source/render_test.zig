@@ -223,12 +223,39 @@ fn checkGenerations(original: render.Binding) !void {
         var binding = original; binding.class = class; binding.programs.bytes = profile.bytes();
         try render.shaderUploadFor(class, bytes[0..profile.bytes()]);
         try render.encode(binding, &stream);
+        // GA106 rejected the old 0x1140/data=1 command. NVIDIA class
+        // headers place SNORM8_UNORM16_SNORM16 in bit 4, leaving bit 0
+        // reserved. Check the emitted stream for every supported class.
+        try t.expectEqual(@as(u32, 0x10), try state(&stream, 0x1140));
+        // GA106 rejects the additional raster override 0x0fb8. The pinned
+        // NVK path configures samples with SET_ANTI_ALIAS (0x15d0) only.
+        try t.expectError(error.MissingState, state(&stream, 0x0fb8));
+        try t.expectError(error.MissingState, state(&stream, 0x0fa4));
+        try t.expectEqual(@as(u32, 0), try state(&stream, 0x15d0));
+        for ([_]u32{0x0fbc,0x0fc0,0x0fc4,0x0fc8}) |method|
+            try t.expectEqual(@as(u32, 0xffff), try state(&stream, method));
         try t.expectEqual(class, try state(&stream, 0));
+        // Render-target surface clip is independent of viewport/scissor.
+        // A fresh context must not retain an empty surface clip rectangle.
+        try t.expectEqual(binding.draw.target.width << 16, try state(&stream, 0x0ff4));
+        try t.expectEqual(binding.draw.target.height << 16, try state(&stream, 0x0ff8));
         try t.expectEqual(@as(u32,@intFromBool(class >= 0xc997)), try state(&stream, 0x0d94));
         if (class == 0xc597) try t.expectError(error.MissingState, state(&stream, 0x02cc))
         else try t.expectEqual(@as(u32,2), try state(&stream, 0x02cc));
         try t.expectEqual(@as(u32,@intCast(binding.programs.address + profile.offset(1))),
             try state(&stream, 0x2018 + 5 * 64));
+        // C597 has address A/B but no PREFETCH method. The seven-bit
+        // block count exists only from C797, for both bound stages.
+        for ([_]u32{1, 5}, [_]usize{0, 1}) |pipeline, shader_index| {
+            const method = 0x201c + pipeline * 64;
+            if (class == 0xc597) {
+                try t.expectError(error.MissingState, state(&stream, method));
+            } else {
+                const blocks = try state(&stream, method);
+                try t.expect(blocks > 0 and blocks <= 127);
+                try t.expect(@as(usize, blocks) * 256 >= 128 + profile.programs[shader_index].code.len or blocks == 127);
+            }
+        }
         try t.expectEqual(@as(u32,0x00025482), word(&bytes, profile.offset(1)));
         binding.programs.bytes -= 1;
         try t.expectError(error.Bounds, render.encode(binding, &stream));

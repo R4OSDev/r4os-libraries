@@ -431,7 +431,14 @@ fn bindShader(comptime hw: type, profile: profiles.Profile, out: *Program, progr
     const stride = pipeline * 64;
     const address = programs.address + profile.offset(index);
     try out.one(hw.SET_PIPELINE_SHADER + stride, 1 | (pipeline << 4));
-    try out.words(hw.SET_PIPELINE_PROGRAM_ADDRESS_A + stride, &.{@intCast(address >> 32), @truncate(address), @intCast((128 + shader.code.len + 255) / 256)});
+    // C597 defines only address A/B. C797 and later append the seven-bit
+    // prefetch size, including the shader header, as in pinned NVK.
+    const address_words = [_]u32{
+        @intCast(address >> 32), @truncate(address),
+        @intCast(@min(127, (128 + shader.code.len + 255) / 256)),
+    };
+    try out.words(hw.SET_PIPELINE_PROGRAM_ADDRESS_A + stride,
+        address_words[0..if (profile.class >= 0xc797) 3 else 2]);
     try out.words(hw.SET_PIPELINE_REGISTER_COUNT + stride, &.{shader.gprs, shader.stage});
 }
 pub fn encode(binding: Binding, out: *Program) Error!void {
@@ -466,6 +473,9 @@ fn encodeFor(comptime hw: type, binding: Binding, out: *Program) Error!void {
         if (attribute != 0) try out.one(hw.SET_VERTEX_STREAM_A_FORMAT + @as(u32,@intCast(attribute)) * 16, 0);
     }
     try out.words(hw.SET_COLOR_TARGET_A, &target.words);
+    // Surface clip is a separate hardware rectangle, not inferred from
+    // target storage or viewport. Per-draw scissor applies inside it.
+    try out.words(hw.SET_SURFACE_CLIP_HORIZONTAL, &.{draw.target.width << 16, draw.target.height << 16});
     const half_width = @as(f32,@floatFromInt(draw.target.width)) / 2.0;
     const half_height = @as(f32,@floatFromInt(draw.target.height)) / 2.0;
     try out.words(hw.SET_VIEWPORT_SCALE_X, &.{@bitCast(half_width), @bitCast(half_height), @bitCast(@as(f32,0.5)), @bitCast(half_width), @bitCast(half_height), @bitCast(@as(f32,0.5))});

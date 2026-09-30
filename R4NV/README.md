@@ -108,3 +108,31 @@ fixture correction and all four compiler/state profiles are recorded under
 `ExFiles/Reference/GFX/0.79.33`.
 Physical qualification follows `ExFiles/Reports/OssiGPU.txt`; native Windows
 compiler execution and runtime compiler integration remain in 0.79.34.
+
+Version 0.1.12 encodes SET_BLEND_PER_FORMAT_ENABLE with its original bit-4
+field through DRF_DEF. The previous unshifted enum set reserved bit 0.
+All four generated class tables and the existing command-stream regression
+cover the correction. OssiPC169 passed the small CE pixel test but failed
+the subsequent GR command; physical qualification of this fix remains open.
+
+Version 0.1.13 removes the additional SET_ANTI_ALIAS_RASTER override rejected
+by GA106. Sample layout still uses SET_ANTI_ALIAS, matching the pinned NVK
+path. All four generated tables and the existing emitted-stream regression
+cover this change. Hardware170 repeated the CE pixel result and progressed
+past the fixed blend flag; GR execution of the new recipe remains pending.
+
+Version 0.1.14 removes SET_SAMPLE_MASK0xfa4 rejected by GA106. The four
+regular sample masks remain0xffff, matching the pinned NVK path. The
+existing four-class emitted-stream case covers both omission and masks.
+Hardware171 repeated512 exact CE pixels; GR with this recipe is pending.
+
+Version 0.1.15 sets the previously missing surface clip to the complete
+target extent, independently of viewport and scissor, matching pinned NVK.
+Shader binding emits only address A/B on C597; C797 and newer additionally
+receive bounded prefetch blocks covering the header and code, capped at127.
+The existing four-class command checks reproduce both prior errors and pass
+with the corrected stream. Shader bytes and external ABI are unchanged.
+Hardware172/R4NV14 completed CE and GR receipts but left all512 pixels
+unchanged. Hardware173/R4NV15 passes both512-pixel CE and GR rounds on GA106;153 filled
+and359 preserved pixels are exact each round. Resource balance and driver
+shutdown remain open. This does not qualify another GPU generation.
