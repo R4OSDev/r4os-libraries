@@ -527,6 +527,8 @@ _Static_assert(offsetof(R4NvYuvRender, yuv_matrix) == 64u, "R4NvYuvRender.yuv_ma
 #define R4NV_ARCHITECTURE_VERSION ((uint32_t)3)
 #define R4NV_ARCHITECTURE_HOST_COHERENT ((uint32_t)1)
 #define R4NV_ARCHITECTURE_IMAGE_LAYOUTS ((uint32_t)2)
+#define R4NV_COPY_FLAG_GRAPHICS_CHANNEL ((uint32_t)1)
+#define R4NV_FEATURE_COPY_GRAPHICS_CHANNEL ((uint32_t)16)
 #define R4NV_STATUS_INVALID ((int32_t)-1)
 #define R4NV_STATUS_UNSUPPORTED ((int32_t)-2)
 #define R4NV_STATUS_CAPACITY ((int32_t)-3)

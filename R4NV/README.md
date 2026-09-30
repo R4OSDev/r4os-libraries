@@ -10,6 +10,22 @@ and tiled command encoding, and image layouts. Generated C/Zig bindings check
 the interface. Optional consumers can use `IMPORT=R4NV:BACKEND_V1:3:1` and keep
 software rendering when the library is unavailable or incompatible.
 
+Module0.1.16 adds the negotiated `feature_copy_graphics_channel`. Set
+`R4NvCopy.flags=copy_flag_graphics_channel` only for a GR channel with an
+instantiated paired CE: every copy method then uses subchannel4, alongside
+GR0 and compute1. Zero flags retain the independent CE subchannel0 stream.
+Unknown bits fail without changing outputs. Existing table revisions, slots,
+struct layouts and constants stay unchanged; only two constants and explicit
+flag semantics are added. The internal independent encoder is unchanged.
+The existing provider group checks linear and tiled commands, original-C
+operands, header-shaped payloads and rejected flags; C/Zig conformance passes.
+This corrects the physical183/DISPLAYD56 XID13 class/subchannel mismatch;
+physical R4NV16/DISPLAYD57 now passes five native CE pushes, same-VA A-to-B
+remapping and exact separate semaphore/readback checks on GA106. Complete
+memory qualification totals265 canonical CE jobs and72241748 exact bytes
+with identical settled BO/runtime balance. The prior fault's reset retirement
+remains a separate NVIDIA driver defect; other GPU profiles remain unqualified.
+
 Native queue packets use `R4NvNativeSubmitHeader` (32 bytes), followed by exactly
 `push_count` `R4NvNativePush` records (16 bytes each). Version 1 admits at most
 510 pushes and flags `incomplete`/`no_prefetch`. Engine mask bit1 selects graphics;

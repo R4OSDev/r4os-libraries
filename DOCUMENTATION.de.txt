@@ -73,3 +73,17 @@ zweite R4FONT-API, sondern nur die gemeinsame Dateiformatdefinition fuer die
 Erzeugung installierbarer `.R4F`-Systemfonts.
 
 Herkunft und Transfergrenzen stehen in `PROVENANCE.txt`.
+
+R4NV0.1.16 /0.82.3: Optional ausgehandelte Copy-Variante fuer den
+gemischten GR-Kanal: flags=copy_flag_graphics_channel setzt ausschliesslich
+Methodenheader auf CE-Subchannel4 neben GR0/Compute1. Flags0 behaelt die
+eigenstaendige CE unveraendert auf0. Unbekannte Bits werden ohne Aenderung
+der Ausgabe abgewiesen. Bestehende Slots, Revisionen, Structgroessen,
+Offsets, Typen und Konstanten bleiben gleich; zwei additive Konstanten und
+eine ausdrueckliche Flagsbedeutung sind kontrolliert generiert/baselineiert.
+Vorhandene Provider-/C-Zig-Gruppen RED15/GREEN16:11/11,2/2 bestanden.
+Anlass ist echter XID13 auf NVIDIA183/DISPLAYD56. Physisch16/57 bestehen
+fuenf native CE-/VA-Auftraege samt A->B-Remap und eigenen Semaphoren.
+Gesamt265 regulaere CE/8 logische Bilder/72241748 exakte Bytes und gleiche
+ruhende BO-/Runtimebilanz. Der alte Fehlerabbau ist separat beim NVIDIA-
+Treiber offen; keine pauschale Qualifikation weiterer GPU-Profile.

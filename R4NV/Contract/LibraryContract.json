@@ -1129,7 +1129,7 @@
             "is_const": false,
             "nullable": false
           },
-          "description": "flags"
+          "description": "Zero for independent CE subchannel0; COPY_FLAG_GRAPHICS_CHANNEL selects CE subchannel4 alongside GR0/compute1. Reject other bits. Encoding feature negotiation and driver engine ownership remain separate."
         }
       ],
       "description": "GPU virtual operands supplied by the owning driver. Zero rows denotes a linear transfer; otherwise bytes per row."
@@ -3407,6 +3407,20 @@
       "type": "u32",
       "value": 2,
       "description": "Revision3: native RM virtual ranges support uncompressed NVIDIA PTE kinds1..6 in GART and VRAM. Use R4DRAW36 range flags bit0 plus kind in bits8..15. Allocation type/depth/packing and format must agree, and RM ACK must preserve the exact kind. Binding uses virtual page kind. No compression, sparse or Vulkan feature claim."
+    },
+    {
+      "zig_name": "copy_flag_graphics_channel",
+      "c_name": "R4NV_COPY_FLAG_GRAPHICS_CHANNEL",
+      "type": "u32",
+      "value": 1,
+      "description": "Select copy subchannel4 on a GR channel with an instantiated paired CE. Zero flags retain independent CE subchannel0; other bits are invalid. Requires FEATURE_COPY_GRAPHICS_CHANNEL encoding support and a real driver paired CE."
+    },
+    {
+      "zig_name": "feature_copy_graphics_channel",
+      "c_name": "R4NV_FEATURE_COPY_GRAPHICS_CHANNEL",
+      "type": "u32",
+      "value": 16,
+      "description": "Encoder accepts COPY_FLAG_GRAPHICS_CHANNEL for linear, pitched and supported blocklinear copies. This does not assert hardware support or physical execution."
     }
   ],
   "errors": [

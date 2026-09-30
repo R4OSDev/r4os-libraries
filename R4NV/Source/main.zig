@@ -42,6 +42,7 @@ pub export var r4nv_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exp
 };
 
 test "backend and shader ABI preserve operands, executable identity and rejected outputs" {
+    try checkGraphicsCopyChannel();
     try @import("encode_checks.zig").run();
     try @import("video_checks.zig").run();
     try @import("telemetry_checks.zig").run();
@@ -54,7 +55,7 @@ test "backend and shader ABI preserve operands, executable identity and rejected
         .adapter_id = 3, .flags = 0, .device_generation = 0x100000007, .reset_generation = 0x200000008 };
     var features = std.mem.zeroes(c.R4NvFeatures);
     try t.expectEqual(c.status_ok, r4nv_backend_v1.negotiate(&profile, &features));
-    try t.expect(features.features == 15 and features.gpu_address_bits == 49 and features.max_copy_bytes == 0xffffffff and features.max_command_words == copy.max_words);
+    try t.expect(features.features == 31 and features.gpu_address_bits == 49 and features.max_copy_bytes == 0xffffffff and features.max_command_words == copy.max_words);
     const accepted = features;
     profile.command_abi += 1;
     try t.expectEqual(c.status_unsupported, r4nv_backend_v1.negotiate(&profile, &features));
@@ -111,6 +112,48 @@ test "backend and shader ABI preserve operands, executable identity and rejected
     try checkCopyGenerations();
 }
 
+fn checkGraphicsCopyChannel() !void {
+    const t = std.testing;
+    // Payload words deliberately resemble an INCR header. Only the frozen
+    // method-header positions may change; caller operands stay byte-identical.
+    var request: c.R4NvCopy = .{ .version = 1, .size = @sizeOf(c.R4NvCopy),
+        .source = 0x120010000, .target = 0x220010000, .bytes = 64,
+        .semaphore = 0x300000008, .copy_class = 0xc7b5, .rows = 0,
+        .source_pitch = 0, .target_pitch = 0, .point = 0x20010000, .flags = 0 };
+    var legacy: [19]u32 = @splat(0xa5a5a5a5);
+    var shared: [19]u32 = @splat(0xa5a5a5a5);
+    var written: u32 = 99;
+    try t.expectEqual(c.status_ok, r4nv_backend_v1.encode_copy(&request, &legacy, legacy.len, &written));
+    try t.expect(written == 17 and legacy[0] == 0x20010000);
+    request.flags = c.copy_flag_graphics_channel;
+    try t.expectEqual(c.status_ok, r4nv_backend_v1.encode_copy(&request, &shared, shared.len, &written));
+    try t.expect(written == 17 and shared[0] == 0x20018000);
+    const headers = [_]usize{0, 2, 7, 9, 11, 15};
+    for (shared, legacy, 0..) |actual, original, index|
+        try t.expectEqual(original | @as(u32, if (std.mem.indexOfScalar(usize, &headers, index) != null) 0x8000 else 0), actual);
+    const before = shared;
+    request.flags = 2;
+    written = 99;
+    try t.expectEqual(c.status_invalid, r4nv_backend_v1.encode_copy(&request, &shared, shared.len, &written));
+    try t.expect(written == 99);
+    try t.expectEqualSlices(u32, &before, &shared);
+    var layout: c.R4NvCopyLayout = .{ .copy = request, .source_block = .{ .enabled = 1, .width = 128, .height = 65, .x = 5, .y = 17, .log2_gobs = 2 },
+        .target_block = .{ .enabled = 1, .width = 192, .height = 79, .x = 21, .y = 31, .log2_gobs = 3 } };
+    layout.copy.flags = c.copy_flag_graphics_channel;
+    layout.copy.source = 0x100000000; layout.copy.target = 0x100100000;
+    layout.copy.semaphore = 0x20020000c; layout.copy.point = 0xfffffffe;
+    layout.copy.bytes = 31; layout.copy.rows = 7; layout.copy.source_pitch = 128; layout.copy.target_pitch = 192;
+    var tiled: [37]u32 = @splat(0xa5a5a5a5);
+    try t.expectEqual(c.status_ok, r4nv_backend_v1.encode_copy_layout(&layout, &tiled, tiled.len, &written));
+    try t.expect(written == 37);
+    const vector = @embedFile("copy_layout_vectors.bin")[39 * 4 ..][0 .. 37 * 4];
+    const tiled_headers = [_]usize{0, 2, 11, 17, 20, 26, 29, 31, 35};
+    for (tiled, 0..) |actual, index| {
+        const original = std.mem.readInt(u32, vector[index * 4..][0..4], .little);
+        try t.expectEqual(original | @as(u32, if (std.mem.indexOfScalar(usize, &tiled_headers, index) != null) 0x8000 else 0), actual);
+    }
+}
+
 fn checkCopyGenerations() !void {
     const t = std.testing;
     const input: copy.Transfer = .{ .source = 0x100000, .target = 0x200000, .bytes = 31,
@@ -133,7 +176,7 @@ fn checkCopyGenerations() !void {
             .adapter_id = 3, .flags = 0, .device_generation = 7, .reset_generation = 8 };
         var features: c.R4NvFeatures = undefined;
         try t.expectEqual(c.status_ok, r4nv_backend_v1.negotiate(&profile, &features));
-        try t.expectEqual(@as(u64,if(class >= 0xc9b5) 3 else 15), features.features);
+        try t.expectEqual(@as(u64,if(class >= 0xc9b5) 19 else 31), features.features);
         const linear = try copy.encode(class, .{ .source = 0x100000, .target = 0x200000, .bytes = 64 }, 0x300000, 1);
         try t.expectEqual(class, linear[1]);
         try t.expectEqual(@as(u32,if(class >= 0xc7b5) 0x04000182 else 0x182), linear[10]);

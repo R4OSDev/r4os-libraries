@@ -56,6 +56,12 @@ libdisplay-info cta.c; its source hash is also recorded in that provenance.
 
 R4NV/Source/copy.zig contains the existing NVIDIA 570.144 and Nouveau-based CE encoding implementation, now shared with NVIDIA.R4D. Full NVIDIA and Red Hat MIT notices are preserved in the source and R4NV/ThirdParty/Nvidia/LICENSES.txt. No firmware is embedded in R4NV.R4L. The existing distributed NVIDIA-GSP-RUNTIME-LICENSE.txt contains these notices.
 
+Mixed-channel routing (R4NV0.1.16) follows the GR0/compute1/CE4 constants
+in the pinned Mesa `src/nouveau/headers/nv_push.h` and the NVIDIA
+NV906F/NVC56F SUBCHANNEL15:13 field. The bounded private-packet header walk
+in Source/backend.zig is original R4OS code; no additional upstream
+implementation is linked. Existing NVIDIA method/header notices above apply.
+
 ## R4NV host shader compiler
 
 `R4NV/Tools/Compiler` builds Mesa 26.2.2 NIR/NAK from its checksum-pinned
