@@ -36,6 +36,7 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4nv_video", b.path("R4NV/Source/video.zig"));
     b.addNamedLazyPath("r4nv_encode", b.path("R4NV/Source/encode.zig"));
     b.addNamedLazyPath("r4nv_render", b.path("R4NV/Source/render.zig"));
+    b.addNamedLazyPath("r4nv_render_reference", b.path("R4NV/Source/render_reference_cases.zig"));
     b.addNamedLazyPath("r4nv_telemetry", b.path("R4NV/Source/telemetry.zig"));
     b.addNamedLazyPath("r4nv_zig_binding", b.path("R4NV/Bindings/Zig/r4nv.zig"));
     b.addNamedLazyPath("r4nv_c_include", b.path("R4NV/Bindings/C"));

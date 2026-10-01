@@ -1,10 +1,15 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
-//! Small host-only reference scenes. Expected pixels are frozen outputs of
+//! Shared diagnostic reference scenes. Expected pixels are frozen outputs of
 //! R4GFX's integer CPU renderer, or an independent f64 color calculation.
 const std = @import("std");
 const r = @import("render.zig");
 pub const target_bytes = 128 * 24;
 pub const source_bytes = 32 * 5;
+pub fn expectedPixels(scene_index: usize) []const u8 {
+    const pixels = @embedFile("Fixtures/render-pixels.bin");
+    comptime std.debug.assert(pixels.len == target_bytes * scenes.len);
+    return pixels[scene_index * target_bytes..][0..target_bytes];
+}
 pub const Scene = struct {
     name: []const u8,
     format: r.image.Format = .argb8888,
