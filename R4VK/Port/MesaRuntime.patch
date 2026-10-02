@@ -2906,7 +2906,21 @@
           uint32_t binary_index = 0;
           for (uint32_t i = 0; i < compile_info.stage_count; i++) {
              if (compile_info.stages[i].imported)
-@@ -2411,17 +2732,17 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
+@@ -2265,6 +2586,13 @@ vk_common_CreateGraphicsPipelines(VkDevice _device,
+     */
+    memset(pPipelines, 0, createInfoCount * sizeof(*pPipelines));
+
++#if defined(R4OS_VULKAN)
++   /* Resident cache hits must not revive an old native device epoch. */
++   VkResult status = vk_device_check_status(device);
++   if (status != VK_SUCCESS)
++      return status;
++#endif
++
+    unsigned i = 0;
+    for (; i < createInfoCount; i++) {
+       VkResult result = vk_create_graphics_pipeline(device, cache,
+@@ -2411,17 +2739,17 @@ vk_pipeline_compile_compute_stage(struct vk_device *device,
                                    struct vk_pipeline_layout *pipeline_layout,
                                    struct vk_pipeline_stage *stage,
                                    bool *cache_hit)
@@ -2974,7 +2988,21 @@
        VK_FROM_HANDLE(vk_pipeline_binary, binary,
                       bin_info->pPipelineBinaries[0]);
 
-@@ -3186,13 +3515,14 @@ vk_pipeline_compile_rt_shader(struct vk_device *device,
+@@ -2678,6 +3014,13 @@ vk_common_CreateComputePipelines(VkDevice _device,
+     */
+    memset(pPipelines, 0, createInfoCount * sizeof(*pPipelines));
+
++#if defined(R4OS_VULKAN)
++   /* Binary and resident cache paths share the exact native owner binding. */
++   VkResult status = vk_device_check_status(device);
++   if (status != VK_SUCCESS)
++      return status;
++#endif
++
+    unsigned i = 0;
+    for (; i < createInfoCount; i++) {
+       VkResult result = vk_create_compute_pipeline(device, cache,
+@@ -3186,13 +3529,14 @@ vk_pipeline_compile_rt_shader(struct vk_device *device,
     int64_t stage_start = os_time_get_nano();
 
     if (cache != NULL) {
@@ -4469,6 +4497,27 @@
           first_fail_or_success = result;
 --- a/src/nouveau/vulkan/nvk_cmd_indirect.c
 +++ b/src/nouveau/vulkan/nvk_cmd_indirect.c
+@@ -390,9 +390,18 @@ build_process_cs_cmd_seq(nir_builder *b, struct nvk_nir_push *p,
+                nir_ushr_imm(b, root_addr, cb0_layout.addr_shift);
+             qmd_repl[cb0_addr_lo_dw] =
+                nir_unpack_64_2x32_split_x(b, root_addr_shifted);
++            /* Replace the address field, preserving the size/flags sharing
++             * its upper dword. Execution-set QMDs contain a nonzero dummy
++             * CB0 address; OR-ing it with the root address can point at an
++             * unrelated, unmapped VA when the generated dispatch executes.
++             */
++            const uint32_t cb0_addr_hi_mask =
++               BITFIELD_MASK(cb0_layout.addr_hi_end - cb0_layout.addr_hi_start);
+             qmd_repl[cb0_addr_hi_dw] =
+-               nir_ior(b, load_global_dw(b, shader_qmd_addr, cb0_addr_hi_dw),
+-                          nir_unpack_64_2x32_split_y(b, root_addr_shifted));
++               nir_ior(b, nir_iand_imm(b,
++                             load_global_dw(b, shader_qmd_addr, cb0_addr_hi_dw),
++                             ~cb0_addr_hi_mask),
++                          nir_unpack_64_2x32_split_y(b, root_addr_shifted));
+
+             /* Ensure each local size parameters are part of the same 32-bit
+              * value */
 @@ -801,27 +801,12 @@ build_process_gfx_cmd_seq(nir_builder *b, struct nvk_nir_push *p,
        }
     }

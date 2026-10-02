@@ -1,11 +1,20 @@
 ﻿# R4VK native Vulkan provider
 
-R4VK 0.1.29 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+R4VK 0.1.31 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
 runtime. Provider-specific constructors, revalidation and destruction select
 only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
 queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
 `IMAGE_SCOPE=slim` installs the module in normal images. Missing backends
 produce no device; the firmware-framebuffer renderer remains available.
+
+Roadmap 0.82.26 qualifies physical GA106 graphics/compute, generated commands,
+pipeline libraries/binaries, distinct multisample resolves and parallel cache
+lifetimes. Version30 replaces generated-QMD CB0 high address bits;31 checks
+device loss before compute/graphics cache hits. The unchanged public reset
+caller now rejects old cache/binary pipelines and executes imported bytes on
+the rebuilt GPU with NVIDIA197's corrected GR bootstrap and exact command RM admission.
+All original failed results remain archived. See GrafikVulkan07936.txt/.json;
+active output and manual variants remain0.82.37/38.
 
 Roadmap 0.82.25 qualifies the regular public NVIDIA ICD on physical GA106:
 headless buffer/image/meta readbacks, coherent RAM and VRAM aliases, independent
@@ -553,6 +562,13 @@ have separate memory lists and loss state. They retain their physical owner;
 memory and standalone VA objects retain their logical owner through destruction.
 Final C cleanup may precede resident broker retirement without leaving caller
 pointers in the kernel. Partial construction preserves output and unwinds.
+
+Compute and graphics pipeline creation revalidate this native owner after
+initializing all pipeline outputs to null. A resident shader-cache hit must
+not create a live pipeline on a lost logical device. The check also covers
+imported binaries and linked graphics libraries. Saved compiler bytes and
+global pipeline keys retain their compatibility identity across a GPU reset;
+a new logical device imports them into its own current native incarnation.
 
 The original NVK physical-device constructor now has a native entry receiving
 an exact R4OS backend and the immutable platform tables. `Port/nvk_physical.c`
