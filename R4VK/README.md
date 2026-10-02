@@ -1,11 +1,22 @@
 ﻿# R4VK native Vulkan provider
 
-R4VK 0.1.24 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+R4VK 0.1.29 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
 runtime. Provider-specific constructors, revalidation and destruction select
 only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
 queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
 `IMAGE_SCOPE=slim` installs the module in normal images. Missing backends
 produce no device; the firmware-framebuffer renderer remains available.
+
+Roadmap 0.82.25 qualifies the regular public NVIDIA ICD on physical GA106:
+headless buffer/image/meta readbacks, coherent RAM and VRAM aliases, independent
+logical devices, native queue/ring lifetimes and bounded resource growth.
+A single owned-unmapped BDA read interrupts actual compute at the expected
+counter; public calls report device loss, old resources retire, and fresh
+Vulkan work passes after physical FLR and rebuild. Exact warm BO accounting
+returns after the new epoch's first-use cache allocation. Original failed
+probes remain preserved. Software missing-ACK/COPY10+ fixtures are identified
+separately; no physical CTS, active output or absent-board claim is made.
+See `GrafikVulkan07935.txt/.json` in Docs for scope, source reuse and evidence.
 
 AMD 0.80.25 admits the software Vulkan 1.3 profile with actual RADV/NIR/ACO
 pipelines, dynamic rendering, synchronization2 and Mesa timeline semaphores
