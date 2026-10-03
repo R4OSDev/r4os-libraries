@@ -153,24 +153,33 @@ VkResult r4vk_surface_snapshot(struct vk_physical_device *pdev, VkSurfaceKHR han
                         &surface->identity, &reply) != R4OS_WINDOW_GRAPHICS_OK)
       return VK_ERROR_SURFACE_LOST_KHR;
    const R4WindowGraphicsConfig *config = &reply.config;
+   const bool software = config->backend.binding.adapter_id == 0;
+   const bool headless = config->flags & R4OS_WINDOW_GRAPHICS_HEADLESS;
+   const R4GfxOutputId no_output = {0};
    if (config->version != 1 || config->size != sizeof(*config) || !config->revision ||
        !config->width || !config->height || config->reserved ||
        config->format_count > ARRAY_SIZE(config->formats) || !config->format_count ||
        config->min_images < 2 || config->max_images < config->min_images || config->max_images > 3 ||
        !(config->present_modes & R4OS_WINDOW_GRAPHICS_FIFO) ||
        config->present_modes & ~(R4OS_WINDOW_GRAPHICS_FIFO | R4OS_WINDOW_GRAPHICS_MAILBOX) ||
-       config->flags & ~R4OS_WINDOW_GRAPHICS_VISIBLE || !config->display_generation ||
-       !config->output.connector_id || !config->output.connection_generation ||
-       config->output.adapter_id != config->backend.binding.adapter_id ||
-       config->output.device_generation != config->backend.binding.device_generation)
+       config->flags & ~(R4OS_WINDOW_GRAPHICS_VISIBLE | R4OS_WINDOW_GRAPHICS_HEADLESS) || !config->display_generation ||
+       (headless && (!software || memcmp(&config->output, &no_output, sizeof(no_output)))) ||
+       (!headless && (!config->output.connector_id || !config->output.connection_generation ||
+                     !config->output.device_generation)) ||
+       config->backend.version != 1 || config->backend.size != sizeof(config->backend) ||
+       config->backend.binding.version != 1 || config->backend.binding.size != sizeof(config->backend.binding) ||
+       !config->backend.binding.device_generation || !config->backend.binding.reset_generation ||
+       (software && config->backend.binding.milestone != R4OS_GFX_QUEUE_MILESTONE_CPU_STORES) ||
+       (!software && (config->output.adapter_id != config->backend.binding.adapter_id ||
+                      config->output.device_generation != config->backend.binding.device_generation)))
       return VK_ERROR_SURFACE_LOST_KHR;
    caps->config = *config;
    R4GfxBackendBinding binding;
    uint64_t generation;
    if (ops->physical(pdev, &binding, &generation) != VK_SUCCESS)
       return VK_ERROR_SURFACE_LOST_KHR;
-   if (memcmp(&binding, &config->backend.binding, sizeof(binding)) ||
-       generation != config->backend.memory_generation ||
+   if ((!software && (memcmp(&binding, &config->backend.binding, sizeof(binding)) ||
+                      generation != config->backend.memory_generation)) ||
        config->width > pdev->properties.maxImageDimension2D ||
        config->height > pdev->properties.maxImageDimension2D)
       return VK_SUCCESS; /* Another adapter/incarnation is not this surface's owner. */
@@ -179,6 +188,11 @@ VkResult r4vk_surface_snapshot(struct vk_physical_device *pdev, VkSurfaceKHR han
    for (uint32_t i = 0; i < config->format_count; i++) {
       const R4WindowGraphicsFormat *entry = &config->formats[i];
       if (entry->reserved) continue;
+      /* Headless consumers read the original portable BO at its declared
+       * precision through the common color compositor. Existing physical
+       * software outputs retain their established 8-bit publication. */
+      if (software && !headless && entry->format != R4OS_GFX_BUFFER_FORMAT_XRGB8888 &&
+          entry->format != R4OS_GFX_BUFFER_FORMAT_ARGB8888) continue;
       /* Only exact, implemented color contracts may be exposed. In
        * particular legacy 100-nit FP16 is not scRGB's absolute 80-nit scale. */
       VkSurfaceFormatKHR mapped;

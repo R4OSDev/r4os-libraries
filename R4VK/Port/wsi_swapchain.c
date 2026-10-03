@@ -360,6 +360,43 @@ static VkResult allocation_result(int32_t rc)
 static VkResult source_image(struct native_chain *chain, uint32_t format,
                              R4GfxBufferReference *out)
 {
+   if (chain->config.backend.binding.adapter_id == 0) {
+      /* Render directly into the canonical portable BO consumed by Desktop.
+       * There is no CPU-emulated producer or full-frame staging copy here.
+       * Both providers import modifier-zero images through their usual VA
+       * and real native queue owners. Native fence pins outlive the chain. */
+      uint64_t pixel_bytes = 4;
+      switch (format) {
+      case R4OS_GFX_BUFFER_FORMAT_XRGB8888:
+      case R4OS_GFX_BUFFER_FORMAT_ARGB8888: break;
+      case R4OS_GFX_BUFFER_FORMAT_XRGB2101010:
+      case R4OS_GFX_BUFFER_FORMAT_ARGB2101010:
+         if (!(chain->config.flags & R4OS_WINDOW_GRAPHICS_HEADLESS))
+            return VK_ERROR_FORMAT_NOT_SUPPORTED;
+         break;
+      case R4OS_GFX_BUFFER_FORMAT_ABGR16161616F:
+         if (!(chain->config.flags & R4OS_WINDOW_GRAPHICS_HEADLESS))
+            return VK_ERROR_FORMAT_NOT_SUPPORTED;
+         pixel_bytes = 8;
+         break;
+      default: return VK_ERROR_FORMAT_NOT_SUPPORTED;
+      }
+      const uint64_t pitch = ((uint64_t)chain->config.width * pixel_bytes + 255) & ~255ull;
+      if (!pitch || !chain->config.height || chain->config.height > (UINT64_MAX - 65535) / pitch)
+         return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+      const R4GfxBufferDescriptor descriptor = {
+         .version = 1, .size = sizeof(descriptor),
+         .byte_length = (pitch * chain->config.height + 65535) & ~65535ull,
+         .alignment = 4096, .location = R4OS_GFX_BUFFER_LOCATION_SYSTEM,
+         .width = chain->config.width, .height = chain->config.height,
+         .format = format, .plane_count = 1, .plane_pitches = {pitch},
+         .usage = R4OS_GFX_BUFFER_USAGE_CPU_READ | R4OS_GFX_BUFFER_USAGE_CPU_WRITE |
+            R4OS_GFX_BUFFER_USAGE_RENDER | R4OS_GFX_BUFFER_USAGE_TRANSFER_SOURCE |
+            R4OS_GFX_BUFFER_USAGE_TRANSFER_TARGET,
+      };
+      const int32_t rc = r4draw_gfx_buffer_create(&chain->draw, &descriptor, out);
+      return rc == 1 ? VK_SUCCESS : allocation_result(rc);
+   }
    R4GfxNativeAllocation allocation = {
       .version = 1, .size = sizeof(allocation),
       .adapter_id = chain->config.backend.binding.adapter_id,

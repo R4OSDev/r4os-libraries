@@ -1,11 +1,21 @@
 ﻿# R4VK native Vulkan provider
 
-R4VK 0.1.31 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+R4VK 0.1.33 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
 runtime. Provider-specific constructors, revalidation and destruction select
 only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
 queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
 `IMAGE_SCOPE=slim` installs the module in normal images. Missing backends
 produce no device; the firmware-framebuffer renderer remains available.
+
+Roadmap 0.82.27 qualifies actual GA106 WSI pixel/depth readbacks, regular
+Desktop window/fullscreen/resize/occlusion, source FP16/PQ capture, retained
+producer fences beyond Deviceclose, full Desktop restart with surviving GUI,
+and real MMU/FLR followed by fresh same-GUI pixels and exact warm retirement.
+Headless windows explicitly use an all-zero output and portable system BOs;
+the native producer's DeviceExecution fence keeps its actual GPU identity.
+Old contract layouts and slots remain unchanged. Active TV/output integration
+and manual variants stay in0.82.37/38. Evidence: GrafikVulkan07937.txt/.json
+in Docs. Existing failed results and original software/model limits remain.
 
 Roadmap 0.82.26 qualifies physical GA106 graphics/compute, generated commands,
 pipeline libraries/binaries, distinct multisample resolves and parallel cache
