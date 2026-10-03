@@ -12,4 +12,6 @@ VkResult r4vk_nvk_import_wsi_image(VkDevice device,
 void r4vk_nvk_finish_wsi_image(VkDevice device,
                               const VkAllocationCallbacks *allocator,
                               struct r4vk_wsi_image *image);
+VkResult r4vk_nvk_wsi_acquired(VkDevice device, struct r4vk_wsi_image *image,
+                               bool acquired);
 #endif

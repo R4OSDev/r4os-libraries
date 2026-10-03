@@ -33,4 +33,9 @@ VkResult r4vk_nvk_import_mem(struct r4vk_nvk_mem_context *context,
                             R4GfxBufferDescriptor *descriptor);
 VkResult r4vk_nvk_mem_reference(struct nvkmd_mem *mem,
                                R4GfxBufferReference *out);
+/* Private WSI ownership. The shared window owner supplies the actual
+ * acquire/handoff proof; the memory owner updates all canonical VA aliases. */
+VkResult r4vk_nvk_mem_wsi_acquired(struct nvkmd_mem *mem, bool acquired);
+/* Caller holds this memory's resources->residency_mutex. */
+uint32_t r4vk_nvk_mem_access(struct nvkmd_mem *mem);
 #endif

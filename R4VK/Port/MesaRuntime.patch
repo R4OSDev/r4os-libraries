@@ -194,9 +194,67 @@
 
 --- a/src/vulkan/runtime/vk_device.c
 +++ b/src/vulkan/runtime/vk_device.c
-@@ -234,6 +234,11 @@ vk_device_init(struct vk_device *device,
+@@ -155,6 +155,16 @@
+    }
+ }
+ 
++
++#if defined(R4OS_VULKAN)
++#include <stdio.h>
++extern void r4vk_device_startup_trace(const char *);
++extern bool r4vk_device_startup_trace_enabled(void);
++#define R4VK_DEVICE_STAGE(message) r4vk_device_startup_trace("R4VK DEVICE " message)
++#else
++#define R4VK_DEVICE_STAGE(message) ((void)0)
++#endif
++
+ VkResult
+ vk_device_init(struct vk_device *device,
+                struct vk_physical_device *physical_device,
+@@ -207,14 +217,40 @@
+       device->enabled_extensions.extensions[idx] = true;
+    }
+ 
++#if defined(R4OS_VULKAN)
++   if (r4vk_device_startup_trace_enabled()) {
++      char line[200];
++      snprintf(line, sizeof(line), "R4VK DEVICE requested queues=%u extensions=%u",
++               pCreateInfo->queueCreateInfoCount, pCreateInfo->enabledExtensionCount);
++      r4vk_device_startup_trace(line);
++      for (unsigned i = 0; i < pCreateInfo->enabledExtensionCount && i < 256; i++) {
++         snprintf(line, sizeof(line), "R4VK DEVICE extension[%u]=%s", i,
++                  pCreateInfo->ppEnabledExtensionNames[i]);
++         r4vk_device_startup_trace(line);
++      }
++      /* This CPU-only dump is bounded independently of Vulkan's normal walk.
++       * It changes neither the caller's chain nor the feature-check result. */
++      const VkBaseInStructure *node = pCreateInfo->pNext;
++      for (unsigned i = 0; node && i < 256; i++, node = node->pNext) {
++         snprintf(line, sizeof(line), "R4VK DEVICE feature[%u] type=%u addr=%p next=%p",
++                  i, (unsigned)node->sType, (const void *)node,
++                  (const void *)node->pNext);
++         r4vk_device_startup_trace(line);
++      }
++      if (node) R4VK_DEVICE_STAGE("requested feature trace bound reached");
++   }
++#endif
++   R4VK_DEVICE_STAGE("common before requested feature validation");
+    VkResult result =
+       vk_physical_device_check_device_features(physical_device,
+                                                pCreateInfo);
+    if (result != VK_SUCCESS)
+       return result;
+ 
++   R4VK_DEVICE_STAGE("common requested features accepted; before collection");
+    collect_enabled_features(device, pCreateInfo);
+ 
++   R4VK_DEVICE_STAGE("common requested features collected");
+    p_atomic_set(&device->private_data_next_index, 0);
+ 
+    list_inithead(&device->queues);
+@@ -234,6 +270,11 @@
        break;
-
+ 
     case VK_DEVICE_TIMELINE_MODE_ASSISTED:
 +#if defined(R4OS_VULKAN)
 +      /* Native policy uses Mesa's ordinary on-demand submit worker. There is
@@ -206,38 +264,38 @@
        if (os_get_option("MESA_VK_ENABLE_SUBMIT_THREAD")) {
           if (debug_get_bool_option("MESA_VK_ENABLE_SUBMIT_THREAD", false)) {
              device->submit_mode = VK_QUEUE_SUBMIT_MODE_THREADED;
-@@ -243,6 +248,7 @@ vk_device_init(struct vk_device *device,
+@@ -243,6 +284,7 @@
        } else {
           device->submit_mode = VK_QUEUE_SUBMIT_MODE_THREADED_ON_DEMAND;
        }
 +#endif
        break;
-
+ 
     default:
-@@ -325,7 +331,9 @@ vk_device_finish(struct vk_device *device)
+@@ -325,7 +367,9 @@
        device->sync->finalize(device->sync);
-
+ 
     vk_device_memory_report_finish(device);
 +#if !defined(R4OS_VULKAN)
     vk_memory_trace_finish(device);
 +#endif
-
+ 
  #ifdef VK_USE_PLATFORM_ANDROID_KHR
     if (device->swapchain_private) {
-@@ -442,8 +450,10 @@ _vk_device_set_lost(struct vk_device *device,
+@@ -442,8 +486,10 @@
     vk_logd(VK_LOG_OBJS(device), "Timeline mode is %s.",
             timeline_mode_str(device));
-
+ 
 +#if !defined(R4OS_VULKAN)
     if (debug_get_bool_option("MESA_VK_ABORT_ON_DEVICE_LOSS", false))
        abort();
 +#endif
-
+ 
     return VK_ERROR_DEVICE_LOST;
  }
-@@ -860,7 +870,14 @@ vk_device_get_timestamp(struct vk_device *device, VkTimeDomainKHR domain,
+@@ -860,7 +906,14 @@
     }
-
+ 
     /* device is not used for host time domains */
 -#if DETECT_OS_WINDOWS
 +#if defined(R4OS_VULKAN)
@@ -251,16 +309,16 @@
     if (domain == VK_TIME_DOMAIN_QUERY_PERFORMANCE_COUNTER_KHR) {
        LARGE_INTEGER ts;
        if (QueryPerformanceCounter(&ts)) {
-@@ -902,6 +919,7 @@ fail:
+@@ -902,6 +955,7 @@
     return VK_ERROR_FEATURE_NOT_PRESENT;
  }
-
+ 
 +#if !defined(R4OS_VULKAN)
  VKAPI_ATTR VkResult VKAPI_CALL
  vk_common_GetCalibratedTimestampsKHR(
     VkDevice _device, uint32_t timestampCount,
-@@ -964,3 +982,4 @@ vk_common_GetCalibratedTimestampsKHR(
-
+@@ -964,3 +1018,4 @@
+ 
     return VK_SUCCESS;
  }
 +#endif /* Native provider does not advertise calibrated timestamps. */
@@ -326,7 +384,7 @@
 +++ b/src/nouveau/vulkan/nvk_device.c
 @@ -14,7 +14,11 @@
  #include "nvkmd/nvkmd.h"
-
+ 
  #include "vk_common_entrypoints.h"
 +#if defined(R4OS_VULKAN)
 +#include "r4vk_nvk_device.h"
@@ -336,10 +394,10 @@
  #include "vk_pipeline_cache.h"
  #include "vk_debug_utils.h"
  #include "util/u_printf.h"
-@@ -159,7 +163,14 @@ nvk_device_check_status(struct vk_device *vk_dev)
+@@ -159,7 +163,14 @@
     VkResult status = VK_SUCCESS;
     struct nvk_device *dev = container_of(vk_dev, struct nvk_device, vk);
-
+ 
 -   if (NAK_CAN_PRINTF)
 +#if defined(R4OS_VULKAN)
 +   /* The native owner can lose this exact backend incarnation without a
@@ -350,9 +408,9 @@
 +
 +   if (dev->nvkmd && NAK_CAN_PRINTF)
        status = vk_check_printf_status(&dev->vk, &dev->printf);
-
+ 
     return status;
-@@ -168,9 +179,17 @@ nvk_device_check_status(struct vk_device *vk_dev)
+@@ -168,9 +179,17 @@
  static VkResult
  nvk_device_get_timestamp(struct vk_device *vk_dev, uint64_t *timestamp)
  {
@@ -368,22 +426,60 @@
     return VK_SUCCESS;
 +#endif
  }
-
+ 
  struct dispatch_table_builder {
-@@ -220,7 +239,9 @@ init_dispatch_tables(struct nvk_device *dev)
+@@ -220,9 +239,19 @@
     init_app_workarounds_entrypoints(dev, &b);
-
+ 
     add_entrypoints(&b, &nvk_device_entrypoints, NVK_DISPATCH_TABLE_COUNT);
 +#if !defined(R4OS_VULKAN) || defined(NVK_USE_WSI_PLATFORM)
     add_entrypoints(&b, &wsi_device_entrypoints, NVK_DISPATCH_TABLE_COUNT);
 +#endif
     add_entrypoints(&b, &vk_common_device_entrypoints, NVK_DISPATCH_TABLE_COUNT);
  }
-
-@@ -257,11 +278,15 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
++
++
++#if defined(R4OS_VULKAN)
++extern void r4vk_device_startup_trace(const char *);
++#define R4VK_DEVICE_STAGE(message) r4vk_device_startup_trace("R4VK DEVICE " message)
++#else
++#define R4VK_DEVICE_STAGE(message) ((void)0)
++#endif
+ 
+ VKAPI_ATTR VkResult VKAPI_CALL
+ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
+@@ -234,49 +263,63 @@
+    VkResult result = VK_ERROR_OUT_OF_HOST_MEMORY;
+    struct nvk_device *dev;
+ 
++   R4VK_DEVICE_STAGE("NVK before device allocation");
+    dev = vk_zalloc2(&pdev->vk.instance->alloc, pAllocator,
+                     sizeof(*dev), 8, VK_SYSTEM_ALLOCATION_SCOPE_DEVICE);
+    if (!dev)
+       return vk_error(pdev, VK_ERROR_OUT_OF_HOST_MEMORY);
+ 
++   R4VK_DEVICE_STAGE("NVK before common device initialization");
+    result = vk_device_init(&dev->vk, &pdev->vk, NULL, pCreateInfo, pAllocator);
+    if (result != VK_SUCCESS)
+       goto fail_alloc;
+ 
++   R4VK_DEVICE_STAGE("NVK common device initialized; before dispatch tables");
+    init_dispatch_tables(dev);
+ 
+    dev->vk.shader_ops = &nvk_device_shader_ops;
+    dev->vk.check_status = &nvk_device_check_status;
+ 
++   R4VK_DEVICE_STAGE("NVK dispatch tables initialized");
+    uint32_t queue_count = 0;
+    for (uint32_t i = 0; i < pCreateInfo->queueCreateInfoCount; i++)
+       queue_count += pCreateInfo->pQueueCreateInfos[i].queueCount;
+ 
+    if (queue_count > 0) {
++   R4VK_DEVICE_STAGE("NVK before resource device");
+       result = nvkmd_pdev_create_dev(pdev->nvkmd, &pdev->vk.base, &dev->nvkmd);
        if (result != VK_SUCCESS)
           goto fail_init;
-
+ 
 +#if !defined(R4OS_VULKAN)
        vk_device_set_drm_fd(&dev->vk, nvkmd_dev_get_drm_fd(dev->nvkmd));
 +      dev->vk.copy_sync_payloads = vk_drm_syncobj_copy_payloads;
@@ -391,24 +487,114 @@
 +      /* Native syncs use ordinary queue submission. Leaving the optional
 +       * payload-copy optimization unset selects the common fallback. */
        dev->vk.command_buffer_ops = &nvk_cmd_buffer_ops;
-
+ 
        dev->vk.get_timestamp = nvk_device_get_timestamp;
 -      dev->vk.copy_sync_payloads = vk_drm_syncobj_copy_payloads;
-
+-
++
++   R4VK_DEVICE_STAGE("NVK resource device created; before upload queue");
        result = nvk_upload_queue_init(dev, &dev->upload);
        if (result != VK_SUCCESS)
-@@ -394,16 +419,21 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
+          goto fail_nvkmd;
+ 
++   R4VK_DEVICE_STAGE("NVK upload queue initialized; before zero page allocation");
+       result = nvkmd_dev_alloc_mapped_mem(dev->nvkmd, &pdev->vk.base,
+                                           0x1000, 0, NVKMD_MEM_LOCAL,
+                                           NVKMD_MEM_MAP_WR, &dev->zero_page);
+       if (result != VK_SUCCESS)
+          goto fail_upload;
+ 
++   R4VK_DEVICE_STAGE("NVK zero page allocated; before CPU store");
+       memset(dev->zero_page->map, 0, 0x1000);
++   R4VK_DEVICE_STAGE("NVK before zero page GPU synchronization");
+       nvkmd_mem_sync_map_to_gpu(dev->zero_page, 0, 0x1000);
+       nvkmd_mem_unmap(dev->zero_page, 0);
+ 
++   R4VK_DEVICE_STAGE("NVK zero page synchronized; before image descriptors");
+       result = nvk_descriptor_table_init(dev, &dev->images,
+                                          sizeof(struct nil_descriptor),
+                                          1024, 1024 * 1024);
+@@ -294,6 +337,7 @@
+       assert(result == VK_SUCCESS);
+       assert(null_image_index == 0);
+ 
++   R4VK_DEVICE_STAGE("NVK image descriptors ready; before samplers");
+       result = nvk_descriptor_table_init(dev, &dev->samplers,
+                                          8 * 4 /* tsc entry size */,
+                                          4096, 4096);
+@@ -319,6 +363,7 @@
+ 
+       if (dev->vk.enabled_features.descriptorBuffer ||
+           nvk_use_edb_buffer_views(pdev)) {
++   R4VK_DEVICE_STAGE("NVK before descriptor-buffer view cache");
+          result = nvk_edb_bview_cache_init(dev, &dev->edb_bview_cache);
+          if (result != VK_SUCCESS)
+             goto fail_samplers;
+@@ -333,6 +378,7 @@
+       enum nvkmd_mem_map_flags shader_map_flags = 0;
+       if (pdev->info.bar_size_B >= pdev->info.vram_size_B)
+          shader_map_flags = NVKMD_MEM_MAP_WR;
++   R4VK_DEVICE_STAGE("NVK before shader heap");
+       result = nvk_heap_init(dev, &dev->shader_heap,
+                              NVKMD_MEM_LOCAL, shader_map_flags,
+                              2048 /* overalloc */,
+@@ -340,6 +386,7 @@
+       if (result != VK_SUCCESS)
+          goto fail_edb_bview_cache;
+ 
++   R4VK_DEVICE_STAGE("NVK before event heap");
+       result = nvk_heap_init(dev, &dev->event_heap,
+                              NVKMD_MEM_LOCAL | NVKMD_MEM_COHERENT,
+                              NVKMD_MEM_MAP_WR,
+@@ -355,6 +402,7 @@
+             goto fail_event_heap;
+       }
+ 
++   R4VK_DEVICE_STAGE("NVK before SLM owner");
+       nvk_slm_area_init(&dev->slm);
+ 
+       if (pdev->info.cls_eng3d >= FERMI_A &&
+@@ -369,6 +417,7 @@
+ 
+       for (unsigned i = 0; i < pCreateInfo->queueCreateInfoCount; i++) {
+          for (unsigned q = 0; q < pCreateInfo->pQueueCreateInfos[i].queueCount; q++) {
++   R4VK_DEVICE_STAGE("NVK before application queue");
+             result = nvk_queue_create(dev, &pCreateInfo->pQueueCreateInfos[i], q);
+             if (result != VK_SUCCESS)
+                goto fail_queues;
+@@ -376,6 +425,7 @@
+       }
+    }
+ 
++   R4VK_DEVICE_STAGE("NVK queues ready; before pipeline cache");
+    struct vk_pipeline_cache_create_info cache_info = {
+       .weak_ref = true,
+    };
+@@ -386,24 +436,32 @@
+    }
+ 
+    if (queue_count > 0) {
++   R4VK_DEVICE_STAGE("NVK before meta owner");
+       result = nvk_device_init_meta(dev);
+       if (result != VK_SUCCESS)
+          goto fail_mem_cache;
+    }
+ 
     if (queue_count > 0 && NAK_CAN_PRINTF) {
++   R4VK_DEVICE_STAGE("NVK before printf owner");
        result = nvk_init_printf(dev);
        if (result != VK_SUCCESS)
 -         goto fail_mem_cache;
+-   }
+-
 +         goto fail_meta;
-    }
-
++   }
++
++   R4VK_DEVICE_STAGE("NVK device complete");
     *pDevice = nvk_device_to_handle(dev);
-
+ 
     return VK_SUCCESS;
-
+ 
 +fail_meta:
 +   nvk_device_finish_meta(dev);
  fail_mem_cache:

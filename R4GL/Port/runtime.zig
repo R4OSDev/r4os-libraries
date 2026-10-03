@@ -133,6 +133,27 @@ export fn r4gl_cpu_capacity(available: *u32, configured: *u32) callconv(.c) c_in
     available.* = capacity.available_cpus; configured.* = capacity.configured_cpus;
     return 1;
 }
+export fn r4gl_native_startup_trace(message: [*:0]const u8) callconv(.c) void {
+    // Read the caller's environment directly: this also works inside the
+    // initializer of a different process-local Mesa object without recursion.
+    var value: [4]u8 = undefined;
+    const enabled = native.process.environmentValue("R4GL_STARTUP_TRACE", &value) catch return;
+    if (!std.mem.eql(u8, enabled, "1")) return;
+    const bundle = native.application.bundle() orelse return;
+    const sys = r.r4sys.Context.init(bundle);
+    sys.println(std.mem.span(message));
+}
+export fn r4gl_native_runtime_trace(stage: [*:0]const u8) callconv(.c) void {
+    var value: [4]u8 = undefined;
+    const enabled = native.process.environmentValue("R4GL_STARTUP_TRACE", &value) catch return;
+    if (!std.mem.eql(u8, enabled, "1")) return;
+    const now = native.time.read() orelse return;
+    const bundle = native.application.bundle() orelse return;
+    var line: [256]u8 = undefined;
+    const text = std.fmt.bufPrint(&line, "R4GL RUNTIME stage={s} instant-ns={d}",
+        .{ std.mem.span(stage), now.instant_ns }) catch return;
+    r.r4sys.Context.init(bundle).println(text);
+}
 export fn r4gl_process_exec_path(out: [*]u8, capacity: usize) callconv(.c) usize {
     return (native.process.modulePath(out[0..capacity]) orelse return 0).len;
 }

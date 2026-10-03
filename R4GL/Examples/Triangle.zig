@@ -187,11 +187,31 @@ fn runWindow(app: *r.App, f: Functions, observer: ?Observer) !void {
                     f.glClearColor(0.04, 0.06, 0.12, 1);
                     f.glClear(0x4000);
                     f.glDrawArrays(4, 0, 3);
+                    var pixel: [4]u8 = undefined;
                     if (observer != null) {
-                        var pixel: [4]u8 = undefined;
                         f.glReadPixels(@divTrunc(width, 2), @divTrunc(height, 2), 1, 1, 0x1908, 0x1401, &pixel);
-                        try require(std.mem.eql(u8, &pixel, &.{ 0, 255, 0, 255 }));
                     }
+                    try require(f.glGetError() == 0);
+                    var current_width: i32 = 0;
+                    var current_height: i32 = 0;
+                    try require(f.eglQuerySurface(display, surface, 0x3057, &current_width) == 1 and
+                        f.eglQuerySurface(display, surface, 0x3056, &current_height) == 1);
+                    // Desktop can publish a resize while native rendering
+                    // runs. Pixels and the old viewport are then undefined
+                    // for the new drawable. Repaint before claiming a frame;
+                    // a mismatch at the same extent remains a real error.
+                    if (current_width != width or current_height != height) {
+                        // Return the rendered native image through its normal
+                        // WSI handoff before revalidating the new drawable.
+                        try require(f.eglSwapBuffers(display, surface) == 1);
+                        emit(observer, "GLTRIANGLE drawable resized during rendering; repaint pending");
+                        dirty = true;
+                        resize_until = sys.ticks() +| sys.ticksFromMilliseconds(1000);
+                        sys.sleepTicks(1);
+                        continue;
+                    }
+                    if (observer != null)
+                        try require(std.mem.eql(u8, &pixel, &.{ 0, 255, 0, 255 }));
                     try require(f.glGetError() == 0 and f.eglSwapBuffers(display, surface) == 1);
                     var buffer: [160]u8 = undefined;
                     emit(observer, try std.fmt.bufPrint(&buffer, "GLTRIANGLE frame mode={s} client={d},{d},{d},{d} framebuffer={d},{d} pixel=green", .{ if (info.flags & r.abi.gui_window_flag_fullscreen != 0) @as([]const u8, "fullscreen") else "windowed", info.client_x, info.client_y, info.client_w, info.client_h, width, height }));

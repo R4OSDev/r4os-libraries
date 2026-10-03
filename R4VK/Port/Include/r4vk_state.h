@@ -3,6 +3,9 @@
 #define R4VK_STATE_H
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+void r4vk_native_failure(const char *stage, int32_t result, int64_t detail,
+                         uint64_t identity, uint64_t point);
 bool r4vk_state_ensure(const void *key, size_t bytes, size_t alignment);
 void *r4vk_state_get(const void *key);
 bool r4vk_cpu_state_prepare(void);

@@ -31,6 +31,10 @@
     "Port/MesaZinkLineStipple.patch",
     "Port/MesaZinkBorderSwizzle.patch",
     "Port/MesaZinkCore46.patch",
-    "Port/MesaCoreAliases.patch"
+    "Port/MesaCoreAliases.patch",
+    "Port/MesaZinkStartup.patch",
+    "Port/MesaZinkFence.patch",
+    "Port/MesaRuntimeTiming.patch",
+    "Port/MesaZinkBatchAhead.patch"
   ]
 }

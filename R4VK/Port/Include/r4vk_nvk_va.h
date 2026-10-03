@@ -9,13 +9,15 @@ struct r4vk_nvk_point;
 /* Private NVK adapter, not a public library ABI. One context belongs to one
  * nvkmd_dev and outlives its VA objects. The memory owner supplies a borrowed
  * canonical reference; the kernel obtains its own loan before start returns.
- * dev->va_start/end and pdev->bind_align_B must contain actual backend limits.
+ * Initialization receives actual backend bounds and retains them separately.
+ * dev->va_start/end then describe NVK's usable subset of that exact backend.
  * No Linux FD or RM token crosses this interface. */
 struct r4vk_nvk_va_context {
    struct nvkmd_dev *dev;
    R4Draw draw;
    uint32_t adapter_id;
    uint64_t memory_generation;
+   uint64_t backend_va_start, backend_va_end;
    bool image_layouts; /* Explicit revision3 backend + R4DRAW36 admission. */
    uint32_t lost; /* atomic, shared by this device's resource calls */
    /* All live bindings in this device, including aliases whose original BO
@@ -30,6 +32,10 @@ struct r4vk_nvk_va_context {
    simple_mtx_t submit_mutex;
    struct r4vk_nvk_point *submission_tail;
    VkResult (*reference)(struct nvkmd_mem *mem, R4GfxBufferReference *out);
+   /* Optional memory-owner policy, read only under residency_mutex while
+    * publishing a binding. Ordinary BOs remain conservative writers. WSI
+    * images handed to the consumer retain read loans until reacquired. */
+   uint32_t (*access)(struct nvkmd_mem *mem);
    /* Optional paired private owner hooks. Set before allocating children;
     * each successful memory/VA object holds one reference until destruction.
     * Standalone caller-owned contexts leave both NULL. */
@@ -55,6 +61,10 @@ VkResult r4vk_nvk_va_context_init(struct r4vk_nvk_va_context *context,
                                  VkResult (*reference)(struct nvkmd_mem *,
                                                        R4GfxBufferReference *));
 bool r4vk_nvk_va_device_lost(const struct r4vk_nvk_va_context *context);
+/* Caller holds residency_mutex. Update every alias of this exact canonical
+ * BO; no binding is omitted from the execution lifetime snapshot. */
+void r4vk_nvk_va_access_locked(struct r4vk_nvk_va_context *context,
+                               R4GfxBufferHandle buffer, uint32_t access);
 void r4vk_nvk_va_context_finish(struct r4vk_nvk_va_context *context);
 VkResult r4vk_nvk_va_submit(struct r4vk_nvk_va_context *context,
                            bool retain_bindings,

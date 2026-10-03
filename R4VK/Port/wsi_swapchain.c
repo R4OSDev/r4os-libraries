@@ -672,7 +672,11 @@ nvk_AcquireNextImage2KHR(VkDevice device, const VkAcquireNextImageInfoKHR *info,
          else result = vk_result(reply.result);
       }
       if (result == VK_SUCCESS) {
-         if (info->semaphore) result = vk_sync_signal(sc->device,
+         /* The broker has returned this exact image's previous consumer
+          * loans. Only this confirmed acquisition restores native writes. */
+         if (chain->ops->acquired)
+            result = chain->ops->acquired(device, &sc->images[reply.image_slot], true);
+         if (result == VK_SUCCESS && info->semaphore) result = vk_sync_signal(sc->device,
             vk_semaphore_get_active_sync(vk_semaphore_from_handle(info->semaphore)), 0);
          if (result == VK_SUCCESS && info->fence) result = vk_sync_signal(sc->device,
             vk_fence_get_active_sync(vk_fence_from_handle(info->fence)), 0);
@@ -758,9 +762,15 @@ nvk_QueuePresentKHR(VkQueue handle, const VkPresentInfoKHR *info)
     * Native submission emits an actual device checkpoint. Its metadata pin
     * survives Vulkan fence destruction and asynchronous Desktop consumption. */
    result = vk_common_QueueSubmit2(handle, 1, &submit, fence);
-   if (result != VK_SUCCESS) { result = VK_ERROR_DEVICE_LOST; goto all_failed; }
+   if (result != VK_SUCCESS) {
+      r4vk_native_failure("present-submit", result, info->waitSemaphoreCount, 0, 0);
+      result = VK_ERROR_DEVICE_LOST; goto all_failed;
+   }
    result = ops->take(sync, &point, &native_fence);
-   if (result != VK_SUCCESS) { result = VK_ERROR_DEVICE_LOST; goto all_failed; }
+   if (result != VK_SUCCESS) {
+      r4vk_native_failure("present-take", result, 0, 0, 0);
+      result = VK_ERROR_DEVICE_LOST; goto all_failed;
+   }
    vk_common_DestroyFence(device, fence, NULL); fence = VK_NULL_HANDLE;
    vk_free(&dev->alloc, waits); waits = NULL;
    result = VK_SUCCESS;
@@ -775,7 +785,12 @@ nvk_QueuePresentKHR(VkQueue handle, const VkPresentInfoKHR *info)
           !(chain->acquired & (1u << slot)))) one = VK_ERROR_SURFACE_LOST_KHR;
       if (one == VK_SUCCESS) {
          assert(!chain->points[slot]);
-         one = ops->pin(point, NULL);
+         /* QueuePresent's checkpoint already owns the submitted writers.
+          * Mark all canonical aliases read-only before the host may publish
+          * a CPU/read-only consumer loan. Future snapshots retain every BO
+          * without falsely writing this previous front image. */
+         if (ops->acquired) one = ops->acquired(device, &sc->images[slot], false);
+         if (one == VK_SUCCESS) one = ops->pin(point, NULL);
          if (one == VK_SUCCESS) {
             ops->ref(point); chain->points[slot] = point;
             R4WindowGraphicsRequest command = request_for(chain, R4OS_WINDOW_GRAPHICS_PRESENT);
@@ -784,6 +799,9 @@ nvk_QueuePresentKHR(VkQueue handle, const VkPresentInfoKHR *info)
             if (!request(s, chain, command, &reply)) one = VK_ERROR_SURFACE_LOST_KHR;
             else {
                one = vk_result(reply.result);
+               if (one != VK_SUCCESS)
+                  r4vk_native_failure("present-host", one, reply.result,
+                                       chain->chain, slot);
                if (one != VK_SUCCESS) release_point(chain, slot);
             }
          }
@@ -800,6 +818,7 @@ nvk_QueuePresentKHR(VkQueue handle, const VkPresentInfoKHR *info)
    if (result < 0) wake_worker(s);
    return result;
 all_failed:
+   r4vk_native_failure("present-failed", result, info->waitSemaphoreCount, 0, 0);
    vk_common_DestroyFence(device, fence, NULL);
    vk_free(&dev->alloc, waits);
    for (uint32_t i = 0; i < info->swapchainCount; i++) if (info->pResults) info->pResults[i] = result;

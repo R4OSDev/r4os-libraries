@@ -1,6 +1,7 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "r4vk_nvk_wsi_image.h"
 #include "r4vk_nvk_device.h"
+#include "r4vk_nvk_mem.h"
 #include "nvk_device.h"
 #include "nvk_device_memory.h"
 #include "nvk_entrypoints.h"
@@ -183,6 +184,7 @@ VkResult r4vk_nvk_import_wsi_image(VkDevice device,
    };
    result = nvk_BindImageMemory2(device, 1, &bind);
    if (result == VK_SUCCESS) result = r4vk_nvk_check_device(dev->nvkmd);
+   if (result == VK_SUCCESS) result = r4vk_nvk_mem_wsi_acquired(backing, false);
    if (result != VK_SUCCESS) {
       r4vk_nvk_finish_wsi_image(device, allocator, &candidate);
       return result;
@@ -204,4 +206,16 @@ void r4vk_nvk_finish_wsi_image(VkDevice device,
    nvk_DestroyImage(device, image->image, allocator);
    nvk_FreeMemory(device, image->memory, allocator);
    *image = (struct r4vk_wsi_image){0};
+}
+
+VkResult r4vk_nvk_wsi_acquired(VkDevice device, struct r4vk_wsi_image *image,
+                               bool acquired)
+{
+   if (!device || !image || !image->memory) return VK_ERROR_INITIALIZATION_FAILED;
+   VK_FROM_HANDLE(nvk_device, dev, device);
+   struct nvk_device_memory *mem = nvk_device_memory_from_handle(image->memory);
+   if (mem->mem->dev != dev->nvkmd) return VK_ERROR_INVALID_EXTERNAL_HANDLE;
+   VkResult result = r4vk_nvk_check_device(dev->nvkmd);
+   if (result != VK_SUCCESS) return result;
+   return r4vk_nvk_mem_wsi_acquired(mem->mem, acquired);
 }

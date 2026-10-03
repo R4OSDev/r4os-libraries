@@ -1,5 +1,6 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #include "r4vk_nvk_va.h"
+#include "r4vk_state.h"
 #include <stdlib.h>
 
 /* Implemented by the native time port, using one monotonic-clock snapshot. */
@@ -10,6 +11,8 @@ struct binding {
    struct binding *next;
    struct list_head residency;
    R4GfxBufferHandle handle;
+   R4GfxBufferHandle buffer;
+   uint32_t access;
    uint64_t offset, bytes;
 };
 struct native_va {
@@ -97,7 +100,15 @@ VkResult r4vk_nvk_va_context_init(struct r4vk_nvk_va_context *context,
    *context = (struct r4vk_nvk_va_context) {
       .dev = dev, .draw = *draw, .adapter_id = adapter,
       .memory_generation = generation, .reference = reference,
+      .backend_va_start = dev->va_start, .backend_va_end = dev->va_end,
    };
+   /* Mesa's pinned NVK descriptor-buffer cache prepopulates views over this
+    * usable range and has a 12-bit chunk key. Its Nouveau adapter supplies a
+    * 512 GiB range, not the GPU's full 49-bit hardware VA. Retain the real
+    * bounds above and give this logical resource device the same bounded
+    * span, without extending a smaller backend or altering its shared owner. */
+   const uint64_t span = MIN2(dev->va_end - dev->va_start, UINT64_C(1) << 39);
+   dev->va_end = dev->va_start + span;
    simple_mtx_init(&context->residency_mutex, mtx_plain);
    simple_mtx_init(&context->submit_mutex, mtx_plain);
    list_inithead(&context->residency);
@@ -142,7 +153,7 @@ VkResult r4vk_nvk_va_submit(struct r4vk_nvk_va_context *context,
    if (retain_bindings) list_for_each_entry(struct binding, b, &context->residency, residency) {
       resources[index++] = (R4GfxNativeResource) {
          .version = 1, .size = sizeof(*resources), .binding = b->handle,
-         .access = 1, /* Native read/write loan; zero is read-only. */
+         .access = b->access,
       };
    }
    R4GfxNativeSubmission snapshot = *native;
@@ -156,7 +167,20 @@ VkResult r4vk_nvk_va_submit(struct r4vk_nvk_va_context *context,
    if (rc == R4OS_GFX_QUEUE_ERROR_BUSY || rc == R4OS_GFX_QUEUE_ERROR_CAPACITY)
       return VK_NOT_READY;
    if (rc == R4OS_GFX_QUEUE_ERROR_OOM) return VK_ERROR_OUT_OF_HOST_MEMORY;
-   return status(context, rc);
+   const VkResult result = status(context, rc);
+   r4vk_native_failure("native-submit", result, rc,
+                        queue->timeline, submission->dependency_count);
+   return result;
+}
+
+void r4vk_nvk_va_access_locked(struct r4vk_nvk_va_context *context,
+                               R4GfxBufferHandle buffer, uint32_t access)
+{
+   assert(handle_valid(buffer) && access <= 1);
+   list_for_each_entry(struct binding, b, &context->residency, residency) {
+      if (b->buffer.id == buffer.id && b->buffer.generation == buffer.generation)
+         b->access = access;
+   }
 }
 
 /* Dropping the public handle requests cleanup; it does not assert physical
@@ -214,10 +238,20 @@ static VkResult create(struct r4vk_nvk_va_context *context,
        ready.address > UINT64_MAX - ready.byte_length ||
        (expected_address && ready.address != expected_address) ||
        (request->kind == 1 && (ready.address % request->alignment ||
-          ready.address < context->dev->va_start || ready.address >= context->dev->va_end ||
-          ready.byte_length > context->dev->va_end - ready.address))) {
+          ready.address < context->backend_va_start || ready.address >= context->backend_va_end ||
+          ready.byte_length > context->backend_va_end - ready.address))) {
       abandon(context, initial.resource);
       return lost(context);
+   }
+   if (request->kind == 1 && (ready.address >= context->dev->va_end ||
+       ready.byte_length > context->dev->va_end - ready.address)) {
+      /* The shared native allocator chooses the first aligned free range.
+       * A valid allocation above NVK's usable subset means that subset has
+       * no fitting hole. Drop exactly this reservation and report OOM; an
+       * ordinary provider limit is not a stale/invalid backend receipt. */
+      abandon(context, initial.resource);
+      return r4vk_nvk_va_device_lost(context) ? VK_ERROR_DEVICE_LOST :
+         VK_ERROR_OUT_OF_DEVICE_MEMORY;
    }
    *output = ready;
    return VK_SUCCESS;
@@ -311,9 +345,12 @@ static VkResult va_bind(struct nvkmd_va *base, struct vk_object_base *log_obj,
    if (result != VK_SUCCESS) goto fail;
    *binding = (struct binding) {
       .next = va->bindings, .handle = ready.resource, .offset = va_offset, .bytes = bytes,
+      .buffer = reference.buffer,
    };
    va->bindings = binding;
    simple_mtx_lock(&context->residency_mutex);
+   binding->access = context->access ? context->access(mem) : 1;
+   assert(binding->access <= 1);
    list_addtail(&binding->residency, &context->residency);
    simple_mtx_unlock(&context->residency_mutex);
    simple_mtx_unlock(&va->mutex);

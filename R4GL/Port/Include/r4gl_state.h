@@ -16,6 +16,11 @@ void *r4gl_process_state(const void *key, size_t bytes, size_t alignment,
 size_t r4gl_process_exec_path(char *out, size_t capacity);
 /* R4SYS scheduler capacity, success=1; failure=0 leaves outputs unchanged. */
 int r4gl_cpu_capacity(uint32_t *available, uint32_t *configured);
+/* Optional process-local R4GL_STARTUP_TRACE=1 markers. No allocation, option
+ * cache, recursive state initialization or GPU/output operations. */
+void r4gl_native_startup_trace(const char *message);
+/* Optional absolute monotonic timestamps for caller-owned runtime diagnosis. */
+void r4gl_native_runtime_trace(const char *stage);
 /* Cold diagnostic throttles are process-owned and saturate, so concurrent
  * callers cannot reopen a warning budget through integer wraparound. */
 static inline void r4gl_diagnostic_budget_init(void *data)

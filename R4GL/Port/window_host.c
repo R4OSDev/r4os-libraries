@@ -263,13 +263,23 @@ bool r4gl_window_finish(uint64_t deadline)
 static bool config_ok(const R4WindowGraphicsConfig *c)
 {
    const bool gpu = r4gl_native_profile() == 1;
+   const R4GfxOutputId no_output = {0};
+   /* Zink's renderer and the window's consumer have separate owners. The
+    * real GPU can render portable images for Desktop's headless CPU consumer;
+    * this publication promises no native output or synchronized scanout. */
+   const bool headless_cpu = (c->flags & R4OS_WINDOW_GRAPHICS_HEADLESS) &&
+      !(c->flags & ~(R4OS_WINDOW_GRAPHICS_VISIBLE | R4OS_WINDOW_GRAPHICS_HEADLESS)) &&
+      !c->reserved && c->display_generation &&
+      c->backend.binding.adapter_id == 0 &&
+      c->backend.binding.milestone == R4OS_GFX_QUEUE_MILESTONE_CPU_STORES &&
+      !memcmp(&c->output, &no_output, sizeof(no_output));
    return c->version == 1 && c->size == sizeof(*c) && c->revision && c->width && c->height &&
       c->width <= 32768 && c->height <= 32768 &&
       c->backend.version == 1 && c->backend.size == sizeof(c->backend) &&
       c->backend.binding.version == 1 && c->backend.binding.size == sizeof(c->backend.binding) &&
       c->backend.binding.device_generation && c->backend.binding.reset_generation &&
-      (gpu ? c->backend.binding.adapter_id != 0 &&
-         c->backend.binding.milestone == R4OS_GFX_QUEUE_MILESTONE_DEVICE_EXECUTION :
+      (gpu ? (headless_cpu || (c->backend.binding.adapter_id != 0 &&
+         c->backend.binding.milestone == R4OS_GFX_QUEUE_MILESTONE_DEVICE_EXECUTION)) :
          c->backend.binding.adapter_id == 0 &&
          c->backend.binding.milestone == R4OS_GFX_QUEUE_MILESTONE_CPU_STORES) &&
       c->min_images >= 2 && c->max_images <= 3 && c->min_images <= c->max_images &&
@@ -377,7 +387,7 @@ static void release(void *value, struct r4gl_sw_storage *storage)
    if (r4draw_gfx_buffer_unmap(&s->draw, &s->map.lease) != 1 || r4draw_gfx_buffer_release(&s->draw, &s->bo.reference) != 1) abort();
    free(s); *storage = (struct r4gl_sw_storage){0};
 }
-static EGLint create_chain(struct window *w, unsigned mode)
+static EGLint create_chain(struct window *w, unsigned mode, R4WindowGraphicsReply *failed)
 {
    const R4GfxColorDescription color = { .version = 1, .size = sizeof(color),
       .primaries = R4GFX_COLOR_PRIMARIES_SRGB, .transfer = R4GFX_COLOR_TRANSFER_SRGB,
@@ -400,13 +410,13 @@ static EGLint create_chain(struct window *w, unsigned mode)
    request.image_count = c->count; request.format_index = format; request.present_mode = mode;
    R4WindowGraphicsReply reply;
    if (!issue(c, request, &reply)) { error = EGL_BAD_ACCESS; goto fail; }
-   if ((error = result(reply.result)) != EGL_SUCCESS) goto fail;
+   if ((error = result(reply.result)) != EGL_SUCCESS) { *failed = reply; goto fail; }
    for (unsigned i = 0; i < c->count; i++) {
       R4GfxBufferDescriptor desc = descriptor(c->config.width, c->config.height, c->config.width * 4, 4096);
       if (r4draw_gfx_buffer_create(&w->draw, &desc, &c->images[i]) != 1) { error = EGL_BAD_ALLOC; goto fail; }
       request = command(c, R4OS_WINDOW_GRAPHICS_ATTACH); request.image_slot = i; request.source = c->images[i].reference;
       if (!issue(c, request, &reply)) { error = EGL_BAD_ACCESS; goto fail; }
-      if ((error = result(reply.result)) != EGL_SUCCESS) goto fail;
+      if ((error = result(reply.result)) != EGL_SUCCESS) { *failed = reply; goto fail; }
    }
    w->active = c; return EGL_SUCCESS;
 fail:
@@ -427,7 +437,7 @@ static EGLint swap_interval(void *value, void *lease, EGLint interval)
 /* Changing the next posting's policy cannot cancel an earlier FIFO posting.
  * Its source may be returned later; reaching leased/returning is sufficient
  * because the desktop retains it until its last composition/capture use. */
-static EGLint change_mode(struct window *w, unsigned mode, uint64_t until)
+static EGLint change_mode(struct window *w, unsigned mode, uint64_t until, R4WindowGraphicsReply *failed)
 {
    struct chain *c = w->active;
    if (!c || c->mode == mode) return EGL_SUCCESS;
@@ -440,7 +450,7 @@ static EGLint change_mode(struct window *w, unsigned mode, uint64_t until)
             request.image_slot = slot;
             R4WindowGraphicsReply reply;
             if (!r4gl_window_request(&w->application, &request, &reply)) return EGL_BAD_ACCESS;
-            if (reply.result != OK) return result(reply.result);
+            if (reply.result != OK) { *failed = reply; return result(reply.result); }
             if (reply.chain != c->id || reply.image_slot != slot ||
                 memcmp(&reply.surface, &w->identity, sizeof(w->identity))) return EGL_BAD_ACCESS;
             w->revision = reply.revision;
@@ -454,30 +464,56 @@ static EGLint change_mode(struct window *w, unsigned mode, uint64_t until)
    retire(c);
    return EGL_SUCCESS;
 }
+static EGLint publication_error(struct window *w, uint64_t revision,
+                                const R4WindowGraphicsReply *reply, EGLint error)
+{
+   /* The broker can invalidate a chain after publish's first refresh, during
+    * creation, attachment, acquisition or handoff. Only its known rejection
+    * for this exact surface and a newly confirmed configuration can discard
+    * that old frame. Unknown mutations and every other error stay failures;
+    * retired chains keep their consumer/fence loans until ordinary collection. */
+   if (reply->result != R4OS_WINDOW_GRAPHICS_OUT_OF_DATE) return error;
+   if (memcmp(&reply->surface, &w->identity, sizeof(w->identity))) return EGL_BAD_ACCESS;
+   if (!config_ok(&reply->config)) return EGL_BAD_MATCH;
+   if (reply->config.revision <= revision) return error;
+   EGLint rc = refresh(w);
+   if (rc != EGL_SUCCESS) return rc;
+   return w->config.revision >= reply->config.revision ? EGL_SUCCESS : error;
+}
 static EGLint publish(struct window *w, struct r4gl_sw_storage *input)
 {
    struct storage *s = input->token;
    if (s->window != w) return EGL_BAD_NATIVE_WINDOW;
    EGLint rc = refresh(w);
    if (rc != EGL_SUCCESS) return rc;
-   if (s->revision != w->config.revision || s->width != w->config.width || s->height != w->config.height) return EGL_BAD_SURFACE;
+   if (s->revision != w->config.revision || s->width != w->config.width || s->height != w->config.height) {
+      /* Desktop may resize after EGL's geometry check but before this
+       * refreshed publication. The exact live window has advanced: discard
+       * the old frame and let EGL revalidate its drawable on the next frame.
+       * Same-revision geometry corruption and future storage stay invalid. */
+      return w->config.revision > s->revision ? EGL_SUCCESS : EGL_BAD_SURFACE;
+   }
    unsigned mode = R4OS_WINDOW_GRAPHICS_MAILBOX;
    if (w->interval) {
       if (!r4gl_window_swap_limit(&w->application, &w->config)) return EGL_BAD_MATCH;
       mode = R4OS_WINDOW_GRAPHICS_FIFO;
    } else if (!(w->config.present_modes & mode)) mode = R4OS_WINDOW_GRAPHICS_FIFO;
    uint64_t until = r4gl_native_now() + 1000000000ull;
-   if ((rc = change_mode(w, mode, until)) != EGL_SUCCESS) return rc;
-   if (!w->active && (rc = create_chain(w, mode)) != EGL_SUCCESS) return rc;
+   R4WindowGraphicsReply reply = {0};
+   if ((rc = change_mode(w, mode, until, &reply)) != EGL_SUCCESS)
+      return publication_error(w, s->revision, &reply, rc);
+   if (!w->active && (rc = create_chain(w, mode, &reply)) != EGL_SUCCESS)
+      return publication_error(w, s->revision, &reply, rc);
    struct chain *c = w->active;
-   R4WindowGraphicsReply reply;
    for (;;) {
       if (!issue(c, command(c, R4OS_WINDOW_GRAPHICS_ACQUIRE), &reply)) { retire(c); return EGL_BAD_ACCESS; }
       if (reply.result != R4OS_WINDOW_GRAPHICS_NOT_READY) break;
       if (r4gl_native_now() >= until) return EGL_BAD_ACCESS;
       r4gl_window_wait(&w->application, &w->identity.owner, w->revision, 25000000ull);
    }
-   if ((rc = result(reply.result)) != EGL_SUCCESS) { retire(c); return rc; }
+   if ((rc = result(reply.result)) != EGL_SUCCESS) {
+      retire(c); return publication_error(w, s->revision, &reply, rc);
+   }
    unsigned slot = reply.image_slot;
    if (!release_fence(c, slot)) { retire(c); return EGL_BAD_ACCESS; }
    R4GfxBufferMap map;
@@ -498,7 +534,9 @@ static EGLint publish(struct window *w, struct r4gl_sw_storage *input)
    request.image_slot = slot; request.acquire_token = c->tokens[slot]; request.fence = status.fence;
    if (!issue(c, request, &reply)) { retire(c); return EGL_BAD_ACCESS; }
    rc = result(reply.result);
-   if (rc != EGL_SUCCESS) retire(c);
+   if (rc != EGL_SUCCESS) {
+      retire(c); return publication_error(w, s->revision, &reply, rc);
+   }
    return rc;
 }
 static void present(void *value, struct r4gl_sw_storage *storage, void *context, unsigned count, const struct pipe_box *damage)

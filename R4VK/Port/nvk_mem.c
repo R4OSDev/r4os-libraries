@@ -12,6 +12,7 @@ struct native_mem {
    simple_mtx_t mutex;
    R4GfxBufferMap mapping;
    uint32_t map_roles; /* internal and client; NVK counts internal users */
+   bool wsi, wsi_acquired; /* resources->residency_mutex, not map mutex */
 };
 static const struct nvkmd_mem_ops mem_ops;
 
@@ -367,6 +368,27 @@ VkResult r4vk_nvk_mem_reference(struct nvkmd_mem *base, R4GfxBufferReference *ou
    struct native_mem *mem = native(base);
    if (is_lost(mem->context)) return VK_ERROR_DEVICE_LOST;
    *out = mem->reference;
+   return VK_SUCCESS;
+}
+
+uint32_t r4vk_nvk_mem_access(struct nvkmd_mem *base)
+{
+   struct native_mem *mem = native(base);
+   return !mem->wsi || mem->wsi_acquired;
+}
+
+VkResult r4vk_nvk_mem_wsi_acquired(struct nvkmd_mem *base, bool acquired)
+{
+   if (!base || base->ops != &mem_ops) return VK_ERROR_UNKNOWN;
+   struct native_mem *mem = native(base);
+   struct r4vk_nvk_va_context *resources = mem->context->resources;
+   if (is_lost(mem->context)) return VK_ERROR_DEVICE_LOST;
+   simple_mtx_lock(&resources->residency_mutex);
+   mem->wsi = true;
+   mem->wsi_acquired = acquired;
+   r4vk_nvk_va_access_locked(resources, mem->reference.buffer,
+                              r4vk_nvk_mem_access(base));
+   simple_mtx_unlock(&resources->residency_mutex);
    return VK_SUCCESS;
 }
 

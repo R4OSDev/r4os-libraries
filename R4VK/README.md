@@ -1,11 +1,98 @@
 ﻿# R4VK native Vulkan provider
 
-R4VK 0.1.33 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+R4VK 0.1.39 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
 runtime. Provider-specific constructors, revalidation and destruction select
 only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
 queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
 `IMAGE_SCOPE=slim` installs the module in normal images. Missing backends
 produce no device; the firmware-framebuffer renderer remains available.
+
+Version35 bounds the private NVK device's usable virtual-address span to
+512 GiB, matching the pinned Nouveau backend. The descriptor-buffer view
+cache prepopulates this span with a 12-bit chunk key; passing the hardware's
+full 49-bit range reaches its assertion at chunk4096 during device creation.
+The VA owner retains the actual backend bounds separately. A valid native
+reservation outside the usable span is dropped and reports device-memory
+exhaustion; malformed receipts or failed drops still report device loss.
+Smaller native ranges are preserved. CPU regressions execute the actual
+owner and unchanged cache algorithm, including RGB32 boundary lookups,
+transport/retirement failures and cache OOM cleanup. Descriptor/hash/format
+interfaces in that regression are CPU fixtures. The exact R4GL19/R4VK35
+physical GA106 pbuffer run now completes NVK/Zink initialization and yields
+64 green RGBA pixels plus 64 intact guard bytes, byte-identical to Softpipe,
+with a basic EGL fence and exact warm BO retirement. R4GL24/R4VK37 now
+qualify the full regular GUI cycle and controlled physical loss/rebuild.
+R4GL27/R4VK39 also qualify genuinely outstanding EGL fences, asynchronous
+server ordering, held-wait deletion and complete resource retirement.
+R4GL22/R4VK35
+also pass all four original EGLImage case groups on the physical GPU:444
+complete RGBA records,7104 pixels, byte-identical to the actual software
+reference, with full EGL/runtime retirement and exact warm BO balances.
+
+Version36 adds optional first-failure recording for native queue/point/WSI
+diagnosis. `R4VK_NATIVE_FAILURE_FILE` names an explicit caller-owned file.
+One bounded record contains the original stage, Vulkan result, native result
+or detail and exact queue/point identity. Later teardown errors cannot replace
+it. GUI callers otherwise have no console transcript. The disabled path does
+not allocate or write; recording failure never changes the operation's result
+or establishes GPU completion. At36, physical multi-frame EGL window
+qualification remained open. The original22/35 second-frame readback is zero, and a separate
+control without readback fails its second swap with EGL_CONTEXT_LOST. The
+22/36 first-error file records queue-flush VK_NOT_READY before context loss.
+
+Version37 preserves every native VA/BO execution loan while distinguishing
+NVK swapchain ownership. Unacquired or handed-off images retain read loans;
+the broker's confirmed exact-image acquisition restores write loans. The
+memory owner changes every canonical alias under the residency mutex, and
+later aliases inherit the same policy. Ordinary BOs remain conservative
+writers. Handoff happens after the GPU checkpoint is submitted and before
+the host can publish its consumer loan. Existing submitted jobs keep their
+independent original write loans; CPU/read-only conflicts and exact fence
+retirement remain enforced by the common owner. Actual old/new memory and
+VA source snapshots pass28 CPU integration controls against the unchanged
+kernel owner, including ordinary CPU readers, immutable exports, late aliases
+and rejected actual writers. The installed22/37 physical run now renders
+three consecutive stable frames and1280x720 pixels/capture. The full resize,
+restore and occlusion cycle subsequently passes with GL24/37 and exact
+warm retirement. The original36 diagnostic failure is retained.
+
+Version38 reserves the exact last native execution point for a signal-only
+submission on the same queue and resource epoch. Reserving metadata before
+the nonblocking reap preserves the actual WSI fence pins. Assigning that
+existing completion avoids a second empty physical job waiting for prior
+execution at the serialized publisher; it does not invent GPU completion.
+Commands, waits, initial signals, foreign/stale points and released metadata
+retain ordinary physical submission. Timeline allocation, assignment and
+installation failures retain existing error/device-loss handling. Actual
+old/new functions pass21 CPU controls under ASan/UBSan; the exact38 artifact
+passes the fresh SMP4 software pixel/compute/guard/cleanup controls and
+native no-device rejection. The refreshed physical GL24/VK38 GUI cycle passes with exact warm
+retirement. PendingFenceE still returns an already completed first fence
+after384 ms inside eglCreateSync. GL27 corrects the separate next-batch
+recording order; the actual pending/server/delete and refreshed image
+qualification subsequently pass with27/39.
+
+Version39 adds opt-in native submission and completion-wait timing under
+R4VK_DEVICE_TRACE. Markers retain the exact queue identity and original
+result, emit outside the submit/point owners, and never supply completion.
+The same21 CPU owner controls pass for38/39; the complete39 build and fresh
+SMP4 qualification pass. Physical F/G timing on GA106 measures about35 us
+for native submission and170 us for signal handling. GL25 markers locate
+about328 ms in the next command-buffer begin, while the unchanged pending
+predicate still fails. These timings establish neither a pending fence nor
+server/delete ordering. Physical I with GL27/VK39 separately proves both,
+with unchanged shaders/workloads/oracles and full warm retirement. All444
+original image records/7104 GPU pixels also match software in physical D.
+
+Version34 adds optional caller-local device-construction diagnostics for
+Roadmap0.82.29. `R4VK_DEVICE_TRACE=1` records the exact requested extension
+names and feature-chain node types/addresses, followed by common/NVK startup
+stages. The CPU-only dump is bounded to256 extensions and256 nodes; it changes
+neither Vulkan validation nor GPU/resource order. It is silent by default.
+The exact new R4GL19/R4VK34 artifacts pass the fresh SMP4 Softpipe pixel/guard/
+fence/cleanup and native no-device rejection run. That guest result does not
+exercise NVK's real-device constructor; the physical initialization and pixel
+result above uses the subsequent private VA correction in35.
 
 Roadmap 0.82.27 qualifies actual GA106 WSI pixel/depth readbacks, regular
 Desktop window/fullscreen/resize/occlusion, source FP16/PQ capture, retained

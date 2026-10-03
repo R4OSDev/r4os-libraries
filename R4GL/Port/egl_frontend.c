@@ -1,5 +1,6 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0 */
 #define EGL_NO_PLATFORM_SPECIFIC_TYPES
+#include "r4gl_state.h"
 #include "r4gl_egl.h"
 #include "r4gl_vulkan.h"
 #include "gallium/drivers/zink/zink_public.h"
@@ -151,7 +152,9 @@ static _EGLSync *create_sync(_EGLDisplay *disp, EGLenum type, const EGLAttrib *a
    /* Execute the real GL command stream and retain its Gallium fence.
     * Softpipe completes synchronously; asynchronous screens must supply
     * actual fence completion and server-ordering implementations. */
+   r4gl_native_runtime_trace("egl-sync-before-flush");
    st_context_flush(context->st, 0, &sync->fence, NULL, NULL);
+   r4gl_native_runtime_trace("egl-sync-after-flush");
    if (!sync->fence)
       goto fail;
    p_atomic_inc(&display->references);
@@ -168,17 +171,25 @@ static EGLBoolean destroy_sync(_EGLDisplay *disp, _EGLSync *base)
    _eglPutSync(base); /* Final release may instead happen in egl_relax_end. */
    return EGL_TRUE;
 }
+static bool sync_display_lost(struct native_display *display)
+{
+   return display->zink && zink_screen(display->frontend.screen)->device_lost;
+}
 static EGLint client_wait_sync(_EGLDisplay *disp, _EGLSync *base, EGLint flags, EGLTime timeout)
 {
    (void)disp;
    struct native_sync *sync = (void *)base;
    struct native_context *context = (void *)_eglGetCurrentContext();
+   if (sync_display_lost(sync->owner))
+      return _eglError(EGL_CONTEXT_LOST, "R4GL sync device lost");
    if (context && (flags & EGL_SYNC_FLUSH_COMMANDS_BIT_KHR) &&
        p_atomic_read(&base->SyncStatus) != EGL_SIGNALED_KHR)
       st_context_flush(context->st, 0, NULL, NULL, NULL);
    struct pipe_context *pipe = context && context->owner == sync->owner ? context->st->pipe : NULL;
    struct pipe_screen *screen = sync->owner->frontend.screen;
    bool complete = screen->fence_finish(screen, pipe, sync->fence, timeout);
+   if (sync_display_lost(sync->owner))
+      return _eglError(EGL_CONTEXT_LOST, "R4GL sync device lost");
    if (complete)
       p_atomic_set(&base->SyncStatus, EGL_SIGNALED_KHR);
    return complete ? EGL_CONDITION_SATISFIED_KHR : EGL_TIMEOUT_EXPIRED_KHR;
@@ -190,12 +201,19 @@ static EGLint server_wait_sync(_EGLDisplay *disp, _EGLSync *base)
    struct native_context *context = (void *)_eglGetCurrentContext();
    if (!sync_context(context) || context->owner != sync->owner)
       return _eglError(EGL_BAD_MATCH, "R4GL server wait context");
+   if (sync_display_lost(sync->owner))
+      return _eglError(EGL_CONTEXT_LOST, "R4GL sync device lost");
    struct pipe_screen *screen = sync->owner->frontend.screen;
    struct pipe_context *pipe = context->st->pipe;
-   if (screen->fence_finish(screen, NULL, sync->fence, 0)) {
+   bool complete = screen->fence_finish(screen, NULL, sync->fence, 0);
+   if (sync_display_lost(sync->owner))
+      return _eglError(EGL_CONTEXT_LOST, "R4GL server sync device lost");
+   if (complete) {
       p_atomic_set(&base->SyncStatus, EGL_SIGNALED_KHR);
    } else if (pipe->fence_server_sync) {
       pipe->fence_server_sync(pipe, sync->fence, 0);
+      if (sync_display_lost(sync->owner))
+         return _eglError(EGL_CONTEXT_LOST, "R4GL server sync device lost");
    } else {
       return _eglError(EGL_BAD_MATCH, "R4GL server wait unavailable");
    }
@@ -437,7 +455,15 @@ static bool prepare(struct native_surface *surface, unsigned mask)
       size.revision != surface->storage.revision;
    struct pipe_screen *screen = surface->owner->frontend.screen;
    struct pipe_resource *pending[ST_ATTACHMENT_COUNT] = {0};
-   for (unsigned i = 0; i < ST_ATTACHMENT_COUNT; i++) {
+   bool kopper = surface->window && surface->owner->zink;
+   bool front_alias = kopper && (surface->visual.buffer_mask & ST_ATTACHMENT_BACK_LEFT_MASK);
+   if (front_alias && (mask & ST_ATTACHMENT_FRONT_LEFT_MASK))
+      mask |= ST_ATTACHMENT_BACK_LEFT_MASK;
+   /* A Kopper front resource receives its back resource as loader data.
+    * Create the back first, including a transactional replacement on resize. */
+   for (unsigned pass = 0; pass < ST_ATTACHMENT_COUNT; pass++) {
+      unsigned i = pass == ST_ATTACHMENT_FRONT_LEFT ? ST_ATTACHMENT_BACK_LEFT :
+         pass == ST_ATTACHMENT_BACK_LEFT ? ST_ATTACHMENT_FRONT_LEFT : pass;
       if (!(mask & (1u << i)) || (!resized && surface->textures[i]))
          continue;
       bool depth = i == ST_ATTACHMENT_DEPTH_STENCIL;
@@ -449,9 +475,17 @@ static bool prepare(struct native_surface *surface, unsigned mask)
          .bind = depth ? PIPE_BIND_DEPTH_STENCIL : PIPE_BIND_RENDER_TARGET,
       };
       if (surface->window && !depth) {
-         template.bind |= PIPE_BIND_DISPLAY_TARGET;
          void *loader = surface->window;
-         if (surface->owner->zink) {
+         if (front_alias && i == ST_ATTACHMENT_FRONT_LEFT) {
+            loader = pending[ST_ATTACHMENT_BACK_LEFT] ? pending[ST_ATTACHMENT_BACK_LEFT] :
+               surface->textures[ST_ATTACHMENT_BACK_LEFT];
+            if (!loader) {
+               for (unsigned j = 0; j < ST_ATTACHMENT_COUNT; j++)
+                  pipe_resource_reference(&pending[j], NULL);
+               return fail_surface(surface, EGL_BAD_ALLOC);
+            }
+         } else if (surface->owner->zink) {
+            template.bind |= PIPE_BIND_DISPLAY_TARGET;
             error = surface->owner->host.window_loader(surface->owner->host.sw.owner,
                surface->window, &surface->loader);
             if (error != EGL_SUCCESS) {
@@ -460,6 +494,8 @@ static bool prepare(struct native_surface *surface, unsigned mask)
                return fail_surface(surface, error);
             }
             loader = &surface->loader;
+         } else {
+            template.bind |= PIPE_BIND_DISPLAY_TARGET;
          }
          pending[i] = surface->owner->zink ? screen->resource_create_drawable(screen, &template, loader) :
             screen->resource_create_front(screen, &template, loader);
@@ -518,11 +554,20 @@ static bool present(struct native_surface *surface, struct st_context *st,
    EGLint error = geometry(surface, &size);
    if (error != EGL_SUCCESS)
       return fail_surface(surface, error);
-   /* Never publish an old-size or old-generation frame into a resized window. */
-   if (size.width != surface->storage.width || size.height != surface->storage.height ||
-       size.revision != surface->storage.revision) {
+   bool obsolete = size.width != surface->storage.width ||
+      size.height != surface->storage.height || size.revision != surface->storage.revision;
+   if (obsolete) {
+      /* Only the exact live window's confirmed advance can discard contents.
+       * Corrupt same-revision geometry and future storage remain errors. */
+      if (size.revision <= surface->storage.revision)
+         return fail_surface(surface, EGL_BAD_SURFACE);
       p_atomic_inc(&surface->drawable.stamp);
-      return true; /* Contents are undefined across resize; next frame revalidates. */
+      if (!display->zink)
+         return true;
+      /* A native image is still acquired and may have a present semaphore.
+       * Submit its ordinary WSI handoff even when the old frame cannot be
+       * displayed. WINSVC rejects the obsolete revision before publication,
+       * and Kopper retains the exact submitted image until retirement. */
    }
    if (!surface->textures[attachment])
       return true; /* No rendering has allocated this attachment yet. */
@@ -556,6 +601,16 @@ static bool present(struct native_surface *surface, struct st_context *st,
       if (!dt) return fail_surface(surface, EGL_BAD_SURFACE);
       switch (dt->r4os_result) {
       case VK_SUCCESS: case VK_SUBOPTIMAL_KHR: return true;
+      case VK_ERROR_OUT_OF_DATE_KHR:
+         /* The window may also advance during the WSI handoff. Validate that
+          * exact change; unrelated OUT_OF_DATE failures are not success. */
+         error = geometry(surface, &size);
+         if (error != EGL_SUCCESS)
+            return fail_surface(surface, error);
+         if (size.revision <= surface->storage.revision)
+            return fail_surface(surface, EGL_BAD_SURFACE);
+         p_atomic_inc(&surface->drawable.stamp);
+         return true;
       case VK_ERROR_DEVICE_LOST: return fail_surface(surface, EGL_CONTEXT_LOST);
       case VK_ERROR_OUT_OF_HOST_MEMORY: case VK_ERROR_OUT_OF_DEVICE_MEMORY:
          return fail_surface(surface, EGL_BAD_ALLOC);
@@ -1020,9 +1075,16 @@ static EGLBoolean swap_buffers(_EGLDisplay *disp, _EGLSurface *base)
    EGLint error = surface->error;
    surface->error = EGL_SUCCESS;
    if (ok) {
-      struct pipe_resource *front = surface->textures[ST_ATTACHMENT_FRONT_LEFT];
-      surface->textures[ST_ATTACHMENT_FRONT_LEFT] = surface->textures[ST_ATTACHMENT_BACK_LEFT];
-      surface->textures[ST_ATTACHMENT_BACK_LEFT] = front;
+      /* Kopper's back resource follows its Vulkan swapchain. Until a front
+       * read/draw has requested another resource, keep that back resource:
+       * exchanging it with NULL needlessly creates another Kopper drawable.
+       * Software surfaces still exchange their CPU buffers. */
+      if (!surface->window || !surface->owner->zink ||
+          surface->textures[ST_ATTACHMENT_FRONT_LEFT]) {
+         struct pipe_resource *front = surface->textures[ST_ATTACHMENT_FRONT_LEFT];
+         surface->textures[ST_ATTACHMENT_FRONT_LEFT] = surface->textures[ST_ATTACHMENT_BACK_LEFT];
+         surface->textures[ST_ATTACHMENT_BACK_LEFT] = front;
+      }
       p_atomic_inc(&surface->drawable.stamp);
    }
    mtx_unlock(&surface->gate);

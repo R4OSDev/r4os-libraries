@@ -88,6 +88,7 @@ POINT_BRIDGE(radv)
 static const struct r4vk_wsi_backend nvk_ops = {
    .instance = nvk_instance, .physical = nvk_physical, .features = nvk_features, .can_present = nvk_present,
    .check = nvk_check, .import = r4vk_nvk_import_wsi_image, .finish = r4vk_nvk_finish_wsi_image,
+   .acquired = r4vk_nvk_wsi_acquired,
    .image = nvk_image, .create_image = nvk_CreateImage, .prepare = r4vk_nvk_sync_prepare_present,
    .take = nvk_take, .pin = nvk_pin, .ref = nvk_ref, .unref = nvk_unref, .unpin = nvk_unpin,
 };

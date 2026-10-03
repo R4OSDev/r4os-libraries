@@ -18,6 +18,9 @@ struct r4vk_wsi_backend {
    VkResult (*import)(VkDevice, const R4GfxBufferHandle *, VkFormat, VkImageUsageFlags,
       VkImageCreateFlags, const VkImageFormatListCreateInfo *, const VkAllocationCallbacks *, struct r4vk_wsi_image *);
    void (*finish)(VkDevice, const VkAllocationCallbacks *, struct r4vk_wsi_image *);
+   /* Optional provider policy after a confirmed acquire and before handing
+    * already-submitted pixels to the consumer. All execution loans remain. */
+   VkResult (*acquired)(VkDevice, struct r4vk_wsi_image *, bool);
    const struct vk_image *(*image)(VkImage);
    VkResult (*create_image)(VkDevice, const VkImageCreateInfo *, const VkAllocationCallbacks *, VkImage *);
    VkResult (*prepare)(struct vk_sync *);

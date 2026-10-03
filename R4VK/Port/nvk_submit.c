@@ -3,12 +3,39 @@
 #include "r4vk_nvk_device.h"
 #include "vk_sync_timeline.h"
 #include "vk_object.h"
+#include "r4vk_state.h"
 #include <r4nv.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 int r4vk_operation_deadline(uint64_t, uint64_t *, uint64_t *);
 int r4vk_wait_ticks(uint64_t, uint64_t *);
+int r4vk_monotonic_time(uint64_t *);
+bool r4vk_device_startup_trace_enabled(void);
+void r4vk_device_startup_trace(const char *);
+
+/* Caller-owned, disabled-by-default timing. Emit only outside the resource
+ * and point owners; observing a duration never supplies a GPU receipt. */
+static uint64_t trace_begin(void)
+{
+   uint64_t now;
+   return r4vk_device_startup_trace_enabled() &&
+      r4vk_monotonic_time(&now) == 0 ? now : 0;
+}
+static void trace_end(const char *stage, uint64_t begin, uint64_t timeline,
+                       uint64_t detail, VkResult result, bool slow_only)
+{
+   uint64_t now;
+   if (!begin || r4vk_monotonic_time(&now) != 0 || now < begin ||
+       (slow_only && now - begin < 1000000)) return;
+   char line[240];
+   snprintf(line, sizeof(line),
+      "R4VK SUBMIT stage=%s elapsed-ns=%llu timeline=%llu detail=%llu result=%d",
+      stage, (unsigned long long)(now - begin),
+      (unsigned long long)timeline, (unsigned long long)detail, result);
+   r4vk_device_startup_trace(line);
+}
 
 struct native_ctx;
 static void ctx_unref(struct native_ctx *ctx);
@@ -74,8 +101,12 @@ static bool status_valid(const R4GfxFenceStatus *value, R4GfxFence fence)
 static void release_fence(struct r4vk_nvk_point *point)
 {
    if (!point->complete || point->exports || point->signal_pending || !point->fence.slot) return;
-   if (r4draw_gfx_fence_release(&point->resources->draw, &point->fence) != R4OS_GFX_QUEUE_OK)
+   const int32_t rc = r4draw_gfx_fence_release(&point->resources->draw, &point->fence);
+   if (rc != R4OS_GFX_QUEUE_OK) {
+      r4vk_native_failure("point-release", VK_ERROR_DEVICE_LOST, rc,
+                           point->fence.timeline, point->fence.point);
       point->result = lost(point->resources);
+   }
    point->fence.slot = 0;
 }
 void r4vk_nvk_point_ref(struct r4vk_nvk_point *point)
@@ -100,10 +131,13 @@ void r4vk_nvk_point_unref(struct r4vk_nvk_point *point)
 }
 VkResult r4vk_nvk_point_wait(struct r4vk_nvk_point *point, uint64_t until)
 {
+   const uint64_t trace = trace_begin();
    simple_mtx_lock(&point->mutex);
    if (point->complete) {
       VkResult result = point->result;
       simple_mtx_unlock(&point->mutex);
+      trace_end("point-cached", trace, point->queue_owner->queue.timeline,
+                  until, result, true);
       return result;
    }
    R4GfxFence fence = point->fence;
@@ -118,11 +152,17 @@ VkResult r4vk_nvk_point_wait(struct r4vk_nvk_point *point, uint64_t until)
       const int32_t rc = r4draw_gfx_fence_wait(&point->resources->draw, &fence,
          ticks, R4OS_GFX_QUEUE_WAIT_COMPLETION, &status);
       if (rc == R4OS_GFX_QUEUE_ERROR_WAIT_TIMEOUT) result = VK_TIMEOUT;
-      else if (rc != R4OS_GFX_QUEUE_OK || !status_valid(&status, fence))
+      else if (rc != R4OS_GFX_QUEUE_OK || !status_valid(&status, fence)) {
+         r4vk_native_failure("point-wait-status", VK_ERROR_DEVICE_LOST, rc,
+                              fence.timeline, fence.point);
          result = lost(point->resources);
+      }
       else if (status.phase != R4OS_GFX_QUEUE_PHASE_TERMINAL) result = VK_TIMEOUT;
-      else if (status.result != R4OS_GFX_QUEUE_RESULT_COMPLETE)
+      else if (status.result != R4OS_GFX_QUEUE_RESULT_COMPLETE) {
+         r4vk_native_failure("point-wait-terminal", VK_ERROR_DEVICE_LOST,
+                              status.result, fence.timeline, fence.point);
          result = lost(point->resources);
+      }
       else result = VK_SUCCESS;
    }
    simple_mtx_lock(&point->mutex);
@@ -134,6 +174,7 @@ VkResult r4vk_nvk_point_wait(struct r4vk_nvk_point *point, uint64_t until)
    release_fence(point);
    if (point->complete) result = point->result;
    simple_mtx_unlock(&point->mutex);
+   trace_end("point-wait", trace, fence.timeline, until, result, true);
    return result;
 }
 VkResult r4vk_nvk_point_export(struct r4vk_nvk_point *point, R4GfxFence *out)
@@ -159,8 +200,11 @@ VkResult r4vk_nvk_point_pin(struct r4vk_nvk_point *point, R4GfxFence *out)
 {
    simple_mtx_lock(&point->mutex);
    VkResult result = VK_SUCCESS;
-   if (!point->fence.slot || (point->complete && point->result != VK_SUCCESS))
+   if (!point->fence.slot || (point->complete && point->result != VK_SUCCESS)) {
+      r4vk_native_failure("point-pin-unavailable", VK_ERROR_DEVICE_LOST,
+                           point->result, point->fence.timeline, point->fence.point);
       result = VK_ERROR_DEVICE_LOST;
+   }
    else {
       point->exports++;
       if (out) *out = point->fence;
@@ -303,7 +347,10 @@ static VkResult flush(struct native_ctx *ctx, bool force, bool reserve_signals)
       r4vk_nvk_point_unref(point); return lost(ctx->resources);
    }
    struct r4vk_nvk_point *blocker = NULL;
+   uint64_t trace = trace_begin();
    result = submit_attempt(ctx, point, &submission, &blocker);
+   trace_end("physical-submit", trace, ctx->queue.timeline,
+               ctx->packet.header.push_count, result, false);
    /* Wait outside both owner mutexes, then rebuild against the current tail.
     * Other contexts may have submitted while this thread was asleep. */
    if (result == VK_NOT_READY && blocker) {
@@ -311,11 +358,17 @@ static VkResult flush(struct native_ctx *ctx, bool force, bool reserve_signals)
       r4vk_nvk_point_unref(blocker);
       blocker = NULL;
       if (result == VK_SUCCESS) result = reap(ctx);
-      if (result == VK_SUCCESS)
+      if (result == VK_SUCCESS) {
+         trace = trace_begin();
          result = submit_attempt(ctx, point, &submission, &blocker);
+         trace_end("physical-retry", trace, ctx->queue.timeline,
+                     ctx->packet.header.push_count, result, false);
+      }
    }
    r4vk_nvk_point_unref(blocker);
    if (result != VK_SUCCESS) {
+      r4vk_native_failure("queue-flush", result, ctx->packet.header.push_count,
+                           ctx->queue.timeline, ctx->wait_count);
       r4vk_nvk_point_unref(point);
       return result == VK_TIMEOUT ? lost(ctx->resources) :
          result == VK_NOT_READY ? VK_ERROR_OUT_OF_HOST_MEMORY : result;
@@ -446,10 +499,32 @@ static VkResult ctx_exec(struct nvkmd_ctx *base, struct vk_object_base *log,
    }
    return VK_SUCCESS;
 }
+/* A signal-only submit orders after this queue's actual last execution.
+ * Reuse that exact completion instead of publishing a second empty native
+ * job, which a serialized physical publisher may accept only after the
+ * execution finishes. Reserve its real metadata before reap can release it;
+ * WSI signal consumers need the same independently pinned receipt. Commands,
+ * waits, another queue/epoch and already released receipts still use flush.
+ * Vulkan queue submission is externally synchronized by its caller. */
+static bool reserve_last_signals(struct native_ctx *ctx)
+{
+   struct r4vk_nvk_point *point = ctx->last;
+   if (!point || ctx->packet.header.push_count || ctx->wait_count)
+      return false;
+   simple_mtx_lock(&point->mutex);
+   bool valid = point->resources == ctx->resources && point->queue_owner == ctx &&
+      !point->signal_pending && fence_valid(point->fence, ctx) &&
+      (!point->complete || point->result == VK_SUCCESS);
+   if (valid) point->signal_pending = true;
+   simple_mtx_unlock(&point->mutex);
+   return valid;
+}
 static VkResult ctx_signal(struct nvkmd_ctx *base, struct vk_object_base *log,
                             uint32_t count, const struct vk_sync_signal *signals)
 {
    struct native_ctx *ctx = native(base);
+   const uint64_t trace = trace_begin();
+   bool reserved = false;
    bool has_timeline = false;
    for (uint32_t i = 0; i < count; i++) {
       if (internal_timeline(log, signals[i].sync) && signals[i].signal_value)
@@ -471,7 +546,8 @@ static VkResult ctx_signal(struct nvkmd_ctx *base, struct vk_object_base *log,
          if (result != VK_SUCCESS) goto done;
       }
    }
-   result = flush(ctx, count != 0, count != 0);
+   reserved = count != 0 && reserve_last_signals(ctx);
+   result = reserved ? reap(ctx) : flush(ctx, count != 0, count != 0);
    if (result != VK_SUCCESS) goto done;
    for (uint32_t i = 0; i < count; i++) {
       struct vk_sync *sync = points && points[i] ? &points[i]->sync : signals[i].sync;
@@ -493,6 +569,8 @@ done:
          if (points[i]) vk_sync_timeline_point_unref(log->device, points[i]);
       free(points);
    }
+   trace_end("signal", trace, ctx->queue.timeline,
+               ((uint64_t)count << 32) | reserved, result, false);
    return result;
 }
 static VkResult ctx_flush(struct nvkmd_ctx *base, struct vk_object_base *log)
