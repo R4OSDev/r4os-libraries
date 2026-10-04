@@ -55,6 +55,7 @@ pub fn build(b: *std.Build) void {
     resources.addImport("gpu_model", gpu_model);
     const video = b.createModule(.{ .root_source_file = b.path("../R4NV/Source/video.zig"), .target = b.graph.host });
     const decoder = b.createModule(.{ .root_source_file = b.path("Source/gpu_decoder.zig"), .target = b.graph.host });
+    decoder.addImport("r4os", host);
     decoder.addImport("gpu_resources", gpu);
     decoder.addImport("r4nv_video", video);
     resources.addImport("gpu_decoder", decoder);

@@ -10,6 +10,10 @@ const c = d.c;
 const yuv = @import("color_yuv.zig");
 const resource = @import("native_resource.zig");
 
+// Caller opt-in diagnostics preserve the original admission/error and never
+// turn a staged mapping or an encoder result into an execution receipt.
+const Trace = @import("native_diagnostics.zig").Trace;
+
 pub fn submit(handle: *const c.R4GfxDevice, request: *const c.R4GfxYuvRenderRequest, output: *c.R4GfxJob) callconv(.c) i32 {
     execute(handle, request, output) catch |err| return d.code(err);
     return c.status_ok;
@@ -50,6 +54,8 @@ fn plane(item: *const resource.Resource, input: c.R4GfxYuvBufferPlane, from: c.R
 }
 fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, output: *c.R4GfxJob) d.Error!void {
     const device = try d.get(handle, false);
+    var trace = Trace.init(device);
+    errdefer |err| trace.failure(err);
     _ = try d.pointer(c.R4GfxYuvRenderRequest, @intFromPtr(input));
     try d.outputSafe(c.R4GfxJob, output, device);
     if (d.overlaps(@intFromPtr(input), @sizeOf(c.R4GfxYuvRenderRequest), @intFromPtr(device), @sizeOf(d.Device)) or
@@ -88,6 +94,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
         @memcpy(dependencies[0..request.dependency_count], @as([*]const a.GfxFence,@ptrFromInt(request.dependencies))[0..request.dependency_count]);
     }
     try device.selectBackend();
+    trace.stage = "target-residency";
     if (device.backend() != c.render_backend_nvidia and device.backend() != c.render_backend_amd) return error.Unsupported;
     const target = try device.resource(request.target, true);
     if (target.invalidated) return error.Stale;
@@ -106,6 +113,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
     if (device.backend() == c.render_backend_amd) return @import("native_yuv_amd.zig").submit(device,request,target,slot,serial,
         program.words,matrix.rows,origin,dependencies[0..request.dependency_count],output);
     const owner = &device.native_yuv;
+    trace.stage = "native-profile";
     const profile = try owner.ensure(device);
     const client = nv.RenderV1Client.init(device.bundle.raw) catch return error.Unsupported;
     var indices: [4]u8 = @splat(0);
@@ -116,21 +124,26 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
     var views: [3]nv.R4NvRenderPlane = @splat(std.mem.zeroes(nv.R4NvRenderPlane));
     var ready = true;
     for (planes[0..from.plane_count], 0..) |value, i| {
+        trace.stage = if (i == 0) "luma-mapping" else "chroma-mapping";
         indices[i] = @intCast(try owner.acquire(device, .{ .id = value.reference_id, .generation = value.reference_generation, .reserved0 = value.reserved }, request.deadline_ns));
         const entry = &owner.entries[indices[i]].resource;
         owner.entries[indices[i]].uses += 1;
         acquired += 1;
         if (std.meta.eql(entry.backing.buffer, target.backing.buffer)) return error.Alias;
+        trace.stage = if (i == 0) "luma-view" else "chroma-view";
         views[i] = try plane(entry, value, from, i);
         ready = ready and entry.ready;
     }
+    trace.stage = "target-mapping";
     indices[from.plane_count] = @intCast(try owner.acquire(device, target.backing.reference, request.deadline_ns));
     owner.entries[indices[from.plane_count]].uses += 1;
     acquired += 1;
     const target_map = &owner.entries[indices[from.plane_count]].resource;
+    trace.stage = "upload-mapping";
     const upload = try owner.upload(device, slot, request.deadline_ns);
     if (!ready or !target_map.ready or !upload.ready) return error.Busy;
     var info: nv.R4NvRenderInfo = undefined;
+    trace.stage = "renderer-info";
     try nvResult(client.render_info(profile.graphics_class, &info));
     if (info.version != 1 or info.size != @sizeOf(nv.R4NvRenderInfo) or info.packet_bytes != 1280 or info.max_command_words > 1024 or info.program_bytes == 0) return error.Unsupported;
     const packet_offset = std.mem.alignForward(u64, info.program_bytes, 256);
@@ -139,6 +152,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
     const bytes = upload.bytes();
     var written: u32 = 0;
     if (!owner.uploaded[slot]) {
+        trace.stage = "shader-upload";
         try nvResult(client.render_upload(profile.graphics_class, bytes.ptr, info.program_bytes, &written));
         if (written != info.program_bytes) return error.Invalid;
         owner.uploaded[slot] = true;
@@ -149,6 +163,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
         .source_rect = nvRect(src), .destination = nvRect(transform.target_rect), .scissor = nvRect(transform.target_rect),
         .format = from.format, .filter = transform.sampler, .blend = @intFromBool(transform.operation == c.render_operation_over), .opacity = transform.opacity,
         .chroma_x = @bitCast(origin[0]), .chroma_y = @bitCast(origin[1]) };
+    trace.stage = "encode-yuv";
     try nvResult(client.encode_yuv(&.{ .version = 1, .size = @sizeOf(nv.R4NvYuvRender), .graphics_class = profile.graphics_class, .draw_count = 1,
         .draws = @intFromPtr(&draw), .program_address = upload.address, .program_bytes = info.program_bytes,
         .packet_address = upload.address + packet_offset, .packet_bytes = info.packet_bytes,
@@ -173,9 +188,11 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
     @memcpy(submission.dependencies[0..request.dependency_count], dependencies[0..request.dependency_count]);
     const native: a.GfxNativeSubmission = .{ .interface_id_lo = nv.backend_v1_header.interface_id_lo, .interface_id_hi = nv.backend_v1_header.interface_id_hi,
         .revision = 1, .command_bytes = @sizeOf(@TypeOf(packet)), .commands = @intFromPtr(&packet), .resource_count = @intCast(loan_count), .resources = @intFromPtr(&loans) };
+    trace.stage = "queue-binding";
     try device.ensureQueue();
     asm volatile ("mfence" ::: .{ .memory = true });
     var status: a.GfxFenceStatus = .{};
+    trace.stage = "queue-admission";
     try d.queueAdmission(device.queues().submitNative(&device.queue, &submission, &native, &status));
     owner.hold(indices[0..from.plane_count+1]);
     target.job_refs += 1;

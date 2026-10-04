@@ -1,6 +1,8 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 // Wire fields derived from NVIDIA nvdec_drv.h, clc7b0.h and clc9b0.h (MIT).
 // H.264 buffer sizing, EOS and field marking follow Mesa NVK h264.rs (MIT),
+// NVDEC's SET_OBJECT must select the software engine (NVC56F ENGINE_SW),
+// on subchannel4 as in NVK rust/video/decode/mod.rs and nv_push_rs.
 // Copyright (c) 2024 Collabora, Ltd and Red Hat, Inc.
 // Full notices: ../ThirdParty/Nvidia/LICENSES.txt; pinned sources and original
 // C-header vectors: nvdec_h264_vectors.json. No CUDA/NVDECODE dependency.
@@ -248,7 +250,7 @@ pub fn encodeCommands(class: u32, p: *const Picture, layout: Layout, b: *const B
         if (a.address < other.address + other.bytes and other.address < a.address + a.bytes) return error.Alias;
     };
     var words: [command_words]u32 = undefined;
-    words[0..4].* = .{ inc(0, 1), class, inc(0x200, 1), 3 };
+    words[0..4].* = .{ inc(0, 1), class | (0x1f << 16), inc(0x200, 1), 3 };
     words[4..12].* = .{ inc(0x400, 7), 3 | (1 << 4) | (1 << 5) | (1 << 13) | (1 << 18),
         @intCast(b.picture.address >> 8), @intCast(b.bitstream.address >> 8), picture_index,
         @intCast(b.slices.address >> 8), @intCast(b.coloc.address >> 8), @intCast(b.history.address >> 8) };
@@ -371,7 +373,7 @@ fn overlaps(a: usize, a_size: usize, b: usize, b_size: usize) bool {
     return a < b_end and b < a_end;
 }
 fn inc(method: u32, count: u32) u32 {
-    return 0x20000000 | (count << 16) | (method >> 2);
+    return 0x20000000 | (count << 16) | (4 << 13) | (method >> 2);
 }
 fn alignUp(value: u32, alignment: u32) u32 {
     return (value + alignment - 1) & ~(alignment - 1);

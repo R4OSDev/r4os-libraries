@@ -181,6 +181,76 @@ pub fn Implementation(comptime ff: type) type {
             if (target.len < bytes.len) return error.Invalid;
             @memcpy(target[0..bytes.len], bytes);
         }
+        fn snapshotStatus(self: *Self) ![v.status_bytes]u8 {
+            const mapped = try self.resource(.status).mappedBytes();
+            var snapshot: [v.status_bytes]u8 = undefined;
+            const status: [*]volatile const u8 = @ptrCast(mapped.ptr);
+            for (&snapshot, 0..) |*byte, i| byte.* = status[i];
+            return snapshot;
+        }
+        // Opt-in caller diagnostics only. Neither a snapshot nor a marker is
+        // a completion receipt; keep the exact original submit/status errors.
+        fn trace(self: *Self, stage: []const u8, known: ?*const [v.status_bytes]u8, failure: ?anyerror) void {
+            const bundle = self.ctx.base.bundle orelse return;
+            const sys = bundle.sys orelse return;
+            if (sys.env_get == 0 or sys.write == 0) return;
+            const get: @import("r4os").abi.R4SysFns.env_get = @ptrFromInt(sys.env_get);
+            var option: [16]u8 = undefined;
+            if (get("R4VIDEO_NVDEC_TRACE", &option, option.len) != 1 or option[0] != '1') return;
+            const snapshot: ?[v.status_bytes]u8 = if (known) |value| value.* else self.snapshotStatus() catch null;
+            const status_hex = if (snapshot) |value| std.fmt.bytesToHex(&value, .lower) else @as([2 * v.status_bytes]u8, @splat('?'));
+            const write: @import("r4os").abi.R4SysFns.write = @ptrFromInt(sys.write);
+            var text: [512]u8 = undefined;
+            const line = std.fmt.bufPrint(&text,
+                "R4VIDEO NVDEC stage={s} class={x} picture={d} profile={d} mbs={d}x{d} slot={d} references={d} queue={d} failure={s} status={s}\n",
+                .{ stage, self.ctx.device.class, self.picture_index, self.picture.sequence.profile,
+                    self.picture.sequence.width_mbs, self.picture.sequence.height_mbs,
+                    self.picture.current_surface, self.picture.references.len, self.ctx.queue.timeline,
+                    if (failure) |err| @errorName(err) else "none", status_hex }) catch return;
+            _ = write(line.ptr, @intCast(line.len));
+            if (std.mem.eql(u8, stage, "before-submit")) {
+                self.tracePayload(write, .commands, v.command_words * @sizeOf(u32));
+                self.tracePayload(write, .parameters, v.picture_bytes);
+            }
+        }
+        fn tracePayload(self: *Self, write: @import("r4os").abi.R4SysFns.write, comptime kind: Kind, comptime bytes: usize) void {
+            const mapped = self.resource(kind).mappedBytes() catch return;
+            if (mapped.len < bytes) return;
+            const snapshot: *const [bytes]u8 = @ptrCast(mapped.ptr);
+            var text: [2 * bytes + 128]u8 = undefined;
+            const line = std.fmt.bufPrint(&text, "R4VIDEO NVDEC payload={s} picture={d} bytes={d} hex={s}\n",
+                .{ @tagName(kind), self.picture_index, bytes, std.fmt.bytesToHex(snapshot, .lower) }) catch return;
+            _ = write(line.ptr, @intCast(line.len));
+        }
+        fn stepTrace(self: *Self) bool {
+            const bundle = self.ctx.base.bundle orelse return false;
+            const sys = bundle.sys orelse return false;
+            if (sys.env_get == 0) return false;
+            const get: @import("r4os").abi.R4SysFns.env_get = @ptrFromInt(sys.env_get);
+            var option: [16]u8 = undefined;
+            return get("R4VIDEO_NVDEC_STEP", &option, option.len) == 1 and option[0] == '1';
+        }
+        // Opt-in method isolation retains the exact original words and BO/VA
+        // owners through each acknowledged queue completion. EXECUTE alone
+        // starts decoding; mandatory fresh picture status still gates output.
+        fn submitPicture(self: *Self, words: *const [v.command_words]u32, loans: []gpu.Context.Loan) !void {
+            if (!self.stepTrace()) return self.ctx.submit(self.resource(.commands), @sizeOf(@TypeOf(words.*)), loans);
+            const ends = [_]usize{ 2, 4, 12, 14, 32, 50, 52, 54 };
+            const names = [_][]const u8{ "object", "application", "control", "status", "luma", "chroma", "mbhist", "execute" };
+            var begin_word: usize = 0;
+            for (ends, names) |end_word, name| {
+                const bytes = std.mem.sliceAsBytes(words[begin_word..end_word]);
+                try self.upload(.commands, bytes);
+                var stage: [64]u8 = undefined;
+                self.trace(try std.fmt.bufPrint(&stage, "step-before-{s}", .{name}), null, null);
+                self.ctx.submit(self.resource(.commands), @intCast(bytes.len), loans) catch |err| {
+                    self.trace(std.fmt.bufPrint(&stage, "step-error-{s}", .{name}) catch "step-error", null, err);
+                    return err;
+                };
+                self.trace(try std.fmt.bufPrint(&stage, "step-after-{s}", .{name}), null, null);
+                begin_word = end_word;
+            }
+        }
         fn end(self: *Self, ptr: ?*anyopaque) callconv(.c) c_int {
             const image = self.find(ptr) orelse return self.reject(error.Invalid);
             if (self.failed or self.active != image or image.state != .decoding) return self.reject(error.Invalid);
@@ -218,14 +288,19 @@ pub fn Implementation(comptime ff: type) type {
             self.picture_index += 1;
             const words = try v.encodeCommands(self.ctx.device.class, &self.picture, self.layout, &buffers, self.picture_index);
             try self.upload(.commands, std.mem.sliceAsBytes(&words));
-            try self.ctx.submit(self.resource(.commands), @sizeOf(@TypeOf(words)), loans[0..count]);
+            self.trace("before-submit", null, null);
+            self.submitPicture(&words, loans[0..count]) catch |err| {
+                self.trace("submit-error", null, err);
+                return err;
+            };
             // Read once from the coherent status BO after full engine/resource
             // completion. A queue fence alone never marks an Image complete.
-            const mapped = try self.resource(.status).mappedBytes();
-            var snapshot: [v.status_bytes]u8 = undefined;
-            const status: [*]volatile const u8 = @ptrCast(mapped.ptr);
-            for (&snapshot, 0..) |*byte, i| byte.* = status[i];
-            _ = try v.pictureStatus(&snapshot, .succeeded, self.picture.sequence.width_mbs * self.picture.sequence.height_mbs);
+            const snapshot = try self.snapshotStatus();
+            self.trace("after-submit", &snapshot, null);
+            _ = v.pictureStatus(&snapshot, .succeeded, self.picture.sequence.width_mbs * self.picture.sequence.height_mbs) catch |err| {
+                self.trace("status-error", &snapshot, err);
+                return err;
+            };
         }
         fn abort(self: *Self, ptr: ?*anyopaque) callconv(.c) void {
             const image = self.find(ptr) orelse @trap();

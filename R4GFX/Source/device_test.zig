@@ -120,7 +120,9 @@ const Model = struct {
         const entry = virtualNode(input.*);
         out.* = .{ .resource = entry.handle, .parent = entry.request.parent, .kind = entry.request.kind,
             .byte_length = entry.request.byte_length, .deadline_ns = entry.request.deadline_ns,
-            .flags = if (entry.closing) (if (retire_ack) @as(u32,7) else 3) else (if (virtual_ack) @as(u32,1) else 0),
+            // The real common owner publishes its active driver claim before
+            // the asynchronous create result. Flag 8/result 0 is pending.
+            .flags = if (entry.closing) (if (retire_ack) @as(u32,7) else 3) else (if (virtual_ack) @as(u32,1) else 8),
             .result = if (virtual_ack) 1 else 0, .address = if (virtual_ack) entry.address else 0 };
         return 1;
     }

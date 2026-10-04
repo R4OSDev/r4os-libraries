@@ -28,9 +28,32 @@
       "license": "MIT",
       "sha256": "d89059e1db123a320f2133df3010893f0ef19befdbfded97d0999866416535f1",
       "url": "https://chromium.googlesource.com/external/gitlab.freedesktop.org/mesa/mesa/+/684c1b339bddbed6f11af93161da1c1bba77edb1/src/nouveau/vulkan/rust/video/decode/h264.rs?format=TEXT"
+    },
+    {
+      "original": "ExFiles/Reference/GFX/0.82.30/NvdecBindingSource/clc56f.h",
+      "file": "clc56f.h",
+      "commit": "8ec351aeb96a93a4bb69ccc12a542bf8a8df2b6f",
+      "license": "MIT",
+      "sha256": "8b7a6d6d5d5e3538f2f3e3b975d00c4aa94bd2480008c49aefcfc2566e3f658e"
+    },
+    {
+      "original": "ExFiles/Reference/GFX/0.82.30/NvdecBindingSource/decode-mod.rs",
+      "file": "decode-mod.rs",
+      "commit": "684c1b339bddbed6f11af93161da1c1bba77edb1",
+      "license": "MIT",
+      "sha256": "37998f5ef46f657b815213e967bb28d5b332034e036bf57f14f61f9c9427209d",
+      "url": "https://chromium.googlesource.com/external/gitlab.freedesktop.org/mesa/mesa/+/684c1b339bddbed6f11af93161da1c1bba77edb1/src/nouveau/vulkan/rust/video/decode/mod.rs?format=TEXT"
+    },
+    {
+      "original": "ExFiles/Reference/GFX/0.82.30/NvdecBindingSource/nv_push_rs.rs",
+      "file": "nv_push_rs.rs",
+      "commit": "684c1b339bddbed6f11af93161da1c1bba77edb1",
+      "license": "MIT",
+      "sha256": "ea0377f772a61a3dc1745fbc70d66eacd4305dee074935f8e1e3a51a83b50e78",
+      "url": "https://chromium.googlesource.com/external/gitlab.freedesktop.org/mesa/mesa/+/684c1b339bddbed6f11af93161da1c1bba77edb1/src/nouveau/headers/nv_push_rs/lib.rs?format=TEXT"
     }
   ],
-  "recipe": "Temp/gfx-video07940/NvdecH264/Generate.ps1 (also preserved in Evidence/NvdecH264)",
+  "recipe": "Temp/Ossi08230/GenerateBinding9.ps1",
   "scope": "H.264 wire encoding reference; no physical decode claim",
   "layout": {
     "picture_size": 764,
@@ -73,8 +96,15 @@
     "records": 2
   },
   "generator": "Tests/nvdec_h264_reference.c",
-  "generator_sha256": "80e4c7028aebe1a2e4b3d2b7ae4a1937e88f2311810b989f46533febd1e87271",
-  "vector_sha256": "525f36a562764fb219ace1c7e9cf08f1a3c06399597f0c3550aa8ecc48402365",
+  "generator_sha256": "a2304d99b38250527d8f59033438c21f55edeb7aae1e8fce146c404fc27ac0ae",
+  "vector_sha256": "86e8ffc025f9662543b447c53dcaefed9f3b3b1a562c985cb165c218073a6e0f",
   "vector": "Source/nvdec_h264_vectors.bin",
-  "date": "2026-09-18"
+  "date": "2026-10-04",
+  "binding": {
+    "subchannel": 4,
+    "engine_sw": 31,
+    "vector_offset": 1708,
+    "vector_words": 5,
+    "source": "Original NVK state init chooses ENGINE_SW and original Push class_to_subc maps decoder to4. C header emits actual NVC56F ENGINE_SW bits; previous picture/method/status vectors unchanged."
+  }
 }

@@ -59,6 +59,13 @@ inside the existing R4NV test group. VIDEO_V1's NVIDIA codec integration also
 passes modeled replies; physical decoding remains pending. Provenance:
 `Source/nvdec_h264_vectors.json` and `Tests/nvdec_h264_reference.c`.
 
+NVDEC `SET_OBJECT` selects the FIFO software engine (`ENGINE_SW=31`),
+and every decoder method uses subchannel4, matching the original NVK state
+initializer and Push class mapping. Binding only the class with engine0 is
+insufficient for these software methods. The independent header vectors also
+check both C7B0/C9B0 bindings; picture/method/status reference bytes are unchanged.
+This serializer is embedded by R4VIDEO and does not add an exported R4NV slot.
+
 `Source/encode.zig` (`r4nv_encode`) supplies C7B7/C9B7 H.264 Constrained Baseline
 parameter blocks, one-slice CQP IDR/P controls, matching Annex-B SPS/PPS and a
 61-word native command stream. The profile is progressive8-bit NV12, one

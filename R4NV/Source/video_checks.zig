@@ -66,9 +66,15 @@ fn commands(p: *const v.Picture, layout: v.Layout) !void {
         .luma = span(7 + 2 * i, req.luma), .chroma = span(8 + 2 * i, req.chroma),
     };
     const methods = vectors[2 * 764 ..][0 .. 17 * 4];
+    const binding = vectors[2 * 764 + 17 * 4 + 2 * 56 ..][0 .. 5 * 4];
     for ([_]u32{ 0xc7b0, 0xc9b0 }, 0..) |class, class_index| {
         const words = try v.encodeCommands(class, p, layout, &b, 0xfefefefe);
-        try t.expectEqual(read(methods, class_index * 4), words[1]);
+        try t.expectEqual(read(binding, 8), words[0]);
+        try t.expectEqual(read(binding, 12 + class_index * 4), words[1]);
+        try t.expectEqual(read(methods, class_index * 4), words[1] & 0xffff);
+        try t.expectEqual(read(binding, 4), (words[1] >> 16) & 31);
+        for ([_]usize{ 0, 2, 4, 12, 14, 32, 50, 52 }) |pos|
+            try t.expectEqual(read(binding, 0), (words[pos] >> 13) & 7);
         const positions = [_]usize{ 2, 4, 14, 32, 50, 52 };
         const method_indices = [_]usize{ 2, 4, 13, 14, 15, 16 };
         for (positions, method_indices) |pos, i| try t.expectEqual(read(methods, i * 4), (words[pos] & 0x1fff) * 4);

@@ -113,6 +113,22 @@ Each job retains all indirect BO/VA resources, resets the picture status and
 checks the coherent result after queue completion. Missing/error status produces
 no frame. A partial allocation or timed-out job remains reachable for cleanup.
 
+Caller-local `R4VIDEO_NVDEC_TRACE=1` enables bounded diagnostics before submit,
+after engine/resource completion and on submit/status errors. The trace includes
+the fresh status bytes, class/profile/slot/reference identities and original
+command/picture payloads. It is disabled by default; it changes neither the
+submitted commands nor the error/completion predicate. Missing diagnostic
+access remains silent and never supplies a completion receipt. The first
+physical 0.82.30 decode produced RC20 and no frame; its automatically recovered
+failure remains recorded in OssiGPU.txt pending native decode/pixel validation.
+
+Additional `R4VIDEO_NVDEC_STEP=1` isolates the original method words into eight
+groups with full native queue/resource retirement between them. This diagnostic
+is disabled by default and is not the regular decode qualification. Every group
+retains all indirect BO/VA owners; only EXECUTE can decode, and the same mandatory
+fresh codec status still gates output. Unavailable trace snapshots are marked
+with question marks rather than concealing the original submit error.
+
 VIDEO_V1 now admits that NVIDIA path and publishes two NV12 planes borrowing
 the same canonical BO, with normal timestamps, crop and color metadata. The
 coordinator retains the received AVFrame through the consumer fence AND public

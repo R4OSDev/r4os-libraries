@@ -268,3 +268,16 @@ The existing numerical/color check can be selected with
 `test "-Dprovider-test-filter=bounded color conversion"`. It now also compares
 36 staged/unstaged format/sampler/alpha cases and 12 late NaN/Inf failures,
 including target bytes/padding and the reported physical image reads.
+
+Native YUV diagnostics (R4GFX 0.1.31)
+-----------------------------------
+`R4GFX_YUV_TRACE=1` reports the native owner's failing preparation or
+submission stage. It defaults to off, suppresses ordinary `BUSY` retries,
+and preserves the original error and resource retirement. A mapping or
+encoder diagnostic is not a decoded-frame or rendering completion proof.
+
+Since 0.1.32, this option also reports the exact failed native VA query and
+step metadata. R4GFX 0.1.33 waits while the common owner reports a driver
+claim without a published result (flags 8/result 0); only the matching
+successful create completion admits the mapping. The existing native
+NVIDIA/AMD resource check now exercises that real asynchronous state.

@@ -9,6 +9,7 @@
 #include "nvdec_drv.h"
 #include "clc7b0.h"
 #include "clc9b0.h"
+#include "class/clc56f.h"
 
 #define OFFSET(f) printf("\"" #f "\":%zu,\n", offsetof(nvdec_h264_pic_s, f))
 int main(int argc, char **argv) {
@@ -87,5 +88,15 @@ int main(int argc, char **argv) {
     s.mbs_in_error = 1; s.error_status = NVC7B0_DEC_ERROR_H264_DETECTED_VLD_FAILURE;
     s.slice_header_error_code = NVC7B0_H264_VLD_ERR_BITSTREAM_ERROR;
     if (fwrite(&s, sizeof(s), 1, out) != 1) return 6;
-    return fclose(out) ? 7 : 0;
+    /* NVK rust/video/decode/mod.rs binds the software engine, and
+     * nv_push_rs::class_to_subc maps video decoder classes to subchannel4.
+     * Preserve earlier picture/method/status offsets; append binding vectors. */
+    const uint32_t binding[] = {
+        4, NVC56F_SET_OBJECT_ENGINE_SW,
+        0x20000000u | (1u << 16) | (4u << 13) | (NVC56F_SET_OBJECT >> 2),
+        NVC7B0_VIDEO_DECODER | (NVC56F_SET_OBJECT_ENGINE_SW << 16),
+        NVC9B0_VIDEO_DECODER | (NVC56F_SET_OBJECT_ENGINE_SW << 16),
+    };
+    if (fwrite(binding, sizeof(binding), 1, out) != 1) return 7;
+    return fclose(out) ? 8 : 0;
 }

@@ -712,3 +712,11 @@ clc9b7.h
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+
+
+NVDEC software-engine binding references (0.82.30)
+NVIDIA570.144 class/clc56f.h: NVIDIA Corporation, MIT; full NVIDIA header
+notice reproduced above. Mesa rust/video/decode/mod.rs and
+src/nouveau/headers/nv_push_rs/lib.rs: Copyright © 2024 Collabora, Ltd., MIT;
+full Collabora MIT notice reproduced above. Exact originals, commits and hashes
+are recorded with the NVDEC header vectors. No private firmware code is copied.

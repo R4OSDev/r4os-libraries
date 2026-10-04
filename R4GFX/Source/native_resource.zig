@@ -126,11 +126,23 @@ pub const Resource = struct {
     }
     fn query(self: *Resource, device: *d.Device, profile: Profile, handle: a.GfxBufferHandle, parent: a.GfxBufferHandle, kind: u32) d.Error!bool {
         var result: a.GfxVirtualStatus = .{};
+        const trace = @import("native_diagnostics.zig").Trace.init(device);
+        errdefer |err| trace.detail("R4GFX virtual-query error={s} expected={d}:{d} parent={d}:{d} kind={d} bytes={d} deadline={d}; actual={d}:{d} parent={d}:{d} kind={d} bytes={d} deadline={d} flags={x} result={d} address={x}",
+            .{ @errorName(err), handle.id, handle.generation, parent.id, parent.generation, kind, self.descriptor.byte_length, self.deadline,
+                result.resource.id, result.resource.generation, result.parent.id, result.parent.generation, result.kind,
+                result.byte_length, result.deadline_ns, result.flags, result.result, result.address });
         try d.platform(device.base().gfxVirtualQuery(&handle, &result));
         if (!payload(result) or !equal(result.resource, handle) or !equal(result.parent, parent) or result.kind != kind or
             result.byte_length != self.descriptor.byte_length or result.deadline_ns != self.deadline or result.reserved0 != 0 or
             result.flags & ~@as(u32, 15) != 0) return error.Invalid;
-        if (result.flags == 0) return false;
+        // Bit 3 is the common owner's in-flight driver claim. Its result is
+        // still zero until bit 0 publishes the exact create completion; a
+        // claimed request is not a failed or usable mapping.
+        if (result.flags & 1 == 0) {
+            if (result.result != 0) return error.Invalid;
+            if (result.flags & 6 != 0) return error.Stale;
+            return false;
+        }
         try d.platform(result.result);
         if (result.flags != 1 or result.address % granule != 0 or result.address < profile.va_start or
             result.address >= profile.va_end or result.byte_length > profile.va_end - result.address or
@@ -140,6 +152,16 @@ pub const Resource = struct {
     }
     // One start/query transition per step, never a wait or an unbounded loop.
     pub fn step(self: *Resource, device: *d.Device, profile: Profile) d.Error!bool {
+        return self.advance(device, profile) catch |err| {
+            if (err != error.Busy) @import("native_diagnostics.zig").Trace.init(device).detail(
+                "R4GFX virtual-step error={s} BO={d}:{d} range={d}:{d} binding={d}:{d} bytes={d} deadline={d} ready={} retiring={} CPU-lease={d}:{d}",
+                .{ @errorName(err), self.backing.buffer.id, self.backing.buffer.generation, self.range.id, self.range.generation,
+                    self.binding.id, self.binding.generation, self.descriptor.byte_length, self.deadline, self.ready, self.retiring,
+                    self.map.lease.id, self.map.lease.generation });
+            return err;
+        };
+    }
+    fn advance(self: *Resource, device: *d.Device, profile: Profile) d.Error!bool {
         if (self.failed) |err| return err;
         if (self.retiring) return error.Busy;
         if (self.ready) return true;
