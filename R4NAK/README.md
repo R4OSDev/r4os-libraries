@@ -1,8 +1,8 @@
 ﻿# R4NAK runtime compiler
 
-R4NAK.R4L 0.1.1 translates caller-provided SPIR-V through pinned Mesa 26.2.2
+R4NAK.R4L 0.1.2 translates caller-provided SPIR-V through pinned Mesa 26.2.2
 NIR and NAK into NVIDIA machine code. It runs on R4OS, independently of R4NV's
-seven fixed shader profiles. Its `COMPILER_V1` contract, generated C/Zig
+nine fixed shader profiles. Its `COMPILER_V1` contract, generated C/Zig
 bindings and ABI baseline are owned by this unit.
 
 ## Build
@@ -24,8 +24,10 @@ The Windows execution proof is pending; it is not inferred from Linux.
 `Tools/Build.sh -Offline` or `Tools\Build.bat -Offline` prepares only the
 native archive, without network access. Its `-OutputFile` is optional and
 workspace-relative; `-Rebuild` rebuilds the selected private cache directory.
-The regular library build adds the Zig provider, contract checks and R4M0
-container. A cached build verifies the recipe, host tool versions and archive
+The regular library build accepts `R4NAK -Doffline=true` and adds the Zig
+provider, contract checks and R4M0 container. The flag reaches the same native
+source owner; a missing source archive fails instead of starting a download.
+A cached build verifies the recipe, host tool versions and archive
 hash. Initial source preparation reuses the verified Mesa host-build owner.
 
 The source closure combines the existing Mesa/six-crate lock with
@@ -94,8 +96,11 @@ hashes, worker OOM recovery, deadline, malformed/aliased input, executable
 cache identity/integrity, atomic file publication and format queries. It
 performs CPU work and temporary cache I/O only, with no GPU access. The
 targeted SMP4 report is `Docs/Drivers/GrafikCompiler07934.json` in the workspace.
-Actual Windows-host and NVIDIA execution followups are in
-`ExFiles/Reports/OssiGPU.txt`, section 0.79.34.
+The native Windows-host qualification remains 0.82.38/T15. The shared PS7
+build, package and SMP4 replay is documented in
+`Docs/Deployment/GrafikFreigabe07945.txt` in the workspace. Physical NVIDIA
+execution has separate, version-bound evidence from 0.82.10; the compiler
+guest alone does not establish it.
 
 Original R4OS glue is Apache-2.0. Upstream code retains its original terms.
 `ThirdParty/NOTICES.txt` contains the complete collected notices;

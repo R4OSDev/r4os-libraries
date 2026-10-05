@@ -494,6 +494,10 @@ mandatory import and merge allocation failures unwind and return OOM. Short
 exports contain complete records, and serialization diagnostics run after unlock.
 The provider's cache identity includes the verified native sources, compiler
 archives and build options; Tools/BuildNative.ps1 emits the required digest.
+Since 0.1.40, the native C/NIL identities bind the verified R4NAK archive
+instead of the entire diagnostic `build.json`. Its elapsed build time must
+not change the driver or pipeline-cache identity when compiler bytes and
+recipe are unchanged. Record, source and archive verification still run.
 The targeted SMP4 cache probe passes corrupted/truncated inputs, import and
 lazy-load OOM, full-table insertion/merge failure and retry, partial export
 reuse and final zero C allocations. Its first failure exposed a string-reader

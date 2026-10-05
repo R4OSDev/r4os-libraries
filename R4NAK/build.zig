@@ -15,6 +15,7 @@ pub fn build(b: *std.Build) void {
     const sdk = sdk_build.sdk(b, b.dependencyFromBuildZig(sdk_build, .{}), .{});
     const native = b.addSystemCommand(&.{ "pwsh", "-NoProfile", "-File" });
     native.addFileArg(b.path("Tools/Build.ps1"));
+    if (b.option(bool, "offline", "Require already cached compiler source archives") orelse false) native.addArg("-Offline");
     native.addArg("-OutputFile");
     const archive = native.addOutputFileArg("R4NAK.a");
     inline for (.{ "Port", "ThirdParty", "Tools" }) |tree| trackTree(b, native, tree);

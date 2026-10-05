@@ -107,7 +107,9 @@ function CompilerInputs {
     return @{ c = $cArgs; paste = [string]$matches[0].filename[0] }
 }
 $inputs = CompilerInputs
-$paths = @($PSCommandPath, (Join-Path $PSScriptRoot 'MesaSource.ps1'), $nakRecordPath, $preparePath,
+# The record is validated above. Its elapsed time is evidence, not an input
+# to the compiler/driver identity; bind the actual verified archive instead.
+$paths = @($PSCommandPath, (Join-Path $PSScriptRoot 'MesaSource.ps1'), (Join-Path $compiler 'R4NAK.a'), $preparePath,
     (Join-Path $nakUnit 'Port/Rust/r4os-x86_64.json'), $inputs.paste)
 $paths += @($dependencies | ForEach-Object { Join-Path $compiler $_ })
 $paths += @(Get-ChildItem -LiteralPath $hostBuild -Recurse -File -Filter '*.h' | ForEach-Object FullName)

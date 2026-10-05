@@ -82,7 +82,7 @@ $inputs.sources += @(foreach ($name in $cpp.units) {
 $inputs.sources += Join-Path $mesa.libraries 'Shared/Native/cpp.cpp'
 $inputs.cpp_arguments += '-DR4OS_NATIVE_R4M=1'
 $paths = @($inputs.sources) + @($mesa.lock_path, $mesa.manifest_path, $zig, $clang,
-    (Join-Path $compiler 'build.json'), (Join-Path $prepared 'prepare.json'), (Join-Path $shaders 'shaders.json'),
+    (Join-Path $compiler 'R4NAK.a'), (Join-Path $prepared 'prepare.json'), (Join-Path $shaders 'shaders.json'),
     (Join-Path $mesa.libraries 'R4NAK/Tools/CInputs.ps1'))
 foreach ($directory in @('Port', 'Tools', 'Source', 'Contract')) {
     $path = Join-Path $mesa.unit $directory
