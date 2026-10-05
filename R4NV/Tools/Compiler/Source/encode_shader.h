@@ -1,9 +1,9 @@
 /* Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
  * Encoder input packing, profile9. CBuf1: integer Y/U/V handles at0/4/8.
  * CBuf3:u4(format1NV12/3I420, plane0Y/1UV, destination byte pitch, width),
- * then u32 height. All remaining words zero. An R8 linear target receives
- * row-major16x16 byte tiles; the fragment coordinate denotes storage bytes,
- * not source pixels. Chroma keeps UV channel parity when replicating edges.
+ * then u32 height. All remaining words zero. Each plane is an R8 view of a
+ * native NV12 target; the render target performs its block-linear addressing.
+ * Chroma keeps UV channel parity when replicating edges.
  * No filtering, color conversion, CPU pixels or producer-fence handling here.
  */
 #ifndef R4NV_ENCODE_SHADER_H
@@ -32,14 +32,8 @@ static nir_def *r4e_texel(nir_builder *b, unsigned plane, nir_def *position)
 static nir_def *r4nv_encode_pack(nir_builder *b, nir_def *opacity)
 {
    nir_def *head = r4e_uniform(b, 0), *tail = r4e_uniform(b, 16);
-   nir_def *pitch = nir_channel(b, head, 2);
    nir_def *pixel = nir_f2u32(b, nir_channels(b, nir_load_frag_coord(b), 3));
-   nir_def *byte = nir_iadd(b, nir_imul(b, nir_channel(b, pixel, 1), pitch), nir_channel(b, pixel, 0));
-   nir_def *tile = nir_ushr_imm(b, byte, 8), *columns = nir_ushr_imm(b, pitch, 4);
-   nir_def *tile_y = nir_udiv(b, tile, columns);
-   nir_def *tile_x = nir_isub(b, tile, nir_imul(b, tile_y, columns));
-   nir_def *x = nir_iadd(b, nir_ishl_imm(b, tile_x, 4), nir_iand_imm(b, byte, 15));
-   nir_def *y = nir_iadd(b, nir_ishl_imm(b, tile_y, 4), nir_iand_imm(b, nir_ushr_imm(b, byte, 4), 15));
+   nir_def *x = nir_channel(b, pixel, 0), *y = nir_channel(b, pixel, 1);
    nir_def *width = nir_channel(b, head, 3), *height = nir_channel(b, tail, 0);
    nir_push_if(b, nir_ieq_imm(b, nir_channel(b, head, 1), 0));
    nir_def *luma_pos = nir_vec2(b, nir_umin(b, x, nir_iadd_imm(b, width, -1)),

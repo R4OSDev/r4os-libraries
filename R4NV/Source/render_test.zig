@@ -139,13 +139,13 @@ pub fn check() !void {
 
 fn checkEncodePackets() !void {
     var draw: render.Draw = .{
-        .target = .{ .address = 0x100000, .bytes = 4096, .width = 128, .height = 32, .pitch = 128, .format = .r8, .layout = .linear },
+        .target = .{ .address = 0x100000, .bytes = 4096, .width = 64, .height = 24, .pitch = 64, .format = .r8, .layout = .blocklinear, .log2_gobs = 1 },
         .source = .{ .address = 0x200000, .bytes = 4096, .width = 62, .height = 46, .pitch = 64, .format = .r8, .layout = .blocklinear, .log2_gobs = 1 },
         .encode_input = .{ .format = .nv12, .plane = .chroma, .extent = .{62, 46},
             .chroma = .{ .address = 0x210000, .bytes = 2048, .width = 31, .height = 23, .pitch = 64, .format = .rg8, .layout = .blocklinear, .log2_gobs = 1 } },
-        .destination = .{ .x = 0, .y = 0, .width = 128, .height = 32 },
+        .destination = .{ .x = 0, .y = 0, .width = 64, .height = 24 },
         .source_rect = .{ .x = 0, .y = 0, .width = 62, .height = 46 },
-        .scissor = .{ .x = 0, .y = 0, .width = 128, .height = 32 },
+        .scissor = .{ .x = 0, .y = 0, .width = 64, .height = 24 },
     };
     var packet: [render.packet_bytes]u8 = undefined;
     for ([_]bool{ false, true }) |planar| {
@@ -157,7 +157,7 @@ fn checkEncodePackets() !void {
         try t.expectEqual(@as(u32, 9), draw.profile());
         try t.expectEqual(@as(u32, 0x6010021d), word(&packet, 0));
         try t.expectEqual(@as(u32, if (planar) 0x6010021d else 0x60d01218), word(&packet, 32));
-        for ([_]u32{ if (planar) 3 else 1, 1, 128, 62, 46 }, 0..) |value, i| try t.expectEqual(value, word(&packet, 256 + 4 * i));
+        for ([_]u32{ if (planar) 3 else 1, 1, 64, 62, 46 }, 0..) |value, i| try t.expectEqual(value, word(&packet, 256 + 4 * i));
         try t.expect(std.mem.allEqual(u8, packet[276..512], 0));
         for (render.profiles.catalog) |profile| {
             var program: render.Program = .{};
@@ -171,13 +171,13 @@ fn checkEncodePackets() !void {
             try t.expectEqual(@as(u32, if (planar) 2 else 1), try state(&program, hw.SET_TEX_HEADER_POOL_A + 8));
             try t.expect(program.count + 11 <= 1024);
             var batch: [render.batch_capacity]render.Draw = @splat(draw);
-            for (&batch, 0..) |*entry, i| entry.scissor = .{ .x = 0, .y = @intCast(i), .width = 128, .height = 1 };
+            for (&batch, 0..) |*entry, i| entry.scissor = .{ .x = 0, .y = @intCast(i), .width = 64, .height = 1 };
             try render.encode(.{ .class = profile.class, .draw = batch[0], .additional = batch[1..],
                 .programs = .{ .address = 0x300000, .bytes = profile.bytes() },
                 .packet = .{ .address = 0x400000, .bytes = render.packet_capacity_bytes } }, &program);
             try t.expect(program.count + 11 <= 1024);
         }
-        // Arbitrary scissor slicing must preserve the packing's global byte
+        // Arbitrary scissor slicing must preserve the shader's global pixel
         // coordinates. Full input/target geometry and CBuf3 remain unchanged.
         const part = try render.slice(draw, 17, 70);
         var sliced: [render.packet_bytes]u8 = undefined;
@@ -193,7 +193,7 @@ fn checkEncodePackets() !void {
     try t.expectError(error.Unsupported, draw.validate());
     draw = good; draw.source_rect.width -= 2;
     try t.expectError(error.Unsupported, draw.validate());
-    draw = good; draw.target.layout = .blocklinear;
+    draw = good; draw.target.layout = .linear;
     try t.expectError(error.Unsupported, draw.validate());
     draw = good; draw.encode_input.?.second = null;
     try t.expectError(error.Bounds, draw.validate());

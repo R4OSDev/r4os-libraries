@@ -1,7 +1,7 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
-//! GPU-only NV12/I420 packing into row-major16x16 byte tiles with replicated
-//! macroblock/pitch edges. This is a private encoding surface, not a generic
-//! NVIDIA block-linear modifier. Physical NVENC layout qualification is separate.
+//! GPU-only NV12/I420 preparation into native block-linear NV12 planes, with
+//! replicated macroblock/pitch edges. The authenticated render target owns
+//! addressing; fragment coordinates remain ordinary sample coordinates.
 const std = @import("std");
 const image = @import("render_image.zig");
 pub const Format = enum(u32) { nv12 = 1, yuv420p = 3 };
@@ -25,11 +25,12 @@ pub const Sampling = struct {
         try checkPlane(self.extent, self.chroma, if (self.format == .nv12) .rg8 else .r8);
         if (self.format == .yuv420p) try checkPlane(self.extent, self.second orelse return error.Bounds, .r8)
         else if (self.second != null) return error.Unsupported;
-        // Linear color targets require128-byte pitch, even for R8. This still
-        // satisfies NVENC's64-byte surface-pitch requirement.
-        const pitch = std.mem.alignForward(u32, width, 128);
-        const rows = std.mem.alignForward(u32, if (self.plane == .luma) height else height / 2, 16);
-        if (target.format != .r8 or target.layout != .linear or target.width != pitch or target.pitch != pitch or
+        // Shared native NV12 allocation has at least32 storage rows. Chroma
+        // covers half that extent; it is not separately rounded to16 rows.
+        const pitch = std.mem.alignForward(u32, width, 64);
+        const storage_rows = @max(std.mem.alignForward(u32, height, 16), 32);
+        const rows = if (self.plane == .luma) storage_rows else storage_rows / 2;
+        if (target.format != .r8 or target.layout != .blocklinear or target.width != pitch or target.pitch != pitch or
             target.height != rows) return error.Unsupported;
         _ = try image.target(target);
     }

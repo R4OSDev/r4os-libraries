@@ -56,7 +56,8 @@ must first replace its previous status record with `pendingStatus()`.
 The helper adds no R4L slot or external runtime. Original NVIDIA-header vectors
 exercise signed picture fields, DPB marking, scaling matrices and status layout
 inside the existing R4NV test group. VIDEO_V1's NVIDIA codec integration also
-passes modeled replies; physical decoding remains pending. Provenance:
+passes modeled replies; GA106 physical decoding and lifetime/pixel checks
+are documented in workspace Docs/Drivers/Videodekodierung07940.txt. Provenance:
 `Source/nvdec_h264_vectors.json` and `Tests/nvdec_h264_reference.c`.
 
 NVDEC `SET_OBJECT` selects the FIFO software engine (`ENGINE_SW=31`),
@@ -75,12 +76,25 @@ picture/rate limits and QP0..51 are checked. Native picture state uses the same
 frame-number, POC and QP definitions as the generated parameter sets.
 
 The input layout's `block_height_field` is an explicit NVIDIA wire value.
-The BO owner must admit the actual modifier, complete tiled extents and valid
-macroblock padding. Command checks cover40-bit addresses, minimum footprints,
-disjoint ranges and the complete H.264 app/method selection. They do not qualify
-an arbitrary surface layout. A fresh completion record and validated codec
-status remain mandatory. No GPU allocation, submission or NVENC capability is
-published by these pure helpers; R4ENC native integration remains open.
+R4ENC admits the native NV12 descriptor, complete block-linear plane extents
+and replicated macroblock padding; manual16x16 byte tiles are not accepted.
+Both plane methods name one base, with the UV offset in the picture layout.
+Opaque reconstruction has an independent layout. Command checks cover40-bit
+addresses, retained plane extents, disjoint ranges and the H.264 app/method
+selection. Disabled MEPRED methods are omitted and the CEA address is zero.
+
+Physical C7B7 execution established picture codec0 (method CODEC_TYPE remains3),
+macroblock slice mode0 and positive SSD/RDO initialization. Status completion2
+with zero microcode error and an exclusive end offset is required after the
+exact successful queue fence. The actual independently decoded IDR status is
+preserved in `nvenc_status_capture.bin/.json`; it supplements the original-C
+layout vectors. No GPU allocation, submission or capability is published by
+these pure helpers. Canonical GA106 internal sessions pass independently
+decoded static/changing IDR/P sequences. The installed public R4ENC worker
+also passes native-input, timestamp and bounded lifecycle cases. Productive
+recording and explicit fallback after a controlled physical GPU reset are
+qualified in workspace Docs/Drivers/Videoencoding07941.txt. A C9B7 header
+vector is not a physical Ada result.
 
 Existing provider tests compare complete picture/control blocks and methods
 against the original NVIDIA C types. Independent FFmpeg decoding of two actual

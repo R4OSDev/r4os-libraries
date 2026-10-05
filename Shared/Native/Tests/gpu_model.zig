@@ -32,6 +32,8 @@ pub const Model = struct {
     queue_timeout: bool = false,
     queue_released: bool = true,
     queue_closed: bool = true,
+    queue_close_result: i32 = a.gfx_queue_ok,
+    fence_query_result: i32 = a.gfx_queue_ok,
     queue_count: u32 = 0,
     next_timeline: u64 = 91,
     fence_released: bool = true,
@@ -321,6 +323,7 @@ fn fenceWait(input: *const a.GfxFence, ticks: u64, until: u32, output: *a.GfxFen
 }
 fn fenceQuery(input: *const a.GfxFence, output: *a.GfxFenceStatus) callconv(.c) i32 {
     std.debug.assert(std.meta.eql(input.*, model.fence) and !model.fence_released);
+    if (model.fence_query_result != a.gfx_queue_ok) return model.fence_query_result;
     output.* = fenceStatus();
     return 1;
 }
@@ -337,9 +340,13 @@ fn fenceRelease(input: *const a.GfxFence) callconv(.c) i32 {
 fn queueClose(input: *const a.GfxQueueHandle) callconv(.c) i32 {
     std.debug.assert(input.timeline >= 91 and input.timeline < model.next_timeline and !model.queue_closed and
         (model.fence_released or input.timeline != model.fence.timeline));
+    if (model.queue_close_result != a.gfx_queue_ok and model.queue_close_result != a.gfx_queue_error_stale)
+        return model.queue_close_result;
+    // Stale models a reset that has already removed this exact empty queue.
+    // An outstanding client fence must still be observed/released separately.
     model.queue_count -= 1;
     model.queue_closed = model.queue_count == 0;
-    return 1;
+    return model.queue_close_result;
 }
 pub fn word(bytes: []const u8, offset: usize) u32 {
     return std.mem.readInt(u32, bytes[offset..][0..4], .little);

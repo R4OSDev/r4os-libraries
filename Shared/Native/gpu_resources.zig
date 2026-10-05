@@ -321,7 +321,11 @@ pub const Context = struct {
             self.fence = .{};
         }
         if (self.queue.timeline != 0) {
-            try result(self.queues().close(&self.queue));
+            const rc = self.queues().close(&self.queue);
+            // A reset may already have removed an empty queue. Only after the
+            // exact outstanding fence was physically released above is Stale
+            // an idempotent queue-close receipt; it never retires a job or BO.
+            if (rc != a.gfx_queue_error_stale) try result(rc);
             self.queue = .{};
         }
     }

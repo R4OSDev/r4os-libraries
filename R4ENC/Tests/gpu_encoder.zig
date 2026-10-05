@@ -24,17 +24,21 @@ fn put(bytes: []u8, offset: usize, value: u32) void { std.mem.writeInt(u32, byte
 fn half(bytes: []u8, offset: usize, value: u16) void { std.mem.writeInt(u16, bytes[offset..][0..2], value, .little); }
 fn word(bytes: []const u8, index: usize) u32 { return fixture.word(bytes, index * 4); }
 fn inspect(words: []const u8) void {
-    std.debug.assert(word(words, 1) == (if (fixture.model.class_chip == 0x174) @as(u32, 0xc7b7) else 0xc9b7));
-    std.debug.assert(word(words, 3) == 1 and word(words, 39) == 0xb03 and word(words, 40) == expected.index);
-    const params = fixture.virtualBytes(@as(u64, word(words, 43)) << 8);
-    const status = fixture.virtualBytes(@as(u64, word(words, 45)) << 8);
-    const bitstream = fixture.virtualBytes(@as(u64, word(words, 46)) << 8);
+    std.debug.assert(word(words, 1) == ((if (fixture.model.class_chip == 0x174) @as(u32, 0xc7b7) else 0xc9b7) | (31 << 16)));
+    std.debug.assert(word(words, 3) == 1 and word(words, 40) == 0x5b03 and word(words, 41) == expected.index);
+    // Optional hints are absent; UV shares the exact input base and uses the
+    // validated relative offset in the picture. There are no dummy hint BOs.
+    std.debug.assert(word(words, 45) == 0 and word(words, 53) == word(words, 55) and word(words, 55) == word(words, 56));
+    const params = fixture.virtualBytes(@as(u64, word(words, 44)) << 8);
+    const status = fixture.virtualBytes(@as(u64, word(words, 46)) << 8);
+    const bitstream = fixture.virtualBytes(@as(u64, word(words, 47)) << 8);
+    std.debug.assert((params[430] & 0x60) == 0 and (fixture.word(params, 652) & 0x3ff) == 0);
     std.debug.assert(std.mem.readInt(u16, params[380..382], .little) == expected.frame_num);
     std.debug.assert(std.mem.readInt(u16, params[384..386], .little) == expected.idr_id);
     std.debug.assert((fixture.word(params, 424) >> 2) & 3 == (if (expected.key) @as(u32, 3) else 0));
-    std.debug.assert(word(words, 51) != expected.previous_recon and word(words, 50) != expected.previous_coloc);
-    std.debug.assert(word(words, 5) == (if (expected.key) @as(u32, 0) else expected.previous_recon));
-    std.debug.assert(word(words, 49) == (if (expected.key) @as(u32, 0) else expected.previous_coloc));
+    std.debug.assert(word(words, 52) != expected.previous_recon and word(words, 51) != expected.previous_coloc);
+    std.debug.assert(word(words, 6) == (if (expected.key) @as(u32, 0) else expected.previous_recon));
+    std.debug.assert(word(words, 50) == (if (expected.key) @as(u32, 0) else expected.previous_coloc));
     std.debug.assert(fixture.model.loan_count == (if (expected.key) @as(usize, 8) else 10));
     // Four system BOs only: commands, parameters, status, compressed output.
     // The input, history, reconstructed references and coloc data have no map.
@@ -45,9 +49,9 @@ fn inspect(words: []const u8) void {
     if (expected.failure == .missing) return;
     @memset(status[0..enc.status_bytes], 0);
     put(status, 0, if (expected.failure == .stale) expected.index + 1 else expected.index);
-    put(status, 4, @intFromBool(expected.failure == .corrupt));
+    put(status, 4, if (expected.failure == .corrupt) 6 else 2);
     put(status, 8, 48); // One six-byte modeled VCL NAL.
-    put(status, 36, 5); // Last valid byte, not the slice-header bit count.
+    put(status, 36, 6); // Firmware returns the exclusive end.
     half(status, 16, if (expected.key) 3 else 0);
     half(status, 18, 1);
     half(status, 22, 26);
@@ -57,8 +61,8 @@ fn inspect(words: []const u8) void {
     bitstream[0..6].* = .{ 0, 0, 0, 1, if (expected.key) 0x65 else 0x41, 0x80 };
     if (expected.failure == .bitstream) bitstream[4] = 0;
     if (expected.failure == .none) {
-        expected.previous_recon = word(words, 51);
-        expected.previous_coloc = word(words, 50);
+        expected.previous_recon = word(words, 52);
+        expected.previous_coloc = word(words, 51);
     }
 }
 pub fn run() !void {
@@ -78,7 +82,7 @@ pub fn run() !void {
         var session: encoder.Session = .{ .ctx = .{ .base = base, .device = try gpu.Device.queryFor(base, 9, .encode), .budget = &budget, .clock = fixture.clock } };
         var input: gpu.Resource = .{};
         try session.open(sequence, output.len, 3);
-        try input.video(&session.ctx, session.storage.bytes);
+        try input.nv12(&session.ctx, 64, 64);
         // Initial IDR, two P pictures, periodic IDR, explicit IDR, abort/reset IDR.
         const frames = [_]struct { key: bool, frame_num: u16, idr: u16, force: bool = false }{
             .{ .key = true, .frame_num = 0, .idr = 0 }, .{ .key = false, .frame_num = 1, .idr = 1 },
@@ -108,7 +112,7 @@ pub fn run() !void {
         var session: encoder.Session = .{ .ctx = .{ .base = base, .device = try gpu.Device.queryFor(base, 9, .encode), .budget = &budget, .clock = fixture.clock } };
         var input: gpu.Resource = .{};
         try session.open(sequence, output.len, 3);
-        try input.video(&session.ctx, session.storage.bytes);
+        try input.nv12(&session.ctx, 64, 64);
         @memset(&output, 0x7c);
         if (session.encodePrepared(&input, false, &output)) |_| return error.AcceptedBadStatus else |err| {
             try t.expect(err == error.MissingStatus or err == error.Encode or err == error.Bitstream);
@@ -125,13 +129,14 @@ pub fn run() !void {
     expected = .{};
     var session: encoder.Session = .{ .ctx = .{ .base = base, .device = try gpu.Device.queryFor(base, 9, .encode), .budget = &budget, .clock = fixture.clock } };
     var input: gpu.Resource = .{};
-    try session.open(sequence, output.len, 3); try input.video(&session.ctx, session.storage.bytes);
+    try session.open(sequence, output.len, 3); try input.nv12(&session.ctx, 64, 64);
     const held = budget.liveBytes();
     try t.expectError(error.Timeout, session.encodePrepared(&input, false, &output));
     try t.expect(session.reference == null and session.picture_index == 0);
     try t.expectError(error.Busy, session.close()); try t.expectError(error.Busy, input.close());
     try t.expectEqual(held, budget.liveBytes());
     state.queue_released = true;
+    state.queue_close_result = a.gfx_queue_error_stale;
     state.retire_ready = false;
     try t.expectError(error.Busy, session.close());
     try t.expectEqual(held, budget.liveBytes());

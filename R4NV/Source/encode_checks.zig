@@ -6,6 +6,7 @@ const original = @embedFile("nvenc_status_vectors.bin");
 
 pub fn run() !void {
     try pictures();
+    try capturedStatus();
     var expected: e.Expected = .{ .picture_index = 0x12345678, .kind = .idr,
         .macroblocks = 240, .buffer_bytes = 4096, .start = 256 };
     const valid = original[0..e.status_bytes];
@@ -15,8 +16,13 @@ pub fn run() !void {
     expected.kind = .predicted;
     _ = try e.pictureStatus(original[e.status_bytes..][0..e.status_bytes], .succeeded, expected);
     expected.kind = .idr;
-    for (2..4) |i| try t.expectError(error.Encode,
-        e.pictureStatus(original[i * e.status_bytes..][0..e.status_bytes], .succeeded, expected));
+    for (2..4) |i| {
+        const failed = original[i * e.status_bytes..][0..e.status_bytes];
+        try t.expectError(error.Encode, e.pictureStatus(failed, .succeeded, expected));
+        var rejected = e.pendingStatus();
+        @memcpy(rejected[0..8], failed[0..8]);
+        try t.expectError(error.Encode, e.pictureStatus(&rejected, .succeeded, expected));
+    }
     try t.expectError(error.NotReady, e.pictureStatus(valid, .pending, expected));
     try t.expectError(error.Device, e.pictureStatus(valid, .failed, expected));
     try t.expectError(error.MissingStatus, e.pictureStatus(&e.pendingStatus(), .succeeded, expected));
@@ -35,7 +41,7 @@ pub fn run() !void {
         .{ .offset = 8, .value = 0 }, .{ .offset = 8, .value = 168 },
         .{ .offset = 12, .value = 161 }, .{ .offset = 16, .value = 3 },
         .{ .offset = 16, .value = 0x20003 }, .{ .offset = 32, .value = 255 },
-        .{ .offset = 36, .value = 274 }, .{ .offset = 40, .value = 239 },
+        .{ .offset = 36, .value = 274 }, .{ .offset = 36, .value = 275 }, .{ .offset = 40, .value = 239 },
         .{ .offset = 68, .value = 52 << 16 }, .{ .offset = 68, .value = (18 << 16) | 32 },
         .{ .offset = 128, .value = 0xfffffffe }, .{ .offset = 132, .value = 0 },
         .{ .offset = 136, .value = 0 }, .{ .offset = 136, .value = 161 },
@@ -70,19 +76,39 @@ pub fn run() !void {
     try t.expect(e.supported(0xc7b7) and e.supported(0xc9b7) and !e.supported(0xc4b7) and !e.supported(0xcfb7));
 }
 
+fn capturedStatus() !void {
+    // Actual C7 completion after GR preparation and independently decoded
+    // NVENC output. This protects semantics that C sizeof/offsetof cannot.
+    const data = @embedFile("nvenc_status_capture.bin");
+    const expected: e.Expected = .{ .picture_index = 0, .kind = .idr,
+        .macroblocks = 240, .buffer_bytes = 1048535 };
+    const result = try e.pictureStatus(data, .succeeded, expected);
+    try t.expect(result.offset == 0 and result.bytes == 38400 and result.header_bits == 28);
+    try t.expectError(error.NotReady, e.pictureStatus(data, .pending, expected));
+    try t.expectError(error.Device, e.pictureStatus(data, .failed, expected));
+    for ([_]u32{0,1,3,6,10,0x30000006}) |code| {
+        var invalid: [e.status_bytes]u8 = data.*;
+        std.mem.writeInt(u32, invalid[4..8], code, .little);
+        try t.expectError(error.Encode, e.pictureStatus(&invalid, .succeeded, expected));
+    }
+    var inclusive: [e.status_bytes]u8 = data.*;
+    std.mem.writeInt(u32, inclusive[36..40], result.bytes - 1, .little);
+    try t.expectError(error.Encode, e.pictureStatus(&inclusive, .succeeded, expected));
+}
+
 fn pictures() !void {
     const v = e.picture;
     const vectors = @embedFile("nvenc_picture_vectors.bin");
     var p: v.Picture = .{ .sequence = .{ .width = 62, .height = 46, .qp = 0, .fps_num = 30000, .fps_den = 1001 },
-        .input = .{ .luma_pitch = 128, .chroma_pitch = 64 },
-        .reference = .{ .luma_pitch = 128, .chroma_pitch = 64, .tiled_16x16 = true },
+        .input = .{ .luma_pitch = 128, .chroma_pitch = 64, .chroma_offset = 8192, .block_height_field = 2 },
+        .reference = .{ .luma_pitch = 128, .chroma_pitch = 64, .chroma_offset = 8192, .block_height_field = 2 },
         .kind = .idr, .frame_num = 0, .idr_pic_id = 65535, .bitstream_bytes = 4096 };
     for ([_]u32{ 0xc7b7, 0xc9b7 }, 0..) |class, ci| {
         for (0..2) |variant| {
             p.kind = if (variant == 0) .idr else .predicted;
             p.sequence.qp = if (variant == 0) 0 else 51;
             p.frame_num = if (variant == 0) 0 else 65535;
-            p.input.block_height_field = if (variant == 0) 0 else 5;
+            p.input.block_height_field = if (variant == 0) 2 else 4;
             p.bitstream_bytes = if (variant == 0) 4096 else 8 * 1024 * 1024;
             const bytes = try v.encode(class, p);
             try t.expectEqualSlices(u8, vectors[(ci * 2 + variant) * v.picture_bytes ..][0..v.picture_bytes], &bytes);
@@ -92,9 +118,15 @@ fn pictures() !void {
     }
     try commands(p);
     try t.expectError(error.Unsupported, v.encode(0xc4b7, p));
-    p.reference.tiled_16x16 = false;
-    try t.expectError(error.Unsupported, v.encode(0xc7b7, p));
     p.reference.tiled_16x16 = true;
+    try t.expectError(error.Unsupported, v.encode(0xc7b7, p));
+    p.reference.tiled_16x16 = false;
+    p.input.block_height_field = 0;
+    try t.expectError(error.Unsupported, v.encode(0xc7b7, p));
+    p.input.block_height_field = 4;
+    p.input.chroma_offset = 8191;
+    try t.expectError(error.Bounds, v.encode(0xc7b7, p));
+    p.input.chroma_offset = 8192;
     p.reference.luma_pitch = 65536;
     try t.expectError(error.Bounds, v.encode(0xc7b7, p));
     p.reference.luma_pitch = 128;
@@ -128,27 +160,20 @@ fn commands(picture: e.picture.Picture) !void {
     const original_buffers: c.Buffers = .{
         .picture = span(0, 1152), .status = span(1, 256), .history = span(2, req.history),
         .bitstream = span(3, picture.bitstream_bytes),
-        .input = .{ .luma = span(4, 6144), .chroma = span(5, 1536) },
-        .output = .{ .luma = span(6, 6144), .chroma = span(7, 2048) },
+        .input = testSurface(4),
+        .output = testSurface(6),
         .coloc = span(8, req.coloc),
-        .reference = .{ .surface = .{ .luma = span(9, 6144), .chroma = span(10, 2048) }, .coloc = span(11, req.coloc) },
+        .reference = .{ .surface = testSurface(9), .coloc = span(11, req.coloc) },
     };
     for ([_]u32{ 0xc7b7, 0xc9b7 }, 0..) |class, i| {
-        const original_methods = vectors[i * 108 ..][0..108];
         const words = try c.encode(class, picture, original_buffers, 0x12345678);
-        try t.expectEqual(read(original_methods, 0), words[1]);
-        try t.expectEqual(read(original_methods, 100), (words[2] & 0x1fff) * 4);
-        try t.expectEqual(read(original_methods, 104), words[3]);
-        for ([_]usize{ 4, 21, 38, 59 }, 1..) |at, mi|
-            try t.expectEqual(read(original_methods, mi * 4), (words[at] & 0x1fff) * 4);
-        for (0..19) |n| try t.expectEqual(read(original_methods, (n + 5) * 4), 0x704 + @as(u32, @intCast(n)) * 4);
-        try t.expectEqual(read(original_methods, 96), words[39]);
-        try t.expectEqual(@as(u32, 0x12345678), words[40]);
-        for ([_]usize{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
-             [_]usize{ 43, 45, 47, 46, 52, 55, 51, 58, 50, 5, 22, 49 }) |allocation, at|
-            try t.expectEqual(@as(u32, @intCast(span(allocation, 0).address >> 8)), words[at]);
-        try t.expect(std.mem.allEqual(u32, words[6..21], 0) and std.mem.allEqual(u32, words[23..38], 0));
-        for ([_]usize{ 41, 42, 44, 48, 53, 54, 56, 57, 60 }) |at| try t.expectEqual(@as(u32, 0), words[at]);
+        try t.expectEqualSlices(u8, vectors[i * c.word_count * 4 ..][0 .. c.word_count * 4], std.mem.asBytes(&words));
+        for ([_]usize{ 0, 2, 5, 22, 39, 54, 59 }) |at|
+            try t.expectEqual(@as(u32, 0), (words[at] >> 13) & 7);
+        try t.expect(words[53] == words[55] and words[55] == words[56]);
+        try t.expect(words[52] == words[58] and words[6] == words[23]);
+        try t.expect(std.mem.allEqual(u32, words[7..22], 0) and std.mem.allEqual(u32, words[24..39], 0));
+        for ([_]usize{ 42, 43, 45, 49, 57, 60 }) |at| try t.expectEqual(@as(u32, 0), words[at]);
     }
     var p = picture;
     var b = original_buffers;
@@ -156,12 +181,16 @@ fn commands(picture: e.picture.Picture) !void {
     try t.expectError(error.Bounds, c.encode(0xc7b7, p, b, 0));
     p.kind = .idr; p.frame_num = 0;
     const intra = try c.encode(0xc7b7, p, b, 0);
-    try t.expect(intra[5] == 0 and intra[22] == 0 and intra[49] == 0);
+    try t.expect(intra[6] == 0 and intra[23] == 0 and intra[50] == 0);
     p = picture; b = original_buffers;
     b.bitstream.bytes -= 1;
     try t.expectError(error.Bounds, c.encode(0xc7b7, p, b, 0));
     b = original_buffers; b.output = b.input;
     try t.expectError(error.Alias, c.encode(0xc7b7, p, b, 0));
+    b = original_buffers; b.history.address = b.picture.address;
+    try t.expectError(error.Alias, c.encode(0xc7b7, p, b, 0));
+    b = original_buffers; b.input.chroma.address += 256;
+    try t.expectError(error.Bounds, c.encode(0xc7b7, p, b, 0));
     b = original_buffers; b.status.address += 1;
     try t.expectError(error.Bounds, c.encode(0xc7b7, p, b, 0));
     b = original_buffers; b.status.address = (@as(u64, 1) << 40) - 256; b.status.bytes = 257;
@@ -170,6 +199,9 @@ fn commands(picture: e.picture.Picture) !void {
     _ = try c.encode(0xc7b7, p, b, 0);
     try t.expectError(error.Bounds, c.encode(0xc7b7, p, b, 0xffffffff));
     try t.expectError(error.Unsupported, c.encode(0xcfb7, p, b, 0));
+}
+fn testSurface(index: usize) e.commands.Surface {
+    return .{ .luma = span(index, 8192), .chroma = .{ .address = span(index, 0).address + 8192, .bytes = 2048 } };
 }
 fn span(index: usize, bytes: u64) e.commands.Span {
     return .{ .address = 0x100000000 + index * 0x2000000, .bytes = bytes };

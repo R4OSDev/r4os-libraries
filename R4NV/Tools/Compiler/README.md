@@ -88,7 +88,7 @@ Generated code alone establishes neither native bootstrap nor physical support.
 | 6 | Solid vertex | Uses attributes 0 and 2; writes position/tint without unused UV outputs. Pair with profile 5 or 9. |
 | 7 | Color fragment | Named RGB transfer/primaries/range/alpha conversion, white scaling and optional output tone/gamut mapping and dither; CBuf2 coefficients. Pair with profile 1. |
 | 8 | YUV fragment | NV12/P010/YUV420P integer plane loads, explicit chroma phase and range/matrix, then shared color conversion; CBuf3 sampling coefficients. Pair with profile 1. |
-| 9 | Encode packing fragment | NV12/I420 integer loads, replicated edges and private16x16 NV12 byte tiles in linear R8 targets; CBuf3 geometry. Pair with profile6. |
+| 9 | Encode preparation fragment | NV12/I420 integer loads and replicated edges in native NV12 plane views; block-linear R8 targets, CBuf3 geometry. Pair with profile6. |
 
 Profiles 1 and 2–4/7–8 share their UV/tint interface. Profile 6 pairs with 5 or 9,
 so the fixed pipeline does not require disabling out-of-range attribute
@@ -136,12 +136,15 @@ canonical BO/VA loans and physical retirement remain with the caller/queue.
 
 Profile9 uses CBuf1 integer texture handles and CBuf3 format/plane/pitch/visible
 extent. Texture storage extents remain independent of the visible crop. It
-writes128-byte-aligned linear R8 targets, packing row-major16x16 byte tiles;
-chroma edge replication preserves U/V parity. SM86/89:1104 bytes,24 GPRs,
-69 instructions; SM75:1136 bytes/71 instructions; SM120:1152 bytes/72
-instructions. All have no scratch or stack. This working interpretation of
-NVENC16x16 storage still requires physical layout qualification. Strict host
-evaluation of emitted NIR is not execution of the compiled GPU machine code.
+writes block-linear R8 views of an authenticated native NV12 allocation.
+The render target handles storage addressing; fragment coordinates name
+ordinary samples, and chroma edge replication preserves U/V parity.
+SM86/89:624 bytes,24 GPRs,39 instructions; SM75:656 bytes/41 instructions;
+SM120:672 bytes/42 instructions. All have no scratch or stack. The previous
+private16x16 byte packing produced incorrect pixels on the physical C7B7
+encoder despite a completed fence and syntactically valid H.264. Physical
+qualification must compare both prepared bytes and independently decoded
+pixels; host compilation alone does not establish either result.
 
 `Source/shaders.c`, `Source/color_shader.h`, `Source/yuv_shader.h` and
 `Source/encode_shader.h` are the source of truth. Metadata uses explicit JSON fields;

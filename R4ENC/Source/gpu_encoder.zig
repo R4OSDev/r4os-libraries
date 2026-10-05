@@ -1,7 +1,7 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
-//! Single-worker NVENC session. The input preparer supplies padded NV12 in the
-//! engine's 16x16 tiled layout, in a raw linear VA allocation. A generic NVIDIA
-//! block-linear image is NOT that layout. Public admission stays in the caller.
+//! Single-worker NVENC session. The preparer supplies padded native NV12;
+//! its authenticated descriptor determines the input surface layout. Opaque
+//! reconstructed references have a separate fixed block-linear layout.
 const std = @import("std");
 const gpu = @import("gpu_resources");
 const enc = @import("r4nv_encode");
@@ -20,8 +20,8 @@ pub const Storage = struct {
 
     pub fn forSequence(sequence: enc.Sequence) Error!Storage {
         const dims = try enc.headers.dimensions(sequence);
-        // The GR preparer writes linear R8 targets, whose pitch must be128
-        // aligned. NVENC also accepts this multiple of its64-byte granularity.
+        // Opaque reconstruction uses a128-byte stride and16 storage rows per
+        // block. GR preparation has its own independently described native BO.
         const pitch = std.mem.alignForward(u32, dims.width_mbs * 16, 128);
         const rows = dims.height_mbs * 16;
         const chroma_offset = std.mem.alignForward(u64, @as(u64, pitch) * rows, 256);
@@ -29,7 +29,8 @@ pub const Storage = struct {
             .bytes = chroma_offset + @as(u64, pitch) * std.mem.alignForward(u32, rows / 2, 16) };
     }
     pub fn layout(self: Storage) enc.picture.Layout {
-        return .{ .luma_pitch = self.pitch, .chroma_pitch = self.pitch, .tiled_16x16 = true };
+        return .{ .luma_pitch = self.pitch, .chroma_pitch = self.pitch,
+            .chroma_offset = self.chroma_offset, .block_height_field = 2 };
     }
     fn planes(self: Storage, resource: *const gpu.Resource) enc.commands.Surface {
         return .{ .luma = .{ .address = resource.address, .bytes = self.chroma_offset },
@@ -81,7 +82,10 @@ pub const Session = struct {
         const sizes = [_]u64{ enc.picture.picture_bytes, enc.status_bytes, self.bitstream_bytes,
             enc.commands.word_count * 4, req.history };
         for (&self.work, sizes, work_kinds) |*bo, bytes, kind| {
-            if (kind == .history) try bo.video(&self.ctx, bytes) else try bo.system(&self.ctx, bytes);
+            switch (kind) {
+                .history => try bo.video(&self.ctx, bytes),
+                else => try bo.system(&self.ctx, bytes),
+            }
         }
         for (&self.recon, &self.coloc) |*recon, *coloc| {
             try recon.video(&self.ctx, storage.bytes);
@@ -98,24 +102,27 @@ pub const Session = struct {
         return .{ .address = bo.address, .bytes = bo.descriptor.byte_length };
     }
     /// Input preparation and its producer fence must have physically finished.
-    /// `input` must contain this session's Storage layout including every padded
-    /// macroblock pixel. This private boundary does not reinterpret public BOs.
+    /// `input` must contain authenticated native NV12, including every padded
+    /// macroblock pixel. No raw BYTES allocation is reinterpreted as an image.
     /// Only the compressed access unit is copied into the caller's packet arena.
     pub fn encodePrepared(self: *Session, input: *const gpu.Resource, force_idr: bool, output: []u8) Error!Packet {
         if (self.failed or self.closing or self.ctx.poisoned) return error.Stale;
         if (!self.ready or self.ctx.fence.timeline != 0) return error.Busy;
         if (self.picture_index == std.math.maxInt(u32)) return error.Bounds;
         const d = input.descriptor;
-        if (!input.ready or input.owner != &self.ctx or d.location != a.gfx_buffer_location_device_local or
-            d.format != a.gfx_buffer_format_bytes or d.modifier != 0 or d.plane_count != 0 or
-            d.byte_length < self.storage.bytes or output.len < self.packet_bytes) return error.Invalid;
+        if (!input.ready or input.owner != &self.ctx or input.mapping.lease.id != 0 or
+            d.location != a.gfx_buffer_location_device_local or output.len < self.packet_bytes) return error.Invalid;
+        const layout = try self.inputLayout(d);
         const key = force_idr or self.reference == null or self.since_idr >= self.key_interval or self.frame_num == 0;
         const target: usize = if (self.reference) |last| last ^ 1 else 0;
-        const picture = self.makePicture(key);
+        var picture = self.makePicture(key);
+        picture.input = layout;
         const params = try enc.picture.encode(self.ctx.device.class, picture);
         const buffers: enc.commands.Buffers = .{ .picture = span(self.resource(.parameters)),
             .status = span(self.resource(.status)), .history = span(self.resource(.history)),
-            .bitstream = span(self.resource(.bitstream)), .input = self.storage.planes(input),
+            .bitstream = span(self.resource(.bitstream)), .input = .{
+                .luma = .{ .address = input.address, .bytes = d.plane_offsets[1] },
+                .chroma = .{ .address = input.address + d.plane_offsets[1], .bytes = d.byte_length - d.plane_offsets[1] } },
             .output = self.storage.planes(&self.recon[target]), .coloc = span(&self.coloc[target]),
             .reference = if (!key) .{ .surface = self.storage.planes(&self.recon[self.reference.?]),
                 .coloc = span(&self.coloc[self.reference.?]) } else null };
@@ -123,7 +130,7 @@ pub const Session = struct {
         @memcpy((try self.resource(.parameters).mappedBytes())[0..params.len], &params);
         @memcpy((try self.resource(.status).mappedBytes())[0..enc.status_bytes], &enc.pendingStatus());
         @memcpy((try self.resource(.commands).mappedBytes())[0..@sizeOf(@TypeOf(commands))], std.mem.asBytes(&commands));
-        var loans: [10]gpu.Context.Loan = undefined;
+        var loans: [9]gpu.Context.Loan = undefined;
         var count: usize = 0;
         for (work_kinds) |kind| {
             if (kind == .commands) continue;
@@ -154,6 +161,23 @@ pub const Session = struct {
         self.frame_num = picture.frame_num +% 1;
         if (key) { self.idr_id +%= 1; self.since_idr = 1; } else self.since_idr += 1;
         return .{ .bytes = prefix + slice.len, .key = key };
+    }
+    fn inputLayout(self: *const Session, d: a.GfxBufferDescriptor) Error!enc.picture.Layout {
+        const width = std.mem.alignForward(u32, self.sequence.width, 16);
+        const pitch = std.mem.alignForward(u32, width, 64);
+        const log2_gobs = d.modifier & 15;
+        if (d.format != a.gfx_buffer_format_nv12 or d.plane_count != 2 or
+            d.modifier & ~@as(u64, 15) != 0x0300000000606010 or log2_gobs < 1 or log2_gobs > 5 or
+            d.width != width or d.height != @max(self.storage.rows, 32) or d.plane_offsets[0] != 0 or
+            d.plane_pitches[0] != pitch or d.plane_pitches[1] != pitch or
+            d.plane_offsets[2] != 0 or d.plane_offsets[3] != 0 or
+            d.plane_pitches[2] != 0 or d.plane_pitches[3] != 0) return error.Unsupported;
+        const layout: enc.picture.Layout = .{ .luma_pitch = pitch, .chroma_pitch = pitch,
+            .chroma_offset = d.plane_offsets[1], .block_height_field = @as(u7, 1) << @intCast(log2_gobs) };
+        const extents = try enc.picture.planeBytes(layout, self.storage.rows);
+        if (layout.chroma_offset & 255 != 0 or layout.chroma_offset < extents.luma or
+            layout.chroma_offset >= d.byte_length or extents.chroma > d.byte_length - layout.chroma_offset) return error.Bounds;
+        return layout;
     }
     /// Abort invalidates prediction only after the active fence retires. A
     /// failed/poisoned session must be closed and recreated by the coordinator.

@@ -1,9 +1,9 @@
 {
-  "scope": "Four complete H264 setup/control blocks, emitted with original C types under NVENC7.3/8.2 magic. This proves wire layout, not hardware admission or video output.",
+  "scope": "Four complete original-C H264 controls for shared-base block-linear surfaces, codec0/slice0 and positive SSD/RDO controls. C7/C9 layout proof; physical qualification is separate.",
   "bytes": 4608,
-  "sha256": "4c9dd6deabb73f0a06bc9d2d71e50c3fd10c2aa96a19a861242239a6dd95a72c",
+  "sha256": "0fe7871ccc2554d2e3a550ab5e997f59cd04ab2c3f94f0da2d3a6bf4c8bcd703",
   "generator": "Tests/nvenc_h264_reference.c",
-  "generator_sha256": "fe61c001d64e599168e802a200c97fa12e29a44aa2b74ff727c3a5ada1ad129d",
+  "generator_sha256": "e6dacbe866f76569a546acde96b84413c4b2a8794ef21fb4e4486b63fe5f032a",
   "sources": [
     {
       "path": "Original/Nvidia/OpenGpuDoc/classes/video/nvenc_drv.h",

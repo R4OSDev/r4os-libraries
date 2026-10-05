@@ -12,6 +12,15 @@ constant CRC tables. Linux execution and Windows cross-compilation of these
 generators were checked; the complete PowerShell build was run on Linux.
 `-Offline` requires the checksum-verified archive. See ThirdParty/Sources.json.
 
+The shared native owner (0.82.31) treats an already removed empty queue as
+closed after its own exact fence has acknowledged physical resource release.
+An unknown outstanding fence remains an error; other close failures retain
+the queue. Existing resource cases also cover these GPU-reset cleanup paths.
+Installed0.1.11 on GA106/NVIDIA222 also passes the existing36-frame native
+Baseline/Main/High probe: retained frames through Flush/Close, exact decoder
+and runtime joins and unchanged public resource counters. This reuses the
+original lifetime probe; pixel/output qualification retains its0.82.30 scope.
+
 The archive has 277 objects (264 upstream, six adapters, seven shared C
 helpers), plus separately built shared Math/Scan archives. SIMD dispatch uses
 actual CPUID/XCR0; AVX512 remains masked under the current SDK contract.

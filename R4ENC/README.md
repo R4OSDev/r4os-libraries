@@ -1,5 +1,15 @@
 ﻿# R4ENC
 
+Native NVIDIA work in 0.82.31 corrects the picture controls, completion
+semantics and GR-to-NVENC surface handoff. SET_OBJECT selects the original
+NVC56F software engine. The GR preparer awaits each exact asynchronous
+input-VA retirement within the job deadline; pending unmaps neither fail a
+completed preparation nor resubmit it. The pure R4NV encode helper and GR
+preparer are compiled into R4ENC. The installed public ENCODE_V1 worker also
+passes the bounded native-input sequence and lifecycle cases below. The
+productive Desktop recorder also passes real NVENC, files and explicit
+software fallback after a controlled physical GPU reset.
+
 Independent encoder library introduced in 0.79.41. The generated
 `ENCODE_V1:1` contract separates canonical input BOs/fences, stream timestamps,
 explicit codec/rate capabilities, bounded queues and immutable bitstream
@@ -26,8 +36,10 @@ reconstructed references, IDR/P sequencing and fresh status validation.
 It uses Shared/Native/gpu_resources.zig, including exact physical retirement
 after timeout. Its Ampere/Ada SDK-dispatch model passes within the existing
 second component case; no input pixels or actual codec execution are modeled.
-The private encodePrepared boundary requires fully padded NV12 in NVENC
-16x16 tile storage; it does not accept or reinterpret generic block-linear BOs.
+The internal encodePrepared boundary requires a fully padded, authenticated
+native NV12 BO owned by the exact session. Its descriptor supplies the shared
+plane base, relative UV offset, stride and block height. Opaque reconstructed
+references use a separate fixed layout and remain private to NVENC.
 The public NVIDIA path now selects matching Ampere/Ada NVENC and GR classes
 and uses this session through its existing bounded worker. It starts GPU work
 only for accepted input, applies one deadline to preparation/encoding and
@@ -35,10 +47,43 @@ retires both engines before input/close acknowledgements. Abort resets the
 reference chain. Explicit NVIDIA requests never silently select software.
 
 The GR preparer samples retained NV12/I420 directly, including authenticated
-block-linear textures, and writes edge-padded private16x16 NV12 storage. Only
+block-linear textures, and writes edge-padded native NV12. Only
 shader/packet/command/status/bitstream BOs are CPU-mapped; no full-frame
-readback or extra intermediate copy is required. Private layout qualification
-and actual NVENC output remain physical follow-up. Native configuration is
+readback or extra intermediate copy is required. Manual16x16 byte tiling is
+not the admitted input layout. On GA106/C7B7, all92160 padded Y/UV bytes from
+the canonical GR preparer were checked through CE; a subsequent native IDR
+decoded independently to the correct318x190 image at QP18 (Y/U/V PSNR
+41.67/42.59/42.44dB). The canonical encoder reproduced that bitstream without
+private control hooks, with full resource retirement and a normal reboot.
+Two eight-frame static/changing sequences also decode correctly, including
+actual P-reference consumption, alternating reconstruction buffers, GOP,
+forced IDR and reset. Lowest measured PSNR is41.42dB; maximum sample error14.
+First encoder calls take346–351ms, following calls11–38ms including broker
+work; these bounded runs do not establish sustained throughput.
+
+Installed R4ENC0.1.6/R4NV0.1.17 also passed an eight-frame changing native-input
+sequence through the public ENCODE_V1 worker. Independent FFmpeg decoding and
+demux confirm pixels, keyframes, variable PTS/DTS and per-frame durations,
+BT.709 limited and sRGB transfer13. The append-only Matroska clip spans832ms
+by packet PTS plus BlockDuration; it has no backpatched Info.Duration.
+A held output lease for500ms kept queue/memory bounded and packet bytes stable;
+Drain/EOS, Abort/IDR, held Close, exact worker join, all20 resource counters and
+a normal reboot passed. Send-to-receive latency was1.60s on first startup and
+111–115ms thereafter, including worker scheduling and caller polling. This
+caller fills a bounded memory sink then writes the completed file.
+
+The unchanged Desktop0.1.102 recording owner is separately qualified with a
+controlled CPU capture publisher and actual NVENC/file streams:24 decoded
+pictures across four parts, source/size changes, stop/restart and static tail.
+Injected800ms file delay/error cases retain no capture leases while waiting;
+all BO/capture counters, encoder joins and no-consumer idle recover exactly.
+With encoder and final packet held across a controlled physical FLR, the
+recorder preserves its native part and opens software only after exact native
+retirement. Both parts decode independently (four native/six software frames).
+This does not qualify spontaneous faults, active display or sustained capture.
+Current shared evidence and scope: Docs/Drivers/Videoencoding07941.txt.
+
+Native configuration is
 CQP,8-bit BT.709 limited, transfer1 or sRGB13, default/left chroma, GOP<=65535; unsupported metadata,
 layouts, generations or missing channels return explicit errors. Capability
 queries describe this software profile, not a completed physical qualification.
@@ -51,8 +96,8 @@ Desktop's Ctrl+Print Screen recorder owns activation, latest-frame selection,
 explicit fallback, file rotation and the worker. Its SMP4 consumer run decoded
 62 pictures independently and checked delayed/failed writes, modeled NVIDIA
 loss, repeated recording, exact joins and restored BO/capture baselines.
-Physical NVENC execution remains unqualified. CBR/VBR constants define requests; they do
-not imply backend support.
+The bounded sequence evidence does not qualify sustained capture or other hardware.
+CBR/VBR constants define requests; they do not imply backend support.
 
 Build the module from Libraries with `./Build.sh R4ENC -Doffline=true` (or
 `Build.bat R4ENC -Doffline=true`). Source archives must already be cached for
@@ -120,6 +165,14 @@ decode small software reference clips;
 the latter exercise Annex-B admission, not AMD output quality. Real VCN
 bitstreams, rates and laptop performance remain reserved for0.80.39.
 Provenance and limits: Docs/Drivers/AMDEncoding08031.txt/.json.
+
+The shared native owner (0.82.31) accepts an already retired empty queue
+after a GPU reset. Its exact outstanding fence must first acknowledge physical
+resource release; a stale fence or any other queue error still keeps cleanup
+pending. Encoder BOs and accounting close independently afterward. Existing
+owner cases cover this distinction. Physical GA106 output and the productive
+Desktop recorder, including retained-encoder reset/fallback, are qualified
+in0.82.31. Scope and shared evidence: Docs/Drivers/Videoencoding07941.txt.
 
 The compiled `recording_pixels.Layout.initAmd` helper (0.80.32) retains visible
 dimensions and supplies 256-byte pitch, 16-row AVC coded extent, and neutral

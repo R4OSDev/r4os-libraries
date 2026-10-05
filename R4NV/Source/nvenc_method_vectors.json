@@ -1,7 +1,7 @@
 {
-  "scope": "Original C7B7/C9B7 method/class/control/application words",
-  "bytes": 216,
-  "sha256": "8b23e3cf115af6d0e2bf2124d59a52d1ef862676e2360ccb5735c6eee7bfc714",
+  "scope": "Two complete244-byte command streams from original C7B7/C9B7/C56F macros: shared plane bases, watchdog/GPTIMER, no MEPRED methods, zero CEA. Synthetic P-frame operands; no physical P-frame claim.",
+  "bytes": 488,
+  "sha256": "aed65a4162aa104424e12de316ab8407b156d48ec20c258ff6b9baaef9ec5277",
   "sources": [
     {
       "path": "Original/Nvidia/OpenGpuDoc/classes/video/clc7b7.h",
@@ -34,5 +34,15 @@
     "sha256": "3fd5e2c20b1432421a214b12e52778f48f7914b87645d4736cf55324d25c9d3c"
   },
   "generator": "Tests/nvenc_methods_reference.c",
-  "generator_sha256": "ecf628bbb15d7a1753ed9807eadf783e6e31a628db219b11b0cb305245faec18"
+  "generator_sha256": "2ef652b42def643f18ccd92579c7bb02ef36e7e091bf4b1aaa6d21167e8be4d1",
+  "channel_binding": {
+    "subchannel": 0,
+    "engine_sw": 31,
+    "source": "ExFiles/Reference/GFX/0.82.30/NvdecBindingSource/clc56f.h",
+    "license": "MIT",
+    "sha256": "8b7a6d6d5d5e3538f2f3e3b975d00c4aa94bd2480008c49aefcfc2566e3f658e",
+    "commit": "8ec351aeb96a93a4bb69ccc12a542bf8a8df2b6f",
+    "embedded_in_each_command_stream": true
+  },
+  "recipe": "Compile Tests/nvenc_methods_reference.c with original video and NVIDIA SDK include directories."
 }

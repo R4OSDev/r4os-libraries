@@ -1,7 +1,7 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 //! Single-worker GR preparer. Retained YUV BOs are sampled directly, including
 //! block-linear storage; only commands/constants/shaders are mapped by the CPU.
-//! The private16x16 output has its own NVENC VA and is never a generic modifier.
+//! The native NV12 output has its own NVENC VA and an authenticated modifier.
 const std = @import("std");
 const r = @import("r4os");
 const a = r.abi;
@@ -36,7 +36,7 @@ pub const Preparer = struct {
         const shader_bytes = try render.shaderBytesFor(self.ctx.device.class);
         self.session = session;
         errdefer self.failed = true;
-        try self.target.video(&session.ctx, session.storage.bytes);
+        try self.target.nv12(&session.ctx, std.mem.alignForward(u32, session.sequence.width, 16), session.storage.rows);
         try self.destination.borrow(&self.ctx, self.target.backing);
         try self.resource(.shaders).system(&self.ctx, shader_bytes);
         try self.resource(.packet).system(&self.ctx, render.packet_capacity_bytes);
@@ -50,6 +50,15 @@ pub const Preparer = struct {
         for (&self.sources) |*source| source.close() catch |err| { failure = err; };
         if (failure) |err| return err;
     }
+    fn retireInputUntil(self: *Preparer, until: u64) Error!void {
+        if (self.ctx.fence.timeline != 0) return error.Busy;
+        var failure: ?Error = null;
+        // GR completion starts a separate VA retirement. The codec worker
+        // awaits each exact unmap acknowledgement before advancing the job;
+        // pending retirement must neither poison the session nor resubmit GR.
+        for (&self.sources) |*source| source.closeUntil(until) catch |err| { failure = err; };
+        if (failure) |err| return err;
+    }
     pub fn prepare(self: *Preparer, input: anytype) Error!*const gpu.Resource {
         if (!self.ready or self.failed or self.closing or self.ctx.poisoned) return error.Stale;
         const session = self.session.?;
@@ -57,7 +66,7 @@ pub const Preparer = struct {
         if (input.width != session.sequence.width or input.height != session.sequence.height) return error.Invalid;
         const queues: r.gfx_queue.Context = .{ .base = self.ctx.base };
         try input.ready(&queues); // Borrowed producer fence is never consumed.
-        try self.retireInput();
+        try self.retireInputUntil(try self.ctx.deadline());
         const count: usize = input.frame.plane_count;
         if (count != 2 and count != 3) return error.Unsupported;
         var images: [3]Image = undefined;
@@ -80,12 +89,14 @@ pub const Preparer = struct {
             }
             images[p] = try planeImage(view, &self.sources[i], count, p);
         }
-        const storage = session.storage;
+        const target_desc = self.target.descriptor;
         for (0..2) |p| {
-            const offset: u64 = if (p == 0) 0 else storage.chroma_offset;
-            const bytes = if (p == 0) storage.chroma_offset else storage.bytes - offset;
-            const target: Image = .{ .address = self.destination.address + offset, .bytes = bytes,
-                .width = storage.pitch, .height = @intCast(bytes / storage.pitch), .pitch = storage.pitch, .format = .r8, .layout = .linear };
+            const offset = target_desc.plane_offsets[p];
+            const end = if (p == 0) target_desc.plane_offsets[1] else target_desc.byte_length;
+            const pitch: u32 = @intCast(target_desc.plane_pitches[p]);
+            const target: Image = .{ .address = self.destination.address + offset, .bytes = end - offset,
+                .width = pitch, .height = target_desc.height >> @as(u5, @intCast(p)), .pitch = pitch,
+                .format = .r8, .layout = .blocklinear, .log2_gobs = @intCast(target_desc.modifier & 15) };
             const draw: render.Draw = .{ .source = images[0], .target = target,
                 .source_rect = .{ .x = 0, .y = 0, .width = input.width, .height = input.height },
                 .destination = .{ .x = 0, .y = 0, .width = target.width, .height = target.height },
@@ -112,7 +123,7 @@ pub const Preparer = struct {
                 if (done) break;
             }
         }
-        try self.retireInput();
+        try self.retireInputUntil(try self.ctx.deadline());
         return &self.target;
     }
     fn emit(self: *Preparer, draws: []const render.Draw, sources: []const gpu.Resource) Error!void {

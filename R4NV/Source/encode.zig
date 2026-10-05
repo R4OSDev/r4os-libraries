@@ -55,12 +55,15 @@ pub fn pictureStatus(data: []const u8, completion: Completion, expected: Expecte
         expected.macroblocks == 0 or expected.macroblocks > 36864 or
         expected.buffer_bytes == 0 or expected.buffer_bytes > max_bitstream_bytes or
         expected.start >= expected.buffer_bytes) return error.Bounds;
-    if (word(data, 0) != expected.picture_index or word(data, 4) == 0xffffffff or
-        word(data, 8) == 0xffffffff or word(data, 128) == 0xffffffff or
+    if (word(data, 0) != expected.picture_index or word(data, 4) == 0xffffffff) return error.MissingStatus;
+    // Physical C7 completion is engine result2 with zero microcode error.
+    // A HOST fence alone only proves that memory accesses have retired.
+    if (word(data, 4) != 2) return error.Encode;
+    // Firmware can reject parameters before producing any slice record. Keep
+    // that fresh engine error distinct from a wholly missing completion; only
+    // successful encoding needs the exact slice/range acknowledgement below.
+    if (word(data, 8) == 0xffffffff or word(data, 128) == 0xffffffff or
         word(data, 132) == 0xffffffff or word(data, 136) == 0xffffffff) return error.MissingStatus;
-    // Both the two-bit engine result and the thirty-bit microcode result must
-    // be zero. A HOST fence only means the channel stopped accessing memory.
-    if (word(data, 4) != 0) return error.Encode;
     if (half(data, 16) != @intFromEnum(expected.kind) or half(data, 18) != 1 or
         @as(u32, half(data, 40)) + half(data, 42) != expected.macroblocks or
         half(data, 22) > 51 or half(data, 70) > 51 or half(data, 68) > half(data, 70)) return error.Encode;
@@ -72,7 +75,7 @@ pub fn pictureStatus(data: []const u8, completion: Completion, expected: Expecte
         length < 6 or length > expected.buffer_bytes - start or bits == 0 or
         (@as(u64, bits) + 7) / 8 != length or word(data, 12) > bits or
         header_bits == 0 or header_bits > bits or
-        word(data, 36) != start + length - 1) return error.Encode;
+        word(data, 36) != start + length) return error.Encode; // Exclusive end despite the original field name.
     return .{ .offset = start, .bytes = length, .header_bits = header_bits,
         .cycles = word(data, 24), .qp_min = half(data, 68), .qp_max = half(data, 70) };
 }

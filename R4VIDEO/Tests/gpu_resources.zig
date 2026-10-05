@@ -132,12 +132,25 @@ pub fn run() !void {
     try t.expectError(error.Timeout, ctx.submit(&commands, 216, &.{.{ .resource = &image, .write = true }}));
     try t.expect(ctx.poisoned);
     try t.expectError(error.Busy, commands.mappedBytes());
+    // A missing outstanding fence never proves physical retirement.
+    const pending_fence = ctx.fence;
+    state.fence_query_result = a.gfx_queue_error_stale;
+    try t.expectError(error.Stale, ctx.close());
+    try t.expectEqualDeep(pending_fence, ctx.fence);
+    try t.expectEqual(@as(usize, 3 * 65536), budget.liveBytes());
+    try t.expect(!state.fence_released and !state.queue_closed);
+    state.fence_query_result = a.gfx_queue_ok;
     try t.expectError(error.Busy, ctx.close());
     try t.expectEqual(@as(u32, 1), state.cancel_count);
     try t.expectError(error.Busy, image.close());
     try t.expectError(error.Busy, commands.close());
     try t.expectEqual(@as(usize, 3 * 65536), budget.liveBytes());
     state.queue_released = true;
+    state.queue_close_result = a.gfx_queue_error_busy;
+    try t.expectError(error.Busy, ctx.close());
+    try t.expect(ctx.fence.timeline == 0 and ctx.queue.timeline != 0 and !state.queue_closed);
+    try t.expectEqual(@as(usize, 3 * 65536), budget.liveBytes());
+    state.queue_close_result = a.gfx_queue_error_stale;
     try ctx.close();
     try image.close();
     try commands.close();

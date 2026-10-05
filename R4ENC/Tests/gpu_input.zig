@@ -27,10 +27,10 @@ fn inspect(words: []const u8) void {
     const bytes = fixture.virtualBytes(prep.work[1].address);
     const plane = fixture.word(bytes, 260);
     std.debug.assert(fixture.word(bytes, 256) == (if (expected.count == 2) @as(u32, 1) else 3) and plane < 2);
-    std.debug.assert(fixture.word(bytes, 264) == prep.session.?.storage.pitch and
+    std.debug.assert(fixture.word(bytes, 264) == prep.target.descriptor.plane_pitches[plane] and
         fixture.word(bytes, 268) == expected.width and fixture.word(bytes, 272) == expected.height);
-    if (expected.width == 318 and plane == 0) std.debug.assert(fixture.word(bytes, 1280 + 268) == 318 and
-        fixture.word(bytes, 1280 + 272) == 190); // Both luma slices share a submit.
+    if (expected.width == 638 and plane == 0) std.debug.assert(fixture.word(bytes, 1280 + 268) == 638 and
+        fixture.word(bytes, 1280 + 272) == 382); // Luma slices share a submit.
     expected.calls += 1;
     expected.planes |= @as(u32, 1) << @intCast(plane);
     var mapped: usize = 0;
@@ -82,8 +82,8 @@ pub fn run() !void {
     for (0..3) |case| {
         state = .{ .graphics = true, .engine = .graphics, .class_chip = if (case == 2) 0x192 else 0x174,
             .push_bytes = 0, .on_submit = &inspect };
-        const width: u32 = if (case == 2) 318 else 62;
-        const height: u32 = if (case == 2) 190 else 46;
+        const width: u32 = if (case == 2) 638 else 62;
+        const height: u32 = if (case == 2) 382 else 46;
         const planar = case == 1;
         var session: encoder.Session = .{ .ctx = .{ .base = base, .device = try gpu.Device.queryFor(base, 9, .encode), .budget = &budget, .clock = fixture.clock } };
         try session.open(.{ .width = width, .height = height, .qp = 26, .fps_num = 30, .fps_den = 1 }, 65536, 30);
@@ -99,7 +99,12 @@ pub fn run() !void {
         expected = .{ .preparer = &prep, .width = width, .height = height, .count = if (planar) 3 else 2,
             .mapped = if (planar) 10 else 7 };
         const held = budget.liveBytes();
+        // Engine completion and the subsequent input-VA retirement are
+        // distinct acknowledgements. A pending unmap must be awaited inside
+        // this worker preparation, without resubmitting either plane.
+        state.retire_ready = false;
         const prepared = try prep.prepare(&owner);
+        try t.expect(state.retire_ready and !prep.failed);
         try t.expect(prepared == &prep.target and prepared.owner == &session.ctx);
         try t.expectEqual(@as(u32, 3), expected.planes);
         try t.expectEqual(@as(u32, 2), expected.calls);
@@ -115,8 +120,8 @@ pub fn run() !void {
             for ([_]*c.R4EncPlane{ &alias_frame.plane0, &alias_frame.plane1 }, 0..) |plane, p| {
                 plane.buffer = @bitCast(prep.target.backing.buffer);
                 plane.reference = @bitCast(prep.target.backing.reference);
-                plane.pitch = session.storage.pitch;
-                plane.offset = if (p == 0) 0 else session.storage.chroma_offset;
+                plane.pitch = prep.target.descriptor.plane_pitches[p];
+                plane.offset = prep.target.descriptor.plane_offsets[p];
             }
             try alias.admit(&memory, &budget, alias_frame, width, height);
             try t.expectError(error.Invalid, prep.prepare(&alias));

@@ -23,7 +23,7 @@ static int emit(FILE *out, unsigned int kind, unsigned int code) {
     p.actual_min_qp_used = 18;
     p.actual_max_qp_used = 32;
     p.bitstream_start_pos = 256;
-    p.last_valid_byte_offset = 275;
+    p.last_valid_byte_offset = 276; // Physical C7 firmware writes an exclusive end.
     p.intra_mb_count = kind == 3 ? 240 : 40;
     p.inter_mb_count = kind == 3 ? 0 : 200;
     p.cycle_count = 0x76543210;
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     if (argc != 2) return 1;
     FILE *out = fopen(argv[1], "wb");
     if (!out) return 2;
-    int ok = emit(out, 3, 0) && emit(out, 0, 0) && emit(out, 3, 1) && emit(out, 3, 0x30000004);
+    int ok = emit(out, 3, 2) && emit(out, 0, 2) && emit(out, 3, 1) && emit(out, 3, 0x30000006);
     if (fclose(out)) return 3;
     return ok ? 0 : 4;
 }

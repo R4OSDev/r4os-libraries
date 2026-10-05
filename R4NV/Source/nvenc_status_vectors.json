@@ -1,5 +1,5 @@
 {
-  "scope": "Original NVIDIA C status structures; two success and two independent engine/microcode error records. No GPU execution.",
+  "scope": "Original C layouts with physically verified completion2/exclusive-end semantics; two successes and two independent engine/microcode errors. Synthetic vectors, separate actual capture.",
   "source": {
     "path": "Original/Nvidia/OpenGpuDoc/classes/video/nvenc_drv.h",
     "bytes": 275485,
@@ -13,9 +13,9 @@
     }
   },
   "generator": "Tests/nvenc_status_reference.c",
-  "generator_sha256": "3e5a0428c3b7217d080e38f1ff1dfae7bc680f300b9db1a22c5daec3cb8b47eb",
+  "generator_sha256": "609c3f0e535dc5ced47c58e4f16fe51bbd6023ae9d60c8ae7fe75202eade0e6b",
   "bytes": 576,
-  "sha256": "3b925f7cc4b73271faabd3e7a9e9bc534142fe1e1f0545c8ba342cf8214a6082",
+  "sha256": "45d2f9530df5b62acab0e445d834fff6240456c44263715f323c7220e477869e",
   "records": [
     "IDR",
     "P",
