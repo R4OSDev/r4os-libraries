@@ -14,7 +14,8 @@
  * do not issue printf or sample-table loads. CBuf 1 holds the texture
  * handle at 0, float4 source texel-center bounds at16, an optional64-byte
  * logical sampling grid at32, source atlas rectangle at96 and extent at112.
- * A zero grid preserves the earlier texture sampling path. */
+ * A zero grid selects interpolated bilinear sampling. Ordinary nearest
+ * packets use a scale-60 grid and doubled destination coordinates. */
 const struct nak_constant_offset_info nak_const_offsets_base = {
    .sample_info_cb = 0, .sample_locations_offset = 0,
    .sample_masks_offset = 16, .printf_cb = 0, .printf_buffer_offset = 48,
@@ -86,7 +87,9 @@ grid_coordinates(nir_builder *b, nir_def *ordinary)
    nir_def *oriented = nir_bcsel(b, nir_ieq_imm(b, rotation, 1), nir_vec2(b, reverse_y, x),
       nir_bcsel(b, nir_ieq_imm(b, rotation, 2), nir_vec2(b, reverse_x, reverse_y),
       nir_bcsel(b, nir_ieq_imm(b, rotation, 3), nir_vec2(b, y, reverse_x), pixel)));
-   /* All values are admitted positive and <=32768. Products fit u32.
+   /* Image/draw extents are <=32768; ordinary nearest's doubled viewport
+    * may reach65536. Covered relative coordinates times source extents
+    * remain below2^31, and all products fit u32.
     * Integer division defines both sampling stages, including exact ties.
     * Convert only the final integer texel center to normalized float UV. */
    nir_def *logical = nir_udiv(b, nir_imul_imm(b, nir_iadd_imm(b, nir_imul_imm(b, oriented, 2), 1), 120),
@@ -162,8 +165,7 @@ r4nv_build_shader(enum r4nv_shader_profile profile,
          nir_def *coord = nir_fmin(&b, nir_fmax(&b, nir_load_var(&b, uv),
                                                nir_channels(&b, bounds, 3)),
                                        nir_channels(&b, bounds, 12));
-         if (profile == R4NV_TEXTURE_FRAGMENT || profile == R4NV_COLOR_FRAGMENT)
-            coord = grid_coordinates(&b, coord);
+         coord = grid_coordinates(&b, coord);
          nir_tex_instr *tex = nir_tex_instr_create(b.shader, 3);
          tex->op = nir_texop_tex;
          tex->sampler_dim = GLSL_SAMPLER_DIM_2D;

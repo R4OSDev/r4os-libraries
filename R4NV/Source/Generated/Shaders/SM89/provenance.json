@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "compiler_id": "a7aef0704bdc258adc361c82e0a0c547bca2209cedbe8db62690cd92debb7222",
+  "compiler_id": "6f3c6543aedcaaf14f2ae08581c2c78071a14bac63385a70c0300b0bb6dcc122",
   "target": {
     "sm": 89,
     "max_warps_per_mp": 48
@@ -28,7 +28,7 @@
     },
     {
       "path": "Source/shaders.c",
-      "sha256": "47b92f2438b717e0f06646d7788d1e8b64389761c02047a780e3683027f0ad18"
+      "sha256": "88c637792736713d7f39f5b35b3e4c5075db4b08130a4f826bdaf154b9785e7f"
     },
     {
       "path": "Source/shaders.h",
@@ -74,24 +74,24 @@
     {
       "profile": 3,
       "name": "srgb_decode_fragment",
-      "sha256": "96e9319486f7503fa1448fdf2b4ab97545acd19a0954a097c2aa451145fb0f76",
-      "metadata_sha256": "03769ad0c8bc5201c2b85f697e3bddbbc640d5684121307961815695a66623cb",
-      "assembly_sha256": "207978ad82143fcf7987846a8b2c6fd77ccfdaa4b9866a4e4f0c2a8ff9a582d5",
-      "nir_sha256": "ee3d5009c018a2cf43baba2e645fea5653747bfb2ec2d000bf671dca7bb2664b",
-      "code_bytes": 816,
+      "sha256": "3873884f06b24cdd2fb1e101efae58130c734b003052af415d5b2705c2dc8e25",
+      "metadata_sha256": "7773c517560f7ebf522190c6ac386f50e1d30ec1f192e9ab8f3b210605fa9e45",
+      "assembly_sha256": "b69c6c85de6b7895b5afa4169c36c576f0badc48af42a44a01e3dde7a0e6c48e",
+      "nir_sha256": "6d76362e3195d359c70986a3748f5c89ec224c84996b1609b02a9db3185ff480",
+      "code_bytes": 2736,
       "gprs": 24,
-      "instructions": 51
+      "instructions": 171
     },
     {
       "profile": 4,
       "name": "srgb_encode_fragment",
-      "sha256": "a27451b864b05ab0b32d16083965674ef4dc2175a6e459fd22055b63dd0b8173",
-      "metadata_sha256": "37620c3ddb45fcc426e798c5776438846d58589836f2b29b1924831e05b4fa40",
-      "assembly_sha256": "b4d4a1c3e92f1382d9a158ede4fa36bddad2b23e8554b5595efc477e0866ebc9",
-      "nir_sha256": "6513ef51e7df2a0ee01df57b13038f583a41d9751604be779d532ef665874b3f",
-      "code_bytes": 832,
+      "sha256": "240fff71918a8d7f6c21782de436cb4698d6d82b772caf1e9b9c8919f36534f6",
+      "metadata_sha256": "3a78b8eda96999aaa6dbd2df312e4d8eeae6ce4ecb21a81e8dfb8f1fa2112b8a",
+      "assembly_sha256": "78accfd9c99baff975465d760766903e316ee636770a924ffa7f4a45fc74ad46",
+      "nir_sha256": "8b12178625ed2132f34cbb1d658f92c58f69979c788d0603a338d3023c2225e3",
+      "code_bytes": 2736,
       "gprs": 24,
-      "instructions": 52
+      "instructions": 171
     },
     {
       "profile": 5,
@@ -149,5 +149,5 @@
       "instructions": 39
     }
   ],
-  "generated_zig_sha256": "18466377482ee6ac656402ac3a27be0be8092d59ee07d73f51b1974dfa73a915"
+  "generated_zig_sha256": "bc95fe0981f52752b07c9025f0ef4fee93ec9c8c4760dab930e199222bc808e2"
 }

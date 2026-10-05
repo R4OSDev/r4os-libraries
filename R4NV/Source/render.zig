@@ -375,7 +375,22 @@ pub fn packetUpload(draw: Draw, out: []u8) Error!void {
             (origin[0] + @as(f32, @floatFromInt(draw.source_rect.width)) - 0.5) / extent[0],
             (origin[1] + @as(f32, @floatFromInt(draw.source_rect.height)) - 0.5) / extent[1] };
         @memcpy(out[528..544], std.mem.asBytes(&bounds));
-        @memcpy(out[544..608], std.mem.asBytes(&draw.grid));
+        var grid = draw.grid;
+        if (grid.enabled == 0 and draw.filter == .nearest and draw.yuv == null and draw.encode_input == null) {
+            // Ordinary pixel-center nearest uses the same integer sampling
+            // shader as logical grids. At scale 60 its first stage produces
+            // 2*x+1, so a doubled destination gives exact rational centers.
+            // Interpolated float UVs can fall below an exact texel boundary
+            // (e.g. source 64 -> destination 160 at pixel 157 selects 62).
+            // Draw admission bounds every covered relative coordinate below
+            // 2*32768; its product with the source extent still fits u32.
+            grid = .{ .enabled = 1, .scale = 60,
+                .pixel_width = draw.target.width, .pixel_height = draw.target.height,
+                .viewport_x = draw.destination.x * 2, .viewport_y = draw.destination.y * 2,
+                .viewport_width = draw.destination.width * 2, .viewport_height = draw.destination.height * 2,
+                .guest_width = draw.source_rect.width, .guest_height = draw.source_rect.height };
+        }
+        @memcpy(out[544..608], std.mem.asBytes(&grid));
         const rectangle: [4]u32 = .{ @intCast(draw.source_rect.x), @intCast(draw.source_rect.y), draw.source_rect.width, draw.source_rect.height };
         @memcpy(out[608..624], std.mem.asBytes(&rectangle));
         @memcpy(out[624..632], std.mem.asBytes(&extent));

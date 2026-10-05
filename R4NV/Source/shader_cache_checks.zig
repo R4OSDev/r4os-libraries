@@ -15,16 +15,16 @@ pub fn run(api: *const c.ShaderV1) !void {
     const hashes = [_][]const u8{
         "1efe5eb9bf14ca597f48dda6460b2e09e7a2c335e7c25671cdf5eb63ed6437c9",
         "1d42b2d4e6e9354020c561b97596b3c910d41c63a7dd119f977c5ba7d02084bc",
-        "96e9319486f7503fa1448fdf2b4ab97545acd19a0954a097c2aa451145fb0f76",
-        "a27451b864b05ab0b32d16083965674ef4dc2175a6e459fd22055b63dd0b8173",
+        "3873884f06b24cdd2fb1e101efae58130c734b003052af415d5b2705c2dc8e25",
+        "240fff71918a8d7f6c21782de436cb4698d6d82b772caf1e9b9c8919f36534f6",
         "94811e8c07f6e09dcba8c3c0cce8aacedbab7293b76542935ecbf150abd39984",
         "356c276ffdc82e9cc63e49fb5a79b7602ff82d4981804689f7ec8f8c042ccc04",
         "d4ecf66ff0fa3256d5e080488427720ff212c98c58f19d2d511c0be7c5dc5447",
         "2439c347520463a6c76824c0e8e4435b2838f49281301ab0db7fee83b1ddc49e",
         "dc4b31a3727e861fc64fcb348b4939123371aa0116913fb99f6a45e375572c01",
     };
-    const sizes = [_]u32{ 112, 2208, 816, 832, 80, 80, 10976, 11056, 624 };
-    const instructions = [_]u32{ 7, 138, 51, 52, 5, 5, 686, 691, 39 };
+    const sizes = [_]u32{ 112, 2208, 2736, 2736, 80, 80, 10976, 11056, 624 };
+    const instructions = [_]u32{ 7, 138, 171, 171, 5, 5, 686, 691, 39 };
     var storage: [c.shader_cache_max_bytes + 8]u8 align(8) = @splat(0xa5);
     const bytes = storage[1 .. 1 + c.shader_cache_max_bytes]; // ABI promises byte alignment.
     var view: c.R4NvShaderView = std.mem.zeroes(c.R4NvShaderView);

@@ -241,7 +241,7 @@ fn executeDraw(class: u32, methods: []const u8, packet: []const u8, program_addr
             const v = scalar(packet,788)+(py-y0)/(y3-y0)*(scalar(packet,908)-scalar(packet,788));
             color = sample(src,.{std.math.clamp(u,scalar(packet,528),scalar(packet,536)),std.math.clamp(v,scalar(packet,532),scalar(packet,540))},linear);
             if (word(packet, 544) != 0) {
-                if ((id != 2 and id != 7) or linear) return error.Sampler;
+                if ((id != 2 and id != 3 and id != 4 and id != 7) or linear) return error.Sampler;
                 // Decode the actual uploaded CBuf, independently of Draw and
                 // its admission helper. These are the shader's integer stages.
                 const nx: i64 = @as(i64, @intCast(x)) + @as(i32, @bitCast(word(packet, 564)));
@@ -305,7 +305,38 @@ pub fn check() !void {
         std.debug.print("render reference {s}: max={d}/{d} LSB\n",.{scene.name,maximum,scene.tolerance});
     }
     try checkGrids();
+    try checkNearestBoundaries();
     try checkHighPrecision();
+}
+fn checkNearestBoundaries() !void {
+    // Physical GA106 exposed one-neighbor errors exactly at the rational
+    // centers of 64 -> 160. Consume the real packet/methods with independent
+    // integer expected texels, including a cropped source and signed target.
+    var source: [80 * 4]u8 = undefined;
+    for (0..80) |x| std.mem.writeInt(u32, source[x * 4..][0..4], 0xff000000 | @as(u32, @intCast(x)) * 0x010101, .little);
+    for ([_]i32{ 0, -2, 7 }) |origin| {
+        var pixels: [768]u8 = @splat(0xcc);
+        const draw: r.Draw = .{
+            .source = .{ .address = 0x200000, .bytes = source.len, .width = 80, .height = 1, .pitch = 320, .format = .argb8888, .layout = .linear },
+            .target = .{ .address = 0x100000, .bytes = pixels.len, .width = 176, .height = 1, .pitch = 768, .format = .argb8888, .layout = .linear },
+            .source_rect = .{ .x = 5, .y = 0, .width = 64, .height = 1 },
+            .destination = .{ .x = origin, .y = 0, .width = 160, .height = 1 },
+            .scissor = .{ .x = 0, .y = 0, .width = 176, .height = 1 },
+        };
+        var packet: [r.packet_bytes]u8 = undefined;
+        var program: r.Program = .{};
+        try r.packetUpload(draw, &packet);
+        try t.expectEqual(@as(u32, 1), word(&packet, 544)); // exact integer GPU path
+        try r.encode(.{ .draw = draw, .programs = .{ .address = 0x300000, .bytes = r.shader_bytes }, .packet = .{ .address = 0x400000, .bytes = r.packet_bytes } }, &program);
+        try execute(std.mem.sliceAsBytes(program.slice()), &packet, 0x300000, 0x400000, Surface.from(draw.target, &pixels), Surface.from(draw.source.?, &source));
+        for (0..176) |x| {
+            const relative = @as(i64, @intCast(x)) - origin;
+            const expected: u32 = if (relative < 0 or relative >= 160) 0xcccccccc else
+                0xff000000 | @as(u32, @intCast(5 + @divTrunc((relative * 2 + 1) * 64, 320))) * 0x010101;
+            try t.expectEqual(expected, word(&pixels, x * 4));
+        }
+        for (pixels[704..]) |byte| try t.expectEqual(@as(u8, 0xcc), byte);
+    }
 }
 fn checkHighPrecision() !void {
     // Follow an encoded native draw and its actual TIC/RT descriptors through
