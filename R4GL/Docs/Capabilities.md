@@ -32,6 +32,21 @@ listed in README. Surface availability and swap intervals additionally require
 the exact window/output lifetime. A native profile failure does not silently
 select software; the application chooses profile 0 in a new runtime/process.
 
+R4GL 0.1.29 also admits Zink windows consumed by the CPU compositor on a
+registered physical output. The producer supplies its actual Vulkan GPU fence;
+the consumer retains its CPU receipt and exact output incarnation. Headless
+publications require an empty output identity. Swap interval admission uses
+the real presentation capabilities; the 19-case production admission check
+passes. On the physical GA106, the original EGL/native GUI cycle passes window,
+border resize, 1080p fullscreen, return and actual Desktop Run-dialog occlusion
+with unchanged frame bounds and pixel oracles. The full client restores byte
+exactly. Regular EGL/app retirement and the exact warm BO balance pass, with
+48 additional native submit/visible/release receipts and no lost frames.
+GPU-Desktop readiness and further display integration remain open in 0.82.37;
+this finite case establishes no panel, throughput or 60 FPS qualification.
+Evidence: `ExFiles/Reports/OssiGPU/20261005-tv08237/N258GuiVerified` and
+`ExFiles/Reports/OssiGPU/20261005-tv08237/Checkpoint.txt` (workspace).
+
 Full lists, artifact hashes, captures and check inputs:
 `ExFiles/Reference/GFX/0.79.39/Evidence/EGLDesktop` (workspace).
 NVIDIA physical follow-up: `ExFiles/Reports/OssiGPU.txt`, section 0.79.39.

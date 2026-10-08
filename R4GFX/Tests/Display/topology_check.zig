@@ -4,6 +4,7 @@ const topology = @import("../../Display/topology.zig");
 const Point = topology.Point;
 const Rect = topology.Rect;
 pub fn check(report: *const @import("../../Display/edid.zig").Report) !void {
+    try checkDiscoveryBusy();
     const key = try topology.Key.fromReport(0x10de250401000900, 4, report);
     try t.expect(key.persistable());
     var refreshed = report.*;
@@ -177,3 +178,65 @@ pub fn check(report: *const @import("../../Display/edid.zig").Report) !void {
         }
     }
 }
+
+// The catalog is a transaction. An active head or receiver temporarily
+// unavailable during native work cannot become a disconnected/session-only
+// output in the next successful snapshot.
+fn checkDiscoveryBusy() !void {
+    const a = @import("r4os").abi;
+    const catalog = @import("../../Display/desktop_outputs.zig");
+    var draw: DiscoveryDraw = .{};
+    const full = try catalog.Snapshot.read(&draw);
+    try t.expect(full.count == 1 and full.entries[0].active() and full.entries[0].key.persistable());
+    for ([_]i32{ a.gfx_output_error_busy, a.gfx_output_error_stale, a.gfx_output_error_unavailable }) |rc| {
+        draw.target_result = rc;
+        try t.expectError(error.Stale, catalog.Snapshot.read(&draw));
+    }
+    draw.target_result = a.gfx_output_ok;
+    draw.receiver_result = a.gfx_output_error_busy;
+    try t.expectError(error.Stale, catalog.Snapshot.read(&draw));
+    draw.receiver_result = a.gfx_output_ok;
+    try t.expect(full.sameOutputs(&(try catalog.Snapshot.read(&draw))));
+    draw.target_result = a.gfx_output_error_unsupported;
+    const absent = try catalog.Snapshot.read(&draw);
+    try t.expect(absent.count == 1 and !absent.entries[0].active());
+    draw.target_result = a.gfx_output_ok;
+    draw.receiver_bytes = 0;
+    const anonymous = try catalog.Snapshot.read(&draw);
+    try t.expect(anonymous.entries[0].active() and !anonymous.entries[0].key.persistable());
+}
+const DiscoveryDraw = struct {
+    const a = @import("r4os").abi;
+    const bytes = @embedFile("Fixtures/qemu.edid");
+    const identity: a.GfxOutputId = .{ .adapter_id = 17, .connector_id = 4, .device_generation = 3, .connection_generation = 7 };
+    target_result: i32 = a.gfx_output_ok,
+    receiver_result: i32 = a.gfx_output_ok,
+    receiver_bytes: u32 = bytes.len,
+    pub fn outputs(self: *const DiscoveryDraw) *const DiscoveryDraw { return self; }
+    pub fn revision(_: *const DiscoveryDraw, out: *a.GfxDisplayRevision) i32 {
+        out.* = .{ .revision = 9, .present = 1, .capacity = 32 }; return a.gfx_output_ok;
+    }
+    pub fn info(self: *const DiscoveryDraw, index: u32, out: *a.GfxOutputInfo) i32 {
+        if (index != 0) return a.gfx_output_error_invalid;
+        out.* = .{ .identity = identity, .topology_revision = 9, .edid_bytes = self.receiver_bytes,
+            .flags = a.gfx_output_flag_connected | a.gfx_output_flag_active }; return a.gfx_output_ok;
+    }
+    pub fn color(_: *const DiscoveryDraw, _: *const a.GfxOutputId, _: *a.GfxOutputColorState) i32 { return a.gfx_output_error_unsupported; }
+    pub fn edid(self: *const DiscoveryDraw, _: *const a.GfxOutputId, index: u32, out: *a.GfxEdidBlock) i32 {
+        if (self.receiver_result != a.gfx_output_ok) return self.receiver_result;
+        if (index >= bytes.len / 128) return a.gfx_output_error_invalid;
+        out.* = .{ .identity = identity, .block_index = index, .byte_count = 128 };
+        @memcpy(&out.data, bytes[@as(usize, index) * 128 ..][0..128]); return a.gfx_output_ok;
+    }
+    pub fn displayOutputTarget(self: *const DiscoveryDraw, _: u32, head: u32, out: *a.GfxOutputTarget) i32 {
+        if (head != 0) return a.gfx_output_error_unsupported;
+        if (self.target_result != a.gfx_output_ok) return self.target_result;
+        out.* = .{ .adapter_id = identity.adapter_id, .connector_id = identity.connector_id, .device_generation = identity.device_generation,
+            .connection_generation = identity.connection_generation, .display_generation = 5 }; return a.gfx_output_ok;
+    }
+    pub fn displayOutputPresentationInfo(_: *const DiscoveryDraw, _: *const a.GfxOutputTarget, out: *a.DisplayPresentationInfo) i32 {
+        out.* = .{ .flags = a.display_presentation_info_native | a.display_presentation_info_active | a.display_presentation_info_visibility,
+            .width = 1920, .height = 1080, .format = a.gfx_buffer_format_xrgb8888, .buffer_count = 2, .plane_count = 1,
+            .interval_ns = 16_666_666, .policies = 3, .path = 1 }; return a.gfx_output_ok;
+    }
+};

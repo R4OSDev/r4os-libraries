@@ -6,7 +6,22 @@ const a = @import("r4os").abi;
 const d = @import("device.zig");
 const resource = @import("native_resource.zig");
 pub const capacity = 64;
-pub const Entry = struct { resource: resource.Resource = .{}, uses: u32 = 0, touched: u64 = 0 };
+const Rejection = struct {
+    buffer: a.GfxBufferHandle,
+    deadline: u64,
+    failure: d.Error,
+    fn matches(self: Rejection, buffer: a.GfxBufferHandle, deadline: u64) bool {
+        return self.deadline == deadline and std.meta.eql(self.buffer, buffer);
+    }
+};
+pub const Entry = struct {
+    resource: resource.Resource = .{},
+    uses: u32 = 0,
+    touched: u64 = 0,
+    // Closing the actual range must not erase this attempt's terminal error.
+    // A different deadline, BO generation or device profile may try again.
+    rejection: ?Rejection = null,
+};
 pub const Owner = struct {
     profile: ?resource.Profile = null,
     entries: [capacity]Entry = @splat(.{}),
@@ -32,7 +47,9 @@ pub const Owner = struct {
         self.serial +|= 1;
         // A borrowed reference is imported before a cache lookup. Matching the
         // canonical buffer identity must never make a stale reference usable.
-        const free = for (&self.entries, 0..) |*entry, i| { if (!entry.resource.live()) break i; } else {
+        const free = for (&self.entries, 0..) |*entry, i| {
+            if (!entry.resource.live() and entry.rejection == null) break i;
+        } else for (&self.entries, 0..) |*entry, i| { if (!entry.resource.live()) break i; } else {
             var victim: ?usize = null;
             for (&self.entries, 0..) |*entry, i| if (entry.uses == 0 and !entry.resource.retiring) {
                 if (victim == null or entry.touched < self.entries[victim.?].touched) victim = i;
@@ -44,13 +61,23 @@ pub const Owner = struct {
             return error.Busy;
         };
         const entry = &self.entries[free];
-        entry.* = .{ .touched = self.serial };
+        entry.* = .{ .touched = self.serial, .rejection = entry.rejection };
         entry.resource.import(device, profile, reference, deadline) catch |err| {
             entry.resource.failed = err;
             entry.resource.close(device) catch {};
             return err;
         };
+        if (entry.rejection) |rejected| if (rejected.matches(entry.resource.backing.buffer, deadline)) {
+            entry.resource.failed = error.Busy;
+            entry.resource.close(device) catch {};
+            return rejected.failure;
+        };
         for (&self.entries, 0..) |*other, index| {
+            if (index != free) if (other.rejection) |rejected| if (rejected.matches(entry.resource.backing.buffer, deadline)) {
+                entry.resource.failed = error.Busy;
+                entry.resource.close(device) catch {};
+                return rejected.failure;
+            };
             if (index == free or !other.resource.live() or other.resource.retiring or other.resource.failed != null or
                 !std.meta.eql(other.resource.backing.buffer, entry.resource.backing.buffer)) continue;
             if (!std.meta.eql(other.resource.descriptor, entry.resource.descriptor)) {
@@ -63,6 +90,7 @@ pub const Owner = struct {
             other.touched = self.serial;
             return index;
         }
+        entry.rejection = null;
         return free;
     }
     pub fn upload(self: *Owner, device: *d.Device, slot: usize, deadline: u64) d.Error!*resource.Resource {
@@ -82,21 +110,33 @@ pub const Owner = struct {
         for (&self.entries) |*entry| {
             const item = &entry.resource;
             if (!item.live()) continue;
-            if (entry.uses == 0) self.advance(item, device, profile, now);
+            if (entry.uses == 0) {
+                const buffer = item.backing.buffer;
+                const deadline = item.deadline;
+                if (self.advance(item, device, profile, now)) |err| {
+                    if (err != error.Busy and !self.closing)
+                        entry.rejection = .{ .buffer = buffer, .deadline = deadline, .failure = err };
+                }
+            }
             live = live or item.live();
         }
         for (&self.uploads, 0..) |*item, slot| {
             if (!item.live()) continue;
-            if (device.jobs[slot].serial == 0) self.advance(item, device, profile, now);
+            if (device.jobs[slot].serial == 0) _ = self.advance(item, device, profile, now);
             if (!item.live()) self.uploaded[slot] = false;
             live = live or item.live();
         }
         if (self.closing and !live) self.* = .{};
     }
-    fn advance(self: *Owner, item: *resource.Resource, device: *d.Device, profile: resource.Profile, now: ?u64) void {
-        if (!item.ready and (now == null or now.? >= item.deadline)) item.failed = error.Unavailable;
-        if (self.closing or item.failed != null or item.retiring) { item.close(device) catch {}; return; }
-        _ = item.step(device, profile) catch |err| { item.failed = err; return; };
+    fn advance(self: *Owner, item: *resource.Resource, device: *d.Device, profile: resource.Profile, now: ?u64) ?d.Error {
+        if (!item.ready and item.failed == null and (now == null or now.? >= item.deadline)) item.failed = error.Unavailable;
+        if (self.closing or item.failed != null or item.retiring) {
+            const failure = item.failed;
+            item.close(device) catch {};
+            return failure;
+        }
+        _ = item.step(device, profile) catch |err| { item.failed = err; return err; };
+        return null;
     }
     pub fn hold(self: *Owner, indices: []const u8) void {
         for (indices) |index| {

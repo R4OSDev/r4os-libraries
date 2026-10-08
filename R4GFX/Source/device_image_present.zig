@@ -72,7 +72,10 @@ fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, outpu
     source.job_refs += 1;
     device.jobs[index] = .{ .serial = serial, .source = request.source, .fence = accepted.fence,
         .backend = if (source.descriptor.location == a.gfx_buffer_location_device_local) device.backend() else c.render_backend_software,
-        .bytes = submission.byte_length * source.image.height };
+        // Direct retains and flips the source image; final retirement does
+        // not transfer its bytes. Composition presentation still counts its
+        // complete copy after the exact successful completion receipt.
+        .bytes = if (direct) 0 else submission.byte_length * source.image.height };
     device.job_serial = serial;
     output.* = .{ .slot = @intCast(index + 1), .reserved = 0, .generation = serial, .device_generation = device.generation, .device_address = device.self_address };
     return c.status_ok;

@@ -66,12 +66,24 @@ pub const Snapshot = struct {
             if (readReceiver(draw, &value.info)) |report| {
                 @memcpy(value.name[0..13], &report.name);
                 value.key = topology.Key.fromReport(value.key.adapter, value.key.connector, &report) catch value.key;
-            } else |_| {}
+            } else |err| {
+                // A transient EDID read cannot rename a connected monitor
+                // to its anonymous port key in an otherwise valid snapshot.
+                if (err == error.Stale) return error.Stale;
+            }
             if (value.info.flags & a.gfx_output_flag_active != 0) for (0..topology.capacity) |head| {
                 var target: a.GfxOutputTarget = .{};
-                if (draw.displayOutputTarget(value.info.identity.adapter_id, @intCast(head), &target) != a.gfx_output_ok or
-                    target.connector_id != value.info.identity.connector_id or target.device_generation != value.info.identity.device_generation or
-                    target.connection_generation != value.info.identity.connection_generation) continue;
+                const target_rc = draw.displayOutputTarget(value.info.identity.adapter_id, @intCast(head), &target);
+                if (target_rc != a.gfx_output_ok) {
+                    // Busy while the native output owner is borrowed is not
+                    // evidence that an active head disappeared. Abort this
+                    // candidate; callers retain their last complete catalog.
+                    if (target_rc == a.gfx_output_error_unsupported or target_rc == a.err_no_fn or target_rc == a.err_no_group) continue;
+                    return error.Stale;
+                }
+                if (target.connector_id != value.info.identity.connector_id) continue;
+                if (target.device_generation != value.info.identity.device_generation or
+                    target.connection_generation != value.info.identity.connection_generation) return error.Stale;
                 var presentation: a.DisplayPresentationInfo = .{};
                 if (draw.displayOutputPresentationInfo(&target, &presentation) != a.gfx_output_ok) return error.Stale;
                 if (presentation.width == 0 or presentation.height == 0 or presentation.width > 65536 or presentation.height > 65536 or

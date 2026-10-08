@@ -73,6 +73,7 @@ const Model = struct {
     var virtual_starts: usize = 0;
     var virtual_closes: usize = 0;
     var virtual_ack = false;
+    var virtual_reject_object: ?usize = null;
     var retire_ack = false;
     const AmdPacket = extern struct { header: amd.R4AmdYuvHeader, color: [64]u32, matrix: [3][4]f32 };
     var amd_packet: AmdPacket = undefined;
@@ -118,12 +119,15 @@ const Model = struct {
     }
     fn virtualQuery(input: *const a.GfxBufferHandle, out: *a.GfxVirtualStatus) callconv(.c) i32 {
         const entry = virtualNode(input.*);
+        const rejected = entry.request.kind == 2 and virtual_reject_object != null and
+            ref(entry.request.reference).object.? == virtual_reject_object.?;
         out.* = .{ .resource = entry.handle, .parent = entry.request.parent, .kind = entry.request.kind,
             .byte_length = entry.request.byte_length, .deadline_ns = entry.request.deadline_ns,
             // The real common owner publishes its active driver claim before
             // the asynchronous create result. Flag 8/result 0 is pending.
-            .flags = if (entry.closing) (if (retire_ack) @as(u32,7) else 3) else (if (virtual_ack) @as(u32,1) else 8),
-            .result = if (virtual_ack) 1 else 0, .address = if (virtual_ack) entry.address else 0 };
+            .flags = if (entry.closing) (if (retire_ack) @as(u32,7) else 3) else (if (rejected) @as(u32,7) else if (virtual_ack) @as(u32,1) else 8),
+            .result = if (rejected) a.gfx_buffer_error_unsupported else if (virtual_ack) 1 else 0,
+            .address = if (virtual_ack and !rejected) entry.address else 0 };
         return 1;
     }
     fn virtualClose(input: *const a.GfxBufferHandle, flags: u32) callconv(.c) i32 {
@@ -193,7 +197,7 @@ const Model = struct {
         clock = 100; submit_serial = 0x400000017; feedback = null; shown = @splat(0xabcdef); present_calls = 0; fail_present = false;
         retire_requested = false;
         outputs = @splat(.{});
-        virtuals = @splat(.{}); virtual_starts = 0; virtual_closes = 0; virtual_ack = false; retire_ack = false;
+        virtuals = @splat(.{}); virtual_starts = 0; virtual_closes = 0; virtual_ack = false; virtual_reject_object = null; retire_ack = false;
         presentation_info = .{ .flags = a.display_presentation_info_active, .head_id = 2, .display_generation = 1,
             .sequence = 1, .width = 4, .height = 4, .format = c.format_xrgb8888, .policies = 7, .buffer_count = 2, .plane_count = 1 };
     }
@@ -322,7 +326,12 @@ const Model = struct {
     fn nativeClose(input: *const a.GfxBufferHandle) callconv(.c) i32 {
         std.debug.assert(std.meta.eql(input.*, native_handle)); native_handle = .{}; return 1;
     }
-    fn import(input: *const a.GfxBufferHandle, out: *a.GfxBufferReference) callconv(.c) i32 { return lend(ref(input.*).object.?, out, false); }
+    fn import(input: *const a.GfxBufferHandle, out: *a.GfxBufferReference) callconv(.c) i32 {
+        if (input.id == 0 or input.id > references.len or input.reserved0 != 0) return a.gfx_buffer_error_stale;
+        const value = &references[input.id - 1];
+        if (value.object == null or value.generation != input.generation) return a.gfx_buffer_error_stale;
+        return lend(value.object.?, out, false);
+    }
     fn release(input: *const a.GfxBufferHandle) callconv(.c) i32 {
         const value = ref(input.*); std.debug.assert(!value.mapped);
         const object = value.object.?; value.object = null;
@@ -1026,6 +1035,7 @@ pub fn check() !void {
     draw.gfx_queue_submit_native = @intFromPtr(&Model.submitNative);
     imports[3].table = @intFromPtr(&Model.nv_render); imports[3].resolved_version = nv.render_v1_revision;
     try checkNativeYuv(&config);
+    try checkNativeYuvRejection(&config);
     try checkAmdYuv(&config, &imports, false);
     Model.amd_properties_revision = 2;
     defer Model.amd_properties_revision = 1;
@@ -1208,6 +1218,101 @@ fn checkNativeYuv(config: *const c.R4GfxDeviceConfig) !void {
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
     for (Model.virtuals) |entry| try t.expect(entry.handle.id == 0);
     std.debug.print("native YUV: public encoder, one upload/no pixel maps, cached BO/VA reuse, reset and separate engine/map retirement: OK\n", .{});
+}
+
+fn checkNativeYuvRejection(config: *const c.R4GfxDeviceConfig) !void {
+    Model.reset(); Model.operations = 29 | (@as(u64,1) << a.gfx_queue_operation_native);
+    const colors = &@import("main.zig").r4gfx_color_v1;
+    var handle: c.R4GfxDevice = undefined;
+    try t.expectEqual(c.status_ok, api.device_open(config, &handle));
+    var source: a.GfxBufferReference = .{};
+    try t.expectEqual(@as(i32,1), Model.create(&.{ .byte_length = 131072, .alignment = 65536, .modifier = 0x0300000000606011,
+        .width = 4, .height = 32, .format = a.gfx_buffer_format_nv12, .plane_count = 2, .plane_offsets = .{0,65536,0,0}, .plane_pitches = .{64,64,0,0},
+        .usage = 28, .location = 1, .adapter_id = Model.binding.adapter_id, .device_generation = 73, .driver_owner = 79 }, &source));
+    var native: c.R4GfxNativeImage = .{ .version = 1, .size = 32, .deadline_ns = 99999999,
+        .width = 4, .height = 4, .format = c.format_abgr16161616f, .layout = 0 };
+    var desc: c.R4GfxColorResourceDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxColorResourceDesc),
+        .resource = descriptor(c.resource_image), .description = .{ .version = 1, .size = @sizeOf(c.R4GfxColorDescription),
+            .primaries = c.color_primaries_srgb, .transfer = c.color_transfer_linear, .range = c.color_range_full,
+            .alpha = c.color_alpha_optical, .precision = c.color_precision_float16, .flags = 0,
+            .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 } };
+    desc.resource.flags = c.image_target; desc.resource.source_kind = c.source_create_native; desc.resource.source_address = @intFromPtr(&native);
+    var target: c.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, colors.color_resource_create(&handle, &desc, &target));
+    var request = std.mem.zeroes(c.R4GfxYuvRenderRequest);
+    request.version = 1; request.size = @sizeOf(c.R4GfxYuvRenderRequest); request.target = target; request.deadline_ns = native.deadline_ns;
+    request.source = .{ .version = 1, .size = @sizeOf(c.R4GfxYuvBufferImage), .format = 1, .width = 4, .height = 4, .plane_count = 2, .reserved = 0,
+        .crop = .{ .x = 1, .y = 1, .width = 3, .height = 3 },
+        .description = .{ .version = 1, .size = @sizeOf(c.R4GfxYuvDescription), .primaries = 1, .transfer = 1, .matrix = 1, .range = 2,
+            .chroma_location = 1, .flags = 0, .reference_white = 1000000, .peak = 1000000, .black = 0, .reserved = 0 },
+        .plane0 = .{ .reference_id = source.reference.id, .reference_generation = source.reference.generation, .reserved = 0, .offset = 0, .byte_length = 65536, .pitch = 64 },
+        .plane1 = .{ .reference_id = source.reference.id, .reference_generation = source.reference.generation, .reserved = 0, .offset = 65536, .byte_length = 65536, .pitch = 64 },
+        .plane2 = std.mem.zeroes(c.R4GfxYuvBufferPlane) };
+    request.transform = .{ .version = 1, .size = @sizeOf(c.R4GfxColorTransform), .source_rect = request.source.crop,
+        .target_rect = .{ .x = 0, .y = 0, .width = 4, .height = 4 }, .sampler = 1, .operation = c.render_operation_over,
+        .opacity = 32768, .flags = 0, .pixel_budget = 16 };
+    var job = std.mem.zeroes(c.R4GfxJob);
+    const empty = job;
+    const device = try d.get(&handle, false);
+    const target_entry = try device.resource(target, true);
+    Model.virtual_reject_object = Model.ref(target_entry.backing.reference).object.?;
+    Model.virtual_ack = true;
+    // A real asynchronous terminal bind rejection is separate from physical
+    // range retirement. It must reach the public caller without another map.
+    var rejected = false;
+    for (0..8) |_| {
+        const rc = colors.color_yuv_render_submit(&handle, &request, &job);
+        try t.expectEqualDeep(empty, job);
+        if (rc == c.status_unsupported) { rejected = true; break; }
+        try t.expectEqual(c.status_busy, rc);
+    }
+    try t.expect(rejected and !Model.job_live);
+    const starts = Model.virtual_starts;
+    Model.virtual_reject_object = null;
+    // Changing the provider cannot change this exact attempt's rejection.
+    // CPU stepping and held retirement must not turn it into retries/BUSY.
+    for (0..8) |_| {
+        var info: c.R4GfxDeviceInfo = undefined;
+        try t.expectEqual(c.status_ok, api.device_info(&handle, &info));
+        try t.expectEqual(c.status_unsupported, colors.color_yuv_render_submit(&handle, &request, &job));
+        try t.expectEqualDeep(empty, job);
+        try t.expect(Model.virtual_starts == starts and !Model.job_live);
+    }
+    Model.retire_ack = true;
+    for (0..4) |_| {
+        try t.expectEqual(c.status_unsupported, colors.color_yuv_render_submit(&handle, &request, &job));
+        try t.expectEqualDeep(empty, job);
+        try t.expect(Model.virtual_starts == starts and !Model.job_live);
+    }
+    // Import authentication precedes either live or failed cache lookup.
+    var stale = request;
+    stale.source.plane0.reference_generation += 1;
+    try t.expectEqual(c.status_stale, colors.color_yuv_render_submit(&handle, &stale, &job));
+    try t.expectEqualDeep(empty, job);
+    try t.expect(Model.virtual_starts == starts and !Model.job_live);
+    // A fresh attempt may retry the same BO after its actual old range closes.
+    request.deadline_ns += 1;
+    for (0..8) |_| {
+        const rc = colors.color_yuv_render_submit(&handle, &request, &job);
+        if (rc == c.status_ok) break;
+        try t.expectEqual(c.status_busy, rc);
+    }
+    try t.expect(job.slot != 0 and Model.job_live and Model.virtual_starts == starts + 2);
+    Model.status.phase = a.gfx_queue_phase_terminal;
+    Model.status.result = a.gfx_queue_result_complete;
+    Model.status.flags = 0;
+    try t.expectEqual(c.status_ok, api.job_release(&handle, &job));
+    try t.expectEqual(c.status_ok, api.resource_release(&handle, &target));
+    try t.expectEqual(@as(i32,1), Model.release(&source.reference));
+    var closed = false;
+    for (0..4) |_| {
+        const rc = api.device_close(&handle);
+        if (rc == c.status_ok) { closed = true; break; }
+        try t.expectEqual(c.status_busy, rc);
+    }
+    try t.expect(closed and Model.referenceCount() == 0 and Model.premature_closes == 0);
+    for (Model.virtuals) |entry| try t.expect(entry.handle.id == 0);
+    std.debug.print("native YUV: exact terminal rejection survives held/final map retirement; no retries, stale import rejected, new attempt allowed, full cleanup: OK\n", .{});
 }
 
 fn checkResidency(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartImport, use_amd: bool) !void {
@@ -1602,6 +1707,9 @@ fn checkSwapchains(config: *const c.R4GfxDeviceConfig, imports: *[6]a.R4XStartIm
         .source_timeline = source_fence.timeline, .source_point = source_fence.point, .visible_ns = Model.clock + 1 };
     try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
     try t.expect(chainFrame(status, first).result == 1 and chainFrame(status, first).visible_ns == Model.feedback.?.visible_ns);
+    var copy_info: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.device_info(&handle, &copy_info));
+    try t.expectEqual(@as(u64, 64), copy_info.gpu_copy_bytes);
     try t.expectEqual(c.status_ok, api.swapchain_release(&handle, &chain, &first));
     try t.expectEqual(c.status_ok, api.swapchain_acquire(&handle, &chain, 0, &next));
     try t.expectEqual(c.status_ok, api.swapchain_present(&handle, &chain, &presentRequest(next)));
@@ -1700,6 +1808,13 @@ fn checkDirectSwapchain(config: *const c.R4GfxDeviceConfig) !void {
     try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chain, &status));
     try t.expect(chainFrame(status, frame).released_ns > visible.visible_ns and status.held_count == 0);
     try t.expectEqual(c.status_ok, api.swapchain_close(&handle, &chain));
+    // Retirement of a retained direct front is not a copy. Keep the exact
+    // completed-receipt accounting check after final retirement, where the
+    // old implementation incorrectly charged the complete image size.
+    var direct_info: c.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, api.device_info(&handle, &direct_info));
+    try t.expectEqual(@as(u64, 0), direct_info.gpu_copy_bytes);
+    try t.expect(direct_info.cpu_read_bytes == 0 and direct_info.cpu_write_bytes == 0 and direct_info.upload_bytes == 0);
     try t.expectEqual(c.status_ok, api.device_close(&handle));
     try t.expect(Model.referenceCount() == 0 and Model.premature_closes == 0);
 }

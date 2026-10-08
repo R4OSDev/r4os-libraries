@@ -263,27 +263,28 @@ bool r4gl_window_finish(uint64_t deadline)
 static bool config_ok(const R4WindowGraphicsConfig *c)
 {
    const bool gpu = r4gl_native_profile() == 1;
+   const bool software = c->backend.binding.adapter_id == 0;
+   const bool headless = c->flags & R4OS_WINDOW_GRAPHICS_HEADLESS;
    const R4GfxOutputId no_output = {0};
    /* Zink's renderer and the window's consumer have separate owners. The
-    * real GPU can render portable images for Desktop's headless CPU consumer;
-    * this publication promises no native output or synchronized scanout. */
-   const bool headless_cpu = (c->flags & R4OS_WINDOW_GRAPHICS_HEADLESS) &&
-      !(c->flags & ~(R4OS_WINDOW_GRAPHICS_VISIBLE | R4OS_WINDOW_GRAPHICS_HEADLESS)) &&
-      !c->reserved && c->display_generation &&
-      c->backend.binding.adapter_id == 0 &&
-      c->backend.binding.milestone == R4OS_GFX_QUEUE_MILESTONE_CPU_STORES &&
-      !memcmp(&c->output, &no_output, sizeof(no_output));
+    * real GPU can render portable images for a CPU compositor on an actual
+    * output or without scanout. Its CPU receipt does not prove GPU rendering
+    * or synchronized scanout; those owners retain their separate receipts. */
    return c->version == 1 && c->size == sizeof(*c) && c->revision && c->width && c->height &&
-      c->width <= 32768 && c->height <= 32768 &&
+      c->width <= 32768 && c->height <= 32768 && !c->reserved && c->display_generation &&
+      !(c->flags & ~(R4OS_WINDOW_GRAPHICS_VISIBLE | R4OS_WINDOW_GRAPHICS_HEADLESS)) &&
+      (headless ? (software && !memcmp(&c->output, &no_output, sizeof(no_output))) :
+         (c->output.connector_id && c->output.connection_generation && c->output.device_generation &&
+          (software || (c->output.adapter_id == c->backend.binding.adapter_id &&
+                        c->output.device_generation == c->backend.binding.device_generation)))) &&
       c->backend.version == 1 && c->backend.size == sizeof(c->backend) &&
       c->backend.binding.version == 1 && c->backend.binding.size == sizeof(c->backend.binding) &&
       c->backend.binding.device_generation && c->backend.binding.reset_generation &&
-      (gpu ? (headless_cpu || (c->backend.binding.adapter_id != 0 &&
-         c->backend.binding.milestone == R4OS_GFX_QUEUE_MILESTONE_DEVICE_EXECUTION)) :
-         c->backend.binding.adapter_id == 0 &&
-         c->backend.binding.milestone == R4OS_GFX_QUEUE_MILESTONE_CPU_STORES) &&
+      (software ? c->backend.binding.milestone == R4OS_GFX_QUEUE_MILESTONE_CPU_STORES :
+         (gpu && c->backend.binding.milestone == R4OS_GFX_QUEUE_MILESTONE_DEVICE_EXECUTION)) &&
       c->min_images >= 2 && c->max_images <= 3 && c->min_images <= c->max_images &&
-      c->format_count && c->format_count <= COUNT(c->formats) && (c->present_modes & (R4OS_WINDOW_GRAPHICS_MAILBOX | R4OS_WINDOW_GRAPHICS_FIFO));
+      c->format_count && c->format_count <= COUNT(c->formats) && (c->present_modes & R4OS_WINDOW_GRAPHICS_FIFO) &&
+      !(c->present_modes & ~(R4OS_WINDOW_GRAPHICS_MAILBOX | R4OS_WINDOW_GRAPHICS_FIFO));
 }
 static EGLint refresh(struct window *w)
 {

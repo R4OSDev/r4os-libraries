@@ -112,7 +112,9 @@ fn runWindow(app: *r.App, f: Functions, observer: ?Observer) !void {
     try require(major == 1 and minor >= 5 and f.eglBindAPI(0x30a2) == 1);
     var config: H = null;
     var count: i32 = 0;
-    try require(f.eglChooseConfig(display, &.{ 0x3033, 4, 0x3040, 8, 0x3024, 8, 0x3023, 8, 0x3022, 8, 0x3038 }, &config, 1, &count) == 1 and count == 1);
+    // This example explicitly uses interval zero. A different output may
+    // offer synchronized configs while this window has a CPU consumer.
+    try require(f.eglChooseConfig(display, &.{ 0x3033, 4, 0x3040, 8, 0x3024, 8, 0x3023, 8, 0x3022, 8, 0x303c, 0, 0x3038 }, &config, 1, &count) == 1 and count == 1);
     const context = f.eglCreateContext(display, config, null, &.{ 0x3098, 3, 0x30fb, 3, 0x30fd, 1, 0x3038 });
     try require(context != null);
     defer _ = f.eglDestroyContext(display, context);

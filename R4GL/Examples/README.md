@@ -14,6 +14,8 @@ It is an example source, not a separately installed application or test gate.
 Software rendering is the default. `/ZINK` explicitly selects the native
 Vulkan backend and fails if its requirements are unavailable. Both use swap
 interval zero; fullscreen does not change monitor timing or promise VSync.
+The example selects a 0..0 EGL config explicitly. Another output's VSync
+capability does not make this window's CPU consumer a synchronized target.
 
 An optional observer passed to `run` receives renderer/version/extensions and
 logical client geometry and EGL framebuffer dimensions. Framebuffer dimensions
