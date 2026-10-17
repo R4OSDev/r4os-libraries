@@ -116,7 +116,7 @@ try {
     $results = @(foreach ($entry in $plan.units) {
         if ($entry.name -notmatch '^[a-z0-9_]+$') { throw 'Invalid object name.' }
         $flags = if ($plan.profile -eq 'mesa') { @($profile.cpp_flags) } else {
-            @('-target','x86_64-unknown-none-elf','-O2','-ffreestanding','-nostdinc','-fno-stack-protector','-fno-asynchronous-unwind-tables','-fno-unwind-tables','-fno-pic','-mcmodel=large','-mno-red-zone','-ffunction-sections','-fdata-sections','-isystem', ($resource.Trim() + '/include'))
+            @('-target','x86_64-unknown-none-elf','-O2','-ffreestanding','-nostdinc','-fno-stack-protector','-Xclang','-fstack-clash-protection','-fno-asynchronous-unwind-tables','-fno-unwind-tables','-fno-pic','-mcmodel=large','-mno-red-zone','-ffunction-sections','-fdata-sections','-isystem', ($resource.Trim() + '/include'))
         }
         if ($entry.language -eq 'c') { $flags = @($flags | Where-Object { $_ -notmatch '^-std=|^-fno-(exceptions|rtti)$|^-nostdinc\+\+$' }) + '-std=c11' }
         $object = Join-Path $objects ($entry.name + '.o')

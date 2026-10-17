@@ -41,6 +41,13 @@ normal image profiles until package integration; see their READMEs.
 Both `Build.bat` and `./Build.sh` use the shared PowerShell 7 `Build.ps1`. Dependency paths are mapped by
 `Settings.R4S`.
 
+The SDK emits pagewise inline stack probes for Zig modules. Native C/C++
+profiles pass `-Xclang -fstack-clash-protection` directly to the frontend,
+including the shared NAK/Vulkan and portability profiles; the freestanding
+driver-level option alone is ignored. The native Rust target already uses
+inline probes. Probes preserve the existing ABI and do not allocate or wait;
+fixed worker stacks still require bounded resident workspaces.
+
 Detailed German migration notes are preserved in
 `DOCUMENTATION.de.txt`.
 

@@ -21,7 +21,7 @@ $cPaths.Add((Join-Path $unit 'Source/native.c'))
 foreach ($name in @('blake3','blake3_dispatch','blake3_portable')) { $cPaths.Add((Join-Path $source "src/util/blake3/$name.c")) }
 $cPaths.Add((Join-Path $source 'src/util/mesa-blake3.c'))
 $cPaths.Add((Join-Path $hostBuild 'src/util/format/u_format_table.c'))
-$cArgs = @('-target','x86_64-unknown-none-elf','-std=c11','-O2','-ffreestanding','-fno-stack-protector','-fno-asynchronous-unwind-tables','-fno-unwind-tables',
+$cArgs = @('-target','x86_64-unknown-none-elf','-std=c11','-O2','-ffreestanding','-fno-stack-protector','-Xclang','-fstack-clash-protection','-fno-asynchronous-unwind-tables','-fno-unwind-tables',
     '-fno-pic','-mcmodel=large','-mno-red-zone','-ffunction-sections','-fdata-sections','-fvisibility=hidden','-nostdinc',
     '-fno-math-errno','-fno-trapping-math','-fno-builtin','-ferror-limit=5',
     '-isystem',(Join-Path (& $tools.clang -print-resource-dir) 'include'),"-I$(Join-Path $unit 'Port/Include')","-I$hostBuild")

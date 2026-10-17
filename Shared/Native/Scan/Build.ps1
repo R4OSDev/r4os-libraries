@@ -24,7 +24,7 @@ foreach($file in $manifest.files){
 $resource=(& $Clang -print-resource-dir).Trim()
 if($LASTEXITCODE){throw 'Native scan compiler resource lookup failed'}
 $flags=@('-target','x86_64-unknown-none-elf','-std=c11','-O2','-ffreestanding','-nostdinc',
- '-fno-builtin','-fno-stack-protector','-fno-asynchronous-unwind-tables','-fno-unwind-tables',
+ '-fno-builtin','-fno-stack-protector','-Xclang','-fstack-clash-protection','-fno-asynchronous-unwind-tables','-fno-unwind-tables',
  '-fno-pic','-mcmodel=large','-mno-red-zone','-ffunction-sections','-fdata-sections','-fvisibility=hidden',
  '-fno-fast-math','-frounding-math','-ffp-contract=off','-mlong-double-64',
  '-D__floatscan=r4native_floatscan64','-D__shlim=r4native_shlim','-D__shgetc=r4native_shgetc',

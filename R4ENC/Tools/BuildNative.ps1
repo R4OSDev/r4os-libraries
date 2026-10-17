@@ -75,7 +75,7 @@ if (Test-Path -LiteralPath $record) {
     [IO.File]::Delete($record)
 }
 [IO.Directory]::CreateDirectory($objects) | Out-Null
-$flags = @('-target','x86_64-unknown-none-elf','-O2','-ffreestanding','-fno-stack-protector',
+$flags = @('-target','x86_64-unknown-none-elf','-O2','-ffreestanding','-fno-stack-protector','-Xclang','-fstack-clash-protection',
     '-fno-asynchronous-unwind-tables','-fno-unwind-tables','-fno-pic','-mcmodel=large','-mno-red-zone',
     '-ffunction-sections','-fdata-sections','-fvisibility=hidden','-fno-math-errno','-fno-trapping-math',
     '-femulated-tls','-nostdinc','-ferror-limit=3','-DR4OS_ENCODE=1','-DX86_ASM','-DHAVE_AVX2',
