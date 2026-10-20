@@ -109,3 +109,17 @@ Pfadvergleich; fuenf gezielte Hostfaelle fuer die betroffenen Oberflaechen und
 REG; ein SMP4-Gastlauf mit privaten TMP/BAK-Daten, erhaltenem Fremdschluessel,
 geaendertem COUNT, unveraenderter4097-Byte-Datei nach Groessenfehler und
 vorhandener leerer Datei. Kein neuer kanonischer Testlauf angelegt.
+Transportpfade (0.85.42)
+-----------------------
+Bindings/Zig/path_text.zig ist ein reiner statischer Texthelfer, exportiert
+als r4std_path_text. valid prueft kanonisches UTF8, NUL/ASCII-Steuerzeichen,
+unzulassige Pfadzeichen,255UTF16-Einheiten je Komponente und die vom Caller
+uebergebene Bytekapazitaet ohne NUL. Laufwerkspraefixe sind Syntax.
+Leerzeichen, kombinierte Zeichen und alle zugelassenen Originalbytes bleiben
+unveraendert; keine Normalisierung, Kollation oder OEM-Vermutung. Weitere
+Dateisystem-/Transaktionsgrenzen bleiben beim jeweiligen Operationsbesitzer.
+validText prueft komplette druckbare UTF8-Protokollzeilen; ein Transport muss
+unvollstaendige Bytepraefixe bis zum Recordende behalten. Die dynamische
+R4STD-Version und CODEC_V1 aendern sich dadurch nicht.
+Gezielte Hostpruefung im Libraries-Root: zig build test-path-text.
+
