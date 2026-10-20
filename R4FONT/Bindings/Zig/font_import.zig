@@ -7,6 +7,8 @@
 
 const std = @import("std");
 const r4f = @import("font_format.zig");
+const legacy = @import("r4std_legacy_tables");
+const text = @import("r4std_console_text");
 
 const RT_FONT: u16 = 8;
 const FNT_HEADER_SIZE: usize = 118;
@@ -95,6 +97,7 @@ pub fn faceCount(data: []const u8) usize {
 pub fn inspect(data: []const u8, face_index: usize) !FaceInfo {
     const source = try selectedFnt(data, face_index);
     const info = try parseFntInfo(source.bytes);
+    _ = try fntCharset(info.charset);
     const family = readFntString(source.bytes, info.face_offset, "Windows FNT");
     return .{
         .family = family,
@@ -114,6 +117,7 @@ pub fn inspect(data: []const u8, face_index: usize) !FaceInfo {
 pub fn convert(allocator: std.mem.Allocator, data: []const u8, source_name: []const u8, face_index: usize) ![]u8 {
     const source = try selectedFnt(data, face_index);
     const info = try parseFntInfo(source.bytes);
+    const charset = try fntCharset(info.charset);
     if (info.pix_height == 0) return error.NotRasterFnt;
 
     var owned_glyphs: std.ArrayList([]u8) = .empty;
@@ -125,6 +129,7 @@ pub fn convert(allocator: std.mem.Allocator, data: []const u8, source_name: []co
     defer glyphs.deinit(allocator);
 
     try extractGlyphs(allocator, source.bytes, info, &owned_glyphs, &glyphs);
+    try mapLegacyGlyphs(&glyphs, charset);
 
     const family = readFntString(source.bytes, info.face_offset, "Windows FNT");
     return writeRasterFont(allocator, glyphs.items, .{
@@ -138,11 +143,11 @@ pub fn convert(allocator: std.mem.Allocator, data: []const u8, source_name: []co
         .line_height = @intCast(info.pix_height + info.external_leading),
         .weight = if (info.weight == 0) 400 else info.weight,
         .style_flags = fntStyleFlags(info),
-        .charset = fntCharset(info.charset),
+        .charset = charset,
     });
 }
 
-/// Rasterizes ASCII sample text from an FNT resource without installing it.
+/// Rasterizes strict UTF-8 sample text from an FNT resource without installing it.
 /// `pixels` uses `pixel_width` as its row stride and is filled with white
 /// background plus black glyph pixels.
 pub fn rasterizePreview(
@@ -157,6 +162,10 @@ pub fn rasterizePreview(
     if (pixel_width == 0 or pixel_height == 0 or pixels.len < @as(usize, pixel_width) * pixel_height) return error.BadPreviewBuffer;
     const source = try selectedFnt(data, face_index);
     const info = try parseFntInfo(source.bytes);
+    const charset = try fntCharset(info.charset);
+    // Reject malformed or incomplete text before touching the caller's pixels.
+    var checked: usize = 0;
+    while (checked < sample.len) checked += (try text.decode(sample[checked..])).len;
 
     var owned_glyphs: std.ArrayList([]u8) = .empty;
     defer {
@@ -166,13 +175,17 @@ pub fn rasterizePreview(
     var glyphs: std.ArrayList(RasterGlyph) = .empty;
     defer glyphs.deinit(allocator);
     try extractGlyphs(allocator, source.bytes, info, &owned_glyphs, &glyphs);
+    try mapLegacyGlyphs(&glyphs, charset);
 
     const stride: usize = pixel_width;
     const raster_len = stride * pixel_height;
     @memset(pixels[0..raster_len], 0x00FFFFFF);
     var pen_x: usize = 0;
-    for (sample) |ch| {
-        const codepoint: u32 = ch;
+    var offset: usize = 0;
+    while (offset < sample.len) {
+        const scalar = try text.decode(sample[offset..]);
+        offset += scalar.len;
+        const codepoint: u32 = scalar.value;
         var selected: ?RasterGlyph = null;
         for (glyphs.items) |glyph| {
             if (glyph.codepoint == codepoint) {
@@ -488,8 +501,35 @@ fn fntStyleFlags(info: FntInfo) u32 {
     return flags;
 }
 
-fn fntCharset(charset: u8) u16 {
-    return if (charset == 0xFF) r4f.CHARSET_CP437 else r4f.CHARSET_WINDOWS_1252;
+fn fntCharset(charset: u8) !u16 {
+    // R4OS's explicit ANSI/OEM import policy. OEM_CHARSET is locale dependent
+    // on Windows; this importer supports US OEM 437 only, never aliases 850.
+    // DEFAULT, SYMBOL and all other Windows charsets need a real codec first.
+    return switch (charset) {
+        0 => r4f.CHARSET_WINDOWS_1252,
+        0xff => r4f.CHARSET_CP437,
+        else => error.UnsupportedFntCharset,
+    };
+}
+
+fn mapLegacyGlyphs(glyphs: *std.ArrayList(RasterGlyph), charset: u16) !void {
+    var used: usize = 0;
+    for (glyphs.items) |raw| {
+        if (raw.codepoint > 255) return error.BadFntCharacter;
+        const cp = if (charset == r4f.CHARSET_CP437)
+            legacy.pc_graphics[raw.codepoint]
+        else
+            legacy.windows1252[raw.codepoint];
+        // Undefined 1252 slots are not Unicode glyphs. The backing allocation
+        // stays in owned_glyphs and is released even when its record is omitted.
+        if (cp == legacy.undefined_scalar) continue;
+        var mapped = raw;
+        mapped.codepoint = cp;
+        glyphs.items[used] = mapped;
+        used += 1;
+    }
+    glyphs.items.len = used;
+    if (used == 0) return error.NoMappedFntGlyphs;
 }
 
 fn readFntString(data: []const u8, offset: u32, fallback: []const u8) []const u8 {
@@ -588,6 +628,7 @@ fn writeRasterFont(allocator: std.mem.Allocator, glyphs: []const RasterGlyph, op
     var max_width: u16 = 0;
     var max_bytes_per_row: u16 = 0;
     for (glyphs) |glyph| {
+        if (!r4f.validScalar(glyph.codepoint)) return error.InvalidUnicodeScalar;
         if (glyph.height != opts.pixel_height or glyph.width == 0) return error.UnsupportedBitmapSize;
         const bytes_per_row: u16 = @intCast((@as(usize, glyph.width) + 7) / 8);
         if (glyph.data.len < @as(usize, bytes_per_row) * opts.pixel_height) return error.ShortGlyphData;
@@ -644,7 +685,7 @@ fn writeRasterFont(allocator: std.mem.Allocator, glyphs: []const RasterGlyph, op
     try appendU32(&glyph_map, allocator, @intCast(glyphs.len));
     for (glyphs, 0..) |glyph, glyph_id| {
         try appendU16(&glyph_map, allocator, 0);
-        try appendU16(&glyph_map, allocator, opts.charset);
+        try appendU16(&glyph_map, allocator, r4f.CHARSET_UNICODE);
         try appendU32(&glyph_map, allocator, glyph.codepoint);
         try appendU32(&glyph_map, allocator, @intCast(glyph_id));
         try appendU32(&glyph_map, allocator, 0);
@@ -833,6 +874,95 @@ fn le32(data: []const u8, offset: usize) u32 {
         (@as(u32, data[offset + 3]) << 24);
 }
 
+fn testFnt(charset: u8, byte: u8) [138]u8 {
+    var fnt: [138]u8 = .{0} ** 138;
+    fnt[1] = 1;
+    fnt[2] = 138;
+    fnt[68] = 8;
+    fnt[74] = 7;
+    fnt[85] = charset;
+    fnt[86] = 8;
+    fnt[88] = 8;
+    fnt[91] = 8;
+    fnt[93] = 8;
+    fnt[95] = byte;
+    fnt[96] = byte;
+    fnt[99] = 1;
+    fnt[105] = 130;
+    fnt[113] = 118;
+    @memcpy(fnt[118..126], &[_]u8{ 0x18, 0x24, 0x42, 0x7e, 0x42, 0x42, 0, 0 });
+    fnt[130] = 'T';
+    return fnt;
+}
+
+fn testMap(bytes: []const u8) []const u8 {
+    const count = le16(bytes, 20);
+    for (0..count) |i| {
+        const dir = le32(bytes, 16) + i * r4f.TABLE_ENTRY_SIZE;
+        if (le32(bytes, dir) == r4f.TABLE_GLYPH_MAP) {
+            const offset = le32(bytes, dir + 4);
+            return bytes[offset .. offset + le32(bytes, dir + 8)];
+        }
+    }
+    unreachable;
+}
+
+test "FNT OEM 81 C4 and ANSI 80 emit Unicode maps and matching UTF8 pixels" {
+    const cases = [_]struct { charset: u8, byte: u8, cp: u32, utf8: []const u8 }{
+        .{ .charset = 0xff, .byte = 0x81, .cp = 0xfc, .utf8 = "\xc3\xbc" },
+        .{ .charset = 0xff, .byte = 0xc4, .cp = 0x2500, .utf8 = "\xe2\x94\x80" },
+        .{ .charset = 0, .byte = 0x80, .cp = 0x20ac, .utf8 = "\xe2\x82\xac" },
+        .{ .charset = 0xff, .byte = 1, .cp = 0x263a, .utf8 = "\xe2\x98\xba" },
+    };
+    for (cases) |c| {
+        const input = testFnt(c.charset, c.byte);
+        const output = try convert(std.testing.allocator, &input, "TEST.FNT", 0);
+        defer std.testing.allocator.free(output);
+        const map = testMap(output);
+        try std.testing.expectEqual(@as(u32, 1), le32(map, 0));
+        try std.testing.expectEqual(r4f.CHARSET_UNICODE, le16(map, 6));
+        try std.testing.expectEqual(c.cp, le32(map, 8));
+        var pixels: [64]u32 = undefined;
+        _ = try rasterizePreview(std.testing.allocator, &input, 0, c.utf8, &pixels, 8, 8);
+        const oracle = [_]u8{ 0x18, 0x24, 0x42, 0x7e, 0x42, 0x42, 0, 0 };
+        for (pixels, 0..) |pixel, i| {
+            const ink = oracle[i / 8] & (@as(u8, 0x80) >> @intCast(i % 8)) != 0;
+            try std.testing.expectEqual(@as(u32, if (ink) 0 else 0xffffff), pixel);
+        }
+    }
+}
+
+test "FNT unknown or ambiguous charsets and 1252 holes are never relabeled" {
+    for ([_]u8{ 1, 2, 77, 128, 161, 204, 254 }) |charset| {
+        const input = testFnt(charset, 0x81);
+        try std.testing.expectError(error.UnsupportedFntCharset, inspect(&input, 0));
+        try std.testing.expectError(error.UnsupportedFntCharset, convert(std.testing.allocator, &input, "BAD.FNT", 0));
+        var pixels = [_]u32{0x12345678} ** 64;
+        try std.testing.expectError(error.UnsupportedFntCharset, rasterizePreview(std.testing.allocator, &input, 0, "A", &pixels, 8, 8));
+        for (pixels) |pixel| try std.testing.expectEqual(@as(u32, 0x12345678), pixel);
+    }
+    for ([_]u8{ 0x81, 0x8d, 0x8f, 0x90, 0x9d }) |byte| {
+        const input = testFnt(0, byte);
+        try std.testing.expectError(error.NoMappedFntGlyphs, convert(std.testing.allocator, &input, "HOLE.FNT", 0));
+    }
+}
+
+test "preview rejects malformed UTF8 unchanged and leaves missing glyphs blank" {
+    const input = testFnt(0xff, 0x81);
+    for ([_][]const u8{ "\xc3", "\xed\xa0\x80", "\xc0\xaf", "\xf4\x90\x80\x80" }) |bad| {
+        var pixels = [_]u32{0x12345678} ** 64;
+        if (bad.len == 1) {
+            try std.testing.expectError(error.Incomplete, rasterizePreview(std.testing.allocator, &input, 0, bad, &pixels, 8, 8));
+        } else {
+            try std.testing.expectError(error.InvalidUtf8, rasterizePreview(std.testing.allocator, &input, 0, bad, &pixels, 8, 8));
+        }
+        for (pixels) |pixel| try std.testing.expectEqual(@as(u32, 0x12345678), pixel);
+    }
+    var pixels: [64]u32 = undefined;
+    _ = try rasterizePreview(std.testing.allocator, &input, 0, "\xf0\x9f\x98\x80", &pixels, 8, 8);
+    for (pixels) |pixel| try std.testing.expectEqual(@as(u32, 0xffffff), pixel);
+}
+
 test "version 1 bitmap FNT converts to R4F" {
     const allocator = std.testing.allocator;
     var fnt: [138]u8 = .{0} ** 138;
@@ -951,24 +1081,22 @@ test "version 1 vector FNT rasterizes to R4F" {
     try std.testing.expectEqualSlices(u8, &r4f.MAGIC, r4f_bytes[0..4]);
 }
 
-test "bundled legacy FON sources convert to bounded R4F strikes" {
+test "optional local research FON sources convert to bounded R4F strikes" {
     const allocator = std.testing.allocator;
-    const sources = [_]struct { path: []const u8, name: []const u8 }{
-        .{ .path = "Injection/Temp/Fonts/COURA.FON", .name = "COURA.FON" },
-        .{ .path = "Injection/Temp/Fonts/HELVA.FON", .name = "HELVA.FON" },
-        .{ .path = "Injection/Temp/Fonts/TMSRA.FON", .name = "TMSRA.FON" },
-        .{ .path = "Injection/Temp/Fonts/MODERN.FON", .name = "MODERN.FON" },
-        .{ .path = "Injection/Temp/Fonts/ROMAN.FON", .name = "ROMAN.FON" },
-        .{ .path = "Injection/Temp/Fonts/SCRIPT.FON", .name = "SCRIPT.FON" },
+    const root = @import("font_test_options").legacy_fonts_path orelse return error.SkipZigTest;
+    const sources = [_][]const u8{
+        "COURA.FON", "HELVA.FON", "TMSRA.FON", "MODERN.FON", "ROMAN.FON", "SCRIPT.FON",
     };
-    for (sources) |source| {
-        const input = try std.Io.Dir.cwd().readFileAlloc(std.testing.io, source.path, allocator, .limited(64 * 1024));
+    for (sources) |name| {
+        const path = try std.fs.path.join(allocator, &.{ root, name });
+        defer allocator.free(path);
+        const input = try std.Io.Dir.cwd().readFileAlloc(std.testing.io, path, allocator, .limited(64 * 1024));
         defer allocator.free(input);
         const count = faceCount(input);
         try std.testing.expect(count > 0);
         var face_index: usize = 0;
         while (face_index < count) : (face_index += 1) {
-            const converted = try convert(allocator, input, source.name, face_index);
+            const converted = try convert(allocator, input, name, face_index);
             defer allocator.free(converted);
             const strike = r4fStrike(converted) orelse return error.BadR4fStrike;
             try std.testing.expect(strike.width <= 40);
@@ -977,6 +1105,40 @@ test "bundled legacy FON sources convert to bounded R4F strikes" {
             try std.testing.expect(r4fRuntimeBitmapPayloads(converted, strike));
         }
     }
+}
+
+test "authored NE FON selects two resources and validates resource bounds" {
+    var fon = [_]u8{0} ** 1024;
+    @memcpy(fon[0..2], "MZ");
+    fon[0x3c] = 0x40;
+    @memcpy(fon[0x40..0x42], "NE");
+    fon[0x64] = 0x40; // resource table at 0x80, alignment shift zero
+    fon[0x82] = 8;
+    fon[0x83] = 0x80;
+    fon[0x84] = 2;
+    // Two independent 138-byte resources at 0x100 and 0x200.
+    fon[0x8a] = 0;
+    fon[0x8b] = 1;
+    fon[0x8c] = 138;
+    fon[0x96] = 0;
+    fon[0x97] = 2;
+    fon[0x98] = 138;
+    const first = testFnt(0xff, 0x81);
+    const second = testFnt(0, 0x80);
+    @memcpy(fon[0x100 .. 0x100 + 138], &first);
+    @memcpy(fon[0x200 .. 0x200 + 138], &second);
+    try std.testing.expectEqual(@as(usize, 2), faceCount(&fon));
+    for ([_]u32{ 0xfc, 0x20ac }, 0..) |cp, index| {
+        const output = try convert(std.testing.allocator, &fon, "AUTHORED.FON", index);
+        defer std.testing.allocator.free(output);
+        try std.testing.expectEqual(cp, le32(testMap(output), 8));
+        const strike = r4fStrike(output) orelse return error.BadR4fStrike;
+        try std.testing.expect(r4fRuntimeBitmapPayloads(output, strike));
+    }
+    try std.testing.expectError(error.FontResourceNotFound, convert(std.testing.allocator, &fon, "AUTHORED.FON", 2));
+    fon[0x8c] = 0xff;
+    fon[0x8d] = 0xff;
+    try std.testing.expectError(error.BadFontResource, convert(std.testing.allocator, &fon, "BAD.FON", 0));
 }
 
 const R4fStrike = struct { width: u16, height: u16, bytes_per_row: u16 };

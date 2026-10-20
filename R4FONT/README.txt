@@ -46,3 +46,23 @@ No decoder API, interface layout or upstream library version changes.
 The existing vendor byte manifest records the corrected local bridge.
 Focused checks reuse the small R4F/FNT/FON/WOFF examples; no raster profiles
 or long font runs are added.
+
+Legacy helper text semantics (0.85.40)
+------------------------------------
+font_tools is a static consumer helper; it does not change API_V1 or the
+R4FONT.R4L implementation. Consumers supply the r4std_legacy_tables and
+r4std_console_text modules from the same Libraries package. The exact R4STD
+mapping tables are reused, with no new independently maintained codepage.
+FNT ANSI=0 uses Windows-1252; OEM=255 explicitly uses R4OS's US CP437 policy.
+Windows OEM is locale dependent: a foreign OEM font is not proved CP437 by
+its header alone. DEFAULT=1, SYMBOL and other charsets are rejected until a
+real codec/policy exists. Undefined 1252 slots are omitted, never relabeled.
+GMAP codepoints are Unicode scalars; new records use CHARSET_UNICODE. FACE
+flags retain source repertoire plus UNICODE. OEM control-picture glyphs use
+their separate Unicode graphic scalars; text C0 controls are not redefined.
+Preview samples are strict UTF-8; bad text/charset leaves pixels unchanged.
+Distribution's font-test directly runs the owner helper cases and an authored
+two-resource NE/FON fixture. The optional -Dlegacy-font-fixtures directory
+also runs six local research FON sources; these are not distributed. A missing
+optional directory skips only that research case. Old ambiguous raw-byte
+imports require reimporting.

@@ -51,6 +51,7 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4gfx_c_include", b.path("R4GFX/Bindings/C"));
     b.addNamedLazyPath("r4std_zig_binding", b.path("R4STD/Bindings/Zig/r4std.zig"));
     b.addNamedLazyPath("r4std_console_text", b.path("R4STD/Bindings/Zig/console_text.zig"));
+    b.addNamedLazyPath("r4std_legacy_tables", b.path("R4STD/Source/codec_tables.zig"));
     b.addNamedLazyPath("r4std_c_include", b.path("R4STD/Bindings/C"));
     b.addNamedLazyPath("r4img_zig_binding", b.path("R4IMG/Bindings/Zig/r4img.zig"));
     b.addNamedLazyPath("r4img_c_include", b.path("R4IMG/Bindings/C"));
@@ -58,5 +59,6 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4font_c_include", b.path("R4FONT/Bindings/C"));
     b.addNamedLazyPath("r4font_app_fonts", b.path("R4FONT/Bindings/Zig/app_fonts.zig"));
     b.addNamedLazyPath("r4font_font_tools", b.path("R4FONT/Bindings/Zig/font_tools.zig"));
+    b.addNamedLazyPath("r4font_import", b.path("R4FONT/Bindings/Zig/font_import.zig"));
     b.addNamedLazyPath("r4font_format", b.path("R4FONT/Bindings/Zig/font_format.zig"));
 }

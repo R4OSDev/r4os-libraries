@@ -45,6 +45,17 @@ pub const CHARSET_CP437: u16 = 437;
 pub const CHARSET_WINDOWS_1252: u16 = 1252;
 pub const CHARSET_UNICODE: u16 = 0xFFFF;
 
+pub fn validScalar(cp: u32) bool {
+    return cp <= 0x10ffff and !(cp >= 0xd800 and cp <= 0xdfff);
+}
+
+// GMAP.codepoint is always a Unicode scalar, including when an older writer
+// tags its record with CP437/1252 provenance. It is never a legacy byte index.
+// New bitmap writers tag GMAP with CHARSET_UNICODE. FACE charset flags describe
+// supported source repertoires; UNICODE is required for these scalar maps.
+// Reserved GMAP flags are zero. Repeated scalar mappings select the lowest
+// glyph ID; assigning different scalars to the same glyph ID is unsupported.
+
 pub const CHARSET_FLAG_CP437: u32 = 0x0000_0001;
 pub const CHARSET_FLAG_WINDOWS_1252: u32 = 0x0000_0002;
 pub const CHARSET_FLAG_UNICODE: u32 = 0x0000_0004;
