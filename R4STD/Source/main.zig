@@ -6,6 +6,7 @@ const settings = @import("settings.zig");
 const date = @import("date.zig");
 const time = @import("time.zig");
 const config = @import("config.zig");
+const codec = @import("codec.zig");
 
 export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}
 
@@ -750,6 +751,58 @@ pub export var r4std_config_v1: contract.ConfigV1 align(8) linksection(".data.r4
     .ensure_dirs = r4std_config_ensure_dirs_impl,
 };
 
+pub export fn r4std_codec_legacy_decode_impl(codepage: u32, mode: u32, byte: u32, scalar: *u32) linksection(".text.r4l_exports") callconv(.c) i32 {
+    const value = codec.legacyDecode(codepage, mode, byte) catch |err| return codec.status(err);
+    scalar.* = value;
+    return contract.status_ok;
+}
+
+pub export fn r4std_codec_legacy_encode_impl(codepage: u32, mode: u32, scalar: u32, byte: *u8) linksection(".text.r4l_exports") callconv(.c) i32 {
+    const value = codec.legacyEncode(codepage, mode, scalar) catch |err| return codec.status(err);
+    byte.* = value;
+    return contract.status_ok;
+}
+
+pub export fn r4std_codec_utf8_decode_impl(input: [*]const u8, input_length: u64, output: *contract.R4StdScalarResult) linksection(".text.r4l_exports") callconv(.c) i32 {
+    const len = length(input_length) orelse return contract.status_invalid_argument;
+    switch (codec.decode(input[0..len])) {
+        .complete => |value| {
+            output.* = value;
+            return contract.status_ok;
+        },
+        .incomplete => |required| {
+            output.* = .{ .scalar = 0, .byte_length = 0, .required = required, .reserved = 0 };
+            return contract.codec_incomplete;
+        },
+        .invalid => return contract.status_invalid_text,
+    }
+}
+
+pub export fn r4std_codec_utf8_encode_impl(scalar: u32, output: [*]u8, output_capacity: u64, written: *u32) linksection(".text.r4l_exports") callconv(.c) i32 {
+    const len = length(output_capacity) orelse return contract.status_invalid_argument;
+    const count = codec.encode(scalar, output[0..len]) catch |err| return codec.status(err);
+    written.* = count;
+    return contract.status_ok;
+}
+
+pub export fn r4std_codec_utf8_push_impl(state: *contract.R4StdUtf8State, byte: u32, output: *contract.R4StdScalarResult) linksection(".text.r4l_exports") callconv(.c) i32 {
+    return codec.push(state, byte, output);
+}
+
+pub export fn r4std_codec_utf8_finish_impl(state: *const contract.R4StdUtf8State) linksection(".text.r4l_exports") callconv(.c) i32 {
+    return codec.finish(state);
+}
+
+pub export var r4std_codec_v1: contract.CodecV1 align(8) linksection(".data.r4l_exports") = .{
+    .header = contract.codec_v1_header,
+    .legacy_decode = r4std_codec_legacy_decode_impl,
+    .legacy_encode = r4std_codec_legacy_encode_impl,
+    .utf8_decode = r4std_codec_utf8_decode_impl,
+    .utf8_encode = r4std_codec_utf8_encode_impl,
+    .utf8_push = r4std_codec_utf8_push_impl,
+    .utf8_finish = r4std_codec_utf8_finish_impl,
+};
+
 pub export var r4std_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
     .magic = r4os.abi.r4l_abi_magic,
     .abi_version = r4os.abi.r4l_abi_version,
@@ -759,9 +812,10 @@ pub export var r4std_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_ex
     .reserved = 0,
 };
 
-test "R4STD exports five independent local interfaces" {
+test "R4STD preserves five interfaces and adds independent scalar codecs" {
     try std.testing.expectEqual(@as(u32, 0), r4std_query.group);
     try std.testing.expectEqual(contract.text_v1_header.interface_id_lo, r4std_text_v1.header.interface_id_lo);
+    try std.testing.expectEqual(contract.codec_v1_header.interface_id_lo, r4std_codec_v1.header.interface_id_lo);
     try std.testing.expectEqual(contract.settings_v1_header.interface_id_lo, r4std_settings_v1.header.interface_id_lo);
     try std.testing.expectEqual(contract.date_v1_header.interface_id_lo, r4std_date_v1.header.interface_id_lo);
     try std.testing.expectEqual(contract.time_v1_header.interface_id_lo, r4std_time_v1.header.interface_id_lo);

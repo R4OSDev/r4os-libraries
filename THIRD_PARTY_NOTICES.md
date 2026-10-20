@@ -6,6 +6,7 @@ R4OS material.
 
 | Unit | Component | Version | License | Local license/provenance |
 | --- | --- | --- | --- | --- |
+| R4STD | Unicode/Microsoft CP437/Windows-1252 and separate Unicode IBM PC video mapping | CP437/CP1252 table2.00, IBMGRAPH1.0; accessed2026-10-20 | Unicode License V3 and original mapping notice | `R4STD/ThirdParty/Unicode/UPSTREAM.json`, `UNICODE-LICENSE.txt` and complete original table headers |
 | R4IMG | stb_image | 2.30 | MIT (selected from the upstream MIT/public-domain dual offer) | `R4IMG/ThirdParty/stb/LICENSE-MIT` and `R4IMG/ThirdParty/stb/stb_image.h` |
 | R4IMG tests | Web Platform Tests image fixtures | commit 4a5810a124fa0523dd2494996bf1542d4b67f394 | BSD-3-Clause | `R4IMG/Tests/Decoder/Fixtures/LICENSE-WPT-BSD-3-Clause.txt` |
 | R4FONT | FreeType | 2.14.3 | FreeType License 1.0 | `R4FONT/ThirdParty/r4font/freetype/FTL.TXT` |

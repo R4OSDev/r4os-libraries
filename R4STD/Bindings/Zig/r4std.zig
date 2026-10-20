@@ -4,12 +4,14 @@ const runtime = @import("runtime.zig");
 pub const abi = runtime.abi;
 pub const name = abi.module_name;
 pub const import_text_v1 = "R4STD:TEXT_V1:1";
+pub const import_codec_v1 = "R4STD:CODEC_V1:1";
 pub const import_settings_v1 = "R4STD:SETTINGS_V1:1";
 pub const import_date_v1 = "R4STD:DATE_V1:1";
 pub const import_time_v1 = "R4STD:TIME_V1:1";
 pub const import_config_v1 = "R4STD:CONFIG_V1:1";
 
 pub const text = @import("text.zig");
+pub const codec = @import("codec.zig");
 pub const settings = @import("settings.zig");
 pub const date = @import("date.zig");
 pub const time = @import("time.zig");

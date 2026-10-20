@@ -170,6 +170,30 @@ _Static_assert(sizeof(R4StdTimeConfig) == 8u, "R4StdTimeConfig size mismatch");
 _Static_assert(offsetof(R4StdTimeConfig, timezone_index) == 0u, "R4StdTimeConfig.timezone_index offset mismatch");
 _Static_assert(offsetof(R4StdTimeConfig, clock_format) == 4u, "R4StdTimeConfig.clock_format offset mismatch");
 
+typedef struct R4StdScalarResult {
+    uint32_t scalar;
+    uint32_t byte_length;
+    uint32_t required;
+    uint32_t reserved;
+} R4StdScalarResult;
+_Static_assert(sizeof(R4StdScalarResult) == 16u, "R4StdScalarResult size mismatch");
+_Static_assert(offsetof(R4StdScalarResult, scalar) == 0u, "R4StdScalarResult.scalar offset mismatch");
+_Static_assert(offsetof(R4StdScalarResult, byte_length) == 4u, "R4StdScalarResult.byte_length offset mismatch");
+_Static_assert(offsetof(R4StdScalarResult, required) == 8u, "R4StdScalarResult.required offset mismatch");
+_Static_assert(offsetof(R4StdScalarResult, reserved) == 12u, "R4StdScalarResult.reserved offset mismatch");
+
+typedef struct R4StdUtf8State {
+    uint32_t packed_bytes;
+    uint32_t length;
+    uint32_t reserved0;
+    uint32_t reserved1;
+} R4StdUtf8State;
+_Static_assert(sizeof(R4StdUtf8State) == 16u, "R4StdUtf8State size mismatch");
+_Static_assert(offsetof(R4StdUtf8State, packed_bytes) == 0u, "R4StdUtf8State.packed_bytes offset mismatch");
+_Static_assert(offsetof(R4StdUtf8State, length) == 4u, "R4StdUtf8State.length offset mismatch");
+_Static_assert(offsetof(R4StdUtf8State, reserved0) == 8u, "R4StdUtf8State.reserved0 offset mismatch");
+_Static_assert(offsetof(R4StdUtf8State, reserved1) == 12u, "R4StdUtf8State.reserved1 offset mismatch");
+
 #define R4STD_STATUS_OK ((int32_t)0)
 #define R4STD_STATUS_NOT_FOUND ((int32_t)1)
 #define R4STD_STATUS_END ((int32_t)2)
@@ -236,6 +260,12 @@ _Static_assert(offsetof(R4StdTimeConfig, clock_format) == 4u, "R4StdTimeConfig.c
 #define R4STD_CONFIG_RESULT_DEFAULTED ((int32_t)1)
 #define R4STD_CONFIG_RESULT_CREATED ((int32_t)2)
 #define R4STD_CONFIG_RESULT_RECOVERED ((int32_t)3)
+#define R4STD_CODEC_INCOMPLETE ((int32_t)4)
+#define R4STD_CODEPAGE_CP437 ((uint32_t)437)
+#define R4STD_CODEPAGE_WINDOWS1252 ((uint32_t)1252)
+#define R4STD_CODEPAGE_CP850 ((uint32_t)850)
+#define R4STD_CODEC_MODE_CONTROLS ((uint32_t)0)
+#define R4STD_CODEC_MODE_PC_GRAPHICS ((uint32_t)1)
 #define R4STD_STATUS_INVALID_ARGUMENT ((int32_t)-100)
 #define R4STD_STATUS_BUFFER_TOO_SMALL ((int32_t)-101)
 #define R4STD_STATUS_INVALID_TEXT ((int32_t)-102)
@@ -250,6 +280,9 @@ _Static_assert(offsetof(R4StdTimeConfig, clock_format) == 4u, "R4StdTimeConfig.c
 #define R4STD_CONFIG_ERROR_VERIFY_FAILED ((int32_t)-7)
 #define R4STD_CONFIG_ERROR_RECOVERY_FAILED ((int32_t)-8)
 #define R4STD_CONFIG_ERROR_READ_FAILED ((int32_t)-9)
+#define R4STD_STATUS_INVALID_SCALAR ((int32_t)-105)
+#define R4STD_STATUS_UNREPRESENTABLE ((int32_t)-106)
+#define R4STD_STATUS_UNDEFINED_BYTE ((int32_t)-107)
 
 #define R4STD_TEXT_V1_EXPORT_NAME "TEXT_V1"
 #define R4STD_TEXT_V1_ABI_MAJOR 1u
@@ -797,6 +830,85 @@ static inline uint32_t r4std_config_has_leftovers(R4StdConfigV1Client *client, u
 static inline int32_t r4std_config_ensure_dirs(R4StdConfigV1Client *client, uint64_t caller_context, uint32_t kind) {
     R4StdConfigV1EnsureDirsFn function = (R4StdConfigV1EnsureDirsFn)r4l_slot_address(client->header, 72u);
     return function(caller_context, kind);
+}
+
+#define R4STD_CODEC_V1_EXPORT_NAME "CODEC_V1"
+#define R4STD_CODEC_V1_ABI_MAJOR 1u
+#define R4STD_CODEC_V1_REVISION 1u
+#define R4STD_CODEC_V1_INTERFACE_ID_LO 0x5244535444434f44ull
+#define R4STD_CODEC_V1_INTERFACE_ID_HI 0x4543544558543031ull
+#define R4STD_CODEC_V1_TABLE_SIZE 80u
+#define R4STD_CODEC_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4STD_CODEC_V1_TABLE_SIZE, R4STD_CODEC_V1_ABI_MAJOR, R4STD_CODEC_V1_REVISION, R4STD_CODEC_V1_INTERFACE_ID_LO, R4STD_CODEC_V1_INTERFACE_ID_HI }
+typedef int32_t (*R4StdCodecV1LegacyDecodeFn)(uint32_t codepage, uint32_t mode, uint32_t byte, uint32_t * scalar);
+typedef int32_t (*R4StdCodecV1LegacyEncodeFn)(uint32_t codepage, uint32_t mode, uint32_t scalar, uint8_t * byte);
+typedef int32_t (*R4StdCodecV1Utf8DecodeFn)(const uint8_t * input, uint64_t input_length, R4StdScalarResult * output);
+typedef int32_t (*R4StdCodecV1Utf8EncodeFn)(uint32_t scalar, uint8_t * output, uint64_t output_capacity, uint32_t * written);
+typedef int32_t (*R4StdCodecV1Utf8PushFn)(R4StdUtf8State * state, uint32_t byte, R4StdScalarResult * output);
+typedef int32_t (*R4StdCodecV1Utf8FinishFn)(const R4StdUtf8State * state);
+typedef struct R4StdCodecV1 {
+    R4LInterfaceHeader header;
+    R4StdCodecV1LegacyDecodeFn legacy_decode;
+    R4StdCodecV1LegacyEncodeFn legacy_encode;
+    R4StdCodecV1Utf8DecodeFn utf8_decode;
+    R4StdCodecV1Utf8EncodeFn utf8_encode;
+    R4StdCodecV1Utf8PushFn utf8_push;
+    R4StdCodecV1Utf8FinishFn utf8_finish;
+} R4StdCodecV1;
+_Static_assert(sizeof(R4StdCodecV1) == 80u, "R4StdCodecV1 size mismatch");
+_Static_assert(offsetof(R4StdCodecV1, legacy_decode) == 32u, "R4StdCodecV1.legacy_decode offset mismatch");
+_Static_assert(offsetof(R4StdCodecV1, legacy_encode) == 40u, "R4StdCodecV1.legacy_encode offset mismatch");
+_Static_assert(offsetof(R4StdCodecV1, utf8_decode) == 48u, "R4StdCodecV1.utf8_decode offset mismatch");
+_Static_assert(offsetof(R4StdCodecV1, utf8_encode) == 56u, "R4StdCodecV1.utf8_encode offset mismatch");
+_Static_assert(offsetof(R4StdCodecV1, utf8_push) == 64u, "R4StdCodecV1.utf8_push offset mismatch");
+_Static_assert(offsetof(R4StdCodecV1, utf8_finish) == 72u, "R4StdCodecV1.utf8_finish offset mismatch");
+typedef struct R4StdCodecV1Client { const R4LInterfaceHeader *header; } R4StdCodecV1Client;
+
+static inline int32_t r4std_codec_v1_init(const R4XStartContext *ctx, R4StdCodecV1Client *out_client) {
+    if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4STD", "CODEC_V1");
+    const R4LInterfaceExpectation expected = { 0x5244535444434f44ull, 0x4543544558543031ull, 1u, 1u, 80u, 0u, 0u };
+    const R4LInterfaceHeader *header = 0;
+    int32_t status = r4l_validate_import(item, &expected, &header);
+    if (status != R4L_BINDING_OK) return status;
+    if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 56u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 64u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 72u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    out_client->header = header;
+    return R4L_BINDING_OK;
+}
+
+static inline int32_t r4std_codec_legacy_decode(R4StdCodecV1Client *client, uint32_t codepage, uint32_t mode, uint32_t byte, uint32_t * scalar) {
+    R4StdCodecV1LegacyDecodeFn function = (R4StdCodecV1LegacyDecodeFn)r4l_slot_address(client->header, 32u);
+    return function(codepage, mode, byte, scalar);
+}
+
+static inline int32_t r4std_codec_legacy_encode(R4StdCodecV1Client *client, uint32_t codepage, uint32_t mode, uint32_t scalar, uint8_t * byte) {
+    R4StdCodecV1LegacyEncodeFn function = (R4StdCodecV1LegacyEncodeFn)r4l_slot_address(client->header, 40u);
+    return function(codepage, mode, scalar, byte);
+}
+
+static inline int32_t r4std_codec_utf8_decode(R4StdCodecV1Client *client, const uint8_t * input, uint64_t input_length, R4StdScalarResult * output) {
+    R4StdCodecV1Utf8DecodeFn function = (R4StdCodecV1Utf8DecodeFn)r4l_slot_address(client->header, 48u);
+    return function(input, input_length, output);
+}
+
+static inline int32_t r4std_codec_utf8_encode(R4StdCodecV1Client *client, uint32_t scalar, uint8_t * output, uint64_t output_capacity, uint32_t * written) {
+    R4StdCodecV1Utf8EncodeFn function = (R4StdCodecV1Utf8EncodeFn)r4l_slot_address(client->header, 56u);
+    return function(scalar, output, output_capacity, written);
+}
+
+static inline int32_t r4std_codec_utf8_push(R4StdCodecV1Client *client, R4StdUtf8State * state, uint32_t byte, R4StdScalarResult * output) {
+    R4StdCodecV1Utf8PushFn function = (R4StdCodecV1Utf8PushFn)r4l_slot_address(client->header, 64u);
+    return function(state, byte, output);
+}
+
+static inline int32_t r4std_codec_utf8_finish(R4StdCodecV1Client *client, const R4StdUtf8State * state) {
+    R4StdCodecV1Utf8FinishFn function = (R4StdCodecV1Utf8FinishFn)r4l_slot_address(client->header, 72u);
+    return function(state);
 }
 
 #endif

@@ -75,6 +75,16 @@ comptime {
     if (@sizeOf(implementation.R4StdTimeConfig) != 8 or @sizeOf(binding.R4StdTimeConfig) != 8) @compileError("R4StdTimeConfig size drift");
     if (@offsetOf(implementation.R4StdTimeConfig, "timezone_index") != 0 or @offsetOf(binding.R4StdTimeConfig, "timezone_index") != 0) @compileError("R4StdTimeConfig.timezone_index offset drift");
     if (@offsetOf(implementation.R4StdTimeConfig, "clock_format") != 4 or @offsetOf(binding.R4StdTimeConfig, "clock_format") != 4) @compileError("R4StdTimeConfig.clock_format offset drift");
+    if (@sizeOf(implementation.R4StdScalarResult) != 16 or @sizeOf(binding.R4StdScalarResult) != 16) @compileError("R4StdScalarResult size drift");
+    if (@offsetOf(implementation.R4StdScalarResult, "scalar") != 0 or @offsetOf(binding.R4StdScalarResult, "scalar") != 0) @compileError("R4StdScalarResult.scalar offset drift");
+    if (@offsetOf(implementation.R4StdScalarResult, "byte_length") != 4 or @offsetOf(binding.R4StdScalarResult, "byte_length") != 4) @compileError("R4StdScalarResult.byte_length offset drift");
+    if (@offsetOf(implementation.R4StdScalarResult, "required") != 8 or @offsetOf(binding.R4StdScalarResult, "required") != 8) @compileError("R4StdScalarResult.required offset drift");
+    if (@offsetOf(implementation.R4StdScalarResult, "reserved") != 12 or @offsetOf(binding.R4StdScalarResult, "reserved") != 12) @compileError("R4StdScalarResult.reserved offset drift");
+    if (@sizeOf(implementation.R4StdUtf8State) != 16 or @sizeOf(binding.R4StdUtf8State) != 16) @compileError("R4StdUtf8State size drift");
+    if (@offsetOf(implementation.R4StdUtf8State, "packed_bytes") != 0 or @offsetOf(binding.R4StdUtf8State, "packed_bytes") != 0) @compileError("R4StdUtf8State.packed_bytes offset drift");
+    if (@offsetOf(implementation.R4StdUtf8State, "length") != 4 or @offsetOf(binding.R4StdUtf8State, "length") != 4) @compileError("R4StdUtf8State.length offset drift");
+    if (@offsetOf(implementation.R4StdUtf8State, "reserved0") != 8 or @offsetOf(binding.R4StdUtf8State, "reserved0") != 8) @compileError("R4StdUtf8State.reserved0 offset drift");
+    if (@offsetOf(implementation.R4StdUtf8State, "reserved1") != 12 or @offsetOf(binding.R4StdUtf8State, "reserved1") != 12) @compileError("R4StdUtf8State.reserved1 offset drift");
     if (@sizeOf(implementation.TextV1) != 48 or @sizeOf(binding.TextV1) != 48) @compileError("TextV1 size drift");
     if (@offsetOf(implementation.TextV1, "inspect") != 32 or @offsetOf(binding.TextV1, "inspect") != 32) @compileError("TextV1.inspect slot drift");
     if (@offsetOf(implementation.TextV1, "write") != 40 or @offsetOf(binding.TextV1, "write") != 40) @compileError("TextV1.write slot drift");
@@ -127,6 +137,13 @@ comptime {
     if (@offsetOf(implementation.ConfigV1, "recover_document") != 56 or @offsetOf(binding.ConfigV1, "recover_document") != 56) @compileError("ConfigV1.recover_document slot drift");
     if (@offsetOf(implementation.ConfigV1, "has_leftovers") != 64 or @offsetOf(binding.ConfigV1, "has_leftovers") != 64) @compileError("ConfigV1.has_leftovers slot drift");
     if (@offsetOf(implementation.ConfigV1, "ensure_dirs") != 72 or @offsetOf(binding.ConfigV1, "ensure_dirs") != 72) @compileError("ConfigV1.ensure_dirs slot drift");
+    if (@sizeOf(implementation.CodecV1) != 80 or @sizeOf(binding.CodecV1) != 80) @compileError("CodecV1 size drift");
+    if (@offsetOf(implementation.CodecV1, "legacy_decode") != 32 or @offsetOf(binding.CodecV1, "legacy_decode") != 32) @compileError("CodecV1.legacy_decode slot drift");
+    if (@offsetOf(implementation.CodecV1, "legacy_encode") != 40 or @offsetOf(binding.CodecV1, "legacy_encode") != 40) @compileError("CodecV1.legacy_encode slot drift");
+    if (@offsetOf(implementation.CodecV1, "utf8_decode") != 48 or @offsetOf(binding.CodecV1, "utf8_decode") != 48) @compileError("CodecV1.utf8_decode slot drift");
+    if (@offsetOf(implementation.CodecV1, "utf8_encode") != 56 or @offsetOf(binding.CodecV1, "utf8_encode") != 56) @compileError("CodecV1.utf8_encode slot drift");
+    if (@offsetOf(implementation.CodecV1, "utf8_push") != 64 or @offsetOf(binding.CodecV1, "utf8_push") != 64) @compileError("CodecV1.utf8_push slot drift");
+    if (@offsetOf(implementation.CodecV1, "utf8_finish") != 72 or @offsetOf(binding.CodecV1, "utf8_finish") != 72) @compileError("CodecV1.utf8_finish slot drift");
 }
 
 test "generated implementation and binding views are identical" {
@@ -140,4 +157,6 @@ test "generated implementation and binding views are identical" {
     try std.testing.expectEqual(implementation.time_v1_header.interface_id_lo, binding.time_v1_header.interface_id_lo);
     try std.testing.expectEqual(implementation.config_v1_header.size, binding.config_v1_header.size);
     try std.testing.expectEqual(implementation.config_v1_header.interface_id_lo, binding.config_v1_header.interface_id_lo);
+    try std.testing.expectEqual(implementation.codec_v1_header.size, binding.codec_v1_header.size);
+    try std.testing.expectEqual(implementation.codec_v1_header.interface_id_lo, binding.codec_v1_header.interface_id_lo);
 }

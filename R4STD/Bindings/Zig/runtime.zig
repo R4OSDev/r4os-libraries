@@ -9,6 +9,7 @@ pub const Runtime = struct {
     date: ?abi.DateV1Client,
     time: ?abi.TimeV1Client,
     config: ?abi.ConfigV1Client,
+    codec: ?abi.CodecV1Client,
 };
 
 var storage: Runtime = undefined;
@@ -22,8 +23,9 @@ pub fn init(raw: *const r4os.abi.R4XStartContext) bool {
         .date = abi.DateV1Client.init(raw) catch null,
         .time = abi.TimeV1Client.init(raw) catch null,
         .config = abi.ConfigV1Client.init(raw) catch null,
+        .codec = abi.CodecV1Client.init(raw) catch null,
     };
-    if (candidate.text == null and candidate.settings == null and candidate.date == null and candidate.time == null and candidate.config == null) return false;
+    if (candidate.text == null and candidate.settings == null and candidate.date == null and candidate.time == null and candidate.config == null and candidate.codec == null) return false;
     if (ready and storage.raw != raw) return false;
     storage = candidate;
     ready = true;
@@ -86,6 +88,15 @@ pub fn hasConfig() bool {
 
 pub fn rawAddress() u64 {
     return @intFromPtr(get().raw);
+}
+
+pub fn hasCodec() bool {
+    return ready and storage.codec != null;
+}
+
+pub fn codec() *const abi.CodecV1Client {
+    if (get().codec) |*client| return client;
+    unreachable;
 }
 
 pub fn resetForTesting() void {

@@ -157,6 +157,30 @@ Versionierte, caller-identitaetstreue R4SYS-Dateioberflaeche.
 - Slot 5, Offset 72: `ensure_dirs` - Legt die standardisierten Konfigurationsverzeichnisse an.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4STD_CONFIG_RESULT`; Besitz: Bereits vorhandene Verzeichnisse bleiben unveraendert..
 
+CODEC_V1
+--------
+
+Independent strict scalar/legacy codecs, separate from bytes/SystemText/DocumentText and typed keyboard events. Byte/scalar/grapheme lengths are distinct. No automatic encoding guess, normalization or replacement.
+
+- ELF-Symbol: `r4std_codec_v1`
+- ABI-Major: 1
+- Revision: 1
+- Interface-ID: `0x4543544558543031:0x5244535444434f44`
+- Tabellengroesse: 80 Byte
+
+- Slot 0, Offset 32: `legacy_decode` - Strict official CP437/Windows1252 byte to scalar. Byte<=255. Explicit CP437 PC-graphics mode uses separate Unicode IBMGRAPH C0/DEL mapping; undefined byte returns -107. No replacement, no CP850 alias.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4STD_STATUS`; Besitz: All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix..
+- Slot 1, Offset 40: `legacy_encode` - Strict inverse. Invalid scalar -105; not representable -106; unsupported codepage/mode -100. Failure preserves output.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4STD_STATUS`; Besitz: All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix..
+- Slot 2, Offset 48: `utf8_decode` - Read at most first four available bytes. Strict shortest scalar UTF8, including U+0000. Complete0, valid incomplete4 (length0/required1..4), invalid -102 with unchanged result. No normalization/replacement.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4STD_STATUS`; Besitz: All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix..
+- Slot 3, Offset 56: `utf8_encode` - Encode one valid scalar to1..4 shortest UTF8 bytes. Capacity preflight; invalid/capacity failure preserves entire output/written. NUL allowed in this scalar codec only; old TextV1 no-NUL policy unchanged.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4STD_STATUS`; Besitz: All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix..
+- Slot 4, Offset 64: `utf8_push` - Accept one byte transactionally into caller state. At most4 examined bytes and at most3 pending bytes after return. Valid incomplete4 retains prefix, complete0 clears state; invalid byte/prefix/state preserves state/output. Caller explicitly resets/discards on error and can retry offending byte. No lost following ASCII.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4STD_STATUS`; Besitz: All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix..
+- Slot 5, Offset 72: `utf8_finish` - Validate final state without mutation: empty0, valid unfinished prefix4, invalid state -100. Reset by zero-initializing all16 bytes. No implicit replacement or silent truncation.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4STD_STATUS`; Besitz: All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix..
+
 Typen
 -----
 
@@ -171,6 +195,8 @@ Typen
 - `R4StdUtcTime`: 16 Byte, Alignment 8. Library-lokaler UTC-Epochenwert.
 - `R4StdClockTime`: 4 Byte, Alignment 1. Uhrzeit innerhalb eines Tages.
 - `R4StdTimeConfig`: 8 Byte, Alignment 4. Unabhaengige Zeitkonfiguration.
+- `R4StdScalarResult`: 16 Byte, Alignment 4. Complete scalar with total encoded byte_length1..4. Incomplete scalar0/byte_length0/required1..4; reserved0. Byte counts are not grapheme counts.
+- `R4StdUtf8State`: 16 Byte, Alignment 4. Caller-owned zero-initialized16-byte state. Pending bytes in low8*length bits in arrival order; length0..3, all unused bits/reserved words zero. Valid UTF8 prefixes only. No pointers, global state, allocation or stream intermixing.
 
 Besitzregeln
 ------------

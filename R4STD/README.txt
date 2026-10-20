@@ -9,6 +9,7 @@ platform Contract, and core SDK contain no R4STD implementation.
 Versioned interfaces:
 
 - R4STD:TEXT_V1:1
+- R4STD:CODEC_V1:1
 - R4STD:SETTINGS_V1:1
 - R4STD:DATE_V1:1
 - R4STD:TIME_V1:1
@@ -17,6 +18,32 @@ Versioned interfaces:
 Applications import only the interfaces they use and bind
 Bindings/Zig/r4std.zig or Bindings/C/r4std.h. Query:1 is the technical module
 identity, not a functional R4STD import.
+
+CODEC_V1 provides strict CP437 and Windows-1252 conversion and scalar UTF-8
+encode/decode, plus a caller-owned incremental UTF-8 state. The five existing
+interfaces, their IDs/layouts, and Bytes/SystemText/DocumentText semantics are
+unchanged. Zig consumers import CODEC_V1 explicitly and use r4std.codec.
+
+CP437 control mode follows the official Microsoft text table. Its separate
+pc_graphics mode uses Unicode's IBMGRAPH display mapping for 01..1F and7F;
+00 remains U+0000. Windows-1252 rejects its five undefined bytes. CP850 has a
+distinct identifier and is unsupported, never treated as CP437. Valid scalars
+without an exact inverse are unrepresentable. No guessing, normalization or
+automatic replacement. Scalar codecs allow U+0000; TextV1 still rejects NUL.
+
+UTF-8 accepts only shortest scalar encodings. Complete, valid incomplete,
+and invalid are distinct. Stream state retains at most three pending bytes
+and examines at most four. Negative results consume nothing and preserve
+state/output; the caller explicitly resets/reports/replaces and may retry
+the offending byte. finish reports unfinished input without discarding it.
+Each stream owns its state; call boundaries and streams never share bytes.
+Lengths name bytes or scalars; graphemes and display width are separate.
+
+Bulk Zig conversion preflights every scalar, policy and capacity before
+writing. Overlap is rejected in both directions. The imported provider stays
+pinned and has immutable, stateless mappings for the writing pass.
+Original tables, hashes, transformations and notices are retained in
+ThirdParty/Unicode. Derived scalar tables contain no borrowed codec code.
 
 Important paths:
 

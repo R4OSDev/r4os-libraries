@@ -3415,6 +3415,408 @@
         }
       ],
       "description": "Versionierte, caller-identitaetstreue R4SYS-Dateioberflaeche."
+    },
+    {
+      "export_name": "CODEC_V1",
+      "symbol": "r4std_codec_v1",
+      "zig_name": "codec_v1",
+      "zig_type": "CodecV1",
+      "c_type": "R4StdCodecV1",
+      "abi_major": 1,
+      "revision": 1,
+      "interface_id_lo": 5927954630914035524,
+      "interface_id_hi": 4990925468868030513,
+      "known_required_flags": 0,
+      "functions": [
+        {
+          "name": "legacy_decode",
+          "c_name": "r4std_codec_legacy_decode",
+          "symbol": "r4std_codec_legacy_decode_impl",
+          "slot": 0,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "codepage",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Exact codepage identifier437 or1252;850 is distinct and unsupported."
+            },
+            {
+              "name": "mode",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Controls0, or CP437-only PC graphics1."
+            },
+            {
+              "name": "byte",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Legacy/input byte0..255; values outside are invalid."
+            },
+            {
+              "name": "scalar",
+              "type": {
+                "name": "u32",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Unicode scalar or caller-owned scalar output, unchanged on error."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4STD_STATUS",
+            "ownership": "All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix."
+          },
+          "description": "Strict official CP437/Windows1252 byte to scalar. Byte<=255. Explicit CP437 PC-graphics mode uses separate Unicode IBMGRAPH C0/DEL mapping; undefined byte returns -107. No replacement, no CP850 alias."
+        },
+        {
+          "name": "legacy_encode",
+          "c_name": "r4std_codec_legacy_encode",
+          "symbol": "r4std_codec_legacy_encode_impl",
+          "slot": 1,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "codepage",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Exact codepage identifier437 or1252;850 is distinct and unsupported."
+            },
+            {
+              "name": "mode",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Controls0, or CP437-only PC graphics1."
+            },
+            {
+              "name": "scalar",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Unicode scalar or caller-owned scalar output, unchanged on error."
+            },
+            {
+              "name": "byte",
+              "type": {
+                "name": "u8",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Legacy/input byte0..255; values outside are invalid."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4STD_STATUS",
+            "ownership": "All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix."
+          },
+          "description": "Strict inverse. Invalid scalar -105; not representable -106; unsupported codepage/mode -100. Failure preserves output."
+        },
+        {
+          "name": "utf8_decode",
+          "c_name": "r4std_codec_utf8_decode",
+          "symbol": "r4std_codec_utf8_decode_impl",
+          "slot": 2,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "input",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "length_by": "input_length",
+              "description": "Caller-owned input UTF8 bytes, at most first four examined."
+            },
+            {
+              "name": "input_length",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Available input byte count, not scalar/grapheme count."
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4StdScalarResult",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Caller-owned bounded result or byte output, disjoint from other outputs."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4STD_STATUS",
+            "ownership": "All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix."
+          },
+          "description": "Read at most first four available bytes. Strict shortest scalar UTF8, including U+0000. Complete0, valid incomplete4 (length0/required1..4), invalid -102 with unchanged result. No normalization/replacement."
+        },
+        {
+          "name": "utf8_encode",
+          "c_name": "r4std_codec_utf8_encode",
+          "symbol": "r4std_codec_utf8_encode_impl",
+          "slot": 3,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "scalar",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Unicode scalar or caller-owned scalar output, unchanged on error."
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "u8",
+                "pointer": "many",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "length_by": "output_capacity",
+              "description": "Caller-owned bounded result or byte output, disjoint from other outputs."
+            },
+            {
+              "name": "output_capacity",
+              "type": {
+                "name": "u64",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Available output byte capacity."
+            },
+            {
+              "name": "written",
+              "type": {
+                "name": "u32",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Caller-owned successful encoded byte count1..4, unchanged on error."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4STD_STATUS",
+            "ownership": "All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix."
+          },
+          "description": "Encode one valid scalar to1..4 shortest UTF8 bytes. Capacity preflight; invalid/capacity failure preserves entire output/written. NUL allowed in this scalar codec only; old TextV1 no-NUL policy unchanged."
+        },
+        {
+          "name": "utf8_push",
+          "c_name": "r4std_codec_utf8_push",
+          "symbol": "r4std_codec_utf8_push_impl",
+          "slot": 4,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "state",
+              "type": {
+                "name": "R4StdUtf8State",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "inout",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Caller-owned canonical16-byte stream state; zero initialization/reset, no retained pointer."
+            },
+            {
+              "name": "byte",
+              "type": {
+                "name": "u32",
+                "pointer": "value",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "value",
+              "ownership": "none",
+              "lifetime": "none",
+              "description": "Legacy/input byte0..255; values outside are invalid."
+            },
+            {
+              "name": "output",
+              "type": {
+                "name": "R4StdScalarResult",
+                "pointer": "single",
+                "is_const": false,
+                "nullable": false
+              },
+              "direction": "output",
+              "ownership": "caller_owned",
+              "lifetime": "call",
+              "description": "Caller-owned bounded result or byte output, disjoint from other outputs."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4STD_STATUS",
+            "ownership": "All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix."
+          },
+          "description": "Accept one byte transactionally into caller state. At most4 examined bytes and at most3 pending bytes after return. Valid incomplete4 retains prefix, complete0 clears state; invalid byte/prefix/state preserves state/output. Caller explicitly resets/discards on error and can retry offending byte. No lost following ASCII."
+        },
+        {
+          "name": "utf8_finish",
+          "c_name": "r4std_codec_utf8_finish",
+          "symbol": "r4std_codec_utf8_finish_impl",
+          "slot": 5,
+          "since_revision": 1,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "state",
+              "type": {
+                "name": "R4StdUtf8State",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "Caller-owned canonical16-byte stream state; zero initialization/reset, no retained pointer."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
+            "error_domain": "R4STD_STATUS",
+            "ownership": "All buffers/state are caller-owned and borrowed only during this call; no allocation or retained pointer. Disjoint outputs. Failure preserves output/state; incomplete push accepts the one byte and retains only a valid prefix."
+          },
+          "description": "Validate final state without mutation: empty0, valid unfinished prefix4, invalid state -100. Reset by zero-initializing all16 bytes. No implicit replacement or silent truncation."
+        }
+      ],
+      "description": "Independent strict scalar/legacy codecs, separate from bytes/SystemText/DocumentText and typed keyboard events. Byte/scalar/grapheme lengths are distinct. No automatic encoding guess, normalization or replacement."
     }
   ],
   "types": [
@@ -4165,6 +4567,110 @@
         }
       ],
       "description": "Unabhaengige Zeitkonfiguration."
+    },
+    {
+      "name": "R4StdScalarResult",
+      "size": 16,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "scalar",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "scalar"
+        },
+        {
+          "name": "byte_length",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "byte length"
+        },
+        {
+          "name": "required",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "required"
+        },
+        {
+          "name": "reserved",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Reserved zero."
+        }
+      ],
+      "description": "Complete scalar with total encoded byte_length1..4. Incomplete scalar0/byte_length0/required1..4; reserved0. Byte counts are not grapheme counts."
+    },
+    {
+      "name": "R4StdUtf8State",
+      "size": 16,
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "packed_bytes",
+          "offset": 0,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "packed bytes"
+        },
+        {
+          "name": "length",
+          "offset": 4,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "length"
+        },
+        {
+          "name": "reserved0",
+          "offset": 8,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Reserved zero."
+        },
+        {
+          "name": "reserved1",
+          "offset": 12,
+          "type": {
+            "name": "u32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "description": "Reserved zero."
+        }
+      ],
+      "description": "Caller-owned zero-initialized16-byte state. Pending bytes in low8*length bits in arrival order; length0..3, all unused bits/reserved words zero. Valid UTF8 prefixes only. No pointers, global state, allocation or stream intermixing."
     }
   ],
   "constants": [
@@ -4629,6 +5135,48 @@
       "type": "i32",
       "value": 3,
       "description": "Atomaren Save wiederhergestellt."
+    },
+    {
+      "zig_name": "codec_incomplete",
+      "c_name": "R4STD_CODEC_INCOMPLETE",
+      "type": "i32",
+      "value": 4,
+      "description": "Valid unfinished scalar; not invalid. Only valid prefix pending, no automatic EOF replacement."
+    },
+    {
+      "zig_name": "codepage_cp437",
+      "c_name": "R4STD_CODEPAGE_CP437",
+      "type": "u32",
+      "value": 437,
+      "description": "Microsoft CP437 text mapping; C0 controls preserved in control mode."
+    },
+    {
+      "zig_name": "codepage_windows1252",
+      "c_name": "R4STD_CODEPAGE_WINDOWS1252",
+      "type": "u32",
+      "value": 1252,
+      "description": "Microsoft Windows1252 mapping, five undefined bytes rejected."
+    },
+    {
+      "zig_name": "codepage_cp850",
+      "c_name": "R4STD_CODEPAGE_CP850",
+      "type": "u32",
+      "value": 850,
+      "description": "Distinct encoding identifier; not implemented by CodecV1 and never aliased to437."
+    },
+    {
+      "zig_name": "codec_mode_controls",
+      "c_name": "R4STD_CODEC_MODE_CONTROLS",
+      "type": "u32",
+      "value": 0,
+      "description": "Official text/control mapping."
+    },
+    {
+      "zig_name": "codec_mode_pc_graphics",
+      "c_name": "R4STD_CODEC_MODE_PC_GRAPHICS",
+      "type": "u32",
+      "value": 1,
+      "description": "CP437 only: separate Unicode IBMGRAPH C0/DEL display interpretation. Byte0 remains U+0000. No terminal control execution implied."
     }
   ],
   "errors": [
@@ -4729,6 +5277,27 @@
       "type": "i32",
       "value": -9,
       "description": "Vorhandene Konfigurationsdatei nicht vollstaendig lesbar; Bestand erhalten."
+    },
+    {
+      "zig_name": "status_invalid_scalar",
+      "c_name": "R4STD_STATUS_INVALID_SCALAR",
+      "type": "i32",
+      "value": -105,
+      "description": "Surrogate or scalar greater thanU+10FFFF."
+    },
+    {
+      "zig_name": "status_unrepresentable",
+      "c_name": "R4STD_STATUS_UNREPRESENTABLE",
+      "type": "i32",
+      "value": -106,
+      "description": "Valid scalar has no exact inverse in selected mode/codepage."
+    },
+    {
+      "zig_name": "status_undefined_byte",
+      "c_name": "R4STD_STATUS_UNDEFINED_BYTE",
+      "type": "i32",
+      "value": -107,
+      "description": "Byte is unassigned in selected legacy mapping."
     }
   ],
   "ownership_rules": [

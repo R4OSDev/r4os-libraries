@@ -65,6 +65,10 @@ pub fn build(b: *std.Build) void {
     runtime_root.addImport("project", provider_root);
     runtime_root.addImport("r4std", binding);
     runtime_root.addImport("r4os", host_r4os);
+    runtime_root.addIncludePath(b.path("Bindings/C"));
+    runtime_root.addIncludePath(sdk.profile.c_include_root);
+    runtime_root.addIncludePath(sdk.profile.contract_c_include_root);
+    runtime_root.addCSourceFile(.{ .file = b.path("Tests/codec_transport.c"), .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" } });
     const runtime_tests = b.addTest(.{ .root_module = runtime_root });
     const run_runtime = b.addRunArtifact(runtime_tests);
 

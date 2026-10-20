@@ -97,6 +97,20 @@ pub const R4StdTimeConfig = extern struct {
     timezone_index: u32,
     clock_format: u32,
 };
+
+pub const R4StdScalarResult = extern struct {
+    scalar: u32,
+    byte_length: u32,
+    required: u32,
+    reserved: u32,
+};
+
+pub const R4StdUtf8State = extern struct {
+    packed_bytes: u32,
+    length: u32,
+    reserved0: u32,
+    reserved1: u32,
+};
 pub const status_ok: i32 = 0;
 pub const status_not_found: i32 = 1;
 pub const status_end: i32 = 2;
@@ -163,6 +177,12 @@ pub const config_result_ok: i32 = 0;
 pub const config_result_defaulted: i32 = 1;
 pub const config_result_created: i32 = 2;
 pub const config_result_recovered: i32 = 3;
+pub const codec_incomplete: i32 = 4;
+pub const codepage_cp437: u32 = 437;
+pub const codepage_windows1252: u32 = 1252;
+pub const codepage_cp850: u32 = 850;
+pub const codec_mode_controls: u32 = 0;
+pub const codec_mode_pc_graphics: u32 = 1;
 pub const status_invalid_argument: i32 = -100;
 pub const status_buffer_too_small: i32 = -101;
 pub const status_invalid_text: i32 = -102;
@@ -177,6 +197,9 @@ pub const config_error_invalid_value: i32 = -6;
 pub const config_error_verify_failed: i32 = -7;
 pub const config_error_recovery_failed: i32 = -8;
 pub const config_error_read_failed: i32 = -9;
+pub const status_invalid_scalar: i32 = -105;
+pub const status_unrepresentable: i32 = -106;
+pub const status_undefined_byte: i32 = -107;
 
 pub const text_v1_export_name = "TEXT_V1";
 pub const text_v1_revision: u16 = 1;
@@ -350,6 +373,34 @@ pub const ConfigV1 = extern struct {
     recover_document: ConfigV1RecoverDocumentFn,
     has_leftovers: ConfigV1HasLeftoversFn,
     ensure_dirs: ConfigV1EnsureDirsFn,
+};
+
+pub const codec_v1_export_name = "CODEC_V1";
+pub const codec_v1_revision: u16 = 1;
+pub const codec_v1_header = InterfaceHeader{
+    .magic = r4os.runtime_r4l.interface_magic,
+    .header_version = r4os.runtime_r4l.interface_header_version,
+    .flags = 0,
+    .size = 80,
+    .abi_major = 1,
+    .abi_minor = 1,
+    .interface_id_lo = 0x5244535444434f44,
+    .interface_id_hi = 0x4543544558543031,
+};
+pub const CodecV1LegacyDecodeFn = *const fn (codepage: u32, mode: u32, byte: u32, scalar: *u32) callconv(.c) i32;
+pub const CodecV1LegacyEncodeFn = *const fn (codepage: u32, mode: u32, scalar: u32, byte: *u8) callconv(.c) i32;
+pub const CodecV1Utf8DecodeFn = *const fn (input: [*]const u8, input_length: u64, output: *R4StdScalarResult) callconv(.c) i32;
+pub const CodecV1Utf8EncodeFn = *const fn (scalar: u32, output: [*]u8, output_capacity: u64, written: *u32) callconv(.c) i32;
+pub const CodecV1Utf8PushFn = *const fn (state: *R4StdUtf8State, byte: u32, output: *R4StdScalarResult) callconv(.c) i32;
+pub const CodecV1Utf8FinishFn = *const fn (state: *const R4StdUtf8State) callconv(.c) i32;
+pub const CodecV1 = extern struct {
+    header: InterfaceHeader,
+    legacy_decode: CodecV1LegacyDecodeFn,
+    legacy_encode: CodecV1LegacyEncodeFn,
+    utf8_decode: CodecV1Utf8DecodeFn,
+    utf8_encode: CodecV1Utf8EncodeFn,
+    utf8_push: CodecV1Utf8PushFn,
+    utf8_finish: CodecV1Utf8FinishFn,
 };
 
 pub const TextV1Client = struct {
@@ -716,5 +767,58 @@ pub const ConfigV1Client = struct {
     pub fn ensure_dirs(self: *const ConfigV1Client, caller_context: u64, kind: u32) i32 {
         const function = r4os.runtime_r4l.functionAt(ConfigV1EnsureDirsFn, self.header, 72) orelse unreachable;
         return function(caller_context, kind);
+    }
+};
+
+pub const CodecV1Client = struct {
+    header: *const InterfaceHeader,
+
+    pub fn init(raw: *const r4os.abi.R4XStartContext) !CodecV1Client {
+        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, codec_v1_export_name) orelse return error.MissingImport;
+        const header = try r4os.runtime_r4l.validateImport(item, .{
+            .interface_id_lo = 0x5244535444434f44,
+            .interface_id_hi = 0x4543544558543031,
+            .abi_major = 1,
+            .min_revision = 1,
+            .required_size = 80,
+            .known_required_flags = 0,
+        });
+        if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 40) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 48) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 56) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 64) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 72) == null) return error.MissingSlot;
+        return .{ .header = header };
+    }
+
+    pub fn legacy_decode(self: *const CodecV1Client, codepage: u32, mode: u32, byte: u32, scalar: *u32) i32 {
+        const function = r4os.runtime_r4l.functionAt(CodecV1LegacyDecodeFn, self.header, 32) orelse unreachable;
+        return function(codepage, mode, byte, scalar);
+    }
+
+    pub fn legacy_encode(self: *const CodecV1Client, codepage: u32, mode: u32, scalar: u32, byte: *u8) i32 {
+        const function = r4os.runtime_r4l.functionAt(CodecV1LegacyEncodeFn, self.header, 40) orelse unreachable;
+        return function(codepage, mode, scalar, byte);
+    }
+
+    pub fn utf8_decode(self: *const CodecV1Client, input: [*]const u8, input_length: u64, output: *R4StdScalarResult) i32 {
+        const function = r4os.runtime_r4l.functionAt(CodecV1Utf8DecodeFn, self.header, 48) orelse unreachable;
+        return function(input, input_length, output);
+    }
+
+    pub fn utf8_encode(self: *const CodecV1Client, scalar: u32, output: [*]u8, output_capacity: u64, written: *u32) i32 {
+        const function = r4os.runtime_r4l.functionAt(CodecV1Utf8EncodeFn, self.header, 56) orelse unreachable;
+        return function(scalar, output, output_capacity, written);
+    }
+
+    pub fn utf8_push(self: *const CodecV1Client, state: *R4StdUtf8State, byte: u32, output: *R4StdScalarResult) i32 {
+        const function = r4os.runtime_r4l.functionAt(CodecV1Utf8PushFn, self.header, 64) orelse unreachable;
+        return function(state, byte, output);
+    }
+
+    pub fn utf8_finish(self: *const CodecV1Client, state: *const R4StdUtf8State) i32 {
+        const function = r4os.runtime_r4l.functionAt(CodecV1Utf8FinishFn, self.header, 72) orelse unreachable;
+        return function(state);
     }
 };
