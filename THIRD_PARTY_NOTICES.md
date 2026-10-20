@@ -413,4 +413,3 @@ property files and the GraphemeBreakTest vectors. Sources.json pins the exact
 URLs and SHA-256 hashes. LICENSE.txt is the Unicode License v3; its notices
 also apply to the generated grapheme property tables and the test data copy.
 The implementation follows UAX #29 revision 47 default extended graphemes.
-
