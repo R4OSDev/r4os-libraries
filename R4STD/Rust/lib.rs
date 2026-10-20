@@ -3,6 +3,7 @@
 //! mapping data; presentation, controls, replacement and column policy remain
 //! with each consumer. No allocation, CPU probes or hardware instructions.
 mod tables;
+pub mod utf16;
 pub const UTF8: u32 = 65001;
 pub const CP437: u32 = 437;
 pub const WINDOWS1252: u32 = 1252;
