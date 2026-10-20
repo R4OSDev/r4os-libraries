@@ -406,3 +406,11 @@ VcnCodecs.ps1. The 80-file catalog includes ac_vcn_vp9_default.h. AMD's MIT
 copyrights and complete grants accompany these files and the distribution's
 R4AMD-NOTICES.txt. The bounded adapter and JPEG specialization retain their
 upstream attribution. No third-party implementation is relicensed.
+# Unicode 17.0.0 data
+
+R4STD/ThirdParty/Unicode17 contains unmodified Unicode Character Database
+property files and the GraphemeBreakTest vectors. Sources.json pins the exact
+URLs and SHA-256 hashes. LICENSE.txt is the Unicode License v3; its notices
+also apply to the generated grapheme property tables and the test data copy.
+The implementation follows UAX #29 revision 47 default extended graphemes.
+

@@ -51,6 +51,7 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4gfx_c_include", b.path("R4GFX/Bindings/C"));
     b.addNamedLazyPath("r4std_zig_binding", b.path("R4STD/Bindings/Zig/r4std.zig"));
     b.addNamedLazyPath("r4std_console_text", b.path("R4STD/Bindings/Zig/console_text.zig"));
+    b.addNamedLazyPath("r4std_grapheme", b.path("R4STD/Bindings/Zig/grapheme.zig"));
     b.addNamedLazyPath("r4std_path_text", b.path("R4STD/Bindings/Zig/path_text.zig"));
     b.addNamedLazyPath("r4std_legacy_tables", b.path("R4STD/Source/codec_tables.zig"));
     b.addNamedLazyPath("r4std_c_include", b.path("R4STD/Bindings/C"));
@@ -62,6 +63,12 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4font_font_tools", b.path("R4FONT/Bindings/Zig/font_tools.zig"));
     b.addNamedLazyPath("r4font_import", b.path("R4FONT/Bindings/Zig/font_import.zig"));
     b.addNamedLazyPath("r4font_format", b.path("R4FONT/Bindings/Zig/font_format.zig"));
+    const grapheme_tests = b.addTest(.{ .root_module = b.createModule(.{
+        .root_source_file = b.path("R4STD/Bindings/Zig/grapheme.zig"),
+        .target = b.graph.host,
+        .optimize = .ReleaseSafe,
+    }) });
+    b.step("test-grapheme", "Pinned Unicode17 extended grapheme vectors, streaming and bounded prefixes").dependOn(&b.addRunArtifact(grapheme_tests).step);
     const path_tests = b.addTest(.{ .root_module = b.createModule(.{
         .root_source_file = b.path("R4STD/Bindings/Zig/path_text.zig"),
         .target = b.graph.host,

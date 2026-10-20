@@ -123,3 +123,14 @@ unvollstaendige Bytepraefixe bis zum Recordende behalten. Die dynamische
 R4STD-Version und CODEC_V1 aendern sich dadurch nicht.
 Gezielte Hostpruefung im Libraries-Root: zig build test-path-text.
 
+
+Graphemgrenzen (statischer Zig-Textbaustein, Paket0.64.23):
+Bindings/Zig/grapheme.zig implementiert die Default Extended Grapheme
+Clusters nach Unicode17.0.0/UAX29Revision47 einschliesslich GB9c.
+Byteoffsets, Skalare, Cluster und Displayzellen bleiben getrennt. Kein
+Normalisieren, Shaping, Bidi oder Breitenversprechen. Iterator und Stream
+sind allokationsfrei; der Caller behaelt Bytes bis zum naechsten Grenzereignis.
+Ganze Eingaben werden vor begrenzten Praefixen streng validiert.
+ThirdParty/Unicode17 enthaelt gepinnte Originaldaten, Lizenz und Hashes.
+Tools/Generate-Grapheme.ps1 generiert die Tabellen deterministisch offline.
+Runtime-R4L und bestehender Rustkern bleiben unveraendert.
