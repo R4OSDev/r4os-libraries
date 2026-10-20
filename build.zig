@@ -50,6 +50,7 @@ pub fn build(b: *std.Build) void {
     b.addNamedLazyPath("r4gfx_transfer", b.path("R4GFX/Display/transfer.zig"));
     b.addNamedLazyPath("r4gfx_c_include", b.path("R4GFX/Bindings/C"));
     b.addNamedLazyPath("r4std_zig_binding", b.path("R4STD/Bindings/Zig/r4std.zig"));
+    b.addNamedLazyPath("r4std_console_text", b.path("R4STD/Bindings/Zig/console_text.zig"));
     b.addNamedLazyPath("r4std_c_include", b.path("R4STD/Bindings/C"));
     b.addNamedLazyPath("r4img_zig_binding", b.path("R4IMG/Bindings/Zig/r4img.zig"));
     b.addNamedLazyPath("r4img_c_include", b.path("R4IMG/Bindings/C"));

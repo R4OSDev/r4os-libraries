@@ -56,6 +56,12 @@ pub fn build(b: *std.Build) void {
 
     const binding_tests = b.addTest(.{ .root_module = binding });
     const run_binding = b.addRunArtifact(binding_tests);
+    const console_text_tests = b.addRunArtifact(b.addTest(.{ .root_module = b.createModule(.{
+        .root_source_file = b.path("Bindings/Zig/console_text.zig"),
+        .target = b.graph.host,
+        .optimize = .Debug,
+    }) }));
+    b.getInstallStep().dependOn(&console_text_tests.step);
 
     const runtime_root = b.createModule(.{
         .root_source_file = b.path("Tests/runtime_test.zig"),
@@ -77,6 +83,7 @@ pub fn build(b: *std.Build) void {
     b.getInstallStep().dependOn(&run_binding.step);
     b.getInstallStep().dependOn(&run_runtime.step);
     const test_step = b.step("test", "Run R4STD contract and provider tests");
+    test_step.dependOn(&console_text_tests.step);
     test_step.dependOn(&run_conformance.step);
     test_step.dependOn(&run_provider.step);
     test_step.dependOn(&run_binding.step);
