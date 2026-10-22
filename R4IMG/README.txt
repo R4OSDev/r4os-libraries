@@ -3,7 +3,9 @@
 
 R4IMG is the independent Runtime-R4L for raster and vector image formats. It
 owns its implementation, stb_image integration, local V1 contract, and
-generated Zig and C bindings. Consumers import R4IMG:API_V1:1 and call only
+generated Zig/C/Rust contract bindings. Higher Rust/C consumers use the
+original helpers through Libraries/Shared/Rust and Bindings/C/r4img_helpers.h;
+see Libraries/Shared/Rust/README.md. Consumers import R4IMG:API_V1:1 and call only
 the loaded function table. Pixel and scratch buffers always remain owned by
 the calling process.
 

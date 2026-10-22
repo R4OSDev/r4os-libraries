@@ -2,7 +2,10 @@
 
 This repository contains the independent Runtime-R4L units R4STD, R4IMG, R4GFX, R4NV,
 R4NAK, R4VK, R4GL, R4VIDEO, R4ENC, R4FONT, R4AMD, and R4ACO. Each library owns its implementation, contract, baseline, Zig and C
-bindings, manifest, and tests.
+bindings, manifest, and tests. Generated Rust table consumers live beside the
+Zig/C contracts. Higher R4STD/R4IMG/R4FONT Rust and C helpers are described in
+[Shared/Rust/README.md](Shared/Rust/README.md); they execute the original owner
+functions and are linked explicitly, without changing provider binaries.
 
 ## Build and validation
 

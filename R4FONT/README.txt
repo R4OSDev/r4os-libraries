@@ -3,7 +3,10 @@
 
 R4FONT is an independent Runtime-R4L for validated font sources. It exports
 the versioned API_V1:1 table and owns its implementation, contract, baseline,
-Zig and C bindings, FreeType, Brotli, and zlib integration. The core SDK does
+Zig/C/Rust contract bindings, FreeType, Brotli, and zlib integration. Higher
+Rust/C consumers use Libraries/Shared/Rust and Bindings/C/r4font_helpers.h;
+see Libraries/Shared/Rust/README.md for decoder/source/allocator loans and
+original cache/import lifetime rules. The core SDK does
 not contain R4FONT types or decoder sources.
 
 Supported inputs include TTF, OpenType/CFF, WOFF, WOFF2, and SFNT collections

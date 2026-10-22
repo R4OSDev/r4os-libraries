@@ -3,7 +3,10 @@
 
 R4STD is an independent Runtime-R4L for text, R4S settings, dates, time zones,
 and atomic configuration files. Its contract, baseline, implementation, Zig
-and C bindings, and tests belong entirely to this library. The kernel, central
+and C bindings, generated Rust contract consumers and tests belong entirely
+to this library. Higher Rust/C consumers use the original helper functions
+through Libraries/Shared/Rust and Bindings/C/r4std_helpers.h; instructions
+and lifetime rules are in Libraries/Shared/Rust/README.md. The kernel, central
 platform Contract, and core SDK contain no R4STD implementation.
 
 Versioned interfaces:
@@ -19,7 +22,7 @@ Applications import only the interfaces they use and bind
 Bindings/Zig/r4std.zig or Bindings/C/r4std.h. Query:1 is the technical module
 identity, not a functional R4STD import.
 
-CODEC_V1 provides strict CP437 and Windows-1252 conversion and scalar UTF-8
+CODEC_V1 provides strict CP437, CP850 and Windows-1252 conversion and scalar UTF-8
 encode/decode, plus a caller-owned incremental UTF-8 state. The five existing
 interfaces, their IDs/layouts, and Bytes/SystemText/DocumentText semantics are
 unchanged. Zig consumers import CODEC_V1 explicitly and use r4std.codec.

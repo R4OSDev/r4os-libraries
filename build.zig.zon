@@ -1,6 +1,6 @@
 .{
     .name = .r4os_libraries,
-    .version = "0.64.24",
+    .version = "0.64.25",
     .fingerprint = 0xb4b7d2df351f7e74,
     .minimum_zig_version = "0.16.0",
     .paths = .{
@@ -19,6 +19,9 @@
         "R4VIDEO",
         "R4ENC",
         "Shared",
+        "Tools",
+        "consumer_helpers.zig",
+        "consumer_adapters.zig",
         "README.md",
         "DOCUMENTATION.de.txt",
         "THIRD_PARTY_NOTICES.md",
