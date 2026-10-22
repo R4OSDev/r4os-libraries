@@ -66,6 +66,15 @@ static inline int32_t r4vk_vulkan_v1_init(const R4XStartContext *ctx, R4VkVulkan
     return R4L_BINDING_OK;
 }
 
+static inline int32_t r4vk_vulkan_v1_init_optional(const R4XStartContext *ctx, R4VkVulkanV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4VK", "VULKAN_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4vk_vulkan_v1_init(ctx, out_client);
+}
+
 static inline int32_t r4vk_open(R4VkVulkanV1Client *client, const R4VkRuntime * runtime, R4VkLoader * output) {
     R4VkVulkanV1OpenFn function = (R4VkVulkanV1OpenFn)r4l_slot_address(client->header, 32u);
     return function(runtime, output);

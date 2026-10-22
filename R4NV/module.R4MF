@@ -16,6 +16,7 @@ CONTRACT_BASELINE=Contract/LibraryContract.baseline.json
 IMPLEMENTATION_ZIG=Contract/Generated/implementation_abi.zig
 BINDING_ZIG=Bindings/Zig/r4nv.zig
 BINDING_C=Bindings/C/r4nv.h
+BINDING_RUST=Bindings/Rust/src/lib.rs
 CONFORMANCE_ZIG=Tests/Generated/contract_conformance.zig
 CONFORMANCE_C=Tests/Generated/contract_conformance.c
 API_REFERENCE=Docs/API.md

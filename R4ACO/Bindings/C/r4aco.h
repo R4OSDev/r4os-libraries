@@ -315,6 +315,15 @@ static inline int32_t r4aco_info_v1_init(const R4XStartContext *ctx, R4AcoInfoV1
     return R4L_BINDING_OK;
 }
 
+static inline int32_t r4aco_info_v1_init_optional(const R4XStartContext *ctx, R4AcoInfoV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4ACO", "INFO_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4aco_info_v1_init(ctx, out_client);
+}
+
 static inline int32_t r4aco_get_info(R4AcoInfoV1Client *client, R4AcoInfo * output, uint32_t output_bytes) {
     R4AcoInfoV1GetInfoFn function = (R4AcoInfoV1GetInfoFn)r4l_slot_address(client->header, 32u);
     return function(output, output_bytes);
@@ -355,6 +364,15 @@ static inline int32_t r4aco_compiler_v1_init(const R4XStartContext *ctx, R4AcoCo
     if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4aco_compiler_v1_init_optional(const R4XStartContext *ctx, R4AcoCompilerV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4ACO", "COMPILER_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4aco_compiler_v1_init(ctx, out_client);
 }
 
 static inline int32_t r4aco_compile(R4AcoCompilerV1Client *client, const R4AcoRuntime * runtime, const R4AcoRequest * request, R4AcoBinary * output) {

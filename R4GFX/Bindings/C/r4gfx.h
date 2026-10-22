@@ -1343,6 +1343,15 @@ static inline int32_t r4gfx_api_v1_init(const R4XStartContext *ctx, R4GfxApiV1Cl
     return R4L_BINDING_OK;
 }
 
+static inline int32_t r4gfx_api_v1_init_optional(const R4XStartContext *ctx, R4GfxApiV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "API_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4gfx_api_v1_init(ctx, out_client);
+}
+
 static inline int32_t r4gfx_linear_layout(R4GfxApiV1Client *client, uint32_t width, uint32_t height, uint32_t format, uint64_t row_alignment, R4GfxLinearLayout * output) {
     R4GfxApiV1LinearLayoutFn function = (R4GfxApiV1LinearLayoutFn)r4l_slot_address(client->header, 32u);
     return function(width, height, format, row_alignment, output);
@@ -1384,6 +1393,15 @@ static inline int32_t r4gfx_render_v1_init(const R4XStartContext *ctx, R4GfxRend
     if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4gfx_render_v1_init_optional(const R4XStartContext *ctx, R4GfxRenderV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "RENDER_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4gfx_render_v1_init(ctx, out_client);
 }
 
 static inline int32_t r4gfx_render_capabilities(R4GfxRenderV1Client *client, R4GfxRenderCaps * output) {
@@ -1555,6 +1573,15 @@ static inline int32_t r4gfx_device_v1_init(const R4XStartContext *ctx, R4GfxDevi
     if (r4l_slot_address(header, 296u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4gfx_device_v1_init_optional(const R4XStartContext *ctx, R4GfxDeviceV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "DEVICE_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4gfx_device_v1_init(ctx, out_client);
 }
 
 static inline uint64_t r4gfx_storage_size(R4GfxDeviceV1Client *client) {
@@ -1810,6 +1837,15 @@ static inline int32_t r4gfx_color_v1_init(const R4XStartContext *ctx, R4GfxColor
     if (r4l_slot_address(header, 144u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4gfx_color_v1_init_optional(const R4XStartContext *ctx, R4GfxColorV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GFX", "COLOR_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4gfx_color_v1_init(ctx, out_client);
 }
 
 static inline int32_t r4gfx_color_description_validate(R4GfxColorV1Client *client, const R4GfxColorDescription * description) {

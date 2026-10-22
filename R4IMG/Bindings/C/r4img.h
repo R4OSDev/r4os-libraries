@@ -266,6 +266,15 @@ static inline int32_t r4img_api_v1_init(const R4XStartContext *ctx, R4ImgApiV1Cl
     return R4L_BINDING_OK;
 }
 
+static inline int32_t r4img_api_v1_init_optional(const R4XStartContext *ctx, R4ImgApiV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4IMG", "API_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4img_api_v1_init(ctx, out_client);
+}
+
 static inline int32_t r4img_probe(R4ImgApiV1Client *client, const uint8_t * encoded, uint64_t encoded_length, const uint8_t * content_type, uint64_t content_type_length, R4ImgInfo * output) {
     R4ImgApiV1ProbeFn function = (R4ImgApiV1ProbeFn)r4l_slot_address(client->header, 32u);
     return function(encoded, encoded_length, content_type, content_type_length, output);
@@ -337,6 +346,15 @@ static inline int32_t r4img_png_v1_init(const R4XStartContext *ctx, R4ImgPngV1Cl
     return R4L_BINDING_OK;
 }
 
+static inline int32_t r4img_png_v1_init_optional(const R4XStartContext *ctx, R4ImgPngV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4IMG", "PNG_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4img_png_v1_init(ctx, out_client);
+}
+
 static inline int32_t r4img_png_color_info(R4ImgPngV1Client *client, const uint8_t * encoded, uint64_t encoded_length, R4ImgPngColor * output) {
     R4ImgPngV1PngColorInfoFn function = (R4ImgPngV1PngColorInfoFn)r4l_slot_address(client->header, 32u);
     return function(encoded, encoded_length, output);
@@ -388,6 +406,15 @@ static inline int32_t r4img_raster_v1_init(const R4XStartContext *ctx, R4ImgRast
     if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4img_raster_v1_init_optional(const R4XStartContext *ctx, R4ImgRasterV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4IMG", "RASTER_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4img_raster_v1_init(ctx, out_client);
 }
 
 static inline int32_t r4img_raster_color_info(R4ImgRasterV1Client *client, const uint8_t * encoded, uint64_t encoded_length, R4ImgRasterColor * output) {

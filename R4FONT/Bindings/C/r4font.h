@@ -202,6 +202,15 @@ static inline int32_t r4font_api_v1_init(const R4XStartContext *ctx, R4FontApiV1
     return R4L_BINDING_OK;
 }
 
+static inline int32_t r4font_api_v1_init_optional(const R4XStartContext *ctx, R4FontApiV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    if (!r4xstart_context_valid(ctx)) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4FONT", "API_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4font_api_v1_init(ctx, out_client);
+}
+
 static inline int32_t r4font_sniff(R4FontApiV1Client *client, const uint8_t * bytes, uint64_t length, uint32_t * output_format) {
     R4FontApiV1SniffFn function = (R4FontApiV1SniffFn)r4l_slot_address(client->header, 32u);
     return function(bytes, length, output_format);
