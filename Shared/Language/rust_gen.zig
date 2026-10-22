@@ -15,7 +15,7 @@ fn typeCandidate(name: []const u8) bool {
     return false;
 }
 fn selected(comptime name: []const u8) bool {
-    return starts(name, "R4Lib") or starts(name, "R4Std") or starts(name, "R4ImgHelpers") or starts(name, "R4Font");
+    return starts(name, "R4Lib") or starts(name, "R4Std") or starts(name, "R4ImgHelpers") or starts(name, "R4Font") or starts(name, "R4Gfx") or starts(name, "R4Enc") or starts(name, "R4Video") or starts(name, "R4Aco") or starts(name, "R4Nak") or starts(name, "R4Media");
 }
 fn canonical(comptime name: []const u8) ?[]const u8 {
     if (@hasDecl(abi, name)) return name;

@@ -1,6 +1,6 @@
 .{
     .name = .r4os_libraries,
-    .version = "0.64.25",
+    .version = "0.64.26",
     .fingerprint = 0xb4b7d2df351f7e74,
     .minimum_zig_version = "0.16.0",
     .paths = .{
@@ -22,6 +22,9 @@
         "Tools",
         "consumer_helpers.zig",
         "consumer_adapters.zig",
+        "consumer_media.zig",
+        "consumer_media_adapters.zig",
+        "consumer_oracles.zig",
         "README.md",
         "DOCUMENTATION.de.txt",
         "THIRD_PARTY_NOTICES.md",

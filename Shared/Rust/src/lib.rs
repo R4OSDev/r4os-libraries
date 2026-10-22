@@ -11,11 +11,17 @@ pub use r4os_sdk::abi;
 pub use r4os_text_core as text_core;
 #[path = "../../../R4FONT/Bindings/Rust/src/helpers.rs"]
 pub mod font;
+#[path = "../../../R4GFX/Bindings/Rust/src/helpers.rs"]
+pub mod graphics;
 #[path = "../../../R4IMG/Bindings/Rust/src/helpers.rs"]
 pub mod image;
+#[path = "../../../R4ENC/Bindings/Rust/src/helpers.rs"]
+pub mod media;
 pub mod raw;
 #[path = "../../../R4STD/Bindings/Rust/src/helpers.rs"]
 pub mod standard;
+#[path = "../../../R4VIDEO/Bindings/Rust/src/helpers.rs"]
+pub mod video;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {

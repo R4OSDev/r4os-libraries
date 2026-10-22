@@ -21,7 +21,7 @@ int32_t r4libraries59_pure(void) {
     value=R4StdGraphemeIterator_next(0,&it,&range);
     if(value.flags || value.status)return 9;
     R4XStartContext invalid_start={0};
-    R4Lib_R4GFX_Bindings_Zig_r4gfx_abi_ColorV1Client color;
+    R4LibraryColorClient color;
     R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client video;
     value=R4Library_colorClient(0,&invalid_start,&color);
     if(value.status || !(value.flags&R4LIBRARIES_NATIVE_ERROR))return 10;

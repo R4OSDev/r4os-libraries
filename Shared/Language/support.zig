@@ -47,9 +47,46 @@ pub fn freeBytes(allocator: std.mem.Allocator, bytes: []u8) void {
 
 /// Concrete clients for the public color/JPEG specializations. Foreign
 /// consumers never need to invent the private Zig client layout.
-pub fn colorClient(raw: *const r4os.abi.R4XStartContext) !@import("../../R4GFX/Bindings/Zig/r4gfx_abi.zig").ColorV1Client {
-    return @import("../../R4GFX/Bindings/Zig/r4gfx_abi.zig").ColorV1Client.init(raw);
+pub fn colorClient(raw: *const r4os.abi.R4XStartContext) !@import("r4gfx_binding").ColorV1Client {
+    return @import("r4gfx_binding").ColorV1Client.init(raw);
 }
 pub fn videoClient(raw: *const r4os.abi.R4XStartContext) !@import("../../R4VIDEO/Bindings/Zig/r4video.zig").VideoV1Client {
     return @import("../../R4VIDEO/Bindings/Zig/r4video.zig").VideoV1Client.init(raw);
+}
+
+pub fn deviceClient(raw: *const r4os.abi.R4XStartContext) !@import("r4gfx_binding").DeviceV1Client {
+    return @import("r4gfx_binding").DeviceV1Client.init(raw);
+}
+pub fn renderClient(raw: *const r4os.abi.R4XStartContext) !@import("r4gfx_binding").RenderV1Client {
+    return @import("r4gfx_binding").RenderV1Client.init(raw);
+}
+pub fn graphicsClient(raw: *const r4os.abi.R4XStartContext) !@import("r4gfx_binding").ApiV1Client {
+    return @import("r4gfx_binding").ApiV1Client.init(raw);
+}
+pub fn encoderClient(raw: *const r4os.abi.R4XStartContext) !@import("../../R4ENC/Bindings/Zig/r4enc.zig").EncodeV1Client {
+    return @import("../../R4ENC/Bindings/Zig/r4enc.zig").EncodeV1Client.init(raw);
+}
+pub fn acoClient(raw: *const r4os.abi.R4XStartContext) !@import("r4aco").CompilerV1Client {
+    return @import("r4aco").CompilerV1Client.init(raw);
+}
+pub fn nakClient(raw: *const r4os.abi.R4XStartContext) !@import("r4nak").CompilerV1Client {
+    return @import("r4nak").CompilerV1Client.init(raw);
+}
+
+/// Initialize at the final address before deriving contexts or starting a
+/// worker; retain the exact application for every derived native loan.
+pub fn application(output: *r4os.App, raw: *const r4os.abi.R4XStartContext, profile: r4os.AppProfile) i32 {
+    return switch (r4os.App.init(raw, profile)) {
+        .value => |value| blk: {
+            output.* = value;
+            break :blk 0;
+        },
+        .failure => |failure| failure.raw_code,
+    };
+}
+pub fn applicationSystem(app: *const r4os.App) r4os.r4sys.Context {
+    return app.system();
+}
+pub fn applicationDraw(app: *const r4os.App) ?r4os.r4draw.Context {
+    return app.drawing();
 }

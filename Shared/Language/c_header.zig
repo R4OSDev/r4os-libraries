@@ -14,12 +14,56 @@ pub fn name(comptime T: type) []const u8 {
         if (T == s.owners.image_color) break :blk "R4ImgColor";
         if (T == s.owners.native_jpeg) break :blk "R4ImgNativeJpeg";
         if (T == s.owners.time.Config) break :blk "R4StdTimeHelpersConfig";
+        if (T == s.owners.media.gfx_api.ColorV1Client) break :blk "R4LibraryColorClient";
+        if (T == s.owners.media.gfx_api.DeviceV1Client) break :blk "R4LibraryDeviceClient";
+        if (T == s.owners.media.gfx_api.RenderV1Client) break :blk "R4LibraryRenderClient";
+        if (T == s.owners.media.gfx_api.ApiV1Client) break :blk "R4LibraryGraphicsClient";
+        if (T == s.owners.media.aco_api.CompilerV1Client) break :blk "R4LibraryAcoClient";
+        if (T == s.owners.media.nak_api.CompilerV1Client) break :blk "R4LibraryNakClient";
+        if (T == s.owners.media.profile) break :blk "R4GfxDisplayProfileOwner";
         if (s.canonical(T)) {
             const last = full[(std.mem.lastIndexOfScalar(u8, full, '.') orelse unreachable) + 1 ..];
             break :blk if (std.mem.startsWith(u8, last, "R4")) last else "R4" ++ last;
         }
         if (@typeInfo(T) == .pointer or @typeInfo(T) == .optional or @typeInfo(T) == .array or @typeInfo(T) == .error_union or std.mem.indexOf(u8, full, "__") != null) break :blk std.fmt.comptimePrint("R4Lib_Value{d}", .{s.typeId(T)});
         const prefixes = .{
+            .{ "consumer_media_adapters", "R4Media" },
+            .{ "R4ACO.Bindings.Zig.shaders", "R4AcoShaders" },
+            .{ "R4ACO.Bindings.Zig.worker", "R4Aco" },
+            .{ "R4ENC.Bindings.Zig.recording_mux", "R4EncMux" },
+            .{ "R4ENC.Bindings.Zig.recording_pixels", "R4EncPixels" },
+            .{ "R4GFX.Bindings.Zig.outputs", "R4GfxOutputs" },
+            .{ "R4GFX.Bindings.Zig.queue", "R4GfxQueue" },
+            .{ "R4GFX.Display.brightness_client", "R4GfxBrightnessClient" },
+            .{ "R4GFX.Display.brightness_preferences", "R4GfxBrightnessPreferences" },
+            .{ "R4GFX.Display.brightness_status", "R4GfxBrightnessStatus" },
+            .{ "R4GFX.Display.color_control", "R4GfxColorControl" },
+            .{ "R4GFX.Display.color_preferences", "R4GfxColorPreferences" },
+            .{ "R4GFX.Display.color_signal", "R4GfxColorSignal" },
+            .{ "R4GFX.Display.control", "R4GfxControl" },
+            .{ "R4GFX.Display.cta_timings", "R4GfxCtaTimings" },
+            .{ "R4GFX.Display.desktop_outputs", "R4GfxDesktopOutputs" },
+            .{ "R4GFX.Display.display_profile", "R4GfxDisplayProfile" },
+            .{ "R4GFX.Display.edid", "R4GfxEdid" },
+            .{ "R4GFX.Display.eld", "R4GfxEld" },
+            .{ "R4GFX.Display.links", "R4GfxLinks" },
+            .{ "R4GFX.Display.mode_control", "R4GfxModeControl" },
+            .{ "R4GFX.Display.preferences", "R4GfxPreferences" },
+            .{ "R4GFX.Display.readback", "R4GfxReadback" },
+            .{ "R4GFX.Display.refresh_client", "R4GfxRefreshClient" },
+            .{ "R4GFX.Display.refresh_observer", "R4GfxRefreshObserver" },
+            .{ "R4GFX.Display.refresh_preferences", "R4GfxRefreshPreferences" },
+            .{ "R4GFX.Display.refresh_range", "R4GfxRefreshRange" },
+            .{ "R4GFX.Display.refresh_status", "R4GfxRefreshStatus" },
+            .{ "R4GFX.Display.timing", "R4GfxTiming" },
+            .{ "R4GFX.Display.topology", "R4GfxTopology" },
+            .{ "R4GFX.Display.transfer", "R4GfxTransfer" },
+            .{ "R4GFX.Display.vrr", "R4GfxVrr" },
+            .{ "R4NAK.Bindings.Zig.worker", "R4Nak" },
+            .{ "R4VIDEO.Bindings.Zig.playback", "R4VideoPlayback" },
+            .{ "R4VIDEO.Bindings.Zig.playback_audio", "R4VideoPlaybackAudio" },
+            .{ "R4VIDEO.Bindings.Zig.playback_clock", "R4VideoPlaybackClock" },
+            .{ "R4VIDEO.Bindings.Zig.playback_composition", "R4VideoPlaybackComposition" },
             .{ "R4STD.Bindings.Zig.r4std", "R4Std" },
             .{ "R4STD.Bindings.Zig.text", "R4StdText" },
             .{ "R4STD.Bindings.Zig.settings", "R4StdSettings" },
@@ -61,6 +105,7 @@ pub fn storage(comptime T: type) []const u8 {
         .void => "void",
         .bool => "uint8_t",
         .int => integer(T),
+        .error_set => "const uint8_t *",
         .float => if (@sizeOf(T) == 4) "float" else "double",
         else => if (T == anyopaque) "void" else name(T),
     };
@@ -69,6 +114,7 @@ fn param(comptime T: type) []const u8 {
     return comptime switch (@typeInfo(T)) {
         .bool => "uint8_t",
         .int => integer(T),
+        .error_set => "const uint8_t *",
         .@"enum" => "uint32_t",
         .float => "const " ++ storage(T) ++ " *",
         .pointer => |p| if (@typeInfo(p.child) == .@"fn") "uintptr_t" else (if (p.is_const) "const " else "") ++ storage(p.child) ++ " *",
@@ -91,11 +137,12 @@ pub fn needsOutput(comptime T: type) bool {
 }
 fn parameter(w: *std.Io.Writer, comptime T: type, comptime i: usize) !void {
     try w.print(", {s} p{d}", .{ param(T), i });
-    if (comptime @typeInfo(T) == .pointer and @typeInfo(T).pointer.size == .slice) try w.print(", uintptr_t n{d}", .{i});
+    if (comptime @typeInfo(T) == .error_set or (@typeInfo(T) == .pointer and @typeInfo(T).pointer.size == .slice)) try w.print(", uintptr_t n{d}", .{i});
 }
 fn argument(w: *std.Io.Writer, comptime T: type, comptime index: usize) !void {
     try w.print(" a[{d}] = ", .{index});
     switch (@typeInfo(T)) {
+        .error_set => try w.print("(R4LibrariesSlot){{.ptr=(void *)p{d},.length=n{d},.flags=R4LIBRARIES_PRESENT}};\n", .{ index, index }),
         .bool, .int, .@"enum" => try w.print("(R4LibrariesSlot){{.bits=(uint64_t)(int64_t)p{d},.flags=R4LIBRARIES_PRESENT}};\n", .{index}),
         .optional => try w.print("p{d};\n", .{index}),
         .pointer => |p| {

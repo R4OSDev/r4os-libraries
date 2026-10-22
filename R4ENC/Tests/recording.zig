@@ -21,7 +21,10 @@ const Sink = struct {
     }
 };
 pub fn run() !void {
-    try pixels();
+    return runWithAllocator(t.allocator);
+}
+pub fn runWithAllocator(allocator: std.mem.Allocator) !void {
+    try pixels(allocator);
     const parameters = try enc.parameterSets(.{ .width = 64, .height = 64, .qp = 26, .fps_num = 30, .fps_den = 1 });
     var raw: [512]u8 = undefined;
     @memcpy(raw[0..parameters.length], parameters.bytes());
@@ -58,7 +61,7 @@ pub fn run() !void {
     std.debug.print("recording Matroska: bounded AnnexB/AVC, ordered time, format rotation and sticky partial-write failure: OK\n", .{});
 }
 
-fn pixels() !void {
+fn pixels(allocator: std.mem.Allocator) !void {
     const convert = @import("recording_pixels");
     const layout = try convert.Layout.init(18, 16);
     var rgb: [20 * 16]u32 = undefined;
@@ -102,8 +105,8 @@ fn pixels() !void {
     try t.expectError(error.Bounds, convert.rows(rgb[0..18], 20, layout, &bytes, 0, 2));
     const amd = try convert.Layout.initAmd(130, 130);
     try t.expect(amd.pitch == 256 and amd.coded_rows == 144 and amd.uv_offset == 36864 and amd.bytes == 65536);
-    const captured = try t.allocator.alloc(u32, 130 * 130);
-    defer t.allocator.free(captured);
+    const captured = try allocator.alloc(u32, 130 * 130);
+    defer allocator.free(captured);
     @memset(captured, 0xffffff);
     @memset(&bytes, 0xdd);
     try convert.rows(captured, 130, amd, &bytes, 0, 128);
