@@ -1,6 +1,6 @@
 # Library consumer helpers
 
-Libraries 0.64.26 and SDK 0.64.79 expose the higher R4STD, R4IMG, R4FONT,
+Libraries 0.64.27 and SDK 0.64.80 expose the higher R4STD, R4IMG, R4FONT,
 R4GFX, R4ENC, R4VIDEO, R4ACO and R4NAK helpers to Rust and C. The original Zig functions execute behind a generated,
 fingerprinted boundary. Provider binaries and local ABI contracts are unchanged.
 
@@ -75,6 +75,9 @@ Opaque native storage uses `MaybeUninit`; never read padding or invent a Zig
 slice, optional, union or allocator layout. `R4LibraryMemory` adapts explicit
 allocation/free callbacks. `R4Library_colorClient` and `videoClient` resolve
 the original optional provider contracts without guessing private layouts.
+Native enum tags, type constants and immutable string constants are projected
+from the same owners; no foreign code needs private enum numbers or a second
+path/version list. String getters retain resident storage after return.
 Native error-set values use bounded exact error names, rather than private Zig
 error integers. A returned error value (PRESENT) differs from an operation
 failure (NATIVE_ERROR). Explicit slice alignment is checked, including ICC

@@ -2,6 +2,7 @@
 #include <r4img_helpers.h>
 #include <r4font_helpers.h>
 int32_t r4libraries59_pure(void) {
+    if(R4StdCodecMode_controls!=0 || R4StdCodecMode_pc_graphics!=1)return 12;
     const uint8_t text[]={'A',0xcc,0x88,'B'},invalid[]={'A',0xff};
     R4LibrariesSlot value=R4StdGrapheme_prefix(0,text,sizeof(text),2);
     if(value.status || value.flags!=R4LIBRARIES_PRESENT || value.bits)return 1;

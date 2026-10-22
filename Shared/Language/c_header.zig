@@ -156,6 +156,12 @@ fn argument(w: *std.Io.Writer, comptime T: type, comptime index: usize) !void {
 fn fieldList(comptime T: type) []const std.builtin.Type.StructField {
     return @typeInfo(T).@"struct".fields;
 }
+fn stringConstant(w: *std.Io.Writer, comptime T: type, comptime field: []const u8, comptime bytes: []const u8) !void {
+    try w.print("static const uint8_t {s}_CONST_{s}[] = {{", .{ name(T), field });
+    for (bytes) |b| try w.print("{d},", .{b});
+    try w.writeAll("0};\n");
+    try w.print("static inline R4LibrariesSlot {s}_constant_{s}(void) {{ return (R4LibrariesSlot){{.ptr=(void *){s}_CONST_{s},.length={d},.flags=1u}}; }}\n", .{ name(T), field, name(T), field, bytes.len });
+}
 fn constants(w: *std.Io.Writer, comptime T: type) !void {
     if (comptime @typeInfo(T) != .@"struct" and @typeInfo(T) != .@"union" and @typeInfo(T) != .@"enum") return;
     const declarations = comptime switch (@typeInfo(T)) {
@@ -169,6 +175,12 @@ fn constants(w: *std.Io.Writer, comptime T: type) !void {
         switch (@typeInfo(@TypeOf(value))) {
             .comptime_int, .int => try w.print("#define {s}_{s} ({d})\n", .{ name(T), decl.name, value }),
             .bool => try w.print("#define {s}_{s} {d}u\n", .{ name(T), decl.name, @intFromBool(value) }),
+            .pointer => |pointer| {
+                if (comptime pointer.size == .one and @typeInfo(pointer.child) == .array and @typeInfo(pointer.child).array.child == u8) try stringConstant(w, T, decl.name, value);
+            },
+            .array => |array| {
+                if (comptime array.child == u8) try stringConstant(w, T, decl.name, &value);
+            },
             else => {},
         }
     }
@@ -183,6 +195,15 @@ pub fn emit(w: *std.Io.Writer) !void {
     }
     try w.print("#define R4Libraries_ABI_FINGERPRINT UINT64_C({d})\nint32_t R4LibrariesVerifyAbi(uint64_t);\n", .{s.fingerprint});
     inline for (s.modules) |M| try constants(w, M);
+    inline for (s.types) |T| {
+        if (comptime s.canonical(T) or s.context(T)) continue;
+        if (@typeInfo(T) != .@"struct" and @typeInfo(T) != .@"union" and @typeInfo(T) != .@"enum") continue;
+        comptime var already = false;
+        inline for (s.modules) |M| if (T == M) {
+            already = true;
+        };
+        if (comptime !already) try constants(w, T);
+    }
     inline for (s.functions, 0..) |entry, i| {
         const info = @typeInfo(@TypeOf(@field(entry.owner, entry.name))).@"fn";
         const R = info.return_type.?;

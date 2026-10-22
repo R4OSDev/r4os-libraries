@@ -1999,13 +1999,43 @@ typedef struct R4Lib_Value683 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Val
 #define R4Lib_Value683_TYPE 683u
 #define R4Libraries_ABI_FINGERPRINT UINT64_C(6999400729378588851)
 int32_t R4LibrariesVerifyAbi(uint64_t);
+static const uint8_t R4Std_CONST_name[] = {82,52,83,84,68,0};
+static inline R4LibrariesSlot R4Std_constant_name(void) { return (R4LibrariesSlot){.ptr=(void *)R4Std_CONST_name,.length=5,.flags=1u}; }
+static const uint8_t R4Std_CONST_import_text_v1[] = {82,52,83,84,68,58,84,69,88,84,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4Std_constant_import_text_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4Std_CONST_import_text_v1,.length=15,.flags=1u}; }
+static const uint8_t R4Std_CONST_import_codec_v1[] = {82,52,83,84,68,58,67,79,68,69,67,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4Std_constant_import_codec_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4Std_CONST_import_codec_v1,.length=16,.flags=1u}; }
+static const uint8_t R4Std_CONST_import_settings_v1[] = {82,52,83,84,68,58,83,69,84,84,73,78,71,83,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4Std_constant_import_settings_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4Std_CONST_import_settings_v1,.length=19,.flags=1u}; }
+static const uint8_t R4Std_CONST_import_date_v1[] = {82,52,83,84,68,58,68,65,84,69,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4Std_constant_import_date_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4Std_CONST_import_date_v1,.length=15,.flags=1u}; }
+static const uint8_t R4Std_CONST_import_time_v1[] = {82,52,83,84,68,58,84,73,77,69,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4Std_constant_import_time_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4Std_CONST_import_time_v1,.length=15,.flags=1u}; }
+static const uint8_t R4Std_CONST_import_config_v1[] = {82,52,83,84,68,58,67,79,78,70,73,71,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4Std_constant_import_config_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4Std_CONST_import_config_v1,.length=17,.flags=1u}; }
+static const uint8_t R4StdText_CONST_utf8_bom[] = {239,187,191,0};
+static inline R4LibrariesSlot R4StdText_constant_utf8_bom(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdText_CONST_utf8_bom,.length=3,.flags=1u}; }
+static const uint8_t R4StdSettings_CONST_format_key[] = {82,52,83,95,70,79,82,77,65,84,0};
+static inline R4LibrariesSlot R4StdSettings_constant_format_key(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettings_CONST_format_key,.length=10,.flags=1u}; }
+static const uint8_t R4StdSettings_CONST_schema_key[] = {83,67,72,69,77,65,0};
+static inline R4LibrariesSlot R4StdSettings_constant_schema_key(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettings_CONST_schema_key,.length=6,.flags=1u}; }
 #define R4StdSettings_current_format_version (1)
+static const uint8_t R4StdSettings_CONST_utf8_bom[] = {239,187,191,0};
+static inline R4LibrariesSlot R4StdSettings_constant_utf8_bom(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettings_CONST_utf8_bom,.length=3,.flags=1u}; }
 #define R4StdDate_seconds_per_day (86400)
+static const uint8_t R4StdTime_CONST_schema[] = {84,73,77,69,0};
+static inline R4LibrariesSlot R4StdTime_constant_schema(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdTime_CONST_schema,.length=4,.flags=1u}; }
+static const uint8_t R4StdTime_CONST_default_timezone_id[] = {85,84,67,0};
+static inline R4LibrariesSlot R4StdTime_constant_default_timezone_id(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdTime_CONST_default_timezone_id,.length=3,.flags=1u}; }
 #define R4StdTime_zone_count (38)
 #define R4StdTime_zone_id_max (31)
 #define R4StdTime_zone_label_max (39)
 #define R4StdTime_utc_index (13)
 #define R4StdTime_seconds_per_day (86400)
+static const uint8_t R4StdConfig_CONST_name[] = {82,52,83,84,68,0};
+static inline R4LibrariesSlot R4StdConfig_constant_name(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdConfig_CONST_name,.length=5,.flags=1u}; }
+static const uint8_t R4StdConfig_CONST_import_config_v1[] = {82,52,83,84,68,58,67,79,78,70,73,71,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4StdConfig_constant_import_config_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdConfig_CONST_import_config_v1,.length=17,.flags=1u}; }
 #define R4StdConfig_max_path_len (1023)
 #define R4StdConfig_max_file_bytes (4096)
 #define R4StdConfig_max_output_bytes (4096)
@@ -2022,14 +2052,20 @@ int32_t R4LibrariesVerifyAbi(uint64_t);
 #define R4StdConfig_error_verify_failed (-7)
 #define R4StdConfig_error_recovery_failed (-8)
 #define R4StdConfig_error_read_failed (-9)
+static const uint8_t R4StdGrapheme_CONST_unicode_version[] = {49,55,46,48,46,48,0};
+static inline R4LibrariesSlot R4StdGrapheme_constant_unicode_version(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdGrapheme_CONST_unicode_version,.length=6,.flags=1u}; }
 #define R4StdGrapheme_uax29_revision (47)
 #define R4StdPathText_component_utf16_units (255)
+static const uint8_t R4StdShortcut_CONST_schema[] = {82,52,76,78,75,0};
+static inline R4LibrariesSlot R4StdShortcut_constant_schema(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdShortcut_CONST_schema,.length=5,.flags=1u}; }
 #define R4StdShortcut_title_max (63)
 #define R4StdShortcut_path_max (1023)
 #define R4StdShortcut_args_max (127)
 #define R4StdShortcut_icon_max (1023)
 #define R4StdShortcut_workdir_max (1023)
 #define R4StdShortcut_foreign_max (8)
+static const uint8_t R4StdAssociation_CONST_schema[] = {65,80,80,65,83,83,79,67,0};
+static inline R4LibrariesSlot R4StdAssociation_constant_schema(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdAssociation_CONST_schema,.length=8,.flags=1u}; }
 #define R4StdAssociation_max_apps (8)
 #define R4StdAssociation_max_extensions (16)
 #define R4StdAssociation_app_id_max (15)
@@ -2046,10 +2082,24 @@ int32_t R4LibrariesVerifyAbi(uint64_t);
 #define R4StdAssociation_foreign_key_max (79)
 #define R4StdAssociation_foreign_value_max (127)
 #define R4StdFileHandler_max_choices (24)
+static const uint8_t R4StdSubsystem_CONST_inventory_path[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,77,79,68,85,76,69,83,46,74,83,79,78,0};
+static inline R4LibrariesSlot R4StdSubsystem_constant_inventory_path(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSubsystem_CONST_inventory_path,.length=27,.flags=1u}; }
+static const uint8_t R4ImgHelpers_CONST_name[] = {82,52,73,77,71,0};
+static inline R4LibrariesSlot R4ImgHelpers_constant_name(void) { return (R4LibrariesSlot){.ptr=(void *)R4ImgHelpers_CONST_name,.length=5,.flags=1u}; }
+static const uint8_t R4ImgHelpers_CONST_import_api_v1[] = {82,52,73,77,71,58,65,80,73,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4ImgHelpers_constant_import_api_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4ImgHelpers_CONST_import_api_v1,.length=14,.flags=1u}; }
+static const uint8_t R4ImgHelpers_CONST_import_png_v1[] = {82,52,73,77,71,58,80,78,71,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4ImgHelpers_constant_import_png_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4ImgHelpers_CONST_import_png_v1,.length=14,.flags=1u}; }
+static const uint8_t R4ImgHelpers_CONST_import_raster_v1[] = {82,52,73,77,71,58,82,65,83,84,69,82,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4ImgHelpers_constant_import_raster_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4ImgHelpers_CONST_import_raster_v1,.length=17,.flags=1u}; }
 #define R4ImgHelpers_max_dimension (4096)
 #define R4ImgHelpers_max_pixels (8847360)
 #define R4ImgHelpers_max_scratch_bytes (234881024)
 #define R4ImgHelpers_max_svg_source_bytes (262144)
+static const uint8_t R4FontHelpers_CONST_name[] = {82,52,70,79,78,84,0};
+static inline R4LibrariesSlot R4FontHelpers_constant_name(void) { return (R4LibrariesSlot){.ptr=(void *)R4FontHelpers_CONST_name,.length=6,.flags=1u}; }
+static const uint8_t R4FontHelpers_CONST_import_api_v1[] = {82,52,70,79,78,84,58,65,80,73,95,86,49,58,49,0};
+static inline R4LibrariesSlot R4FontHelpers_constant_import_api_v1(void) { return (R4LibrariesSlot){.ptr=(void *)R4FontHelpers_CONST_import_api_v1,.length=15,.flags=1u}; }
 #define R4FontHelpers_max_source_bytes (8388608)
 #define R4FontHelpers_max_reconstructed_bytes (33554432)
 #define R4FontHelpers_max_raster_dimension (512)
@@ -2058,6 +2108,8 @@ int32_t R4LibrariesVerifyAbi(uint64_t);
 #define R4FontStore_default_cached_bytes (8388608)
 #define R4FontStore_min_pixel_height (4)
 #define R4FontStore_max_pixel_height (256)
+static const uint8_t R4FontFormat_CONST_MAGIC[] = {82,52,70,49,0};
+static inline R4LibrariesSlot R4FontFormat_constant_MAGIC(void) { return (R4LibrariesSlot){.ptr=(void *)R4FontFormat_CONST_MAGIC,.length=4,.flags=1u}; }
 #define R4FontFormat_VERSION (1)
 #define R4FontFormat_HEADER_SIZE (32)
 #define R4FontFormat_TABLE_ENTRY_SIZE (16)
@@ -2111,8 +2163,12 @@ int32_t R4LibrariesVerifyAbi(uint64_t);
 #define R4FontFormat_REQUIRED_SFNT_GLYF (128)
 #define R4FontFormat_REQUIRED_SFNT_OS2 (256)
 #define R4FontFormat_INVALID_GLYPH_ID (65535)
+static const uint8_t R4GfxBrightnessPreferences_CONST_path[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,66,82,73,71,72,84,78,69,83,83,46,82,52,83,0};
+static inline R4LibrariesSlot R4GfxBrightnessPreferences_constant_path(void) { return (R4LibrariesSlot){.ptr=(void *)R4GfxBrightnessPreferences_CONST_path,.length=29,.flags=1u}; }
 #define R4GfxBrightnessPreferences_capacity (16)
 #define R4GfxBrightnessPreferences_max_bytes (4096)
+static const uint8_t R4GfxColorPreferences_CONST_path[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,67,79,76,79,82,83,46,82,52,83,0};
+static inline R4LibrariesSlot R4GfxColorPreferences_constant_path(void) { return (R4LibrariesSlot){.ptr=(void *)R4GfxColorPreferences_CONST_path,.length=25,.flags=1u}; }
 #define R4GfxColorPreferences_capacity (16)
 #define R4GfxColorPreferences_max_bytes (8192)
 #define R4GfxControl_confirmation_ns (15000000000)
@@ -2124,12 +2180,16 @@ int32_t R4LibrariesVerifyAbi(uint64_t);
 #define R4GfxEld_max_bytes (96)
 #define R4GfxEld_max_sads (15)
 #define R4GfxModeControl_confirmation_ms (15000)
+static const uint8_t R4GfxPreferences_CONST_path[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,68,73,83,80,76,65,89,83,46,82,52,83,0};
+static inline R4LibrariesSlot R4GfxPreferences_constant_path(void) { return (R4LibrariesSlot){.ptr=(void *)R4GfxPreferences_CONST_path,.length=27,.flags=1u}; }
 #define R4GfxPreferences_capacity (16)
 #define R4GfxPreferences_max_bytes (4096)
 #define R4GfxReadback_max_regions (8)
 #define R4GfxReadback_max_image_bytes (67108864)
 #define R4GfxReadback_conversion_pixels (65536)
 #define R4GfxRefreshClient_renew_ns (500000000)
+static const uint8_t R4GfxRefreshPreferences_CONST_path[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,82,69,70,82,69,83,72,46,82,52,83,0};
+static inline R4LibrariesSlot R4GfxRefreshPreferences_constant_path(void) { return (R4LibrariesSlot){.ptr=(void *)R4GfxRefreshPreferences_CONST_path,.length=26,.flags=1u}; }
 #define R4GfxRefreshPreferences_capacity (16)
 #define R4GfxRefreshPreferences_max_bytes (4096)
 #define R4GfxTiming_interlaced (1)
@@ -2142,6 +2202,300 @@ int32_t R4LibrariesVerifyAbi(uint64_t);
 #define R4GfxTopology_capacity (8)
 #define R4GfxTopology_scale_unit (120)
 #define R4GfxTransfer_max_bytes (67108864)
+#define R4StdTextEncoding_bytes 0u
+#define R4StdTextEncoding_utf8 1u
+#define R4StdTextEncoding_utf8_bom 2u
+#define R4StdTextLineEnding_none 0u
+#define R4StdTextLineEnding_lf 1u
+#define R4StdTextLineEnding_crlf 2u
+#define R4StdTextLineEnding_mixed 3u
+static const uint8_t R4StdSettingspaths_CONST_sys_dir[] = {67,58,92,82,52,79,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_sys_dir(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_sys_dir,.length=7,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_config_dir[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_config_dir(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_config_dir,.length=14,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_apps_dir[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,65,80,80,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_apps_dir(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_apps_dir,.length=19,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_r4os_dir[] = {67,58,92,82,52,79,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_r4os_dir(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_r4os_dir,.length=7,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_r4os_config_dir[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_r4os_config_dir(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_r4os_config_dir,.length=14,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_desktop[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,68,69,83,75,84,79,80,46,82,52,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_desktop(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_desktop,.length=26,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_desktop_layout[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,68,69,83,75,76,65,89,46,82,52,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_desktop_layout(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_desktop_layout,.length=26,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_input[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,73,78,80,85,84,46,82,52,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_input(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_input,.length=24,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_time[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,84,73,77,69,46,82,52,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_time(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_time,.length=23,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_assoc[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,65,83,83,79,67,46,82,52,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_assoc(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_assoc,.length=24,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_explorer[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,65,80,80,83,92,69,88,80,76,79,82,69,82,46,82,52,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_explorer(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_explorer,.length=32,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_notepad[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,65,80,80,83,92,78,79,84,69,80,65,68,46,82,52,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_notepad(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_notepad,.length=31,.flags=1u}; }
+static const uint8_t R4StdSettingspaths_CONST_paint[] = {67,58,92,82,52,79,83,92,67,79,78,70,73,71,92,65,80,80,83,92,80,65,73,78,84,46,82,52,83,0};
+static inline R4LibrariesSlot R4StdSettingspaths_constant_paint(void) { return (R4LibrariesSlot){.ptr=(void *)R4StdSettingspaths_CONST_paint,.length=29,.flags=1u}; }
+#define R4StdSettingsWritebackDurability_lazy 0u
+#define R4StdSettingsWritebackDurability_soon 1u
+#define R4StdSettingsWritebackDurability_sync 2u
+#define R4StdSettingsWritebackAction_idle 0u
+#define R4StdSettingsWritebackAction_deferred 1u
+#define R4StdSettingsWritebackAction_saved 2u
+#define R4StdSettingsWritebackAction_failed 3u
+#define R4StdDateWeekday_sunday 0u
+#define R4StdDateWeekday_monday 1u
+#define R4StdDateWeekday_tuesday 2u
+#define R4StdDateWeekday_wednesday 3u
+#define R4StdDateWeekday_thursday 4u
+#define R4StdDateWeekday_friday 5u
+#define R4StdDateWeekday_saturday 6u
+#define R4StdCodecCodepage_cp437 437u
+#define R4StdCodecCodepage_windows1252 1252u
+#define R4StdCodecCodepage_cp850 850u
+#define R4StdCodecMode_controls 0u
+#define R4StdCodecMode_pc_graphics 1u
+#define R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type___complete 0u
+#define R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type___incomplete 1u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_Other 0u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_CR 1u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_LF 2u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_Control 3u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_Extend 4u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_ZWJ 5u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_Regional_Indicator 6u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_Prepend 7u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_SpacingMark 8u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_L 9u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_V 10u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_T 11u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_LV 12u
+#define R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_LVT 13u
+#define R4Lib_Value77_none 0u
+#define R4Lib_Value77_consonant 1u
+#define R4Lib_Value77_linker 2u
+#define R4StdShortcutTargetKind_program 0u
+#define R4StdShortcutTargetKind_directory 1u
+#define R4StdShortcutTargetKind_file 2u
+#define R4StdAssociationLaunchKind_direct_program 0u
+#define R4StdAssociationLaunchKind_associated 1u
+#define R4StdAssociationHandlerKind_none 0u
+#define R4StdAssociationHandlerKind_app 1u
+#define R4StdAssociationHandlerKind_subsystem 2u
+#define R4StdFileHandlerTargetKind_direct_program 0u
+#define R4StdFileHandlerTargetKind_application 1u
+#define R4StdFileHandlerTargetKind_subsystem 2u
+#define R4StdFileHandlerResolutionState_unknown 0u
+#define R4StdFileHandlerResolutionState_selected 1u
+#define R4StdFileHandlerResolutionState_ambiguous 2u
+#define R4StdFileHandlerChoiceKind_application 0u
+#define R4StdFileHandlerChoiceKind_subsystem 1u
+#define R4StdSubsystemLoadStatus_not_loaded 0u
+#define R4StdSubsystemLoadStatus_loaded 1u
+#define R4StdSubsystemLoadStatus_missing 2u
+#define R4StdSubsystemLoadStatus_too_large 3u
+#define R4StdSubsystemLoadStatus_read_failed 4u
+#define R4StdSubsystemLoadStatus_invalid 5u
+#define R4ImgHelpersFormat_png 0u
+#define R4ImgHelpersFormat_jpeg 1u
+#define R4ImgHelpersFormat_bmp 2u
+#define R4ImgHelpersFormat_svg 3u
+#define R4FontHelpersFormat_unknown 0u
+#define R4FontHelpersFormat_ttf 1u
+#define R4FontHelpersFormat_otf_cff 2u
+#define R4FontHelpersFormat_woff 3u
+#define R4FontHelpersFormat_woff2 4u
+#define R4FontHelpersFormat_collection 5u
+#define R4EncPixelsProfile_generic 0u
+#define R4EncPixelsProfile_amd_vcn1 1u
+#define R4GfxLinksFrl_none 0u
+#define R4GfxLinksFrl_lanes3_3g 1u
+#define R4GfxLinksFrl_lanes3_6g 2u
+#define R4GfxLinksFrl_lanes4_6g 3u
+#define R4GfxLinksFrl_lanes4_8g 4u
+#define R4GfxLinksFrl_lanes4_10g 5u
+#define R4GfxLinksFrl_lanes4_12g 6u
+#define R4GfxColorSignalTransfer_srgb 0u
+#define R4GfxColorSignalTransfer_pq 1u
+#define R4GfxColorSignalTransfer_hlg 2u
+#define R4GfxColorSignalPrimaries_bt709 0u
+#define R4GfxColorSignalPrimaries_bt2020 1u
+#define R4GfxColorSignalRange_full 0u
+#define R4GfxColorSignalRange_limited 1u
+#define R4GfxColorSignalFormat_xr24 0u
+#define R4GfxColorSignalFormat_xr30 1u
+#define R4GfxColorSignalTransport_dvi 0u
+#define R4GfxColorSignalTransport_hdmi 1u
+#define R4GfxColorSignalTransport_displayport 2u
+#define R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type___dvi 0u
+#define R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type___hdmi 1u
+#define R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type___hdmi_frl 2u
+#define R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type___displayport 3u
+#define R4GfxTopologyRotation_normal 0u
+#define R4GfxTopologyRotation_clockwise90 1u
+#define R4GfxTopologyRotation_clockwise180 2u
+#define R4GfxTopologyRotation_clockwise270 3u
+#define R4GfxEdidWarning_missing (1)
+#define R4GfxEdidWarning_checksum (2)
+#define R4GfxEdidWarning_malformed (4)
+#define R4GfxEdidWarning_unknown (8)
+#define R4GfxEdidWarning_extra (16)
+#define R4GfxEdidWarning_timing_incomplete (32)
+#define R4GfxEldTransport_hdmi 0u
+#define R4GfxEldTransport_display_port 1u
+#define R4GfxReadbackPhase_empty 0u
+#define R4GfxReadbackPhase_idle 1u
+#define R4GfxReadbackPhase_copying 2u
+#define R4GfxReadbackPhase_converting 3u
+#define R4GfxReadbackPhase_ready 4u
+#define R4GfxReadbackPhase_draining 5u
+#define R4GfxReadbackPhase_failed 6u
+#define R4GfxRefreshObserverResult_baseline 0u
+#define R4GfxRefreshObserverResult_sample 1u
+#define R4GfxRefreshObserverResult_duplicate 2u
+#define R4GfxRefreshObserverResult_gap 3u
+#define R4GfxRefreshObserverResult_stale 4u
+#define R4GfxRefreshObserverResult_clock 5u
+#define R4GfxTransferPhase_empty 0u
+#define R4GfxTransferPhase_idle 1u
+#define R4GfxTransferPhase_download 2u
+#define R4GfxTransferPhase_upload 3u
+#define R4GfxTransferPhase_draining 4u
+#define R4GfxTransferPhase_ready 5u
+#define R4GfxTransferPhase_failed 6u
+#define R4GfxVrrLink_hdmi 0u
+#define R4GfxVrrLink_displayport 1u
+#define R4GfxVrrOrigin_edid 1u
+#define R4GfxVrrOrigin_dynamic_displayid 2u
+#define R4GfxVrrOrigin_adaptive_displayid 3u
+#define R4GfxVrrOrigin_hdmi_forum 4u
+#define R4GfxVrrPolicy_off 0u
+#define R4GfxVrrPolicy_fullscreen 1u
+#define R4GfxVrrPolicy_animated_windows 2u
+#define R4GfxVrrReason_none 0u
+#define R4GfxVrrReason_policy_off 1u
+#define R4GfxVrrReason_idle 2u
+#define R4GfxVrrReason_windowed 3u
+#define R4GfxVrrReason_unavailable 4u
+#define R4GfxVrrReason_transition 5u
+#define R4GfxVrrReason_hdr 6u
+#define R4GfxVrrReason_topology 7u
+#define R4GfxVrrReason_capture 8u
+#define R4GfxVrrReason_audio_clock 9u
+#define R4GfxVrrReason_link_lost 10u
+#define R4GfxVrrReason_timing_fault 11u
+#define R4GfxVrrReason_user_flicker 12u
+#define R4GfxVrrReason_stale_clock 13u
+#define R4GfxVrrState_fixed 0u
+#define R4GfxVrrState_enabling 1u
+#define R4GfxVrrState_active 2u
+#define R4GfxVrrState_disabling 3u
+#define R4GfxVrrState_faulted 4u
+#define R4GfxVrrSwitch_none 0u
+#define R4GfxVrrSwitch_enable 1u
+#define R4GfxVrrSwitch_disable 2u
+static const uint8_t R4Lib_R4VIDEO_Bindings_Zig_r4video_CONST_module_name[] = {82,52,86,73,68,69,79,0};
+static inline R4LibrariesSlot R4Lib_R4VIDEO_Bindings_Zig_r4video_constant_module_name(void) { return (R4LibrariesSlot){.ptr=(void *)R4Lib_R4VIDEO_Bindings_Zig_r4video_CONST_module_name,.length=7,.flags=1u}; }
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_ok (0)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_again (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_eos (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_backend_software (0)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_backend_nvidia (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_codec_h264 (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_default (0)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_h264_baseline (66)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_h264_main (77)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_h264_high (100)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_chroma_420 (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_format_nv12 (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_format_p010 (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_format_yuv420p (3)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_formats_nv12 (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_formats_p010 (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_formats_yuv420p (4)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_matrix_unspecified (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_matrix_bt470bg (5)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_matrix_bt709 (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_matrix_bt2020_ncl (9)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_chroma_unspecified (0)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_chroma_left (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_chroma_center (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_chroma_top_left (3)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_packet_pts (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_packet_dts (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_packet_duration (4)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_frame_key (8)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_phase_open (0)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_phase_draining (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_phase_drained (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_phase_flushing (3)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_phase_closing (4)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_phase_closed (5)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_phase_failed (6)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_control_query (0)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_control_drain (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_control_flush (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_control_close (3)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_matrix_smpte170m (6)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_color_reference_white (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_color_luminance (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_color_unspecified (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_backend_amd (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_codec_hevc (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_codec_vp9 (3)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_codec_mpeg2 (4)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_codec_vc1 (5)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_codec_jpeg (6)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_codec_av1 (7)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_codec_mpeg4_part2 (8)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_hevc_main (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_hevc_main10 (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_vp9_0 (0)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_vp9_2 (2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_mpeg2_simple (5)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_mpeg2_main (4)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_vc1_simple (0)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_vc1_main (1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_vc1_advanced (3)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_profile_jpeg_baseline (0)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_error_invalid (-1)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_error_unsupported (-2)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_error_busy (-3)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_error_no_memory (-4)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_error_stale (-5)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_error_decode (-6)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_error_device_lost (-7)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_error_closed (-8)
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_error_internal (-9)
+static const uint8_t R4Lib_R4VIDEO_Bindings_Zig_r4video_CONST_video_v1_export_name[] = {86,73,68,69,79,95,86,49,0};
+static inline R4LibrariesSlot R4Lib_R4VIDEO_Bindings_Zig_r4video_constant_video_v1_export_name(void) { return (R4LibrariesSlot){.ptr=(void *)R4Lib_R4VIDEO_Bindings_Zig_r4video_CONST_video_v1_export_name,.length=8,.flags=1u}; }
+#define R4Lib_R4VIDEO_Bindings_Zig_r4video_video_v1_revision (1)
+#define R4VideoPlaybackPhase_playing 0u
+#define R4VideoPlaybackPhase_paused 1u
+#define R4VideoPlaybackPhase_seeking 2u
+#define R4VideoPlaybackPhase_draining 3u
+#define R4VideoPlaybackPhase_ended 4u
+#define R4VideoPlaybackPhase_failed 5u
+#define R4VideoPlaybackPhase_closing 6u
+#define R4VideoPlaybackPhase_closed 7u
+#define R4Lib__typeInfo_R4VIDEO_Bindings_Zig_playback_composition_Target____union__tag_type___cpu 0u
+#define R4Lib__typeInfo_R4VIDEO_Bindings_Zig_playback_composition_Target____union__tag_type___gpu 1u
+#define R4VideoPlaybackCompositionState_preparing 0u
+#define R4VideoPlaybackCompositionState_rendering 1u
+#define R4VideoPlaybackCompositionState_retiring 2u
+#define R4VideoPlaybackCompositionState_ready 3u
+#define R4VideoPlaybackCompositionState_failed 4u
+#define R4VideoPlaybackAudioState_disabled 0u
+#define R4VideoPlaybackAudioState_ready 1u
+#define R4VideoPlaybackAudioState_active 2u
+#define R4VideoPlaybackAudioState_degraded 3u
+#define R4VideoPlaybackAudioState_closing 4u
+#define R4VideoPlaybackAudioState_closed 5u
+#define R4MediaBuiltinShader_fullscreen 0u
+#define R4MediaBuiltinShader_color 1u
+#define R4MediaBuiltinShader_copy 2u
+#define R4MediaBuiltinShader_fill 3u
+#define R4MediaBuiltinShader_shared 4u
+#define R4MediaBuiltinShader_sample 5u
 /* R4STD.Bindings.Zig.r4std.init -> bool */
 static inline R4LibrariesSlot R4Std_init(uint32_t reserved, const R4XStartContext * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
