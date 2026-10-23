@@ -12,8 +12,10 @@ pub const Rect = struct {
     pub fn right(self: Rect) i64 { return @as(i64, self.x) + self.w; }
     pub fn bottom(self: Rect) i64 { return @as(i64, self.y) + self.h; }
     pub fn valid(self: Rect) bool {
-        return self.w != 0 and self.h != 0 and self.right() <= @as(i64, std.math.maxInt(i32)) + 1 and
-            self.bottom() <= @as(i64, std.math.maxInt(i32)) + 1;
+        // Shared desktop surfaces store signed extents and exclusive edges.
+        // A representable last pixel alone does not make its edge representable.
+        return self.w != 0 and self.h != 0 and self.w <= std.math.maxInt(i32) and self.h <= std.math.maxInt(i32) and
+            self.right() <= std.math.maxInt(i32) and self.bottom() <= std.math.maxInt(i32);
     }
     pub fn contains(self: Rect, point: Point) bool {
         return point.x >= self.x and point.y >= self.y and point.x < self.right() and point.y < self.bottom();
@@ -156,6 +158,8 @@ pub const Layout = struct {
         if (revision == 0) return error.Invalid;
         var result = Layout{ .count = values.len, .revision = revision };
         var enabled: usize = 0; var primary_count: usize = 0;
+        var left: i64 = std.math.maxInt(i64); var top = left;
+        var right: i64 = std.math.minInt(i64); var bottom = right;
         for (values, 0..) |value, i| {
             if (value.key.connector == 0 or value.refresh_millihz > 1_000_000) return error.Invalid;
             for (values[0..i]) |other| if (value.key.samePort(other.key)) return error.Duplicate;
@@ -163,6 +167,9 @@ pub const Layout = struct {
             if (!value.enabled) { if (value.primary) return error.Primary; continue; }
             enabled += 1;
             const rect = try value.view.logical();
+            left = @min(left, rect.x); top = @min(top, rect.y);
+            right = @max(right, rect.right()); bottom = @max(bottom, rect.bottom());
+            if (right - left > std.math.maxInt(i32) or bottom - top > std.math.maxInt(i32)) return error.Bounds;
             if (value.primary) { primary_count += 1; result.primary = i; }
             for (values[0..i]) |other| {
                 if (!other.enabled) continue;

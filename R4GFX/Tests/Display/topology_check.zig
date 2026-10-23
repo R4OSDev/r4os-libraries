@@ -155,6 +155,20 @@ pub fn check(report: *const @import("../../Display/edid.zig").Report) !void {
     try t.expectError(error.Invalid, invalid.logical());
     invalid = outputs[0].view; invalid.origin.x = std.math.maxInt(i32);
     try t.expectError(error.Bounds, invalid.logical());
+    invalid = .{ .origin = .{ .x = std.math.maxInt(i32) - 127 }, .pixel_w = 128, .pixel_h = 1 };
+    try t.expectError(error.Bounds, invalid.logical());
+    var distant = outputs;
+    distant[0].view = .{ .origin = .{ .x = std.math.minInt(i32) }, .pixel_w = 640, .pixel_h = 480 };
+    distant[1].view = .{ .origin = .{ .x = std.math.maxInt(i32) - 640 }, .pixel_w = 640, .pixel_h = 480 };
+    try t.expectError(error.Bounds, topology.Layout.init(&distant, 1));
+    try t.expect(!(Rect{ .x = std.math.minInt(i32), .w = std.math.maxInt(u32), .h = 1 }).valid());
+    const edge = topology.Viewport{ .origin = .{ .x = std.math.maxInt(i32) - 640, .y = std.math.maxInt(i32) - 480 },
+        .pixel_w = 640, .pixel_h = 480 };
+    try t.expectEqual(@as(i64, std.math.maxInt(i32)), (try edge.logical()).right());
+    var shifted = outputs[0]; shifted.view = edge;
+    const shifted_layout = try topology.Layout.init(&.{shifted}, 1);
+    const normalized_edge = try control.normalized(shifted_layout);
+    try t.expectEqualDeep(Rect{ .w = 640, .h = 480 }, try normalized_edge.outputs[0].view.logical());
     const fractional = topology.Viewport{ .origin = .{ .x = -2560, .y = -1440 }, .pixel_w = 3840, .pixel_h = 2160, .scale = 180 };
     try t.expectEqualDeep(Rect{ .x = -2560, .y = -1440, .w = 2560, .h = 1440 }, try fractional.logical());
     try t.expectEqualDeep(Rect{ .x = 1, .y = 1, .w = 2, .h = 2 }, (try fractional.physicalDamage(.{ .x = -2559, .y = -1439, .w = 1, .h = 1 })).?);
