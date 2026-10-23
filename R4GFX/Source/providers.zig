@@ -18,13 +18,15 @@ pub const Registry = struct {
     }
     pub fn available(self: Registry) bool { return self.nvidia != null or self.amdgpu != null; }
     pub fn negotiate(self: Registry, snapshot: a.GfxBackendInfo) ?Selection {
+        // Operations and the memory epoch belong to the current provider;
+        // neither may be inferred from a shorter device/queue snapshot.
+        if (snapshot.version != 1 or snapshot.size < @sizeOf(a.GfxBackendInfo) or snapshot.memory_generation == 0) return null;
         const profile = snapshot.profile;
         const binding = snapshot.binding;
         if (profile.version != 1 or profile.size < @sizeOf(a.GfxBackendProfile) or profile.revision != 1 or profile.data_bytes > profile.data.len) return null;
         for (profile.data[profile.data_bytes..]) |byte| if (byte != 0) return null;
-        const has_operations = snapshot.size >= @offsetOf(a.GfxBackendInfo, "memory_generation");
-        const operations = if (has_operations) snapshot.operations else 0;
-        if (has_operations and operations & (@as(u64, 1) << a.gfx_queue_operation_copy) == 0) return null;
+        const operations = snapshot.operations;
+        if (operations & (@as(u64, 1) << a.gfx_queue_operation_copy) == 0) return null;
         if (profile.interface_id_lo == nv.backend_v1_header.interface_id_lo and profile.interface_id_hi == nv.backend_v1_header.interface_id_hi) {
             const client = self.nvidia orelse return null;
             if (profile.data_bytes != @sizeOf(nv.R4NvDriverProfile)) return null;
@@ -53,9 +55,7 @@ pub const Registry = struct {
         }
         if (profile.interface_id_lo == amd.backend_v1_header.interface_id_lo and profile.interface_id_hi == amd.backend_v1_header.interface_id_hi) {
             const client = self.amdgpu orelse return null;
-            // AMD has no legacy queue-only memory epoch: UMA memory identity
-            // must be explicit from its first supported common backend.
-            if (snapshot.size < @sizeOf(a.GfxBackendInfo) or profile.data_bytes != @sizeOf(amd.R4AmdDriverProfile)) return null;
+            if (profile.data_bytes != @sizeOf(amd.R4AmdDriverProfile)) return null;
             const details = std.mem.bytesToValue(amd.R4AmdDriverProfile, profile.data[0..@sizeOf(amd.R4AmdDriverProfile)]);
             if (details.version != amd.profile_version or details.size != @sizeOf(amd.R4AmdDriverProfile) or details.vendor_id != amd.vendor_id or details.reserved != 0) return null;
             var features: amd.R4AmdFeatures = undefined;

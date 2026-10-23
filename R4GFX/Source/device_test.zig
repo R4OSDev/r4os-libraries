@@ -561,6 +561,28 @@ fn checkProviders(raw: *const a.R4XStartContext, imports: *[6]a.R4XStartImport) 
     var state: c.R4GfxDeviceInfo = undefined;
     try t.expectEqual(c.status_ok, api.device_info(&handle, &state));
     try t.expectEqual(c.render_backend_nvidia, state.backend); // AMD optional import absent.
+    // A queue/device epoch cannot stand in for the independent memory epoch.
+    const registry = @import("providers.zig").Registry.init(raw, false);
+    const before_short = ProviderProbe.nv_calls;
+    for ([_]u32{ 136, 144, @sizeOf(a.GfxBackendInfo) - 1 }) |bytes| {
+        values[0] = nvidia; values[0].size = bytes;
+        try t.expect(registry.negotiate(values[0]) == null);
+        try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+        try t.expectEqual(c.render_backend_software, state.backend);
+        try t.expectEqual(before_short, ProviderProbe.nv_calls);
+    }
+    values[0] = nvidia; values[0].memory_generation = 0;
+    try t.expect(registry.negotiate(values[0]) == null);
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_software, state.backend);
+    values[0] = nvidia; values[0].operations = 0;
+    try t.expect(registry.negotiate(values[0]) == null);
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_software, state.backend);
+    try t.expectEqual(before_short, ProviderProbe.nv_calls);
+    values[0] = nvidia;
+    try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));
+    try t.expectEqual(c.render_backend_nvidia, state.backend);
     imports[4].table = @intFromPtr(&table); imports[4].resolved_version = amd.backend_v1_revision;
     table.header.abi_major = 2;
     try t.expectEqual(c.status_ok, api.device_refresh(&handle, &state));

@@ -250,12 +250,10 @@ pub const Device = struct {
                 var snapshot: a.GfxBackendInfo = .{};
                 if (queue_api.backendInfo(@intCast(index), &snapshot) != a.gfx_queue_ok) continue;
                 const binding = snapshot.binding;
-                if (snapshot.version != 1 or snapshot.size < @offsetOf(a.GfxBackendInfo, "operations") or binding.version != 1 or binding.size < @sizeOf(a.GfxBackendBinding) or
+                if (snapshot.version != 1 or snapshot.size < @sizeOf(a.GfxBackendInfo) or binding.version != 1 or binding.size < @sizeOf(a.GfxBackendBinding) or
                     binding.adapter_id == 0 or binding.device_generation == 0 or binding.reset_generation == 0 or binding.milestone != a.gfx_queue_milestone_device_execution or
                     (self.preferred_adapter != 0 and binding.adapter_id != self.preferred_adapter)) continue;
                 const negotiated = registry.negotiate(snapshot) orelse continue;
-                // Only NVIDIA's pre-memory-epoch ABI has a legacy fallback.
-                if (snapshot.size < @sizeOf(a.GfxBackendInfo)) snapshot.memory_generation = binding.device_generation;
                 if (snapshot.memory_generation == 0) continue;
                 if (!preferBackend(snapshot, candidate, boot_adapter, negotiated.operations, gpu_operations)) continue;
                 candidate = snapshot;

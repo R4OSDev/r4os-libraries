@@ -225,8 +225,9 @@ Docs/Desktop/GrafikIntegration07944.txt in the workspace Docs repository.
 `Source/providers.zig` negotiates each vendor independently. Effective
 capabilities, then the active display adapter, then canonical adapter ID
 determine selection. An explicit preferred adapter never borrows another GPU.
-AMD requires a real common memory generation; the older queue-generation
-fallback remains confined to the NVIDIA protocol. Profile changes invalidate
+Both vendors require the complete current `GfxBackendInfo`, explicit operation
+bits and a nonzero memory generation. Short snapshots cannot borrow a device
+or queue epoch or assume copy support. Profile changes invalidate
 native BOs even when an erroneous producer reuses adapter/generation values.
 Pending jobs retain their original backend ID and exact fence until physical
 retirement; AMD copies count as GPU traffic without acquiring NVIDIA labels.
