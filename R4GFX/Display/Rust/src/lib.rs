@@ -104,6 +104,55 @@ pub struct Viewport {
     pub scale: u32,
     pub rotation: Rotation,
 }
+/// Validated output geometry for a bounded region of local logical/native
+/// pixels. Region owners admit their extents once, then use these pure point
+/// mappings without repeating global-origin or layout validation per pixel.
+#[derive(Clone, Copy, Debug)]
+pub struct Projection {
+    view: Viewport,
+    logical: Rect,
+}
+impl Projection {
+    pub fn logical(self) -> Rect {
+        self.logical
+    }
+    pub fn pixel_width(self) -> usize {
+        self.view.pixel_w as usize
+    }
+    /// Map a local logical cell to its native center sample. Coordinates come
+    /// from the admitted logical rectangle, without the global output origin.
+    #[inline(always)]
+    pub fn native_pixel(self, x: usize, y: usize) -> (usize, usize) {
+        let (width, height) = self.view.oriented();
+        let u = (((2 * x + 1) * self.view.scale as usize) / (2 * SCALE_UNIT as usize))
+            .min(width as usize - 1);
+        let v = (((2 * y + 1) * self.view.scale as usize) / (2 * SCALE_UNIT as usize))
+            .min(height as usize - 1);
+        let (w, h) = (self.view.pixel_w as usize, self.view.pixel_h as usize);
+        match self.view.rotation {
+            Rotation::Normal => (u, v),
+            Rotation::Clockwise90 => (v, h - 1 - u),
+            Rotation::Clockwise180 => (w - 1 - u, h - 1 - v),
+            Rotation::Clockwise270 => (w - 1 - v, u),
+        }
+    }
+    /// Map an admitted native pixel to its local logical cell. This is point
+    /// sampling; primitive edges and conservative damage have other rounding.
+    #[inline(always)]
+    pub fn logical_pixel(self, x: usize, y: usize) -> (usize, usize) {
+        let (w, h) = (self.view.pixel_w as usize, self.view.pixel_h as usize);
+        let (u, v) = match self.view.rotation {
+            Rotation::Normal => (x, y),
+            Rotation::Clockwise90 => (h - 1 - y, x),
+            Rotation::Clockwise180 => (w - 1 - x, h - 1 - y),
+            Rotation::Clockwise270 => (y, w - 1 - x),
+        };
+        (
+            ((2 * u + 1) * SCALE_UNIT as usize) / (2 * self.view.scale as usize),
+            ((2 * v + 1) * SCALE_UNIT as usize) / (2 * self.view.scale as usize),
+        )
+    }
+}
 impl Default for Viewport {
     fn default() -> Self {
         Self {
@@ -154,62 +203,39 @@ impl Viewport {
         self.validate()?;
         Ok(self.logical_unchecked())
     }
-    fn to_native(self, u: i32, v: i32) -> Point {
-        let (w, h) = (self.pixel_w as i32, self.pixel_h as i32);
-        match self.rotation {
-            Rotation::Normal => Point { x: u, y: v },
-            Rotation::Clockwise90 => Point { x: v, y: h - 1 - u },
-            Rotation::Clockwise180 => Point {
-                x: w - 1 - u,
-                y: h - 1 - v,
-            },
-            Rotation::Clockwise270 => Point { x: w - 1 - v, y: u },
-        }
+    pub fn projection(self) -> Result<Projection> {
+        self.validate()?;
+        Ok(Projection {
+            view: self,
+            logical: self.logical_unchecked(),
+        })
     }
     pub fn physical(self, p: Point) -> Result<Point> {
-        let rect = self.logical()?;
+        let projection = self.projection()?;
+        let rect = projection.logical();
         if !rect.contains(p) {
             return Err(Error::Bounds);
         }
-        let (w, h) = self.oriented();
         let (x, y) = (
-            (i64::from(p.x) - i64::from(rect.x)) as u64,
-            (i64::from(p.y) - i64::from(rect.y)) as u64,
+            (i64::from(p.x) - i64::from(rect.x)) as usize,
+            (i64::from(p.y) - i64::from(rect.y)) as usize,
         );
-        let u = (((2 * x + 1) * u64::from(self.scale)) / (2 * u64::from(SCALE_UNIT)))
-            .min(u64::from(w) - 1);
-        let v = (((2 * y + 1) * u64::from(self.scale)) / (2 * u64::from(SCALE_UNIT)))
-            .min(u64::from(h) - 1);
-        Ok(self.to_native(u as i32, v as i32))
+        let (x, y) = projection.native_pixel(x, y);
+        Ok(Point {
+            x: x as i32,
+            y: y as i32,
+        })
     }
     pub fn from_physical(self, p: Point) -> Result<Point> {
-        let rect = self.logical()?;
+        let projection = self.projection()?;
+        let rect = projection.logical();
         if p.x < 0 || p.y < 0 || p.x as u32 >= self.pixel_w || p.y as u32 >= self.pixel_h {
             return Err(Error::Bounds);
         }
-        let (w, h) = (self.pixel_w as i32, self.pixel_h as i32);
-        let local = match self.rotation {
-            Rotation::Normal => p,
-            Rotation::Clockwise90 => Point {
-                x: h - 1 - p.y,
-                y: p.x,
-            },
-            Rotation::Clockwise180 => Point {
-                x: w - 1 - p.x,
-                y: h - 1 - p.y,
-            },
-            Rotation::Clockwise270 => Point {
-                x: p.y,
-                y: w - 1 - p.x,
-            },
-        };
+        let (x, y) = projection.logical_pixel(p.x as usize, p.y as usize);
         Ok(Point {
-            x: (i64::from(rect.x)
-                + ((2 * i64::from(local.x) + 1) * i64::from(SCALE_UNIT))
-                    .div_euclid(2 * i64::from(self.scale))) as i32,
-            y: (i64::from(rect.y)
-                + ((2 * i64::from(local.y) + 1) * i64::from(SCALE_UNIT))
-                    .div_euclid(2 * i64::from(self.scale))) as i32,
+            x: (i64::from(rect.x) + x as i64) as i32,
+            y: (i64::from(rect.y) + y as i64) as i32,
         })
     }
     pub fn physical_damage(self, damage: Rect) -> Result<Option<Rect>> {
