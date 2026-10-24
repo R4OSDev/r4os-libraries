@@ -85,6 +85,31 @@ impl<'a> Standard<'a> {
             _standard: PhantomData,
         })
     }
+    pub fn shortcut<'s>(&'s self, target: &[u8]) -> Result<Shortcut<'s>> {
+        let mut native = MaybeUninit::uninit();
+        required(unsafe {
+            c::R4StdShortcutShortcut_init(
+                0,
+                target.as_ptr(),
+                target.len() as u64,
+                native.as_mut_ptr(),
+            )
+        })?;
+        Ok(Shortcut {
+            native,
+            _standard: PhantomData,
+        })
+    }
+    pub fn parse_shortcut<'s>(&'s self, bytes: &[u8]) -> Result<Shortcut<'s>> {
+        let mut native = MaybeUninit::uninit();
+        required(unsafe {
+            c::R4StdShortcut_parse(0, bytes.as_ptr(), bytes.len() as u64, native.as_mut_ptr())
+        })?;
+        Ok(Shortcut {
+            native,
+            _standard: PhantomData,
+        })
+    }
     pub fn writer<'s, 'b>(&'s self, output: &'b mut [u8]) -> Result<Writer<'s, 'b>> {
         let mut native = MaybeUninit::uninit();
         let buffer = NonNull::new(output.as_mut_ptr()).ok_or(Error::InvalidProvider)?;
@@ -190,12 +215,166 @@ impl Utf8<'_, '_> {
         Ok(scalar(unsafe { c::R4StdTextUtf8Text_scalarCount(0, self.native.as_ptr()) })? as usize)
     }
 }
+/// The original shortcut owns fixed byte arrays and retains no input pointer.
+/// Native getters return short views into those arrays. A mutable operation
+/// cannot run while a previous view is borrowed; opaque padding is never read.
+pub struct Shortcut<'s> {
+    native: MaybeUninit<c::R4StdShortcutShortcut>,
+    _standard: PhantomData<&'s Standard<'s>>,
+}
+pub struct ResolvedShortcut<'a> {
+    pub kind: u32,
+    pub policy: u32,
+    pub target: &'a [u8],
+    pub title: &'a [u8],
+    pub args: &'a [u8],
+    pub icon: &'a [u8],
+    pub workdir: &'a [u8],
+}
+impl Shortcut<'_> {
+    fn field(&self, value: c::R4LibrariesSlot) -> Result<&[u8]> {
+        let value = result(value)?;
+        if value.flags & 1 == 0 {
+            return Err(Error::InvalidProvider);
+        }
+        if value.length == 0 {
+            return Ok(&[]);
+        }
+        let address = value.ptr as usize;
+        let begin = self.native.as_ptr() as usize;
+        let end = begin
+            .checked_add(core::mem::size_of::<c::R4StdShortcutShortcut>())
+            .ok_or(Error::InvalidProvider)?;
+        let len = usize::try_from(value.length).map_err(|_| Error::InvalidProvider)?;
+        if address < begin || address > end || len > end - address {
+            return Err(Error::InvalidProvider);
+        }
+        // The original native getter identifies initialized owned text, not
+        // the entire opaque record which can contain uninitialized padding.
+        Ok(unsafe { core::slice::from_raw_parts(value.ptr.cast(), len) })
+    }
+    pub fn target(&self) -> Result<&[u8]> {
+        self.field(unsafe { c::R4StdShortcutShortcut_targetText(0, self.native.as_ptr()) })
+    }
+    pub fn title(&self) -> Result<&[u8]> {
+        self.field(unsafe { c::R4StdShortcutShortcut_titleText(0, self.native.as_ptr()) })
+    }
+    pub fn args(&self) -> Result<&[u8]> {
+        self.field(unsafe { c::R4StdShortcutShortcut_argsText(0, self.native.as_ptr()) })
+    }
+    pub fn icon(&self) -> Result<&[u8]> {
+        self.field(unsafe { c::R4StdShortcutShortcut_iconText(0, self.native.as_ptr()) })
+    }
+    pub fn set_target(&mut self, value: &[u8]) -> Result<()> {
+        result(unsafe {
+            c::R4StdShortcutShortcut_setTarget(
+                0,
+                self.native.as_mut_ptr(),
+                value.as_ptr(),
+                value.len() as u64,
+            )
+        })
+        .map(|_| ())
+    }
+    pub fn set_title(&mut self, value: &[u8]) -> Result<()> {
+        result(unsafe {
+            c::R4StdShortcutShortcut_setTitle(
+                0,
+                self.native.as_mut_ptr(),
+                value.as_ptr(),
+                value.len() as u64,
+            )
+        })
+        .map(|_| ())
+    }
+    pub fn set_args(&mut self, value: &[u8]) -> Result<()> {
+        result(unsafe {
+            c::R4StdShortcutShortcut_setArgs(
+                0,
+                self.native.as_mut_ptr(),
+                value.as_ptr(),
+                value.len() as u64,
+            )
+        })
+        .map(|_| ())
+    }
+    pub fn set_icon(&mut self, value: &[u8]) -> Result<()> {
+        result(unsafe {
+            c::R4StdShortcutShortcut_setIcon(
+                0,
+                self.native.as_mut_ptr(),
+                value.as_ptr(),
+                value.len() as u64,
+            )
+        })
+        .map(|_| ())
+    }
+    pub fn set_workdir(&mut self, value: &[u8]) -> Result<()> {
+        result(unsafe {
+            c::R4StdShortcutShortcut_setWorkdir(
+                0,
+                self.native.as_mut_ptr(),
+                value.as_ptr(),
+                value.len() as u64,
+            )
+        })
+        .map(|_| ())
+    }
+    pub fn set_policy(&mut self, value: crate::abi::LaunchPolicy) -> Result<()> {
+        result(unsafe { c::R4StdShortcutShortcut_setPolicy(0, self.native.as_mut_ptr(), value.0) })
+            .map(|_| ())
+    }
+    pub fn write<'out>(&self, out: &'out mut [u8]) -> Result<&'out [u8]> {
+        view(
+            unsafe {
+                c::R4StdShortcutShortcut_writeTo(
+                    0,
+                    self.native.as_ptr(),
+                    out.as_mut_ptr(),
+                    out.len() as u64,
+                )
+            },
+            out,
+        )
+    }
+    pub fn resolve(&self) -> Result<ResolvedShortcut<'_>> {
+        let mut value = MaybeUninit::uninit();
+        required(unsafe {
+            c::R4StdShortcutShortcut_resolve(0, self.native.as_ptr(), value.as_mut_ptr())
+        })?;
+        let value = value.as_ptr();
+        Ok(ResolvedShortcut {
+            kind: scalar(unsafe { c::R4StdShortcutResolvedTarget_get_kind(value) })? as u32,
+            policy: scalar(unsafe { c::R4StdShortcutResolvedTarget_get_policy(value) })? as u32,
+            target: self.field(unsafe { c::R4StdShortcutResolvedTarget_get_target(value) })?,
+            title: self.field(unsafe { c::R4StdShortcutResolvedTarget_get_title(value) })?,
+            args: self.field(unsafe { c::R4StdShortcutResolvedTarget_get_args(value) })?,
+            icon: self.field(unsafe { c::R4StdShortcutResolvedTarget_get_icon(value) })?,
+            workdir: self.field(unsafe { c::R4StdShortcutResolvedTarget_get_workdir(value) })?,
+        })
+    }
+}
 pub struct Document<'s, 'b> {
     native: MaybeUninit<c::R4StdSettingsDocument>,
     bytes: &'b [u8],
     _standard: PhantomData<&'s Standard<'s>>,
 }
 impl<'b> Document<'_, 'b> {
+    pub fn has_supported_format(&self) -> Result<bool> {
+        Ok(
+            scalar(unsafe {
+                c::R4StdSettingsDocument_hasSupportedFormat(0, self.native.as_ptr())
+            })? != 0,
+        )
+    }
+    pub fn schema_name(&self) -> Result<Option<&'b [u8]>> {
+        let value =
+            result(unsafe { c::R4StdSettingsDocument_schemaName(0, self.native.as_ptr()) })?;
+        if value.flags & 1 == 0 {
+            return Ok(None);
+        }
+        view(value, self.bytes).map(Some)
+    }
     pub fn value(&self, key: &[u8]) -> Result<Option<&'b [u8]>> {
         let answer = result(unsafe {
             c::R4StdSettingsDocument_value(0, self.native.as_ptr(), key.as_ptr(), key.len() as u64)
@@ -303,6 +482,42 @@ impl Writer<'_, '_> {
     pub fn u32_pair(&mut self, key: &[u8], value: u32) -> Result<()> {
         result(unsafe {
             c::R4StdSettingsWriter_writePairU32(
+                0,
+                self.native.as_mut_ptr(),
+                key.as_ptr(),
+                key.len() as u64,
+                value,
+            )
+        })
+        .map(|_| ())
+    }
+    pub fn i32_pair(&mut self, key: &[u8], value: i32) -> Result<()> {
+        result(unsafe {
+            c::R4StdSettingsWriter_writePairI32(
+                0,
+                self.native.as_mut_ptr(),
+                key.as_ptr(),
+                key.len() as u64,
+                value,
+            )
+        })
+        .map(|_| ())
+    }
+    pub fn bool_pair(&mut self, key: &[u8], value: bool) -> Result<()> {
+        result(unsafe {
+            c::R4StdSettingsWriter_writePairBool(
+                0,
+                self.native.as_mut_ptr(),
+                key.as_ptr(),
+                key.len() as u64,
+                u8::from(value),
+            )
+        })
+        .map(|_| ())
+    }
+    pub fn rgb24_pair(&mut self, key: &[u8], value: u32) -> Result<()> {
+        result(unsafe {
+            c::R4StdSettingsWriter_writePairRgb24(
                 0,
                 self.native.as_mut_ptr(),
                 key.as_ptr(),

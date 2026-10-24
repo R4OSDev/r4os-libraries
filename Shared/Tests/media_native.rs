@@ -9,12 +9,89 @@ mod previous;
 unsafe extern "C" {
     fn r4libraries60_transport() -> i32;
     fn r4libraries60_mux(bytes: *const u8, length: usize) -> u64;
+    fn r4libraries60_mux_color(bytes: *const u8, length: usize, transfer: u8, centered: u8) -> u64;
     fn R4LibrariesAvcOracle(bytes: *mut u8, capacity: usize) -> usize;
     fn R4LibrariesRecordingOracle() -> i32;
 }
 #[test]
 fn aligned_storage_and_named_error_are_not_private_layout_guesses() {
     assert_eq!(unsafe { r4libraries60_transport() }, 0);
+    use core::mem::MaybeUninit;
+    use r4os_library_helpers::raw as c;
+    let mut refresh = MaybeUninit::<c::R4GfxRefreshClientClient>::uninit();
+    let mut choice = MaybeUninit::<c::R4GfxRefreshPreferencesChoice>::uninit();
+    let mut brightness = MaybeUninit::<c::R4GfxBrightnessClientClient>::uninit();
+    let mut level = MaybeUninit::<c::R4GfxBrightnessPreferencesChoice>::uninit();
+    unsafe {
+        for slot in [
+            c::R4Media_refreshInit(0, refresh.as_mut_ptr()),
+            c::R4GfxRefreshPreferencesChoice_create(choice.as_mut_ptr()),
+            c::R4Media_refreshSelect(0, refresh.as_mut_ptr(), choice.as_ptr()),
+            c::R4Media_brightnessInit(0, brightness.as_mut_ptr()),
+            c::R4GfxBrightnessPreferencesChoice_create(level.as_mut_ptr()),
+        ] {
+            assert_eq!(slot.status, 0);
+            assert_eq!(slot.flags & 2, 0);
+        }
+        let selected = c::R4LibrariesSlot {
+            ptr: level.as_mut_ptr().cast(),
+            flags: 1,
+            ..MaybeUninit::<c::R4LibrariesSlot>::zeroed().assume_init()
+        };
+        for value in [
+            selected,
+            MaybeUninit::<c::R4LibrariesSlot>::zeroed().assume_init(),
+        ] {
+            let slot = c::R4Media_brightnessSelect(0, brightness.as_mut_ptr(), value);
+            assert_eq!(slot.status, 0);
+            assert_eq!(slot.flags & 2, 0);
+        }
+        let mut colors = MaybeUninit::<c::R4GfxColorPreferencesConfig>::uninit();
+        let mut changed = MaybeUninit::<c::R4GfxColorPreferencesConfig>::uninit();
+        assert_eq!(
+            c::R4GfxColorPreferencesConfig_create(colors.as_mut_ptr()).status,
+            0
+        );
+        assert_eq!(
+            c::R4GfxColorPreferencesConfig_create(changed.as_mut_ptr()).status,
+            0
+        );
+        assert_eq!(
+            c::R4Media_colorPreferencesEqual(0, colors.as_ptr(), changed.as_ptr()).bits,
+            1
+        );
+        assert_eq!(
+            c::R4GfxColorPreferencesConfig_set_count(changed.as_mut_ptr(), 1).status,
+            0
+        );
+        assert_eq!(
+            c::R4Media_colorPreferencesEqual(0, colors.as_ptr(), changed.as_ptr()).bits,
+            0
+        );
+        let mut color = MaybeUninit::<c::R4GfxColorPreferencesChoice>::uninit();
+        let mut other = MaybeUninit::<c::R4GfxColorPreferencesChoice>::uninit();
+        assert_eq!(
+            c::R4GfxColorPreferencesChoice_create(color.as_mut_ptr()).status,
+            0
+        );
+        assert_eq!(
+            c::R4GfxColorPreferencesChoice_create(other.as_mut_ptr()).status,
+            0
+        );
+        let slot = |ptr| c::R4LibrariesSlot {
+            ptr,
+            flags: 1,
+            ..MaybeUninit::zeroed().assume_init()
+        };
+        let left = slot(color.as_mut_ptr().cast());
+        let right = slot(other.as_mut_ptr().cast());
+        assert_eq!(c::R4Media_colorChoiceEqual(0, left, right).bits, 1);
+        assert_eq!(
+            c::R4GfxColorPreferencesChoice_set_intent(other.as_mut_ptr(), 2).status,
+            0
+        );
+        assert_eq!(c::R4Media_colorChoiceEqual(0, left, right).bits, 0);
+    }
 }
 #[test]
 fn original_recording_oracles_and_identical_c_rust_mux_bytes() {
@@ -39,6 +116,35 @@ fn original_recording_oracles_and_identical_c_rust_mux_bytes() {
         hash
     );
     assert_eq!(writer.frames().unwrap(), 1);
+    for (transfer, centered) in [(1, false), (13, false), (13, true)] {
+        let mut writer = Mux::with_color(64, 64, transfer, centered).unwrap();
+        let mut output = Vec::new();
+        writer
+            .packet(packet, true, 0, 1, |part| {
+                output.extend_from_slice(part);
+                true
+            })
+            .unwrap();
+        let hash = output.iter().fold(14695981039346656037u64, |h, &b| {
+            (h ^ u64::from(b)).wrapping_mul(1099511628211)
+        });
+        assert_eq!(
+            unsafe {
+                r4libraries60_mux_color(packet.as_ptr(), packet.len(), transfer, u8::from(centered))
+            },
+            hash
+        );
+        assert!(
+            output
+                .windows(4)
+                .any(|part| part == [0x55, 0xba, 0x81, transfer])
+        );
+        assert!(
+            output
+                .windows(4)
+                .any(|part| part == [0x55, 0xb7, 0x81, if centered { 2 } else { 1 }])
+        );
+    }
     let mut failed = Mux::new(64, 64).unwrap();
     let mut calls = 0;
     let mut partial = 0;

@@ -1505,326 +1505,326 @@ typedef struct R4Lib_Value516 { _Alignas(8) uint8_t opaque_bytes[7912]; } R4Lib_
 /* *R4GFX.Display.brightness_client.Client; native size 8, alignment 8. */
 typedef struct R4Lib_Value517 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value517;
 #define R4Lib_Value517_TYPE 517u
-/* *R4GFX.Display.refresh_client.Client; native size 8, alignment 8. */
-typedef struct R4Lib_Value518 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value518;
+/* ?R4GFX.Display.brightness_preferences.Choice; native size 56, alignment 8. */
+typedef struct R4Lib_Value518 { _Alignas(8) uint8_t opaque_bytes[56]; } R4Lib_Value518;
 #define R4Lib_Value518_TYPE 518u
-/* *R4GFX.Display.mode_control.Controller; native size 8, alignment 8. */
+/* *R4GFX.Display.refresh_client.Client; native size 8, alignment 8. */
 typedef struct R4Lib_Value519 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value519;
 #define R4Lib_Value519_TYPE 519u
-/* *const R4GFX.Display.desktop_outputs.Entry; native size 8, alignment 8. */
+/* *const R4GFX.Display.color_preferences.Config; native size 8, alignment 8. */
 typedef struct R4Lib_Value520 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value520;
 #define R4Lib_Value520_TYPE 520u
-/* @typeInfo(@typeInfo(@TypeOf(consumer_media_adapters.colorValidate)).@"fn".return_type.?).error_union.error_set!void; native size 2, alignment 2. */
-typedef struct R4Lib_Value521 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value521;
+/* ?R4GFX.Display.color_preferences.Choice; native size 1152, alignment 8. */
+typedef struct R4Lib_Value521 { _Alignas(8) uint8_t opaque_bytes[1152]; } R4Lib_Value521;
 #define R4Lib_Value521_TYPE 521u
-/* error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Source; native size 10, alignment 2. */
-typedef struct R4Lib_Value522 { _Alignas(2) uint8_t opaque_bytes[10]; } R4Lib_Value522;
+/* *R4GFX.Display.mode_control.Controller; native size 8, alignment 8. */
+typedef struct R4Lib_Value522 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value522;
 #define R4Lib_Value522_TYPE 522u
-/* error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Signal; native size 48, alignment 4. */
-typedef struct R4Lib_Value523 { _Alignas(4) uint8_t opaque_bytes[48]; } R4Lib_Value523;
+/* *const R4GFX.Display.desktop_outputs.Entry; native size 8, alignment 8. */
+typedef struct R4Lib_Value523 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value523;
 #define R4Lib_Value523_TYPE 523u
-/* error{Bandwidth,Incomplete,Invalid,Unsupported}!abi_generated.GfxColorSignal; native size 88, alignment 8. */
-typedef struct R4Lib_Value524 { _Alignas(8) uint8_t opaque_bytes[88]; } R4Lib_Value524;
+/* @typeInfo(@typeInfo(@TypeOf(consumer_media_adapters.colorValidate)).@"fn".return_type.?).error_union.error_set!void; native size 2, alignment 2. */
+typedef struct R4Lib_Value524 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value524;
 #define R4Lib_Value524_TYPE 524u
-/* error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Link; native size 40, alignment 8. */
-typedef struct R4Lib_Value525 { _Alignas(8) uint8_t opaque_bytes[40]; } R4Lib_Value525;
+/* error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Source; native size 10, alignment 2. */
+typedef struct R4Lib_Value525 { _Alignas(2) uint8_t opaque_bytes[10]; } R4Lib_Value525;
 #define R4Lib_Value525_TYPE 525u
-/* error{Bandwidth,Incomplete,Invalid,Unsupported}!void; native size 2, alignment 2. */
-typedef struct R4Lib_Value526 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value526;
+/* error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Signal; native size 48, alignment 4. */
+typedef struct R4Lib_Value526 { _Alignas(4) uint8_t opaque_bytes[48]; } R4Lib_Value526;
 #define R4Lib_Value526_TYPE 526u
-/* error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Plan; native size 56, alignment 8. */
-typedef struct R4Lib_Value527 { _Alignas(8) uint8_t opaque_bytes[56]; } R4Lib_Value527;
+/* error{Bandwidth,Incomplete,Invalid,Unsupported}!abi_generated.GfxColorSignal; native size 88, alignment 8. */
+typedef struct R4Lib_Value527 { _Alignas(8) uint8_t opaque_bytes[88]; } R4Lib_Value527;
 #define R4Lib_Value527_TYPE 527u
-/* error{Clock,Incomplete,Range,Stale,State,Timing,Unsupported}!R4GFX.Display.vrr.Plan; native size 64, alignment 8. */
-typedef struct R4Lib_Value528 { _Alignas(8) uint8_t opaque_bytes[64]; } R4Lib_Value528;
+/* error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Link; native size 40, alignment 8. */
+typedef struct R4Lib_Value528 { _Alignas(8) uint8_t opaque_bytes[40]; } R4Lib_Value528;
 #define R4Lib_Value528_TYPE 528u
-/* @typeInfo(@typeInfo(@TypeOf(consumer_media_adapters.profileOpenFile)).@"fn".return_type.?).error_union.error_set!R4GFX.Display.display_profile.Owner(r4gfx_abi); native size 80, alignment 8. */
-typedef struct R4Lib_Value529 { _Alignas(8) uint8_t opaque_bytes[80]; } R4Lib_Value529;
+/* error{Bandwidth,Incomplete,Invalid,Unsupported}!void; native size 2, alignment 2. */
+typedef struct R4Lib_Value529 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value529;
 #define R4Lib_Value529_TYPE 529u
+/* error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Plan; native size 56, alignment 8. */
+typedef struct R4Lib_Value530 { _Alignas(8) uint8_t opaque_bytes[56]; } R4Lib_Value530;
+#define R4Lib_Value530_TYPE 530u
+/* error{Clock,Incomplete,Range,Stale,State,Timing,Unsupported}!R4GFX.Display.vrr.Plan; native size 64, alignment 8. */
+typedef struct R4Lib_Value531 { _Alignas(8) uint8_t opaque_bytes[64]; } R4Lib_Value531;
+#define R4Lib_Value531_TYPE 531u
+/* @typeInfo(@typeInfo(@TypeOf(consumer_media_adapters.profileOpenFile)).@"fn".return_type.?).error_union.error_set!R4GFX.Display.display_profile.Owner(r4gfx_abi); native size 80, alignment 8. */
+typedef struct R4Lib_Value532 { _Alignas(8) uint8_t opaque_bytes[80]; } R4Lib_Value532;
+#define R4Lib_Value532_TYPE 532u
 /* consumer_media_adapters.BuiltinShader; native size 1, alignment 1. */
 typedef struct R4MediaBuiltinShader { _Alignas(1) uint8_t opaque_bytes[1]; } R4MediaBuiltinShader;
-#define R4MediaBuiltinShader_TYPE 530u
+#define R4MediaBuiltinShader_TYPE 533u
 /* *R4STD.Bindings.Zig.settings.EntryIterator; native size 8, alignment 8. */
-typedef struct R4Lib_Value531 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value531;
-#define R4Lib_Value531_TYPE 531u
-/* *R4STD.Bindings.Zig.settings.Writer; native size 8, alignment 8. */
-typedef struct R4Lib_Value532 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value532;
-#define R4Lib_Value532_TYPE 532u
-/* *const R4STD.Bindings.Zig.settings.Writer; native size 8, alignment 8. */
-typedef struct R4Lib_Value533 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value533;
-#define R4Lib_Value533_TYPE 533u
-/* *const R4STD.Bindings.Zig.settings.Writeback; native size 8, alignment 8. */
 typedef struct R4Lib_Value534 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value534;
 #define R4Lib_Value534_TYPE 534u
-/* *R4STD.Bindings.Zig.time.Config; native size 8, alignment 8. */
+/* *R4STD.Bindings.Zig.settings.Writer; native size 8, alignment 8. */
 typedef struct R4Lib_Value535 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value535;
 #define R4Lib_Value535_TYPE 535u
-/* *R4STD.Bindings.Zig.codec.Stream; native size 8, alignment 8. */
+/* *const R4STD.Bindings.Zig.settings.Writer; native size 8, alignment 8. */
 typedef struct R4Lib_Value536 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value536;
 #define R4Lib_Value536_TYPE 536u
-/* *const R4STD.Bindings.Zig.codec.Stream; native size 8, alignment 8. */
+/* *const R4STD.Bindings.Zig.settings.Writeback; native size 8, alignment 8. */
 typedef struct R4Lib_Value537 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value537;
 #define R4Lib_Value537_TYPE 537u
-/* error{BufferTooSmall,InvalidArgument,InvalidScalar,InvalidUtf8,RangesOverlap,RuntimeUnavailable,UndefinedByte,Unrepresentable}!bool; native size 4, alignment 2. */
-typedef struct R4Lib_Value538 { _Alignas(2) uint8_t opaque_bytes[4]; } R4Lib_Value538;
+/* *R4STD.Bindings.Zig.time.Config; native size 8, alignment 8. */
+typedef struct R4Lib_Value538 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value538;
 #define R4Lib_Value538_TYPE 538u
-/* *R4STD.Bindings.Zig.grapheme.State; native size 8, alignment 8. */
+/* *R4STD.Bindings.Zig.codec.Stream; native size 8, alignment 8. */
 typedef struct R4Lib_Value539 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value539;
 #define R4Lib_Value539_TYPE 539u
-/* *R4STD.Bindings.Zig.grapheme.Iterator; native size 8, alignment 8. */
+/* *const R4STD.Bindings.Zig.codec.Stream; native size 8, alignment 8. */
 typedef struct R4Lib_Value540 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value540;
 #define R4Lib_Value540_TYPE 540u
-/* error{Incomplete,InvalidUtf8}!?R4STD.Bindings.Zig.grapheme.Range; native size 32, alignment 8. */
-typedef struct R4Lib_Value541 { _Alignas(8) uint8_t opaque_bytes[32]; } R4Lib_Value541;
+/* error{BufferTooSmall,InvalidArgument,InvalidScalar,InvalidUtf8,RangesOverlap,RuntimeUnavailable,UndefinedByte,Unrepresentable}!bool; native size 4, alignment 2. */
+typedef struct R4Lib_Value541 { _Alignas(2) uint8_t opaque_bytes[4]; } R4Lib_Value541;
 #define R4Lib_Value541_TYPE 541u
-/* ?R4STD.Bindings.Zig.grapheme.Range; native size 24, alignment 8. */
-typedef struct R4Lib_Value542 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value542;
+/* *R4STD.Bindings.Zig.grapheme.State; native size 8, alignment 8. */
+typedef struct R4Lib_Value542 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value542;
 #define R4Lib_Value542_TYPE 542u
-/* *R4STD.Bindings.Zig.grapheme.Stream; native size 8, alignment 8. */
+/* *R4STD.Bindings.Zig.grapheme.Iterator; native size 8, alignment 8. */
 typedef struct R4Lib_Value543 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value543;
 #define R4Lib_Value543_TYPE 543u
-/* error{Incomplete,InvalidUtf8}!?R4STD.Bindings.Zig.grapheme.Stream.Event; native size 40, alignment 8. */
-typedef struct R4Lib_Value544 { _Alignas(8) uint8_t opaque_bytes[40]; } R4Lib_Value544;
+/* error{Incomplete,InvalidUtf8}!?R4STD.Bindings.Zig.grapheme.Range; native size 32, alignment 8. */
+typedef struct R4Lib_Value544 { _Alignas(8) uint8_t opaque_bytes[32]; } R4Lib_Value544;
 #define R4Lib_Value544_TYPE 544u
-/* ?R4STD.Bindings.Zig.grapheme.Stream.Event; native size 32, alignment 8. */
-typedef struct R4Lib_Value545 { _Alignas(8) uint8_t opaque_bytes[32]; } R4Lib_Value545;
+/* ?R4STD.Bindings.Zig.grapheme.Range; native size 24, alignment 8. */
+typedef struct R4Lib_Value545 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value545;
 #define R4Lib_Value545_TYPE 545u
+/* *R4STD.Bindings.Zig.grapheme.Stream; native size 8, alignment 8. */
+typedef struct R4Lib_Value546 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value546;
+#define R4Lib_Value546_TYPE 546u
+/* error{Incomplete,InvalidUtf8}!?R4STD.Bindings.Zig.grapheme.Stream.Event; native size 40, alignment 8. */
+typedef struct R4Lib_Value547 { _Alignas(8) uint8_t opaque_bytes[40]; } R4Lib_Value547;
+#define R4Lib_Value547_TYPE 547u
+/* ?R4STD.Bindings.Zig.grapheme.Stream.Event; native size 32, alignment 8. */
+typedef struct R4Lib_Value548 { _Alignas(8) uint8_t opaque_bytes[32]; } R4Lib_Value548;
+#define R4Lib_Value548_TYPE 548u
 /* R4STD.Bindings.Zig.grapheme.Stream.Event; native size 24, alignment 8. */
 typedef struct R4StdGraphemeStream_Event { _Alignas(8) uint8_t opaque_bytes[24]; } R4StdGraphemeStream_Event;
-#define R4StdGraphemeStream_Event_TYPE 546u
+#define R4StdGraphemeStream_Event_TYPE 549u
 /* *const R4STD.Bindings.Zig.grapheme.Stream; native size 8, alignment 8. */
-typedef struct R4Lib_Value547 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value547;
-#define R4Lib_Value547_TYPE 547u
-/* *R4STD.Bindings.Zig.shortcut.Shortcut; native size 8, alignment 8. */
-typedef struct R4Lib_Value548 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value548;
-#define R4Lib_Value548_TYPE 548u
-/* error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!void; native size 2, alignment 2. */
-typedef struct R4Lib_Value549 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value549;
-#define R4Lib_Value549_TYPE 549u
-/* *const R4STD.Bindings.Zig.shortcut.Shortcut; native size 8, alignment 8. */
 typedef struct R4Lib_Value550 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value550;
 #define R4Lib_Value550_TYPE 550u
-/* error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}![]const u8; native size 24, alignment 8. */
-typedef struct R4Lib_Value551 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value551;
+/* *R4STD.Bindings.Zig.shortcut.Shortcut; native size 8, alignment 8. */
+typedef struct R4Lib_Value551 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value551;
 #define R4Lib_Value551_TYPE 551u
-/* error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!R4STD.Bindings.Zig.shortcut.ResolvedTarget; native size 96, alignment 8. */
-typedef struct R4Lib_Value552 { _Alignas(8) uint8_t opaque_bytes[96]; } R4Lib_Value552;
+/* error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!void; native size 2, alignment 2. */
+typedef struct R4Lib_Value552 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value552;
 #define R4Lib_Value552_TYPE 552u
-/* *const R4STD.Bindings.Zig.app_assoc.ExtEntry; native size 8, alignment 8. */
+/* *const R4STD.Bindings.Zig.shortcut.Shortcut; native size 8, alignment 8. */
 typedef struct R4Lib_Value553 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value553;
 #define R4Lib_Value553_TYPE 553u
-/* *R4STD.Bindings.Zig.app_assoc.Config; native size 8, alignment 8. */
-typedef struct R4Lib_Value554 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value554;
+/* error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}![]const u8; native size 24, alignment 8. */
+typedef struct R4Lib_Value554 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value554;
 #define R4Lib_Value554_TYPE 554u
-/* ?*const R4STD.Bindings.Zig.app_assoc.ExtEntry; native size 8, alignment 8. */
-typedef struct R4Lib_Value555 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value555;
+/* error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!R4STD.Bindings.Zig.shortcut.ResolvedTarget; native size 96, alignment 8. */
+typedef struct R4Lib_Value555 { _Alignas(8) uint8_t opaque_bytes[96]; } R4Lib_Value555;
 #define R4Lib_Value555_TYPE 555u
-/* ?R4STD.Bindings.Zig.app_assoc.LaunchTarget; native size 128, alignment 8. */
-typedef struct R4Lib_Value556 { _Alignas(8) uint8_t opaque_bytes[128]; } R4Lib_Value556;
+/* *const R4STD.Bindings.Zig.app_assoc.ExtEntry; native size 8, alignment 8. */
+typedef struct R4Lib_Value556 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value556;
 #define R4Lib_Value556_TYPE 556u
-/* *const R4STD.Bindings.Zig.file_handler.ChoiceList; native size 8, alignment 8. */
+/* *R4STD.Bindings.Zig.app_assoc.Config; native size 8, alignment 8. */
 typedef struct R4Lib_Value557 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value557;
 #define R4Lib_Value557_TYPE 557u
-/* []const R4STD.Bindings.Zig.file_handler.Choice; native size 16, alignment 8. */
-typedef struct R4Lib_Value558 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value558;
+/* ?*const R4STD.Bindings.Zig.app_assoc.ExtEntry; native size 8, alignment 8. */
+typedef struct R4Lib_Value558 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value558;
 #define R4Lib_Value558_TYPE 558u
-/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!usize; native size 16, alignment 8. */
-typedef struct R4Lib_Value559 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value559;
+/* ?R4STD.Bindings.Zig.app_assoc.LaunchTarget; native size 128, alignment 8. */
+typedef struct R4Lib_Value559 { _Alignas(8) uint8_t opaque_bytes[128]; } R4Lib_Value559;
 #define R4Lib_Value559_TYPE 559u
-/* ?R4IMG.Bindings.Zig.r4img.RasterContext; native size 16, alignment 8. */
-typedef struct R4Lib_Value560 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value560;
+/* *const R4STD.Bindings.Zig.file_handler.ChoiceList; native size 8, alignment 8. */
+typedef struct R4Lib_Value560 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value560;
 #define R4Lib_Value560_TYPE 560u
-/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img_abi.R4ImgRasterColor; native size 92, alignment 4. */
-typedef struct R4Lib_Value561 { _Alignas(4) uint8_t opaque_bytes[92]; } R4Lib_Value561;
+/* []const R4STD.Bindings.Zig.file_handler.Choice; native size 16, alignment 8. */
+typedef struct R4Lib_Value561 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value561;
 #define R4Lib_Value561_TYPE 561u
-/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}![]u8; native size 24, alignment 8. */
-typedef struct R4Lib_Value562 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value562;
+/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!usize; native size 16, alignment 8. */
+typedef struct R4Lib_Value562 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value562;
 #define R4Lib_Value562_TYPE 562u
-/* ?R4IMG.Bindings.Zig.r4img.Context; native size 16, alignment 8. */
+/* ?R4IMG.Bindings.Zig.r4img.RasterContext; native size 16, alignment 8. */
 typedef struct R4Lib_Value563 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value563;
 #define R4Lib_Value563_TYPE 563u
-/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Info; native size 16, alignment 4. */
-typedef struct R4Lib_Value564 { _Alignas(4) uint8_t opaque_bytes[16]; } R4Lib_Value564;
+/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img_abi.R4ImgRasterColor; native size 92, alignment 4. */
+typedef struct R4Lib_Value564 { _Alignas(4) uint8_t opaque_bytes[92]; } R4Lib_Value564;
 #define R4Lib_Value564_TYPE 564u
-/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Image; native size 40, alignment 8. */
-typedef struct R4Lib_Value565 { _Alignas(8) uint8_t opaque_bytes[40]; } R4Lib_Value565;
+/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}![]u8; native size 24, alignment 8. */
+typedef struct R4Lib_Value565 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value565;
 #define R4Lib_Value565_TYPE 565u
-/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}![]u32; native size 24, alignment 8. */
-typedef struct R4Lib_Value566 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value566;
+/* ?R4IMG.Bindings.Zig.r4img.Context; native size 16, alignment 8. */
+typedef struct R4Lib_Value566 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value566;
 #define R4Lib_Value566_TYPE 566u
-/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.DecoderDiagnostic; native size 24, alignment 8. */
-typedef struct R4Lib_Value567 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value567;
+/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Info; native size 16, alignment 4. */
+typedef struct R4Lib_Value567 { _Alignas(4) uint8_t opaque_bytes[16]; } R4Lib_Value567;
 #define R4Lib_Value567_TYPE 567u
-/* ?R4IMG.Bindings.Zig.r4img.PngContext; native size 16, alignment 8. */
-typedef struct R4Lib_Value568 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value568;
+/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Image; native size 40, alignment 8. */
+typedef struct R4Lib_Value568 { _Alignas(8) uint8_t opaque_bytes[40]; } R4Lib_Value568;
 #define R4Lib_Value568_TYPE 568u
-/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img_abi.R4ImgPngColor; native size 132, alignment 4. */
-typedef struct R4Lib_Value569 { _Alignas(4) uint8_t opaque_bytes[132]; } R4Lib_Value569;
+/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}![]u32; native size 24, alignment 8. */
+typedef struct R4Lib_Value569 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value569;
 #define R4Lib_Value569_TYPE 569u
-/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Image16; native size 168, alignment 8. */
-typedef struct R4Lib_Value570 { _Alignas(8) uint8_t opaque_bytes[168]; } R4Lib_Value570;
+/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.DecoderDiagnostic; native size 24, alignment 8. */
+typedef struct R4Lib_Value570 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value570;
 #define R4Lib_Value570_TYPE 570u
-/* ?R4FONT.Bindings.Zig.r4font.Context; native size 16, alignment 8. */
+/* ?R4IMG.Bindings.Zig.r4img.PngContext; native size 16, alignment 8. */
 typedef struct R4Lib_Value571 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value571;
 #define R4Lib_Value571_TYPE 571u
-/* *const R4FONT.Bindings.Zig.r4font_abi.ApiV1; native size 8, alignment 8. */
-typedef struct R4Lib_Value572 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value572;
+/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img_abi.R4ImgPngColor; native size 132, alignment 4. */
+typedef struct R4Lib_Value572 { _Alignas(4) uint8_t opaque_bytes[132]; } R4Lib_Value572;
 #define R4Lib_Value572_TYPE 572u
-/* R4FONT.Bindings.Zig.r4font_abi.ApiV1; native size 120, alignment 8. */
-typedef struct R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 { _Alignas(8) uint8_t opaque_bytes[120]; } R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1;
-#define R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_TYPE 573u
-/* r4os.runtime_r4l.InterfaceHeader; native size 32, alignment 8. */
-typedef struct R4Lib_r4os_runtime_r4l_InterfaceHeader { _Alignas(8) uint8_t opaque_bytes[32]; } R4Lib_r4os_runtime_r4l_InterfaceHeader;
-#define R4Lib_r4os_runtime_r4l_InterfaceHeader_TYPE 574u
-/* *const r4os.runtime_r4l.InterfaceHeader; native size 8, alignment 8. */
+/* error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Image16; native size 168, alignment 8. */
+typedef struct R4Lib_Value573 { _Alignas(8) uint8_t opaque_bytes[168]; } R4Lib_Value573;
+#define R4Lib_Value573_TYPE 573u
+/* ?R4FONT.Bindings.Zig.r4font.Context; native size 16, alignment 8. */
+typedef struct R4Lib_Value574 { _Alignas(8) uint8_t opaque_bytes[16]; } R4Lib_Value574;
+#define R4Lib_Value574_TYPE 574u
+/* *const R4FONT.Bindings.Zig.r4font_abi.ApiV1; native size 8, alignment 8. */
 typedef struct R4Lib_Value575 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value575;
 #define R4Lib_Value575_TYPE 575u
-/* *const R4FONT.Bindings.Zig.r4font.Context; native size 8, alignment 8. */
-typedef struct R4Lib_Value576 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value576;
-#define R4Lib_Value576_TYPE 576u
-/* ?R4FONT.Bindings.Zig.r4font.Format; native size 8, alignment 4. */
-typedef struct R4Lib_Value577 { _Alignas(4) uint8_t opaque_bytes[8]; } R4Lib_Value577;
-#define R4Lib_Value577_TYPE 577u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Decoder; native size 32, alignment 8. */
-typedef struct R4Lib_Value578 { _Alignas(8) uint8_t opaque_bytes[32]; } R4Lib_Value578;
+/* R4FONT.Bindings.Zig.r4font_abi.ApiV1; native size 120, alignment 8. */
+typedef struct R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 { _Alignas(8) uint8_t opaque_bytes[120]; } R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1;
+#define R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_TYPE 576u
+/* r4os.runtime_r4l.InterfaceHeader; native size 32, alignment 8. */
+typedef struct R4Lib_r4os_runtime_r4l_InterfaceHeader { _Alignas(8) uint8_t opaque_bytes[32]; } R4Lib_r4os_runtime_r4l_InterfaceHeader;
+#define R4Lib_r4os_runtime_r4l_InterfaceHeader_TYPE 577u
+/* *const r4os.runtime_r4l.InterfaceHeader; native size 8, alignment 8. */
+typedef struct R4Lib_Value578 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value578;
 #define R4Lib_Value578_TYPE 578u
-/* *R4FONT.Bindings.Zig.r4font.Decoder; native size 8, alignment 8. */
+/* *const R4FONT.Bindings.Zig.r4font.Context; native size 8, alignment 8. */
 typedef struct R4Lib_Value579 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value579;
 #define R4Lib_Value579_TYPE 579u
-/* *const R4FONT.Bindings.Zig.r4font.Decoder; native size 8, alignment 8. */
-typedef struct R4Lib_Value580 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value580;
+/* ?R4FONT.Bindings.Zig.r4font.Format; native size 8, alignment 4. */
+typedef struct R4Lib_Value580 { _Alignas(4) uint8_t opaque_bytes[8]; } R4Lib_Value580;
 #define R4Lib_Value580_TYPE 580u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Face; native size 24, alignment 8. */
-typedef struct R4Lib_Value581 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value581;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Decoder; native size 32, alignment 8. */
+typedef struct R4Lib_Value581 { _Alignas(8) uint8_t opaque_bytes[32]; } R4Lib_Value581;
 #define R4Lib_Value581_TYPE 581u
-/* *R4FONT.Bindings.Zig.r4font.Face; native size 8, alignment 8. */
+/* *R4FONT.Bindings.Zig.r4font.Decoder; native size 8, alignment 8. */
 typedef struct R4Lib_Value582 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value582;
 #define R4Lib_Value582_TYPE 582u
-/* *const R4FONT.Bindings.Zig.r4font.Face; native size 8, alignment 8. */
+/* *const R4FONT.Bindings.Zig.r4font.Decoder; native size 8, alignment 8. */
 typedef struct R4Lib_Value583 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value583;
 #define R4Lib_Value583_TYPE 583u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.FaceInfo; native size 80, alignment 8. */
-typedef struct R4Lib_Value584 { _Alignas(8) uint8_t opaque_bytes[80]; } R4Lib_Value584;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Face; native size 24, alignment 8. */
+typedef struct R4Lib_Value584 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value584;
 #define R4Lib_Value584_TYPE 584u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.GlyphMetrics; native size 32, alignment 4. */
-typedef struct R4Lib_Value585 { _Alignas(4) uint8_t opaque_bytes[32]; } R4Lib_Value585;
+/* *R4FONT.Bindings.Zig.r4font.Face; native size 8, alignment 8. */
+typedef struct R4Lib_Value585 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value585;
 #define R4Lib_Value585_TYPE 585u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}![2]i32; native size 12, alignment 4. */
-typedef struct R4Lib_Value586 { _Alignas(4) uint8_t opaque_bytes[12]; } R4Lib_Value586;
+/* *const R4FONT.Bindings.Zig.r4font.Face; native size 8, alignment 8. */
+typedef struct R4Lib_Value586 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value586;
 #define R4Lib_Value586_TYPE 586u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Raster; native size 48, alignment 8. */
-typedef struct R4Lib_Value587 { _Alignas(8) uint8_t opaque_bytes[48]; } R4Lib_Value587;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.FaceInfo; native size 80, alignment 8. */
+typedef struct R4Lib_Value587 { _Alignas(8) uint8_t opaque_bytes[80]; } R4Lib_Value587;
 #define R4Lib_Value587_TYPE 587u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.FaceStore; native size 200, alignment 8. */
-typedef struct R4Lib_Value588 { _Alignas(8) uint8_t opaque_bytes[200]; } R4Lib_Value588;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.GlyphMetrics; native size 32, alignment 4. */
+typedef struct R4Lib_Value588 { _Alignas(4) uint8_t opaque_bytes[32]; } R4Lib_Value588;
 #define R4Lib_Value588_TYPE 588u
-/* *R4FONT.Bindings.Zig.app_fonts.FaceStore; native size 8, alignment 8. */
-typedef struct R4Lib_Value589 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value589;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}![2]i32; native size 12, alignment 4. */
+typedef struct R4Lib_Value589 { _Alignas(4) uint8_t opaque_bytes[12]; } R4Lib_Value589;
 #define R4Lib_Value589_TYPE 589u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.FaceHandle; native size 24, alignment 8. */
-typedef struct R4Lib_Value590 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value590;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Raster; native size 48, alignment 8. */
+typedef struct R4Lib_Value590 { _Alignas(8) uint8_t opaque_bytes[48]; } R4Lib_Value590;
 #define R4Lib_Value590_TYPE 590u
-/* *R4FONT.Bindings.Zig.app_fonts.FaceHandle; native size 8, alignment 8. */
-typedef struct R4Lib_Value591 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value591;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.FaceStore; native size 200, alignment 8. */
+typedef struct R4Lib_Value591 { _Alignas(8) uint8_t opaque_bytes[200]; } R4Lib_Value591;
 #define R4Lib_Value591_TYPE 591u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!void; native size 2, alignment 2. */
-typedef struct R4Lib_Value592 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value592;
+/* *R4FONT.Bindings.Zig.app_fonts.FaceStore; native size 8, alignment 8. */
+typedef struct R4Lib_Value592 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value592;
 #define R4Lib_Value592_TYPE 592u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.FaceInfo; native size 80, alignment 8. */
-typedef struct R4Lib_Value593 { _Alignas(8) uint8_t opaque_bytes[80]; } R4Lib_Value593;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.FaceHandle; native size 24, alignment 8. */
+typedef struct R4Lib_Value593 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value593;
 #define R4Lib_Value593_TYPE 593u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!?u32; native size 12, alignment 4. */
-typedef struct R4Lib_Value594 { _Alignas(4) uint8_t opaque_bytes[12]; } R4Lib_Value594;
+/* *R4FONT.Bindings.Zig.app_fonts.FaceHandle; native size 8, alignment 8. */
+typedef struct R4Lib_Value594 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value594;
 #define R4Lib_Value594_TYPE 594u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!bool; native size 4, alignment 2. */
-typedef struct R4Lib_Value595 { _Alignas(2) uint8_t opaque_bytes[4]; } R4Lib_Value595;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!void; native size 2, alignment 2. */
+typedef struct R4Lib_Value595 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value595;
 #define R4Lib_Value595_TYPE 595u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.FaceMetrics26_6; native size 20, alignment 4. */
-typedef struct R4Lib_Value596 { _Alignas(4) uint8_t opaque_bytes[20]; } R4Lib_Value596;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.FaceInfo; native size 80, alignment 8. */
+typedef struct R4Lib_Value596 { _Alignas(8) uint8_t opaque_bytes[80]; } R4Lib_Value596;
 #define R4Lib_Value596_TYPE 596u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.GlyphMetrics26_6; native size 28, alignment 4. */
-typedef struct R4Lib_Value597 { _Alignas(4) uint8_t opaque_bytes[28]; } R4Lib_Value597;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!?u32; native size 12, alignment 4. */
+typedef struct R4Lib_Value597 { _Alignas(4) uint8_t opaque_bytes[12]; } R4Lib_Value597;
 #define R4Lib_Value597_TYPE 597u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}![2]i32; native size 12, alignment 4. */
-typedef struct R4Lib_Value598 { _Alignas(4) uint8_t opaque_bytes[12]; } R4Lib_Value598;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!bool; native size 4, alignment 2. */
+typedef struct R4Lib_Value598 { _Alignas(2) uint8_t opaque_bytes[4]; } R4Lib_Value598;
 #define R4Lib_Value598_TYPE 598u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Raster; native size 48, alignment 8. */
-typedef struct R4Lib_Value599 { _Alignas(8) uint8_t opaque_bytes[48]; } R4Lib_Value599;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.FaceMetrics26_6; native size 20, alignment 4. */
+typedef struct R4Lib_Value599 { _Alignas(4) uint8_t opaque_bytes[20]; } R4Lib_Value599;
 #define R4Lib_Value599_TYPE 599u
-/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.BorrowedRaster; native size 48, alignment 8. */
-typedef struct R4Lib_Value600 { _Alignas(8) uint8_t opaque_bytes[48]; } R4Lib_Value600;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.GlyphMetrics26_6; native size 28, alignment 4. */
+typedef struct R4Lib_Value600 { _Alignas(4) uint8_t opaque_bytes[28]; } R4Lib_Value600;
 #define R4Lib_Value600_TYPE 600u
-/* *const R4FONT.Bindings.Zig.app_fonts.FaceStore; native size 8, alignment 8. */
-typedef struct R4Lib_Value601 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value601;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}![2]i32; native size 12, alignment 4. */
+typedef struct R4Lib_Value601 { _Alignas(4) uint8_t opaque_bytes[12]; } R4Lib_Value601;
 #define R4Lib_Value601_TYPE 601u
-/* *Shared.Language.support.Memory; native size 8, alignment 8. */
-typedef struct R4Lib_Value602 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value602;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Raster; native size 48, alignment 8. */
+typedef struct R4Lib_Value602 { _Alignas(8) uint8_t opaque_bytes[48]; } R4Lib_Value602;
 #define R4Lib_Value602_TYPE 602u
-/* @typeInfo(@typeInfo(@TypeOf(R4ACO.Bindings.Zig.worker.Worker.init)).@"fn".return_type.?).error_union.error_set!R4ACO.Bindings.Zig.worker.Worker; native size 600, alignment 8. */
-typedef struct R4Lib_Value603 { _Alignas(8) uint8_t opaque_bytes[600]; } R4Lib_Value603;
+/* error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.BorrowedRaster; native size 48, alignment 8. */
+typedef struct R4Lib_Value603 { _Alignas(8) uint8_t opaque_bytes[48]; } R4Lib_Value603;
 #define R4Lib_Value603_TYPE 603u
-/* *R4ACO.Bindings.Zig.worker.Worker; native size 8, alignment 8. */
+/* *const R4FONT.Bindings.Zig.app_fonts.FaceStore; native size 8, alignment 8. */
 typedef struct R4Lib_Value604 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value604;
 #define R4Lib_Value604_TYPE 604u
-/* error{Bounds}!R4ENC.Bindings.Zig.recording_pixels.Layout; native size 48, alignment 8. */
-typedef struct R4Lib_Value605 { _Alignas(8) uint8_t opaque_bytes[48]; } R4Lib_Value605;
+/* *Shared.Language.support.Memory; native size 8, alignment 8. */
+typedef struct R4Lib_Value605 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value605;
 #define R4Lib_Value605_TYPE 605u
-/* *R4GFX.Display.refresh_range.Facts; native size 8, alignment 8. */
-typedef struct R4Lib_Value606 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value606;
+/* @typeInfo(@typeInfo(@TypeOf(R4ACO.Bindings.Zig.worker.Worker.init)).@"fn".return_type.?).error_union.error_set!R4ACO.Bindings.Zig.worker.Worker; native size 600, alignment 8. */
+typedef struct R4Lib_Value606 { _Alignas(8) uint8_t opaque_bytes[600]; } R4Lib_Value606;
 #define R4Lib_Value606_TYPE 606u
-/* error{Bandwidth,Descriptor,Unsupported}!R4GFX.Display.links.Hdmi; native size 24, alignment 4. */
-typedef struct R4Lib_Value607 { _Alignas(4) uint8_t opaque_bytes[24]; } R4Lib_Value607;
+/* *R4ACO.Bindings.Zig.worker.Worker; native size 8, alignment 8. */
+typedef struct R4Lib_Value607 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value607;
 #define R4Lib_Value607_TYPE 607u
-/* error{Bandwidth,Descriptor,Unsupported}!R4GFX.Display.links.Frl; native size 4, alignment 2. */
-typedef struct R4Lib_Value608 { _Alignas(2) uint8_t opaque_bytes[4]; } R4Lib_Value608;
+/* error{Bounds}!R4ENC.Bindings.Zig.recording_pixels.Layout; native size 48, alignment 8. */
+typedef struct R4Lib_Value608 { _Alignas(8) uint8_t opaque_bytes[48]; } R4Lib_Value608;
 #define R4Lib_Value608_TYPE 608u
-/* *R4GFX.Bindings.Zig.queue.Queue; native size 8, alignment 8. */
+/* *R4GFX.Display.refresh_range.Facts; native size 8, alignment 8. */
 typedef struct R4Lib_Value609 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value609;
 #define R4Lib_Value609_TYPE 609u
-/* *const R4GFX.Bindings.Zig.queue.Queue; native size 8, alignment 8. */
-typedef struct R4Lib_Value611 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value611;
+/* error{Bandwidth,Descriptor,Unsupported}!R4GFX.Display.links.Hdmi; native size 24, alignment 4. */
+typedef struct R4Lib_Value610 { _Alignas(4) uint8_t opaque_bytes[24]; } R4Lib_Value610;
+#define R4Lib_Value610_TYPE 610u
+/* error{Bandwidth,Descriptor,Unsupported}!R4GFX.Display.links.Frl; native size 4, alignment 2. */
+typedef struct R4Lib_Value611 { _Alignas(2) uint8_t opaque_bytes[4]; } R4Lib_Value611;
 #define R4Lib_Value611_TYPE 611u
-/* *abi_generated.GfxFenceStatus; native size 8, alignment 8. */
+/* *R4GFX.Bindings.Zig.queue.Queue; native size 8, alignment 8. */
 typedef struct R4Lib_Value612 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value612;
 #define R4Lib_Value612_TYPE 612u
-/* error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!void; native size 2, alignment 2. */
-typedef struct R4Lib_Value614 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value614;
+/* *const R4GFX.Bindings.Zig.queue.Queue; native size 8, alignment 8. */
+typedef struct R4Lib_Value614 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value614;
 #define R4Lib_Value614_TYPE 614u
-/* error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!R4GFX.Display.topology.Key; native size 40, alignment 8. */
-typedef struct R4Lib_Value615 { _Alignas(8) uint8_t opaque_bytes[40]; } R4Lib_Value615;
+/* *abi_generated.GfxFenceStatus; native size 8, alignment 8. */
+typedef struct R4Lib_Value615 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value615;
 #define R4Lib_Value615_TYPE 615u
-/* *const R4GFX.Display.brightness_preferences.Config; native size 8, alignment 8. */
-typedef struct R4Lib_Value616 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value616;
-#define R4Lib_Value616_TYPE 616u
-/* ?R4GFX.Display.brightness_preferences.Choice; native size 56, alignment 8. */
-typedef struct R4Lib_Value617 { _Alignas(8) uint8_t opaque_bytes[56]; } R4Lib_Value617;
+/* error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!void; native size 2, alignment 2. */
+typedef struct R4Lib_Value617 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value617;
 #define R4Lib_Value617_TYPE 617u
-/* error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!R4GFX.Display.brightness_preferences.Config; native size 784, alignment 8. */
-typedef struct R4Lib_Value618 { _Alignas(8) uint8_t opaque_bytes[784]; } R4Lib_Value618;
+/* error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!R4GFX.Display.topology.Key; native size 40, alignment 8. */
+typedef struct R4Lib_Value618 { _Alignas(8) uint8_t opaque_bytes[40]; } R4Lib_Value618;
 #define R4Lib_Value618_TYPE 618u
-/* error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}![]const u8; native size 24, alignment 8. */
-typedef struct R4Lib_Value619 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value619;
+/* *const R4GFX.Display.brightness_preferences.Config; native size 8, alignment 8. */
+typedef struct R4Lib_Value619 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value619;
 #define R4Lib_Value619_TYPE 619u
-/* *const R4GFX.Display.color_control.Restoration; native size 8, alignment 8. */
-typedef struct R4Lib_Value620 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value620;
+/* error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!R4GFX.Display.brightness_preferences.Config; native size 784, alignment 8. */
+typedef struct R4Lib_Value620 { _Alignas(8) uint8_t opaque_bytes[784]; } R4Lib_Value620;
 #define R4Lib_Value620_TYPE 620u
-/* *R4GFX.Display.color_control.Restoration; native size 8, alignment 8. */
-typedef struct R4Lib_Value621 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value621;
+/* error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}![]const u8; native size 24, alignment 8. */
+typedef struct R4Lib_Value621 { _Alignas(8) uint8_t opaque_bytes[24]; } R4Lib_Value621;
 #define R4Lib_Value621_TYPE 621u
-/* *const R4GFX.Display.color_preferences.Choice; native size 8, alignment 8. */
+/* *const R4GFX.Display.color_control.Restoration; native size 8, alignment 8. */
 typedef struct R4Lib_Value622 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value622;
 #define R4Lib_Value622_TYPE 622u
-/* *R4GFX.Display.color_preferences.Choice; native size 8, alignment 8. */
+/* *R4GFX.Display.color_control.Restoration; native size 8, alignment 8. */
 typedef struct R4Lib_Value623 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value623;
 #define R4Lib_Value623_TYPE 623u
-/* error{Buffer,Capacity,Duplicate,Format,Invalid,UnknownReceiver}!void; native size 2, alignment 2. */
-typedef struct R4Lib_Value624 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value624;
+/* *const R4GFX.Display.color_preferences.Choice; native size 8, alignment 8. */
+typedef struct R4Lib_Value624 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value624;
 #define R4Lib_Value624_TYPE 624u
-/* *const R4GFX.Display.color_preferences.Config; native size 8, alignment 8. */
+/* *R4GFX.Display.color_preferences.Choice; native size 8, alignment 8. */
 typedef struct R4Lib_Value625 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Value625;
 #define R4Lib_Value625_TYPE 625u
-/* ?R4GFX.Display.color_preferences.Choice; native size 1152, alignment 8. */
-typedef struct R4Lib_Value626 { _Alignas(8) uint8_t opaque_bytes[1152]; } R4Lib_Value626;
+/* error{Buffer,Capacity,Duplicate,Format,Invalid,UnknownReceiver}!void; native size 2, alignment 2. */
+typedef struct R4Lib_Value626 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value626;
 #define R4Lib_Value626_TYPE 626u
 /* error{Buffer,Capacity,Duplicate,Format,Invalid,UnknownReceiver}!R4GFX.Display.color_preferences.Config; native size 18320, alignment 8. */
 typedef struct R4Lib_Value627 { _Alignas(8) uint8_t opaque_bytes[18320]; } R4Lib_Value627;
@@ -1997,7 +1997,7 @@ typedef struct R4Lib_Value682 { _Alignas(8) uint8_t opaque_bytes[8]; } R4Lib_Val
 /* error{ClockRegression,Invalid,Overflow}!void; native size 2, alignment 2. */
 typedef struct R4Lib_Value683 { _Alignas(2) uint8_t opaque_bytes[2]; } R4Lib_Value683;
 #define R4Lib_Value683_TYPE 683u
-#define R4Libraries_ABI_FINGERPRINT UINT64_C(6999400729378588851)
+#define R4Libraries_ABI_FINGERPRINT UINT64_C(12995334308968972729)
 int32_t R4LibrariesVerifyAbi(uint64_t);
 static const uint8_t R4Std_CONST_name[] = {82,52,83,84,68,0};
 static inline R4LibrariesSlot R4Std_constant_name(void) { return (R4LibrariesSlot){.ptr=(void *)R4Std_CONST_name,.length=5,.flags=1u}; }
@@ -3932,6 +3932,46 @@ static inline R4LibrariesSlot R4Media_brightness(uint32_t reserved, R4GfxBrightn
  a[4] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p4,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,200u,a,5u,0);
 }
+/* consumer_media_adapters.brightnessInit -> void */
+static inline R4LibrariesSlot R4Media_brightnessInit(uint32_t reserved, R4GfxBrightnessClientClient * p0) {
+ (void)reserved; R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,201u,a,1u,0);
+}
+/* consumer_media_adapters.brightnessSelect -> void */
+static inline R4LibrariesSlot R4Media_brightnessSelect(uint32_t reserved, R4GfxBrightnessClientClient * p0, R4LibrariesSlot p1) {
+ (void)reserved; R4LibrariesSlot a[2]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ a[1] = p1;
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,202u,a,2u,0);
+}
+/* consumer_media_adapters.refreshInit -> void */
+static inline R4LibrariesSlot R4Media_refreshInit(uint32_t reserved, R4GfxRefreshClientClient * p0) {
+ (void)reserved; R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,203u,a,1u,0);
+}
+/* consumer_media_adapters.refreshSelect -> void */
+static inline R4LibrariesSlot R4Media_refreshSelect(uint32_t reserved, R4GfxRefreshClientClient * p0, const R4GfxRefreshPreferencesChoice * p1) {
+ (void)reserved; R4LibrariesSlot a[2]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,204u,a,2u,0);
+}
+/* consumer_media_adapters.colorPreferencesEqual -> bool */
+static inline R4LibrariesSlot R4Media_colorPreferencesEqual(uint32_t reserved, const R4GfxColorPreferencesConfig * p0, const R4GfxColorPreferencesConfig * p1) {
+ (void)reserved; R4LibrariesSlot a[2]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,205u,a,2u,0);
+}
+/* consumer_media_adapters.colorChoiceEqual -> bool */
+static inline R4LibrariesSlot R4Media_colorChoiceEqual(uint32_t reserved, R4LibrariesSlot p0, R4LibrariesSlot p1) {
+ (void)reserved; R4LibrariesSlot a[2]={0};
+ a[0] = p0;
+ a[1] = p1;
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,206u,a,2u,0);
+}
 /* consumer_media_adapters.refresh -> void */
 static inline R4LibrariesSlot R4Media_refresh(uint32_t reserved, R4GfxRefreshClientClient * p0, const R4Lib_r4os_r4draw_Context * p1, const R4GfxOutputTarget * p2, uint64_t p3, uint32_t p4, uint8_t p5) {
  (void)reserved; R4LibrariesSlot a[6]={0};
@@ -3941,7 +3981,7 @@ static inline R4LibrariesSlot R4Media_refresh(uint32_t reserved, R4GfxRefreshCli
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p4,.flags=R4LIBRARIES_PRESENT};
  a[5] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p5,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,201u,a,6u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,207u,a,6u,0);
 }
 /* consumer_media_adapters.refreshRelease -> void */
 static inline R4LibrariesSlot R4Media_refreshRelease(uint32_t reserved, R4GfxRefreshClientClient * p0, const R4Lib_r4os_r4draw_Context * p1, const R4GfxOutputTarget * p2) {
@@ -3949,21 +3989,21 @@ static inline R4LibrariesSlot R4Media_refreshRelease(uint32_t reserved, R4GfxRef
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,202u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,208u,a,3u,0);
 }
 /* consumer_media_adapters.modesRefresh -> bool */
 static inline R4LibrariesSlot R4Media_modesRefresh(uint32_t reserved, R4GfxModeControlController * p0, const R4Lib_r4os_r4draw_Context * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,203u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,209u,a,2u,0);
 }
 /* consumer_media_adapters.modesApply -> bool */
 static inline R4LibrariesSlot R4Media_modesApply(uint32_t reserved, R4GfxModeControlController * p0, const R4Lib_r4os_r4draw_Context * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,204u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,210u,a,2u,0);
 }
 /* consumer_media_adapters.modesApplyColor -> bool */
 static inline R4LibrariesSlot R4Media_modesApplyColor(uint32_t reserved, R4GfxModeControlController * p0, const R4Lib_r4os_r4draw_Context * p1, const R4LibraryColorClient * p2, const R4GfxColorSignal * p3) {
@@ -3972,14 +4012,14 @@ static inline R4LibrariesSlot R4Media_modesApplyColor(uint32_t reserved, R4GfxMo
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,205u,a,4u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,211u,a,4u,0);
 }
 /* consumer_media_adapters.modesPoll -> bool */
 static inline R4LibrariesSlot R4Media_modesPoll(uint32_t reserved, R4GfxModeControlController * p0, const R4Lib_r4os_r4draw_Context * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,206u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,212u,a,2u,0);
 }
 /* consumer_media_adapters.modesResolve -> bool */
 static inline R4LibrariesSlot R4Media_modesResolve(uint32_t reserved, R4GfxModeControlController * p0, const R4Lib_r4os_r4draw_Context * p1, uint8_t p2) {
@@ -3987,21 +4027,21 @@ static inline R4LibrariesSlot R4Media_modesResolve(uint32_t reserved, R4GfxModeC
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,207u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,213u,a,3u,0);
 }
 /* consumer_media_adapters.modesClose -> void */
 static inline R4LibrariesSlot R4Media_modesClose(uint32_t reserved, R4GfxModeControlController * p0, const R4Lib_r4os_r4draw_Context * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,208u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,214u,a,2u,0);
 }
 /* consumer_media_adapters.modesCleanup -> bool */
 static inline R4LibrariesSlot R4Media_modesCleanup(uint32_t reserved, R4GfxModeControlController * p0, const R4Lib_r4os_r4draw_Context * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,209u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,215u,a,2u,0);
 }
 /* consumer_media_adapters.colorValidate -> @typeInfo(@typeInfo(@TypeOf(consumer_media_adapters.colorValidate)).@"fn".return_type.?).error_union.error_set!void */
 static inline R4LibrariesSlot R4Media_colorValidate(uint32_t reserved, const R4Lib_r4os_r4draw_Context * p0, const R4GfxDesktopOutputsEntry * p1, const R4GfxOutputMode * p2, const R4GfxColorSignal * p3) {
@@ -4010,40 +4050,40 @@ static inline R4LibrariesSlot R4Media_colorValidate(uint32_t reserved, const R4L
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,210u,a,4u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,216u,a,4u,0);
 }
 /* consumer_media_adapters.source -> error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Source */
 static inline R4LibrariesSlot R4Media_source(uint32_t reserved, const R4GfxOutputColorState * p0, uint32_t p1, R4GfxColorSignalSource *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,211u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,217u,a,2u,output);
 }
 /* consumer_media_adapters.publishedSignal -> error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Signal */
 static inline R4LibrariesSlot R4Media_publishedSignal(uint32_t reserved, const R4GfxOutputColorState * p0, R4LibrariesSlot p1, R4GfxColorSignalSignal *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = p1;
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,212u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,218u,a,2u,output);
 }
 /* consumer_media_adapters.requestedSignal -> error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Signal */
 static inline R4LibrariesSlot R4Media_requestedSignal(uint32_t reserved, const R4GfxColorSignal * p0, R4GfxColorSignalSignal *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,213u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,219u,a,1u,output);
 }
 /* consumer_media_adapters.signalRequest -> error{Bandwidth,Incomplete,Invalid,Unsupported}!abi_generated.GfxColorSignal */
 static inline R4LibrariesSlot R4Media_signalRequest(uint32_t reserved, const R4GfxColorSignalSignal * p0, R4GfxColorSignal *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,214u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,220u,a,1u,output);
 }
 /* consumer_media_adapters.publishedLink -> error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Link */
 static inline R4LibrariesSlot R4Media_publishedLink(uint32_t reserved, const R4GfxOutputColorState * p0, uint32_t p1, R4GfxColorSignalLink *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,215u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,221u,a,2u,output);
 }
 /* consumer_media_adapters.preview -> error{Bandwidth,Incomplete,Invalid,Unsupported}!void */
 static inline R4LibrariesSlot R4Media_preview(uint32_t reserved, const R4GfxEdidReport * p0, const R4GfxColorSignalSignal * p1, const R4GfxOutputColorState * p2, uint32_t p3, const R4GfxColorSignalPipeline * p4, uint64_t p5, uint16_t p6, uint32_t p7, uint32_t p8) {
@@ -4057,7 +4097,7 @@ static inline R4LibrariesSlot R4Media_preview(uint32_t reserved, const R4GfxEdid
  a[6] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p6,.flags=R4LIBRARIES_PRESENT};
  a[7] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p7,.flags=R4LIBRARIES_PRESENT};
  a[8] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p8,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,216u,a,9u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,222u,a,9u,0);
 }
 /* consumer_media_adapters.colorAdmit -> error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Plan */
 static inline R4LibrariesSlot R4Media_colorAdmit(uint32_t reserved, const R4GfxEdidReport * p0, const R4GfxColorSignalSignal * p1, const R4GfxColorSignalSource * p2, const R4GfxColorSignalPipeline * p3, const R4GfxColorSignalLink * p4, uint64_t p5, uint16_t p6, R4GfxColorSignalPlan *output) {
@@ -4069,7 +4109,7 @@ static inline R4LibrariesSlot R4Media_colorAdmit(uint32_t reserved, const R4GfxE
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.flags=R4LIBRARIES_PRESENT};
  a[5] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p5,.flags=R4LIBRARIES_PRESENT};
  a[6] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p6,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,217u,a,7u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,223u,a,7u,output);
 }
 /* consumer_media_adapters.hdmiDsc -> error{Bandwidth,Incomplete,Invalid,Unsupported}!R4GFX.Display.color_signal.Plan */
 static inline R4LibrariesSlot R4Media_hdmiDsc(uint32_t reserved, const R4GfxEdidReport * p0, const R4GfxColorSignalSignal * p1, const R4GfxColorSignalSource * p2, const R4GfxColorSignalPipeline * p3, uint64_t p4, uint16_t p5, R4GfxColorSignalPlan *output) {
@@ -4080,19 +4120,19 @@ static inline R4LibrariesSlot R4Media_hdmiDsc(uint32_t reserved, const R4GfxEdid
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p4,.flags=R4LIBRARIES_PRESENT};
  a[5] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p5,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,218u,a,6u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,224u,a,6u,output);
 }
 /* consumer_media_adapters.profileSignal -> bool */
 static inline R4LibrariesSlot R4Media_profileSignal(uint32_t reserved, const R4GfxColorSignal * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,219u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,225u,a,1u,0);
 }
 /* consumer_media_adapters.profileOutput -> bool */
 static inline R4LibrariesSlot R4Media_profileOutput(uint32_t reserved, const R4GfxOutputColorState * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,220u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,226u,a,1u,0);
 }
 /* consumer_media_adapters.vrrAdmit -> error{Clock,Incomplete,Range,Stale,State,Timing,Unsupported}!R4GFX.Display.vrr.Plan */
 static inline R4LibrariesSlot R4Media_vrrAdmit(uint32_t reserved, const R4GfxEdidReport * p0, const R4GfxTimingTiming * p1, uint32_t p2, const R4GfxVrrSource * p3, R4GfxVrrPlan *output) {
@@ -4101,7 +4141,7 @@ static inline R4LibrariesSlot R4Media_vrrAdmit(uint32_t reserved, const R4GfxEdi
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,221u,a,4u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,227u,a,4u,output);
 }
 /* consumer_media_adapters.profileOpenFile -> @typeInfo(@typeInfo(@TypeOf(consumer_media_adapters.profileOpenFile)).@"fn".return_type.?).error_union.error_set!R4GFX.Display.display_profile.Owner(r4gfx_abi) */
 static inline R4LibrariesSlot R4Media_profileOpenFile(uint32_t reserved, const R4LibraryAllocator * p0, const R4LibraryColorClient * p1, const R4Lib_r4os_r4sys_Context * p2, const uint8_t * p3, uint32_t p4, uint32_t p5, R4GfxDisplayProfileOwner *output) {
@@ -4112,184 +4152,184 @@ static inline R4LibrariesSlot R4Media_profileOpenFile(uint32_t reserved, const R
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p4,.flags=R4LIBRARIES_PRESENT};
  a[5] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p5,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,222u,a,6u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,228u,a,6u,output);
 }
 /* consumer_media_adapters.shader -> []const u32 */
 static inline R4LibrariesSlot R4Media_shader(uint32_t reserved, uint32_t p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,223u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,229u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.text.Bytes.init -> R4STD.Bindings.Zig.text.Bytes */
 static inline R4LibrariesSlot R4StdTextBytes_init(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4StdTextBytes *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,224u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,230u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.text.Bytes.view -> abi_generated.R4TextView */
 static inline R4LibrariesSlot R4StdTextBytes_view(uint32_t reserved, const R4StdTextBytes * p0, R4TextView *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,225u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,231u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.text.Utf8Text.init -> error{BufferTooSmall,EmbeddedNul,InvalidLineEnding,InvalidUiText8,InvalidUtf8,RuntimeUnavailable}!R4STD.Bindings.Zig.text.Utf8Text */
 static inline R4LibrariesSlot R4StdTextUtf8Text_init(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4StdTextUtf8Text *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,226u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,232u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.text.Utf8Text.byteLen -> usize */
 static inline R4LibrariesSlot R4StdTextUtf8Text_byteLen(uint32_t reserved, const R4StdTextUtf8Text * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,227u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,233u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.text.Utf8Text.scalarCount -> usize */
 static inline R4LibrariesSlot R4StdTextUtf8Text_scalarCount(uint32_t reserved, const R4StdTextUtf8Text * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,228u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,234u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.text.Utf8Text.view -> abi_generated.R4TextView */
 static inline R4LibrariesSlot R4StdTextUtf8Text_view(uint32_t reserved, const R4StdTextUtf8Text * p0, R4TextView *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,229u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,235u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.text.UiText8.init -> error{BufferTooSmall,EmbeddedNul,InvalidLineEnding,InvalidUiText8,InvalidUtf8,RuntimeUnavailable}!R4STD.Bindings.Zig.text.UiText8 */
 static inline R4LibrariesSlot R4StdTextUiText8_init(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4StdTextUiText8 *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,230u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,236u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.text.UiText8.view -> abi_generated.R4TextView */
 static inline R4LibrariesSlot R4StdTextUiText8_view(uint32_t reserved, const R4StdTextUiText8 * p0, R4TextView *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,231u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,237u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.text.SystemText.parse -> error{BufferTooSmall,EmbeddedNul,InvalidLineEnding,InvalidUiText8,InvalidUtf8,RuntimeUnavailable}!R4STD.Bindings.Zig.text.SystemText */
 static inline R4LibrariesSlot R4StdTextSystemText_parse(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4StdTextSystemText *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,232u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,238u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.text.SystemText.canonicalSize -> usize */
 static inline R4LibrariesSlot R4StdTextSystemText_canonicalSize(uint32_t reserved, const R4StdTextSystemText * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,233u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,239u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.text.SystemText.writeCanonical -> error{BufferTooSmall,EmbeddedNul,InvalidLineEnding,InvalidUiText8,InvalidUtf8,RuntimeUnavailable}![]const u8 */
 static inline R4LibrariesSlot R4StdTextSystemText_writeCanonical(uint32_t reserved, const R4StdTextSystemText * p0, uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,234u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,240u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.text.DocumentText.init -> error{BufferTooSmall,EmbeddedNul,InvalidLineEnding,InvalidUiText8,InvalidUtf8,RuntimeUnavailable}!R4STD.Bindings.Zig.text.DocumentText */
 static inline R4LibrariesSlot R4StdTextDocumentText_init(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4StdTextDocumentText *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,235u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,241u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.text.DocumentText.writeExact -> error{BufferTooSmall,EmbeddedNul,InvalidLineEnding,InvalidUiText8,InvalidUtf8,RuntimeUnavailable}![]const u8 */
 static inline R4LibrariesSlot R4StdTextDocumentText_writeExact(uint32_t reserved, const R4StdTextDocumentText * p0, uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,236u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,242u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.EntryIterator.init -> R4STD.Bindings.Zig.settings.EntryIterator */
 static inline R4LibrariesSlot R4StdSettingsEntryIterator_init(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4StdSettingsEntryIterator *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,237u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,243u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.settings.EntryIterator.next -> ?R4STD.Bindings.Zig.settings.Entry */
 static inline R4LibrariesSlot R4StdSettingsEntryIterator_next(uint32_t reserved, R4StdSettingsEntryIterator * p0, R4StdSettingsEntry *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,238u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,244u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.settings.Document.init -> R4STD.Bindings.Zig.settings.Document */
 static inline R4LibrariesSlot R4StdSettingsDocument_init(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4StdSettingsDocument *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,239u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,245u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.settings.Document.value -> ?[]const u8 */
 static inline R4LibrariesSlot R4StdSettingsDocument_value(uint32_t reserved, const R4StdSettingsDocument * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,240u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,246u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.Document.boolValue -> ?bool */
 static inline R4LibrariesSlot R4StdSettingsDocument_boolValue(uint32_t reserved, const R4StdSettingsDocument * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,241u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,247u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.Document.u32Value -> ?u32 */
 static inline R4LibrariesSlot R4StdSettingsDocument_u32Value(uint32_t reserved, const R4StdSettingsDocument * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,242u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,248u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.Document.i32Value -> ?i32 */
 static inline R4LibrariesSlot R4StdSettingsDocument_i32Value(uint32_t reserved, const R4StdSettingsDocument * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,243u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,249u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.Document.rgb24Value -> ?u32 */
 static inline R4LibrariesSlot R4StdSettingsDocument_rgb24Value(uint32_t reserved, const R4StdSettingsDocument * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,244u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,250u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.Document.formatVersion -> ?u32 */
 static inline R4LibrariesSlot R4StdSettingsDocument_formatVersion(uint32_t reserved, const R4StdSettingsDocument * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,245u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,251u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.Document.schemaName -> ?[]const u8 */
 static inline R4LibrariesSlot R4StdSettingsDocument_schemaName(uint32_t reserved, const R4StdSettingsDocument * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,246u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,252u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.Document.hasSupportedFormat -> bool */
 static inline R4LibrariesSlot R4StdSettingsDocument_hasSupportedFormat(uint32_t reserved, const R4StdSettingsDocument * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,247u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,253u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writer.init -> R4STD.Bindings.Zig.settings.Writer */
 static inline R4LibrariesSlot R4StdSettingsWriter_init(uint32_t reserved, uint8_t * p0, uintptr_t n0, R4StdSettingsWriter *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,248u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,254u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.settings.Writer.writeHeader -> void */
 static inline R4LibrariesSlot R4StdSettingsWriter_writeHeader(uint32_t reserved, R4StdSettingsWriter * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,249u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,255u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writer.writeComment -> void */
 static inline R4LibrariesSlot R4StdSettingsWriter_writeComment(uint32_t reserved, R4StdSettingsWriter * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,250u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,256u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writer.writePair -> void */
 static inline R4LibrariesSlot R4StdSettingsWriter_writePair(uint32_t reserved, R4StdSettingsWriter * p0, const uint8_t * p1, uintptr_t n1, const uint8_t * p2, uintptr_t n2) {
@@ -4297,7 +4337,7 @@ static inline R4LibrariesSlot R4StdSettingsWriter_writePair(uint32_t reserved, R
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,251u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,257u,a,3u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writer.writePairBool -> void */
 static inline R4LibrariesSlot R4StdSettingsWriter_writePairBool(uint32_t reserved, R4StdSettingsWriter * p0, const uint8_t * p1, uintptr_t n1, uint8_t p2) {
@@ -4305,7 +4345,7 @@ static inline R4LibrariesSlot R4StdSettingsWriter_writePairBool(uint32_t reserve
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,252u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,258u,a,3u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writer.writePairU32 -> void */
 static inline R4LibrariesSlot R4StdSettingsWriter_writePairU32(uint32_t reserved, R4StdSettingsWriter * p0, const uint8_t * p1, uintptr_t n1, uint32_t p2) {
@@ -4313,7 +4353,7 @@ static inline R4LibrariesSlot R4StdSettingsWriter_writePairU32(uint32_t reserved
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,253u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,259u,a,3u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writer.writePairI32 -> void */
 static inline R4LibrariesSlot R4StdSettingsWriter_writePairI32(uint32_t reserved, R4StdSettingsWriter * p0, const uint8_t * p1, uintptr_t n1, int32_t p2) {
@@ -4321,7 +4361,7 @@ static inline R4LibrariesSlot R4StdSettingsWriter_writePairI32(uint32_t reserved
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,254u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,260u,a,3u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writer.writePairRgb24 -> void */
 static inline R4LibrariesSlot R4StdSettingsWriter_writePairRgb24(uint32_t reserved, R4StdSettingsWriter * p0, const uint8_t * p1, uintptr_t n1, uint32_t p2) {
@@ -4329,56 +4369,56 @@ static inline R4LibrariesSlot R4StdSettingsWriter_writePairRgb24(uint32_t reserv
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,255u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,261u,a,3u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writer.bytes -> []const u8 */
 static inline R4LibrariesSlot R4StdSettingsWriter_bytes(uint32_t reserved, const R4StdSettingsWriter * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,256u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,262u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writer.ok -> bool */
 static inline R4LibrariesSlot R4StdSettingsWriter_ok(uint32_t reserved, const R4StdSettingsWriter * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,257u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,263u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.WritebackFlush.attempted -> bool */
 static inline R4LibrariesSlot R4StdSettingsWritebackFlush_attempted(uint32_t reserved, const R4StdSettingsWritebackFlush * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,258u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,264u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.WritebackFlush.ok -> bool */
 static inline R4LibrariesSlot R4StdSettingsWritebackFlush_ok(uint32_t reserved, const R4StdSettingsWritebackFlush * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,259u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,265u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.WritebackPolicy.forHz -> R4STD.Bindings.Zig.settings.WritebackPolicy */
 static inline R4LibrariesSlot R4StdSettingsWritebackPolicy_forHz(uint32_t reserved, uint32_t p0, uint32_t p1, R4StdSettingsWritebackPolicy *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,260u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,266u,a,2u,output);
 }
 /* R4STD.Bindings.Zig.settings.WritebackPolicy.defaultSaveDelayMs -> u32 */
 static inline R4LibrariesSlot R4StdSettingsWritebackPolicy_defaultSaveDelayMs(uint32_t reserved, uint32_t p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,261u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,267u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.WritebackPolicy.defaultRetryDelayMs -> u32 */
 static inline R4LibrariesSlot R4StdSettingsWritebackPolicy_defaultRetryDelayMs(uint32_t reserved, uint32_t p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,262u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,268u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writeback.init -> R4STD.Bindings.Zig.settings.Writeback */
 static inline R4LibrariesSlot R4StdSettingsWriteback_init(uint32_t reserved, const R4StdSettingsWritebackPolicy * p0, R4StdSettingsWriteback *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,263u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,269u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.settings.Writeback.configure -> void */
 static inline R4LibrariesSlot R4StdSettingsWriteback_configure(uint32_t reserved, R4StdSettingsWriteback * p0, const R4StdSettingsWritebackPolicy * p1, uint64_t p2) {
@@ -4386,27 +4426,27 @@ static inline R4LibrariesSlot R4StdSettingsWriteback_configure(uint32_t reserved
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,264u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,270u,a,3u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writeback.markDirty -> void */
 static inline R4LibrariesSlot R4StdSettingsWriteback_markDirty(uint32_t reserved, R4StdSettingsWriteback * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,265u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,271u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writeback.isDirty -> bool */
 static inline R4LibrariesSlot R4StdSettingsWriteback_isDirty(uint32_t reserved, const R4StdSettingsWriteback * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,266u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,272u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writeback.isDue -> bool */
 static inline R4LibrariesSlot R4StdSettingsWriteback_isDue(uint32_t reserved, const R4StdSettingsWriteback * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,267u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,273u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.settings.Writeback.complete -> R4STD.Bindings.Zig.settings.WritebackFlush */
 static inline R4LibrariesSlot R4StdSettingsWriteback_complete(uint32_t reserved, R4StdSettingsWriteback * p0, uint64_t p1, int32_t p2, R4StdSettingsWritebackFlush *output) {
@@ -4414,66 +4454,66 @@ static inline R4LibrariesSlot R4StdSettingsWriteback_complete(uint32_t reserved,
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,268u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,274u,a,3u,output);
 }
 /* R4STD.Bindings.Zig.time.Config.selectedIndex -> usize */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_selectedIndex(uint32_t reserved, const R4StdTimeHelpersConfig * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,269u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,275u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.time.Config.zone -> R4STD.Bindings.Zig.time.Zone */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_zone(uint32_t reserved, const R4StdTimeHelpersConfig * p0, R4StdTimeZone *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,270u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,276u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.time.Config.selectedClockFormat -> u32 */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_selectedClockFormat(uint32_t reserved, const R4StdTimeHelpersConfig * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,271u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,277u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.time.Config.offsetMinutes -> i16 */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_offsetMinutes(uint32_t reserved, const R4StdTimeHelpersConfig * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,272u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,278u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.time.Config.offsetMinutesForState -> i16 */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_offsetMinutesForState(uint32_t reserved, const R4StdTimeHelpersConfig * p0, const R4TimeState * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,273u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,279u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.time.Config.loadFromBytes -> bool */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_loadFromBytes(uint32_t reserved, R4StdTimeHelpersConfig * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,274u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,280u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.time.Config.setIndex -> void */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_setIndex(uint32_t reserved, R4StdTimeHelpersConfig * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,275u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,281u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.time.Config.setClockFormat -> void */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_setClockFormat(uint32_t reserved, R4StdTimeHelpersConfig * p0, uint32_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,276u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,282u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.time.Config.writeTo -> []const u8 */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_writeTo(uint32_t reserved, const R4StdTimeHelpersConfig * p0, uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,277u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,283u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.time.Config.writeToForState -> []const u8 */
 static inline R4LibrariesSlot R4StdTimeHelpersConfig_writeToForState(uint32_t reserved, const R4StdTimeHelpersConfig * p0, uint8_t * p1, uintptr_t n1, const R4TimeState * p2) {
@@ -4481,261 +4521,261 @@ static inline R4LibrariesSlot R4StdTimeHelpersConfig_writeToForState(uint32_t re
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,278u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,284u,a,3u,0);
 }
 /* R4STD.Bindings.Zig.codec.Stream.push -> error{BufferTooSmall,InvalidArgument,InvalidScalar,InvalidUtf8,RangesOverlap,RuntimeUnavailable,UndefinedByte,Unrepresentable}!R4STD.Bindings.Zig.codec.Decoded */
 static inline R4LibrariesSlot R4StdCodecStream_push(uint32_t reserved, R4StdCodecStream * p0, uint8_t p1, R4StdCodecDecoded *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,279u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,285u,a,2u,output);
 }
 /* R4STD.Bindings.Zig.codec.Stream.finish -> error{BufferTooSmall,InvalidArgument,InvalidScalar,InvalidUtf8,RangesOverlap,RuntimeUnavailable,UndefinedByte,Unrepresentable}!bool */
 static inline R4LibrariesSlot R4StdCodecStream_finish(uint32_t reserved, const R4StdCodecStream * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,280u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,286u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.codec.Stream.reset -> void */
 static inline R4LibrariesSlot R4StdCodecStream_reset(uint32_t reserved, R4StdCodecStream * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,281u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,287u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.grapheme.State.push -> bool */
 static inline R4LibrariesSlot R4StdGraphemeState_push(uint32_t reserved, R4StdGraphemeState * p0, uint32_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,282u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,288u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.grapheme.Iterator.next -> error{Incomplete,InvalidUtf8}!?R4STD.Bindings.Zig.grapheme.Range */
 static inline R4LibrariesSlot R4StdGraphemeIterator_next(uint32_t reserved, R4StdGraphemeIterator * p0, R4StdGraphemeRange *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,283u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,289u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.grapheme.Stream.push -> error{Incomplete,InvalidUtf8}!?R4STD.Bindings.Zig.grapheme.Stream.Event */
 static inline R4LibrariesSlot R4StdGraphemeStream_push(uint32_t reserved, R4StdGraphemeStream * p0, uint8_t p1, R4StdGraphemeStream_Event *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,284u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,290u,a,2u,output);
 }
 /* R4STD.Bindings.Zig.grapheme.Stream.finish -> error{Incomplete,InvalidUtf8}!usize */
 static inline R4LibrariesSlot R4StdGraphemeStream_finish(uint32_t reserved, const R4StdGraphemeStream * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,285u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,291u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.init -> error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!R4STD.Bindings.Zig.shortcut.Shortcut */
 static inline R4LibrariesSlot R4StdShortcutShortcut_init(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4StdShortcutShortcut *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,286u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,292u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.loadFromBytes -> error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!void */
 static inline R4LibrariesSlot R4StdShortcutShortcut_loadFromBytes(uint32_t reserved, R4StdShortcutShortcut * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,287u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,293u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.writeTo -> error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}![]const u8 */
 static inline R4LibrariesSlot R4StdShortcutShortcut_writeTo(uint32_t reserved, const R4StdShortcutShortcut * p0, uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,288u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,294u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.resolve -> error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!R4STD.Bindings.Zig.shortcut.ResolvedTarget */
 static inline R4LibrariesSlot R4StdShortcutShortcut_resolve(uint32_t reserved, const R4StdShortcutShortcut * p0, R4StdShortcutResolvedTarget *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,289u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,295u,a,1u,output);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.setTarget -> error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!void */
 static inline R4LibrariesSlot R4StdShortcutShortcut_setTarget(uint32_t reserved, R4StdShortcutShortcut * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,290u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,296u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.setTitle -> error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!void */
 static inline R4LibrariesSlot R4StdShortcutShortcut_setTitle(uint32_t reserved, R4StdShortcutShortcut * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,291u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,297u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.setArgs -> error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!void */
 static inline R4LibrariesSlot R4StdShortcutShortcut_setArgs(uint32_t reserved, R4StdShortcutShortcut * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,292u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,298u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.setPolicy -> void */
 static inline R4LibrariesSlot R4StdShortcutShortcut_setPolicy(uint32_t reserved, R4StdShortcutShortcut * p0, uint32_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,293u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,299u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.setIcon -> error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!void */
 static inline R4LibrariesSlot R4StdShortcutShortcut_setIcon(uint32_t reserved, R4StdShortcutShortcut * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,294u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,300u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.setWorkdir -> error{ArgsTooLong,BufferTooSmall,DuplicateField,IconTooLong,InvalidPolicy,InvalidTarget,InvalidText,MissingFormat,MissingSchema,MissingTarget,TargetTooLong,TitleTooLong,UnknownField,UnsupportedFormat,WorkdirTooLong,WrongSchema}!void */
 static inline R4LibrariesSlot R4StdShortcutShortcut_setWorkdir(uint32_t reserved, R4StdShortcutShortcut * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,295u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,301u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.targetText -> []const u8 */
 static inline R4LibrariesSlot R4StdShortcutShortcut_targetText(uint32_t reserved, const R4StdShortcutShortcut * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,296u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,302u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.titleText -> []const u8 */
 static inline R4LibrariesSlot R4StdShortcutShortcut_titleText(uint32_t reserved, const R4StdShortcutShortcut * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,297u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,303u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.argsText -> []const u8 */
 static inline R4LibrariesSlot R4StdShortcutShortcut_argsText(uint32_t reserved, const R4StdShortcutShortcut * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,298u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,304u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.iconText -> []const u8 */
 static inline R4LibrariesSlot R4StdShortcutShortcut_iconText(uint32_t reserved, const R4StdShortcutShortcut * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,299u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,305u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.shortcut.Shortcut.workdirText -> []const u8 */
 static inline R4LibrariesSlot R4StdShortcutShortcut_workdirText(uint32_t reserved, const R4StdShortcutShortcut * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,300u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,306u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.AppEntry.idText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationAppEntry_idText(uint32_t reserved, const R4StdAssociationAppEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,301u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,307u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.AppEntry.titleText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationAppEntry_titleText(uint32_t reserved, const R4StdAssociationAppEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,302u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,308u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.AppEntry.pathText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationAppEntry_pathText(uint32_t reserved, const R4StdAssociationAppEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,303u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,309u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.AppEntry.argsText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationAppEntry_argsText(uint32_t reserved, const R4StdAssociationAppEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,304u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,310u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.ExtEntry.extText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationExtEntry_extText(uint32_t reserved, const R4StdAssociationExtEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,305u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,311u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.ExtEntry.appIdText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationExtEntry_appIdText(uint32_t reserved, const R4StdAssociationExtEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,306u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,312u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.ExtEntry.subsystemIdText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationExtEntry_subsystemIdText(uint32_t reserved, const R4StdAssociationExtEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,307u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,313u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.ExtEntry.formatIdText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationExtEntry_formatIdText(uint32_t reserved, const R4StdAssociationExtEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,308u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,314u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.ExtEntry.typeNameText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationExtEntry_typeNameText(uint32_t reserved, const R4StdAssociationExtEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,309u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,315u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.ExtEntry.shortNameText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationExtEntry_shortNameText(uint32_t reserved, const R4StdAssociationExtEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,310u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,316u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.ExtEntry.prefixText -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationExtEntry_prefixText(uint32_t reserved, const R4StdAssociationExtEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,311u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,317u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.initDefault -> R4STD.Bindings.Zig.app_assoc.Config */
 static inline R4LibrariesSlot R4StdAssociationConfig_initDefault(uint32_t reserved, R4StdAssociationConfig *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,312u,a,0u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,318u,a,0u,output);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.clear -> void */
 static inline R4LibrariesSlot R4StdAssociationConfig_clear(uint32_t reserved, R4StdAssociationConfig * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,313u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,319u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.loadDefaults -> void */
 static inline R4LibrariesSlot R4StdAssociationConfig_loadDefaults(uint32_t reserved, R4StdAssociationConfig * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,314u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,320u,a,1u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.loadFromBytes -> bool */
 static inline R4LibrariesSlot R4StdAssociationConfig_loadFromBytes(uint32_t reserved, R4StdAssociationConfig * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,315u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,321u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.writeTo -> []const u8 */
 static inline R4LibrariesSlot R4StdAssociationConfig_writeTo(uint32_t reserved, const R4StdAssociationConfig * p0, uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,316u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,322u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.appById -> ?*const R4STD.Bindings.Zig.app_assoc.AppEntry */
 static inline R4LibrariesSlot R4StdAssociationConfig_appById(uint32_t reserved, const R4StdAssociationConfig * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,317u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,323u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.extensionByName -> ?*const R4STD.Bindings.Zig.app_assoc.ExtEntry */
 static inline R4LibrariesSlot R4StdAssociationConfig_extensionByName(uint32_t reserved, const R4StdAssociationConfig * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,318u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,324u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.resolvePath -> ?R4STD.Bindings.Zig.app_assoc.LaunchTarget */
 static inline R4LibrariesSlot R4StdAssociationConfig_resolvePath(uint32_t reserved, const R4StdAssociationConfig * p0, const uint8_t * p1, uintptr_t n1, uint8_t * p2, uintptr_t n2, R4StdAssociationLaunchTarget *output) {
@@ -4743,7 +4783,7 @@ static inline R4LibrariesSlot R4StdAssociationConfig_resolvePath(uint32_t reserv
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,319u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,325u,a,3u,output);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.expandAppArgs -> ?[]const u8 */
 static inline R4LibrariesSlot R4StdAssociationConfig_expandAppArgs(uint32_t reserved, const R4StdAssociationConfig * p0, const uint8_t * p1, uintptr_t n1, const uint8_t * p2, uintptr_t n2, uint8_t * p3, uintptr_t n3) {
@@ -4752,7 +4792,7 @@ static inline R4LibrariesSlot R4StdAssociationConfig_expandAppArgs(uint32_t rese
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,320u,a,4u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,326u,a,4u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.setExtensionApp -> bool */
 static inline R4LibrariesSlot R4StdAssociationConfig_setExtensionApp(uint32_t reserved, R4StdAssociationConfig * p0, uint64_t p1, const uint8_t * p2, uintptr_t n2) {
@@ -4760,7 +4800,7 @@ static inline R4LibrariesSlot R4StdAssociationConfig_setExtensionApp(uint32_t re
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,321u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,327u,a,3u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.setExtensionSubsystem -> bool */
 static inline R4LibrariesSlot R4StdAssociationConfig_setExtensionSubsystem(uint32_t reserved, R4StdAssociationConfig * p0, uint64_t p1, const uint8_t * p2, uintptr_t n2, const uint8_t * p3, uintptr_t n3) {
@@ -4769,39 +4809,39 @@ static inline R4LibrariesSlot R4StdAssociationConfig_setExtensionSubsystem(uint3
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,322u,a,4u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,328u,a,4u,0);
 }
 /* R4STD.Bindings.Zig.app_assoc.Config.setExtensionNone -> bool */
 static inline R4LibrariesSlot R4StdAssociationConfig_setExtensionNone(uint32_t reserved, R4StdAssociationConfig * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,323u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,329u,a,2u,0);
 }
 /* R4STD.Bindings.Zig.file_handler.ChoiceList.slice -> []const R4STD.Bindings.Zig.file_handler.Choice */
 static inline R4LibrariesSlot R4StdFileHandlerChoiceList_slice(uint32_t reserved, const R4StdFileHandlerChoiceList * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,324u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,330u,a,1u,0);
 }
 /* R4IMG.Bindings.Zig.r4img.Info.pixelCount -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!usize */
 static inline R4LibrariesSlot R4ImgHelpersInfo_pixelCount(uint32_t reserved, const R4ImgHelpersInfo * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,325u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,331u,a,1u,0);
 }
 /* R4IMG.Bindings.Zig.r4img.RasterContext.init -> ?R4IMG.Bindings.Zig.r4img.RasterContext */
 static inline R4LibrariesSlot R4ImgHelpersRasterContext_init(uint32_t reserved, const R4XStartContext * p0, R4ImgHelpersRasterContext *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,326u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,332u,a,1u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.RasterContext.color -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img_abi.R4ImgRasterColor */
 static inline R4LibrariesSlot R4ImgHelpersRasterContext_color(uint32_t reserved, const R4ImgHelpersRasterContext * p0, const uint8_t * p1, uintptr_t n1, R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgRasterColor *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,327u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,333u,a,2u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.RasterContext.iccProfile -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}![]u8 */
 static inline R4LibrariesSlot R4ImgHelpersRasterContext_iccProfile(uint32_t reserved, const R4ImgHelpersRasterContext * p0, const uint8_t * p1, uintptr_t n1, uint8_t * p2, uintptr_t n2) {
@@ -4809,13 +4849,13 @@ static inline R4LibrariesSlot R4ImgHelpersRasterContext_iccProfile(uint32_t rese
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,328u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,334u,a,3u,0);
 }
 /* R4IMG.Bindings.Zig.r4img.Context.init -> ?R4IMG.Bindings.Zig.r4img.Context */
 static inline R4LibrariesSlot R4ImgHelpersContext_init(uint32_t reserved, const R4XStartContext * p0, R4ImgHelpersContext *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,329u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,335u,a,1u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.Context.probe -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Info */
 static inline R4LibrariesSlot R4ImgHelpersContext_probe(uint32_t reserved, const R4ImgHelpersContext * p0, const uint8_t * p1, uintptr_t n1, const uint8_t * p2, uintptr_t n2, R4ImgHelpersInfo *output) {
@@ -4823,7 +4863,7 @@ static inline R4LibrariesSlot R4ImgHelpersContext_probe(uint32_t reserved, const
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,330u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,336u,a,3u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.Context.scratchBytesFor -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!usize */
 static inline R4LibrariesSlot R4ImgHelpersContext_scratchBytesFor(uint32_t reserved, const R4ImgHelpersContext * p0, const R4ImgHelpersInfo * p1, uint64_t p2) {
@@ -4831,7 +4871,7 @@ static inline R4LibrariesSlot R4ImgHelpersContext_scratchBytesFor(uint32_t reser
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,331u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,337u,a,3u,0);
 }
 /* R4IMG.Bindings.Zig.r4img.Context.decode -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Image */
 static inline R4LibrariesSlot R4ImgHelpersContext_decode(uint32_t reserved, const R4ImgHelpersContext * p0, const uint8_t * p1, uintptr_t n1, const uint8_t * p2, uintptr_t n2, uint32_t * p3, uintptr_t n3, uint8_t * p4, uintptr_t n4, R4ImgHelpersImage *output) {
@@ -4841,7 +4881,7 @@ static inline R4LibrariesSlot R4ImgHelpersContext_decode(uint32_t reserved, cons
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.length=n4,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,332u,a,5u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,338u,a,5u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.Context.decodeSvg -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Image */
 static inline R4LibrariesSlot R4ImgHelpersContext_decodeSvg(uint32_t reserved, const R4ImgHelpersContext * p0, const uint8_t * p1, uintptr_t n1, const uint8_t * p2, uintptr_t n2, uint32_t * p3, uintptr_t n3, uint8_t * p4, uintptr_t n4, const R4ImgHelpersSvgRenderOptions * p5, R4ImgHelpersImage *output) {
@@ -4852,7 +4892,7 @@ static inline R4LibrariesSlot R4ImgHelpersContext_decodeSvg(uint32_t reserved, c
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.length=n4,.flags=R4LIBRARIES_PRESENT};
  a[5] = (R4LibrariesSlot){.ptr=(void *)p5,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,333u,a,6u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,339u,a,6u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.Context.decodeSvgAt -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Image */
 static inline R4LibrariesSlot R4ImgHelpersContext_decodeSvgAt(uint32_t reserved, const R4ImgHelpersContext * p0, const uint8_t * p1, uintptr_t n1, const uint8_t * p2, uintptr_t n2, uint32_t * p3, uintptr_t n3, uint8_t * p4, uintptr_t n4, uint32_t p5, uint32_t p6, const R4ImgHelpersSvgRenderOptions * p7, R4ImgHelpersImage *output) {
@@ -4865,7 +4905,7 @@ static inline R4LibrariesSlot R4ImgHelpersContext_decodeSvgAt(uint32_t reserved,
  a[5] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p5,.flags=R4LIBRARIES_PRESENT};
  a[6] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p6,.flags=R4LIBRARIES_PRESENT};
  a[7] = (R4LibrariesSlot){.ptr=(void *)p7,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,334u,a,8u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,340u,a,8u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.Context.scaleComposite -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}![]u32 */
 static inline R4LibrariesSlot R4ImgHelpersContext_scaleComposite(uint32_t reserved, const R4ImgHelpersContext * p0, const R4ImgHelpersImage * p1, uint32_t * p2, uintptr_t n2, uint32_t p3, uint32_t p4, uint32_t p5) {
@@ -4876,26 +4916,26 @@ static inline R4LibrariesSlot R4ImgHelpersContext_scaleComposite(uint32_t reserv
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p4,.flags=R4LIBRARIES_PRESENT};
  a[5] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p5,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,335u,a,6u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,341u,a,6u,0);
 }
 /* R4IMG.Bindings.Zig.r4img.Context.decoderDiagnostic -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.DecoderDiagnostic */
 static inline R4LibrariesSlot R4ImgHelpersContext_decoderDiagnostic(uint32_t reserved, const R4ImgHelpersContext * p0, R4ImgHelpersDecoderDiagnostic *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,336u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,342u,a,1u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.PngContext.init -> ?R4IMG.Bindings.Zig.r4img.PngContext */
 static inline R4LibrariesSlot R4ImgHelpersPngContext_init(uint32_t reserved, const R4XStartContext * p0, R4ImgHelpersPngContext *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,337u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,343u,a,1u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.PngContext.pngColor -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img_abi.R4ImgPngColor */
 static inline R4LibrariesSlot R4ImgHelpersPngContext_pngColor(uint32_t reserved, const R4ImgHelpersPngContext * p0, const uint8_t * p1, uintptr_t n1, R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,338u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,344u,a,2u,output);
 }
 /* R4IMG.Bindings.Zig.r4img.PngContext.pngIccProfile -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}![]u8 */
 static inline R4LibrariesSlot R4ImgHelpersPngContext_pngIccProfile(uint32_t reserved, const R4ImgHelpersPngContext * p0, const uint8_t * p1, uintptr_t n1, uint8_t * p2, uintptr_t n2) {
@@ -4903,7 +4943,7 @@ static inline R4LibrariesSlot R4ImgHelpersPngContext_pngIccProfile(uint32_t rese
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,339u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,345u,a,3u,0);
 }
 /* R4IMG.Bindings.Zig.r4img.PngContext.pngScratchBytes16 -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!usize */
 static inline R4LibrariesSlot R4ImgHelpersPngContext_pngScratchBytes16(uint32_t reserved, const R4ImgHelpersPngContext * p0, const R4ImgHelpersInfo * p1, uint64_t p2) {
@@ -4911,7 +4951,7 @@ static inline R4LibrariesSlot R4ImgHelpersPngContext_pngScratchBytes16(uint32_t 
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,340u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,346u,a,3u,0);
 }
 /* R4IMG.Bindings.Zig.r4img.PngContext.pngDecode16 -> error{DecodeFailed,Empty,InvalidArgument,InvalidDimensions,InvalidImage,PixelBufferTooSmall,ScratchBufferTooSmall,TooLarge,UnsupportedFeature,UnsupportedFormat}!R4IMG.Bindings.Zig.r4img.Image16 */
 static inline R4LibrariesSlot R4ImgHelpersPngContext_pngDecode16(uint32_t reserved, const R4ImgHelpersPngContext * p0, const uint8_t * p1, uintptr_t n1, uint16_t * p2, uintptr_t n2, uint8_t * p3, uintptr_t n3, R4ImgHelpersImage16 *output) {
@@ -4920,32 +4960,32 @@ static inline R4LibrariesSlot R4ImgHelpersPngContext_pngDecode16(uint32_t reserv
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.length=n2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,341u,a,4u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,347u,a,4u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Context.init -> ?R4FONT.Bindings.Zig.r4font.Context */
 static inline R4LibrariesSlot R4FontHelpersContext_init(uint32_t reserved, const R4XStartContext * p0, R4FontHelpersContext *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,342u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,348u,a,1u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Context.initTable -> ?R4FONT.Bindings.Zig.r4font.Context */
 static inline R4LibrariesSlot R4FontHelpersContext_initTable(uint32_t reserved, const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 * p0, R4FontHelpersContext *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,343u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,349u,a,1u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Context.initHeader -> ?R4FONT.Bindings.Zig.r4font.Context */
 static inline R4LibrariesSlot R4FontHelpersContext_initHeader(uint32_t reserved, const R4Lib_r4os_runtime_r4l_InterfaceHeader * p0, R4FontHelpersContext *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,344u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,350u,a,1u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Context.sniff -> ?R4FONT.Bindings.Zig.r4font.Format */
 static inline R4LibrariesSlot R4FontHelpersContext_sniff(uint32_t reserved, const R4FontHelpersContext * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,345u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,351u,a,2u,0);
 }
 /* R4FONT.Bindings.Zig.r4font.Context.createDecoder -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Decoder */
 static inline R4LibrariesSlot R4FontHelpersContext_createDecoder(uint32_t reserved, const R4FontHelpersContext * p0, const R4LibraryAllocator * p1, uint64_t p2, R4FontHelpersDecoder *output) {
@@ -4953,19 +4993,19 @@ static inline R4LibrariesSlot R4FontHelpersContext_createDecoder(uint32_t reserv
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,346u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,352u,a,3u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Decoder.deinit -> void */
 static inline R4LibrariesSlot R4FontHelpersDecoder_deinit(uint32_t reserved, R4FontHelpersDecoder * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,347u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,353u,a,1u,0);
 }
 /* R4FONT.Bindings.Zig.r4font.Decoder.diagnostics -> R4FONT.Bindings.Zig.r4font.Diagnostics */
 static inline R4LibrariesSlot R4FontHelpersDecoder_diagnostics(uint32_t reserved, const R4FontHelpersDecoder * p0, R4FontHelpersDiagnostics *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,348u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,354u,a,1u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Decoder.openFace -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Face */
 static inline R4LibrariesSlot R4FontHelpersDecoder_openFace(uint32_t reserved, R4FontHelpersDecoder * p0, const uint8_t * p1, uintptr_t n1, uint32_t p2, R4FontHelpersFace *output) {
@@ -4973,33 +5013,33 @@ static inline R4LibrariesSlot R4FontHelpersDecoder_openFace(uint32_t reserved, R
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,349u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,355u,a,3u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Face.deinit -> void */
 static inline R4LibrariesSlot R4FontHelpersFace_deinit(uint32_t reserved, R4FontHelpersFace * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,350u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,356u,a,1u,0);
 }
 /* R4FONT.Bindings.Zig.r4font.Face.info -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.FaceInfo */
 static inline R4LibrariesSlot R4FontHelpersFace_info(uint32_t reserved, const R4FontHelpersFace * p0, R4FontHelpersFaceInfo *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,351u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,357u,a,1u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Face.glyphIndex -> u32 */
 static inline R4LibrariesSlot R4FontHelpersFace_glyphIndex(uint32_t reserved, const R4FontHelpersFace * p0, uint32_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,352u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,358u,a,2u,0);
 }
 /* R4FONT.Bindings.Zig.r4font.Face.glyphMetrics -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.GlyphMetrics */
 static inline R4LibrariesSlot R4FontHelpersFace_glyphMetrics(uint32_t reserved, const R4FontHelpersFace * p0, uint32_t p1, R4FontHelpersGlyphMetrics *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,353u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,359u,a,2u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Face.kerning -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}![2]i32 */
 static inline R4LibrariesSlot R4FontHelpersFace_kerning(uint32_t reserved, const R4FontHelpersFace * p0, uint32_t p1, uint32_t p2, R4Lib_Value218 *output) {
@@ -5007,7 +5047,7 @@ static inline R4LibrariesSlot R4FontHelpersFace_kerning(uint32_t reserved, const
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,354u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,360u,a,3u,output);
 }
 /* R4FONT.Bindings.Zig.r4font.Face.rasterize -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Raster */
 static inline R4LibrariesSlot R4FontHelpersFace_rasterize(uint32_t reserved, const R4FontHelpersFace * p0, uint32_t p1, uint32_t p2, uint8_t * p3, uintptr_t n3, R4FontHelpersRaster *output) {
@@ -5016,7 +5056,7 @@ static inline R4LibrariesSlot R4FontHelpersFace_rasterize(uint32_t reserved, con
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,355u,a,4u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,361u,a,4u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.init -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.FaceStore */
 static inline R4LibrariesSlot R4FontStoreFaceStore_init(uint32_t reserved, const R4FontHelpersContext * p0, const R4LibraryAllocator * p1, const R4FontStoreOptions * p2, R4FontStoreFaceStore *output) {
@@ -5024,13 +5064,13 @@ static inline R4LibrariesSlot R4FontStoreFaceStore_init(uint32_t reserved, const
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,356u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,362u,a,3u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.deinit -> void */
 static inline R4LibrariesSlot R4FontStoreFaceStore_deinit(uint32_t reserved, R4FontStoreFaceStore * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,357u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,363u,a,1u,0);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.openCopy -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.FaceHandle */
 static inline R4LibrariesSlot R4FontStoreFaceStore_openCopy(uint32_t reserved, R4FontStoreFaceStore * p0, const uint8_t * p1, uintptr_t n1, uint32_t p2, R4FontStoreFaceHandle *output) {
@@ -5038,21 +5078,21 @@ static inline R4LibrariesSlot R4FontStoreFaceStore_openCopy(uint32_t reserved, R
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,358u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,364u,a,3u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.release -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!void */
 static inline R4LibrariesSlot R4FontStoreFaceStore_release(uint32_t reserved, R4FontStoreFaceStore * p0, R4FontStoreFaceHandle * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,359u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,365u,a,2u,0);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.info -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.FaceInfo */
 static inline R4LibrariesSlot R4FontStoreFaceStore_info(uint32_t reserved, R4FontStoreFaceStore * p0, const R4FontStoreFaceHandle * p1, R4FontHelpersFaceInfo *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,360u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,366u,a,2u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.glyphIndex -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!?u32 */
 static inline R4LibrariesSlot R4FontStoreFaceStore_glyphIndex(uint32_t reserved, R4FontStoreFaceStore * p0, const R4FontStoreFaceHandle * p1, uint32_t p2) {
@@ -5060,7 +5100,7 @@ static inline R4LibrariesSlot R4FontStoreFaceStore_glyphIndex(uint32_t reserved,
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,361u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,367u,a,3u,0);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.hasGlyph -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!bool */
 static inline R4LibrariesSlot R4FontStoreFaceStore_hasGlyph(uint32_t reserved, R4FontStoreFaceStore * p0, const R4FontStoreFaceHandle * p1, uint32_t p2) {
@@ -5068,7 +5108,7 @@ static inline R4LibrariesSlot R4FontStoreFaceStore_hasGlyph(uint32_t reserved, R
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,362u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,368u,a,3u,0);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.faceMetricsAt -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.FaceMetrics26_6 */
 static inline R4LibrariesSlot R4FontStoreFaceStore_faceMetricsAt(uint32_t reserved, R4FontStoreFaceStore * p0, const R4FontStoreFaceHandle * p1, uint32_t p2, R4FontStoreFaceMetrics26_6 *output) {
@@ -5076,7 +5116,7 @@ static inline R4LibrariesSlot R4FontStoreFaceStore_faceMetricsAt(uint32_t reserv
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,363u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,369u,a,3u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.glyphMetricsAt -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.GlyphMetrics26_6 */
 static inline R4LibrariesSlot R4FontStoreFaceStore_glyphMetricsAt(uint32_t reserved, R4FontStoreFaceStore * p0, const R4FontStoreFaceHandle * p1, uint32_t p2, uint32_t p3, R4FontStoreGlyphMetrics26_6 *output) {
@@ -5085,7 +5125,7 @@ static inline R4LibrariesSlot R4FontStoreFaceStore_glyphMetricsAt(uint32_t reser
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,364u,a,4u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,370u,a,4u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.kerningAt -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}![2]i32 */
 static inline R4LibrariesSlot R4FontStoreFaceStore_kerningAt(uint32_t reserved, R4FontStoreFaceStore * p0, const R4FontStoreFaceHandle * p1, uint32_t p2, uint32_t p3, uint32_t p4, R4Lib_Value218 *output) {
@@ -5095,7 +5135,7 @@ static inline R4LibrariesSlot R4FontStoreFaceStore_kerningAt(uint32_t reserved, 
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p4,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,365u,a,5u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,371u,a,5u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.rasterize -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.r4font.Raster */
 static inline R4LibrariesSlot R4FontStoreFaceStore_rasterize(uint32_t reserved, R4FontStoreFaceStore * p0, const R4FontStoreFaceHandle * p1, uint32_t p2, uint32_t p3, uint8_t * p4, uintptr_t n4, R4FontHelpersRaster *output) {
@@ -5105,7 +5145,7 @@ static inline R4LibrariesSlot R4FontStoreFaceStore_rasterize(uint32_t reserved, 
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.length=n4,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,366u,a,5u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,372u,a,5u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.rasterizeCached -> error{BufferTooSmall,DecoderFailure,InvalidArgument,InvalidFaceIndex,InvalidFont,InvalidGlyph,InvalidHandle,OutOfMemory,TooLarge,UnsupportedFormat}!R4FONT.Bindings.Zig.app_fonts.BorrowedRaster */
 static inline R4LibrariesSlot R4FontStoreFaceStore_rasterizeCached(uint32_t reserved, R4FontStoreFaceStore * p0, const R4FontStoreFaceHandle * p1, uint32_t p2, uint32_t p3, R4FontStoreBorrowedRaster *output) {
@@ -5114,165 +5154,165 @@ static inline R4LibrariesSlot R4FontStoreFaceStore_rasterizeCached(uint32_t rese
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,367u,a,4u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,373u,a,4u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.cacheStats -> R4FONT.Bindings.Zig.app_fonts.CacheStats */
 static inline R4LibrariesSlot R4FontStoreFaceStore_cacheStats(uint32_t reserved, const R4FontStoreFaceStore * p0, R4FontStoreCacheStats *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,368u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,374u,a,1u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.diagnostics -> R4FONT.Bindings.Zig.app_fonts.Diagnostics */
 static inline R4LibrariesSlot R4FontStoreFaceStore_diagnostics(uint32_t reserved, const R4FontStoreFaceStore * p0, R4FontStoreDiagnostics *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,369u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,375u,a,1u,output);
 }
 /* R4FONT.Bindings.Zig.app_fonts.FaceStore.clearRasterCache -> void */
 static inline R4LibrariesSlot R4FontStoreFaceStore_clearRasterCache(uint32_t reserved, R4FontStoreFaceStore * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,370u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,376u,a,1u,0);
 }
 /* Shared.Language.support.Memory.allocator -> mem.Allocator */
 static inline R4LibrariesSlot R4LibraryMemory_allocator(uint32_t reserved, R4LibraryMemory * p0, R4LibraryAllocator *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,371u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,377u,a,1u,output);
 }
 /* consumer_adapters.Saver.save -> i32 */
 static inline R4LibrariesSlot R4StdAdaptersSaver_save(uint32_t reserved, const R4StdAdaptersSaver * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,372u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,378u,a,1u,0);
 }
 /* R4ACO.Bindings.Zig.worker.Worker.init -> @typeInfo(@typeInfo(@TypeOf(R4ACO.Bindings.Zig.worker.Worker.init)).@"fn".return_type.?).error_union.error_set!R4ACO.Bindings.Zig.worker.Worker */
 static inline R4LibrariesSlot R4AcoWorker_init(uint32_t reserved, R4Lib_r4os_app_contract_App * p0, R4AcoWorker *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,373u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,379u,a,1u,output);
 }
 /* R4ACO.Bindings.Zig.worker.Worker.start -> i32 */
 static inline R4LibrariesSlot R4AcoWorker_start(uint32_t reserved, R4AcoWorker * p0, const R4Lib_r4aco_R4AcoRequest * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,374u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,380u,a,2u,0);
 }
 /* R4ACO.Bindings.Zig.worker.Worker.cancel -> void */
 static inline R4LibrariesSlot R4AcoWorker_cancel(uint32_t reserved, R4AcoWorker * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,375u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,381u,a,1u,0);
 }
 /* R4ACO.Bindings.Zig.worker.Worker.join -> ?i32 */
 static inline R4LibrariesSlot R4AcoWorker_join(uint32_t reserved, R4AcoWorker * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,376u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,382u,a,2u,0);
 }
 /* R4ENC.Bindings.Zig.recording_pixels.Layout.init -> error{Bounds}!R4ENC.Bindings.Zig.recording_pixels.Layout */
 static inline R4LibrariesSlot R4EncPixelsLayout_init(uint32_t reserved, uint32_t p0, uint32_t p1, R4EncPixelsLayout *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,377u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,383u,a,2u,output);
 }
 /* R4ENC.Bindings.Zig.recording_pixels.Layout.initAmd -> error{Bounds}!R4ENC.Bindings.Zig.recording_pixels.Layout */
 static inline R4LibrariesSlot R4EncPixelsLayout_initAmd(uint32_t reserved, uint32_t p0, uint32_t p1, R4EncPixelsLayout *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,378u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,384u,a,2u,output);
 }
 /* R4GFX.Display.edid.Report.complete -> bool */
 static inline R4LibrariesSlot R4GfxEdidReport_complete(uint32_t reserved, const R4GfxEdidReport * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,379u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,385u,a,1u,0);
 }
 /* R4GFX.Display.refresh_range.Facts.addAdaptive -> bool */
 static inline R4LibrariesSlot R4GfxRefreshRangeFacts_addAdaptive(uint32_t reserved, R4GfxRefreshRangeFacts * p0, const R4GfxRefreshRangeAdaptive * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,380u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,386u,a,2u,0);
 }
 /* R4GFX.Display.refresh_range.Range.valid -> bool */
 static inline R4LibrariesSlot R4GfxRefreshRangeRange_valid(uint32_t reserved, const R4GfxRefreshRangeRange * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,381u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,387u,a,1u,0);
 }
 /* R4GFX.Display.refresh_range.Range.contains -> bool */
 static inline R4LibrariesSlot R4GfxRefreshRangeRange_contains(uint32_t reserved, const R4GfxRefreshRangeRange * p0, uint32_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,382u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,388u,a,2u,0);
 }
 /* R4GFX.Display.links.Hdmi.parse -> error{Bandwidth,Descriptor,Unsupported}!R4GFX.Display.links.Hdmi */
 static inline R4LibrariesSlot R4GfxLinksHdmi_parse(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4GfxLinksHdmi *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,383u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,389u,a,1u,output);
 }
 /* R4GFX.Display.links.Frl.decode -> error{Bandwidth,Descriptor,Unsupported}!R4GFX.Display.links.Frl */
 static inline R4LibrariesSlot R4GfxLinksFrl_decode(uint32_t reserved, uint8_t p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,384u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,390u,a,1u,0);
 }
 /* R4GFX.Display.links.Frl.lanes -> u8 */
 static inline R4LibrariesSlot R4GfxLinksFrl_lanes(uint32_t reserved, uint32_t p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,385u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,391u,a,1u,0);
 }
 /* R4GFX.Display.links.Frl.gigabits -> u8 */
 static inline R4LibrariesSlot R4GfxLinksFrl_gigabits(uint32_t reserved, uint32_t p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,386u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,392u,a,1u,0);
 }
 /* R4GFX.Display.links.Frl.codingCeiling -> u64 */
 static inline R4LibrariesSlot R4GfxLinksFrl_codingCeiling(uint32_t reserved, uint32_t p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,387u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,393u,a,1u,0);
 }
 /* R4GFX.Display.timing.Timing.valid -> bool */
 static inline R4LibrariesSlot R4GfxTimingTiming_valid(uint32_t reserved, const R4GfxTimingTiming * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,388u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,394u,a,1u,0);
 }
 /* R4GFX.Display.timing.Timing.millihz -> u32 */
 static inline R4LibrariesSlot R4GfxTimingTiming_millihz(uint32_t reserved, const R4GfxTimingTiming * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,389u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,395u,a,1u,0);
 }
 /* R4GFX.Display.timing.Timing.sameMode -> bool */
 static inline R4LibrariesSlot R4GfxTimingTiming_sameMode(uint32_t reserved, const R4GfxTimingTiming * p0, const R4GfxTimingTiming * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,390u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,396u,a,2u,0);
 }
 /* R4GFX.Bindings.Zig.queue.Queue.open -> i32 */
 static inline R4LibrariesSlot R4GfxQueueQueue_open(uint32_t reserved, R4GfxQueueQueue * p0, const R4GfxQueueConfig * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,391u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,397u,a,2u,0);
 }
 /* R4GFX.Bindings.Zig.queue.Queue.close -> i32 */
 static inline R4LibrariesSlot R4GfxQueueQueue_close(uint32_t reserved, R4GfxQueueQueue * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,392u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,398u,a,1u,0);
 }
 /* R4GFX.Bindings.Zig.queue.Queue.copy -> i32 */
 static inline R4LibrariesSlot R4GfxQueueQueue_copy(uint32_t reserved, const R4GfxQueueQueue * p0, const R4GfxQueueCopy * p1, R4GfxFenceStatus * p2) {
@@ -5280,7 +5320,7 @@ static inline R4LibrariesSlot R4GfxQueueQueue_copy(uint32_t reserved, const R4Gf
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,393u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,399u,a,3u,0);
 }
 /* R4GFX.Bindings.Zig.queue.Queue.barrier -> i32 */
 static inline R4LibrariesSlot R4GfxQueueQueue_barrier(uint32_t reserved, const R4GfxQueueQueue * p0, uint64_t p1, uint64_t p2, const R4GfxFence * p3, uintptr_t n3, R4GfxFenceStatus * p4) {
@@ -5290,26 +5330,26 @@ static inline R4LibrariesSlot R4GfxQueueQueue_barrier(uint32_t reserved, const R
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,394u,a,5u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,400u,a,5u,0);
 }
 /* R4GFX.Display.brightness_preferences.Choice.validate -> error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!void */
 static inline R4LibrariesSlot R4GfxBrightnessPreferencesChoice_validate(uint32_t reserved, const R4GfxBrightnessPreferencesChoice * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,395u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,401u,a,1u,0);
 }
 /* R4GFX.Display.topology.Key.samePort -> bool */
 static inline R4LibrariesSlot R4GfxTopologyKey_samePort(uint32_t reserved, const R4GfxTopologyKey * p0, const R4GfxTopologyKey * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,396u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,402u,a,2u,0);
 }
 /* R4GFX.Display.topology.Key.persistable -> bool */
 static inline R4LibrariesSlot R4GfxTopologyKey_persistable(uint32_t reserved, const R4GfxTopologyKey * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,397u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,403u,a,1u,0);
 }
 /* R4GFX.Display.topology.Key.fromReport -> error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!R4GFX.Display.topology.Key */
 static inline R4LibrariesSlot R4GfxTopologyKey_fromReport(uint32_t reserved, uint64_t p0, uint32_t p1, const R4GfxEdidReport * p2, R4GfxTopologyKey *output) {
@@ -5317,14 +5357,14 @@ static inline R4LibrariesSlot R4GfxTopologyKey_fromReport(uint32_t reserved, uin
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,398u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,404u,a,3u,output);
 }
 /* R4GFX.Display.brightness_preferences.Config.find -> ?R4GFX.Display.brightness_preferences.Choice */
 static inline R4LibrariesSlot R4GfxBrightnessPreferencesConfig_find(uint32_t reserved, const R4GfxBrightnessPreferencesConfig * p0, const R4GfxTopologyKey * p1, R4GfxBrightnessPreferencesChoice *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,399u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,405u,a,2u,output);
 }
 /* R4GFX.Display.brightness_preferences.Config.change -> error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!R4GFX.Display.brightness_preferences.Config */
 static inline R4LibrariesSlot R4GfxBrightnessPreferencesConfig_change(uint32_t reserved, const R4GfxBrightnessPreferencesConfig * p0, const R4GfxTopologyKey * p1, uint32_t p2, R4GfxBrightnessPreferencesConfig *output) {
@@ -5332,20 +5372,20 @@ static inline R4LibrariesSlot R4GfxBrightnessPreferencesConfig_change(uint32_t r
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,400u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,406u,a,3u,output);
 }
 /* R4GFX.Display.brightness_preferences.Config.parse -> error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!R4GFX.Display.brightness_preferences.Config */
 static inline R4LibrariesSlot R4GfxBrightnessPreferencesConfig_parse(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4GfxBrightnessPreferencesConfig *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,401u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,407u,a,1u,output);
 }
 /* R4GFX.Display.brightness_preferences.Config.encode -> error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}![]const u8 */
 static inline R4LibrariesSlot R4GfxBrightnessPreferencesConfig_encode(uint32_t reserved, const R4GfxBrightnessPreferencesConfig * p0, uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,402u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,408u,a,2u,0);
 }
 /* R4GFX.Display.color_control.Restoration.seen -> bool */
 static inline R4LibrariesSlot R4GfxColorControlRestoration_seen(uint32_t reserved, const R4GfxColorControlRestoration * p0, const R4GfxColorPreferencesChoice * p1, const R4GfxOutputId * p2) {
@@ -5353,7 +5393,7 @@ static inline R4LibrariesSlot R4GfxColorControlRestoration_seen(uint32_t reserve
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,403u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,409u,a,3u,0);
 }
 /* R4GFX.Display.color_control.Restoration.record -> void */
 static inline R4LibrariesSlot R4GfxColorControlRestoration_record(uint32_t reserved, R4GfxColorControlRestoration * p0, const R4GfxColorPreferencesChoice * p1, const R4GfxOutputId * p2) {
@@ -5361,93 +5401,93 @@ static inline R4LibrariesSlot R4GfxColorControlRestoration_record(uint32_t reser
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,404u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,410u,a,3u,0);
 }
 /* R4GFX.Display.color_preferences.Choice.enabled -> bool */
 static inline R4LibrariesSlot R4GfxColorPreferencesChoice_enabled(uint32_t reserved, const R4GfxColorPreferencesChoice * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,405u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,411u,a,1u,0);
 }
 /* R4GFX.Display.color_preferences.Choice.profilePath -> [*:0]const u8 */
 static inline R4LibrariesSlot R4GfxColorPreferencesChoice_profilePath(uint32_t reserved, const R4GfxColorPreferencesChoice * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,406u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,412u,a,1u,0);
 }
 /* R4GFX.Display.color_preferences.Choice.setPath -> error{Buffer,Capacity,Duplicate,Format,Invalid,UnknownReceiver}!void */
 static inline R4LibrariesSlot R4GfxColorPreferencesChoice_setPath(uint32_t reserved, R4GfxColorPreferencesChoice * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,407u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,413u,a,2u,0);
 }
 /* R4GFX.Display.color_preferences.Choice.validate -> error{Buffer,Capacity,Duplicate,Format,Invalid,UnknownReceiver}!void */
 static inline R4LibrariesSlot R4GfxColorPreferencesChoice_validate(uint32_t reserved, const R4GfxColorPreferencesChoice * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,408u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,414u,a,1u,0);
 }
 /* R4GFX.Display.color_preferences.Config.find -> ?R4GFX.Display.color_preferences.Choice */
 static inline R4LibrariesSlot R4GfxColorPreferencesConfig_find(uint32_t reserved, const R4GfxColorPreferencesConfig * p0, const R4GfxTopologyKey * p1, R4GfxColorPreferencesChoice *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,409u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,415u,a,2u,output);
 }
 /* R4GFX.Display.color_preferences.Config.remember -> error{Buffer,Capacity,Duplicate,Format,Invalid,UnknownReceiver}!R4GFX.Display.color_preferences.Config */
 static inline R4LibrariesSlot R4GfxColorPreferencesConfig_remember(uint32_t reserved, const R4GfxColorPreferencesConfig * p0, const R4GfxColorPreferencesChoice * p1, R4GfxColorPreferencesConfig *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,410u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,416u,a,2u,output);
 }
 /* R4GFX.Display.color_preferences.Config.parse -> error{Buffer,Capacity,Duplicate,Format,Invalid,UnknownReceiver}!R4GFX.Display.color_preferences.Config */
 static inline R4LibrariesSlot R4GfxColorPreferencesConfig_parse(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4GfxColorPreferencesConfig *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,411u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,417u,a,1u,output);
 }
 /* R4GFX.Display.color_preferences.Config.encode -> error{Buffer,Capacity,Duplicate,Format,Invalid,UnknownReceiver}![]const u8 */
 static inline R4LibrariesSlot R4GfxColorPreferencesConfig_encode(uint32_t reserved, const R4GfxColorPreferencesConfig * p0, uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,412u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,418u,a,2u,0);
 }
 /* R4GFX.Display.color_signal.Metadata.validate -> error{Bandwidth,Incomplete,Invalid,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxColorSignalMetadata_validate(uint32_t reserved, const R4GfxColorSignalMetadata * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,413u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,419u,a,1u,0);
 }
 /* R4GFX.Display.topology.Layout.init -> error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!R4GFX.Display.topology.Layout */
 static inline R4LibrariesSlot R4GfxTopologyLayout_init(uint32_t reserved, const R4GfxTopologyOutput * p0, uintptr_t n0, uint64_t p1, R4GfxTopologyLayout *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,414u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,420u,a,2u,output);
 }
 /* R4GFX.Display.topology.Layout.at -> ?usize */
 static inline R4LibrariesSlot R4GfxTopologyLayout_at(uint32_t reserved, const R4GfxTopologyLayout * p0, const R4GfxTopologyPoint * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,415u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,421u,a,2u,0);
 }
 /* R4GFX.Display.topology.Layout.nearest -> ?R4GFX.Display.topology.Layout.nearest__struct_ */
 static inline R4LibrariesSlot R4GfxTopologyLayout_nearest(uint32_t reserved, const R4GfxTopologyLayout * p0, const R4GfxTopologyPoint * p1, R4Lib_Value632 *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,416u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,422u,a,2u,output);
 }
 /* R4GFX.Display.topology.Layout.dominant -> ?usize */
 static inline R4LibrariesSlot R4GfxTopologyLayout_dominant(uint32_t reserved, const R4GfxTopologyLayout * p0, const R4GfxTopologyRect * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,417u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,423u,a,2u,0);
 }
 /* R4GFX.Display.topology.Layout.rescue -> error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!R4GFX.Display.topology.Rect */
 static inline R4LibrariesSlot R4GfxTopologyLayout_rescue(uint32_t reserved, const R4GfxTopologyLayout * p0, const R4GfxTopologyRect * p1, uint32_t p2, R4GfxTopologyRect *output) {
@@ -5455,103 +5495,103 @@ static inline R4LibrariesSlot R4GfxTopologyLayout_rescue(uint32_t reserved, cons
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,418u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,424u,a,3u,output);
 }
 /* R4GFX.Display.topology.Output.interval -> ?u64 */
 static inline R4LibrariesSlot R4GfxTopologyOutput_interval(uint32_t reserved, const R4GfxTopologyOutput * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,419u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,425u,a,1u,0);
 }
 /* R4GFX.Display.topology.Viewport.validate -> error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!void */
 static inline R4LibrariesSlot R4GfxTopologyViewport_validate(uint32_t reserved, const R4GfxTopologyViewport * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,420u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,426u,a,1u,0);
 }
 /* R4GFX.Display.topology.Viewport.logical -> error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!R4GFX.Display.topology.Rect */
 static inline R4LibrariesSlot R4GfxTopologyViewport_logical(uint32_t reserved, const R4GfxTopologyViewport * p0, R4GfxTopologyRect *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,421u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,427u,a,1u,output);
 }
 /* R4GFX.Display.topology.Viewport.physical -> error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!R4GFX.Display.topology.Point */
 static inline R4LibrariesSlot R4GfxTopologyViewport_physical(uint32_t reserved, const R4GfxTopologyViewport * p0, const R4GfxTopologyPoint * p1, R4GfxTopologyPoint *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,422u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,428u,a,2u,output);
 }
 /* R4GFX.Display.topology.Viewport.fromPhysical -> error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!R4GFX.Display.topology.Point */
 static inline R4LibrariesSlot R4GfxTopologyViewport_fromPhysical(uint32_t reserved, const R4GfxTopologyViewport * p0, const R4GfxTopologyPoint * p1, R4GfxTopologyPoint *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,423u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,429u,a,2u,output);
 }
 /* R4GFX.Display.topology.Viewport.physicalDamage -> error{Bounds,Capacity,Clone,Duplicate,Empty,Invalid,Overlap,Primary}!?R4GFX.Display.topology.Rect */
 static inline R4LibrariesSlot R4GfxTopologyViewport_physicalDamage(uint32_t reserved, const R4GfxTopologyViewport * p0, const R4GfxTopologyRect * p1, R4GfxTopologyRect *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,424u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,430u,a,2u,output);
 }
 /* R4GFX.Display.desktop_outputs.Entry.active -> bool */
 static inline R4LibrariesSlot R4GfxDesktopOutputsEntry_active(uint32_t reserved, const R4GfxDesktopOutputsEntry * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,425u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,431u,a,1u,0);
 }
 /* R4GFX.Display.desktop_outputs.Snapshot.sameOutputs -> bool */
 static inline R4LibrariesSlot R4GfxDesktopOutputsSnapshot_sameOutputs(uint32_t reserved, const R4GfxDesktopOutputsSnapshot * p0, const R4GfxDesktopOutputsSnapshot * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,426u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,432u,a,2u,0);
 }
 /* R4GFX.Display.eld.Data.baselineBytes -> usize */
 static inline R4LibrariesSlot R4GfxEldData_baselineBytes(uint32_t reserved, const R4GfxEldData * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,427u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,433u,a,1u,0);
 }
 /* R4GFX.Display.links.Clock.valid -> bool */
 static inline R4LibrariesSlot R4GfxLinksClock_valid(uint32_t reserved, const R4GfxLinksClock * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,428u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,434u,a,1u,0);
 }
 /* R4GFX.Display.links.Clock.ceilHz -> error{Bandwidth,Descriptor,Unsupported}!u64 */
 static inline R4LibrariesSlot R4GfxLinksClock_ceilHz(uint32_t reserved, const R4GfxLinksClock * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,429u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,435u,a,1u,0);
 }
 /* R4GFX.Display.links.Clock.nvidia -> R4GFX.Display.links.Clock */
 static inline R4LibrariesSlot R4GfxLinksClock_nvidia(uint32_t reserved, uint32_t p0, R4GfxLinksClock *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,430u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,436u,a,1u,output);
 }
 /* R4GFX.Display.links.Clock.atMost -> bool */
 static inline R4LibrariesSlot R4GfxLinksClock_atMost(uint32_t reserved, const R4GfxLinksClock * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,431u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,437u,a,2u,0);
 }
 /* R4GFX.Display.links.Demand.fits -> bool */
 static inline R4LibrariesSlot R4GfxLinksDemand_fits(uint32_t reserved, const R4GfxLinksDemand * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,432u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,438u,a,2u,0);
 }
 /* R4GFX.Display.links.Demand.ceilBitsPerSecond -> error{Bandwidth,Descriptor,Unsupported}!u64 */
 static inline R4LibrariesSlot R4GfxLinksDemand_ceilBitsPerSecond(uint32_t reserved, const R4GfxLinksDemand * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,433u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,439u,a,1u,0);
 }
 /* R4GFX.Display.mode_control.Restoration.seen -> bool */
 static inline R4LibrariesSlot R4GfxModeControlRestoration_seen(uint32_t reserved, const R4GfxModeControlRestoration * p0, const R4GfxTopologyOutput * p1, const R4GfxOutputId * p2) {
@@ -5559,7 +5599,7 @@ static inline R4LibrariesSlot R4GfxModeControlRestoration_seen(uint32_t reserved
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,434u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,440u,a,3u,0);
 }
 /* R4GFX.Display.mode_control.Restoration.record -> void */
 static inline R4LibrariesSlot R4GfxModeControlRestoration_record(uint32_t reserved, R4GfxModeControlRestoration * p0, const R4GfxTopologyOutput * p1, const R4GfxOutputId * p2) {
@@ -5567,54 +5607,54 @@ static inline R4LibrariesSlot R4GfxModeControlRestoration_record(uint32_t reserv
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,435u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,441u,a,3u,0);
 }
 /* R4GFX.Display.mode_control.Controller.busy -> bool */
 static inline R4LibrariesSlot R4GfxModeControlController_busy(uint32_t reserved, const R4GfxModeControlController * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,436u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,442u,a,1u,0);
 }
 /* R4GFX.Display.mode_control.Controller.move -> void */
 static inline R4LibrariesSlot R4GfxModeControlController_move(uint32_t reserved, R4GfxModeControlController * p0, int32_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,437u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,443u,a,2u,0);
 }
 /* R4GFX.Display.mode_control.Controller.secondsLeft -> u64 */
 static inline R4LibrariesSlot R4GfxModeControlController_secondsLeft(uint32_t reserved, const R4GfxModeControlController * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,438u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,444u,a,2u,0);
 }
 /* R4GFX.Display.preferences.Config.find -> ?R4GFX.Display.topology.Output */
 static inline R4LibrariesSlot R4GfxPreferencesConfig_find(uint32_t reserved, const R4GfxPreferencesConfig * p0, const R4GfxTopologyKey * p1, R4GfxTopologyOutput *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,439u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,445u,a,2u,output);
 }
 /* R4GFX.Display.preferences.Config.remember -> error{Bounds,Buffer,Capacity,Clone,Duplicate,Empty,Format,Invalid,Number,Overlap,Primary,UnknownReceiver}!R4GFX.Display.preferences.Config */
 static inline R4LibrariesSlot R4GfxPreferencesConfig_remember(uint32_t reserved, const R4GfxPreferencesConfig * p0, const R4GfxTopologyLayout * p1, R4GfxPreferencesConfig *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,440u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,446u,a,2u,output);
 }
 /* R4GFX.Display.preferences.Config.parse -> error{Bounds,Buffer,Capacity,Clone,Duplicate,Empty,Format,Invalid,Number,Overlap,Primary,UnknownReceiver}!R4GFX.Display.preferences.Config */
 static inline R4LibrariesSlot R4GfxPreferencesConfig_parse(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4GfxPreferencesConfig *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,441u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,447u,a,1u,output);
 }
 /* R4GFX.Display.preferences.Config.encode -> error{Bounds,Buffer,Capacity,Clone,Duplicate,Empty,Format,Invalid,Number,Overlap,Primary,UnknownReceiver}![]const u8 */
 static inline R4LibrariesSlot R4GfxPreferencesConfig_encode(uint32_t reserved, const R4GfxPreferencesConfig * p0, uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,442u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,448u,a,2u,0);
 }
 /* R4GFX.Display.readback.Owner.init -> R4GFX.Display.readback.Owner */
 static inline R4LibrariesSlot R4GfxReadbackOwner_init(uint32_t reserved, const R4LibraryAllocator * p0, const R4LibraryDeviceClient * p1, const R4LibraryColorClient * p2, const R4Lib_r4gfx_abi_R4GfxDevice * p3, R4GfxReadbackOwner *output) {
@@ -5623,7 +5663,7 @@ static inline R4LibrariesSlot R4GfxReadbackOwner_init(uint32_t reserved, const R
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,443u,a,4u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,449u,a,4u,output);
 }
 /* R4GFX.Display.readback.Owner.matches -> bool */
 static inline R4LibrariesSlot R4GfxReadbackOwner_matches(uint32_t reserved, const R4GfxReadbackOwner * p0, uint32_t p1, uint32_t p2, uint32_t p3, const R4Lib_r4gfx_abi_R4GfxColorDescription * p4) {
@@ -5633,7 +5673,7 @@ static inline R4LibrariesSlot R4GfxReadbackOwner_matches(uint32_t reserved, cons
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,444u,a,5u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,450u,a,5u,0);
 }
 /* R4GFX.Display.readback.Owner.prepare -> error{Busy,Deadline,Graphics,Invalid,Limit,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxReadbackOwner_prepare(uint32_t reserved, R4GfxReadbackOwner * p0, uint32_t p1, uint32_t p2, uint32_t p3, const R4Lib_r4gfx_abi_R4GfxColorDescription * p4) {
@@ -5643,74 +5683,74 @@ static inline R4LibrariesSlot R4GfxReadbackOwner_prepare(uint32_t reserved, R4Gf
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,445u,a,5u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,451u,a,5u,0);
 }
 /* R4GFX.Display.readback.Owner.sourceHeld -> bool */
 static inline R4LibrariesSlot R4GfxReadbackOwner_sourceHeld(uint32_t reserved, const R4GfxReadbackOwner * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,446u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,452u,a,1u,0);
 }
 /* R4GFX.Display.readback.Owner.pending -> bool */
 static inline R4LibrariesSlot R4GfxReadbackOwner_pending(uint32_t reserved, const R4GfxReadbackOwner * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,447u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,453u,a,1u,0);
 }
 /* R4GFX.Display.readback.Owner.begin -> error{Busy,Deadline,Graphics,Invalid,Limit,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxReadbackOwner_begin(uint32_t reserved, R4GfxReadbackOwner * p0, const R4GfxReadbackRequest * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,448u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,454u,a,2u,0);
 }
 /* R4GFX.Display.readback.Owner.cancel -> void */
 static inline R4LibrariesSlot R4GfxReadbackOwner_cancel(uint32_t reserved, R4GfxReadbackOwner * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,449u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,455u,a,2u,0);
 }
 /* R4GFX.Display.readback.Owner.poll -> void */
 static inline R4LibrariesSlot R4GfxReadbackOwner_poll(uint32_t reserved, R4GfxReadbackOwner * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,450u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,456u,a,2u,0);
 }
 /* R4GFX.Display.readback.Owner.acknowledge -> error{Busy,Deadline,Graphics,Invalid,Limit,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxReadbackOwner_acknowledge(uint32_t reserved, R4GfxReadbackOwner * p0, uint8_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,451u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,457u,a,2u,0);
 }
 /* R4GFX.Display.readback.Owner.close -> error{Busy,Deadline,Graphics,Invalid,Limit,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxReadbackOwner_close(uint32_t reserved, R4GfxReadbackOwner * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,452u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,458u,a,1u,0);
 }
 /* R4GFX.Display.refresh_client.Activity.frame -> void */
 static inline R4LibrariesSlot R4GfxRefreshClientActivity_frame(uint32_t reserved, R4GfxRefreshClientActivity * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,453u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,459u,a,2u,0);
 }
 /* R4GFX.Display.refresh_client.Activity.animated -> bool */
 static inline R4LibrariesSlot R4GfxRefreshClientActivity_animated(uint32_t reserved, const R4GfxRefreshClientActivity * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,454u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,460u,a,2u,0);
 }
 /* R4GFX.Display.refresh_observer.Observer.reset -> void */
 static inline R4LibrariesSlot R4GfxRefreshObserverObserver_reset(uint32_t reserved, R4GfxRefreshObserverObserver * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,455u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,461u,a,2u,0);
 }
 /* R4GFX.Display.refresh_observer.Observer.feed -> R4GFX.Display.refresh_observer.Result */
 static inline R4LibrariesSlot R4GfxRefreshObserverObserver_feed(uint32_t reserved, R4GfxRefreshObserverObserver * p0, uint64_t p1, uint64_t p2, uint16_t p3, uint64_t p4) {
@@ -5720,26 +5760,26 @@ static inline R4LibrariesSlot R4GfxRefreshObserverObserver_feed(uint32_t reserve
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p4,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,456u,a,5u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,462u,a,5u,0);
 }
 /* R4GFX.Display.refresh_observer.Observer.summary -> R4GFX.Display.refresh_observer.Summary */
 static inline R4LibrariesSlot R4GfxRefreshObserverObserver_summary(uint32_t reserved, const R4GfxRefreshObserverObserver * p0, R4GfxRefreshObserverSummary *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,457u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,463u,a,1u,output);
 }
 /* R4GFX.Display.refresh_preferences.Choice.validate -> error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!void */
 static inline R4LibrariesSlot R4GfxRefreshPreferencesChoice_validate(uint32_t reserved, const R4GfxRefreshPreferencesChoice * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,458u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,464u,a,1u,0);
 }
 /* R4GFX.Display.refresh_preferences.Config.find -> ?R4GFX.Display.refresh_preferences.Choice */
 static inline R4LibrariesSlot R4GfxRefreshPreferencesConfig_find(uint32_t reserved, const R4GfxRefreshPreferencesConfig * p0, const R4GfxTopologyKey * p1, R4GfxRefreshPreferencesChoice *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,459u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,465u,a,2u,output);
 }
 /* R4GFX.Display.refresh_preferences.Config.change -> error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!R4GFX.Display.refresh_preferences.Config */
 static inline R4LibrariesSlot R4GfxRefreshPreferencesConfig_change(uint32_t reserved, const R4GfxRefreshPreferencesConfig * p0, const R4GfxTopologyKey * p1, uint32_t p2, uint8_t p3, R4GfxRefreshPreferencesConfig *output) {
@@ -5748,59 +5788,59 @@ static inline R4LibrariesSlot R4GfxRefreshPreferencesConfig_change(uint32_t rese
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,460u,a,4u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,466u,a,4u,output);
 }
 /* R4GFX.Display.refresh_preferences.Config.parse -> error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}!R4GFX.Display.refresh_preferences.Config */
 static inline R4LibrariesSlot R4GfxRefreshPreferencesConfig_parse(uint32_t reserved, const uint8_t * p0, uintptr_t n0, R4GfxRefreshPreferencesConfig *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,461u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,467u,a,1u,output);
 }
 /* R4GFX.Display.refresh_preferences.Config.encode -> error{Buffer,Capacity,Duplicate,Exhausted,Format,Invalid}![]const u8 */
 static inline R4LibrariesSlot R4GfxRefreshPreferencesConfig_encode(uint32_t reserved, const R4GfxRefreshPreferencesConfig * p0, uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,462u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,468u,a,2u,0);
 }
 /* R4GFX.Display.topology.Rect.right -> i64 */
 static inline R4LibrariesSlot R4GfxTopologyRect_right(uint32_t reserved, const R4GfxTopologyRect * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,463u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,469u,a,1u,0);
 }
 /* R4GFX.Display.topology.Rect.bottom -> i64 */
 static inline R4LibrariesSlot R4GfxTopologyRect_bottom(uint32_t reserved, const R4GfxTopologyRect * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,464u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,470u,a,1u,0);
 }
 /* R4GFX.Display.topology.Rect.valid -> bool */
 static inline R4LibrariesSlot R4GfxTopologyRect_valid(uint32_t reserved, const R4GfxTopologyRect * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,465u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,471u,a,1u,0);
 }
 /* R4GFX.Display.topology.Rect.contains -> bool */
 static inline R4LibrariesSlot R4GfxTopologyRect_contains(uint32_t reserved, const R4GfxTopologyRect * p0, const R4GfxTopologyPoint * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,466u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,472u,a,2u,0);
 }
 /* R4GFX.Display.topology.Rect.intersection -> ?R4GFX.Display.topology.Rect */
 static inline R4LibrariesSlot R4GfxTopologyRect_intersection(uint32_t reserved, const R4GfxTopologyRect * p0, const R4GfxTopologyRect * p1, R4GfxTopologyRect *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,467u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,473u,a,2u,output);
 }
 /* R4GFX.Display.topology.Rect.project -> R4GFX.Display.topology.Point */
 static inline R4LibrariesSlot R4GfxTopologyRect_project(uint32_t reserved, const R4GfxTopologyRect * p0, const R4GfxTopologyPoint * p1, R4GfxTopologyPoint *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,468u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,474u,a,2u,output);
 }
 /* R4GFX.Display.transfer.Owner.init -> R4GFX.Display.transfer.Owner */
 static inline R4LibrariesSlot R4GfxTransferOwner_init(uint32_t reserved, const R4LibraryDeviceClient * p0, const R4LibraryColorClient * p1, const R4Lib_r4gfx_abi_R4GfxDevice * p2, const R4Lib_r4gfx_abi_R4GfxDevice * p3, const R4Lib_r4os_gfx_buffers_Context * p4, R4GfxTransferOwner *output) {
@@ -5810,7 +5850,7 @@ static inline R4LibrariesSlot R4GfxTransferOwner_init(uint32_t reserved, const R
  a[2] = (R4LibrariesSlot){.ptr=(void *)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,469u,a,5u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,475u,a,5u,output);
 }
 /* R4GFX.Display.transfer.Owner.prepare -> error{Busy,Deadline,Graphics,Invalid,Limit,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxTransferOwner_prepare(uint32_t reserved, R4GfxTransferOwner * p0, uint32_t p1, uint32_t p2, uint32_t p3, const R4Lib_r4gfx_abi_R4GfxColorDescription * p4) {
@@ -5820,19 +5860,19 @@ static inline R4LibrariesSlot R4GfxTransferOwner_prepare(uint32_t reserved, R4Gf
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,470u,a,5u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,476u,a,5u,0);
 }
 /* R4GFX.Display.transfer.Owner.sourceHeld -> bool */
 static inline R4LibrariesSlot R4GfxTransferOwner_sourceHeld(uint32_t reserved, const R4GfxTransferOwner * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,471u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,477u,a,1u,0);
 }
 /* R4GFX.Display.transfer.Owner.pending -> bool */
 static inline R4LibrariesSlot R4GfxTransferOwner_pending(uint32_t reserved, const R4GfxTransferOwner * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,472u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,478u,a,1u,0);
 }
 /* R4GFX.Display.transfer.Owner.begin -> error{Busy,Deadline,Graphics,Invalid,Limit,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxTransferOwner_begin(uint32_t reserved, R4GfxTransferOwner * p0, const R4Lib_r4gfx_abi_R4GfxResource * p1, const R4Lib_r4gfx_abi_R4GfxResource * p2, const R4Lib_r4gfx_abi_R4GfxCopyFence * p3, uintptr_t n3, uint64_t p4, uint64_t p5) {
@@ -5843,39 +5883,39 @@ static inline R4LibrariesSlot R4GfxTransferOwner_begin(uint32_t reserved, R4GfxT
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p4,.flags=R4LIBRARIES_PRESENT};
  a[5] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p5,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,473u,a,6u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,479u,a,6u,0);
 }
 /* R4GFX.Display.transfer.Owner.cancel -> void */
 static inline R4LibrariesSlot R4GfxTransferOwner_cancel(uint32_t reserved, R4GfxTransferOwner * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,474u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,480u,a,2u,0);
 }
 /* R4GFX.Display.transfer.Owner.poll -> void */
 static inline R4LibrariesSlot R4GfxTransferOwner_poll(uint32_t reserved, R4GfxTransferOwner * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,475u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,481u,a,2u,0);
 }
 /* R4GFX.Display.transfer.Owner.acknowledge -> error{Busy,Deadline,Graphics,Invalid,Limit,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxTransferOwner_acknowledge(uint32_t reserved, R4GfxTransferOwner * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,476u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,482u,a,1u,0);
 }
 /* R4GFX.Display.transfer.Owner.close -> error{Busy,Deadline,Graphics,Invalid,Limit,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxTransferOwner_close(uint32_t reserved, R4GfxTransferOwner * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,477u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,483u,a,1u,0);
 }
 /* R4GFX.Display.vrr.Scene.reason -> R4GFX.Display.vrr.Reason */
 static inline R4LibrariesSlot R4GfxVrrScene_reason(uint32_t reserved, const R4GfxVrrScene * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,478u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,484u,a,1u,0);
 }
 /* R4GFX.Display.vrr.Scheduler.configure -> error{Clock,Incomplete,Range,Stale,State,Timing,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxVrrScheduler_configure(uint32_t reserved, R4GfxVrrScheduler * p0, uint64_t p1, R4LibrariesSlot p2) {
@@ -5883,14 +5923,14 @@ static inline R4LibrariesSlot R4GfxVrrScheduler_configure(uint32_t reserved, R4G
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = p2;
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,479u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,485u,a,3u,0);
 }
 /* R4GFX.Display.vrr.Scheduler.select -> R4GFX.Display.vrr.Switch */
 static inline R4LibrariesSlot R4GfxVrrScheduler_select(uint32_t reserved, R4GfxVrrScheduler * p0, const R4GfxVrrScene * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,480u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,486u,a,2u,0);
 }
 /* R4GFX.Display.vrr.Scheduler.acknowledged -> error{Clock,Incomplete,Range,Stale,State,Timing,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxVrrScheduler_acknowledged(uint32_t reserved, R4GfxVrrScheduler * p0, uint64_t p1, uint8_t p2) {
@@ -5898,7 +5938,7 @@ static inline R4LibrariesSlot R4GfxVrrScheduler_acknowledged(uint32_t reserved, 
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,481u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,487u,a,3u,0);
 }
 /* R4GFX.Display.vrr.Scheduler.observed -> error{Clock,Incomplete,Range,Stale,State,Timing,Unsupported}!void */
 static inline R4LibrariesSlot R4GfxVrrScheduler_observed(uint32_t reserved, R4GfxVrrScheduler * p0, uint64_t p1, uint64_t p2) {
@@ -5906,14 +5946,14 @@ static inline R4LibrariesSlot R4GfxVrrScheduler_observed(uint32_t reserved, R4Gf
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,482u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,488u,a,3u,0);
 }
 /* R4GFX.Display.vrr.Scheduler.fail -> R4GFX.Display.vrr.Switch */
 static inline R4LibrariesSlot R4GfxVrrScheduler_fail(uint32_t reserved, R4GfxVrrScheduler * p0, uint32_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,483u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,489u,a,2u,0);
 }
 /* R4GFX.Display.vrr.Scheduler.frame -> error{Clock,Incomplete,Range,Stale,State,Timing,Unsupported}!R4GFX.Display.vrr.Frame */
 static inline R4LibrariesSlot R4GfxVrrScheduler_frame(uint32_t reserved, R4GfxVrrScheduler * p0, uint64_t p1, R4LibrariesSlot p2, R4GfxVrrFrame *output) {
@@ -5921,40 +5961,40 @@ static inline R4LibrariesSlot R4GfxVrrScheduler_frame(uint32_t reserved, R4GfxVr
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = p2;
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,484u,a,3u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,490u,a,3u,output);
 }
 /* R4NAK.Bindings.Zig.worker.Worker.init -> @typeInfo(@typeInfo(@TypeOf(R4NAK.Bindings.Zig.worker.Worker.init)).@"fn".return_type.?).error_union.error_set!R4NAK.Bindings.Zig.worker.Worker */
 static inline R4LibrariesSlot R4NakWorker_init(uint32_t reserved, R4Lib_r4os_app_contract_App * p0, R4NakWorker *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,485u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,491u,a,1u,output);
 }
 /* R4NAK.Bindings.Zig.worker.Worker.start -> i32 */
 static inline R4LibrariesSlot R4NakWorker_start(uint32_t reserved, R4NakWorker * p0, const R4Lib_r4nak_R4NakRequest * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,486u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,492u,a,2u,0);
 }
 /* R4NAK.Bindings.Zig.worker.Worker.cancel -> void */
 static inline R4LibrariesSlot R4NakWorker_cancel(uint32_t reserved, R4NakWorker * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,487u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,493u,a,1u,0);
 }
 /* R4NAK.Bindings.Zig.worker.Worker.join -> ?i32 */
 static inline R4LibrariesSlot R4NakWorker_join(uint32_t reserved, R4NakWorker * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,488u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,494u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_composition.ColorPolicy.describe -> error{Busy,Failed,Invalid,Lost,Stale,Unsupported}!r4gfx_abi.R4GfxYuvDescription */
 static inline R4LibrariesSlot R4VideoPlaybackCompositionColorPolicy_describe(uint32_t reserved, const R4VideoPlaybackCompositionColorPolicy * p0, const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoColor * p1, R4Lib_r4gfx_abi_R4GfxYuvDescription *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,489u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,495u,a,2u,output);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.init -> error{Busy,ClockRegression,Failed,Invalid,Overflow,Stale,Unsupported}!R4VIDEO.Bindings.Zig.playback.Session */
 static inline R4LibrariesSlot R4VideoPlaybackSession_init(uint32_t reserved, const R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client * p0, const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime * p1, R4VideoPlaybackCompositionComposition * p2, R4LibrariesSlot p3, const R4VideoPlaybackConfig * p4, uint64_t p5, int64_t p6, R4VideoPlaybackSession *output) {
@@ -5966,14 +6006,14 @@ static inline R4LibrariesSlot R4VideoPlaybackSession_init(uint32_t reserved, con
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.flags=R4LIBRARIES_PRESENT};
  a[5] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p5,.flags=R4LIBRARIES_PRESENT};
  a[6] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p6,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,490u,a,7u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,496u,a,7u,output);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.send -> i32 */
 static inline R4LibrariesSlot R4VideoPlaybackSession_send(uint32_t reserved, R4VideoPlaybackSession * p0, const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,491u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,497u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.pcm -> error{Busy,ClockRegression,Failed,Invalid,Overflow,Stale,Unsupported}!usize */
 static inline R4LibrariesSlot R4VideoPlaybackSession_pcm(uint32_t reserved, R4VideoPlaybackSession * p0, uint64_t p1, int64_t p2, const uint8_t * p3, uintptr_t n3) {
@@ -5982,14 +6022,14 @@ static inline R4LibrariesSlot R4VideoPlaybackSession_pcm(uint32_t reserved, R4Vi
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,492u,a,4u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,498u,a,4u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.drain -> error{Busy,ClockRegression,Failed,Invalid,Overflow,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4VideoPlaybackSession_drain(uint32_t reserved, R4VideoPlaybackSession * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,493u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,499u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.seek -> error{Busy,ClockRegression,Failed,Invalid,Overflow,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4VideoPlaybackSession_seek(uint32_t reserved, R4VideoPlaybackSession * p0, uint64_t p1, int64_t p2, uint8_t p3) {
@@ -5998,41 +6038,41 @@ static inline R4LibrariesSlot R4VideoPlaybackSession_seek(uint32_t reserved, R4V
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,494u,a,4u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,500u,a,4u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.pause -> error{Busy,ClockRegression,Failed,Invalid,Overflow,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4VideoPlaybackSession_pause(uint32_t reserved, R4VideoPlaybackSession * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,495u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,501u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.resumePlaying -> error{Busy,ClockRegression,Failed,Invalid,Overflow,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4VideoPlaybackSession_resumePlaying(uint32_t reserved, R4VideoPlaybackSession * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,496u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,502u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.repositioned -> error{Busy,ClockRegression,Failed,Invalid,Overflow,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4VideoPlaybackSession_repositioned(uint32_t reserved, R4VideoPlaybackSession * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,497u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,503u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.close -> void */
 static inline R4LibrariesSlot R4VideoPlaybackSession_close(uint32_t reserved, R4VideoPlaybackSession * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,498u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,504u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.pendingFrame -> ?R4VIDEO.Bindings.Zig.playback.FrameInfo */
 static inline R4LibrariesSlot R4VideoPlaybackSession_pendingFrame(uint32_t reserved, const R4VideoPlaybackSession * p0, R4VideoPlaybackFrameInfo *output) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,499u,a,1u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,505u,a,1u,output);
 }
 /* R4VIDEO.Bindings.Zig.playback.Session.step -> R4VIDEO.Bindings.Zig.playback.Step */
 static inline R4LibrariesSlot R4VideoPlaybackSession_step(uint32_t reserved, R4VideoPlaybackSession * p0, uint64_t p1, R4LibrariesSlot p2, const R4Lib_r4gfx_abi_R4GfxColorTransform * p3, R4VideoPlaybackStep *output) {
@@ -6041,7 +6081,7 @@ static inline R4LibrariesSlot R4VideoPlaybackSession_step(uint32_t reserved, R4V
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = p2;
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,500u,a,4u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,506u,a,4u,output);
 }
 /* R4VIDEO.Bindings.Zig.playback_composition.Composition.submit -> error{Busy,Failed,Invalid,Lost,Stale,Unsupported}!R4VIDEO.Bindings.Zig.playback_composition.Ticket */
 static inline R4LibrariesSlot R4VideoPlaybackCompositionComposition_submit(uint32_t reserved, R4VideoPlaybackCompositionComposition * p0, const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame * p1, const R4VideoPlaybackCompositionTarget * p2, const R4Lib_r4gfx_abi_R4GfxColorTransform * p3, const R4VideoPlaybackCompositionColorPolicy * p4, uint64_t p5, R4VideoPlaybackCompositionTicket *output) {
@@ -6052,28 +6092,28 @@ static inline R4LibrariesSlot R4VideoPlaybackCompositionComposition_submit(uint3
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.flags=R4LIBRARIES_PRESENT};
  a[4] = (R4LibrariesSlot){.ptr=(void *)p4,.flags=R4LIBRARIES_PRESENT};
  a[5] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p5,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,501u,a,6u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,507u,a,6u,output);
 }
 /* R4VIDEO.Bindings.Zig.playback_composition.Composition.cancel -> error{Busy,Failed,Invalid,Lost,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4VideoPlaybackCompositionComposition_cancel(uint32_t reserved, R4VideoPlaybackCompositionComposition * p0, const R4VideoPlaybackCompositionTicket * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,502u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,508u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_composition.Composition.release -> error{Busy,Failed,Invalid,Lost,Stale,Unsupported}!void */
 static inline R4LibrariesSlot R4VideoPlaybackCompositionComposition_release(uint32_t reserved, R4VideoPlaybackCompositionComposition * p0, const R4VideoPlaybackCompositionTicket * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,503u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,509u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_composition.Composition.result -> error{Busy,Failed,Invalid,Lost,Stale,Unsupported}!i32 */
 static inline R4LibrariesSlot R4VideoPlaybackCompositionComposition_result(uint32_t reserved, R4VideoPlaybackCompositionComposition * p0, const R4VideoPlaybackCompositionTicket * p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,504u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,510u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_composition.Composition.poll -> error{Busy,Failed,Invalid,Lost,Stale,Unsupported}!R4VIDEO.Bindings.Zig.playback_composition.State */
 static inline R4LibrariesSlot R4VideoPlaybackCompositionComposition_poll(uint32_t reserved, R4VideoPlaybackCompositionComposition * p0, const R4VideoPlaybackCompositionTicket * p1, uint64_t p2) {
@@ -6081,7 +6121,7 @@ static inline R4LibrariesSlot R4VideoPlaybackCompositionComposition_poll(uint32_
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,505u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,511u,a,3u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_audio.Audio.init -> error{Busy,Invalid,Overflow,Stale}!R4VIDEO.Bindings.Zig.playback_audio.Audio */
 static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_init(uint32_t reserved, const R4Lib_r4os_app_audio_Audio * p0, uint8_t * p1, uintptr_t n1, uint32_t p2, uint16_t p3, R4VideoPlaybackAudioAudio *output) {
@@ -6090,13 +6130,13 @@ static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_init(uint32_t reserved, 
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,506u,a,4u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,512u,a,4u,output);
 }
 /* R4VIDEO.Bindings.Zig.playback_audio.Audio.frameBytes -> usize */
 static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_frameBytes(uint32_t reserved, const R4VideoPlaybackAudioAudio * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,507u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,513u,a,1u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_audio.Audio.feed -> error{Busy,Invalid,Overflow,Stale}!usize */
 static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_feed(uint32_t reserved, R4VideoPlaybackAudioAudio * p0, uint64_t p1, int64_t p2, const uint8_t * p3, uintptr_t n3) {
@@ -6105,7 +6145,7 @@ static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_feed(uint32_t reserved, 
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.ptr=(void *)p3,.length=n3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,508u,a,4u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,514u,a,4u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_audio.Audio.reset -> error{Busy,Invalid,Overflow,Stale}!void */
 static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_reset(uint32_t reserved, R4VideoPlaybackAudioAudio * p0, uint64_t p1, uint8_t p2) {
@@ -6113,13 +6153,13 @@ static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_reset(uint32_t reserved,
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,509u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,515u,a,3u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_audio.Audio.close -> void */
 static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_close(uint32_t reserved, R4VideoPlaybackAudioAudio * p0) {
  (void)reserved; R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,510u,a,1u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,516u,a,1u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_audio.Audio.step -> void */
 static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_step(uint32_t reserved, R4VideoPlaybackAudioAudio * p0, int64_t p1, uint8_t p2) {
@@ -6127,21 +6167,21 @@ static inline R4LibrariesSlot R4VideoPlaybackAudioAudio_step(uint32_t reserved, 
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,511u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,517u,a,3u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_clock.Clock.init -> R4VIDEO.Bindings.Zig.playback_clock.Clock */
 static inline R4LibrariesSlot R4VideoPlaybackClockClock_init(uint32_t reserved, uint64_t p0, int64_t p1, R4VideoPlaybackClockClock *output) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,512u,a,2u,output);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,518u,a,2u,output);
 }
 /* R4VIDEO.Bindings.Zig.playback_clock.Clock.position -> error{ClockRegression,Invalid,Overflow}!i64 */
 static inline R4LibrariesSlot R4VideoPlaybackClockClock_position(uint32_t reserved, R4VideoPlaybackClockClock * p0, uint64_t p1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,513u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,519u,a,2u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_clock.Clock.setPaused -> error{ClockRegression,Invalid,Overflow}!void */
 static inline R4LibrariesSlot R4VideoPlaybackClockClock_setPaused(uint32_t reserved, R4VideoPlaybackClockClock * p0, uint64_t p1, uint8_t p2) {
@@ -6149,7 +6189,7 @@ static inline R4LibrariesSlot R4VideoPlaybackClockClock_setPaused(uint32_t reser
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,514u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,520u,a,3u,0);
 }
 /* R4VIDEO.Bindings.Zig.playback_clock.Clock.seek -> error{ClockRegression,Invalid,Overflow}!void */
 static inline R4LibrariesSlot R4VideoPlaybackClockClock_seek(uint32_t reserved, R4VideoPlaybackClockClock * p0, uint64_t p1, int64_t p2) {
@@ -6157,14 +6197,14 @@ static inline R4LibrariesSlot R4VideoPlaybackClockClock_seek(uint32_t reserved, 
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,515u,a,3u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,521u,a,3u,0);
 }
 /* consumer_media_adapters.Sink.write -> bool */
 static inline R4LibrariesSlot R4MediaSink_write(uint32_t reserved, const R4MediaSink * p0, const uint8_t * p1, uintptr_t n1) {
  (void)reserved; R4LibrariesSlot a[2]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.ptr=(void *)p1,.length=n1,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,516u,a,2u,0);
+ return R4LibrariesInvoke(R4Libraries_ABI_FINGERPRINT,522u,a,2u,0);
 }
 static inline R4LibrariesSlot R4Lib_Value0_create(R4Lib_Value0 *output, const R4XStartContext * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
@@ -16500,89 +16540,101 @@ static inline R4LibrariesSlot R4Lib_Value517_create(R4Lib_Value517 *output, R4Gf
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,517u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value517_inspect(const R4Lib_Value517 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,517u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value518_create(R4Lib_Value518 *output, R4GfxRefreshClientClient * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+static inline R4LibrariesSlot R4Lib_Value518_create(R4Lib_Value518 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
+ a[0] = p0;
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,518u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value518_inspect(const R4Lib_Value518 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,518u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value519_create(R4Lib_Value519 *output, R4GfxModeControlController * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value518_inspect(const R4Lib_Value518 *self, R4GfxBrightnessPreferencesChoice *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,518u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value519_create(R4Lib_Value519 *output, R4GfxRefreshClientClient * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,519u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value519_inspect(const R4Lib_Value519 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,519u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value520_create(R4Lib_Value520 *output, const R4GfxDesktopOutputsEntry * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value520_create(R4Lib_Value520 *output, const R4GfxColorPreferencesConfig * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,520u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value520_inspect(const R4Lib_Value520 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,520u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value521_inspect(const R4Lib_Value521 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,521u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value522_inspect(const R4Lib_Value522 *self, R4GfxColorSignalSource *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,522u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value523_inspect(const R4Lib_Value523 *self, R4GfxColorSignalSignal *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,523u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value524_inspect(const R4Lib_Value524 *self, R4GfxColorSignal *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,524u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value525_inspect(const R4Lib_Value525 *self, R4GfxColorSignalLink *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,525u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value526_inspect(const R4Lib_Value526 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,526u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value527_inspect(const R4Lib_Value527 *self, R4GfxColorSignalPlan *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,527u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value528_inspect(const R4Lib_Value528 *self, R4GfxVrrPlan *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,528u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value529_inspect(const R4Lib_Value529 *self, R4GfxDisplayProfileOwner *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,529u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value521_create(R4Lib_Value521 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
+ a[0] = p0;
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,521u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value521_inspect(const R4Lib_Value521 *self, R4GfxColorPreferencesChoice *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,521u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value522_create(R4Lib_Value522 *output, R4GfxModeControlController * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,522u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value522_inspect(const R4Lib_Value522 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,522u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value523_create(R4Lib_Value523 *output, const R4GfxDesktopOutputsEntry * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,523u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value523_inspect(const R4Lib_Value523 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,523u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value524_inspect(const R4Lib_Value524 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,524u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value525_inspect(const R4Lib_Value525 *self, R4GfxColorSignalSource *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,525u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value526_inspect(const R4Lib_Value526 *self, R4GfxColorSignalSignal *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,526u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value527_inspect(const R4Lib_Value527 *self, R4GfxColorSignal *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,527u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value528_inspect(const R4Lib_Value528 *self, R4GfxColorSignalLink *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,528u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value529_inspect(const R4Lib_Value529 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,529u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value530_inspect(const R4Lib_Value530 *self, R4GfxColorSignalPlan *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,530u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value531_inspect(const R4Lib_Value531 *self, R4GfxVrrPlan *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,531u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value532_inspect(const R4Lib_Value532 *self, R4GfxDisplayProfileOwner *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,532u,(void *)self,output); }
 static inline R4LibrariesSlot R4MediaBuiltinShader_create(R4MediaBuiltinShader *output, uint32_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,530u,a,1u,output); }
-static inline R4LibrariesSlot R4MediaBuiltinShader_inspect(const R4MediaBuiltinShader *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,530u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value531_create(R4Lib_Value531 *output, R4StdSettingsEntryIterator * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,531u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value531_inspect(const R4Lib_Value531 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,531u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value532_create(R4Lib_Value532 *output, R4StdSettingsWriter * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,532u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value532_inspect(const R4Lib_Value532 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,532u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value533_create(R4Lib_Value533 *output, const R4StdSettingsWriter * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,533u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value533_inspect(const R4Lib_Value533 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,533u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value534_create(R4Lib_Value534 *output, const R4StdSettingsWriteback * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4MediaBuiltinShader_inspect(const R4MediaBuiltinShader *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,533u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value534_create(R4Lib_Value534 *output, R4StdSettingsEntryIterator * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,534u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value534_inspect(const R4Lib_Value534 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,534u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value535_create(R4Lib_Value535 *output, R4StdTimeHelpersConfig * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value535_create(R4Lib_Value535 *output, R4StdSettingsWriter * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,535u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value535_inspect(const R4Lib_Value535 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,535u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value536_create(R4Lib_Value536 *output, R4StdCodecStream * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value536_create(R4Lib_Value536 *output, const R4StdSettingsWriter * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,536u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value536_inspect(const R4Lib_Value536 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,536u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value537_create(R4Lib_Value537 *output, const R4StdCodecStream * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value537_create(R4Lib_Value537 *output, const R4StdSettingsWriteback * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,537u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value537_inspect(const R4Lib_Value537 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,537u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value538_create(R4Lib_Value538 *output, R4StdTimeHelpersConfig * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,538u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value538_inspect(const R4Lib_Value538 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,538u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value539_create(R4Lib_Value539 *output, R4StdGraphemeState * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value539_create(R4Lib_Value539 *output, R4StdCodecStream * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,539u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value539_inspect(const R4Lib_Value539 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,539u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value540_create(R4Lib_Value540 *output, R4StdGraphemeIterator * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value540_create(R4Lib_Value540 *output, const R4StdCodecStream * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,540u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value540_inspect(const R4Lib_Value540 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,540u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value541_inspect(const R4Lib_Value541 *self, R4StdGraphemeRange *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,541u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value542_create(R4Lib_Value542 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
- a[0] = p0;
+static inline R4LibrariesSlot R4Lib_Value541_inspect(const R4Lib_Value541 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,541u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value542_create(R4Lib_Value542 *output, R4StdGraphemeState * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,542u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value542_inspect(const R4Lib_Value542 *self, R4StdGraphemeRange *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,542u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value543_create(R4Lib_Value543 *output, R4StdGraphemeStream * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value542_inspect(const R4Lib_Value542 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,542u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value543_create(R4Lib_Value543 *output, R4StdGraphemeIterator * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,543u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value543_inspect(const R4Lib_Value543 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,543u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value544_inspect(const R4Lib_Value544 *self, R4StdGraphemeStream_Event *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,544u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value544_inspect(const R4Lib_Value544 *self, R4StdGraphemeRange *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,544u,(void *)self,output); }
 static inline R4LibrariesSlot R4Lib_Value545_create(R4Lib_Value545 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
  a[0] = p0;
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,545u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value545_inspect(const R4Lib_Value545 *self, R4StdGraphemeStream_Event *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,545u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value545_inspect(const R4Lib_Value545 *self, R4StdGraphemeRange *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,545u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value546_create(R4Lib_Value546 *output, R4StdGraphemeStream * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,546u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value546_inspect(const R4Lib_Value546 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,546u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value547_inspect(const R4Lib_Value547 *self, R4StdGraphemeStream_Event *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,547u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value548_create(R4Lib_Value548 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
+ a[0] = p0;
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,548u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value548_inspect(const R4Lib_Value548 *self, R4StdGraphemeStream_Event *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,548u,(void *)self,output); }
 static inline R4LibrariesSlot R4StdGraphemeStream_Event_create(R4StdGraphemeStream_Event *output, uint64_t p0, uint32_t p1, uint64_t p2, uint8_t p3) {
  R4LibrariesSlot a[4]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,546u,a,4u,output);
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,549u,a,4u,output);
 }
 static inline R4LibrariesSlot R4StdGraphemeStream_Event_from_fields(R4StdGraphemeStream_Event *output, uint64_t p0, uint32_t p1, uint64_t p2, uint8_t p3) {
  R4LibrariesSlot a[4]={0};
@@ -16590,93 +16642,93 @@ static inline R4LibrariesSlot R4StdGraphemeStream_Event_from_fields(R4StdGraphem
  a[1] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p1,.flags=R4LIBRARIES_PRESENT};
  a[2] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p2,.flags=R4LIBRARIES_PRESENT};
  a[3] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p3,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,546u,a,4u,output);
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,549u,a,4u,output);
 }
-static inline R4LibrariesSlot R4StdGraphemeStream_Event_get_offset(const R4StdGraphemeStream_Event *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,546u,0u,(void *)self,0,0); }
+static inline R4LibrariesSlot R4StdGraphemeStream_Event_get_offset(const R4StdGraphemeStream_Event *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,549u,0u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4StdGraphemeStream_Event_set_offset(R4StdGraphemeStream_Event *self, uint64_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,546u,0u,self,a,0); }
-static inline R4LibrariesSlot R4StdGraphemeStream_Event_get_scalar(const R4StdGraphemeStream_Event *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,546u,1u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,549u,0u,self,a,0); }
+static inline R4LibrariesSlot R4StdGraphemeStream_Event_get_scalar(const R4StdGraphemeStream_Event *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,549u,1u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4StdGraphemeStream_Event_set_scalar(R4StdGraphemeStream_Event *self, uint32_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,546u,1u,self,a,0); }
-static inline R4LibrariesSlot R4StdGraphemeStream_Event_get_byte_length(const R4StdGraphemeStream_Event *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,546u,2u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,549u,1u,self,a,0); }
+static inline R4LibrariesSlot R4StdGraphemeStream_Event_get_byte_length(const R4StdGraphemeStream_Event *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,549u,2u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4StdGraphemeStream_Event_set_byte_length(R4StdGraphemeStream_Event *self, uint64_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,546u,2u,self,a,0); }
-static inline R4LibrariesSlot R4StdGraphemeStream_Event_get_break_before(const R4StdGraphemeStream_Event *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,546u,3u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,549u,2u,self,a,0); }
+static inline R4LibrariesSlot R4StdGraphemeStream_Event_get_break_before(const R4StdGraphemeStream_Event *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,549u,3u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4StdGraphemeStream_Event_set_break_before(R4StdGraphemeStream_Event *self, uint8_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.bits=(uint64_t)(int64_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,546u,3u,self,a,0); }
-static inline R4LibrariesSlot R4StdGraphemeStream_Event_inspect(const R4StdGraphemeStream_Event *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,546u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value547_create(R4Lib_Value547 *output, const R4StdGraphemeStream * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,547u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value547_inspect(const R4Lib_Value547 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,547u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value548_create(R4Lib_Value548 *output, R4StdShortcutShortcut * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,548u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value548_inspect(const R4Lib_Value548 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,548u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value549_inspect(const R4Lib_Value549 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,549u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value550_create(R4Lib_Value550 *output, const R4StdShortcutShortcut * p0) { R4LibrariesSlot a[1]={0};
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,549u,3u,self,a,0); }
+static inline R4LibrariesSlot R4StdGraphemeStream_Event_inspect(const R4StdGraphemeStream_Event *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,549u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value550_create(R4Lib_Value550 *output, const R4StdGraphemeStream * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,550u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value550_inspect(const R4Lib_Value550 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,550u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value551_create(R4Lib_Value551 *output, R4StdShortcutShortcut * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,551u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value551_inspect(const R4Lib_Value551 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,551u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value552_inspect(const R4Lib_Value552 *self, R4StdShortcutResolvedTarget *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,552u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value553_create(R4Lib_Value553 *output, const R4StdAssociationExtEntry * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value552_inspect(const R4Lib_Value552 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,552u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value553_create(R4Lib_Value553 *output, const R4StdShortcutShortcut * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,553u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value553_inspect(const R4Lib_Value553 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,553u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value554_create(R4Lib_Value554 *output, R4StdAssociationConfig * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,554u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value554_inspect(const R4Lib_Value554 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,554u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value555_create(R4Lib_Value555 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
- a[0] = p0;
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,555u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value555_inspect(const R4Lib_Value555 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,555u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value556_create(R4Lib_Value556 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
- a[0] = p0;
+static inline R4LibrariesSlot R4Lib_Value555_inspect(const R4Lib_Value555 *self, R4StdShortcutResolvedTarget *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,555u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value556_create(R4Lib_Value556 *output, const R4StdAssociationExtEntry * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,556u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value556_inspect(const R4Lib_Value556 *self, R4StdAssociationLaunchTarget *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,556u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value557_create(R4Lib_Value557 *output, const R4StdFileHandlerChoiceList * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value556_inspect(const R4Lib_Value556 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,556u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value557_create(R4Lib_Value557 *output, R4StdAssociationConfig * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,557u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value557_inspect(const R4Lib_Value557 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,557u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value558_create(R4Lib_Value558 *output, const R4StdFileHandlerChoice * p0, uintptr_t n0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
+static inline R4LibrariesSlot R4Lib_Value558_create(R4Lib_Value558 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
+ a[0] = p0;
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,558u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value558_inspect(const R4Lib_Value558 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,558u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value559_inspect(const R4Lib_Value559 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,559u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value560_create(R4Lib_Value560 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value559_create(R4Lib_Value559 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
  a[0] = p0;
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,559u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value559_inspect(const R4Lib_Value559 *self, R4StdAssociationLaunchTarget *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,559u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value560_create(R4Lib_Value560 *output, const R4StdFileHandlerChoiceList * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,560u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value560_inspect(const R4Lib_Value560 *self, R4ImgHelpersRasterContext *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,560u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value561_inspect(const R4Lib_Value561 *self, R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgRasterColor *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,561u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value560_inspect(const R4Lib_Value560 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,560u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value561_create(R4Lib_Value561 *output, const R4StdFileHandlerChoice * p0, uintptr_t n0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.length=n0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,561u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value561_inspect(const R4Lib_Value561 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,561u,(void *)self,0); }
 static inline R4LibrariesSlot R4Lib_Value562_inspect(const R4Lib_Value562 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,562u,(void *)self,0); }
 static inline R4LibrariesSlot R4Lib_Value563_create(R4Lib_Value563 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
  a[0] = p0;
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,563u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value563_inspect(const R4Lib_Value563 *self, R4ImgHelpersContext *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,563u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value564_inspect(const R4Lib_Value564 *self, R4ImgHelpersInfo *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,564u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value565_inspect(const R4Lib_Value565 *self, R4ImgHelpersImage *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,565u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value566_inspect(const R4Lib_Value566 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,566u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value567_inspect(const R4Lib_Value567 *self, R4ImgHelpersDecoderDiagnostic *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,567u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value568_create(R4Lib_Value568 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value563_inspect(const R4Lib_Value563 *self, R4ImgHelpersRasterContext *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,563u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value564_inspect(const R4Lib_Value564 *self, R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgRasterColor *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,564u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value565_inspect(const R4Lib_Value565 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,565u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value566_create(R4Lib_Value566 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
  a[0] = p0;
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,568u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value568_inspect(const R4Lib_Value568 *self, R4ImgHelpersPngContext *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,568u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value569_inspect(const R4Lib_Value569 *self, R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,569u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value570_inspect(const R4Lib_Value570 *self, R4ImgHelpersImage16 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,570u,(void *)self,output); }
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,566u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value566_inspect(const R4Lib_Value566 *self, R4ImgHelpersContext *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,566u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value567_inspect(const R4Lib_Value567 *self, R4ImgHelpersInfo *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,567u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value568_inspect(const R4Lib_Value568 *self, R4ImgHelpersImage *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,568u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value569_inspect(const R4Lib_Value569 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,569u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value570_inspect(const R4Lib_Value570 *self, R4ImgHelpersDecoderDiagnostic *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,570u,(void *)self,output); }
 static inline R4LibrariesSlot R4Lib_Value571_create(R4Lib_Value571 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
  a[0] = p0;
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,571u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value571_inspect(const R4Lib_Value571 *self, R4FontHelpersContext *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,571u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value572_create(R4Lib_Value572 *output, const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value571_inspect(const R4Lib_Value571 *self, R4ImgHelpersPngContext *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,571u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value572_inspect(const R4Lib_Value572 *self, R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,572u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value573_inspect(const R4Lib_Value573 *self, R4ImgHelpersImage16 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,573u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value574_create(R4Lib_Value574 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
+ a[0] = p0;
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,574u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value574_inspect(const R4Lib_Value574 *self, R4FontHelpersContext *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,574u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value575_create(R4Lib_Value575 *output, const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,572u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value572_inspect(const R4Lib_Value572 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,572u,(void *)self,0); }
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,575u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value575_inspect(const R4Lib_Value575 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,575u,(void *)self,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_create(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *output, const R4Lib_r4os_runtime_r4l_InterfaceHeader * p0, uintptr_t p1, uintptr_t p2, uintptr_t p3, uintptr_t p4, uintptr_t p5, uintptr_t p6, uintptr_t p7, uintptr_t p8, uintptr_t p9, uintptr_t p10, uintptr_t p11) {
  R4LibrariesSlot a[12]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
@@ -16691,7 +16743,7 @@ static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_create(
  a[9] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p9,.flags=R4LIBRARIES_PRESENT};
  a[10] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p10,.flags=R4LIBRARIES_PRESENT};
  a[11] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p11,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,573u,a,12u,output);
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,576u,a,12u,output);
 }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_from_fields(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *output, const R4Lib_r4os_runtime_r4l_InterfaceHeader * p0, uintptr_t p1, uintptr_t p2, uintptr_t p3, uintptr_t p4, uintptr_t p5, uintptr_t p6, uintptr_t p7, uintptr_t p8, uintptr_t p9, uintptr_t p10, uintptr_t p11) {
  R4LibrariesSlot a[12]={0};
@@ -16707,179 +16759,167 @@ static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_from_fi
  a[9] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p9,.flags=R4LIBRARIES_PRESENT};
  a[10] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p10,.flags=R4LIBRARIES_PRESENT};
  a[11] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p11,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,573u,a,12u,output);
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,576u,a,12u,output);
 }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_header(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, R4Lib_r4os_runtime_r4l_InterfaceHeader *output) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,0u,(void *)self,0,output); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_header(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, R4Lib_r4os_runtime_r4l_InterfaceHeader *output) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,0u,(void *)self,0,output); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_header(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, const R4Lib_r4os_runtime_r4l_InterfaceHeader * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,0u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_sniff(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,1u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,0u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_sniff(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,1u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_sniff(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,1u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_decoder_create(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,2u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,1u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_decoder_create(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,2u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_decoder_create(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,2u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_decoder_destroy(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,3u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,2u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_decoder_destroy(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,3u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_decoder_destroy(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,3u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_decoder_diagnostics(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,4u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,3u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_decoder_diagnostics(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,4u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_decoder_diagnostics(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,4u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_decoder_open_face(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,5u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,4u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_decoder_open_face(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,5u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_decoder_open_face(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,5u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_face_close(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,6u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,5u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_face_close(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,6u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_face_close(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,6u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_face_info(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,7u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,6u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_face_info(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,7u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_face_info(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,7u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_glyph_index(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,8u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,7u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_glyph_index(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,8u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_glyph_index(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,8u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_glyph_metrics(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,9u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,8u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_glyph_metrics(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,9u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_glyph_metrics(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,9u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_kerning(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,10u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,9u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_kerning(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,10u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_kerning(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,10u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_rasterize(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,11u,(void *)self,0,0); }
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,10u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_rasterize(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,11u,(void *)self,0,0); }
 static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_rasterize(R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self, uintptr_t p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)(uintptr_t)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,573u,11u,self,a,0); }
-static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_inspect(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,573u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value575_create(R4Lib_Value575 *output, const R4Lib_r4os_runtime_r4l_InterfaceHeader * p0) { R4LibrariesSlot a[1]={0};
+ return R4LibrariesField(R4Libraries_ABI_FINGERPRINT,576u,11u,self,a,0); }
+static inline R4LibrariesSlot R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_inspect(const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,576u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value578_create(R4Lib_Value578 *output, const R4Lib_r4os_runtime_r4l_InterfaceHeader * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,575u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value575_inspect(const R4Lib_Value575 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,575u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value576_create(R4Lib_Value576 *output, const R4FontHelpersContext * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,576u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value576_inspect(const R4Lib_Value576 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,576u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value577_create(R4Lib_Value577 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
- a[0] = p0;
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,577u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value577_inspect(const R4Lib_Value577 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,577u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value578_inspect(const R4Lib_Value578 *self, R4FontHelpersDecoder *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,578u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value579_create(R4Lib_Value579 *output, R4FontHelpersDecoder * p0) { R4LibrariesSlot a[1]={0};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,578u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value578_inspect(const R4Lib_Value578 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,578u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value579_create(R4Lib_Value579 *output, const R4FontHelpersContext * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,579u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value579_inspect(const R4Lib_Value579 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,579u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value580_create(R4Lib_Value580 *output, const R4FontHelpersDecoder * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+static inline R4LibrariesSlot R4Lib_Value580_create(R4Lib_Value580 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
+ a[0] = p0;
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,580u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value580_inspect(const R4Lib_Value580 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,580u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value581_inspect(const R4Lib_Value581 *self, R4FontHelpersFace *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,581u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value582_create(R4Lib_Value582 *output, R4FontHelpersFace * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value581_inspect(const R4Lib_Value581 *self, R4FontHelpersDecoder *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,581u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value582_create(R4Lib_Value582 *output, R4FontHelpersDecoder * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,582u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value582_inspect(const R4Lib_Value582 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,582u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value583_create(R4Lib_Value583 *output, const R4FontHelpersFace * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value583_create(R4Lib_Value583 *output, const R4FontHelpersDecoder * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,583u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value583_inspect(const R4Lib_Value583 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,583u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value584_inspect(const R4Lib_Value584 *self, R4FontHelpersFaceInfo *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,584u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value585_inspect(const R4Lib_Value585 *self, R4FontHelpersGlyphMetrics *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,585u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value586_inspect(const R4Lib_Value586 *self, R4Lib_Value218 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,586u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value587_inspect(const R4Lib_Value587 *self, R4FontHelpersRaster *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,587u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value588_inspect(const R4Lib_Value588 *self, R4FontStoreFaceStore *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,588u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value589_create(R4Lib_Value589 *output, R4FontStoreFaceStore * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value584_inspect(const R4Lib_Value584 *self, R4FontHelpersFace *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,584u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value585_create(R4Lib_Value585 *output, R4FontHelpersFace * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,589u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value589_inspect(const R4Lib_Value589 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,589u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value590_inspect(const R4Lib_Value590 *self, R4FontStoreFaceHandle *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,590u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value591_create(R4Lib_Value591 *output, R4FontStoreFaceHandle * p0) { R4LibrariesSlot a[1]={0};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,585u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value585_inspect(const R4Lib_Value585 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,585u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value586_create(R4Lib_Value586 *output, const R4FontHelpersFace * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,591u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value591_inspect(const R4Lib_Value591 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,591u,(void *)self,0); }
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,586u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value586_inspect(const R4Lib_Value586 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,586u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value587_inspect(const R4Lib_Value587 *self, R4FontHelpersFaceInfo *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,587u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value588_inspect(const R4Lib_Value588 *self, R4FontHelpersGlyphMetrics *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,588u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value589_inspect(const R4Lib_Value589 *self, R4Lib_Value218 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,589u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value590_inspect(const R4Lib_Value590 *self, R4FontHelpersRaster *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,590u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value591_inspect(const R4Lib_Value591 *self, R4FontStoreFaceStore *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,591u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value592_create(R4Lib_Value592 *output, R4FontStoreFaceStore * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,592u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value592_inspect(const R4Lib_Value592 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,592u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value593_inspect(const R4Lib_Value593 *self, R4FontHelpersFaceInfo *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,593u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value593_inspect(const R4Lib_Value593 *self, R4FontStoreFaceHandle *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,593u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value594_create(R4Lib_Value594 *output, R4FontStoreFaceHandle * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,594u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value594_inspect(const R4Lib_Value594 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,594u,(void *)self,0); }
 static inline R4LibrariesSlot R4Lib_Value595_inspect(const R4Lib_Value595 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,595u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value596_inspect(const R4Lib_Value596 *self, R4FontStoreFaceMetrics26_6 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,596u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value597_inspect(const R4Lib_Value597 *self, R4FontStoreGlyphMetrics26_6 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,597u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value598_inspect(const R4Lib_Value598 *self, R4Lib_Value218 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,598u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value599_inspect(const R4Lib_Value599 *self, R4FontHelpersRaster *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,599u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value600_inspect(const R4Lib_Value600 *self, R4FontStoreBorrowedRaster *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,600u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value601_create(R4Lib_Value601 *output, const R4FontStoreFaceStore * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,601u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value601_inspect(const R4Lib_Value601 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,601u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value602_create(R4Lib_Value602 *output, R4LibraryMemory * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,602u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value602_inspect(const R4Lib_Value602 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,602u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value603_inspect(const R4Lib_Value603 *self, R4AcoWorker *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,603u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value604_create(R4Lib_Value604 *output, R4AcoWorker * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value596_inspect(const R4Lib_Value596 *self, R4FontHelpersFaceInfo *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,596u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value597_inspect(const R4Lib_Value597 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,597u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value598_inspect(const R4Lib_Value598 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,598u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value599_inspect(const R4Lib_Value599 *self, R4FontStoreFaceMetrics26_6 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,599u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value600_inspect(const R4Lib_Value600 *self, R4FontStoreGlyphMetrics26_6 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,600u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value601_inspect(const R4Lib_Value601 *self, R4Lib_Value218 *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,601u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value602_inspect(const R4Lib_Value602 *self, R4FontHelpersRaster *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,602u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value603_inspect(const R4Lib_Value603 *self, R4FontStoreBorrowedRaster *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,603u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value604_create(R4Lib_Value604 *output, const R4FontStoreFaceStore * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,604u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value604_inspect(const R4Lib_Value604 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,604u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value605_inspect(const R4Lib_Value605 *self, R4EncPixelsLayout *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,605u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value606_create(R4Lib_Value606 *output, R4GfxRefreshRangeFacts * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value605_create(R4Lib_Value605 *output, R4LibraryMemory * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,606u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value606_inspect(const R4Lib_Value606 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,606u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value607_inspect(const R4Lib_Value607 *self, R4GfxLinksHdmi *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,607u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value608_inspect(const R4Lib_Value608 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,608u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value609_create(R4Lib_Value609 *output, R4GfxQueueQueue * p0) { R4LibrariesSlot a[1]={0};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,605u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value605_inspect(const R4Lib_Value605 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,605u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value606_inspect(const R4Lib_Value606 *self, R4AcoWorker *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,606u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value607_create(R4Lib_Value607 *output, R4AcoWorker * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,607u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value607_inspect(const R4Lib_Value607 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,607u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value608_inspect(const R4Lib_Value608 *self, R4EncPixelsLayout *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,608u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value609_create(R4Lib_Value609 *output, R4GfxRefreshRangeFacts * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,609u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value609_inspect(const R4Lib_Value609 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,609u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value611_create(R4Lib_Value611 *output, const R4GfxQueueQueue * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,611u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value610_inspect(const R4Lib_Value610 *self, R4GfxLinksHdmi *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,610u,(void *)self,output); }
 static inline R4LibrariesSlot R4Lib_Value611_inspect(const R4Lib_Value611 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,611u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value612_create(R4Lib_Value612 *output, R4GfxFenceStatus * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value612_create(R4Lib_Value612 *output, R4GfxQueueQueue * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,612u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value612_inspect(const R4Lib_Value612 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,612u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value614_create(R4Lib_Value614 *output, const R4GfxQueueQueue * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,614u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value614_inspect(const R4Lib_Value614 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,614u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value615_inspect(const R4Lib_Value615 *self, R4GfxTopologyKey *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,615u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value616_create(R4Lib_Value616 *output, const R4GfxBrightnessPreferencesConfig * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value615_create(R4Lib_Value615 *output, R4GfxFenceStatus * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,616u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value616_inspect(const R4Lib_Value616 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,616u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value617_create(R4Lib_Value617 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
- a[0] = p0;
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,617u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value617_inspect(const R4Lib_Value617 *self, R4GfxBrightnessPreferencesChoice *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,617u,(void *)self,output); }
-static inline R4LibrariesSlot R4Lib_Value618_inspect(const R4Lib_Value618 *self, R4GfxBrightnessPreferencesConfig *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,618u,(void *)self,output); }
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,615u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value615_inspect(const R4Lib_Value615 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,615u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value617_inspect(const R4Lib_Value617 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,617u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value618_inspect(const R4Lib_Value618 *self, R4GfxTopologyKey *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,618u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value619_create(R4Lib_Value619 *output, const R4GfxBrightnessPreferencesConfig * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,619u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value619_inspect(const R4Lib_Value619 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,619u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value620_create(R4Lib_Value620 *output, const R4GfxColorControlRestoration * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,620u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value620_inspect(const R4Lib_Value620 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,620u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value621_create(R4Lib_Value621 *output, R4GfxColorControlRestoration * p0) { R4LibrariesSlot a[1]={0};
- a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,621u,a,1u,output); }
+static inline R4LibrariesSlot R4Lib_Value620_inspect(const R4Lib_Value620 *self, R4GfxBrightnessPreferencesConfig *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,620u,(void *)self,output); }
 static inline R4LibrariesSlot R4Lib_Value621_inspect(const R4Lib_Value621 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,621u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value622_create(R4Lib_Value622 *output, const R4GfxColorPreferencesChoice * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value622_create(R4Lib_Value622 *output, const R4GfxColorControlRestoration * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,622u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value622_inspect(const R4Lib_Value622 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,622u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value623_create(R4Lib_Value623 *output, R4GfxColorPreferencesChoice * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value623_create(R4Lib_Value623 *output, R4GfxColorControlRestoration * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,623u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value623_inspect(const R4Lib_Value623 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,623u,(void *)self,0); }
+static inline R4LibrariesSlot R4Lib_Value624_create(R4Lib_Value624 *output, const R4GfxColorPreferencesChoice * p0) { R4LibrariesSlot a[1]={0};
+ a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
+ return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,624u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value624_inspect(const R4Lib_Value624 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,624u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value625_create(R4Lib_Value625 *output, const R4GfxColorPreferencesConfig * p0) { R4LibrariesSlot a[1]={0};
+static inline R4LibrariesSlot R4Lib_Value625_create(R4Lib_Value625 *output, R4GfxColorPreferencesChoice * p0) { R4LibrariesSlot a[1]={0};
  a[0] = (R4LibrariesSlot){.ptr=(void *)p0,.flags=R4LIBRARIES_PRESENT};
  return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,625u,a,1u,output); }
 static inline R4LibrariesSlot R4Lib_Value625_inspect(const R4Lib_Value625 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,625u,(void *)self,0); }
-static inline R4LibrariesSlot R4Lib_Value626_create(R4Lib_Value626 *output, R4LibrariesSlot p0) { R4LibrariesSlot a[1]={0};
- a[0] = p0;
- return R4LibrariesConstruct(R4Libraries_ABI_FINGERPRINT,626u,a,1u,output); }
-static inline R4LibrariesSlot R4Lib_Value626_inspect(const R4Lib_Value626 *self, R4GfxColorPreferencesChoice *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,626u,(void *)self,output); }
+static inline R4LibrariesSlot R4Lib_Value626_inspect(const R4Lib_Value626 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,626u,(void *)self,0); }
 static inline R4LibrariesSlot R4Lib_Value627_inspect(const R4Lib_Value627 *self, R4GfxColorPreferencesConfig *output) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,627u,(void *)self,output); }
 static inline R4LibrariesSlot R4Lib_Value628_inspect(const R4Lib_Value628 *self) { return R4LibrariesInspect(R4Libraries_ABI_FINGERPRINT,628u,(void *)self,0); }
 static inline R4LibrariesSlot R4Lib_Value629_create(R4Lib_Value629 *output, const R4GfxTopologyOutput * p0, uintptr_t n0) { R4LibrariesSlot a[1]={0};

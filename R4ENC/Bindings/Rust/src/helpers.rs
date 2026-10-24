@@ -12,6 +12,22 @@ impl Mux {
         required(unsafe { c::R4EncMuxWriter_create(native.as_mut_ptr(), width, height) })?;
         Ok(Self { native })
     }
+    /// Set the original writer's CICP transfer/chroma metadata before any
+    /// packets. Pixel conversion and validation remain with their owners.
+    pub fn with_color(
+        width: u32,
+        height: u32,
+        transfer: u8,
+        centered_chroma: bool,
+    ) -> Result<Self> {
+        let mut writer = Self::new(width, height)?;
+        let mut color = MaybeUninit::uninit();
+        required(unsafe {
+            c::R4EncMuxColor_from_fields(color.as_mut_ptr(), transfer, u8::from(centered_chroma))
+        })?;
+        result(unsafe { c::R4EncMuxWriter_set_color(writer.native.as_mut_ptr(), color.as_ptr()) })?;
+        Ok(writer)
+    }
     /// The sink runs synchronously and must acknowledge every byte before
     /// returning true. Failure preserves the original failed-writer state;
     /// the caller discards the staged file. No packet/sink loan is retained.

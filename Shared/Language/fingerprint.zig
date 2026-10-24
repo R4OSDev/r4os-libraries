@@ -1,2 +1,2 @@
 // Generated from the compiler-typed Libraries catalogue. Do not edit.
-pub const fingerprint:u64=6999400729378588851;
+pub const fingerprint:u64=12995334308968972729;

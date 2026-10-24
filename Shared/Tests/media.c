@@ -24,6 +24,23 @@ int32_t r4libraries60_transport(void) {
     if(value.status || value.ptr!=storage || value.length!=sizeof(storage))return 6;
     value=R4GfxDisplayProfileOwner_set_storage(&profile,0,0);
     if(value.status || R4GfxDisplayProfileOwner_get_storage(&profile).length)return 7;
+    /* Opaque output clients are initialized/selected by their real owners. */
+    R4GfxRefreshClientClient refresh;R4GfxRefreshPreferencesChoice refresh_choice;
+    R4GfxBrightnessClientClient brightness;R4GfxBrightnessPreferencesChoice brightness_choice;
+    if(R4Media_refreshInit(0,&refresh).status || R4GfxRefreshPreferencesChoice_create(&refresh_choice).status ||
+       R4Media_refreshSelect(0,&refresh,&refresh_choice).status)return 8;
+    if(R4Media_brightnessInit(0,&brightness).status || R4GfxBrightnessPreferencesChoice_create(&brightness_choice).status)return 9;
+    R4LibrariesSlot choice={.ptr=&brightness_choice,.flags=R4LIBRARIES_PRESENT};
+    if(R4Media_brightnessSelect(0,&brightness,choice).status || R4Media_brightnessSelect(0,&brightness,(R4LibrariesSlot){0}).status)return 10;
+    R4GfxColorPreferencesConfig colors,changed;
+    if(R4GfxColorPreferencesConfig_create(&colors).status || R4GfxColorPreferencesConfig_create(&changed).status ||
+       R4Media_colorPreferencesEqual(0,&colors,&changed).bits!=1)return 11;
+    if(R4GfxColorPreferencesConfig_set_count(&changed,1).status || R4Media_colorPreferencesEqual(0,&colors,&changed).bits)return 12;
+    R4GfxColorPreferencesChoice color,other;
+    if(R4GfxColorPreferencesChoice_create(&color).status || R4GfxColorPreferencesChoice_create(&other).status)return 13;
+    R4LibrariesSlot left={.ptr=&color,.flags=R4LIBRARIES_PRESENT},right={.ptr=&other,.flags=R4LIBRARIES_PRESENT};
+    if(R4Media_colorChoiceEqual(0,left,right).bits!=1 || R4GfxColorPreferencesChoice_set_intent(&other,2).status ||
+       R4Media_colorChoiceEqual(0,left,right).bits || R4Media_colorChoiceEqual(0,(R4LibrariesSlot){0},(R4LibrariesSlot){0}).bits!=1)return 14;
     return 0;
 }
 struct Collect { uint8_t bytes[4096];uintptr_t length; };
@@ -31,13 +48,16 @@ static uint8_t collect(void *context,const uint8_t *bytes,uintptr_t length){
     struct Collect *c=context;if(length>sizeof(c->bytes)-c->length)return 0;
     memcpy(c->bytes+c->length,bytes,length);c->length+=length;return 1;
 }
-uint64_t r4libraries60_mux(const uint8_t *bytes,uintptr_t length){
+uint64_t r4libraries60_mux_color(const uint8_t *bytes,uintptr_t length,uint8_t transfer,uint8_t centered){
     R4EncMuxWriter writer;R4MediaSink sink;struct Collect c={0};
     R4LibrariesSlot context={.ptr=&c,.flags=R4LIBRARIES_PRESENT};
     if(R4EncMuxWriter_create(&writer,64,64).status || R4MediaSink_from_fields(&sink,context,(uintptr_t)collect).status)return 0;
+    R4EncMuxColor color;
+    if(R4EncMuxColor_from_fields(&color,transfer,centered).status || R4EncMuxWriter_set_color(&writer,&color).status)return 0;
     R4LibrariesSlot value=R4Media_muxPacket(0,&writer,&sink,bytes,length,1,0,1);
     if(value.status || value.flags&R4LIBRARIES_NATIVE_ERROR || R4EncMuxWriter_get_frames(&writer).bits!=1)return 0;
     uint64_t hash=14695981039346656037ull;
     for(uintptr_t i=0;i<c.length;++i)hash=(hash^c.bytes[i])*1099511628211ull;
     return hash;
 }
+uint64_t r4libraries60_mux(const uint8_t *bytes,uintptr_t length){return r4libraries60_mux_color(bytes,length,1,0);}

@@ -30,6 +30,26 @@ pub fn receiver(draw: *const Draw, info: *const a.GfxOutputInfo) !Receiver {
 pub fn brightness(self: *m.r4gfx_brightness_client.Client, draw: *const Draw, identity: a.GfxOutputId, now: u64, ready: bool) void {
     self.step(draw, identity, now, ready);
 }
+// Opaque clients must be created/selected through their original owner, not
+// by guessing private layouts or copying the state machine in a consumer.
+pub fn brightnessInit(output: *m.r4gfx_brightness_client.Client) void {
+    output.* = .{};
+}
+pub fn brightnessSelect(self: *m.r4gfx_brightness_client.Client, choice: ?m.r4gfx_brightness_preferences.Choice) void {
+    self.select(choice);
+}
+pub fn refreshInit(output: *m.r4gfx_refresh_client.Client) void {
+    output.* = .{};
+}
+pub fn refreshSelect(self: *m.r4gfx_refresh_client.Client, choice: m.r4gfx_refresh_preferences.Choice) void {
+    self.select(choice);
+}
+pub fn colorPreferencesEqual(left: *const m.r4gfx_color_preferences.Config, right: *const m.r4gfx_color_preferences.Config) bool {
+    return std.meta.eql(left.*, right.*);
+}
+pub fn colorChoiceEqual(left: ?m.r4gfx_color_preferences.Choice, right: ?m.r4gfx_color_preferences.Choice) bool {
+    return std.meta.eql(left, right);
+}
 pub fn refresh(self: *m.r4gfx_refresh_client.Client, draw: *const Draw, target: a.GfxOutputTarget, now: u64, scene: u32, ready: bool) void {
     self.step(draw, target, now, scene, ready);
 }
