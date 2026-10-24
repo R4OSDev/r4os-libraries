@@ -2,6 +2,8 @@
 //! a serial change records an explicit user choice, never a timing sample.
 const std = @import("std");
 const topology = @import("topology.zig");
+const document = @import("document_text.zig");
+const number = document.unsignedNumber;
 pub const path = "C:\\R4OS\\CONFIG\\REFRESH.R4S";
 pub const capacity = 16;
 pub const max_bytes = 4096;
@@ -36,13 +38,10 @@ pub const Config = struct {
     }
     pub fn parse(bytes: []const u8) Error!Config {
         if (bytes.len > max_bytes) return error.Buffer;
-        const content = if (std.mem.startsWith(u8, bytes, "\xef\xbb\xbf")) bytes[3..] else bytes;
-        var lines = std.mem.splitScalar(u8, content, '\n');
+        var lines = document.Lines.init(bytes);
         var result: Config = .{};
         var format = false; var schema = false;
-        while (lines.next()) |raw| {
-            const line = std.mem.trim(u8, raw, " \t\r");
-            if (line.len == 0 or line[0] == '#' or line[0] == ';') continue;
+        while (lines.next()) |line| {
             if (std.mem.eql(u8, line, "R4S_FORMAT=1")) { if (format) return error.Format; format = true; continue; }
             if (std.mem.eql(u8, line, "SCHEMA=GFX_REFRESH_1")) { if (schema) return error.Format; schema = true; continue; }
             if (!format or !schema or !std.mem.startsWith(u8, line, "DISPLAY=")) return error.Format;
@@ -85,8 +84,3 @@ pub const Config = struct {
         return buffer[0..used];
     }
 };
-fn number(comptime T: type, fields: *std.mem.SplitIterator(u8, .scalar), base: u8) Error!T {
-    const field = fields.next() orelse return error.Format;
-    if (field.len == 0 or field[0] == '+' or field[0] == '-') return error.Invalid;
-    return std.fmt.parseInt(T, field, base) catch error.Invalid;
-}

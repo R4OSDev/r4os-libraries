@@ -5,6 +5,7 @@ const paths = @import("r4os").path;
 const a = @import("r4os").abi;
 const color = @import("color_signal.zig");
 const topology = @import("topology.zig");
+const document = @import("document_text.zig");
 pub const path = "C:\\R4OS\\CONFIG\\COLORS.R4S";
 pub const capacity = 16;
 pub const max_bytes = 8192;
@@ -62,12 +63,9 @@ pub const Config = struct {
     pub fn parse(bytes: []const u8) Error!Config {
         if (bytes.len > max_bytes) return error.Buffer;
         var result: Config = .{};
-        const content = if (std.mem.startsWith(u8, bytes, "\xef\xbb\xbf")) bytes[3..] else bytes;
-        var lines = std.mem.splitScalar(u8, content, '\n');
+        var lines = document.Lines.init(bytes);
         var format = false; var schema: u32 = 0;
-        while (lines.next()) |raw| {
-            const line = std.mem.trim(u8, raw, " \t\r");
-            if (line.len == 0 or line[0] == '#' or line[0] == ';') continue;
+        while (lines.next()) |line| {
             if (std.mem.eql(u8, line, "R4S_FORMAT=1")) { if (format) return error.Format; format = true; continue; }
             if (std.mem.eql(u8, line, "SCHEMA=GFX_COLOR_1") or std.mem.eql(u8, line, "SCHEMA=GFX_COLOR_2")) {
                 if (schema != 0) return error.Format; schema = line[line.len - 1] - '0'; continue;

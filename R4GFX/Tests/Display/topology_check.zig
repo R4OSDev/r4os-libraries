@@ -3,7 +3,49 @@ const t = std.testing;
 const topology = @import("../../Display/topology.zig");
 const Point = topology.Point;
 const Rect = topology.Rect;
+fn checkDocumentTextContracts() !void {
+    const outputs = @import("../../Display/preferences.zig");
+    const colors = @import("../../Display/color_preferences.zig");
+    const refresh = @import("../../Display/refresh_preferences.zig");
+    const brightness = @import("../../Display/brightness_preferences.zig");
+    // External complete documents keep independent expectations. Headers and
+    // per-schema errors must not become the tolerant R4STD entry grammar.
+    inline for (.{ .{ outputs, "GFX_OUTPUTS_1" }, .{ colors, "GFX_COLOR_2" },
+        .{ refresh, "GFX_REFRESH_1" }, .{ brightness, "GFX_BRIGHTNESS_1" } }) |document| {
+        const Parser = document[0].Config;
+        const header = "R4S_FORMAT=1\nSCHEMA=" ++ document[1] ++ "\n";
+        const decorated = "\xef\xbb\xbf  # comment\r\n\t; comment\r\n  R4S_FORMAT=1 \t\r\nSCHEMA=" ++ document[1] ++ " \r\n";
+        try t.expectEqual(@as(usize, 0), (try Parser.parse(decorated)).count);
+        try t.expectError(error.Format, Parser.parse(header ++ "R4S_FORMAT=1\n"));
+        try t.expectError(error.Format, Parser.parse(header ++ "SCHEMA=" ++ document[1] ++ "\n"));
+        try t.expectError(error.Format, Parser.parse("SCHEMA=" ++ document[1] ++ "\n"));
+        try t.expectError(error.Format, Parser.parse(header ++ "UNKNOWN=1\n"));
+        try t.expectError(error.Format, Parser.parse("\xef\xbb\xbf" ++ decorated));
+        try t.expectError(error.Format, Parser.parse("\xc2\xa0" ++ header));
+    }
+    const receiver = "01000000000000000000000000000000";
+    inline for (.{ .{ refresh, "GFX_REFRESH_1", "1,0,1\n" },
+        .{ brightness, "GFX_BRIGHTNESS_1", "1,1\n" } }) |document| {
+        const Parser = document[0].Config;
+        const header = "R4S_FORMAT=1\nSCHEMA=" ++ document[1] ++ "\n";
+        const tail = ",2," ++ receiver ++ "," ++ document[2];
+        try t.expectEqual(@as(usize, 1), (try Parser.parse(header ++ "DISPLAY=1" ++ tail)).count);
+        try t.expectError(error.Invalid, Parser.parse(header ++ "DISPLAY=+1" ++ tail));
+        try t.expectError(error.Invalid, Parser.parse(header ++ "DISPLAY=-1" ++ tail));
+        try t.expectError(error.Invalid, Parser.parse(header ++ "DISPLAY=" ++ tail));
+        try t.expectError(error.Format, Parser.parse(header ++ "DISPLAY=1\n"));
+    }
+    // These two original contracts differ from the shared strict unsigned
+    // reader: leading plus is accepted; layout padding reports Number.
+    const layout_header = "R4S_FORMAT=1\nSCHEMA=GFX_OUTPUTS_1\n";
+    const layout_tail = ",2," ++ receiver ++ ",0,0,8,8,120,0,60000,3,0\n";
+    try t.expectEqual(@as(usize, 1), (try outputs.Config.parse(layout_header ++ "OUTPUT=+1" ++ layout_tail)).count);
+    try t.expectError(error.Number, outputs.Config.parse(layout_header ++ "OUTPUT= 1" ++ layout_tail));
+    try t.expectEqual(@as(usize, 1), (try colors.Config.parse(
+        "R4S_FORMAT=1\nSCHEMA=GFX_COLOR_1\nDISPLAY=+1,2," ++ receiver ++ ",1,1,NONE\n")).count);
+}
 pub fn check(report: *const @import("../../Display/edid.zig").Report) !void {
+    try checkDocumentTextContracts();
     try checkDiscoveryBusy();
     const key = try topology.Key.fromReport(0x10de250401000900, 4, report);
     try t.expect(key.persistable());
