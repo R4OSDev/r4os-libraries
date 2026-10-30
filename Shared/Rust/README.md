@@ -97,3 +97,9 @@ and optional compiler availability, plus receiver/NV12/clock/shader checks.
 With present compiler providers it exercises invalid-request worker rejection
 and real join; the software image instead checks both unavailable initializers.
 Both fixtures check final heap balance. No complete test environment needs archiving.
+
+Source package 0.64.39 refreshes the compiler-owned canonical aliases for
+R4AUDIO v4 and DriverApi v39, including the copied audio catalog records.
+The library C boundary and its native fingerprint are unchanged. Regenerate
+this projection when a reachable platform record grows; its exact layout
+assertions deliberately detect stale aliases when using a newer SDK.
