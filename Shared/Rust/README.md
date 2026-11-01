@@ -103,3 +103,11 @@ R4AUDIO v4 and DriverApi v39, including the copied audio catalog records.
 The library C boundary and its native fingerprint are unchanged. Regenerate
 this projection when a reachable platform record grows; its exact layout
 assertions deliberately detect stale aliases when using a newer SDK.
+
+Source package 0.64.40 refreshes the compiler-owned R4SYS v34 / 1392-byte
+alias, including the two existing generation-bound service detail/stop slots, and the reachable
+DesktopEvidence/DesktopAction service records from the current SDK. This
+removes a stale 1376-byte assertion when compiling a consumer against the
+current canonical contract. The compiler-typed library C header and native
+fingerprint pass their unchanged generation check; provider binaries and
+local R4L contracts keep their versions.
