@@ -1,7 +1,8 @@
 const std = @import("std");
 pub fn build(b: *std.Build) void {
     const sdk_build = b.lazyImport(@This(), "r4os_sdk") orelse return;
-    const sdk = sdk_build.sdk(b, b.dependencyFromBuildZig(sdk_build, .{}), .{});
+    const sdk_dependency = b.dependencyFromBuildZig(sdk_build, .{});
+    const sdk = sdk_build.sdk(b, sdk_dependency, .{});
     const nv_package = b.dependency("r4nv", .{});
     const nv_path = nv_package.namedLazyPath("binding");
     const amd_package = b.dependency("r4amd", .{});
@@ -42,7 +43,7 @@ pub fn build(b: *std.Build) void {
     const nv_render = b.createModule(.{ .root_source_file = nv_package.namedLazyPath("render_encoder"), .target = b.graph.host });
     nv_render.addImport("r4l_contract", nv_implementation);
     provider.addImport("r4nv_render_encoder", nv_render);
-    const libraries = b.lazyImport(@This(), "r4os_libraries") orelse return;
+    const libraries = sdk_build.systemLibrariesBuild(sdk_dependency) orelse return;
     libraries.addR4gfxHostColor(b, provider, b.path("."));
     const conformance = b.createModule(.{ .root_source_file = b.path("Tests/Generated/contract_conformance.zig"), .target = b.graph.host });
     conformance.addImport("implementation", implementation);

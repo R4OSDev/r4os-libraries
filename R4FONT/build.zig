@@ -3,7 +3,9 @@ const std = @import("std");
 // The source has exactly one build-module owner, the SDK-selected Libraries
 // package. Unit and external consumers delegate to that shared implementation.
 pub fn addHostDecoder(b: *std.Build, module: *std.Build.Module, root: std.Build.LazyPath) void {
-    const libraries = b.lazyImport(@This(), "r4os_libraries") orelse return;
+    const sdk_build = b.lazyImport(@This(), "r4os_sdk") orelse return;
+    const sdk_dep = b.dependencyFromBuildZig(sdk_build, .{});
+    const libraries = sdk_build.systemLibrariesBuild(sdk_dep) orelse return;
     libraries.addR4fontHostDecoder(b, module, root);
 }
 
