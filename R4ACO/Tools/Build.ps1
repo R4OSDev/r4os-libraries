@@ -121,7 +121,7 @@ try {
             if($entry.source -eq 'src/amd/compiler/aco_opcodes.cpp'){
                 # std::bitset's C++23 constexpr constructor removes the ELF
                 # startup dependency; the warning forbids dynamic fallback.
-                $arguments+=@($using:sdkCpp23Flags)
+                $arguments+=@($sdkCpp23Flags)
             }
             [pscustomobject]@{name=$entry.name;source=$path;arguments=$arguments}
         })
