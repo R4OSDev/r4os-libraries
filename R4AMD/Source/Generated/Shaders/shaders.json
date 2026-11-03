@@ -7,7 +7,7 @@
   "mesa": "26.2.2",
   "glslang": "Glslang Version: 11:15.2.0",
   "compiler_executable_sha256": "09fb258e21a87a4ab4b5d7ac40dbeb7a6eb643a1b4771358a16fd7273223e6ca",
-  "recipe_sha256": "ccd90baa0addf89e1fed7f450c2bba262784c8406bc8947f4712b108d2053637",
+  "recipe_sha256": "0ce4485f643ac47e009dff9d5cca064178108cb262bccccdd39cf365d8deea30",
   "inputs": [
     {
       "path": "Source/Shaders/color.frag",

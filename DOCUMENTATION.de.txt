@@ -87,3 +87,16 @@ fuenf native CE-/VA-Auftraege samt A->B-Remap und eigenen Semaphoren.
 Gesamt265 regulaere CE/8 logische Bilder/72241748 exakte Bytes und gleiche
 ruhende BO-/Runtimebilanz. Der alte Fehlerabbau ist separat beim NVIDIA-
 Treiber offen; keine pauschale Qualifikation weiterer GPU-Profile.
+
+
+SDK-Profilhoheit seit 0.89.31
+----------------------------
+Die gepflegte Build-/Werkzeugpolitik und die Systemauswahl liegen ausschliesslich
+in den drei Dateien Profiles/Build.json, Tools.json und Components.json des
+gewaehlten SDK. Dieses Repository besitzt Quellen, Runtime-ABI, Lizenznachweise
+und fachliche Generatoren. AMDProfile.json, GL-NativeInputs-Profile, Rusttarget
+und die Toolfelder der Locks sind gepruefte SDK-Projektionen. Aenderungen dort
+werden durch SDK/Tools/Sync-NativeProjections.ps1 abgeleitet; native Starter
+pruefen den SDK-Satz vor dem Build. Rust 1.85.1/Clang 19.1.7 der nativen Kette
+bleiben bewusst vom Rust-1.99-Kernel-/Modulprofil getrennt. Entwicklungsstaende
+benoetigen den ausdruecklichen SDK-Quellbeleg; keine automatische Freigabe.

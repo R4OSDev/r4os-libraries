@@ -3,6 +3,9 @@
 param([string]$OutputRoot,[ValidateRange(1,32)][int]$Jobs=4)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
+$sdkCpp23Flags=@($script:R4SdkNative.data.Build.codegen.'native-flags'.cpp23_flags)
+$sdkLibcxxVkFlags=@($script:R4SdkNative.data.Build.codegen.'native-flags'.libcxx_vk_flags)
 if(!$IsWindows -and !$IsLinux){throw 'Supported hosts: Windows and Linux.'}
 $unit=[IO.Path]::GetFullPath('..',$PSScriptRoot)
 $libraries=[IO.Path]::GetFullPath('..',$unit)
@@ -18,9 +21,9 @@ $workspace=Resolve $libraries 'WORKSPACE_ROOT'
 $repositories=Resolve $libraries 'REPOSITORIES_ROOT'
 $artifacts=Resolve $workspace 'ARTIFACTS_ROOT'
 $devkit=Resolve $workspace 'DEVKIT_ROOT'
-$clang=Tool $(if($IsWindows){'clang.exe'}else{'clang-19'})
-$ar=Tool $(if($IsWindows){'llvm-ar.exe'}else{'llvm-ar-19'})
-$nm=Tool $(if($IsWindows){'llvm-nm.exe'}else{'llvm-nm-19'})
+$clang=Tool $(if($IsWindows){'clang.exe'}else{('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0])})
+$ar=Tool $(if($IsWindows){'llvm-ar.exe'}else{('llvm-ar-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0])})
+$nm=Tool $(if($IsWindows){'llvm-nm.exe'}else{('llvm-nm-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0])})
 $git=Tool 'git'
 $python=Tool $(if($IsWindows){'python.exe'}else{'python3'})
 $version=@(& $clang --version)
@@ -63,7 +66,7 @@ try {
         $inputs+=@($manifest.files|ForEach-Object {Join-Path $roots.zig $_.path})
     }
     $identities=@(foreach($file in $inputs|Sort-Object -Unique){[ordered]@{path=[IO.Path]::GetRelativePath($workspace,$file).Replace('\','/');sha256=(Hash $file)}})
-    $identity=[ordered]@{schema=1;host=$hostName;compiler=$version[0];profile='Picasso-GFX9-wave64-native-resource-ABI1-2';inputs=$identities}
+    $identity=[ordered]@{sdk_profiles=$script:R4SdkNative.data.hashes;schema=1;host=$hostName;compiler=$version[0];profile='Picasso-GFX9-wave64-native-resource-ABI1-2';inputs=$identities}
     $id=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes(($identity|ConvertTo-Json -Depth 6 -Compress)))).ToLowerInvariant()
     $recordPath=Join-Path $cache 'native.json'
     $valid=$false
@@ -118,7 +121,7 @@ try {
             if($entry.source -eq 'src/amd/compiler/aco_opcodes.cpp'){
                 # std::bitset's C++23 constexpr constructor removes the ELF
                 # startup dependency; the warning forbids dynamic fallback.
-                $arguments+=@('-std=c++23','-fconstexpr-steps=10000000')
+                $arguments+=@($using:sdkCpp23Flags)
             }
             [pscustomobject]@{name=$entry.name;source=$path;arguments=$arguments}
         })
@@ -129,7 +132,7 @@ try {
         $needle='#elif defined(_LIBCPP_OBJECT_FORMAT_ELF) && !defined(__NVPTX__)'
         if(!$header.Contains($needle)){throw 'libc++ override source drift.'}
         [IO.File]::WriteAllText((Join-Path $private 'include/overridable_function.h'),$header.Replace($needle,$needle+' && !defined(R4OS_NATIVE_R4M)'),[Text.UTF8Encoding]::new($false))
-        $cppFlags=@($flags|Where-Object {$_ -notmatch '^-std='})+@('-std=c++20','-D_LIBCPP_PSTL_BACKEND_SERIAL','-DR4OS_NATIVE_R4M=1','-Werror=global-constructors')
+        $cppFlags=@($flags|Where-Object {$_ -notmatch '^-std='})+@($script:R4SdkNative.data.Build.codegen.'native-flags'.libcxx_aco_flags)
         foreach($name in $cpp.units){
             $path=if($name -eq 'new'){Join-Path $private 'new.cpp'}else{Join-Path $roots.zig "lib/libcxx/src/$name.cpp"}
             $units+=[pscustomobject]@{name=('libcxx_'+$name);source=$path;arguments=($cppFlags+'-D_LIBCPP_BUILDING_LIBRARY')}

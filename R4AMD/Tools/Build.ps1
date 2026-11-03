@@ -3,6 +3,7 @@
 param([string]$OutputRoot)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 $unit = [IO.Path]::GetFullPath('..', $PSScriptRoot)
 $libraries = [IO.Path]::GetFullPath('..', $unit)
 & (Join-Path $PSScriptRoot 'Shaders.ps1')
@@ -19,8 +20,8 @@ $record = Get-Content -Raw (Join-Path $native 'portability.json') | ConvertFrom-
 if ($record.objects.Count -ne 19) { throw 'Incomplete image/render object closure.' }
 $output = if ($OutputRoot) { [IO.Path]::GetFullPath($OutputRoot, $workspace) } else { Join-Path $native 'Archives' }
 [IO.Directory]::CreateDirectory($output) | Out-Null
-$ar = (Get-Command $(if ($IsWindows) { 'llvm-ar.exe' } else { 'llvm-ar-19' }) -CommandType Application | Select-Object -First 1).Source
-$nm = (Get-Command $(if ($IsWindows) { 'llvm-nm.exe' } else { 'llvm-nm-19' }) -CommandType Application | Select-Object -First 1).Source
+$ar = (Get-Command $(if ($IsWindows) { 'llvm-ar.exe' } else { ('llvm-ar-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) }) -CommandType Application | Select-Object -First 1).Source
+$nm = (Get-Command $(if ($IsWindows) { 'llvm-nm.exe' } else { ('llvm-nm-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) }) -CommandType Application | Select-Object -First 1).Source
 $objects = @($record.objects | ForEach-Object { Join-Path $native $_.object })
 function Archive([string]$Name, [string[]]$Files) {
     $path = Join-Path $output $Name

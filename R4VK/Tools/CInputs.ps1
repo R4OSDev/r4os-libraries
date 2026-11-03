@@ -110,11 +110,7 @@ function Get-R4VKNativeCInputs {
         @($amdHeaders | ForEach-Object { '-I' + $_ }) + $cArgs
     $zigRoot = Resolve $Mesa.devkit 'ZIG_ROOT'
     $cppArgs = @(('-I' + (Join-Path $zigRoot 'lib/libcxx/include')), ('-I' + (Join-Path $Mesa.libraries 'R4GL/Port/Include')),
-        ('-I' + (Join-Path $Mesa.libraries 'Shared/Native')), '-std=c++17', '-fno-exceptions', '-fno-rtti', '-nostdinc++',
-        '-Werror=global-constructors', '-D_LIBCPP_ABI_VERSION=1', '-D_LIBCPP_ABI_NAMESPACE=__1', '-D_LIBCPP_HARDENING_MODE_DEFAULT=2',
-        '-D_LIBCPP_HAS_THREADS=1', '-D_LIBCPP_HAS_THREAD_API_EXTERNAL=1', '-D_LIBCPP_HAS_MONOTONIC_CLOCK=1',
-        '-D_LIBCPP_HAS_EXCEPTIONS=0', '-D_LIBCPP_HAS_LOCALIZATION=0', '-D_LIBCPP_HAS_FILESYSTEM=0',
-        '-D_LIBCPP_HAS_WIDE_CHARACTERS=0', '-D_LIBCPP_PSTL_BACKEND_SERIAL') + @($cArgs | Where-Object { $_ -notmatch '^-std=' })
+        ('-I' + (Join-Path $Mesa.libraries 'Shared/Native'))) + @($script:R4SdkNative.data.Build.codegen.'native-flags'.vk_cpp_flags) + @($cArgs | Where-Object { $_ -notmatch '^-std=' })
     [pscustomobject]@{
         sources = @($files | Sort-Object -Unique); arguments = $cArgs; cpp_arguments = $cppArgs; host_build = $hostBuild; zig_root = $zigRoot
         header_roots = @((Join-Path $unit 'Port/Include'), (Join-Path $CompilerRoot 'NativeBindings'),

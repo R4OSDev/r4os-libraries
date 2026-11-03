@@ -3,6 +3,7 @@
 param([Parameter(Mandatory)][string]$OutputRoot)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
 . (Join-Path $PSScriptRoot 'MesaSource.ps1')
 $mesa = Get-R4VKMesaSource

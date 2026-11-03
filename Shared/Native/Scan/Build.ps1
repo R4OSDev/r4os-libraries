@@ -6,9 +6,10 @@ param(
  [string]$ZigRoot = ''
 )
 $ErrorActionPreference='Stop'
+. ([IO.Path]::GetFullPath('../SDK.ps1',$PSScriptRoot))
 Set-StrictMode -Version Latest
 $workspace=[IO.Path]::GetFullPath('../../../../..',$PSScriptRoot)
-if (!$ZigRoot) { $ZigRoot=Join-Path $workspace 'DevKit/Toolchains/Zig' }
+if (!$ZigRoot) { $ZigRoot=[IO.Path]::GetDirectoryName($script:R4SdkNative.zig) }
 $manifest=Get-Content (Join-Path $PSScriptRoot 'Sources.json') -Raw|ConvertFrom-Json
 $sourceRoot=Join-Path $OutputRoot 'Source'
 [IO.Directory]::CreateDirectory($sourceRoot)|Out-Null
@@ -21,16 +22,10 @@ foreach($file in $manifest.files){
   Copy-Item -LiteralPath $path -Destination (Join-Path $sourceRoot ([IO.Path]::GetFileName($path)))
  }
 }
+Assert-R4SdkNativeCompiler $script:R4SdkNative $Clang
 $resource=(& $Clang -print-resource-dir).Trim()
 if($LASTEXITCODE){throw 'Native scan compiler resource lookup failed'}
-$flags=@('-target','x86_64-unknown-none-elf','-std=c11','-O2','-ffreestanding','-nostdinc',
- '-fno-builtin','-fno-stack-protector','-Xclang','-fstack-clash-protection','-fno-asynchronous-unwind-tables','-fno-unwind-tables',
- '-fno-pic','-mcmodel=large','-mno-red-zone','-ffunction-sections','-fdata-sections','-fvisibility=hidden',
- '-fno-fast-math','-frounding-math','-ffp-contract=off','-mlong-double-64',
- '-D__floatscan=r4native_floatscan64','-D__shlim=r4native_shlim','-D__shgetc=r4native_shgetc',
- '-Dstrtold=r4native_strtold64',
- '-Dstrtof=r4native_raw_strtof','-Dstrtod=r4native_raw_strtod',
- '-D__intscan=r4native_intscan',
+$flags=@($script:R4SdkNative.data.Build.codegen.'native-flags'.scan_flags)+@(
  ('-I'+(Join-Path $PSScriptRoot 'Include')),('-I'+$IncludeRoot),
  '-isystem',(Join-Path $resource 'include'),('-I'+$sourceRoot))
 $objects=@()

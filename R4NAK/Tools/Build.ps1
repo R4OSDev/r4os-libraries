@@ -3,6 +3,7 @@
 param([switch]$Offline, [string]$OutputFile = '', [switch]$Rebuild, [string]$ResultFile = '')
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 if (!$IsWindows -and !$IsLinux) { throw 'Supported build hosts: Windows and Linux x64.' }
 $unit = [IO.Path]::GetFullPath('..', $PSScriptRoot)
 $libraries = [IO.Path]::GetFullPath('../..', $PSScriptRoot)
@@ -20,7 +21,7 @@ $mesaLock = Get-Content -LiteralPath (Join-Path $mesaTools 'Sources.lock.json') 
 function Hash([string]$Path,[string]$Algorithm='SHA256') { (Get-FileHash -LiteralPath $Path -Algorithm $Algorithm).Hash.ToLowerInvariant() }
 function Run([string]$Program,[string[]]$Arguments) { & $Program @Arguments; if($LASTEXITCODE){throw "$Program failed ($LASTEXITCODE)"} }
 function Tool([string]$Name) { $t=Get-Command $Name -CommandType Application -ErrorAction Stop | Select-Object -First 1; $t.Source }
-$tools = @{rustc=(Tool 'rustc');clang=(Tool $(if($IsWindows){'clang.exe'}else{'clang-19'}));bindgen=(Tool 'bindgen');git=(Tool 'git');tar=(Tool 'tar');curl=(Tool 'curl');ninja=(Tool 'ninja')}
+$tools = @{rustc=(Tool 'rustc');clang=(Tool $(if($IsWindows){'clang.exe'}else{('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0])}));bindgen=(Tool 'bindgen');git=(Tool 'git');tar=(Tool 'tar');curl=(Tool 'curl');ninja=(Tool 'ninja')}
 $zig = Join-Path (Resolve-Setting $devkit 'ZIG_ROOT') $(if($IsWindows){'zig.exe'}else{'zig'})
 $versions=[ordered]@{}
 foreach($name in @('rustc','clang','bindgen')) {
@@ -35,7 +36,7 @@ $inputs=@(foreach($directory in @('Port','Tools','ThirdParty')) {
         ForEach-Object { [ordered]@{path=[IO.Path]::GetRelativePath($unit,$_.FullName).Replace('\','/');sha256=(Hash $_.FullName)} }
 }) + @(foreach($leaf in @('native.c','native.h')) {[ordered]@{path="Source/$leaf";sha256=(Hash (Join-Path $unit "Source/$leaf"))}})
 $inputs=@($inputs | Sort-Object path)
-$identity=[ordered]@{host=$hostName;tools=$versions;mesa_lock=(Hash (Join-Path $mesaTools 'Sources.lock.json'));mesa_patch=(Hash (Join-Path $mesaTools 'MesaStandalone.patch'));inputs=$inputs}
+$identity=[ordered]@{sdk_profiles=$script:R4SdkNative.data.hashes;host=$hostName;tools=$versions;mesa_lock=(Hash (Join-Path $mesaTools 'Sources.lock.json'));mesa_patch=(Hash (Join-Path $mesaTools 'MesaStandalone.patch'));inputs=$inputs}
 $identityJson=ConvertTo-Json $identity -Depth 10 -Compress
 $id=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($identityJson))).ToLowerInvariant()
 $buildRoot=Join-Path $devkit "Toolchains/R4NAK/$id"

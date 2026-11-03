@@ -4,11 +4,9 @@ $rustSources = Join-Path $foreign 'rust-src-1.85.1/rust-src/lib/rustlib/src/rust
 $out = Join-Path $buildRoot 'Sysroot/lib/rustlib/r4os-x86_64/lib'
 [IO.Directory]::CreateDirectory($out) | Out-Null
 $savedBootstrap = [Environment]::GetEnvironmentVariable('RUSTC_BOOTSTRAP')
-$env:RUSTC_BOOTSTRAP = '1'
+$env:RUSTC_BOOTSTRAP = $script:R4SdkNative.data.Build.codegen.'native-flags'.nak_bootstrap
 try {
-    $common = @('--edition=2021','--crate-type=rlib','--target',$target,'-Cpanic=abort','-Copt-level=2',
-        '-Cno-redzone=yes','-Crelocation-model=static','-Ccode-model=large','-Zforce-unstable-if-unmarked',
-        '--error-format=short','--cap-lints=allow','-L',"dependency=$out")
+    $common = @(Expand-R4SdkNativeFlags $script:R4SdkNative 'nak_sysroot_flags' @{target=$target;out=$out})
     & $tools.rustc @common --crate-name core (Join-Path $rustSources 'core/src/lib.rs') -o (Join-Path $out 'libcore.rlib')
     if ($LASTEXITCODE) { throw 'core failed' }
     & $tools.rustc @common --crate-name compiler_builtins --extern "core=$(Join-Path $out 'libcore.rlib')" `
@@ -29,9 +27,7 @@ $out = Join-Path $buildRoot 'RustBuild'
 function Compile-Rust([string]$name, [string]$path, [string[]]$deps = @(), [string[]]$flags = @()) {
     $crateType = if ($name -eq 'nak_rs') { 'staticlib' } else { 'rlib' }
     $extension = if ($name -eq 'nak_rs') { '.a' } else { '.rlib' }
-    $argv = @('--edition=2021',"--crate-type=$crateType",'--crate-name',$name,'--target',$target,'--sysroot',(Join-Path $buildRoot 'Sysroot'),
-        '-Copt-level=2','-Cpanic=abort','-Crelocation-model=static','-Ccode-model=large','-Cno-redzone=yes',
-        '-Cdebug-assertions=yes','-Coverflow-checks=no','--cap-lints=allow','--error-format=short','-L',"dependency=$out")
+    $argv = @(Expand-R4SdkNativeFlags $script:R4SdkNative 'nak_crate_flags' @{crate_type=$crateType;name=$name;target=$target;sysroot=(Join-Path $buildRoot 'Sysroot');out=$out})
     foreach ($dep in $deps) { $argv += @('--extern', "$dep=$(Join-Path $out ('lib'+$dep+'.rlib'))") }
     $argv += $flags
     $argv += @($path, '-o', (Join-Path $out ('lib'+$name+$extension)))

@@ -1,6 +1,6 @@
 .{
     .name = .r4os_libraries,
-    .version = "0.64.42",
+    .version = "0.64.43",
     .fingerprint = 0xb4b7d2df351f7e74,
     .minimum_zig_version = "0.16.0",
     .paths = .{
@@ -18,6 +18,8 @@
         "R4GL",
         "R4VIDEO",
         "R4ENC",
+        "R4AMD",
+        "R4ACO",
         "Shared",
         "Tools",
         "consumer_helpers.zig",

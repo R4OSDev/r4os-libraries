@@ -21,9 +21,7 @@ $cPaths.Add((Join-Path $unit 'Source/native.c'))
 foreach ($name in @('blake3','blake3_dispatch','blake3_portable')) { $cPaths.Add((Join-Path $source "src/util/blake3/$name.c")) }
 $cPaths.Add((Join-Path $source 'src/util/mesa-blake3.c'))
 $cPaths.Add((Join-Path $hostBuild 'src/util/format/u_format_table.c'))
-$cArgs = @('-target','x86_64-unknown-none-elf','-std=c11','-O2','-ffreestanding','-fno-stack-protector','-Xclang','-fstack-clash-protection','-fno-asynchronous-unwind-tables','-fno-unwind-tables',
-    '-fno-pic','-mcmodel=large','-mno-red-zone','-ffunction-sections','-fdata-sections','-fvisibility=hidden','-nostdinc',
-    '-fno-math-errno','-fno-trapping-math','-fno-builtin','-ferror-limit=5',
+$cArgs = @($script:R4SdkNative.data.Build.codegen.'native-flags'.nak_c_flags) + @(
     '-isystem',(Join-Path (& $tools.clang -print-resource-dir) 'include'),"-I$(Join-Path $unit 'Port/Include')","-I$hostBuild")
 foreach ($p in @('include','src','src/compiler','src/compiler/nir','src/compiler/rust','src/compiler/spirv','src/nouveau/compiler','src/nouveau/headers','src/nouveau/headers/nvidia/classes','src/nouveau/nil','src/util','src/util/format')) {
     $cArgs += "-I$(Join-Path $hostBuild $p)"

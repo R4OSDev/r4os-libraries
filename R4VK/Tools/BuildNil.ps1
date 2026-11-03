@@ -7,6 +7,7 @@ param(
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
 . (Join-Path $PSScriptRoot 'MesaSource.ps1')
 $mesa = Get-R4VKMesaSource
@@ -26,7 +27,7 @@ function Run([string]$Tool, [string[]]$Options) {
 $tools = @{}
 $versions = [ordered]@{}
 foreach ($name in @('rustc', 'clang', 'bindgen')) {
-    $command = if ($name -eq 'clang' -and $IsLinux) { 'clang-19' } else { $name }
+    $command = if ($name -eq 'clang' -and $IsLinux) { ('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) } else { $name }
     $tools[$name] = (Get-Command $command -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
     $reported = @(& $tools[$name] --version)
     if ($LASTEXITCODE -or !$reported.Count -or [string]$reported[0] -notmatch ('(?<![0-9.])' + [regex]::Escape([string]$mesa.lock.host_tools.$name) + '(?![0-9.])')) {
@@ -116,7 +117,7 @@ $paths += @(Get-ChildItem -LiteralPath $hostBuild -Recurse -File -Filter '*.h' |
 $records = @(foreach ($path in $paths | Sort-Object -Unique) {
     [ordered]@{path = [IO.Path]::GetRelativePath($mesa.workspace, $path).Replace('\', '/'); sha256 = (Get-R4VKFileHash $path)}
 })
-$identity = [ordered]@{schema = 1; host = $hostName; tools = $versions; inputs = $records; compiler = $nakRecord.identity; verified_rust_members = $verifiedMembers}
+$identity = [ordered]@{sdk_profiles=$script:R4SdkNative.data.hashes;schema = 1; host = $hostName; tools = $versions; inputs = $records; compiler = $nakRecord.identity; verified_rust_members = $verifiedMembers}
 $id = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes(($identity | ConvertTo-Json -Depth 8 -Compress)))).ToLowerInvariant()
 $recordPath = Join-Path $output 'nil.json'
 if (Test-Path -LiteralPath $recordPath) {
@@ -134,11 +135,11 @@ $rust = Join-Path $output 'Rust'
 [IO.Directory]::CreateDirectory($rust) | Out-Null
 $source = Join-Path $mesa.source 'src/nouveau/nil'
 $generated = Join-Path $prepared 'Generated'
-$bindOptions = @((Join-Path $source 'nil_bindings.h'), '--rust-target', '1.85', '--use-core', '--ctypes-prefix', 'core::ffi', '--with-derive-default', '--no-prepend-enum-name', '--formatter', 'none')
+$bindOptions = @((Join-Path $source 'nil_bindings.h'), '--rust-target', ($script:R4SdkNative.data.Tools.tools.graphics.rustc.Split('.')[0..1] -join '.'), '--use-core', '--ctypes-prefix', 'core::ffi', '--with-derive-default', '--no-prepend-enum-name', '--formatter', 'none')
 foreach ($name in @('util_format_description', 'util_format_get_blocksize', 'util_format_is_compressed', 'util_format_is_pure_integer', 'util_format_is_srgb', 'drm_format_mod_block_linear_2D', 'drm_mod_is_nvidia')) { $bindOptions += @('--allowlist-function', $name) }
 foreach ($name in @('nil_format_support_flags', 'nv_device_info', 'nv_device_type', 'nv_zcull_device_info', 'pipe_format', 'pipe_swizzle')) { $bindOptions += @('--allowlist-type', $name) }
 foreach ($name in @('nil_format_table', 'drm_format_mod_invalid', 'drm_format_mod_linear')) { $bindOptions += @('--allowlist-var', $name) }
-$clangOptions = @('-target', 'x86_64-unknown-none-elf', '-std=c11', '-ffreestanding', '-nostdinc', "-I$generated")
+$clangOptions = @($script:R4SdkNative.data.Build.codegen.'native-flags'.binding_c_flags) + @("-I$generated")
 for ($i = 0; $i -lt $inputs.c.Count; $i++) {
     if ($inputs.c[$i] -eq '-isystem') { $clangOptions += @($inputs.c[$i], $inputs.c[++$i]) }
     elseif ($inputs.c[$i].StartsWith('-I') -or $inputs.c[$i].StartsWith('-D')) { $clangOptions += $inputs.c[$i] }
@@ -168,9 +169,7 @@ foreach ($file in Get-ChildItem -LiteralPath $source -Filter '*.rs' -File) {
     }
     [IO.File]::WriteAllText((Join-Path $rust $file.Name), $text, [Text.UTF8Encoding]::new($false))
 }
-$common = @('--edition=2021', '--target', (Join-Path $nakUnit 'Port/Rust/r4os-x86_64.json'), '--sysroot', (Join-Path $compiler 'Sysroot'),
-    '-Cpanic=abort', '-Copt-level=2', '-Cdebug-assertions=yes', '-Crelocation-model=static', '-Ccode-model=large', '-Cno-redzone=yes', '--cap-lints=allow',
-    '-L', ('dependency=' + (Join-Path $compiler 'RustBuild')), '-L', ('dependency=' + $output))
+$common = @(Expand-R4SdkNativeFlags $script:R4SdkNative 'nil_rust_flags' @{target=(Join-Path $nakUnit 'Port/Rust/r4os-x86_64.json');sysroot=(Join-Path $compiler 'Sysroot');rust_build=(Join-Path $compiler 'RustBuild');output=$output})
 Run $tools.rustc ($common + @('--crate-type=rlib', '--crate-name', 'nil_rs_bindings', $bindings, '-o', (Join-Path $output 'libnil_rs_bindings.rlib')))
 $options = $common + @('--crate-type=staticlib', '--crate-name', 'nil', (Join-Path $rust 'lib.rs'), '-o', (Join-Path $output 'libnil.a'), '--extern', ('nil_rs_bindings=' + (Join-Path $output 'libnil_rs_bindings.rlib')), '--extern', ('paste=' + $inputs.paste))
 foreach ($name in @('r4os_std', 'bitview', 'nvidia_headers')) { $options += @('--extern', ($name + '=' + (Join-Path $compiler ('RustBuild/lib' + $name + '.rlib')))) }

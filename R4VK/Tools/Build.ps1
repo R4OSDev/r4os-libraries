@@ -3,6 +3,7 @@
 param([Parameter(Mandatory)][string]$OutputRoot, [switch]$Offline, [ValidateRange(1,32)][int]$Jobs = 4)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
 . (Join-Path $PSScriptRoot 'MesaSource.ps1')
 $libraries = [IO.Path]::GetFullPath('../..', $PSScriptRoot)

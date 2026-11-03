@@ -23,6 +23,9 @@
 *.sha256 text eol=lf
 *.svg text eol=lf
 *.sh text eol=lf
+*.vert text eol=lf
+*.frag text eol=lf
+*.glsl text eol=lf
 
 # Vendor manifests pin exact bytes, including upstream line endings.
 R4FONT/ThirdParty/r4font/** -text

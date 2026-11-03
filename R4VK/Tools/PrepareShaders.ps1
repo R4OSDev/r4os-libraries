@@ -3,6 +3,7 @@
 param([Parameter(Mandatory)][string]$OutputRoot, [ValidateRange(1,32)][int]$Jobs = 4)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
 . (Join-Path $PSScriptRoot 'MesaSource.ps1')
 $mesa = Get-R4VKMesaSource
@@ -16,8 +17,8 @@ function Tool([string]$Name) {
     (Get-Command $Name -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 }
 $tools = [ordered]@{
-    clang = (Tool $(if ($IsWindows) { 'clang.exe' } else { 'clang-19' }))
-    clangxx = (Tool $(if ($IsWindows) { 'clang++.exe' } else { 'clang++-19' }))
+    clang = (Tool $(if ($IsWindows) { 'clang.exe' } else { ('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) }))
+    clangxx = (Tool $(if ($IsWindows) { 'clang++.exe' } else { ('clang++-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) }))
     llvm = (Tool $(if ($IsWindows) { 'llvm-config.exe' } else { 'llvm-config-19' }))
     meson = (Tool 'meson'); ninja = (Tool 'ninja'); git = (Tool 'git')
     pkgconfig = (Tool 'pkg-config')

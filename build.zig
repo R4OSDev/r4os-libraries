@@ -1,5 +1,5 @@
 const std = @import("std");
-const r4font_build = @import("R4FONT/build.zig");
+const r4font_build = @import("R4FONT/host_build.zig");
 
 pub const addR4fontHostDecoder = r4font_build.addHostDecoder;
 pub const addR4gfxHostColor = @import("R4GFX/color_build.zig").addAt;

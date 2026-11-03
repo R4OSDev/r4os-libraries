@@ -3,6 +3,7 @@
 param([Parameter(Mandatory)][string]$OutputRoot, [switch]$Offline)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
 $unit=[IO.Path]::GetFullPath('..',$PSScriptRoot)
 $libraries=[IO.Path]::GetFullPath('../..',$PSScriptRoot)
@@ -49,7 +50,7 @@ foreach($name in @('python','bison','flex','glslangValidator')) {
     if($LASTEXITCODE -or !$reported.Count){throw "Generator version unavailable: $name"}
     $versions[$name]=[string]$reported[0]
 }
-$identity=[ordered]@{schema=1;host=$(if($IsWindows){'Windows-x64'}else{'Linux-x64'});tools=$versions;inputs=$identities}
+$identity=[ordered]@{sdk_profiles=$script:R4SdkNative.data.hashes;schema=1;host=$(if($IsWindows){'Windows-x64'}else{'Linux-x64'});tools=$versions;inputs=$identities}
 $id=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes(($identity|ConvertTo-Json -Depth 7 -Compress)))).ToLowerInvariant()
 if(Test-Path $recordPath){
     $previous=Get-Content -Raw $recordPath|ConvertFrom-Json

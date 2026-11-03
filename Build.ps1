@@ -21,7 +21,7 @@ $zig = Join-Path $zigRoot $(if ($IsWindows) { 'zig.exe' } else { 'zig' })
 $context=Get-R4SdkBuildContext $sdk $contract $PSScriptRoot $devkit $zigRoot
 $zig=$context.zig
 Assert-R4SdkBuildArguments $context @($args)
-$units = @('R4STD', 'R4IMG', 'R4FONT', 'R4GFX', 'R4NV', 'R4NAK', 'R4VK', 'R4GL', 'R4VIDEO', 'R4ENC', 'R4AMD', 'R4ACO')
+$units = @($context.resolved.system_libraries.Values | ForEach-Object path)
 $forward = @($args)
 if ($forward.Count -gt 0 -and ($forward[0] -in $units -or $forward[0] -eq 'ALL')) {
     if ($forward[0] -ne 'ALL') { $units = @($forward[0]) }

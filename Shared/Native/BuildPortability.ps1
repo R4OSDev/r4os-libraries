@@ -3,6 +3,7 @@
 param([Parameter(Mandatory)][string]$UnitRoot)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('SDK.ps1',$PSScriptRoot))
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
 $unit = [IO.Path]::GetFullPath($UnitRoot)
 $libraries = [IO.Path]::GetFullPath('../..', $PSScriptRoot)
@@ -29,8 +30,8 @@ $profile = Get-Content -Raw -LiteralPath $profilePath | ConvertFrom-Json
 if ($plan.schema -ne 1 -or $sources.schema -ne 1 -or $profile.schema -ne 1 -or
     $plan.module -notin @('AMDGPU','R4AMD','R4ACO')) { throw 'Unsupported portability plan.' }
 if ($plan.profile -eq 'mesa' -and $sources.upstream_version -ne $profile.mesa) { throw 'Mesa profile/source mismatch.' }
-$clang = Tool $(if ($IsWindows) { 'clang.exe' } else { 'clang-19' })
-$nm = Tool $(if ($IsWindows) { 'llvm-nm.exe' } else { 'llvm-nm-19' })
+$clang = Tool $(if ($IsWindows) { 'clang.exe' } else { ('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) })
+$nm = Tool $(if ($IsWindows) { 'llvm-nm.exe' } else { ('llvm-nm-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) })
 $git = Tool 'git'
 $version = @(& $clang --version)
 if ($LASTEXITCODE -or !$version.Count -or $version[0] -notmatch ('(?<![0-9.])' + [regex]::Escape($profile.clang) + '(?![0-9.])')) { throw "Clang $($profile.clang) required." }
@@ -116,7 +117,7 @@ try {
     $results = @(foreach ($entry in $plan.units) {
         if ($entry.name -notmatch '^[a-z0-9_]+$') { throw 'Invalid object name.' }
         $flags = if ($plan.profile -eq 'mesa') { @($profile.cpp_flags) } else {
-            @('-target','x86_64-unknown-none-elf','-O2','-ffreestanding','-nostdinc','-fno-stack-protector','-Xclang','-fstack-clash-protection','-fno-asynchronous-unwind-tables','-fno-unwind-tables','-fno-pic','-mcmodel=large','-mno-red-zone','-ffunction-sections','-fdata-sections','-isystem', ($resource.Trim() + '/include'))
+            @($script:R4SdkNative.data.Build.codegen.'native-flags'.portability_c_flags) + @(($resource.Trim() + '/include'))
         }
         if ($entry.language -eq 'c') { $flags = @($flags | Where-Object { $_ -notmatch '^-std=|^-fno-(exceptions|rtti)$|^-nostdinc\+\+$' }) + '-std=c11' }
         $object = Join-Path $objects ($entry.name + '.o')

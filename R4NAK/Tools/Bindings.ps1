@@ -2,7 +2,7 @@
 $out = Join-Path $buildRoot 'NativeBindings'
 [IO.Directory]::CreateDirectory($out) | Out-Null
 $all = $cArgs
-$clangArgs = @('-target','x86_64-unknown-none-elf','-std=c11','-ffreestanding','-nostdinc')
+$clangArgs = @($script:R4SdkNative.data.Build.codegen.'native-flags'.binding_c_flags)
 for ($i = 0; $i -lt $all.Count; $i++) {
     if ($all[$i] -eq '-isystem') { $clangArgs += @($all[$i],$all[$i+1]); $i++ }
     elseif ($all[$i].StartsWith('-I') -or $all[$i].StartsWith('-D')) { $clangArgs += $all[$i] }
@@ -11,7 +11,7 @@ $types = @('exec_list','exec_node','float_controls','gc_ctx','gl_access_qualifie
     'gl_subgroup_size','gl_system_value','gl_tess_spacing','gl_varying_slot','gl_vert_attrib','glsl_sampler_dim',
     'glsl_type','glsl_matrix_layout','mesa_scope','mesa_prim','mesa_shader_stage','nir_.*','shader_info',
     'tess_primitive_mode','u_printf_info','util_dynarray')
-$common = @('--rust-target','1.85','--use-core','--ctypes-prefix','core::ffi','--with-derive-default',
+$common = @('--rust-target',($script:R4SdkNative.data.Tools.tools.graphics.rustc.Split('.')[0..1] -join '.'),'--use-core','--ctypes-prefix','core::ffi','--with-derive-default',
     '--no-prepend-enum-name','--formatter','none','--disable-header-comment')
 $argv = @((Join-Path $source 'src/compiler/rust/bindings.h')) + $common
 foreach ($pattern in $types + @('u_memstream')) { $argv += @('--allowlist-type',$pattern) }

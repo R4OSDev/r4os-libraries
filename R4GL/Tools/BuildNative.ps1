@@ -3,6 +3,7 @@
 param([switch]$Offline, [ValidateRange(1,32)][int]$Jobs = 4)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
 . (Join-Path $PSScriptRoot 'Common.ps1')
 $paths = Get-R4GLPaths
@@ -14,7 +15,7 @@ $lock = Get-Content -Raw -LiteralPath $paths.lock | ConvertFrom-Json
 $planPath = Join-Path $PSScriptRoot 'NativeInputs.json'
 $plan = Get-Content -Raw -LiteralPath $planPath | ConvertFrom-Json
 if ($plan.schema -ne 1 -or $plan.mesa -ne $lock.mesa.version) { throw 'Native source plan differs from the Mesa lock.' }
-$clang = (Get-Command $(if ($IsWindows) { 'clang.exe' } else { 'clang-19' }) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
+$clang = (Get-Command $(if ($IsWindows) { 'clang.exe' } else { ('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) }) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 $version = @(& $clang --version)
 if ($LASTEXITCODE -or !$version.Count -or [string]$version[0] -notmatch ('(?<![0-9.])' + [regex]::Escape($lock.host_tools.clang) + '(?![0-9.])')) { throw 'Pinned clang required.' }
 $resource = [string](& $clang -print-resource-dir)
@@ -58,7 +59,7 @@ foreach ($provider in @('Math','Scan')) {
 $identities = @(foreach ($file in $inputs | Sort-Object -Unique) {
     [ordered]@{path = [IO.Path]::GetRelativePath($paths.workspace, $file).Replace('\','/'); sha256 = (Get-R4GLHash $file)}
 })
-$identity = [ordered]@{schema = 1; host = $(if ($IsWindows) { 'Windows-x64' } else { 'Linux-x64' }); compiler = $version[0]; inputs = $identities}
+$identity = [ordered]@{sdk_profiles=$script:R4SdkNative.data.hashes;schema = 1; host = $(if ($IsWindows) { 'Windows-x64' } else { 'Linux-x64' }); compiler = $version[0]; inputs = $identities}
 $id = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes(($identity | ConvertTo-Json -Depth 7 -Compress)))).ToLowerInvariant()
 if (Test-Path -LiteralPath $recordPath) {
     $previous = Get-Content -Raw -LiteralPath $recordPath | ConvertFrom-Json
@@ -90,7 +91,7 @@ if (!$header.Contains($needle)) { throw 'libc++ override source drift.' }
 # upstream weak-function fallback without an ELF-only section.
 [IO.File]::WriteAllText((Join-Path $private 'include/overridable_function.h'), $header.Replace($needle, $needle + ' && !defined(R4OS_NATIVE_R4M)'), [Text.UTF8Encoding]::new($false))
 $sample = $units | Where-Object { $_.source.EndsWith('.cpp') } | Select-Object -First 1
-$cppFlags = @($sample.arguments | Where-Object { $_ -notmatch '^-std=' }) + @('-std=c++20', '-D_LIBCPP_PSTL_BACKEND_SERIAL', '-DR4OS_NATIVE_R4M=1')
+$cppFlags = @($sample.arguments | Where-Object { $_ -notmatch '^-std=' }) + @($script:R4SdkNative.data.Build.codegen.'native-flags'.libcxx_flags)
 foreach ($name in $cpp.units) {
     $source = if ($name -eq 'new') { Join-Path $private 'new.cpp' } else { Join-Path $paths.zig "lib/libcxx/src/$name.cpp" }
     $units += [pscustomobject]@{name = "r4gl_libcxx_$name"; source = $source; arguments = ($cppFlags + '-D_LIBCPP_BUILDING_LIBRARY')}

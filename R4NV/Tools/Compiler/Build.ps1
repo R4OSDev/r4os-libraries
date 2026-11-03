@@ -12,6 +12,7 @@ param(
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../../Shared/Native/SDK.ps1',$PSScriptRoot))
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
 $libraryRoot = [IO.Path]::GetFullPath('../../..', $PSScriptRoot)
 $settings = @{}
@@ -64,7 +65,7 @@ if ($InstallDependencies) {
             throw 'Automatic dependency installation currently supports Debian 13; other hosts can provide the tools from Sources.lock.json.'
         }
         $aptArgs = @('install', '-y', '--no-install-recommends', 'rustc', 'bindgen', 'cbindgen', 'meson',
-            'ninja-build', 'python3-mako', 'python3-yaml', 'python3-packaging', 'clang-19',
+            'ninja-build', 'python3-mako', 'python3-yaml', 'python3-packaging', ('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]),
             'libclang-19-dev', 'flex', 'bison', 'pkg-config', 'curl', 'git', 'xz-utils', 'build-essential')
         $uid = & (Find-Tool 'id') -u
         if ($LASTEXITCODE) { throw 'Cannot determine the host user.' }
@@ -81,8 +82,8 @@ foreach ($name in @('rustc', 'meson', 'ninja', 'bindgen', 'cbindgen')) {
     $tools[$name] = Find-Tool ($name + $suffix)
     $toolVersions[$name] = Read-Version $tools[$name] $lock.host_tools.$name
 }
-$cc = Find-Tool $(if ($IsWindows) { 'clang-cl.exe' } else { 'clang-19' })
-$cxx = if ($IsWindows) { $cc } else { Find-Tool 'clang++-19' }
+$cc = Find-Tool $(if ($IsWindows) { 'clang-cl.exe' } else { ('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) })
+$cxx = if ($IsWindows) { $cc } else { Find-Tool ('clang++-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) }
 $toolVersions.clang = Read-Version $cc $lock.host_tools.clang
 }
 $git = Find-Tool ('git' + $suffix)
@@ -176,12 +177,7 @@ foreach ($name in @('CC', 'CXX', 'NAK_DEBUG', 'NIR_DEBUG', 'RUSTFLAGS', 'CFLAGS'
 }
 try {
     $env:CC = $cc; $env:CXX = $cxx; $env:PYTHONHASHSEED = '0'
-    $options = @('--wrap-mode=nodownload', '--force-fallback-for=syn,paste,rustc-hash',
-        '-Dr4os-nak=true', '-Dbuildtype=release', '-Db_ndebug=false', '-Dgallium-drivers=[]',
-        '-Dvulkan-drivers=[]', '-Dplatforms=[]', '-Dglx=disabled', '-Degl=disabled', '-Dgbm=disabled',
-        '-Dllvm=disabled', '-Dopengl=false', '-Dgles1=disabled', '-Dgles2=disabled', '-Dvideo-codecs=[]',
-        '-Dbuild-tests=false', '-Dshader-cache=disabled', '-Dzstd=disabled', '-Dxmlconfig=disabled',
-        '-Dtools=[]', '-Dvalgrind=disabled', '-Dexpat=disabled', '-Dzlib=disabled', '-Ddisplay-info=disabled')
+    $options = @($script:R4SdkNative.data.Build.codegen.'native-flags'.meson_options)
     $setupArgs = @('setup')
     if (Test-Path -LiteralPath (Join-Path $build 'meson-private/coredata.dat')) { $setupArgs += '--reconfigure' }
     Invoke-Checked $tools.meson ($setupArgs + @($build, $source) + $options)
@@ -216,6 +212,10 @@ try {
         [ordered]@{path=$file;sha256=(Hash (Join-Path $PSScriptRoot $file))}
     })
     $recipeText = ($inputs | ConvertTo-Json -Compress) + ($options -join "`n") + ($shaderTarget | ConvertTo-Json -Compress)
+    $inputs+=@(foreach($name in @('Build','Tools','Components')){
+        $path=Join-Path $script:R4SdkNative.sdk_root ('Profiles/'+$name+'.json')
+        [ordered]@{path=[IO.Path]::GetRelativePath($PSScriptRoot,$path).Replace('\','/');sha256=(Hash $path)}
+    })
     $recipe = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($recipeText))).ToLowerInvariant()
     Copy-Item -LiteralPath $compiler -Destination (Join-Path $output ('r4nak' + $suffix))
     # Host-tool redistribution retains every original source/license archive.

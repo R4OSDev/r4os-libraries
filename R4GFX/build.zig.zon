@@ -4,6 +4,11 @@
     .fingerprint = 0x1601ceae76ad67f0,
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
+        .r4os_libraries = .{
+            .url = "https://github.com/R4OSDev/r4os-libraries/archive/6cda2fa2fc28e28cbeaef7f085d8dfb7d1ba310a.tar.gz",
+            .hash = "r4os_libraries-0.64.42-dH4fNcok2wGDV9E_ehLkawAWxkzPXEED23xX46dADis-",
+            .lazy = true,
+        },
         .r4nv = .{ .path = "../R4NV" },
         .r4amd = .{ .path = "../R4AMD" },
         .r4os_sdk = .{
@@ -11,5 +16,5 @@
             .hash = "r4os_sdk-0.64.35-NnPzAr_IEwGTHSJwdpAoaC4r1p2R4j3ifyp5n06kIwL1",
         },
     },
-    .paths = .{ "Bindings", "Contract", "Docs", "Display", "Examples", "Source", "Tests", "ThirdParty", "display_tests.zig", "build.zig", "build.zig.zon", "module.R4MF", "README.txt" },
+    .paths = .{ "Bindings", "Contract", "Docs", "Display", "Examples", "Source", "Tests", "ThirdParty", "display_tests.zig", "build.zig", "color_build.zig", "build.zig.zon", "module.R4MF", "README.txt" },
 }

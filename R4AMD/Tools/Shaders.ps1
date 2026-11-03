@@ -3,6 +3,7 @@
 param([switch]$Write,[string]$CompilerPath)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 $unit=[IO.Path]::GetFullPath('..',$PSScriptRoot)
 $libraries=[IO.Path]::GetFullPath('..',$unit)
 $source=Join-Path $unit 'Source/Shaders'
@@ -26,7 +27,7 @@ if($Write){
     $CompilerPath=[IO.Path]::GetFullPath($CompilerPath)
     $glsl=(Get-Command glslangValidator -CommandType Application -ErrorAction Stop|Select-Object -First 1).Source
     $version=@(& $glsl --version)
-    if($LASTEXITCODE -or $version[0] -notmatch '15\.2\.0'){throw 'Pinned glslangValidator15.2.0 required.'}
+    if($LASTEXITCODE -or $version[0] -notmatch [regex]::Escape([string]$script:R4SdkNative.data.Tools.tools.shader.glslang)){throw 'SDK-pinned glslangValidator required.'}
     $settings=@{}
     foreach($line in Get-Content (Join-Path $libraries 'Settings.R4S')){if($line -match '^([A-Z_]+)=(.+)$'){$settings[$Matches[1]]=$Matches[2]}}
     $workspace=[IO.Path]::GetFullPath($settings.WORKSPACE_ROOT.Replace('\','/'),$libraries)
@@ -66,12 +67,12 @@ if($Write){
     [void]$text.AppendLine('};')
     [void]$text.AppendLine('}; }')
     [IO.File]::WriteAllText((Join-Path $output 'shaders.zig'),$text.ToString().Replace("`r`n","`n"),[Text.UTF8Encoding]::new($false))
-    [ordered]@{schema=2;gfx_profiles=@(902,909);mesa='26.2.2';glslang=$version[0];compiler_executable_sha256=(Hash $CompilerPath);recipe_sha256=(Hash $PSCommandPath);
+    [ordered]@{schema=2;gfx_profiles=@(902,909);mesa='26.2.2';glslang=$version[0];compiler_executable_sha256=(Hash $CompilerPath);recipe_sha256=(Get-R4SdkFileDigest $PSCommandPath);
         inputs=$inputs;profiles=$results;generated_zig_sha256=(Hash (Join-Path $output 'shaders.zig'));reproducible=$true}|ConvertTo-Json -Depth 10|Set-Content $recordPath -Encoding utf8NoBOM
 }
 $record=Get-Content -Raw $recordPath|ConvertFrom-Json
 if($record.schema -ne 2 -or ($record.gfx_profiles -join ',') -cne '902,909' -or $record.mesa -cne '26.2.2' -or !$record.reproducible -or $record.profiles.Count -ne 12 -or
-   $record.recipe_sha256 -cne (Hash $PSCommandPath) -or ($inputs|ConvertTo-Json -Compress) -cne ($record.inputs|ConvertTo-Json -Compress) -or
+   $record.recipe_sha256 -cne (Get-R4SdkFileDigest $PSCommandPath) -or ($inputs|ConvertTo-Json -Compress) -cne ($record.inputs|ConvertTo-Json -Compress) -or
    $record.generated_zig_sha256 -cne (Hash (Join-Path $output 'shaders.zig'))){throw 'AMD shader source/recipe drift; regenerate the real programs.'}
 foreach($index in 0..11){
     $profile=$record.profiles[$index];$name=$profiles[$index%6];$target=$targets[[int][Math]::Floor($index/6)];$asset=$target.prefix+$name

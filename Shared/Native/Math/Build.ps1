@@ -6,22 +6,20 @@ param(
  [string]$ZigRoot = ''
 )
 $ErrorActionPreference='Stop'
+. ([IO.Path]::GetFullPath('../SDK.ps1',$PSScriptRoot))
 Set-StrictMode -Version Latest
 $workspace=[IO.Path]::GetFullPath('../../../../..',$PSScriptRoot)
-if (!$ZigRoot) { $ZigRoot=Join-Path $workspace 'DevKit/Toolchains/Zig' }
+if (!$ZigRoot) { $ZigRoot=[IO.Path]::GetDirectoryName($script:R4SdkNative.zig) }
 $manifest=Get-Content (Join-Path $PSScriptRoot 'Sources.json') -Raw|ConvertFrom-Json
 [IO.Directory]::CreateDirectory($OutputRoot)|Out-Null
 foreach($file in $manifest.files){
  $path=Join-Path $zigRoot $file.path
  if((Get-FileHash $path).Hash.ToLowerInvariant() -ne $file.sha256){throw "Native math source pin mismatch: $($file.path)"}
 }
+Assert-R4SdkNativeCompiler $script:R4SdkNative $Clang
 $resource=(& $Clang -print-resource-dir).Trim()
 if($LASTEXITCODE){throw 'Native math compiler resource lookup failed'}
-$flags=@('-target','x86_64-unknown-none-elf','-std=c11','-O2','-ffreestanding','-nostdinc',
- '-fno-builtin','-fno-stack-protector','-Xclang','-fstack-clash-protection','-fno-asynchronous-unwind-tables','-fno-unwind-tables',
- '-fno-pic','-mcmodel=large','-mno-red-zone','-ffunction-sections','-fdata-sections','-fvisibility=hidden',
- '-fno-fast-math','-frounding-math','-ffp-contract=off',
- '-Dhidden=__attribute__((visibility("hidden")))',
+$flags=@($script:R4SdkNative.data.Build.codegen.'native-flags'.math_flags)+@(
  ('-I'+(Join-Path $PSScriptRoot 'Include')),('-I'+$IncludeRoot),
  '-isystem',(Join-Path $resource 'include'),
  ('-I'+(Join-Path $zigRoot 'lib/libc/musl/src/internal')),

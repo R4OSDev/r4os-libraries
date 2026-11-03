@@ -9,6 +9,9 @@ param(
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
+$sdkCpp23Flags=@($script:R4SdkNative.data.Build.codegen.'native-flags'.cpp23_flags)
+$sdkLibcxxVkFlags=@($script:R4SdkNative.data.Build.codegen.'native-flags'.libcxx_vk_flags)
 if (!$IsWindows -and !$IsLinux) { throw 'Supported hosts: Windows and Linux.' }
 . (Join-Path $PSScriptRoot 'MesaSource.ps1')
 . (Join-Path $PSScriptRoot 'CInputs.ps1')
@@ -24,7 +27,7 @@ foreach ($protected in @($mesa.unit, $mesa.source, $compiler, $prepared, $shader
         throw 'Native output must be outside source and dependency trees.'
     }
 }
-$clang = (Get-Command $(if ($IsWindows) { 'clang.exe' } else { 'clang-19' }) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
+$clang = (Get-Command $(if ($IsWindows) { 'clang.exe' } else { ('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) }) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 $reported = @(& $clang --version)
 if ($LASTEXITCODE -or !$reported.Count -or [string]$reported[0] -notmatch ('(?<![0-9.])' + [regex]::Escape([string]$mesa.lock.host_tools.clang) + '(?![0-9.])')) { throw 'Pinned clang required.' }
 $settings = @{}
@@ -103,7 +106,7 @@ $paths += @($cpp.files | ForEach-Object { Join-Path $zigRoot $_.path })
 $records = @(foreach ($path in $paths | Sort-Object -Unique) {
     [ordered]@{path = [IO.Path]::GetRelativePath($mesa.workspace, $path).Replace('\', '/'); sha256 = (Get-R4VKFileHash $path)}
 })
-$identity = [ordered]@{schema = 1; host = $(if ($IsWindows) { 'Windows-x64' } else { 'Linux-x64' });
+$identity = [ordered]@{sdk_profiles=$script:R4SdkNative.data.hashes;schema = 1; host = $(if ($IsWindows) { 'Windows-x64' } else { 'Linux-x64' });
     compiler = [string]$reported[0]; nak = $nakRecord.identity; inputs = $records;
     arguments = @($inputs.arguments | ForEach-Object { $_.Replace($mesa.workspace, '<workspace>') });
     cpp_arguments = @($inputs.cpp_arguments | ForEach-Object { $_.Replace($mesa.workspace, '<workspace>') })}
@@ -146,10 +149,10 @@ $results = @($sources | ForEach-Object -Parallel {
     if ([IO.Path]::GetExtension($file) -eq '.cpp') {
         $compileOptions = $using:cppOptions
         if ([IO.Path]::GetFileName($file) -eq 'aco_opcodes.cpp') {
-            $compileOptions += @('-std=c++23', '-fconstexpr-steps=10000000')
+            $compileOptions += @($using:sdkCpp23Flags)
         } elseif ($file.StartsWith($using:zigRoot, [StringComparison]::OrdinalIgnoreCase) -or
                   $file.StartsWith($using:cppPrivate, [StringComparison]::OrdinalIgnoreCase)) {
-            $compileOptions += @('-std=c++20', '-D_LIBCPP_BUILDING_LIBRARY')
+            $compileOptions += @($using:sdkLibcxxVkFlags)
         }
     }
     & $using:clang @compileOptions -c $file -o $object 2> $log
