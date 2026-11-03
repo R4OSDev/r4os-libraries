@@ -8,8 +8,9 @@ Rust projects select `r4os-library-helpers` from this directory and pass the
 explicit `-LibraryHelpersRoot /selected/Libraries` to the SDK's
 `Tools/Build-RustModule.ps1` (or its `.sh`/`.bat` starter). This also requires the
 selected pinned `-ZigRoot`. Source files, native objects and dependency roots
-are recorded in the normal build receipt. Component selection belongs to the
-caller; the SDK does not create project pins or select versions for an IDE.
+are recorded in the normal build receipt. The selected SDK alone binds Contract, tools and system libraries through
+Profiles/Build.json, Tools.json and Components.json. Callers select locations
+and may pin additional libraries without shadowing those system providers.
 
 `standard`, `image` and `font` contain borrowed text/settings iterators,
 bounded writers, typed codecs/date/time/config calls, caller-owned image
@@ -111,3 +112,11 @@ removes a stale 1376-byte assertion when compiling a consumer against the
 current canonical contract. The compiler-typed library C header and native
 fingerprint pass their unchanged generation check; provider binaries and
 local R4L contracts keep their versions.
+
+Source package 0.64.47 regenerates the canonical 1408-byte R4SYS alias,
+including service_inventory_page/service_control_bound and their three
+reachable service records. Compile-time aliases come from the selected
+Contract through the original Rust generator; no layout assertion is waived.
+C header and native ABI fingerprint remain unchanged. Existing C/Rust media
+interop and seven ownership/unsafe negatives pass; R4L and Kernel versions
+are unaffected by this projection refresh.
