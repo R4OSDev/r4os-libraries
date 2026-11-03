@@ -17,6 +17,10 @@ $zigRoot = Resolve-Setting $devkit 'ZIG_ROOT'
 $sdk = Resolve-Setting $repositories 'SDK_ROOT'
 $contract = Resolve-Setting $repositories 'CONTRACT_ROOT'
 $zig = Join-Path $zigRoot $(if ($IsWindows) { 'zig.exe' } else { 'zig' })
+. (Join-Path $sdk 'Tools/BuildContext.ps1')
+$context=Get-R4SdkBuildContext $sdk $contract $PSScriptRoot $devkit $zigRoot
+$zig=$context.zig
+Assert-R4SdkBuildArguments $context @($args)
 $units = @('R4STD', 'R4IMG', 'R4FONT', 'R4GFX', 'R4NV', 'R4NAK', 'R4VK', 'R4GL', 'R4VIDEO', 'R4ENC', 'R4AMD', 'R4ACO')
 $forward = @($args)
 if ($forward.Count -gt 0 -and ($forward[0] -in $units -or $forward[0] -eq 'ALL')) {
@@ -27,7 +31,7 @@ foreach ($unit in $units) {
     Push-Location (Join-Path $PSScriptRoot $unit)
     try {
         Write-Host "Building $unit in $PWD"
-        & $zig build "--fork=$sdk" "--fork=$contract" @forward
+        & $zig build "--fork=$sdk" "--fork=$($context.contract_root)" "--fork=$($context.libraries_root)" @forward
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     } finally { Pop-Location }
 }
