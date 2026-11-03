@@ -4,6 +4,7 @@
 param([switch]$Write)
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 $unit=[IO.Path]::GetFullPath('..',$PSScriptRoot)
 $workspace=[IO.Path]::GetFullPath('../../..',$unit)
 $temp=Join-Path $workspace 'Temp/AMD-VcnDecodeVectors'
@@ -77,7 +78,8 @@ int main(int argc, char **argv) {
 '@)
 $c=Join-Path $temp 'oracle.c';$exe=Join-Path $temp $(if($IsWindows){'oracle.exe'}else{'oracle'})
 [IO.File]::WriteAllText($c,($parts -join "`n"),[Text.UTF8Encoding]::new($false))
-$compiler=if($IsWindows){'clang.exe'}else{'clang-19'}
+$compiler=(Get-Command $(if($IsWindows){'clang.exe'}else{'clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]}) -CommandType Application -ErrorAction Stop|Select-Object -First 1).Source
+Assert-R4SdkNativeCompiler $script:R4SdkNative $compiler
 & $compiler -std=c11 -Wall -Wextra -Werror $c -o $exe
 if($LASTEXITCODE){throw 'VCN C oracle compilation failed'}
 $out=Join-Path $temp 'h264.bin'; & $exe $out

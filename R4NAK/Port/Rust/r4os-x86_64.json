@@ -19,7 +19,9 @@
   "dynamic-linking": false,
   "plt-by-default": false,
   "position-independent-executables": true,
-  "stack-probes": { "kind": "inline" },
+  "stack-probes": {
+    "kind": "inline"
+  },
   "metadata": {
     "description": "R4OS x86_64 System V userland, SSE2, no red zone, no OS runtime",
     "host_tools": false,

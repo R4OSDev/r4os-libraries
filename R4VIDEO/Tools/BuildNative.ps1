@@ -4,6 +4,7 @@ param([switch]$Offline, [ValidateRange(1,32)][int]$Jobs = 4)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (!$IsWindows -and !$IsLinux) { throw 'Supported build hosts: Windows and Linux.' }
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 . (Join-Path $PSScriptRoot 'Common.ps1')
 $paths = Get-R4VideoPaths
 & pwsh -NoLogo -NoProfile -File (Join-Path $paths.libraries 'R4AMD/Tools/VcnCodecs.ps1')
@@ -14,17 +15,17 @@ if ($Offline) { $options += '-Offline' }
 if ($LASTEXITCODE) { throw 'FFmpeg preparation failed.' }
 & pwsh -NoLogo -NoProfile -File (Join-Path $PSScriptRoot 'Tables.ps1')
 if ($LASTEXITCODE) { throw 'FFmpeg constant-table generation failed.' }
-$clang = (Get-Command $(if ($IsWindows) { 'clang.exe' } else { 'clang-19' }) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
+$clang = (Get-Command $(if ($IsWindows) { 'clang.exe' } else { 'clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0] }) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 $nasm = (Get-Command nasm -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 $compiler = @(& $clang --version)
-if ($LASTEXITCODE -or !$compiler.Count -or $compiler[0] -notmatch '(?<![0-9.])19\.1\.7(?![0-9.])') { throw 'FFmpeg target profile requires clang 19.1.7.' }
+Assert-R4SdkNativeCompiler $script:R4SdkNative $clang
 $assembler = @(& $nasm -v)
 if ($LASTEXITCODE -or !$assembler.Count -or $assembler[0] -notmatch 'NASM version (\d+)\.(\d+)') { throw 'Cannot identify NASM.' }
-if ([int]$Matches[1] -lt 2 -or ([int]$Matches[1] -eq 2 -and [int]$Matches[2] -lt 16)) { throw 'NASM >= 2.16 required for the selected x86 routines.' }
+if(([version]($Matches[1]+'.'+$Matches[2])) -lt [version]$script:R4SdkNative.data.Tools.tools.graphics.nasm_minimum){throw 'SDK NASM minimum not satisfied'}
 $resource = [string](& $clang -print-resource-dir)
 if ($LASTEXITCODE -or !$resource) { throw 'Cannot locate target compiler headers.' }
 $ar = Join-Path ([IO.Path]::GetDirectoryName($clang)) $(if ($IsWindows) { 'llvm-ar.exe' } else { 'llvm-ar' })
-if (!(Test-Path -LiteralPath $ar)) { $ar = (Get-Command llvm-ar-19 -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source }
+if (!(Test-Path -LiteralPath $ar)) { $ar = (Get-Command ('llvm-ar-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source }
 $planPath = Join-Path $PSScriptRoot 'NativeInputs.json'
 $plan = Get-Content -Raw -LiteralPath $planPath | ConvertFrom-Json
 $sharedC = @('string','tokenize','format','stdio','sort','numeric','errno')
@@ -54,7 +55,7 @@ foreach ($provider in @('Math','Scan')) {
 $identities = @($inputs | Sort-Object -Unique | ForEach-Object {
     [ordered]@{path=[IO.Path]::GetRelativePath($paths.workspace,$_).Replace('\','/'); sha256=(Get-R4VideoHash $_)}
 })
-$identity = [ordered]@{schema=1; host=$(if($IsWindows){'Windows-x64'}else{'Linux-x64'}); compiler=$compiler[0]; assembler=$assembler[0]; inputs=$identities}
+$identity = [ordered]@{sdk_profiles=$script:R4SdkNative.data.hashes;schema=1; host=$(if($IsWindows){'Windows-x64'}else{'Linux-x64'}); compiler=$compiler[0]; assembler=$assembler[0]; inputs=$identities}
 $id = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes(($identity | ConvertTo-Json -Depth 7 -Compress)))).ToLowerInvariant()
 if (Test-Path -LiteralPath $record) {
     $previous = Get-Content -Raw -LiteralPath $record | ConvertFrom-Json
@@ -69,15 +70,11 @@ if (Test-Path -LiteralPath $record) {
     [IO.File]::Delete($record)
 }
 [IO.Directory]::CreateDirectory($objects) | Out-Null
-$flags = @('-target','x86_64-unknown-none-elf','-std=c17','-O2','-ffreestanding','-fno-stack-protector','-Xclang','-fstack-clash-protection',
-    '-fno-asynchronous-unwind-tables','-fno-unwind-tables','-fno-pic','-mcmodel=large','-mno-red-zone',
-    '-ffunction-sections','-fdata-sections','-fvisibility=hidden','-fno-math-errno','-fno-trapping-math',
-    '-femulated-tls','-nostdinc','-ferror-limit=3','-DPIC','-DHAVE_AV_CONFIG_H','-DR4OS_VIDEO=1','-DR4NATIVE_FILE_IO=1',
-    '-isystem',(Join-Path $resource.Trim() 'include'), ('-I'+$include),('-I'+$shared),('-I'+$config),('-I'+$generated),
+$flags = @($script:R4SdkNative.data.Build.codegen.'native-flags'.video_flags)+@('-isystem',(Join-Path $resource.Trim() 'include'), ('-I'+$include),('-I'+$shared),('-I'+$config),('-I'+$generated),
     ('-I'+(Join-Path $config 'libavcodec')),('-I'+(Join-Path $config 'libavutil')),('-I'+$source),
     ('-I'+(Join-Path $paths.unit 'Bindings/C')), ('-I'+(Join-Path $paths.sdk 'Shared/C/include')),
     ('-I'+(Join-Path $paths.contract 'Generated/SDK/C/include')))
-$asmFlags = @('-f','elf64','-DPIC','-DSTACK_ALIGNMENT=16',('-P'+(Join-Path $config 'config.asm')),
+$asmFlags = @($script:R4SdkNative.data.Build.codegen.'native-flags'.video_asm_flags)+@(('-P'+(Join-Path $config 'config.asm')),
     ('-I'+$source.Replace('\','/')+'/'), ('-I'+$config.Replace('\','/')+'/'))
 $units = @(foreach ($unit in $plan.units) {
     if ($unit.source -notmatch '^libav(codec|util)/[A-Za-z0-9_/]+\.(c|asm)$' -or $unit.object -notmatch '^libav(codec|util)/[A-Za-z0-9_/]+\.o$') { throw 'Invalid FFmpeg source path.' }

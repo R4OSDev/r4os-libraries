@@ -1,6 +1,6 @@
 # Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 $target = Join-Path $unit 'Port/Rust/r4os-x86_64.json'
-$rustSources = Join-Path $foreign 'rust-src-1.85.1/rust-src/lib/rustlib/src/rust/library'
+$rustSources = Join-Path $foreign ('rust-src-'+$script:R4SdkNative.data.Tools.tools.graphics.rustc+'/rust-src/lib/rustlib/src/rust/library')
 $out = Join-Path $buildRoot 'Sysroot/lib/rustlib/r4os-x86_64/lib'
 [IO.Directory]::CreateDirectory($out) | Out-Null
 $savedBootstrap = [Environment]::GetEnvironmentVariable('RUSTC_BOOTSTRAP')

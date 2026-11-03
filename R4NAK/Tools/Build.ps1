@@ -70,7 +70,7 @@ if((Test-Path -LiteralPath $record) -and (Test-Path -LiteralPath $archiveOut)) {
     }
     # The official pinned Rust archive supplies full notices on both hosts;
     # a Windows installation need not contain a separate rust-docs component.
-    & (Join-Path $mesaTools 'Build.ps1') -Offline:$Offline -RustCopyrightFile (Join-Path $foreign 'rust-src-1.85.1/COPYRIGHT')
+    & (Join-Path $mesaTools 'Build.ps1') -Offline:$Offline -RustCopyrightFile (Join-Path $foreign ('rust-src-'+$script:R4SdkNative.data.Tools.tools.graphics.rustc+'/COPYRIGHT'))
     if($LASTEXITCODE){throw 'Mesa host preparation failed.'}
     $mesa=Join-Path $devkit ('Toolchains/MesaNAK/'+$mesaLock.mesa.version+'-'+$identity.mesa_patch.Substring(0,16))
     $source=Join-Path $mesa 'Source'

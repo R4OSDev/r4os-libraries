@@ -45,7 +45,7 @@ const AudioModel = struct {
         if (lost) return a.service_api_result_not_running;
         var result: a.AudioServiceStreamResult = .{ .action = op, .stream_id = 7 };
         switch (op) {
-            a.audio_service_op_open_stream => {},
+            a.audio_service_op_open_stream => { result.result = @intCast(result.stream_id); },
             a.audio_service_op_write_stream => {
                 const data = bytes[@sizeOf(a.AudioServiceStreamWriteRequest)..len];
                 std.debug.assert(std.mem.eql(u8, data, expected[accepted..][0..data.len]));

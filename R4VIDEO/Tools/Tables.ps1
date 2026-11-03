@@ -3,6 +3,7 @@
 param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. ([IO.Path]::GetFullPath('../../Shared/Native/SDK.ps1',$PSScriptRoot))
 . (Join-Path $PSScriptRoot 'Common.ps1')
 $paths = Get-R4VideoPaths
 $source = Join-Path $paths.cache 'Source'
@@ -29,7 +30,7 @@ foreach ($table in $tables) {
     $inputs += @($pinPath, (Join-Path $PSScriptRoot ($table.generator+'.c')))
 }
 $identities = @($inputs | ForEach-Object { [ordered]@{path=[IO.Path]::GetRelativePath($paths.workspace,$_).Replace('\','/'); sha256=(Get-R4VideoHash $_)} })
-$identity = [ordered]@{schema=1; host=$(if($IsWindows){'Windows-x64'}else{'Linux-x64'}); inputs=$identities}
+$identity = [ordered]@{sdk_profiles=$script:R4SdkNative.data.hashes;schema=1; host=$(if($IsWindows){'Windows-x64'}else{'Linux-x64'}); inputs=$identities}
 $id = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes(($identity | ConvertTo-Json -Depth 6 -Compress)))).ToLowerInvariant()
 if (Test-Path -LiteralPath $record) {
     $previous = Get-Content -Raw -LiteralPath $record | ConvertFrom-Json
@@ -56,11 +57,11 @@ foreach ($name in @('HAVE_ERF','HAVE_HYPOT')) {
 $outputs = @()
 foreach ($table in $tables) {
     $exe = Join-Path $hostBuild ($table.name+'-tables'+$(if($IsWindows){'.exe'}else{''}))
-    $arguments = @('cc','-O2','-DHAVE_AV_CONFIG_H','-ffunction-sections','-fdata-sections',
+    $arguments = @($script:R4SdkNative.data.Build.codegen.'native-flags'.video_table_host_flags)+@(
     ('-I'+$hostBuild), ('-I'+(Join-Path $paths.unit 'Port/Config')), ('-I'+$source),
     (Join-Path $PSScriptRoot ($table.generator+'.c')))
     $arguments += @($table.sources | ForEach-Object { Join-Path $source $_ })
-    $arguments += @('-Wl,--gc-sections','-o',$exe)
+    $arguments += @($script:R4SdkNative.data.Build.codegen.'native-flags'.video_table_link_flags)+@('-o',$exe)
     $buildLog = Join-Path $hostBuild ($table.name+'-build.log')
     & $zig @arguments 2> $buildLog
     if ($LASTEXITCODE) { throw "Table generator build failed; see $buildLog." }

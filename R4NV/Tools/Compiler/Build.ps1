@@ -66,7 +66,7 @@ if ($InstallDependencies) {
         }
         $aptArgs = @('install', '-y', '--no-install-recommends', 'rustc', 'bindgen', 'cbindgen', 'meson',
             'ninja-build', 'python3-mako', 'python3-yaml', 'python3-packaging', ('clang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]),
-            'libclang-19-dev', 'flex', 'bison', 'pkg-config', 'curl', 'git', 'xz-utils', 'build-essential')
+            ('libclang-'+$script:R4SdkNative.data.Tools.tools.graphics.clang.Split('.')[0]+'-dev'), 'flex', 'bison', 'pkg-config', 'curl', 'git', 'xz-utils', 'build-essential')
         $uid = & (Find-Tool 'id') -u
         if ($LASTEXITCODE) { throw 'Cannot determine the host user.' }
         if ($uid -eq '0') { Invoke-Checked (Find-Tool 'apt-get') $aptArgs }
