@@ -100,3 +100,14 @@ werden durch SDK/Tools/Sync-NativeProjections.ps1 abgeleitet; native Starter
 pruefen den SDK-Satz vor dem Build. Rust 1.85.1/Clang 19.1.7 der nativen Kette
 bleiben bewusst vom Rust-1.99-Kernel-/Modulprofil getrennt. Entwicklungsstaende
 benoetigen den ausdruecklichen SDK-Quellbeleg; keine automatische Freigabe.
+
+Quellpaket0.64.48 / R4OS0.89.47
+-------------------------------
+Die gemeinsame generierte Rust-Projektion verwendet die aktuellen
+Contract75-Typen einschliesslich R4DESK21/632 und GuiWindowAppearance48.
+Der fachliche Generator wurde gegen die wirklichen aktuellen C-Typen gebaut;
+keine handgepflegten Layoutasserts. Gemeinsamer nativer Helferheader und dessen
+Fingerprint bleiben bytegleich, Library-APIs und R4L-Artefakte unveraendert.
+Bestehende C/Rust-Helferfaelle und fuenf Besitz-/Unsafe-Negativfaelle bestehen.
+Der Desktop-Verbrauch besteht mit13 Fensterfaellen und3 Geometriefaellen.
+Anschluss und native Grenze: Docs/API/GuiWindowAppearance.txt.
