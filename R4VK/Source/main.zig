@@ -4,7 +4,10 @@ const c = @import("r4l_contract");
 const port = @import("runtime");
 
 export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}
-comptime { _ = port.compiler; _ = port.platform; }
+comptime {
+    _ = port.compiler;
+    _ = port.platform;
+}
 
 extern fn vk_icdGetInstanceProcAddr(?*anyopaque, [*:0]const u8) callconv(.c) ?*const anyopaque;
 extern fn vk_icdGetPhysicalDeviceProcAddr(?*anyopaque, [*:0]const u8) callconv(.c) ?*const anyopaque;
@@ -30,7 +33,8 @@ pub export fn r4vk_open_impl(runtime: *const c.R4VkRuntime, output: *c.R4VkLoade
     if (!port.bind(@ptrFromInt(runtime.sys)) or !port.platform.bind(@ptrFromInt(runtime.draw), @ptrFromInt(runtime.dev)))
         return c.error_initialization_failed;
     output.* = .{
-        .version = 1, .size = @sizeOf(c.R4VkLoader),
+        .version = 1,
+        .size = @sizeOf(c.R4VkLoader),
         .negotiate_loader_icd = @intFromPtr(&negotiate),
         .get_instance_proc_addr = @intFromPtr(&getInstanceProcAddr),
         .get_physical_device_proc_addr = @intFromPtr(&getPhysicalDeviceProcAddr),
@@ -39,9 +43,17 @@ pub export fn r4vk_open_impl(runtime: *const c.R4VkRuntime, output: *c.R4VkLoade
 }
 
 pub export var r4vk_vulkan_v1: c.VulkanV1 align(8) linksection(".data.r4l_exports") = .{
-    .header = c.vulkan_v1_header, .open = r4vk_open_impl,
+    .header = c.vulkan_v1_header,
+    .open = r4vk_open_impl,
 };
 pub export var r4vk_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
-    .magic = r4os.abi.r4l_abi_magic, .abi_version = r4os.abi.r4l_abi_version,
-    .size = r4os.abi.r4l_query_struct_size, .group = 0, .kernel_bridge = 0, .reserved = 0,
+    .magic = r4os.abi.r4l_abi_magic,
+    .abi_version = r4os.abi.r4l_abi_version,
+    .size = r4os.abi.r4l_query_struct_size,
+    .group = 0,
+    .kernel_bridge = 0,
+    .reserved = 0,
 };
+
+// Technical generation2 query; independent interfaces keep their revisions.
+pub export var r4vk_query2: r4os.platform2.abi.R4LQuery2 align(8) linksection(".data.r4l_exports") = .{};

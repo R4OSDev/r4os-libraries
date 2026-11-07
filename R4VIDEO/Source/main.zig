@@ -55,3 +55,6 @@ pub export var r4video_query: r.abi.R4LQuery align(8) linksection(".data.r4l_exp
     .kernel_bridge = 0,
     .reserved = 0,
 };
+
+// Technical generation2 query; independent interfaces keep their revisions.
+pub export var r4video_query2: r.platform2.abi.R4LQuery2 align(8) linksection(".data.r4l_exports") = .{};

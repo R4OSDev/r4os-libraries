@@ -42,3 +42,6 @@ pub export var r4aco_query: r4os.abi.R4LQuery align(8) linksection(".data.r4l_ex
     .kernel_bridge = 0,
     .reserved = 0,
 };
+
+// Technical generation2 query; independent interfaces keep their revisions.
+pub export var r4aco_query2: r4os.platform2.abi.R4LQuery2 align(8) linksection(".data.r4l_exports") = .{};

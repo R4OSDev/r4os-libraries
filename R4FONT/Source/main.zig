@@ -264,3 +264,6 @@ test "R4FONT implementation preserves every fixed V1 layout" {
     try std.testing.expectEqual(@as(usize, 32), @sizeOf(contract.R4FontRaster));
     try std.testing.expectEqual(@as(usize, 120), @sizeOf(contract.ApiV1));
 }
+
+// Technical generation2 query; independent interfaces keep their revisions.
+pub export var r4font_query2: r4os.platform2.abi.R4LQuery2 align(8) linksection(".data.r4l_exports") = .{};

@@ -14,12 +14,26 @@ pub export fn r4gl_open_impl(input: *const c.R4GlRuntime, output: *c.R4GlLoader)
     output.* = .{ .version = 1, .size = @sizeOf(c.R4GlLoader), .get_proc_address = @intFromPtr(&getProcAddress) };
     return c.success;
 }
-pub export fn r4gl_release_thread_impl() callconv(.c) i32 { return if (runtime.releaseThread()) c.success else c.error_busy; }
-pub export fn r4gl_finish_impl(timeout_ns: u64) callconv(.c) i32 { return runtime.finish(timeout_ns); }
+pub export fn r4gl_release_thread_impl() callconv(.c) i32 {
+    return if (runtime.releaseThread()) c.success else c.error_busy;
+}
+pub export fn r4gl_finish_impl(timeout_ns: u64) callconv(.c) i32 {
+    return runtime.finish(timeout_ns);
+}
 pub export var r4gl_egl_v1: c.EglV1 align(8) linksection(".data.r4l_exports") = .{
-    .header = c.egl_v1_header, .open = r4gl_open_impl, .release_thread = r4gl_release_thread_impl, .finish = r4gl_finish_impl,
+    .header = c.egl_v1_header,
+    .open = r4gl_open_impl,
+    .release_thread = r4gl_release_thread_impl,
+    .finish = r4gl_finish_impl,
 };
 pub export var r4gl_query: r.abi.R4LQuery align(8) linksection(".data.r4l_exports") = .{
-    .magic = r.abi.r4l_abi_magic, .abi_version = r.abi.r4l_abi_version,
-    .size = r.abi.r4l_query_struct_size, .group = 0, .kernel_bridge = 0, .reserved = 0,
+    .magic = r.abi.r4l_abi_magic,
+    .abi_version = r.abi.r4l_abi_version,
+    .size = r.abi.r4l_query_struct_size,
+    .group = 0,
+    .kernel_bridge = 0,
+    .reserved = 0,
 };
+
+// Technical generation2 query; independent interfaces keep their revisions.
+pub export var r4gl_query2: r.platform2.abi.R4LQuery2 align(8) linksection(".data.r4l_exports") = .{};

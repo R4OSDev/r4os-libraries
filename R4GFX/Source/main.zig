@@ -5,7 +5,9 @@ const render = @import("cpu_render.zig");
 const device = @import("device.zig");
 const swapchain = @import("device_swapchain.zig");
 const color_api = @import("color_api.zig");
-comptime { _ = @import("color_icc.zig"); }
+comptime {
+    _ = @import("color_icc.zig");
+}
 
 export fn r4l_entry() linksection(".text.r4l_entry") callconv(.c) void {}
 
@@ -136,3 +138,6 @@ test "layout overflow and rejected rectangles preserve bytes including padding" 
     image.pitch = std.math.maxInt(u64);
     try t.expectEqual(c.status_overflow, r4gfx_fill_rect_impl(&image, &.{ .x = 0, .y = 0, .width = 1, .height = 1 }, 0));
 }
+
+// Technical generation2 query; independent interfaces keep their revisions.
+pub export var r4gfx_query2: r4os.platform2.abi.R4LQuery2 align(8) linksection(".data.r4l_exports") = .{};

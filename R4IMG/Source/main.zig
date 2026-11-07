@@ -257,3 +257,6 @@ test "ABI conversion preserves every supported format and fixed layout" {
     try std.testing.expectEqual(@as(usize, 56), @sizeOf(contract.R4ImgSvgOptions));
     try std.testing.expectEqual(@as(usize, 16), @sizeOf(contract.R4ImgDecoderDiagnostic));
 }
+
+// Technical generation2 query; independent interfaces keep their revisions.
+pub export var r4img_query2: r4os.platform2.abi.R4LQuery2 align(8) linksection(".data.r4l_exports") = .{};

@@ -821,3 +821,6 @@ test "R4STD preserves five interfaces and adds independent scalar codecs" {
     try std.testing.expectEqual(contract.time_v1_header.interface_id_lo, r4std_time_v1.header.interface_id_lo);
     try std.testing.expectEqual(contract.config_v1_header.interface_id_lo, r4std_config_v1.header.interface_id_lo);
 }
+
+// Technical generation2 query; independent interfaces keep their revisions.
+pub export var r4std_query2: r4os.platform2.abi.R4LQuery2 align(8) linksection(".data.r4l_exports") = .{};

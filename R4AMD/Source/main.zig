@@ -65,36 +65,42 @@ pub export var r4amd_image_v1: c.ImageV1 align(8) linksection(".data.r4l_exports
     .import_image = r4amd_image_import_image_impl,
     .descriptors = r4amd_image_descriptors_impl,
 };
-pub export fn r4amd_image_calculate_impl(r: *const c.R4AmdImageRequest, workspace: [*]u8, bytes: u32,
-    out: *c.R4AmdImageLayout, mips: [*]c.R4AmdMip, capacity: u32) callconv(.c) i32 {
-    return @import("images.zig").calculate(r,workspace,bytes,out,mips,capacity);
+pub export fn r4amd_image_calculate_impl(r: *const c.R4AmdImageRequest, workspace: [*]u8, bytes: u32, out: *c.R4AmdImageLayout, mips: [*]c.R4AmdMip, capacity: u32) callconv(.c) i32 {
+    return @import("images.zig").calculate(r, workspace, bytes, out, mips, capacity);
 }
-pub export fn r4amd_image_address_impl(r: *const c.R4AmdImageRequest, coord: *const c.R4AmdCoordinate, workspace: [*]u8,
-    bytes: u32, out: *c.R4AmdImageAddress) callconv(.c) i32 { return @import("images.zig").address(r,coord,workspace,bytes,out); }
-pub export fn r4amd_image_metadata_impl(r: *const c.R4AmdImageRequest, workspace: [*]u8,
-    bytes: u32, out: *c.R4AmdMetadata) callconv(.c) i32 { return @import("images.zig").metadata(r,workspace,bytes,out); }
-pub export fn r4amd_image_import_image_impl(r: *const c.R4AmdImageRequest, imported: *const c.R4AmdImageImport, workspace: [*]u8,
-    bytes: u32, out: *c.R4AmdImageLayout, mips: [*]c.R4AmdMip, capacity: u32) callconv(.c) i32 {
-    return @import("images.zig").importImage(r,imported,workspace,bytes,out,mips,capacity);
+pub export fn r4amd_image_address_impl(r: *const c.R4AmdImageRequest, coord: *const c.R4AmdCoordinate, workspace: [*]u8, bytes: u32, out: *c.R4AmdImageAddress) callconv(.c) i32 {
+    return @import("images.zig").address(r, coord, workspace, bytes, out);
 }
-pub export fn r4amd_image_descriptors_impl(r: *const c.R4AmdImageRequest, view: *const c.R4AmdImageView, workspace: [*]u8,
-    bytes: u32, out: *c.R4AmdImageDescriptors) callconv(.c) i32 { return @import("images.zig").descriptors(r,view,workspace,bytes,out); }
+pub export fn r4amd_image_metadata_impl(r: *const c.R4AmdImageRequest, workspace: [*]u8, bytes: u32, out: *c.R4AmdMetadata) callconv(.c) i32 {
+    return @import("images.zig").metadata(r, workspace, bytes, out);
+}
+pub export fn r4amd_image_import_image_impl(r: *const c.R4AmdImageRequest, imported: *const c.R4AmdImageImport, workspace: [*]u8, bytes: u32, out: *c.R4AmdImageLayout, mips: [*]c.R4AmdMip, capacity: u32) callconv(.c) i32 {
+    return @import("images.zig").importImage(r, imported, workspace, bytes, out, mips, capacity);
+}
+pub export fn r4amd_image_descriptors_impl(r: *const c.R4AmdImageRequest, view: *const c.R4AmdImageView, workspace: [*]u8, bytes: u32, out: *c.R4AmdImageDescriptors) callconv(.c) i32 {
+    return @import("images.zig").descriptors(r, view, workspace, bytes, out);
+}
 
 const render = @import("render_impl.zig").Provider(c);
 pub export fn r4amd_shader_impl(profile: u32, code: [*]u8, capacity: u32, output: *c.R4AmdShader) callconv(.c) i32 {
-    return render.shader(profile,code,capacity,output);
+    return render.shader(profile, code, capacity, output);
 }
-pub export fn r4amd_encode_pipeline_impl(vs: *const c.R4AmdShader, ps: *const c.R4AmdShader, state: *const c.R4AmdPipeline,
-    color: *const c.R4AmdImageDescriptors, depth: *const c.R4AmdDepth, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
-    return render.pipeline(vs,ps,state,color,depth,commands,capacity,written);
+pub export fn r4amd_encode_pipeline_impl(vs: *const c.R4AmdShader, ps: *const c.R4AmdShader, state: *const c.R4AmdPipeline, color: *const c.R4AmdImageDescriptors, depth: *const c.R4AmdDepth, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
+    return render.pipeline(vs, ps, state, color, depth, commands, capacity, written);
 }
 pub export fn r4amd_encode_draw_impl(request: *const c.R4AmdDraw, commands: [*]u32, capacity: u32, written: *u32) callconv(.c) i32 {
-    return render.draw(request,commands,capacity,written);
+    return render.draw(request, commands, capacity, written);
 }
 pub export var r4amd_render_v1: c.RenderV1 align(8) linksection(".data.r4l_exports") = .{
-    .header=c.render_v1_header, .shader=r4amd_shader_impl, .encode_pipeline=r4amd_encode_pipeline_impl, .encode_draw=r4amd_encode_draw_impl,
+    .header = c.render_v1_header,
+    .shader = r4amd_shader_impl,
+    .encode_pipeline = r4amd_encode_pipeline_impl,
+    .encode_draw = r4amd_encode_draw_impl,
 };
 
 pub export fn r4amd_media_caps_impl(query: *const c.R4AmdMediaQuery, output: *c.R4AmdMediaCaps) callconv(.c) i32 {
     return @import("media.zig").Provider(c).caps(query, output);
 }
+
+// Technical generation2 query; independent interfaces keep their revisions.
+pub export var r4amd_query2: r4os.platform2.abi.R4LQuery2 align(8) linksection(".data.r4l_exports") = .{};
