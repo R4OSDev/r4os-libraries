@@ -1,20 +1,16 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 const std = @import("std");
 const c = @import("r4l_contract");
-const Sha256 = std.crypto.hash.sha2.Sha256;
-const key_offset = 64;
-const binary_offset = key_offset + @sizeOf(c.R4AcoCacheKey);
-const digest_offset = binary_offset + @sizeOf(c.R4AcoBinary);
-pub const code_offset = digest_offset + 32;
+const shared = @import("r4cache_codec");
 pub const max_code_bytes = 16 * 1024 * 1024;
 // The native build hashes the complete source/toolchain/port input closure.
 extern fn r4aco_native_identity() callconv(.c) *const [32]u8;
 
 pub fn span(address: usize, size: usize) bool {
-    return address != 0 and size != 0 and size <= std.math.maxInt(usize) - address;
+    return shared.validSpan(address, size);
 }
 pub fn overlaps(a: usize, a_size: usize, b: usize, b_size: usize) bool {
-    return a < b + b_size and b < a + a_size;
+    return shared.overlaps(a, a_size, b, b_size);
 }
 fn nonzero(d: c.R4AcoDigest) bool {
     return d.h0 | d.h1 | d.h2 | d.h3 != 0;
@@ -63,82 +59,30 @@ fn validBinary(key: *const c.R4AcoCacheKey, binary: *const c.R4AcoBinary, bytes:
     }
     return true;
 }
-// Types contain only explicit 32/64-bit scalar fields and nested structures.
-// Walk the schema instead of serializing host padding or addresses.
-fn encode(comptime T: type, output: []u8, value: T) void {
-    switch (@typeInfo(T)) {
-        .int => std.mem.writeInt(T, output[0..@sizeOf(T)], value, .little),
-        .@"struct" => inline for (std.meta.fields(T)) |f| encode(f.type, output[@offsetOf(T, f.name)..], @field(value, f.name)),
-        else => @compileError("Nonportable cache field"),
+// Shared format mechanics; these actual vendor predicates/identity stay local.
+const CachePolicy = struct {
+    pub const magic = "R4ACOC01".*;
+    pub const format_revision: u32 = 1;
+    pub const compiler_revision = c.compiler_revision;
+    pub const max_payload_bytes = max_code_bytes;
+    pub const transient_fields: []const []const u8 = &.{ "peak_bytes", "elapsed_ns", "log_length" };
+    pub const valid_key = validKey;
+    pub const valid_metadata = validBinary;
+    pub fn compilerIdentity() [32]u8 {
+        return r4aco_native_identity().*;
     }
-}
-fn decode(comptime T: type, bytes: []const u8) T {
-    switch (@typeInfo(T)) {
-        .int => return std.mem.readInt(T, bytes[0..@sizeOf(T)], .little),
-        .@"struct" => {
-            var value: T = std.mem.zeroes(T);
-            inline for (std.meta.fields(T)) |f| @field(value, f.name) = decode(f.type, bytes[@offsetOf(T, f.name)..]);
-            return value;
-        },
-        else => @compileError("Nonportable cache field"),
-    }
-}
-fn digest(prefix: []const u8, code: []const u8) [32]u8 {
-    var h: Sha256 = .init(.{});
-    h.update(prefix);
-    h.update(code);
-    return h.finalResult();
-}
+};
+const Codec = shared.CanonicalCacheEnvelope(c.R4AcoCacheKey, c.R4AcoBinary, CachePolicy);
+pub const code_offset = Codec.payload_offset;
 pub export fn r4aco_cache_write_impl(key: *const c.R4AcoCacheKey, binary: *const c.R4AcoBinary, code: [*]const u8, code_length: u64, bytes: [*]u8, capacity: u64, written: *u64) callconv(.c) i32 {
-    if (!validKey(key) or !validBinary(key, binary, code_length) or !span(@intFromPtr(code), code_length) or !span(@intFromPtr(bytes), capacity)) return c.status_invalid;
-    const total = code_offset + code_length;
-    if (capacity < total) return c.status_capacity;
-    if (overlaps(@intFromPtr(bytes), total, @intFromPtr(code), code_length) or
-        overlaps(@intFromPtr(bytes), total, @intFromPtr(key), @sizeOf(c.R4AcoCacheKey)) or
-        overlaps(@intFromPtr(bytes), total, @intFromPtr(binary), @sizeOf(c.R4AcoBinary)) or
-        overlaps(@intFromPtr(bytes), total, @intFromPtr(written), @sizeOf(u64)) or
-        overlaps(@intFromPtr(written), @sizeOf(u64), @intFromPtr(code), code_length) or
-        overlaps(@intFromPtr(written), @sizeOf(u64), @intFromPtr(key), @sizeOf(c.R4AcoCacheKey)) or
-        overlaps(@intFromPtr(written), @sizeOf(u64), @intFromPtr(binary), @sizeOf(c.R4AcoBinary))) return c.status_invalid;
-    var header: [code_offset]u8 = @splat(0);
-    @memcpy(header[0..8], "R4ACOC01");
-    encode(u32, header[8..], 1);
-    encode(u32, header[12..], c.compiler_revision);
-    encode(u64, header[16..], total);
-    encode(u32, header[24..], @sizeOf(c.R4AcoCacheKey));
-    encode(u32, header[28..], @sizeOf(c.R4AcoBinary));
-    @memcpy(header[32..64], r4aco_native_identity());
-    encode(c.R4AcoCacheKey, header[key_offset..], key.*);
-    var executable = binary.*;
-    executable.peak_bytes = 0;
-    executable.elapsed_ns = 0;
-    executable.log_length = 0;
-    encode(c.R4AcoBinary, header[binary_offset..], executable);
-    @memcpy(header[digest_offset..], &digest(header[0..digest_offset], code[0..code_length]));
-    @memcpy(bytes[0..code_offset], &header);
-    @memcpy(bytes[code_offset..][0..code_length], code[0..code_length]);
-    written.* = total;
+    _ = Codec.encode(key, binary, code, code_length, bytes, capacity, written) catch |err| return if (err == error.Capacity) c.status_capacity else c.status_invalid;
     return c.status_ok;
 }
 pub export fn r4aco_cache_read_impl(key: *const c.R4AcoCacheKey, bytes: [*]const u8, length: u64, output: *c.R4AcoBinary, code: [*]u8, capacity: u64) callconv(.c) i32 {
-    if (!validKey(key) or !span(@intFromPtr(bytes), length) or !span(@intFromPtr(code), capacity)) return c.status_invalid;
-    if (length < code_offset or length > code_offset + max_code_bytes) return c.status_cache_miss;
-    const input = bytes[0..length];
-    if (!std.mem.eql(u8, input[0..8], "R4ACOC01") or decode(u32, input[8..]) != 1 or decode(u32, input[12..]) != c.compiler_revision or
-        decode(u64, input[16..]) != length or decode(u32, input[24..]) != @sizeOf(c.R4AcoCacheKey) or
-        decode(u32, input[28..]) != @sizeOf(c.R4AcoBinary) or !std.mem.eql(u8, input[32..64], r4aco_native_identity())) return c.status_cache_miss;
-    const stored_key = decode(c.R4AcoCacheKey, input[key_offset..]);
-    const stored_binary = decode(c.R4AcoBinary, input[binary_offset..]);
-    if (!std.meta.eql(stored_key, key.*) or !validBinary(key, &stored_binary, length - code_offset) or
-        stored_binary.peak_bytes != 0 or stored_binary.elapsed_ns != 0 or stored_binary.log_length != 0 or
-        !std.mem.eql(u8, input[digest_offset..code_offset], &digest(input[0..digest_offset], input[code_offset..]))) return c.status_cache_miss;
-    if (capacity < stored_binary.code_bytes) return c.status_capacity;
-    if (overlaps(@intFromPtr(code), stored_binary.code_bytes, @intFromPtr(bytes), length) or
-        overlaps(@intFromPtr(output), @sizeOf(c.R4AcoBinary), @intFromPtr(bytes), length) or
-        overlaps(@intFromPtr(output), @sizeOf(c.R4AcoBinary), @intFromPtr(code), stored_binary.code_bytes) or
-        overlaps(@intFromPtr(code), stored_binary.code_bytes, @intFromPtr(key), @sizeOf(c.R4AcoCacheKey)) or
-        overlaps(@intFromPtr(output), @sizeOf(c.R4AcoBinary), @intFromPtr(key), @sizeOf(c.R4AcoCacheKey))) return c.status_invalid;
-    @memcpy(code[0..stored_binary.code_bytes], input[code_offset..]);
-    output.* = stored_binary;
+    _ = Codec.decode(key, bytes, length, output, code, capacity) catch |err| return switch (err) {
+        error.Capacity => c.status_capacity,
+        error.InvalidArgument, error.Overflow, error.Overlap => c.status_invalid,
+        else => c.status_cache_miss,
+    };
     return c.status_ok;
 }

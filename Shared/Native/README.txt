@@ -3,6 +3,21 @@
 
 Owner: Libraries. These sources compile into each consuming R4L; they have
 no separate runtime module, install target, manifest or public table ABI.
+
+cache_codec.zig owns bounded canonical scalar schemas and C01 cache-envelope
+mechanics for R4NAK/R4ACO. Scalar fields are explicit LE32/LE64; padding and
+selected transient fields are canonical zero. Entire schema/header/identity/
+digest/capacity/alias admission precedes publication. This pure source helper
+allocates nothing and retains no caller memory. Vendor key/ISA/resource
+admission and actual compiler identities stay in each compiler provider.
+The existing COMPILER_V1:1 cache interfaces expose it to Zig/C/Rust; no new
+runtime import is needed. Schema descriptors and all input buffers remain
+immutable and mapped through return. Normative contract and C01 identity
+limits: Docs/API/CanonicalCacheCodec.txt in the documentation repository.
+Targeted new schema cases: Shared/Tests/cache_codec.zig (named cache_codec
+module points to this directory's cache_codec.zig); original vendor/compiler
+tests and byte fixtures remain independent. No GPU execution is implied.
+
 R4VK consumes threads, locks, memory and process-local storage through its r4native
 Zig module. Compiler arenas, job failure policy and private C entrypoint names
 remain in R4VK. A native caller requires R4SYS21 and its exact current-thread

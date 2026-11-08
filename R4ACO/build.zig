@@ -33,6 +33,7 @@ pub fn build(b: *std.Build) void {
         runtime.addImport("r4os", host);
         const math = b.createModule(.{ .root_source_file = b.path("../Shared/Native/math.zig"), .target = b.graph.host, .optimize = .ReleaseSafe });
         runtime.addImport("r4native_math", math);
+        runtime.addImport("r4cache_codec", b.createModule(.{ .root_source_file = b.path("../Shared/Native/cache_codec.zig"), .target = b.graph.host, .optimize = .ReleaseSafe }));
         const checks = b.createModule(.{ .root_source_file = b.path("Tests/compiler.zig"), .target = b.graph.host, .optimize = .ReleaseSafe });
         checks.addImport("r4l_contract", implementation);
         checks.addImport("compiler_runtime", runtime);
@@ -41,7 +42,8 @@ pub fn build(b: *std.Build) void {
         compiler_check = b.addRunArtifact(b.addTest(.{ .root_module = checks }));
         b.getInstallStep().dependOn(&compiler_check.?.step);
         const cli = b.createModule(.{ .root_source_file = b.path("Tools/compiler.zig"), .target = b.graph.host, .optimize = .ReleaseSafe });
-        cli.addImport("r4l_contract", implementation); cli.addImport("compiler_runtime", runtime);
+        cli.addImport("r4l_contract", implementation);
+        cli.addImport("compiler_runtime", runtime);
         inline for (.{ "R4ACO.a", "R4NativeMath.a", "R4NativeScan.a" }) |name| cli.addObjectFile(archives.path(b, name));
         const tool = b.addExecutable(.{ .name = "r4aco-compiler", .root_module = cli });
         const install_tool = b.addInstallArtifact(tool, .{});
