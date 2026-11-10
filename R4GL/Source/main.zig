@@ -9,8 +9,8 @@ fn getProcAddress(name: [*:0]const u8) callconv(.c) ?*const anyopaque {
 }
 pub export fn r4gl_open_impl(input: *const c.R4GlRuntime, output: *c.R4GlLoader) callconv(.c) i32 {
     if (input.version != 1 or input.size < @sizeOf(c.R4GlRuntime) or input.profile > 1 or input.reserved != 0 or
-        input.application == 0 or input.application % @alignOf(r.abi.R4XStartContext) != 0) return c.error_initialization;
-    if (!runtime.bind(@ptrFromInt(input.application), input.profile)) return c.error_initialization;
+        input.application == 0 or input.application % 8 != 0) return c.error_initialization;
+    if (!runtime.bind(input.application, input.profile)) return c.error_initialization;
     output.* = .{ .version = 1, .size = @sizeOf(c.R4GlLoader), .get_proc_address = @intFromPtr(&getProcAddress) };
     return c.success;
 }

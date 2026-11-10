@@ -21,26 +21,40 @@ fn initialize(value: *State) void { value.* = .{}; }
 fn state() ?*State { return native.process_local.getOrCreate(State, &state_key, initialize); }
 
 const VulkanProc = *const fn (?*anyopaque, [*:0]const u8) callconv(.c) ?*const anyopaque;
-pub fn bind(raw: *const a.R4XStartContext, profile: u32) bool {
+pub fn bind(raw_address: u64, profile: u32) bool {
     if (profile > 1) return false;
-    const client = if (profile == 1) (vk.VulkanV1Client.init(raw) catch return false) else null;
-    const bundle = r.program.bundleValueFromR4XStart(raw) orelse return false;
-    const sys = bundle.sys orelse return false;
-    if (sys.abi_version < 23 or sys.size < @offsetOf(a.R4XStartR4Sys, "program_exit") + 8 or bundle.draw == null) return false;
-    inline for (.{ "program_exit", "cpu_capacity", "vm_reserve", "vm_commit", "vm_release", "program_local_get", "program_local_publish" }) |field|
-        if (@field(sys.*, field) == 0) return false;
-    if (!native.threads.bind(sys)) return false;
+    const input = native.caller.Input.init(raw_address) catch return false;
+    const client: ?vk.VulkanV1Client = if (profile == 1) switch (input) {
+        .legacy => |view| vk.VulkanV1Client.init(view.raw) catch return false,
+        .generation2 => |view| vk.VulkanV1Client.init2(view.raw) catch return false,
+    } else null;
+    const vulkan_runtime: vk.R4VkRuntime = switch (input) {
+        .legacy => |view| block: {
+            const sys = view.sys orelse return false;
+            if (sys.abi_version < 23 or view.draw == null or view.dev == null) return false;
+            inline for (.{ "program_exit", "cpu_capacity", "vm_reserve", "vm_commit", "vm_release", "program_local_get", "program_local_publish" }) |field|
+                if (!native.system.reaches(sys, field)) return false;
+            if (!native.threads.bind(sys) or !native.application.bind(view.raw) or !native.system_info.bind(view.dev.?)) return false;
+            break :block .{ .version = 1, .size = @sizeOf(vk.R4VkRuntime), .sys = @intFromPtr(sys),
+                .draw = @intFromPtr(view.draw.?), .dev = @intFromPtr(view.dev.?) };
+        },
+        .generation2 => |view| block: {
+            const sys = view.system() orelse return false;
+            if (view.drawing() == null or view.devices() == null) return false;
+            inline for (.{ "program_exit", "cpu_capacity" }) |field|
+                if (!native.system.reaches(sys, field)) return false;
+            if (!native.threads.bind2(sys) or !native.application.bind2(view.raw) or !native.system_info.bind2(view.devices().?)) return false;
+            break :block .{ .version = 2, .size = @sizeOf(vk.R4VkRuntime), .sys = raw_address, .draw = 0, .dev = 0 };
+        },
+    };
     kernel_bound.store(true, .release);
-    if (!native.application.bind(raw) or
-        !native.system_info.bind(bundle.dev orelse return false) or !lifecycle.bind()) return false;
+    if (!lifecycle.bind()) return false;
     const value = state() orelse return false;
     if (value.phase.load(.acquire) != 0) return false;
     if (value.profile) |old| return old == profile;
     if (client) |vulkan| {
         var loader: vk.R4VkLoader = undefined;
-        if (vulkan.open(&.{ .version = 1, .size = @sizeOf(vk.R4VkRuntime),
-            .sys = @intFromPtr(sys), .draw = @intFromPtr(bundle.draw.?),
-            .dev = @intFromPtr(bundle.dev.?), }, &loader) != vk.success or
+        if (vulkan.open(&vulkan_runtime, &loader) != vk.success or
             loader.version != 1 or loader.size < @sizeOf(vk.R4VkLoader) or
             loader.get_instance_proc_addr == 0) return false;
         value.vulkan = @ptrFromInt(loader.get_instance_proc_addr);
@@ -67,7 +81,7 @@ export fn r4gl_native_vulkan_proc(instance: ?*anyopaque, name: [*:0]const u8) ca
 
 pub fn ready() bool {
     if (!kernel_bound.load(.acquire)) return false;
-    if (native.application.bundle() == null) return false;
+    if (native.application.snapshot() == null) return false;
     const value = (native.process_local.lookup(State, &state_key) catch return false) orelse return false;
     return value.phase.load(.acquire) == 0;
 }
@@ -77,7 +91,7 @@ extern fn r4native_stdio_finish() callconv(.c) c_int;
 fn releaseApiThread() bool { return eglReleaseThread() != 0; }
 pub fn releaseThread() bool {
     if (!kernel_bound.load(.acquire)) return false;
-    if (native.application.bundle() == null) return false;
+    if (native.application.snapshot() == null) return false;
     const value = (native.process_local.lookup(State, &state_key) catch return false) orelse return false;
     if (value.phase.load(.acquire) == 2) return true;
     return lifecycle.finishCurrent();
@@ -88,7 +102,7 @@ pub fn releaseThread() bool {
 // WINSVC/Desktop. No runtime owner lock spans foreign finalizers or service I/O.
 pub fn finish(timeout_ns: u64) i32 {
     if (!kernel_bound.load(.acquire)) return -1;
-    if (native.application.bundle() == null) return -1;
+    if (native.application.snapshot() == null) return -1;
     const value = (native.process_local.lookup(State, &state_key) catch return -1) orelse return -1;
     if (value.finishing.swap(true, .acq_rel)) return -2;
     defer value.finishing.store(false, .release);
@@ -110,7 +124,7 @@ pub fn finish(timeout_ns: u64) i32 {
 
 pub fn fatal(message: [*:0]const u8, code: i32) noreturn {
     _ = r4native_console_write(message, @intCast(std.mem.len(message)));
-    const call: a.R4SysFns.program_exit = @ptrFromInt(native.threads.table().program_exit);
+    const call = native.system.required("program_exit");
     _ = call(code, a.program_exit_reason_failed);
     // Only a violated kernel calling-context contract can return here.
     @trap();
@@ -139,8 +153,7 @@ export fn r4gl_native_startup_trace(message: [*:0]const u8) callconv(.c) void {
     var value: [4]u8 = undefined;
     const enabled = native.process.environmentValue("R4GL_STARTUP_TRACE", &value) catch return;
     if (!std.mem.eql(u8, enabled, "1")) return;
-    const bundle = native.application.bundle() orelse return;
-    const sys = r.r4sys.Context.init(bundle);
+    const sys = (native.application.snapshot() orelse return).system();
     sys.println(std.mem.span(message));
 }
 export fn r4gl_native_runtime_trace(stage: [*:0]const u8) callconv(.c) void {
@@ -148,11 +161,11 @@ export fn r4gl_native_runtime_trace(stage: [*:0]const u8) callconv(.c) void {
     const enabled = native.process.environmentValue("R4GL_STARTUP_TRACE", &value) catch return;
     if (!std.mem.eql(u8, enabled, "1")) return;
     const now = native.time.read() orelse return;
-    const bundle = native.application.bundle() orelse return;
+    const sys = (native.application.snapshot() orelse return).system();
     var line: [256]u8 = undefined;
     const text = std.fmt.bufPrint(&line, "R4GL RUNTIME stage={s} instant-ns={d}",
         .{ std.mem.span(stage), now.instant_ns }) catch return;
-    r.r4sys.Context.init(bundle).println(text);
+    sys.println(text);
 }
 export fn r4gl_process_exec_path(out: [*]u8, capacity: usize) callconv(.c) usize {
     return (native.process.modulePath(out[0..capacity]) orelse return 0).len;
@@ -165,7 +178,7 @@ export fn os_get_option_cached(name: [*:0]const u8) callconv(.c) ?[*:0]const u8 
 }
 export fn os_get_option_secure(name: [*:0]const u8) callconv(.c) ?[*:0]const u8 { return os_get_option(name); }
 export fn r4native_console_write(bytes: [*]const u8, count: u32) callconv(.c) i32 {
-    const call: a.R4SysFns.write = @ptrFromInt(native.threads.table().write);
+    const call = native.system.required("write");
     return call(bytes, count);
 }
 export fn os_log_message(message: [*:0]const u8) callconv(.c) void { _ = r4native_console_write(message, @intCast(std.mem.len(message))); }
@@ -191,12 +204,17 @@ export fn r4native_cpp_state(key: *const anyopaque, bytes: usize, alignment: usi
 export fn r4native_register_finalizer(callback: finalizers.PlainCallback) callconv(.c) c_int { return if (finalizers.registerPlain(callback)) 0 else -1; }
 export fn r4native_fatal(message: [*:0]const u8) callconv(.c) noreturn { fatal(message, -1); }
 
-const Draw = extern struct { table: *const a.R4XStartR4Draw };
-export fn r4gl_native_application(raw: *a.R4XStartContext, draw: *Draw) callconv(.c) bool {
-    const bundle = native.application.bundle() orelse return false;
-    const table = bundle.draw orelse return false;
-    raw.* = bundle.raw.*;
-    draw.* = .{ .table = table };
+const Draw = extern struct { table: ?*const a.R4XStartR4Draw = null, generation2: ?*const r.platform2.CView = null };
+export fn r4gl_native_application(raw_address: *u64, draw: *Draw) callconv(.c) bool {
+    const saved = native.application.snapshot() orelse return false;
+    switch (saved.*) {
+        .legacy => draw.* = .{ .table = saved.legacy.bundle.draw orelse return false },
+        .generation2 => {
+            if (saved.generation2.context.drawing() == null) return false;
+            draw.* = .{ .generation2 = &saved.generation2.c_view };
+        },
+    }
+    raw_address.* = saved.address();
     return true;
 }
 // A FIFO broker queue alone cannot promise a video-frame interval. Read the
@@ -208,10 +226,9 @@ fn synchronizedOutput(info: a.DisplayPresentationInfo, head: usize) bool {
         info.policies & 1 != 0 and info.interval_ns != 0 and info.interval_ns <= std.time.ns_per_s and
         info.display_generation != 0 and info.sequence != 0;
 }
-export fn r4gl_window_swap_limit(raw: *const a.R4XStartContext, config: ?*const a.WindowGraphicsConfig) callconv(.c) i32 {
-    const bundle = r.program.bundleValueFromR4XStart(raw) orelse return 0;
-    if (bundle.draw == null) return 0;
-    const draw = r.r4draw.Context.init(&bundle);
+export fn r4gl_window_swap_limit(raw_address: u64, config: ?*const a.WindowGraphicsConfig) callconv(.c) i32 {
+    const input = native.caller.Input.init(raw_address) catch return 0;
+    const draw: r.r4draw.Context = .{ .base = input.base() };
     for (0..a.gfx_output_max_assignments) |index| {
         var target: a.GfxOutputTarget = .{};
         var info: a.DisplayPresentationInfo = .{};
@@ -246,11 +263,11 @@ export fn r4gl_window_swap_limit(raw: *const a.R4XStartContext, config: ?*const 
     return 0;
 }
 export fn r4gl_native_now() callconv(.c) u64 { return @intCast(native.time.os_time_get_nano()); }
-export fn r4gl_window_query(raw: *const a.R4XStartContext, id: u32, expected: ?*const a.WindowGraphicsSurface, out: *a.WindowGraphicsReply) callconv(.c) i32 {
-    return native.window.query(raw, id, expected, out);
+export fn r4gl_window_query(raw_address: u64, id: u32, expected: ?*const a.WindowGraphicsSurface, out: *a.WindowGraphicsReply) callconv(.c) i32 {
+    return native.window.query(raw_address, id, expected, out);
 }
-export fn r4gl_window_request(raw: *const a.R4XStartContext, request: *const a.WindowGraphicsRequest, out: *a.WindowGraphicsReply) callconv(.c) bool {
-    return native.window.request(raw, request, out);
+export fn r4gl_window_request(raw_address: u64, request: *const a.WindowGraphicsRequest, out: *a.WindowGraphicsReply) callconv(.c) bool {
+    return native.window.request(raw_address, request, out);
 }
-export fn r4gl_window_service_dead(raw: *const a.R4XStartContext, service: *const a.ProgramProcessHandle) callconv(.c) bool { return native.window.service_dead(raw, service); }
-export fn r4gl_window_wait(raw: *const a.R4XStartContext, owner: *const a.ProgramProcessHandle, revision: u64, ns: u64) callconv(.c) void { native.window.wait(raw, owner, revision, ns); }
+export fn r4gl_window_service_dead(raw_address: u64, service: *const a.ProgramProcessHandle) callconv(.c) bool { return native.window.service_dead(raw_address, service); }
+export fn r4gl_window_wait(raw_address: u64, owner: *const a.ProgramProcessHandle, revision: u64, ns: u64) callconv(.c) void { native.window.wait(raw_address, owner, revision, ns); }

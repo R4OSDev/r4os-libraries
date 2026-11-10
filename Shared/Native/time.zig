@@ -6,7 +6,7 @@ const threads = @import("threads.zig");
 const ns_per_second: u64 = 1_000_000_000;
 
 fn function(comptime name: []const u8) @field(a.R4SysFns, name) {
-    return @ptrFromInt(@field(threads.table().*, name));
+    return threads.system.required(name);
 }
 pub fn read() ?a.MonotonicClockInfo {
     var info: a.MonotonicClockInfo = .{};

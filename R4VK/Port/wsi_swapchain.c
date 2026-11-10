@@ -22,7 +22,7 @@ struct native_window {
    mtx_t mutex;
    uint32_t references; /* state mutex; records and temporary callers */
    R4WindowGraphicsSurface identity;
-   R4XStartContext application;
+   uint64_t application;
    struct native_chain *chains, *active, *pending_owner;
    R4WindowGraphicsRequest pending;
    uint64_t revision;
@@ -98,7 +98,7 @@ static struct native_window *window_get(struct wsi_state *s, const struct r4vk_s
    if (!out && empty) {
       out = empty;
       out->identity = surface->identity;
-      out->application = *surface->application;
+      out->application = surface->application;
       out->revision = 0;
       assert(!out->chains && !out->active && !out->pending_owner);
    }
@@ -159,7 +159,7 @@ static bool drain(struct native_window *w, R4WindowGraphicsReply *out)
    if (!w->pending_owner) return true;
    struct native_chain *chain = w->pending_owner;
    R4WindowGraphicsReply reply;
-   if (!r4vk_window_request(&w->application, &w->pending, &reply)) return false;
+   if (!r4vk_window_request(w->application, &w->pending, &reply)) return false;
    if (reply.result == R4OS_WINDOW_GRAPHICS_OK) {
       if (memcmp(&reply.surface, &w->identity, sizeof(w->identity))) return false;
       switch (w->pending.action) {
@@ -214,7 +214,7 @@ static bool retire_step(struct wsi_state *s, struct native_window *w)
 {
    bool outstanding = false;
    lock(&w->mutex);
-   bool dead = r4vk_window_service_dead(&w->application, &w->identity.service);
+   bool dead = r4vk_window_service_dead(w->application, &w->identity.service);
    if (dead) w->pending_owner = NULL;
    else if (!drain(w, NULL)) { unlock(&w->mutex); return true; }
    struct native_chain **link = &w->chains;
@@ -246,7 +246,7 @@ static bool retire_step(struct wsi_state *s, struct native_window *w)
          R4WindowGraphicsRequest query = request_for(chain, R4OS_WINDOW_GRAPHICS_CHAIN_STATUS);
          query.image_slot = slot;
          R4WindowGraphicsReply reply;
-         if (!r4vk_window_request(&w->application, &query, &reply)) { outstanding = true; continue; }
+         if (!r4vk_window_request(w->application, &query, &reply)) { outstanding = true; continue; }
          /* A closed chain can still contain a leased image. Only an absent
           * chain/surface or a non-leased slot ends its producer-fence loan. */
          if ((reply.result == R4OS_WINDOW_GRAPHICS_STALE && !reply.surface.serial) ||
@@ -617,8 +617,8 @@ r4vkDrainWindowSwapchain(VkDevice device, VkSwapchainKHR handle, uint64_t timeou
          R4WindowGraphicsRequest query = request_for(chain, R4OS_WINDOW_GRAPHICS_CHAIN_STATUS);
          R4WindowGraphicsReply reply;
          query.image_slot = slot;
-         if (!r4vk_window_request(&w->application, &query, &reply)) {
-            result = r4vk_window_service_dead(&w->application, &w->identity.service) ?
+         if (!r4vk_window_request(w->application, &query, &reply)) {
+            result = r4vk_window_service_dead(w->application, &w->identity.service) ?
                VK_ERROR_SURFACE_LOST_KHR : VK_NOT_READY;
             break;
          }
@@ -641,7 +641,7 @@ r4vkDrainWindowSwapchain(VkDevice device, VkSwapchainKHR handle, uint64_t timeou
       uint64_t now;
       if (r4vk_monotonic_time(&now)) return VK_ERROR_DEVICE_LOST;
       if (now >= until) return VK_TIMEOUT;
-      r4vk_window_wait(&w->application, &w->identity.owner, revision, until - now);
+      r4vk_window_wait(w->application, &w->identity.owner, revision, until - now);
    }
 }
 
@@ -698,7 +698,7 @@ nvk_AcquireNextImage2KHR(VkDevice device, const VkAcquireNextImageInfoKHR *info,
       uint64_t now;
       if (r4vk_monotonic_time(&now)) return VK_ERROR_DEVICE_LOST;
       if (now >= until) return VK_TIMEOUT;
-      r4vk_window_wait(&w->application, &w->identity.owner, revision, until - now);
+      r4vk_window_wait(w->application, &w->identity.owner, revision, until - now);
    }
 }
 

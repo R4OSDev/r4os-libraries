@@ -7,7 +7,7 @@ const a = r4os.abi;
 const threads = @import("threads.zig");
 
 fn function(comptime name: []const u8) @field(a.R4SysFns, name) {
-    return @ptrFromInt(@field(threads.table().*, name));
+    return threads.system.required(name);
 }
 
 pub fn lookup(comptime T: type, key: *const anyopaque) error{Unavailable}!?*T {

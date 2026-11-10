@@ -26,12 +26,22 @@ fn negotiate(version: *u32) callconv(.c) i32 {
 }
 
 pub export fn r4vk_open_impl(runtime: *const c.R4VkRuntime, output: *c.R4VkLoader) callconv(.c) i32 {
-    if (runtime.version != 1 or runtime.size < @sizeOf(c.R4VkRuntime) or
-        runtime.sys == 0 or runtime.draw == 0 or runtime.dev == 0 or
-        runtime.sys % 8 != 0 or runtime.draw % 8 != 0 or runtime.dev % 8 != 0)
+    if (runtime.size < @sizeOf(c.R4VkRuntime) or runtime.sys == 0 or runtime.sys % 8 != 0)
         return c.error_initialization_failed;
-    if (!port.bind(@ptrFromInt(runtime.sys)) or !port.platform.bind(@ptrFromInt(runtime.draw), @ptrFromInt(runtime.dev)))
-        return c.error_initialization_failed;
+    switch (runtime.version) {
+        1 => {
+            if (runtime.draw == 0 or runtime.dev == 0 or runtime.draw % 8 != 0 or runtime.dev % 8 != 0 or
+                !port.bind(@ptrFromInt(runtime.sys)) or !port.platform.bind(@ptrFromInt(runtime.draw), @ptrFromInt(runtime.dev)))
+                return c.error_initialization_failed;
+        },
+        // Version2 carries an actual opaque Start2 address in sys; the former
+        // table-address fields are zero. VULKAN_V1's slots/layout stay stable.
+        2 => {
+            if (runtime.draw != 0 or runtime.dev != 0 or !port.bind2(@ptrFromInt(runtime.sys)))
+                return c.error_initialization_failed;
+        },
+        else => return c.error_initialization_failed,
+    }
     output.* = .{
         .version = 1,
         .size = @sizeOf(c.R4VkLoader),

@@ -12,7 +12,7 @@ pub struct R4GlRuntime {
     pub r#version: u32,
     /// At least 24 bytes.
     pub r#size: u32,
-    /// Address of the actual R4XStartContext. Its immutable platform/import tables must follow the application lifetime.
+    /// Opaque address of the actual admitted Start1 or Start2 record. The library copies it into stable process-owned storage; immutable import/name backing follows the process lifetime. No new context is interpreted as the legacy layout.
     pub r#application: u64,
     /// 0 selects CPU softpipe. 1 selects the initial Zink/R4VK pbuffer profile and requires the optional R4VK import. No implicit fallback or hardware claim: eglInitialize validates the actual device. Other values are rejected.
     pub r#profile: u32,
@@ -97,7 +97,7 @@ impl<'a> EglV1Client<'a> {
         if interface.slot_address(48).is_none() { return Err(Error::MissingSlot); }
         Ok(Self { interface })
     }
-    /// Bind the actual application startup context and immutable kernel tables. Requires R4SYS23 and R4DRAW/R4DEV imports; Zink additionally requires the application import R4VK:VULKAN_V1:1. No EGL context or device is created. The selected profile is immutable; repeated matching opens are idempotent until finish begins.
+    /// Bind the actual selected startup generation and immutable platform imports. Start1 requires original R4SYS23/DRAW/DEV; Start2 requires actual SYS2/DRAW2/DEV2. Zink additionally imports independent R4VK:VULKAN_V1:1, plus technical Query2 under Start2. No EGL context/device is created. Matching opens remain idempotent until finish; selected profile stays immutable.
     /// # Safety
     /// Process-owned runtime. Keep this R4L generation loaded until all GL/EGL calls, objects and thread cleanup have finished.
     /// Blocking: may_block; threading: caller_serialized; reentrancy: not_reentrant.

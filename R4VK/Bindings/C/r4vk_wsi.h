@@ -7,8 +7,9 @@
 /* Private R4VK entrypoint, obtained from its instance-proc loader with a
  * live instance that enabled VK_KHR_surface. This is not a registered
  * Vulkan extension and allocates no VkStructureType or extension number.
- * application is the calling program's original R4XStart context; its
- * lifetime must include the surface's lifetime. window_id comes from the
+ * application is the calling program's actual Start1 or Start2 context.
+ * Creation admits and snapshots it in process-owned native storage; its
+ * import/name backing remains resident for the process. window_id comes from the
  * normal Desktop API. WINSVC authenticates the calling process generation.
  * VK_NOT_READY means Desktop has not published a compatible window yet.
  * Destroy a successful result with vkDestroySurfaceKHR. */
@@ -17,7 +18,7 @@
 typedef struct R4VkWindowSurfaceCreateInfo {
     uint32_t version;
     uint32_t size;
-    const R4XStartContext *application;
+    const void *application;
     uint32_t window_id;
     uint32_t reserved;
 } R4VkWindowSurfaceCreateInfo;

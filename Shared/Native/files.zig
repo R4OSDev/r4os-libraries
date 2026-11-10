@@ -7,7 +7,7 @@ const local = @import("process_local.zig");
 const threads = @import("threads.zig");
 const e = struct { const noent=2; const io=5; const badf=9; const busy=16; const exists=17; const isdir=21; const invalid=22; const notty=25; const big=27; const unsupported=95; };
 fn files() ?r.app_storage.Files {
-    return .{ .sys = r.r4sys.Context.init(application.bundle() orelse return null) };
+    return .{ .sys = (application.snapshot() orelse return null).system() };
 }
 fn streamError(code: i32) i32 {
     return -@as(i32, switch (code) {

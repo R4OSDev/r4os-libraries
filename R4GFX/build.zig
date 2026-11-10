@@ -7,8 +7,11 @@ pub fn build(b: *std.Build) void {
     const nv_path = nv_package.namedLazyPath("binding");
     const amd_package = b.dependency("r4amd", .{});
     const amd_path = amd_package.namedLazyPath("binding");
-    const artifact = sdk.addR4MFWithOptions(b.path("module.R4MF"), .{ .zig_module_roots = &.{ nv_path, amd_path } });
+    const caller_path = b.path("../Shared/Native/caller.zig");
+    const artifact = sdk.addR4MFWithOptions(b.path("module.R4MF"), .{ .zig_module_roots = &.{ nv_path, amd_path, caller_path } });
     const host = sdk.createR4osModule(b.graph.host, .Debug);
+    const caller = b.createModule(.{ .root_source_file = caller_path, .target = b.graph.host });
+    caller.addImport("r4os", host);
     const nv = b.createModule(.{ .root_source_file = nv_path, .target = b.graph.host });
     nv.addImport("r4os", host);
     const amd = b.createModule(.{ .root_source_file = amd_path, .target = b.graph.host });
@@ -19,6 +22,7 @@ pub fn build(b: *std.Build) void {
     binding.addImport("r4os", host);
     const provider = b.createModule(.{ .root_source_file = b.path("Source/main.zig"), .target = b.graph.host });
     provider.addImport("r4os", host);
+    provider.addImport("library_caller", caller);
     provider.addImport("r4l_contract", implementation);
     provider.addImport("r4nv_binding", nv);
     provider.addImport("r4amd_binding", amd);
@@ -51,6 +55,7 @@ pub fn build(b: *std.Build) void {
     conformance.addIncludePath(b.path("Bindings/C"));
     conformance.addIncludePath(sdk.profile.c_include_root);
     conformance.addIncludePath(sdk.profile.contract_c_include_root);
+    conformance.addIncludePath(sdk.profile.contract_c_include_root2);
     conformance.addCSourceFile(.{ .file = b.path("Tests/Generated/contract_conformance.c"), .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" } });
     const step = b.step("test", "R4GFX layout, transactional software access and C/Zig ABI conformance");
     const provider_filter = b.option([]const u8, "provider-test-filter", "Run only matching existing provider tests without rebuilding the module");
@@ -61,8 +66,7 @@ pub fn build(b: *std.Build) void {
     for ([_]*std.Build.Module{ provider, conformance, display_tests }) |module| {
         if (provider_filter != null and module != provider) continue;
         if (display_filter != null and module != display_tests) continue;
-        const run = b.addRunArtifact(b.addTest(.{ .root_module = module,
-            .filters = if (display_filter) |filter| &.{filter} else if (provider_filter) |filter| &.{filter} else &.{} }));
+        const run = b.addRunArtifact(b.addTest(.{ .root_module = module, .filters = if (display_filter) |filter| &.{filter} else if (provider_filter) |filter| &.{filter} else &.{} }));
         step.dependOn(&run.step);
         b.getInstallStep().dependOn(&run.step);
     }

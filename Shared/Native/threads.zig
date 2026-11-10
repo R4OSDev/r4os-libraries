@@ -4,13 +4,13 @@
 const std = @import("std");
 const r4os = @import("r4os");
 const a = r4os.abi;
+pub const system = @import("system.zig");
 const sync = @import("threading.zig");
 const Mutex = sync.Mutex;
 const Condition = sync.Condition;
 pub const Once = extern struct { state: u32 = 0, reserved: u32 = 0, notification: u64 = 0 };
 const Timespec = extern struct { seconds: i64, nanoseconds: i64 };
 const MonotonicCondition = extern struct { cond: Condition };
-var kernel_table: std.atomic.Value(usize) = .init(0);
 pub const Entry = *const fn (?*anyopaque) callconv(.c) c_int;
 /// Immutable code-only dispatch owned by the consuming R4L. It must be bound
 /// before that library creates workers; no process data is retained here.
@@ -36,19 +36,20 @@ pub fn bind(kernel: *const a.R4XStartR4Sys) bool {
         kernel.thread_current_handle == 0) return false;
     inline for (.{ "thread_create_handle", "thread_handle_join", "thread_current", "thread_status", "thread_exit", "task_yield" }) |field|
         if (@field(kernel.*, field) == 0) return false;
-    const previous = kernel_table.cmpxchgStrong(0, @intFromPtr(kernel), .release, .acquire);
-    return previous == null or previous.? == @intFromPtr(kernel);
+    return system.bind(kernel);
+}
+pub fn bind2(kernel: *const r4os.platform2.abi.R4XStartR4Sys2) bool {
+    _ = sync.Host.fromTable2(kernel) orelse return false;
+    return system.bind2(kernel);
 }
 pub fn table() *const a.R4XStartR4Sys {
-    const address = kernel_table.load(.acquire);
-    if (address == 0) @trap();
-    return @ptrFromInt(address);
+    return system.legacy() orelse @trap();
 }
-fn host() sync.Host {
-    return sync.Host.fromTable(table()).?;
+pub fn host() sync.Host {
+    return sync.Host.bound() orelse @trap();
 }
 fn function(comptime name: []const u8) @field(a.R4SysFns, name) {
-    return @ptrFromInt(@field(table().*, name));
+    return system.required(name);
 }
 // A void C API cannot report a violated lock lifetime. Never continue with
 // an unlocked/destroyed object or claim that a failed operation succeeded.

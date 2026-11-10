@@ -819,6 +819,57 @@ fn checkAdapterTransfer(raw: *const a.R4XStartContext) !void {
         try t.expectEqual(gfx.status_ok, client.device_close(device));
     }
 }
+// The same original callback model runs behind a genuinely separate SYS2/
+// DRAW2 layout. No legacy context/table cast or fabricated compatibility table.
+fn checkGeneration2(old_sys: *const a.R4XStartR4Sys, old_draw: *const a.R4XStartR4Draw) !void {
+    const r = @import("r4os");
+    const a2 = r.platform2.abi;
+    const binding = @import("r4gfx_binding");
+    var sys: a2.R4XStartR4Sys2 = .{};
+    var draw: a2.R4XStartR4Draw2 = .{};
+    inline for (std.meta.fields(a2.R4XStartR4Sys2)) |field| {
+        if (comptime @hasDecl(a.R4SysFns, field.name)) @field(sys, field.name) = @field(old_sys.*, field.name);
+    }
+    inline for (std.meta.fields(a2.R4XStartR4Draw2)) |field| {
+        if (comptime @hasDecl(a.R4DrawFns, field.name)) @field(draw, field.name) = @field(old_draw.*, field.name);
+    }
+    const imports = [_]a.R4XStartImport{
+        .{ .group_id = 1, .resolved_version = 2, .table = @intFromPtr(&sys) },
+        .{ .group_id = 3, .resolved_version = 2, .table = @intFromPtr(&draw) },
+        .{ .module_name = @intFromPtr("R4GFX"), .symbol_name = @intFromPtr("Query2"), .min_version = 2, .resolved_version = 2, .table = @intFromPtr(&@import("main.zig").r4gfx_query2) },
+        .{ .module_name = @intFromPtr("R4GFX"), .symbol_name = @intFromPtr("DEVICE_V1"), .min_version = 10, .resolved_version = 10, .table = @intFromPtr(api) },
+    };
+    var raw: a2.R4XStartContext2 = .{ .imports = @intFromPtr(&imports), .import_count = imports.len, .instance_id = 7 };
+    const client = try binding.DeviceV1Client.init2(&raw);
+    const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
+    const config: binding.R4GfxDeviceConfig = .{ .version = 1, .size = @sizeOf(binding.R4GfxDeviceConfig), .storage_address = @intFromPtr(storage),
+        .storage_bytes = api.storage_size(), .start_context = @intFromPtr(&raw), .preferred_adapter = 0, .flags = c.device_software_only };
+    var handle: binding.R4GfxDevice = .{ .address = 0x1234, .generation = 77 };
+    const untouched = handle;
+    raw.size = 16;
+    try t.expectEqual(c.status_invalid, client.device_open(&config, &handle));
+    try t.expectEqualDeep(untouched, handle);
+    try t.expect(storage.magic == 0 and storage.generation == 0);
+    raw.size = @sizeOf(a2.R4XStartContext2);
+    try t.expectEqual(c.status_ok, client.device_open(&config, &handle));
+    try t.expect(storage.base().bundle == null and storage.base().generation2 != null);
+    try t.expect(storage.caller.generation2.c_view.raw == &storage.caller.generation2.raw);
+    try t.expect(storage.caller.address() != @intFromPtr(&raw));
+    raw.magic = 0; raw.imports = 0; raw.import_count = 0;
+    var info: binding.R4GfxDeviceInfo = undefined;
+    try t.expectEqual(c.status_ok, client.device_info(&handle, &info));
+    var image = std.mem.zeroes(binding.R4GfxResourceDesc);
+    image.version = 1; image.size = @sizeOf(binding.R4GfxResourceDesc); image.kind = c.resource_image; image.flags = c.image_target;
+    image.source_kind = c.source_create_system;
+    image.image = .{ .cpu_address = 0, .byte_length = 64, .pitch = 16, .width = 4, .height = 4, .format = c.format_xrgb8888, .reserved = 0 };
+    var resource: binding.R4GfxResource = undefined;
+    try t.expectEqual(c.status_ok, client.resource_create(&handle, &image, &resource));
+    try t.expectEqual(@as(usize, 1), Model.referenceCount());
+    try t.expectEqual(c.status_ok, client.resource_release(&handle, &resource));
+    try t.expectEqual(@as(usize, 0), Model.referenceCount());
+    try t.expectEqual(c.status_ok, client.device_close(&handle));
+    Model.reset();
+}
 pub fn check() !void {
     Model.reset();
     const storage = try t.allocator.create(d.Device); defer t.allocator.destroy(storage); storage.* = .{};
@@ -838,6 +889,7 @@ pub fn check() !void {
         .display_present_regions = @intFromPtr(&Model.presentPixels),
         .gfx_queue_backend_properties = @intFromPtr(&Model.properties),
         .gfx_fence_query = @intFromPtr(&Model.query), .gfx_fence_cancel = @intFromPtr(&Model.cancel), .gfx_fence_release = @intFromPtr(&Model.drop) };
+    try checkGeneration2(&sys, &draw);
     var imports = [_]a.R4XStartImport{
         .{ .group_id = @intFromEnum(a.R4LGroup.r4sys), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&sys) },
         .{ .group_id = @intFromEnum(a.R4LGroup.r4draw), .flags = a.r4xstart_import_flag_group_interface, .table = @intFromPtr(&draw) },
@@ -2220,7 +2272,7 @@ fn checkNativeColorMode(config: *const c.R4GfxDeviceConfig, combined: bool) !voi
     // Identical XR30 storage is insufficient: PQ/HLG, primaries, range and
     // luminance must match the actual output before any present submission.
     const device = try d.get(&handle, false);
-    const draw = @constCast(device.bundle.draw.?);
+    const draw = @constCast(device.caller.legacy.bundle.draw.?);
     draw.gfx_output_color = @intFromPtr(&Model.outputColor);
     defer draw.gfx_output_color = 0;
     const output_target: a.GfxOutputTarget = .{ .adapter_id = Model.binding.adapter_id, .connector_id = 4,

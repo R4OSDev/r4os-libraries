@@ -27,7 +27,7 @@ pub fn Runtime(comptime Memory: type) type {
             return local.getOrCreate(State, &key, initialize);
         }
         fn host() sync.Host {
-            return sync.Host.fromTable(threads.table()).?;
+            return threads.host();
         }
         fn unlock(value: *State) void {
             if (value.mutex.unlock(&host()) != sync.success) @trap();

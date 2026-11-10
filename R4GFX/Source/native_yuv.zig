@@ -115,7 +115,7 @@ fn execute(handle: *const c.R4GfxDevice, input: *const c.R4GfxYuvRenderRequest, 
     const owner = &device.native_yuv;
     trace.stage = "native-profile";
     const profile = try owner.ensure(device);
-    const client = nv.RenderV1Client.init(device.bundle.raw) catch return error.Unsupported;
+    const client = device.caller.client(nv.RenderV1Client) catch return error.Unsupported;
     var indices: [4]u8 = @splat(0);
     var acquired: usize = 0;
     // Keep earlier planes protected while later cache entries are acquired.

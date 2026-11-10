@@ -17,7 +17,7 @@ pub const Unscoped = struct {
 
 pub fn Runtime(comptime Policy: type) type {
     return struct {
-        const Context = struct { heap: r4os.vm_allocator.Heap };
+        const Context = struct { heap: threads.system.Heap };
         const Header = struct {
             magic: u64,
             owner: *Context,
@@ -45,7 +45,7 @@ pub fn Runtime(comptime Policy: type) type {
         var context_key: u8 = 0;
 
         fn init(owner: *Context) void {
-            owner.* = .{ .heap = .{ .api = threads.table() } };
+            owner.heap.init();
         }
         fn context() ?*Context {
             return local.getOrCreate(Context, &context_key, init);

@@ -17,7 +17,7 @@ fn result(rc: i32) d.Error!void {
 }
 pub fn query(device: *d.Device, desc: a.GfxBufferDescriptor) d.Error!Result {
     if (device.backend() != d.c.render_backend_amd) return error.Unsupported;
-    const client = amd.ImageV1Client.init(device.bundle.raw) catch return error.Unsupported;
+    const client = device.caller.client(amd.ImageV1Client) catch return error.Unsupported;
     var properties: a.GfxBackendProperties = .{};
     try d.platform(device.queues().backendProperties(&device.selected.binding, &properties));
     if (properties.version != 1 or properties.size < @sizeOf(a.GfxBackendProperties) or

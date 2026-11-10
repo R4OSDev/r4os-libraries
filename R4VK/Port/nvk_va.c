@@ -84,13 +84,11 @@ VkResult r4vk_nvk_va_context_init(struct r4vk_nvk_va_context *context,
                                  VkResult (*reference)(struct nvkmd_mem *,
                                                        R4GfxBufferReference *))
 {
-   if (!context || !dev || !dev->pdev || !draw || !draw->table ||
+   if (!context || !dev || !dev->pdev || !r4draw_available(draw) ||
        !adapter || !generation || !reference)
       return VK_ERROR_INITIALIZATION_FAILED;
-   const R4XStartR4Draw *table = draw->table;
-   if (table->size < offsetof(R4XStartR4Draw, gfx_virtual_wait) + sizeof(uintptr_t) ||
-       !table->gfx_virtual_start || !table->gfx_virtual_query ||
-       !table->gfx_virtual_close || !table->gfx_virtual_wait)
+   if (!R4DRAW_HAS(draw, gfx_virtual_start) || !R4DRAW_HAS(draw, gfx_virtual_query) ||
+       !R4DRAW_HAS(draw, gfx_virtual_close) || !R4DRAW_HAS(draw, gfx_virtual_wait))
       return VK_ERROR_FEATURE_NOT_PRESENT;
    const uint32_t alignment = dev->pdev->bind_align_B;
    if (alignment < 4096 || !power_of_two(alignment) ||

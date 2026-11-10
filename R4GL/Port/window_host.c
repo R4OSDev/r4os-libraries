@@ -18,7 +18,7 @@ struct chain;
 struct window {
    mtx_t gate;
    bool used, live;
-   R4XStartContext application;
+   uint64_t application;
    R4Draw draw;
    R4WindowGraphicsSurface identity;
    R4WindowGraphicsConfig config;
@@ -47,7 +47,7 @@ struct state {
    thrd_t worker;
    struct window windows[16]; /* matches the broker's surface capacity */
 };
-struct host { R4XStartContext application; R4Draw draw; };
+struct host { uint64_t application; R4Draw draw; };
 struct storage {
    R4Draw draw;
    R4GfxBufferReference bo;
@@ -117,7 +117,7 @@ static bool drain(struct window *w, R4WindowGraphicsReply *out)
    struct chain *c = w->pending_owner;
    if (!c) return true;
    R4WindowGraphicsReply reply;
-   if (!r4gl_window_request(&w->application, &w->pending, &reply)) return false;
+   if (!r4gl_window_request(w->application, &w->pending, &reply)) return false;
    if (reply.result == OK) {
       if (memcmp(&reply.surface, &w->identity, sizeof(w->identity))) return false;
       switch (w->pending.action) {
@@ -173,7 +173,7 @@ static bool retire_step(struct window *w)
 {
    bool outstanding = false;
    lock(&w->gate);
-   const bool dead = r4gl_window_service_dead(&w->application, &w->identity.service);
+   const bool dead = r4gl_window_service_dead(w->application, &w->identity.service);
    if (dead) w->pending_owner = NULL;
    else if (!drain(w, NULL)) { unlock(&w->gate); return true; }
    struct chain **link = &w->chains;
@@ -194,7 +194,7 @@ static bool retire_step(struct window *w)
                R4WindowGraphicsRequest request = command(c, R4OS_WINDOW_GRAPHICS_CHAIN_STATUS);
                request.image_slot = i;
                R4WindowGraphicsReply reply;
-               if (r4gl_window_request(&w->application, &request, &reply))
+               if (r4gl_window_request(w->application, &request, &reply))
                   loan_ended = (reply.result == R4OS_WINDOW_GRAPHICS_STALE && !reply.surface.serial) ||
                      (reply.result == R4OS_WINDOW_GRAPHICS_CLOSED && reply.flags != R4OS_WINDOW_GRAPHICS_IMAGE_LEASED);
             }
@@ -289,7 +289,7 @@ static bool config_ok(const R4WindowGraphicsConfig *c)
 static EGLint refresh(struct window *w)
 {
    R4WindowGraphicsReply reply;
-   int32_t rc = r4gl_window_query(&w->application, w->identity.window_id, &w->identity, &reply);
+   int32_t rc = r4gl_window_query(w->application, w->identity.window_id, &w->identity, &reply);
    if (rc != OK) return result(rc);
    if (!config_ok(&reply.config)) return EGL_BAD_MATCH;
    w->config = reply.config; w->revision = reply.revision;
@@ -301,7 +301,7 @@ static EGLint acquire_window(void *value, void *native, void **lease)
    struct host *host = value;
    if (!(uintptr_t)native || (uintptr_t)native > UINT32_MAX) return EGL_BAD_NATIVE_WINDOW;
    R4WindowGraphicsReply reply;
-   int32_t rc = r4gl_window_query(&host->application, (uintptr_t)native, NULL, &reply);
+   int32_t rc = r4gl_window_query(host->application, (uintptr_t)native, NULL, &reply);
    if (rc != OK) return result(rc);
    if (!config_ok(&reply.config)) return EGL_BAD_MATCH;
    struct state *s = state(); if (!s) return EGL_BAD_ALLOC;
@@ -430,7 +430,7 @@ static EGLint swap_interval(void *value, void *lease, EGLint interval)
    struct window *w = lease;
    lock(&w->gate);
    EGLint rc = refresh(w);
-   if (rc == EGL_SUCCESS && interval && !r4gl_window_swap_limit(&w->application, &w->config)) rc = EGL_BAD_MATCH;
+   if (rc == EGL_SUCCESS && interval && !r4gl_window_swap_limit(w->application, &w->config)) rc = EGL_BAD_MATCH;
    if (rc == EGL_SUCCESS) w->interval = interval;
    unlock(&w->gate);
    return rc;
@@ -450,7 +450,7 @@ static EGLint change_mode(struct window *w, unsigned mode, uint64_t until, R4Win
             R4WindowGraphicsRequest request = command(c, R4OS_WINDOW_GRAPHICS_CHAIN_STATUS);
             request.image_slot = slot;
             R4WindowGraphicsReply reply;
-            if (!r4gl_window_request(&w->application, &request, &reply)) return EGL_BAD_ACCESS;
+            if (!r4gl_window_request(w->application, &request, &reply)) return EGL_BAD_ACCESS;
             if (reply.result != OK) { *failed = reply; return result(reply.result); }
             if (reply.chain != c->id || reply.image_slot != slot ||
                 memcmp(&reply.surface, &w->identity, sizeof(w->identity))) return EGL_BAD_ACCESS;
@@ -459,7 +459,7 @@ static EGLint change_mode(struct window *w, unsigned mode, uint64_t until, R4Win
          }
          if (!queued) break;
          if (r4gl_native_now() >= until) return EGL_BAD_ACCESS;
-         r4gl_window_wait(&w->application, &w->identity.owner, w->revision, 25000000ull);
+         r4gl_window_wait(w->application, &w->identity.owner, w->revision, 25000000ull);
       }
    }
    retire(c);
@@ -496,7 +496,7 @@ static EGLint publish(struct window *w, struct r4gl_sw_storage *input)
    }
    unsigned mode = R4OS_WINDOW_GRAPHICS_MAILBOX;
    if (w->interval) {
-      if (!r4gl_window_swap_limit(&w->application, &w->config)) return EGL_BAD_MATCH;
+      if (!r4gl_window_swap_limit(w->application, &w->config)) return EGL_BAD_MATCH;
       mode = R4OS_WINDOW_GRAPHICS_FIFO;
    } else if (!(w->config.present_modes & mode)) mode = R4OS_WINDOW_GRAPHICS_FIFO;
    uint64_t until = r4gl_native_now() + 1000000000ull;
@@ -510,7 +510,7 @@ static EGLint publish(struct window *w, struct r4gl_sw_storage *input)
       if (!issue(c, command(c, R4OS_WINDOW_GRAPHICS_ACQUIRE), &reply)) { retire(c); return EGL_BAD_ACCESS; }
       if (reply.result != R4OS_WINDOW_GRAPHICS_NOT_READY) break;
       if (r4gl_native_now() >= until) return EGL_BAD_ACCESS;
-      r4gl_window_wait(&w->application, &w->identity.owner, w->revision, 25000000ull);
+      r4gl_window_wait(w->application, &w->identity.owner, w->revision, 25000000ull);
    }
    if ((rc = result(reply.result)) != EGL_SUCCESS) {
       retire(c); return publication_error(w, s->revision, &reply, rc);
@@ -559,7 +559,7 @@ EGLint r4gl_egl_open_host(void *native_display, struct r4gl_egl_host *out)
    if (!r4gl_native_application(&host->application, &host->draw)) { free(host); return EGL_NOT_INITIALIZED; }
    *out = (struct r4gl_egl_host){ .sw = {host, supports, allocate, release, present}, .close = close_host,
       .acquire_window = acquire_window, .release_window = release_window, .window_state = window_state, .present_status = present_status,
-      .max_swap_interval = r4gl_window_swap_limit(&host->application, NULL), .swap_interval = swap_interval,
+      .max_swap_interval = r4gl_window_swap_limit(host->application, NULL), .swap_interval = swap_interval,
       .window_loader = window_loader };
    return EGL_SUCCESS;
 }

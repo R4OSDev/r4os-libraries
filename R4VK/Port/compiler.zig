@@ -45,7 +45,7 @@ fn require(result: c_int) void {
     if (result != sync.success) @trap();
 }
 fn currentThread() u32 {
-    const function: r4os.abi.R4SysFns.thread_current = @ptrFromInt(threads.table().thread_current);
+    const function = threads.system.required("thread_current");
     return function();
 }
 fn maybeActive() ?*Call {

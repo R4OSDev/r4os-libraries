@@ -5,10 +5,10 @@ const native = @import("root.zig");
 
 pub fn Runtime(comptime Policy: type, comptime allocation: type) type {
     return struct {
-        const Context = struct { heap: r.vm_allocator.Heap, allocations: allocation.Allocator };
+        const Context = struct { heap: native.system.Heap, allocations: allocation.Allocator };
         var key: u8 = 0;
         fn initialize(value: *Context) void {
-            value.heap = .{ .api = native.threads.table() };
+            value.heap.init();
             value.allocations = .{ .backing = value.heap.allocator() };
         }
         fn context() ?*Context {

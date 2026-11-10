@@ -70,15 +70,14 @@ VkResult r4vk_nvk_mem_context_init(struct r4vk_nvk_mem_context *context,
                                   struct r4vk_nvk_va_context *resources,
                                   bool host_coherent)
 {
-   if (!context || !resources || !resources->dev || !resources->draw.table ||
+   if (!context || !resources || !resources->dev || !r4draw_available(&resources->draw) ||
        resources->reference != r4vk_nvk_mem_reference)
       return VK_ERROR_INITIALIZATION_FAILED;
-   const R4XStartR4Draw *table = resources->draw.table;
-   if (table->size < offsetof(R4XStartR4Draw, gfx_buffer_map_persistent) + sizeof(uintptr_t) ||
-       !table->gfx_buffer_create || !table->gfx_buffer_describe ||
-       !table->gfx_buffer_release || !table->gfx_buffer_map_persistent ||
-       !table->gfx_buffer_unmap || !table->gfx_native_start ||
-       !table->gfx_native_wait || !table->gfx_native_receive || !table->gfx_native_close)
+   const R4Draw *draw = &resources->draw;
+   if (!R4DRAW_HAS(draw, gfx_buffer_create) || !R4DRAW_HAS(draw, gfx_buffer_describe) ||
+       !R4DRAW_HAS(draw, gfx_buffer_release) || !R4DRAW_HAS(draw, gfx_buffer_map_persistent) ||
+       !R4DRAW_HAS(draw, gfx_buffer_unmap) || !R4DRAW_HAS(draw, gfx_native_start) ||
+       !R4DRAW_HAS(draw, gfx_native_wait) || !R4DRAW_HAS(draw, gfx_native_receive) || !R4DRAW_HAS(draw, gfx_native_close))
       return VK_ERROR_FEATURE_NOT_PRESENT;
    *context = (struct r4vk_nvk_mem_context) {
       .resources = resources, .host_coherent = host_coherent,
@@ -289,7 +288,7 @@ VkResult r4vk_nvk_import_mem(struct r4vk_nvk_mem_context *context,
    if (is_lost(context)) return VK_ERROR_DEVICE_LOST;
    if (!source || !valid(*source)) return VK_ERROR_INVALID_EXTERNAL_HANDLE;
    const struct r4vk_nvk_va_context *resources = context->resources;
-   if (!resources->draw.table->gfx_buffer_import) return VK_ERROR_FEATURE_NOT_PRESENT;
+   if (!R4DRAW_HAS(&resources->draw, gfx_buffer_import)) return VK_ERROR_FEATURE_NOT_PRESENT;
    struct native_mem *mem = calloc(1, sizeof(*mem));
    if (!mem) return VK_ERROR_OUT_OF_HOST_MEMORY;
    mem->context = context;

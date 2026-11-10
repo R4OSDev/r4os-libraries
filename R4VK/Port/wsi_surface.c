@@ -21,8 +21,11 @@ r4vkCreateWindowSurface(VkInstance handle, const R4VkWindowSurfaceCreateInfo *in
       return VK_ERROR_INITIALIZATION_FAILED;
    VK_FROM_HANDLE(vk_instance, instance, handle);
    if (!instance->enabled_extensions.KHR_surface) return VK_ERROR_EXTENSION_NOT_PRESENT;
+   uint64_t application;
+   if (!r4vk_application_snapshot(info->application, &application))
+      return VK_ERROR_INITIALIZATION_FAILED;
    R4WindowGraphicsReply reply;
-   int32_t status = r4vk_window_query(info->application, info->window_id, NULL, &reply);
+   int32_t status = r4vk_window_query(application, info->window_id, NULL, &reply);
    if (status == R4OS_WINDOW_GRAPHICS_UNAVAILABLE || status == R4OS_WINDOW_GRAPHICS_NOT_READY)
       return VK_NOT_READY;
    if (status != R4OS_WINDOW_GRAPHICS_OK) return VK_ERROR_SURFACE_LOST_KHR;
@@ -30,7 +33,7 @@ r4vkCreateWindowSurface(VkInstance handle, const R4VkWindowSurfaceCreateInfo *in
       sizeof(*surface), 8, VK_SYSTEM_ALLOCATION_SCOPE_OBJECT);
    if (!surface) return VK_ERROR_OUT_OF_HOST_MEMORY;
    *surface = (struct r4vk_surface) {
-      .instance = instance, .application = info->application, .identity = reply.surface,
+      .instance = instance, .application = application, .identity = reply.surface,
    };
    *out = (VkSurfaceKHR)(uintptr_t)surface;
    return VK_SUCCESS;

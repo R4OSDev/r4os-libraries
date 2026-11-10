@@ -1,5 +1,7 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 // Compiled native-library support. No independent R4L or public module ABI.
+pub const system = @import("system.zig");
+pub const caller = @import("caller.zig");
 pub const threading = @import("threading.zig");
 pub const threads = @import("threads.zig");
 pub const process_local = @import("process_local.zig");

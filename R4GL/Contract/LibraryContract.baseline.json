@@ -65,7 +65,7 @@
             "error_domain": "R4GL",
             "ownership": "Process-owned runtime. Keep this R4L generation loaded until all GL/EGL calls, objects and thread cleanup have finished."
           },
-          "description": "Bind the actual application startup context and immutable kernel tables. Requires R4SYS23 and R4DRAW/R4DEV imports; Zink additionally requires the application import R4VK:VULKAN_V1:1. No EGL context or device is created. The selected profile is immutable; repeated matching opens are idempotent until finish begins."
+          "description": "Bind the actual selected startup generation and immutable platform imports. Start1 requires original R4SYS23/DRAW/DEV; Start2 requires actual SYS2/DRAW2/DEV2. Zink additionally imports independent R4VK:VULKAN_V1:1, plus technical Query2 under Start2. No EGL context/device is created. Matching opens remain idempotent until finish; selected profile stays immutable."
         },
         {
           "name": "release_thread",
@@ -166,7 +166,7 @@
             "is_const": false,
             "nullable": false
           },
-          "description": "Address of the actual R4XStartContext. Its immutable platform/import tables must follow the application lifetime."
+          "description": "Opaque address of the actual admitted Start1 or Start2 record. The library copies it into stable process-owned storage; immutable import/name backing follows the process lifetime. No new context is interpreted as the legacy layout."
         },
         {
           "name": "profile",
@@ -274,7 +274,7 @@
     },
     {
       "name": "presentation",
-      "text": "EGL_DEFAULT_DISPLAY uses the selected native profile. Softpipe window handles encode the creating application WINSVC window ID. Zink currently admits pbuffers only; native Vulkan window integration remains pending. Buffers/fences use R4DRAW and WINSVC; no host window, Linux FD or GPU handle is fabricated."
+      "text": "EGL_DEFAULT_DISPLAY uses the explicitly selected native profile. Window handles identify the creating process WINSVC surface. Zink window integration retains canonical broker/BO/fence identities and requires an actually admitted Vulkan backend; unsupported hardware remains unavailable. No host window, Linux FD or GPU handle is fabricated."
     },
     {
       "name": "fatal",

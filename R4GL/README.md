@@ -1,6 +1,14 @@
 ﻿# R4GL
 
-Native Mesa EGL/OpenGL runtime for R4OS. The initial software profile uses
+Native Mesa EGL/OpenGL runtime for R4OS. Version34 admits the real generation2
+startup context through `Query2:2` and the independent `EGL_V1:1` interface.
+`R4GlRuntime` keeps version1 and its24-byte layout; application contains the
+actual Start2 address for new callers. The process owns a stable startup
+snapshot and explicit C view, together with its heap, TLS and finalizers.
+Keep its startup imports and library objects alive through thread release and
+runtime finish. Explicit legacy admission remains during the staged migration.
+
+The initial software profile uses
 softpipe without LLVM/JIT and works without a native GPU backend.
 Version 0.1.28 negotiates EGL 1.5, OpenGL 3.3 Core for Softpipe/NVK, and
 OpenGL 4.6 Core / GLSL 4.60 for the admitted AMD RADV profile. Zink connects

@@ -602,10 +602,9 @@ VkResult r4vk_nvk_create_ctx(struct r4vk_nvk_va_context *resources,
     * do not reinterpret Mesa's differently numbered engine mask. */
    const unsigned supported = NVKMD_ENGINE_3D | NVKMD_ENGINE_COMPUTE | NVKMD_ENGINE_COPY;
    if (!engines || ((unsigned)engines & ~supported)) return VK_ERROR_FEATURE_NOT_PRESENT;
-   const R4XStartR4Draw *api = resources->draw.table;
-   if (api->size < offsetof(R4XStartR4Draw, gfx_queue_submit_native) + sizeof(uintptr_t) ||
-       !api->gfx_queue_submit_native || !api->gfx_queue_open || !api->gfx_queue_close ||
-       !api->gfx_fence_query || !api->gfx_fence_wait || !api->gfx_fence_release)
+   const R4Draw *draw = &resources->draw;
+   if (!R4DRAW_HAS(draw, gfx_queue_submit_native) || !R4DRAW_HAS(draw, gfx_queue_open) || !R4DRAW_HAS(draw, gfx_queue_close) ||
+       !R4DRAW_HAS(draw, gfx_fence_query) || !R4DRAW_HAS(draw, gfx_fence_wait) || !R4DRAW_HAS(draw, gfx_fence_release))
       return VK_ERROR_FEATURE_NOT_PRESENT;
    VkResult result = r4vk_nvk_check_device(resources->dev);
    if (result != VK_SUCCESS) return result;

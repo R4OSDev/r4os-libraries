@@ -9,9 +9,7 @@ const monotonic = @import("time.zig");
 pub const Timespec = extern struct { seconds: i64, nanoseconds: i64 };
 
 pub fn read() ?Timespec {
-    const table = threads.table();
-    if (table.time_state == 0) return null;
-    const get: a.R4SysFns.time_state = @ptrFromInt(table.time_state);
+    const get = threads.system.function("time_state") orelse return null;
     var value: a.TimeState = .{};
     get(&value);
     if (value.valid == 0) return null;
@@ -40,7 +38,7 @@ pub export fn timespec_get(output: *Timespec, base: c_int) callconv(.c) c_int {
 
 pub export fn cnd_timedwait(condition: *sync.Condition, mutex: *sync.Mutex, absolute: *const Timespec) callconv(.c) c_int {
     if (absolute.nanoseconds < 0 or absolute.nanoseconds >= 1_000_000_000) return sync.failed;
-    const host = sync.Host.fromTable(threads.table()) orelse return sync.failed;
+    const host = sync.Host.bound() orelse return sync.failed;
     const target = @as(i128, absolute.seconds) * 1_000_000_000 + absolute.nanoseconds;
     while (true) {
         const wall = read() orelse return sync.failed;

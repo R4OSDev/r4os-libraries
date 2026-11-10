@@ -240,7 +240,7 @@ const _: () = {
     assert!(core::mem::offset_of!(R4GfxDevice, r#generation) == 8);
 };
 
-/// Version 1; storage_size bytes aligned to 8, borrowed R4XStartContext for this caller. Preferred adapter zero selects automatically. software_only prevents native selection. Storage and outputs must not overlap input/start metadata.
+/// Version1; storage_size bytes aligned to8. start_context is an actual admitted Start1 or Start2 record for this caller. Device storage owns its copied start snapshot; immutable names/import backing follows the process lifetime. Preferred adapter zero selects automatically. software_only prevents native selection. Storage and outputs must not overlap input/start metadata.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct R4GfxDeviceConfig {
@@ -252,7 +252,7 @@ pub struct R4GfxDeviceConfig {
     pub r#storage_address: u64,
     /// storage_bytes
     pub r#storage_bytes: u64,
-    /// start_context
+    /// Opaque address of the actual selected Start1/Start2 record. Its magic and generation are validated before typed access; no legacy context cast.
     pub r#start_context: u64,
     /// preferred_adapter
     pub r#preferred_adapter: u32,

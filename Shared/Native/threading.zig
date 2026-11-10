@@ -25,15 +25,27 @@ pub const Host = struct {
     clock: a.R4SysFns.monotonic_clock,
 
     pub fn fromTable(table: *const a.R4XStartR4Sys) ?Host {
-        if (table.magic != a.r4xstart_r4sys_magic or table.abi_version < 19 or
-            table.size < @offsetOf(a.R4XStartR4Sys, "notification_close") + 8) return null;
+        if (table.abi_version < 19) return null;
+        return fromActualTable(table);
+    }
+    pub fn fromTable2(table: *const r4os.platform2.abi.R4XStartR4Sys2) ?Host {
+        return fromActualTable(table);
+    }
+    fn fromActualTable(table: anytype) ?Host {
         var result: Host = undefined;
         inline for (.{ .{ "create", "notification_create" }, .{ "query", "notification_query" }, .{ "notify", "notification_notify" }, .{ "wait", "notification_wait" }, .{ "close", "notification_close" }, .{ "current", "thread_current" }, .{ "clock", "monotonic_clock" } }) |pair| {
+            if (!@import("system.zig").reaches(table, pair[1])) return null;
             const address = @field(table.*, pair[1]);
             if (address == 0) return null;
             @field(result, pair[0]) = @ptrFromInt(address);
         }
         return result;
+    }
+
+    pub fn bound() ?Host {
+        const system = @import("system.zig");
+        if (system.generation2()) |table| return fromTable2(table);
+        return fromTable(system.legacy() orelse return null);
     }
 
     pub fn waitUntil(self: *const Host, handle: u64, sequence: u64, deadline_ns: u64) c_int {

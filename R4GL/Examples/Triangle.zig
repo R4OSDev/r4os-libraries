@@ -56,15 +56,15 @@ fn require(value: bool) !void {
 fn emit(observer: ?Observer, text: []const u8) void {
     if (observer) |log| log(text);
 }
-pub fn r4_app_main(app: *r.App) i32 {
+pub fn r4_app_main(app: *r.App2) i32 {
     run(app, null) catch |err| {
         app.system().println(@errorName(err));
         return -1;
     };
     return 0;
 }
-pub fn run(app: *r.App, observer: ?Observer) !void {
-    const api = try gl.EglV1Client.init(app.raw);
+pub fn run(app: *r.App2, observer: ?Observer) !void {
+    const api = try gl.EglV1Client.init2(app.raw);
     const sys = app.system();
     var loader: gl.R4GlLoader = undefined;
     const native = std.mem.indexOf(u8, std.mem.span(sys.argsRaw()), "/ZINK") != null;
@@ -76,10 +76,10 @@ pub fn run(app: *r.App, observer: ?Observer) !void {
     try require(released == 0 and finished == 0);
     emit(observer, "GLTRIANGLE closed: OK");
 }
-fn runOpened(app: *r.App, loader: gl.R4GlLoader, observer: ?Observer) !void {
+fn runOpened(app: *r.App2, loader: gl.R4GlLoader, observer: ?Observer) !void {
     try runWindow(app, try Functions.init(@ptrFromInt(loader.get_proc_address)), observer);
 }
-fn runWindow(app: *r.App, f: Functions, observer: ?Observer) !void {
+fn runWindow(app: *r.App2, f: Functions, observer: ?Observer) !void {
     var timers: [0]r.Timer = .{};
     const sys = app.system();
     var win = r.Window.init(sys, app.desktop() orelse return error.NoDesktop, app.drawing() orelse return error.NoDrawing, &timers) orelse return error.NotHosted;

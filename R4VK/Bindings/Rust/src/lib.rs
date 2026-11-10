@@ -4,19 +4,19 @@
 use r4os_sdk::{App, App2, r4l::{Error, Expectation, Interface, InterfaceHeader}};
 
 pub const MODULE_NAME: &str = "R4VK";
-/// Native platform binding. Pass addresses of actual kernel-owned tables, never copies or caller-local wrappers.
+/// Native versioned platform binding. Version1 retains the original three immutable kernel table addresses. Version2 carries an actual Start2 address in sys and zero draw/dev; the library admits its real imports and copies a process-owned start/C-view snapshot. The32-byte record and VULKAN_V1 layout/IDs/revisions/slots are unchanged.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct R4VkRuntime {
-    /// Must be 1.
+    /// 1 for original table binding;2 for actual Start2 caller binding. Other values reject without output.
     pub r#version: u32,
     /// At least 32 bytes.
     pub r#size: u32,
-    /// Immutable boot-lifetime R4SYS table address.
+    /// Version1: immutable boot-lifetime R4SYS table address. Version2: opaque address of the actual Start2 record, never a disguised table.
     pub r#sys: u64,
-    /// Immutable boot-lifetime R4DRAW table address.
+    /// Version1: immutable boot-lifetime R4DRAW table address. Version2: zero; DRAW2 comes only from admitted imports.
     pub r#draw: u64,
-    /// Immutable boot-lifetime R4DEV table address.
+    /// Version1: immutable boot-lifetime R4DEV table address. Version2: zero; DEV2 comes only from admitted imports.
     pub r#dev: u64,
 }
 const _: () = {
@@ -93,7 +93,7 @@ impl<'a> VulkanV1Client<'a> {
         if interface.slot_address(32).is_none() { return Err(Error::MissingSlot); }
         Ok(Self { interface })
     }
-    /// Bind the native platform and obtain the standard ICD entrypoints. Idempotent for the same boot tables. Does not create a Vulkan instance/device or claim GPU support.
+    /// Bind the explicitly selected original tables or actual Start2 caller and obtain standard ICD entrypoints. Version2 retains only process-owned copied start metadata, immutable boot tables and process-lifetime import/name views. Idempotent for matching binding; no Vulkan instance/device or GPU support is created.
     /// # Safety
     /// No device, instance or caller buffer is retained. The imported R4VK generation must remain loaded while using its entrypoints or objects.
     /// Blocking: nonblocking; threading: thread_safe; reentrancy: reentrant.

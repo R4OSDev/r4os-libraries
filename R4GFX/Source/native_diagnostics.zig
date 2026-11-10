@@ -9,20 +9,19 @@ pub const Trace = struct {
     stage: []const u8 = "validate",
     pub fn init(device: *d.Device) Trace {
         var enabled = false;
-        if (device.bundle.sys) |table| if (table.env_get != 0 and table.write != 0) {
-            const get: a.R4SysFns.env_get = @ptrFromInt(table.env_get);
+        const sys = device.caller.system();
+        if (sys.hasFn("env_get") and sys.hasFn("write")) {
             var value: [8]u8 = undefined;
-            enabled = get("R4GFX_YUV_TRACE", &value, value.len) == 1 and value[0] == '1';
-        };
+            enabled = sys.envGet("R4GFX_YUV_TRACE", &value) == 1 and value[0] == '1';
+        }
         return .{ .device = device, .enabled = enabled };
     }
     pub fn detail(self: Trace, comptime fmt: []const u8, args: anytype) void {
         if (!self.enabled) return;
-        const table = self.device.bundle.sys orelse return;
-        const write: a.R4SysFns.write = @ptrFromInt(table.write);
+        const sys = self.device.caller.system();
         var bytes: [512]u8 = undefined;
         const line = std.fmt.bufPrint(&bytes, fmt ++ "\n", args) catch return;
-        _ = write(line.ptr, @intCast(line.len));
+        sys.write(line);
     }
     pub fn failure(self: Trace, err: d.Error) void {
         if (err == error.Busy) return;

@@ -8,7 +8,7 @@ struct vk_instance;
 struct vk_physical_device;
 struct r4vk_surface {
    struct vk_instance *instance;
-   const R4XStartContext *application;
+   uint64_t application;
    R4WindowGraphicsSurface identity;
 };
 struct r4vk_surface_caps {
@@ -27,15 +27,16 @@ uint32_t r4vk_surface_format(const R4WindowGraphicsConfig *config,
 VkResult r4vk_create_swapchain_alias(VkDevice device, const VkImageCreateInfo *info,
    const VkAllocationCallbacks *allocator, VkImage *out);
 VkDeviceMemory r4vk_swapchain_memory(VkDevice device, VkSwapchainKHR chain, uint32_t index);
-int32_t r4vk_window_query(const R4XStartContext *application, uint32_t window_id,
+bool r4vk_application_snapshot(const void *application, uint64_t *snapshot);
+int32_t r4vk_window_query(uint64_t application, uint32_t window_id,
    const R4WindowGraphicsSurface *expected, R4WindowGraphicsReply *reply);
 /* true means a complete, validated response (possibly a business error).
  * false leaves the outcome unknown; retry the exact immutable request. */
-bool r4vk_window_request(const R4XStartContext *application,
+bool r4vk_window_request(uint64_t application,
    const R4WindowGraphicsRequest *request, R4WindowGraphicsReply *reply);
-bool r4vk_window_service_dead(const R4XStartContext *application,
+bool r4vk_window_service_dead(uint64_t application,
    const R4ProgramProcessHandle *service);
-void r4vk_window_wait(const R4XStartContext *application,
+void r4vk_window_wait(uint64_t application,
    const R4ProgramProcessHandle *owner, uint64_t revision, uint64_t duration_ns);
 VKAPI_ATTR VkResult VKAPI_CALL r4vkCreateWindowSurface(VkInstance instance,
    const R4VkWindowSurfaceCreateInfo *info, const VkAllocationCallbacks *allocator,

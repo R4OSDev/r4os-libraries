@@ -61,13 +61,11 @@ static bool idle(struct radeon_winsys *base, struct radeon_winsys_bo *bo)
 VkResult r4vk_radv_create_winsys(const R4Draw *draw, const R4Dev *devices,
    const struct r4vk_radv_architecture *facts, struct radeon_winsys **out)
 {
-   if (!draw || !draw->table || !devices || !facts || !out) return VK_ERROR_INITIALIZATION_FAILED;
-   const R4XStartR4Draw *t = draw->table;
-   if (t->size < offsetof(R4XStartR4Draw, gfx_buffer_map_persistent) + sizeof(uintptr_t) ||
-       !t->gfx_buffer_create || !t->gfx_buffer_describe || !t->gfx_buffer_release || !t->gfx_buffer_map_persistent || !t->gfx_buffer_unmap ||
-       !t->gfx_native_start || !t->gfx_native_wait || !t->gfx_native_receive || !t->gfx_native_close ||
-       !t->gfx_virtual_start || !t->gfx_virtual_wait || !t->gfx_virtual_close ||
-       !t->gfx_queue_open || !t->gfx_queue_close || !t->gfx_queue_submit_native || !t->gfx_fence_wait || !t->gfx_fence_release)
+   if (!r4draw_available(draw) || !devices || !facts || !out) return VK_ERROR_INITIALIZATION_FAILED;
+   if (!R4DRAW_HAS(draw, gfx_buffer_create) || !R4DRAW_HAS(draw, gfx_buffer_describe) || !R4DRAW_HAS(draw, gfx_buffer_release) || !R4DRAW_HAS(draw, gfx_buffer_map_persistent) || !R4DRAW_HAS(draw, gfx_buffer_unmap) ||
+       !R4DRAW_HAS(draw, gfx_native_start) || !R4DRAW_HAS(draw, gfx_native_wait) || !R4DRAW_HAS(draw, gfx_native_receive) || !R4DRAW_HAS(draw, gfx_native_close) ||
+       !R4DRAW_HAS(draw, gfx_virtual_start) || !R4DRAW_HAS(draw, gfx_virtual_wait) || !R4DRAW_HAS(draw, gfx_virtual_close) ||
+       !R4DRAW_HAS(draw, gfx_queue_open) || !R4DRAW_HAS(draw, gfx_queue_close) || !R4DRAW_HAS(draw, gfx_queue_submit_native) || !R4DRAW_HAS(draw, gfx_fence_wait) || !R4DRAW_HAS(draw, gfx_fence_release))
       return VK_ERROR_FEATURE_NOT_PRESENT;
    struct r4vk_radv_ws *ws = calloc(1, sizeof(*ws));
    if (!ws) return VK_ERROR_OUT_OF_HOST_MEMORY;

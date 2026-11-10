@@ -100,7 +100,10 @@ r4vk_nvk_query_architecture(const R4Draw *draw, const R4GfxBackendInfo *backend,
       .va_start = a.va_start, .va_end = a.va_end, .bind_alignment = a.bind_alignment,
       .host_coherent = (a.flags & R4NV_ARCHITECTURE_HOST_COHERENT) != 0,
       .image_layouts = (a.flags & R4NV_ARCHITECTURE_IMAGE_LAYOUTS) != 0 &&
-         draw->table && draw->table->abi_version >= R4OS_GFX_VIRTUAL_LAYOUT_API_VERSION,
+         (draw->generation2 ?
+            (R4DRAW_HAS(draw, gfx_virtual_start) && R4DRAW_HAS(draw, gfx_virtual_query) &&
+             R4DRAW_HAS(draw, gfx_virtual_close) && R4DRAW_HAS(draw, gfx_virtual_wait)) :
+            (draw->table && draw->table->abi_version >= R4OS_GFX_VIRTUAL_LAYOUT_API_VERSION)),
       .info = {
          .type = NV_DEVICE_TYPE_DIS, .device_id = a.device_id, .chipset = a.chipset,
          .pci = { .domain = a.pci_domain, .bus = a.pci_bus, .dev = a.pci_device,

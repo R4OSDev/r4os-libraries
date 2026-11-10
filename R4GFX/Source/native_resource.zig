@@ -34,7 +34,7 @@ pub const Profile = struct {
             (arch.va_start | arch.va_end) % granule != 0) return error.Unsupported;
         if (arch.memory_generation != selected.memory_generation) return error.Stale;
         var info: nv.R4NvRenderInfo = undefined;
-        const client = nv.RenderV1Client.init(device.bundle.raw) catch return error.Unsupported;
+        const client = device.caller.client(nv.RenderV1Client) catch return error.Unsupported;
         if (client.render_info(arch.graphics_class, &info) != nv.status_ok or info.version != 1 or info.size != @sizeOf(nv.R4NvRenderInfo) or
             info.graphics_class != arch.graphics_class or info.shader_model != arch.shader_model) return error.Unsupported;
         return .{ .binding = selected.binding, .memory_generation = arch.memory_generation, .va_start = arch.va_start, .va_end = @min(arch.va_end, @as(u64, 1) << 40), .graphics_class = arch.graphics_class };

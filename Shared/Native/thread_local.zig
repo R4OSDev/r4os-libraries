@@ -63,7 +63,7 @@ const Cache = struct {
 };
 const Owner = struct {
     mutex: sync.Mutex = .{},
-    heap: r4os.vm_allocator.Heap,
+    heap: threads.system.Heap,
     tree: Tree = .{},
     cache: [64]Cache = .{Cache{}} ** 64,
     live_threads: usize = 0,
@@ -71,13 +71,14 @@ const Owner = struct {
 var owner_key: u8 = 0;
 fn init(owner: *Owner) void {
     // No resources outside this region before process-local publication.
-    owner.* = .{ .heap = .{ .api = threads.table() } };
+    owner.* = .{ .heap = undefined };
+    owner.heap.init();
 }
 fn ownerContext() ?*Owner {
     return local.getOrCreate(Owner, &owner_key, init);
 }
 fn transport() sync.Host {
-    return sync.Host.fromTable(threads.table()).?;
+    return threads.host();
 }
 fn unlock(owner: *Owner) void {
     if (owner.mutex.unlock(&transport()) != sync.success) @trap();

@@ -24,6 +24,7 @@ pub fn build(b: *std.Build) void {
     conformance.addIncludePath(b.path("Bindings/C"));
     conformance.addIncludePath(sdk.profile.c_include_root);
     conformance.addIncludePath(sdk.profile.contract_c_include_root);
+    conformance.addIncludePath(sdk.profile.contract_c_include_root2);
     conformance.addCSourceFile(.{ .file = b.path("Tests/Generated/contract_conformance.c"), .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" } });
     const run = b.addRunArtifact(b.addTest(.{ .root_module = conformance }));
     b.getInstallStep().dependOn(&run.step);

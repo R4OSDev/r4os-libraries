@@ -9,6 +9,7 @@ pub const swapchain = @import("device_swapchain.zig");
 pub const color_api = @import("color_api.zig");
 pub const color_resource = @import("color_resource.zig");
 const providers = @import("providers.zig");
+const caller = @import("library_caller");
 const live_magic: u64 = 0x5234474658444556;
 const closed_magic: u64 = 0x5234474658434c53;
 pub const Error = error{ Invalid, Unsupported, Overflow, Limit, Alias, Busy, Stale, Unavailable, Occluded, Suboptimal, Lost };
@@ -108,7 +109,7 @@ pub const Device = struct {
     magic: u64 = 0,
     generation: u64 = 0,
     self_address: u64 = 0,
-    bundle: r4os.program.Bundle = undefined,
+    caller: caller.Snapshot = undefined,
     closing: bool = false,
     preferred_adapter: u32 = 0,
     flags: u32 = 0,
@@ -140,7 +141,7 @@ pub const Device = struct {
     image_writes: [c.render_max_images]bool = undefined,
     commands: [c.render_max_commands]c.R4GfxCpuDraw = undefined,
 
-    pub fn base(self: *Device) r4os.program.Context { return .initBundle(&self.bundle); }
+    pub fn base(self: *Device) r4os.program.Context { return self.caller.base(); }
     pub fn buffers(self: *Device) r4os.gfx_buffers.Context { return .{ .base = self.base() }; }
     pub fn queues(self: *Device) r4os.gfx_queue.Context { return .{ .base = self.base() }; }
     pub fn backend(self: *const Device) u32 { return self.selected_backend; }
@@ -238,7 +239,7 @@ pub const Device = struct {
         var candidate: a.GfxBackendInfo = .{ .binding = .{ .device_generation = 1, .reset_generation = 1 } };
         var gpu_operations: u32 = 0;
         var candidate_backend: u32 = c.render_backend_software;
-        const registry = providers.Registry.init(self.bundle.raw, self.flags & c.device_software_only != 0);
+        const registry = providers.Registry.initCaller(&self.caller, self.flags & c.device_software_only != 0);
         if (registry.available()) {
             const queue_api = self.queues();
             var primary: a.DisplayPresentationInfo = .{};
@@ -337,17 +338,17 @@ fn openDevice(config: *const c.R4GfxDeviceConfig, output: *c.R4GfxDevice) Error!
     _ = try pointer(c.R4GfxDeviceConfig, @intFromPtr(config));
     if (config.version != 1 or config.size != @sizeOf(c.R4GfxDeviceConfig) or config.storage_bytes < @sizeOf(Device) or config.flags & ~c.device_software_only != 0) return error.Invalid;
     const device = try pointer(Device, config.storage_address);
-    const raw = try pointer(a.R4XStartContext, config.start_context);
+    const input = try caller.Input.init(config.start_context);
     try outputSafe(c.R4GfxDevice, output, device);
     if (overlaps(@intFromPtr(config), @sizeOf(c.R4GfxDeviceConfig), @intFromPtr(device), @sizeOf(Device)) or
-        overlaps(@intFromPtr(raw), @sizeOf(a.R4XStartContext), @intFromPtr(device), @sizeOf(Device)) or
+        overlaps(input.address(), input.bytes(), @intFromPtr(device), @sizeOf(Device)) or
         overlaps(@intFromPtr(config), @sizeOf(c.R4GfxDeviceConfig), @intFromPtr(output), @sizeOf(c.R4GfxDevice))) return error.Alias;
     if (device.magic != 0 and device.magic != closed_magic) return error.Busy;
     if (device.magic == 0 and device.generation != 0) return error.Invalid;
     const generation = std.math.add(u64, device.generation, 1) catch return error.Limit;
-    const bundle = r4os.program.bundleValueFromR4XStart(raw) orelse return error.Invalid;
     device.* = .{ .magic = live_magic, .generation = generation, .self_address = @intFromPtr(device),
-        .bundle = bundle, .preferred_adapter = config.preferred_adapter, .flags = config.flags };
+        .preferred_adapter = config.preferred_adapter, .flags = config.flags };
+    device.caller.init(input);
     // Initial selection has no old queue and cannot require a retained close.
     device.selectBackend() catch unreachable;
     output.* = .{ .address = @intFromPtr(device), .generation = generation };

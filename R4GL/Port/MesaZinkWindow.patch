@@ -17,7 +17,7 @@
 +#ifdef R4OS_OPENGL
 +   /* Native identity is private loader data, not a Vulkan structure type.
 +    * Copies keep the R4X context and hash key alive with the displaytarget. */
-+   R4XStartContext r4os_application;
++   uint64_t r4os_application;
 +   R4WindowGraphicsSurface r4os_surface;
 +#endif
     int has_alpha;
@@ -78,7 +78,7 @@
 +   if (!create) return VK_NULL_HANDLE;
 +   const R4VkWindowSurfaceCreateInfo info = {
 +      .version = R4VK_WINDOW_SURFACE_VERSION, .size = sizeof(info),
-+      .application = &cdt->info.r4os_application,
++      .application = (const void *)(uintptr_t)cdt->info.r4os_application,
 +      .window_id = cdt->info.r4os_surface.window_id,
 +   };
 +   error = create(screen->instance, &info, NULL, &surface);

@@ -1,6 +1,13 @@
 ﻿# R4VK native Vulkan provider
 
-R4VK 0.1.39 builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
+Version45 admits real generation2 callers through `Query2:2` and the
+independent `VULKAN_V1:1` interface. Pass runtime version2 with the actual
+Start2 address in sys and draw/dev zero. The32-byte bootstrap layout and
+interface revision1 stay stable. Each process owns its startup snapshot and
+C-facing view; retain its imports and objects through actual destruction.
+Runtime version1 remains the explicit legacy path during staged migration.
+
+R4VK builds Mesa 26.2.2 NVK and RADV in one consistent native Vulkan
 runtime. Provider-specific constructors, revalidation and destruction select
 only admitted NVIDIA/AMD backends. The R4OS winsys owns ordinary BO/VA/map,
 queue and fence handles; NVIDIA.R4D and AMDGPU.R4D remain hardware owners.
@@ -197,8 +204,10 @@ See `Docs/Drivers/GrafikVulkan07937.txt` and `.json` in the Docs repository.
 Native surface entrypoint: include `Bindings/C/r4vk_wsi.h`, enable
 `VK_KHR_surface` (optionally `VK_KHR_get_surface_capabilities2`) on the instance,
 and obtain `R4VK_WINDOW_SURFACE_ENTRYPOINT` from the R4VK instance-proc loader.
-Pass version 1, the exact create-info size, the original calling R4XStart
-context and its Desktop window ID. `VK_NOT_READY` means that Desktop has not
+Pass surface-create version1, the exact create-info size, the actual calling
+startup address and its Desktop window ID. The opaque application pointer
+admits Start2 for new callers and legacy Start1 during migration; the process
+retains a stable copied record for the surface lifetime. `VK_NOT_READY` means that Desktop has not
 published that GPU window; creation does not wait indefinitely. The resulting
 `VkSurfaceKHR` uses ordinary surface support/capability/format/present-mode
 queries and `vkDestroySurfaceKHR`. No private Vulkan extension string,

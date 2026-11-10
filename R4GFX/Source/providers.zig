@@ -16,6 +16,10 @@ pub const Registry = struct {
         if (software) return .{};
         return .{ .nvidia = nv.BackendV1Client.init(raw) catch null, .amdgpu = amd.BackendV1Client.init(raw) catch null };
     }
+    pub fn initCaller(caller: *const @import("library_caller").Snapshot, software: bool) Registry {
+        if (software) return .{};
+        return .{ .nvidia = caller.client(nv.BackendV1Client) catch null, .amdgpu = caller.client(amd.BackendV1Client) catch null };
+    }
     pub fn available(self: Registry) bool { return self.nvidia != null or self.amdgpu != null; }
     pub fn negotiate(self: Registry, snapshot: a.GfxBackendInfo) ?Selection {
         // Operations and the memory epoch belong to the current provider;

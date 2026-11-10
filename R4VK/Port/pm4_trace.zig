@@ -6,7 +6,7 @@ const a = @import("r4os").abi;
 const threads = @import("r4native").threads;
 
 fn function(comptime name: []const u8) @field(a.R4SysFns, name) {
-    return @ptrFromInt(@field(threads.table().*, name));
+    return threads.system.required(name);
 }
 
 pub const State = struct {

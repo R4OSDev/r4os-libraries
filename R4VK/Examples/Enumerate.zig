@@ -8,7 +8,7 @@ fn proc(comptime T: type, get: v.PFN_vkGetInstanceProcAddr, instance: v.VkInstan
     return @ptrCast(get.?(instance, name) orelse return error.MissingFunction);
 }
 
-pub fn r4_app_main(app: *r.App) i32 {
+pub fn r4_app_main(app: *r.App2) i32 {
     const count = enumerate(app) catch |err| {
         app.system().println(@errorName(err));
         return -1;
@@ -19,14 +19,11 @@ pub fn r4_app_main(app: *r.App) i32 {
     return 0;
 }
 
-pub fn enumerate(app: *r.App) !u32 {
-    const client = try binding.VulkanV1Client.init(app.startContext());
-    const tables = app.system().base.bundle orelse return error.NoPlatform;
+pub fn enumerate(app: *r.App2) !u32 {
+    const client = try binding.VulkanV1Client.init2(app.startContext());
     var loader: binding.R4VkLoader = undefined;
-    if (client.open(&.{ .version = 1, .size = @sizeOf(binding.R4VkRuntime),
-        .sys = @intFromPtr(tables.sys orelse return error.NoPlatform),
-        .draw = @intFromPtr(tables.draw orelse return error.NoPlatform),
-        .dev = @intFromPtr(tables.dev orelse return error.NoPlatform) }, &loader) != 0) return error.Loader;
+    if (client.open(&.{ .version = 2, .size = @sizeOf(binding.R4VkRuntime),
+        .sys = @intFromPtr(app.startContext()), .draw = 0, .dev = 0 }, &loader) != 0) return error.Loader;
     const get: v.PFN_vkGetInstanceProcAddr = @ptrFromInt(loader.get_instance_proc_addr);
     const create = try proc(v.PFN_vkCreateInstance, get, null, "vkCreateInstance");
     const application: v.VkApplicationInfo = .{ .sType = v.VK_STRUCTURE_TYPE_APPLICATION_INFO,
