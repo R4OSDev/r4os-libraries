@@ -5,6 +5,11 @@ opens registers or submits GPU work. NVIDIA.R4D owns address spaces, allocation,
 channels, completion and resource retirement. Encoding support does not qualify
 a physical GPU or imply that its native driver bootstrap is implemented.
 
+Generation2 consumers use the generated clients' `init2` entry and this
+library's `Query2` descriptor. Independent interface revisions and command,
+shader and cache bytes retain their own identities. This pure provider has
+no platform-table, worker, heap or process-inventory dependency to replace.
+
 `BACKEND_V1` revision 3 is a 64-byte table for copy negotiation, linear/pitched
 and tiled command encoding, and image layouts. Generated C/Zig bindings check
 the interface. Optional consumers can use `IMPORT=R4NV:BACKEND_V1:3:1` and keep

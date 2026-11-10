@@ -126,6 +126,8 @@ pub type R4DeviceInventorySummary = crate::abi::DeviceInventorySummary;
 const _: () = { assert!(core::mem::size_of::<R4DeviceInventorySummary>() == 20); assert!(core::mem::align_of::<R4DeviceInventorySummary>() == 4); assert!(core::mem::offset_of!(R4DeviceInventorySummary, r#total) == 0); assert!(core::mem::offset_of!(R4DeviceInventorySummary, r#with_driver) == 4); assert!(core::mem::offset_of!(R4DeviceInventorySummary, r#without_driver) == 8); assert!(core::mem::offset_of!(R4DeviceInventorySummary, r#unknown) == 12); assert!(core::mem::offset_of!(R4DeviceInventorySummary, r#truncated) == 16); assert!(core::mem::offset_of!(R4DeviceInventorySummary, r#reserved) == 17); };
 pub type R4DeviceInventoryRecord = crate::abi::DeviceInventoryRecord;
 const _: () = { assert!(core::mem::size_of::<R4DeviceInventoryRecord>() == 224); assert!(core::mem::align_of::<R4DeviceInventoryRecord>() == 2); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#binding) == 0); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#bus) == 1); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#flags) == 2); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#bus_no) == 4); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#device_no) == 5); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#function_no) == 6); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#class_code) == 7); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#subclass) == 8); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#prog_if) == 9); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#reserved0) == 10); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#vendor_id) == 12); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#device_id) == 14); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#name) == 16); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#driver) == 64); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#status) == 96); assert!(core::mem::offset_of!(R4DeviceInventoryRecord, r#note) == 128); };
+pub type R4DeviceInventorySnapshotInfo = crate::abi::DeviceInventorySnapshotInfo;
+const _: () = { assert!(core::mem::size_of::<R4DeviceInventorySnapshotInfo>() == 64); assert!(core::mem::align_of::<R4DeviceInventorySnapshotInfo>() == 8); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#version) == 0); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#size) == 4); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#snapshot_generation) == 8); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#count) == 16); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#required_count) == 20); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#capacity) == 24); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#flags) == 28); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#with_driver) == 32); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#without_driver) == 36); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#unknown) == 40); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#source_mask) == 44); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#record_size) == 48); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#reserved0) == 52); assert!(core::mem::offset_of!(R4DeviceInventorySnapshotInfo, r#reserved1) == 56); };
 pub type R4HardwareSummary = crate::abi::HardwareSummary;
 const _: () = { assert!(core::mem::size_of::<R4HardwareSummary>() == 96); assert!(core::mem::align_of::<R4HardwareSummary>() == 8); assert!(core::mem::offset_of!(R4HardwareSummary, r#flags) == 0); assert!(core::mem::offset_of!(R4HardwareSummary, r#acpi_tables) == 4); assert!(core::mem::offset_of!(R4HardwareSummary, r#acpi_invalid_tables) == 8); assert!(core::mem::offset_of!(R4HardwareSummary, r#pcie_devices) == 12); assert!(core::mem::offset_of!(R4HardwareSummary, r#legacy_pci_devices) == 16); assert!(core::mem::offset_of!(R4HardwareSummary, r#storage_controllers) == 20); assert!(core::mem::offset_of!(R4HardwareSummary, r#network_controllers) == 24); assert!(core::mem::offset_of!(R4HardwareSummary, r#display_controllers) == 28); assert!(core::mem::offset_of!(R4HardwareSummary, r#usb_controllers) == 32); assert!(core::mem::offset_of!(R4HardwareSummary, r#hda_controllers) == 36); assert!(core::mem::offset_of!(R4HardwareSummary, r#block_devices) == 40); assert!(core::mem::offset_of!(R4HardwareSummary, r#usb_devices) == 44); assert!(core::mem::offset_of!(R4HardwareSummary, r#usb_configured) == 48); assert!(core::mem::offset_of!(R4HardwareSummary, r#driver_records) == 52); assert!(core::mem::offset_of!(R4HardwareSummary, r#protocol_records) == 56); assert!(core::mem::offset_of!(R4HardwareSummary, r#irq_controller) == 60); assert!(core::mem::offset_of!(R4HardwareSummary, r#timer_backend) == 61); assert!(core::mem::offset_of!(R4HardwareSummary, r#reserved0) == 62); assert!(core::mem::offset_of!(R4HardwareSummary, r#lapic_count) == 64); assert!(core::mem::offset_of!(R4HardwareSummary, r#ioapic_count) == 68); assert!(core::mem::offset_of!(R4HardwareSummary, r#iso_count) == 72); assert!(core::mem::offset_of!(R4HardwareSummary, r#hpet_frequency_hz) == 80); assert!(core::mem::offset_of!(R4HardwareSummary, r#cpu_logical_processors) == 88); assert!(core::mem::offset_of!(R4HardwareSummary, r#cpu_physical_address_bits) == 92); assert!(core::mem::offset_of!(R4HardwareSummary, r#cpu_virtual_address_bits) == 93); assert!(core::mem::offset_of!(R4HardwareSummary, r#reserved1) == 94); };
 pub type R4ProtocolStatus = crate::abi::ProtocolStatus;
@@ -812,6 +814,132 @@ pub type R4GuiGradientStop = crate::abi::GuiGradientStop;
 const _: () = { assert!(core::mem::size_of::<R4GuiGradientStop>() == 8); assert!(core::mem::align_of::<R4GuiGradientStop>() == 4); assert!(core::mem::offset_of!(R4GuiGradientStop, r#position_bits) == 0); assert!(core::mem::offset_of!(R4GuiGradientStop, r#argb) == 4); };
 pub type R4GuiWindowAppearance = crate::abi::GuiWindowAppearance;
 const _: () = { assert!(core::mem::size_of::<R4GuiWindowAppearance>() == 48); assert!(core::mem::align_of::<R4GuiWindowAppearance>() == 8); assert!(core::mem::offset_of!(R4GuiWindowAppearance, r#window) == 0); assert!(core::mem::offset_of!(R4GuiWindowAppearance, r#flags) == 32); assert!(core::mem::offset_of!(R4GuiWindowAppearance, r#title_background) == 36); assert!(core::mem::offset_of!(R4GuiWindowAppearance, r#title_foreground) == 40); assert!(core::mem::offset_of!(R4GuiWindowAppearance, r#reserved) == 44); };
+pub type R4FileIdentity2 = crate::abi::FileIdentity2;
+const _: () = { assert!(core::mem::size_of::<R4FileIdentity2>() == 48); assert!(core::mem::align_of::<R4FileIdentity2>() == 8); assert!(core::mem::offset_of!(R4FileIdentity2, r#mount_generation) == 0); assert!(core::mem::offset_of!(R4FileIdentity2, r#namespace_generation) == 8); assert!(core::mem::offset_of!(R4FileIdentity2, r#object_hi) == 16); assert!(core::mem::offset_of!(R4FileIdentity2, r#object_lo) == 24); assert!(core::mem::offset_of!(R4FileIdentity2, r#mount_slot) == 32); assert!(core::mem::offset_of!(R4FileIdentity2, r#provider) == 36); assert!(core::mem::offset_of!(R4FileIdentity2, r#flags) == 40); assert!(core::mem::offset_of!(R4FileIdentity2, r#reserved0) == 44); };
+pub type R4FileMetadata2 = crate::abi::FileMetadata2;
+const _: () = { assert!(core::mem::size_of::<R4FileMetadata2>() == 112); assert!(core::mem::align_of::<R4FileMetadata2>() == 8); assert!(core::mem::offset_of!(R4FileMetadata2, r#version) == 0); assert!(core::mem::offset_of!(R4FileMetadata2, r#size) == 4); assert!(core::mem::offset_of!(R4FileMetadata2, r#identity) == 8); assert!(core::mem::offset_of!(R4FileMetadata2, r#byte_size) == 56); assert!(core::mem::offset_of!(R4FileMetadata2, r#content_revision) == 64); assert!(core::mem::offset_of!(R4FileMetadata2, r#backend_node) == 72); assert!(core::mem::offset_of!(R4FileMetadata2, r#flags) == 80); assert!(core::mem::offset_of!(R4FileMetadata2, r#attributes) == 84); assert!(core::mem::offset_of!(R4FileMetadata2, r#drive_letter) == 88); assert!(core::mem::offset_of!(R4FileMetadata2, r#reserved0) == 92); assert!(core::mem::offset_of!(R4FileMetadata2, r#created_time) == 96); assert!(core::mem::offset_of!(R4FileMetadata2, r#created_date) == 98); assert!(core::mem::offset_of!(R4FileMetadata2, r#access_date) == 100); assert!(core::mem::offset_of!(R4FileMetadata2, r#modified_time) == 102); assert!(core::mem::offset_of!(R4FileMetadata2, r#modified_date) == 104); assert!(core::mem::offset_of!(R4FileMetadata2, r#reserved1) == 106); };
+pub type R4DirectoryMetadataEntry2 = crate::abi::DirectoryMetadataEntry2;
+const _: () = { assert!(core::mem::size_of::<R4DirectoryMetadataEntry2>() == 1136); assert!(core::mem::align_of::<R4DirectoryMetadataEntry2>() == 8); assert!(core::mem::offset_of!(R4DirectoryMetadataEntry2, r#info) == 0); assert!(core::mem::offset_of!(R4DirectoryMetadataEntry2, r#path) == 112); };
+pub type R4DirectoryMetadataCursor2 = crate::abi::DirectoryMetadataCursor2;
+const _: () = { assert!(core::mem::size_of::<R4DirectoryMetadataCursor2>() == 2184); assert!(core::mem::align_of::<R4DirectoryMetadataCursor2>() == 8); assert!(core::mem::offset_of!(R4DirectoryMetadataCursor2, r#version) == 0); assert!(core::mem::offset_of!(R4DirectoryMetadataCursor2, r#size) == 4); assert!(core::mem::offset_of!(R4DirectoryMetadataCursor2, r#namespace_generation) == 8); assert!(core::mem::offset_of!(R4DirectoryMetadataCursor2, r#flags) == 16); assert!(core::mem::offset_of!(R4DirectoryMetadataCursor2, r#reserved0) == 20); assert!(core::mem::offset_of!(R4DirectoryMetadataCursor2, r#scan) == 24); };
+pub type R4FontAdvance2 = crate::abi::FontAdvance2;
+const _: () = { assert!(core::mem::size_of::<R4FontAdvance2>() == 8); assert!(core::mem::align_of::<R4FontAdvance2>() == 4); assert!(core::mem::offset_of!(R4FontAdvance2, r#byte_end) == 0); assert!(core::mem::offset_of!(R4FontAdvance2, r#prefix_width) == 4); };
+pub type R4FontAdvanceInfo2 = crate::abi::FontAdvanceInfo2;
+const _: () = { assert!(core::mem::size_of::<R4FontAdvanceInfo2>() == 40); assert!(core::mem::align_of::<R4FontAdvanceInfo2>() == 8); assert!(core::mem::offset_of!(R4FontAdvanceInfo2, r#version) == 0); assert!(core::mem::offset_of!(R4FontAdvanceInfo2, r#size) == 4); assert!(core::mem::offset_of!(R4FontAdvanceInfo2, r#font_revision) == 8); assert!(core::mem::offset_of!(R4FontAdvanceInfo2, r#font_id) == 16); assert!(core::mem::offset_of!(R4FontAdvanceInfo2, r#text_bytes) == 20); assert!(core::mem::offset_of!(R4FontAdvanceInfo2, r#count) == 24); assert!(core::mem::offset_of!(R4FontAdvanceInfo2, r#required_count) == 28); assert!(core::mem::offset_of!(R4FontAdvanceInfo2, r#flags) == 32); assert!(core::mem::offset_of!(R4FontAdvanceInfo2, r#reserved0) == 36); };
+pub type R4WaitSource = crate::abi::WaitSource;
+const _: () = { assert!(core::mem::size_of::<R4WaitSource>() == 80); assert!(core::mem::align_of::<R4WaitSource>() == 8); assert!(core::mem::offset_of!(R4WaitSource, r#version) == 0); assert!(core::mem::offset_of!(R4WaitSource, r#size) == 4); assert!(core::mem::offset_of!(R4WaitSource, r#kind) == 8); assert!(core::mem::offset_of!(R4WaitSource, r#flags) == 12); assert!(core::mem::offset_of!(R4WaitSource, r#object) == 16); assert!(core::mem::offset_of!(R4WaitSource, r#generation) == 24); assert!(core::mem::offset_of!(R4WaitSource, r#observed_revision) == 32); assert!(core::mem::offset_of!(R4WaitSource, r#user_tag) == 40); assert!(core::mem::offset_of!(R4WaitSource, r#deadline_ns) == 48); assert!(core::mem::offset_of!(R4WaitSource, r#clock_source) == 56); assert!(core::mem::offset_of!(R4WaitSource, r#clock_generation) == 60); assert!(core::mem::offset_of!(R4WaitSource, r#event_backend) == 64); assert!(core::mem::offset_of!(R4WaitSource, r#tick_hz) == 68); assert!(core::mem::offset_of!(R4WaitSource, r#reserved0) == 72); };
+pub type R4WaitSetDeadline = crate::abi::WaitSetDeadline;
+const _: () = { assert!(core::mem::size_of::<R4WaitSetDeadline>() == 48); assert!(core::mem::align_of::<R4WaitSetDeadline>() == 8); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#version) == 0); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#size) == 4); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#kind) == 8); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#reserved0) == 12); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#absolute_ns) == 16); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#last_ns) == 24); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#clock_source) == 32); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#clock_generation) == 36); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#event_backend) == 40); assert!(core::mem::offset_of!(R4WaitSetDeadline, r#tick_hz) == 44); };
+pub type R4WaitSetEvent = crate::abi::WaitSetEvent;
+const _: () = { assert!(core::mem::size_of::<R4WaitSetEvent>() == 48); assert!(core::mem::align_of::<R4WaitSetEvent>() == 8); assert!(core::mem::offset_of!(R4WaitSetEvent, r#version) == 0); assert!(core::mem::offset_of!(R4WaitSetEvent, r#size) == 4); assert!(core::mem::offset_of!(R4WaitSetEvent, r#kind) == 8); assert!(core::mem::offset_of!(R4WaitSetEvent, r#flags) == 12); assert!(core::mem::offset_of!(R4WaitSetEvent, r#registration) == 16); assert!(core::mem::offset_of!(R4WaitSetEvent, r#user_tag) == 24); assert!(core::mem::offset_of!(R4WaitSetEvent, r#revision) == 32); assert!(core::mem::offset_of!(R4WaitSetEvent, r#status) == 40); assert!(core::mem::offset_of!(R4WaitSetEvent, r#reserved0) == 44); };
+pub type R4WaitSetBatch = crate::abi::WaitSetBatch;
+const _: () = { assert!(core::mem::size_of::<R4WaitSetBatch>() == 40); assert!(core::mem::align_of::<R4WaitSetBatch>() == 8); assert!(core::mem::offset_of!(R4WaitSetBatch, r#version) == 0); assert!(core::mem::offset_of!(R4WaitSetBatch, r#size) == 4); assert!(core::mem::offset_of!(R4WaitSetBatch, r#outcome) == 8); assert!(core::mem::offset_of!(R4WaitSetBatch, r#flags) == 12); assert!(core::mem::offset_of!(R4WaitSetBatch, r#count) == 16); assert!(core::mem::offset_of!(R4WaitSetBatch, r#reserved0) == 20); assert!(core::mem::offset_of!(R4WaitSetBatch, r#configuration_revision) == 24); assert!(core::mem::offset_of!(R4WaitSetBatch, r#next_registration) == 32); };
+pub type R4WaitSourceRequest = crate::abi::WaitSourceRequest;
+const _: () = { assert!(core::mem::size_of::<R4WaitSourceRequest>() == 64); assert!(core::mem::align_of::<R4WaitSourceRequest>() == 8); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#version) == 0); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#size) == 4); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#kind) == 8); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#flags) == 12); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#object) == 16); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#generation) == 24); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#scope_id) == 32); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#scope_generation) == 40); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#user_tag) == 48); assert!(core::mem::offset_of!(R4WaitSourceRequest, r#observed_revision) == 56); };
+pub type R4ClipboardOfferInfo = crate::abi::ClipboardOfferInfo;
+const _: () = { assert!(core::mem::size_of::<R4ClipboardOfferInfo>() == 80); assert!(core::mem::align_of::<R4ClipboardOfferInfo>() == 8); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#version) == 0); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#size) == 4); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#provider) == 8); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#revision) == 16); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#max_offer_bytes) == 24); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#payload_budget) == 32); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#lease_ns) == 40); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#max_items) == 48); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#max_formats) == 52); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#max_stages) == 56); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#max_snapshots) == 60); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#put_chunk) == 64); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#read_chunk) == 68); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#format_mask) == 72); assert!(core::mem::offset_of!(R4ClipboardOfferInfo, r#flags) == 76); };
+pub type R4ClipboardOfferBegin = crate::abi::ClipboardOfferBegin;
+const _: () = { assert!(core::mem::size_of::<R4ClipboardOfferBegin>() == 32); assert!(core::mem::align_of::<R4ClipboardOfferBegin>() == 8); assert!(core::mem::offset_of!(R4ClipboardOfferBegin, r#version) == 0); assert!(core::mem::offset_of!(R4ClipboardOfferBegin, r#size) == 4); assert!(core::mem::offset_of!(R4ClipboardOfferBegin, r#provider) == 8); assert!(core::mem::offset_of!(R4ClipboardOfferBegin, r#expected_revision) == 16); assert!(core::mem::offset_of!(R4ClipboardOfferBegin, r#total_bytes) == 24); };
+pub type R4ClipboardOfferLease = crate::abi::ClipboardOfferLease;
+const _: () = { assert!(core::mem::size_of::<R4ClipboardOfferLease>() == 48); assert!(core::mem::align_of::<R4ClipboardOfferLease>() == 8); assert!(core::mem::offset_of!(R4ClipboardOfferLease, r#version) == 0); assert!(core::mem::offset_of!(R4ClipboardOfferLease, r#size) == 4); assert!(core::mem::offset_of!(R4ClipboardOfferLease, r#provider) == 8); assert!(core::mem::offset_of!(R4ClipboardOfferLease, r#id) == 16); assert!(core::mem::offset_of!(R4ClipboardOfferLease, r#revision) == 24); assert!(core::mem::offset_of!(R4ClipboardOfferLease, r#expires_ns) == 32); assert!(core::mem::offset_of!(R4ClipboardOfferLease, r#state) == 40); assert!(core::mem::offset_of!(R4ClipboardOfferLease, r#reserved) == 44); };
+pub type R4ClipboardOfferFormat = crate::abi::ClipboardOfferFormat;
+const _: () = { assert!(core::mem::size_of::<R4ClipboardOfferFormat>() == 24); assert!(core::mem::align_of::<R4ClipboardOfferFormat>() == 8); assert!(core::mem::offset_of!(R4ClipboardOfferFormat, r#item) == 0); assert!(core::mem::offset_of!(R4ClipboardOfferFormat, r#format) == 4); assert!(core::mem::offset_of!(R4ClipboardOfferFormat, r#total_bytes) == 8); assert!(core::mem::offset_of!(R4ClipboardOfferFormat, r#flags) == 16); assert!(core::mem::offset_of!(R4ClipboardOfferFormat, r#reserved) == 20); };
+pub type R4ClipboardOfferTransfer = crate::abi::ClipboardOfferTransfer;
+const _: () = { assert!(core::mem::size_of::<R4ClipboardOfferTransfer>() == 48); assert!(core::mem::align_of::<R4ClipboardOfferTransfer>() == 8); assert!(core::mem::offset_of!(R4ClipboardOfferTransfer, r#version) == 0); assert!(core::mem::offset_of!(R4ClipboardOfferTransfer, r#size) == 4); assert!(core::mem::offset_of!(R4ClipboardOfferTransfer, r#provider) == 8); assert!(core::mem::offset_of!(R4ClipboardOfferTransfer, r#id) == 16); assert!(core::mem::offset_of!(R4ClipboardOfferTransfer, r#item) == 24); assert!(core::mem::offset_of!(R4ClipboardOfferTransfer, r#format) == 28); assert!(core::mem::offset_of!(R4ClipboardOfferTransfer, r#offset) == 32); assert!(core::mem::offset_of!(R4ClipboardOfferTransfer, r#total_bytes) == 40); };
+pub type R4ClipboardOfferEnumerate = crate::abi::ClipboardOfferEnumerate;
+const _: () = { assert!(core::mem::size_of::<R4ClipboardOfferEnumerate>() == 32); assert!(core::mem::align_of::<R4ClipboardOfferEnumerate>() == 8); assert!(core::mem::offset_of!(R4ClipboardOfferEnumerate, r#version) == 0); assert!(core::mem::offset_of!(R4ClipboardOfferEnumerate, r#size) == 4); assert!(core::mem::offset_of!(R4ClipboardOfferEnumerate, r#provider) == 8); assert!(core::mem::offset_of!(R4ClipboardOfferEnumerate, r#id) == 16); assert!(core::mem::offset_of!(R4ClipboardOfferEnumerate, r#cursor) == 24); assert!(core::mem::offset_of!(R4ClipboardOfferEnumerate, r#capacity) == 28); };
+pub type R4ClipboardOfferPage = crate::abi::ClipboardOfferPage;
+const _: () = { assert!(core::mem::size_of::<R4ClipboardOfferPage>() == 48); assert!(core::mem::align_of::<R4ClipboardOfferPage>() == 8); assert!(core::mem::offset_of!(R4ClipboardOfferPage, r#version) == 0); assert!(core::mem::offset_of!(R4ClipboardOfferPage, r#size) == 4); assert!(core::mem::offset_of!(R4ClipboardOfferPage, r#provider) == 8); assert!(core::mem::offset_of!(R4ClipboardOfferPage, r#id) == 16); assert!(core::mem::offset_of!(R4ClipboardOfferPage, r#revision) == 24); assert!(core::mem::offset_of!(R4ClipboardOfferPage, r#next) == 32); assert!(core::mem::offset_of!(R4ClipboardOfferPage, r#count) == 36); assert!(core::mem::offset_of!(R4ClipboardOfferPage, r#total) == 40); assert!(core::mem::offset_of!(R4ClipboardOfferPage, r#reserved) == 44); };
+pub type R4ClipboardOfferChunk = crate::abi::ClipboardOfferChunk;
+const _: () = { assert!(core::mem::size_of::<R4ClipboardOfferChunk>() == 56); assert!(core::mem::align_of::<R4ClipboardOfferChunk>() == 8); assert!(core::mem::offset_of!(R4ClipboardOfferChunk, r#version) == 0); assert!(core::mem::offset_of!(R4ClipboardOfferChunk, r#size) == 4); assert!(core::mem::offset_of!(R4ClipboardOfferChunk, r#provider) == 8); assert!(core::mem::offset_of!(R4ClipboardOfferChunk, r#id) == 16); assert!(core::mem::offset_of!(R4ClipboardOfferChunk, r#revision) == 24); assert!(core::mem::offset_of!(R4ClipboardOfferChunk, r#offset) == 32); assert!(core::mem::offset_of!(R4ClipboardOfferChunk, r#total_bytes) == 40); assert!(core::mem::offset_of!(R4ClipboardOfferChunk, r#bytes) == 48); assert!(core::mem::offset_of!(R4ClipboardOfferChunk, r#flags) == 52); };
+pub type R4NetworkAddress = crate::abi::NetworkAddress;
+const _: () = { assert!(core::mem::size_of::<R4NetworkAddress>() == 32); assert!(core::mem::align_of::<R4NetworkAddress>() == 4); assert!(core::mem::offset_of!(R4NetworkAddress, r#family) == 0); assert!(core::mem::offset_of!(R4NetworkAddress, r#reserved0) == 2); assert!(core::mem::offset_of!(R4NetworkAddress, r#scope_id) == 4); assert!(core::mem::offset_of!(R4NetworkAddress, r#interface_id) == 8); assert!(core::mem::offset_of!(R4NetworkAddress, r#reserved1) == 12); assert!(core::mem::offset_of!(R4NetworkAddress, r#bytes) == 16); };
+pub type R4NetworkEndpoint = crate::abi::NetworkEndpoint;
+const _: () = { assert!(core::mem::size_of::<R4NetworkEndpoint>() == 40); assert!(core::mem::align_of::<R4NetworkEndpoint>() == 4); assert!(core::mem::offset_of!(R4NetworkEndpoint, r#address) == 0); assert!(core::mem::offset_of!(R4NetworkEndpoint, r#port) == 32); assert!(core::mem::offset_of!(R4NetworkEndpoint, r#reserved) == 34); assert!(core::mem::offset_of!(R4NetworkEndpoint, r#flags) == 36); };
+pub type R4NetworkDeadline = crate::abi::NetworkDeadline;
+const _: () = { assert!(core::mem::size_of::<R4NetworkDeadline>() == 48); assert!(core::mem::align_of::<R4NetworkDeadline>() == 8); assert!(core::mem::offset_of!(R4NetworkDeadline, r#version) == 0); assert!(core::mem::offset_of!(R4NetworkDeadline, r#size) == 4); assert!(core::mem::offset_of!(R4NetworkDeadline, r#kind) == 8); assert!(core::mem::offset_of!(R4NetworkDeadline, r#reserved0) == 12); assert!(core::mem::offset_of!(R4NetworkDeadline, r#absolute_ns) == 16); assert!(core::mem::offset_of!(R4NetworkDeadline, r#last_ns) == 24); assert!(core::mem::offset_of!(R4NetworkDeadline, r#clock_source) == 32); assert!(core::mem::offset_of!(R4NetworkDeadline, r#clock_generation) == 36); assert!(core::mem::offset_of!(R4NetworkDeadline, r#event_backend) == 40); assert!(core::mem::offset_of!(R4NetworkDeadline, r#tick_hz) == 44); };
+pub type R4NetworkProviderInfo = crate::abi::NetworkProviderInfo;
+const _: () = { assert!(core::mem::size_of::<R4NetworkProviderInfo>() == 48); assert!(core::mem::align_of::<R4NetworkProviderInfo>() == 8); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#version) == 0); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#size) == 4); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#provider) == 8); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#capabilities) == 16); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#max_send) == 24); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#max_recv) == 28); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#max_answers) == 32); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#page_capacity) == 36); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#interface_id) == 40); assert!(core::mem::offset_of!(R4NetworkProviderInfo, r#reserved) == 44); };
+pub type R4NetworkSocketRequest = crate::abi::NetworkSocketRequest;
+const _: () = { assert!(core::mem::size_of::<R4NetworkSocketRequest>() == 128); assert!(core::mem::align_of::<R4NetworkSocketRequest>() == 8); assert!(core::mem::offset_of!(R4NetworkSocketRequest, r#version) == 0); assert!(core::mem::offset_of!(R4NetworkSocketRequest, r#size) == 4); assert!(core::mem::offset_of!(R4NetworkSocketRequest, r#provider) == 8); assert!(core::mem::offset_of!(R4NetworkSocketRequest, r#socket) == 16); assert!(core::mem::offset_of!(R4NetworkSocketRequest, r#generation) == 24); assert!(core::mem::offset_of!(R4NetworkSocketRequest, r#endpoint) == 32); assert!(core::mem::offset_of!(R4NetworkSocketRequest, r#deadline) == 72); assert!(core::mem::offset_of!(R4NetworkSocketRequest, r#flags) == 120); assert!(core::mem::offset_of!(R4NetworkSocketRequest, r#bytes) == 124); };
+pub type R4NetworkSocketResult = crate::abi::NetworkSocketResult;
+const _: () = { assert!(core::mem::size_of::<R4NetworkSocketResult>() == 88); assert!(core::mem::align_of::<R4NetworkSocketResult>() == 8); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#version) == 0); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#size) == 4); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#provider) == 8); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#socket) == 16); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#generation) == 24); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#endpoint) == 32); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#bytes) == 72); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#original_bytes) == 76); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#state) == 80); assert!(core::mem::offset_of!(R4NetworkSocketResult, r#flags) == 84); };
+pub type R4NetworkResolveRequest = crate::abi::NetworkResolveRequest;
+const _: () = { assert!(core::mem::size_of::<R4NetworkResolveRequest>() == 392); assert!(core::mem::align_of::<R4NetworkResolveRequest>() == 8); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#version) == 0); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#size) == 4); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#provider) == 8); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#query) == 16); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#deadline) == 24); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#family) == 72); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#policy) == 76); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#cursor) == 80); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#capacity) == 84); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#server) == 88); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#name_len) == 128); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#reserved) == 132); assert!(core::mem::offset_of!(R4NetworkResolveRequest, r#name) == 136); };
+pub type R4NetworkResolvePage = crate::abi::NetworkResolvePage;
+const _: () = { assert!(core::mem::size_of::<R4NetworkResolvePage>() == 48); assert!(core::mem::align_of::<R4NetworkResolvePage>() == 8); assert!(core::mem::offset_of!(R4NetworkResolvePage, r#version) == 0); assert!(core::mem::offset_of!(R4NetworkResolvePage, r#size) == 4); assert!(core::mem::offset_of!(R4NetworkResolvePage, r#provider) == 8); assert!(core::mem::offset_of!(R4NetworkResolvePage, r#query) == 16); assert!(core::mem::offset_of!(R4NetworkResolvePage, r#expires_ns) == 24); assert!(core::mem::offset_of!(R4NetworkResolvePage, r#next) == 32); assert!(core::mem::offset_of!(R4NetworkResolvePage, r#count) == 36); assert!(core::mem::offset_of!(R4NetworkResolvePage, r#total) == 40); assert!(core::mem::offset_of!(R4NetworkResolvePage, r#flags) == 44); };
+pub type R4NetworkResolveAnswer = crate::abi::NetworkResolveAnswer;
+const _: () = { assert!(core::mem::size_of::<R4NetworkResolveAnswer>() == 40); assert!(core::mem::align_of::<R4NetworkResolveAnswer>() == 4); assert!(core::mem::offset_of!(R4NetworkResolveAnswer, r#address) == 0); assert!(core::mem::offset_of!(R4NetworkResolveAnswer, r#ttl_seconds) == 32); assert!(core::mem::offset_of!(R4NetworkResolveAnswer, r#reserved) == 36); };
+pub type R4NetworkLinkRequest = crate::abi::NetworkLinkRequest;
+const _: () = { assert!(core::mem::size_of::<R4NetworkLinkRequest>() == 1576); assert!(core::mem::align_of::<R4NetworkLinkRequest>() == 8); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#version) == 0); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#size) == 4); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#op) == 8); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#index) == 12); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#interface_id) == 16); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#reserved0) == 20); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#generation) == 24); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#bytes) == 32); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#reserved1) == 36); assert!(core::mem::offset_of!(R4NetworkLinkRequest, r#frame) == 40); };
+pub type R4NetworkLinkInfo = crate::abi::NetworkLinkInfo;
+const _: () = { assert!(core::mem::size_of::<R4NetworkLinkInfo>() == 128); assert!(core::mem::align_of::<R4NetworkLinkInfo>() == 8); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#version) == 0); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#size) == 4); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#index) == 8); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#interface_id) == 12); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#generation) == 16); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#provider) == 24); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#mtu) == 32); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#flags) == 36); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#mac) == 40); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#reserved) == 46); assert!(core::mem::offset_of!(R4NetworkLinkInfo, r#clock) == 48); };
+pub type R4Ipv6FrameOp = crate::abi::Ipv6FrameOp;
+const _: () = { assert!(core::mem::size_of::<R4Ipv6FrameOp>() == 1680); assert!(core::mem::align_of::<R4Ipv6FrameOp>() == 8); assert!(core::mem::offset_of!(R4Ipv6FrameOp, r#version) == 0); assert!(core::mem::offset_of!(R4Ipv6FrameOp, r#size) == 4); assert!(core::mem::offset_of!(R4Ipv6FrameOp, r#link) == 8); assert!(core::mem::offset_of!(R4Ipv6FrameOp, r#bytes) == 136); assert!(core::mem::offset_of!(R4Ipv6FrameOp, r#reserved) == 140); assert!(core::mem::offset_of!(R4Ipv6FrameOp, r#frame) == 144); };
+pub type R4Ipv6InterfaceQuery = crate::abi::Ipv6InterfaceQuery;
+const _: () = { assert!(core::mem::size_of::<R4Ipv6InterfaceQuery>() == 40); assert!(core::mem::align_of::<R4Ipv6InterfaceQuery>() == 8); assert!(core::mem::offset_of!(R4Ipv6InterfaceQuery, r#version) == 0); assert!(core::mem::offset_of!(R4Ipv6InterfaceQuery, r#size) == 4); assert!(core::mem::offset_of!(R4Ipv6InterfaceQuery, r#index) == 8); assert!(core::mem::offset_of!(R4Ipv6InterfaceQuery, r#interface_id) == 12); assert!(core::mem::offset_of!(R4Ipv6InterfaceQuery, r#provider) == 16); assert!(core::mem::offset_of!(R4Ipv6InterfaceQuery, r#generation) == 24); assert!(core::mem::offset_of!(R4Ipv6InterfaceQuery, r#cursor) == 32); assert!(core::mem::offset_of!(R4Ipv6InterfaceQuery, r#reserved) == 36); };
+pub type R4Ipv6InterfaceInfo = crate::abi::Ipv6InterfaceInfo;
+const _: () = { assert!(core::mem::size_of::<R4Ipv6InterfaceInfo>() == 296); assert!(core::mem::align_of::<R4Ipv6InterfaceInfo>() == 8); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#version) == 0); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#size) == 4); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#link) == 8); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#revision) == 136); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#capabilities) == 144); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#address_count) == 152); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#route_count) == 156); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#max_packet) == 160); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#reserved) == 164); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#link_local) == 168); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#preferred) == 200); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#default_router) == 232); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#next_due_ns) == 264); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#rx_packets) == 272); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#tx_packets) == 280); assert!(core::mem::offset_of!(R4Ipv6InterfaceInfo, r#dropped_packets) == 288); };
+pub type R4Ipv6AddressInfo = crate::abi::Ipv6AddressInfo;
+const _: () = { assert!(core::mem::size_of::<R4Ipv6AddressInfo>() == 80); assert!(core::mem::align_of::<R4Ipv6AddressInfo>() == 8); assert!(core::mem::offset_of!(R4Ipv6AddressInfo, r#version) == 0); assert!(core::mem::offset_of!(R4Ipv6AddressInfo, r#size) == 4); assert!(core::mem::offset_of!(R4Ipv6AddressInfo, r#address) == 8); assert!(core::mem::offset_of!(R4Ipv6AddressInfo, r#provider) == 40); assert!(core::mem::offset_of!(R4Ipv6AddressInfo, r#generation) == 48); assert!(core::mem::offset_of!(R4Ipv6AddressInfo, r#preferred_until_ns) == 56); assert!(core::mem::offset_of!(R4Ipv6AddressInfo, r#valid_until_ns) == 64); assert!(core::mem::offset_of!(R4Ipv6AddressInfo, r#flags) == 72); assert!(core::mem::offset_of!(R4Ipv6AddressInfo, r#prefix_length) == 76); };
+pub type R4Ipv6RouteInfo = crate::abi::Ipv6RouteInfo;
+const _: () = { assert!(core::mem::size_of::<R4Ipv6RouteInfo>() == 112); assert!(core::mem::align_of::<R4Ipv6RouteInfo>() == 8); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#version) == 0); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#size) == 4); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#prefix) == 8); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#gateway) == 40); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#provider) == 72); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#generation) == 80); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#valid_until_ns) == 88); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#prefix_length) == 96); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#metric) == 100); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#flags) == 104); assert!(core::mem::offset_of!(R4Ipv6RouteInfo, r#reserved) == 108); };
+pub type R4Ipv6AddressConfig = crate::abi::Ipv6AddressConfig;
+const _: () = { assert!(core::mem::size_of::<R4Ipv6AddressConfig>() == 88); assert!(core::mem::align_of::<R4Ipv6AddressConfig>() == 8); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#version) == 0); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#size) == 4); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#provider) == 8); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#generation) == 16); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#interface_id) == 24); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#flags) == 28); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#address) == 32); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#prefix_length) == 64); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#reserved) == 68); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#preferred_lifetime_ns) == 72); assert!(core::mem::offset_of!(R4Ipv6AddressConfig, r#valid_lifetime_ns) == 80); };
+pub type R4Ipv6Packet = crate::abi::Ipv6Packet;
+const _: () = { assert!(core::mem::size_of::<R4Ipv6Packet>() == 1656); assert!(core::mem::align_of::<R4Ipv6Packet>() == 8); assert!(core::mem::offset_of!(R4Ipv6Packet, r#version) == 0); assert!(core::mem::offset_of!(R4Ipv6Packet, r#size) == 4); assert!(core::mem::offset_of!(R4Ipv6Packet, r#provider) == 8); assert!(core::mem::offset_of!(R4Ipv6Packet, r#generation) == 16); assert!(core::mem::offset_of!(R4Ipv6Packet, r#source) == 24); assert!(core::mem::offset_of!(R4Ipv6Packet, r#destination) == 56); assert!(core::mem::offset_of!(R4Ipv6Packet, r#deadline) == 88); assert!(core::mem::offset_of!(R4Ipv6Packet, r#next_header) == 136); assert!(core::mem::offset_of!(R4Ipv6Packet, r#bytes) == 140); assert!(core::mem::offset_of!(R4Ipv6Packet, r#flags) == 144); assert!(core::mem::offset_of!(R4Ipv6Packet, r#reserved) == 148); assert!(core::mem::offset_of!(R4Ipv6Packet, r#payload) == 152); };
+pub type R4Icmpv6Message = crate::abi::Icmpv6Message;
+const _: () = { assert!(core::mem::size_of::<R4Icmpv6Message>() == 1576); assert!(core::mem::align_of::<R4Icmpv6Message>() == 4); assert!(core::mem::offset_of!(R4Icmpv6Message, r#version) == 0); assert!(core::mem::offset_of!(R4Icmpv6Message, r#size) == 4); assert!(core::mem::offset_of!(R4Icmpv6Message, r#source) == 8); assert!(core::mem::offset_of!(R4Icmpv6Message, r#destination) == 24); assert!(core::mem::offset_of!(R4Icmpv6Message, r#reply_source) == 40); assert!(core::mem::offset_of!(R4Icmpv6Message, r#bytes) == 56); assert!(core::mem::offset_of!(R4Icmpv6Message, r#flags) == 60); assert!(core::mem::offset_of!(R4Icmpv6Message, r#next_header) == 64); assert!(core::mem::offset_of!(R4Icmpv6Message, r#checksum) == 68); assert!(core::mem::offset_of!(R4Icmpv6Message, r#payload) == 72); };
+pub type R4NdpPrefix = crate::abi::NdpPrefix;
+const _: () = { assert!(core::mem::size_of::<R4NdpPrefix>() == 32); assert!(core::mem::align_of::<R4NdpPrefix>() == 4); assert!(core::mem::offset_of!(R4NdpPrefix, r#bytes) == 0); assert!(core::mem::offset_of!(R4NdpPrefix, r#flags) == 16); assert!(core::mem::offset_of!(R4NdpPrefix, r#valid_lifetime_seconds) == 20); assert!(core::mem::offset_of!(R4NdpPrefix, r#preferred_lifetime_seconds) == 24); assert!(core::mem::offset_of!(R4NdpPrefix, r#prefix_length) == 28); };
+pub type R4NdpRequest = crate::abi::NdpRequest;
+const _: () = { assert!(core::mem::size_of::<R4NdpRequest>() == 1608); assert!(core::mem::align_of::<R4NdpRequest>() == 8); assert!(core::mem::offset_of!(R4NdpRequest, r#version) == 0); assert!(core::mem::offset_of!(R4NdpRequest, r#size) == 4); assert!(core::mem::offset_of!(R4NdpRequest, r#interface_id) == 8); assert!(core::mem::offset_of!(R4NdpRequest, r#flags) == 12); assert!(core::mem::offset_of!(R4NdpRequest, r#generation) == 16); assert!(core::mem::offset_of!(R4NdpRequest, r#now_ns) == 24); assert!(core::mem::offset_of!(R4NdpRequest, r#clock_generation) == 32); assert!(core::mem::offset_of!(R4NdpRequest, r#reserved) == 36); assert!(core::mem::offset_of!(R4NdpRequest, r#source) == 40); assert!(core::mem::offset_of!(R4NdpRequest, r#destination) == 56); assert!(core::mem::offset_of!(R4NdpRequest, r#target) == 72); assert!(core::mem::offset_of!(R4NdpRequest, r#mac) == 88); assert!(core::mem::offset_of!(R4NdpRequest, r#reserved1) == 94); assert!(core::mem::offset_of!(R4NdpRequest, r#hop_limit) == 96); assert!(core::mem::offset_of!(R4NdpRequest, r#bytes) == 100); assert!(core::mem::offset_of!(R4NdpRequest, r#payload) == 104); };
+pub type R4NdpEvent = crate::abi::NdpEvent;
+const _: () = { assert!(core::mem::size_of::<R4NdpEvent>() == 328); assert!(core::mem::align_of::<R4NdpEvent>() == 4); assert!(core::mem::offset_of!(R4NdpEvent, r#version) == 0); assert!(core::mem::offset_of!(R4NdpEvent, r#size) == 4); assert!(core::mem::offset_of!(R4NdpEvent, r#kind) == 8); assert!(core::mem::offset_of!(R4NdpEvent, r#flags) == 12); assert!(core::mem::offset_of!(R4NdpEvent, r#target) == 16); assert!(core::mem::offset_of!(R4NdpEvent, r#mac) == 32); assert!(core::mem::offset_of!(R4NdpEvent, r#reserved0) == 38); assert!(core::mem::offset_of!(R4NdpEvent, r#router_lifetime_seconds) == 40); assert!(core::mem::offset_of!(R4NdpEvent, r#reachable_ms) == 44); assert!(core::mem::offset_of!(R4NdpEvent, r#retransmit_ms) == 48); assert!(core::mem::offset_of!(R4NdpEvent, r#mtu) == 52); assert!(core::mem::offset_of!(R4NdpEvent, r#prefix_count) == 56); assert!(core::mem::offset_of!(R4NdpEvent, r#reserved1) == 60); assert!(core::mem::offset_of!(R4NdpEvent, r#prefixes) == 64); assert!(core::mem::offset_of!(R4NdpEvent, r#nonce) == 320); assert!(core::mem::offset_of!(R4NdpEvent, r#reserved2) == 326); };
+pub type R4NdpInfo = crate::abi::NdpInfo;
+const _: () = { assert!(core::mem::size_of::<R4NdpInfo>() == 48); assert!(core::mem::align_of::<R4NdpInfo>() == 8); assert!(core::mem::offset_of!(R4NdpInfo, r#version) == 0); assert!(core::mem::offset_of!(R4NdpInfo, r#size) == 4); assert!(core::mem::offset_of!(R4NdpInfo, r#provider) == 8); assert!(core::mem::offset_of!(R4NdpInfo, r#active_links) == 16); assert!(core::mem::offset_of!(R4NdpInfo, r#max_links) == 20); assert!(core::mem::offset_of!(R4NdpInfo, r#active_neighbors) == 24); assert!(core::mem::offset_of!(R4NdpInfo, r#max_neighbors) == 28); assert!(core::mem::offset_of!(R4NdpInfo, r#probes) == 32); assert!(core::mem::offset_of!(R4NdpInfo, r#timeouts) == 36); assert!(core::mem::offset_of!(R4NdpInfo, r#flags) == 40); };
+pub type R4NetworkTransportRequest = crate::abi::NetworkTransportRequest;
+const _: () = { assert!(core::mem::size_of::<R4NetworkTransportRequest>() == 176); assert!(core::mem::align_of::<R4NetworkTransportRequest>() == 8); assert!(core::mem::offset_of!(R4NetworkTransportRequest, r#version) == 0); assert!(core::mem::offset_of!(R4NetworkTransportRequest, r#size) == 4); assert!(core::mem::offset_of!(R4NetworkTransportRequest, r#provider) == 8); assert!(core::mem::offset_of!(R4NetworkTransportRequest, r#broker) == 16); assert!(core::mem::offset_of!(R4NetworkTransportRequest, r#owner) == 32); assert!(core::mem::offset_of!(R4NetworkTransportRequest, r#request) == 48); };
+pub type R4BytePipeEnd = crate::abi::BytePipeEnd;
+const _: () = { assert!(core::mem::size_of::<R4BytePipeEnd>() == 24); assert!(core::mem::align_of::<R4BytePipeEnd>() == 8); assert!(core::mem::offset_of!(R4BytePipeEnd, r#handle) == 0); assert!(core::mem::offset_of!(R4BytePipeEnd, r#generation) == 8); assert!(core::mem::offset_of!(R4BytePipeEnd, r#direction) == 16); assert!(core::mem::offset_of!(R4BytePipeEnd, r#reserved) == 20); };
+pub type R4BytePipePair = crate::abi::BytePipePair;
+const _: () = { assert!(core::mem::size_of::<R4BytePipePair>() == 56); assert!(core::mem::align_of::<R4BytePipePair>() == 8); assert!(core::mem::offset_of!(R4BytePipePair, r#version) == 0); assert!(core::mem::offset_of!(R4BytePipePair, r#size) == 4); assert!(core::mem::offset_of!(R4BytePipePair, r#reader) == 8); assert!(core::mem::offset_of!(R4BytePipePair, r#writer) == 32); };
+pub type R4BytePipeProgress = crate::abi::BytePipeProgress;
+const _: () = { assert!(core::mem::size_of::<R4BytePipeProgress>() == 24); assert!(core::mem::align_of::<R4BytePipeProgress>() == 8); assert!(core::mem::offset_of!(R4BytePipeProgress, r#version) == 0); assert!(core::mem::offset_of!(R4BytePipeProgress, r#size) == 4); assert!(core::mem::offset_of!(R4BytePipeProgress, r#bytes) == 8); assert!(core::mem::offset_of!(R4BytePipeProgress, r#state) == 16); assert!(core::mem::offset_of!(R4BytePipeProgress, r#flags) == 20); };
+pub type R4BytePipeInfo = crate::abi::BytePipeInfo;
+const _: () = { assert!(core::mem::size_of::<R4BytePipeInfo>() == 48); assert!(core::mem::align_of::<R4BytePipeInfo>() == 8); assert!(core::mem::offset_of!(R4BytePipeInfo, r#version) == 0); assert!(core::mem::offset_of!(R4BytePipeInfo, r#size) == 4); assert!(core::mem::offset_of!(R4BytePipeInfo, r#capacity) == 8); assert!(core::mem::offset_of!(R4BytePipeInfo, r#queued) == 16); assert!(core::mem::offset_of!(R4BytePipeInfo, r#readers) == 24); assert!(core::mem::offset_of!(R4BytePipeInfo, r#writers) == 28); assert!(core::mem::offset_of!(R4BytePipeInfo, r#atomic_limit) == 32); assert!(core::mem::offset_of!(R4BytePipeInfo, r#max_step) == 40); };
+pub type R4LaunchIoBinding = crate::abi::LaunchIoBinding;
+const _: () = { assert!(core::mem::size_of::<R4LaunchIoBinding>() == 32); assert!(core::mem::align_of::<R4LaunchIoBinding>() == 8); assert!(core::mem::offset_of!(R4LaunchIoBinding, r#kind) == 0); assert!(core::mem::offset_of!(R4LaunchIoBinding, r#reserved) == 4); assert!(core::mem::offset_of!(R4LaunchIoBinding, r#end) == 8); };
+pub type R4LaunchIo = crate::abi::LaunchIo;
+const _: () = { assert!(core::mem::size_of::<R4LaunchIo>() == 112); assert!(core::mem::align_of::<R4LaunchIo>() == 8); assert!(core::mem::offset_of!(R4LaunchIo, r#version) == 0); assert!(core::mem::offset_of!(R4LaunchIo, r#size) == 4); assert!(core::mem::offset_of!(R4LaunchIo, r#policy) == 8); assert!(core::mem::offset_of!(R4LaunchIo, r#console_host) == 12); assert!(core::mem::offset_of!(R4LaunchIo, r#stdin_binding) == 16); assert!(core::mem::offset_of!(R4LaunchIo, r#stdout_binding) == 48); assert!(core::mem::offset_of!(R4LaunchIo, r#stderr_binding) == 80); };
+pub type R4Utf8ByteRange = crate::abi::Utf8ByteRange;
+const _: () = { assert!(core::mem::size_of::<R4Utf8ByteRange>() == 16); assert!(core::mem::align_of::<R4Utf8ByteRange>() == 8); assert!(core::mem::offset_of!(R4Utf8ByteRange, r#start) == 0); assert!(core::mem::offset_of!(R4Utf8ByteRange, r#end) == 8); };
+pub type R4CompositionCaret = crate::abi::CompositionCaret;
+const _: () = { assert!(core::mem::size_of::<R4CompositionCaret>() == 24); assert!(core::mem::align_of::<R4CompositionCaret>() == 4); assert!(core::mem::offset_of!(R4CompositionCaret, r#x) == 0); assert!(core::mem::offset_of!(R4CompositionCaret, r#y) == 4); assert!(core::mem::offset_of!(R4CompositionCaret, r#width) == 8); assert!(core::mem::offset_of!(R4CompositionCaret, r#height) == 12); assert!(core::mem::offset_of!(R4CompositionCaret, r#scale_numerator) == 16); assert!(core::mem::offset_of!(R4CompositionCaret, r#scale_denominator) == 20); };
+pub type R4CompositionProvider = crate::abi::CompositionProvider;
+const _: () = { assert!(core::mem::size_of::<R4CompositionProvider>() == 40); assert!(core::mem::align_of::<R4CompositionProvider>() == 8); assert!(core::mem::offset_of!(R4CompositionProvider, r#version) == 0); assert!(core::mem::offset_of!(R4CompositionProvider, r#size) == 4); assert!(core::mem::offset_of!(R4CompositionProvider, r#process) == 8); assert!(core::mem::offset_of!(R4CompositionProvider, r#generation) == 24); assert!(core::mem::offset_of!(R4CompositionProvider, r#features) == 32); assert!(core::mem::offset_of!(R4CompositionProvider, r#max_text_bytes) == 36); };
+pub type R4CompositionFocus = crate::abi::CompositionFocus;
+const _: () = { assert!(core::mem::size_of::<R4CompositionFocus>() == 112); assert!(core::mem::align_of::<R4CompositionFocus>() == 8); assert!(core::mem::offset_of!(R4CompositionFocus, r#version) == 0); assert!(core::mem::offset_of!(R4CompositionFocus, r#size) == 4); assert!(core::mem::offset_of!(R4CompositionFocus, r#window) == 8); assert!(core::mem::offset_of!(R4CompositionFocus, r#view_generation) == 72); assert!(core::mem::offset_of!(R4CompositionFocus, r#focus_generation) == 80); assert!(core::mem::offset_of!(R4CompositionFocus, r#input_revision) == 88); assert!(core::mem::offset_of!(R4CompositionFocus, r#observed_tick) == 96); assert!(core::mem::offset_of!(R4CompositionFocus, r#focused) == 104); assert!(core::mem::offset_of!(R4CompositionFocus, r#reserved) == 108); };
+pub type R4CompositionId = crate::abi::CompositionId;
+const _: () = { assert!(core::mem::size_of::<R4CompositionId>() == 120); assert!(core::mem::align_of::<R4CompositionId>() == 8); assert!(core::mem::offset_of!(R4CompositionId, r#window) == 0); assert!(core::mem::offset_of!(R4CompositionId, r#view_generation) == 64); assert!(core::mem::offset_of!(R4CompositionId, r#focus_generation) == 72); assert!(core::mem::offset_of!(R4CompositionId, r#owner_generation) == 80); assert!(core::mem::offset_of!(R4CompositionId, r#session_generation) == 88); assert!(core::mem::offset_of!(R4CompositionId, r#provider) == 96); assert!(core::mem::offset_of!(R4CompositionId, r#provider_generation) == 112); };
+pub type R4CompositionEvent = crate::abi::CompositionEvent;
+const _: () = { assert!(core::mem::size_of::<R4CompositionEvent>() == 184); assert!(core::mem::align_of::<R4CompositionEvent>() == 8); assert!(core::mem::offset_of!(R4CompositionEvent, r#version) == 0); assert!(core::mem::offset_of!(R4CompositionEvent, r#size) == 4); assert!(core::mem::offset_of!(R4CompositionEvent, r#id) == 8); assert!(core::mem::offset_of!(R4CompositionEvent, r#sequence) == 128); assert!(core::mem::offset_of!(R4CompositionEvent, r#text_revision) == 136); assert!(core::mem::offset_of!(R4CompositionEvent, r#replacement) == 144); assert!(core::mem::offset_of!(R4CompositionEvent, r#selection) == 160); assert!(core::mem::offset_of!(R4CompositionEvent, r#kind) == 176); assert!(core::mem::offset_of!(R4CompositionEvent, r#text_bytes) == 180); };
+pub type R4CompositionFocusReply = crate::abi::CompositionFocusReply;
+const _: () = { assert!(core::mem::size_of::<R4CompositionFocusReply>() == 120); assert!(core::mem::align_of::<R4CompositionFocusReply>() == 8); assert!(core::mem::offset_of!(R4CompositionFocusReply, r#result) == 0); assert!(core::mem::offset_of!(R4CompositionFocusReply, r#reserved) == 4); assert!(core::mem::offset_of!(R4CompositionFocusReply, r#focus) == 8); };
+pub type R4CompositionCapabilityReply = crate::abi::CompositionCapabilityReply;
+const _: () = { assert!(core::mem::size_of::<R4CompositionCapabilityReply>() == 48); assert!(core::mem::align_of::<R4CompositionCapabilityReply>() == 8); assert!(core::mem::offset_of!(R4CompositionCapabilityReply, r#result) == 0); assert!(core::mem::offset_of!(R4CompositionCapabilityReply, r#reserved) == 4); assert!(core::mem::offset_of!(R4CompositionCapabilityReply, r#provider) == 8); };
+pub type R4AudioCaptureSourceId = crate::abi::AudioCaptureSourceId;
+const _: () = { assert!(core::mem::size_of::<R4AudioCaptureSourceId>() == 24); assert!(core::mem::align_of::<R4AudioCaptureSourceId>() == 8); assert!(core::mem::offset_of!(R4AudioCaptureSourceId, r#registration) == 0); assert!(core::mem::offset_of!(R4AudioCaptureSourceId, r#source) == 8); assert!(core::mem::offset_of!(R4AudioCaptureSourceId, r#generation) == 16); };
+pub type R4AudioCaptureFormat = crate::abi::AudioCaptureFormat;
+const _: () = { assert!(core::mem::size_of::<R4AudioCaptureFormat>() == 12); assert!(core::mem::align_of::<R4AudioCaptureFormat>() == 4); assert!(core::mem::offset_of!(R4AudioCaptureFormat, r#rate_hz) == 0); assert!(core::mem::offset_of!(R4AudioCaptureFormat, r#channels) == 4); assert!(core::mem::offset_of!(R4AudioCaptureFormat, r#sample_format) == 6); assert!(core::mem::offset_of!(R4AudioCaptureFormat, r#frame_bytes) == 8); };
+pub type R4AudioCaptureHandle = crate::abi::AudioCaptureHandle;
+const _: () = { assert!(core::mem::size_of::<R4AudioCaptureHandle>() == 56); assert!(core::mem::align_of::<R4AudioCaptureHandle>() == 8); assert!(core::mem::offset_of!(R4AudioCaptureHandle, r#service) == 0); assert!(core::mem::offset_of!(R4AudioCaptureHandle, r#source) == 16); assert!(core::mem::offset_of!(R4AudioCaptureHandle, r#stream) == 40); assert!(core::mem::offset_of!(R4AudioCaptureHandle, r#generation) == 48); };
+pub type R4AudioCaptureSourceInfo = crate::abi::AudioCaptureSourceInfo;
+const _: () = { assert!(core::mem::size_of::<R4AudioCaptureSourceInfo>() == 112); assert!(core::mem::align_of::<R4AudioCaptureSourceInfo>() == 8); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#version) == 0); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#size) == 4); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#id) == 8); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#flags) == 32); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#formats) == 36); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#min_rate) == 40); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#max_rate) == 44); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#min_channels) == 48); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#max_channels) == 50); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#max_queue_frames) == 52); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#clock_id) == 56); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#clock_generation) == 64); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#clock_frequency) == 72); assert!(core::mem::offset_of!(R4AudioCaptureSourceInfo, r#name) == 80); };
+pub type R4AudioCaptureRequest = crate::abi::AudioCaptureRequest;
+const _: () = { assert!(core::mem::size_of::<R4AudioCaptureRequest>() == 104); assert!(core::mem::align_of::<R4AudioCaptureRequest>() == 8); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#version) == 0); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#size) == 4); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#op) == 8); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#flags) == 12); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#handle) == 16); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#format) == 72); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#queue_frames) == 84); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#frames) == 88); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#buffer_bytes) == 92); assert!(core::mem::offset_of!(R4AudioCaptureRequest, r#client_generation) == 96); };
+pub type R4AudioCaptureReply = crate::abi::AudioCaptureReply;
+const _: () = { assert!(core::mem::size_of::<R4AudioCaptureReply>() == 248); assert!(core::mem::align_of::<R4AudioCaptureReply>() == 8); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#version) == 0); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#size) == 4); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#result) == 8); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#flags) == 12); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#handle) == 16); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#source) == 72); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#format) == 184); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#state) == 196); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#queued_frames) == 200); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#frames) == 204); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#first_frame) == 208); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#first_timestamp) == 216); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#overrun_frames) == 224); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#gap_frames) == 232); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#bytes) == 240); assert!(core::mem::offset_of!(R4AudioCaptureReply, r#reserved) == 244); };
 pub type R4XStartContext = crate::abi::R4XStartContext;
 const _: () = { assert!(core::mem::size_of::<R4XStartContext>() == 128); assert!(core::mem::align_of::<R4XStartContext>() == 8); assert!(core::mem::offset_of!(R4XStartContext, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartContext, r#abi_major) == 4); assert!(core::mem::offset_of!(R4XStartContext, r#abi_minor) == 6); assert!(core::mem::offset_of!(R4XStartContext, r#size) == 8); assert!(core::mem::offset_of!(R4XStartContext, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartContext, r#instance_id) == 16); assert!(core::mem::offset_of!(R4XStartContext, r#app_class) == 24); assert!(core::mem::offset_of!(R4XStartContext, r#reserved0) == 28); assert!(core::mem::offset_of!(R4XStartContext, r#program_path) == 32); assert!(core::mem::offset_of!(R4XStartContext, r#args) == 40); assert!(core::mem::offset_of!(R4XStartContext, r#args_len) == 48); assert!(core::mem::offset_of!(R4XStartContext, r#imports) == 56); assert!(core::mem::offset_of!(R4XStartContext, r#import_count) == 64); assert!(core::mem::offset_of!(R4XStartContext, r#reserved1) == 68); assert!(core::mem::offset_of!(R4XStartContext, r#reserved_memory0) == 72); assert!(core::mem::offset_of!(R4XStartContext, r#reserved_memory1) == 80); assert!(core::mem::offset_of!(R4XStartContext, r#exit) == 88); assert!(core::mem::offset_of!(R4XStartContext, r#should_close) == 96); assert!(core::mem::offset_of!(R4XStartContext, r#yield) == 104); assert!(core::mem::offset_of!(R4XStartContext, r#reserved_runtime) == 112); assert!(core::mem::offset_of!(R4XStartContext, r#reserved2) == 120); };
 pub type R4XStartImport = crate::abi::R4XStartImport;
@@ -819,17 +947,17 @@ const _: () = { assert!(core::mem::size_of::<R4XStartImport>() == 40); assert!(c
 pub type R4LQuery = crate::abi::R4LQuery;
 const _: () = { assert!(core::mem::size_of::<R4LQuery>() == 32); assert!(core::mem::align_of::<R4LQuery>() == 8); assert!(core::mem::offset_of!(R4LQuery, r#magic) == 0); assert!(core::mem::offset_of!(R4LQuery, r#abi_version) == 4); assert!(core::mem::offset_of!(R4LQuery, r#size) == 8); assert!(core::mem::offset_of!(R4LQuery, r#group) == 12); assert!(core::mem::offset_of!(R4LQuery, r#kernel_bridge) == 16); assert!(core::mem::offset_of!(R4LQuery, r#reserved) == 24); };
 pub type R4XStartR4Sys = crate::abi::R4XStartR4Sys;
-const _: () = { assert!(core::mem::size_of::<R4XStartR4Sys>() == 1416); assert!(core::mem::align_of::<R4XStartR4Sys>() == 8); assert!(core::mem::offset_of!(R4XStartR4Sys, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Sys, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Sys, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Sys, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Sys, r#write) == 16); assert!(core::mem::offset_of!(R4XStartR4Sys, r#putc) == 24); assert!(core::mem::offset_of!(R4XStartR4Sys, r#sleep_ticks) == 32); assert!(core::mem::offset_of!(R4XStartR4Sys, r#ticks) == 40); assert!(core::mem::offset_of!(R4XStartR4Sys, r#env_get) == 48); assert!(core::mem::offset_of!(R4XStartR4Sys, r#dir_entry) == 56); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_should_close) == 64); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_class) == 72); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_instance) == 80); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_status) == 88); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_open) == 96); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_close) == 104); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_call) == 112); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_register) == 120); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_unregister) == 128); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_poll) == 136); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_recv) == 144); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_reply) == 152); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_detail_by_name) == 160); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_start) == 168); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_stop) == 176); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_restart) == 184); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_install) == 192); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_remove) == 200); assert!(core::mem::offset_of!(R4XStartR4Sys, r#reserved0) == 208); assert!(core::mem::offset_of!(R4XStartR4Sys, r#reserved1) == 216); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_reserve) == 224); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_commit) == 232); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_decommit) == 240); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_release) == 248); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_query) == 256); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_create) == 264); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_exit) == 272); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_join) == 280); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_current) == 288); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_status) == 296); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_read) == 304); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_read_at) == 312); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_write) == 320); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_append) == 328); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_stream_begin) == 336); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_stream_write) == 344); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_stream_finish) == 352); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_stream_abort) == 360); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_service_call) == 368); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_status) == 376); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_wait) == 384); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_close) == 392); assert!(core::mem::offset_of!(R4XStartR4Sys, r#task_yield) == 400); assert!(core::mem::offset_of!(R4XStartR4Sys, r#reserved_shell_run) == 408); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_halt) == 416); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_reboot) == 424); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_poweroff) == 432); assert!(core::mem::offset_of!(R4XStartR4Sys, r#time_state) == 440); assert!(core::mem::offset_of!(R4XStartR4Sys, r#time_set_state) == 448); assert!(core::mem::offset_of!(R4XStartR4Sys, r#time_seconds_since_midnight) == 456); assert!(core::mem::offset_of!(R4XStartR4Sys, r#dir_list) == 464); assert!(core::mem::offset_of!(R4XStartR4Sys, r#dir_create) == 472); assert!(core::mem::offset_of!(R4XStartR4Sys, r#dir_delete) == 480); assert!(core::mem::offset_of!(R4XStartR4Sys, r#drive_info) == 488); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_info) == 496); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_delete) == 504); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_rename) == 512); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_copy) == 520); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_move) == 528); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_read) == 536); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_write) == 544); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_read_at) == 552); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_append) == 560); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_begin) == 568); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_write) == 576); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_finish) == 584); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_abort) == 592); assert!(core::mem::offset_of!(R4XStartR4Sys, r#env_set) == 600); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_key_info) == 608); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_enum_key) == 616); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_enum_value) == 624); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_get_value) == 632); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_set_value) == 640); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_delete_value) == 648); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_info) == 656); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_detail) == 664); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_set_start_mode) == 672); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_wait) == 680); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_run) == 688); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_launch) == 696); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_spawn) == 704); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_kill) == 712); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_status) == 720); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_request_close) == 728); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_reap_instance) == 736); assert!(core::mem::offset_of!(R4XStartR4Sys, r#boot_log_info) == 744); assert!(core::mem::offset_of!(R4XStartR4Sys, r#boot_log_read) == 752); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_spawn_handle) == 760); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_open_handle) == 768); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_status) == 776); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_request_close) == 784); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_kill) == 792); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_wait) == 800); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_reap) == 808); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_completion_read) == 816); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_inventory_begin) == 824); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_inventory_programs) == 832); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_inventory_tasks) == 840); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_inventory_threads) == 848); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_create_handle) == 856); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_handle_join) == 864); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_handle_status) == 872); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_replace_atomic) == 880); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_delete_if_match) == 888); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_update_atomic_checked) == 896); assert!(core::mem::offset_of!(R4XStartR4Sys, r#path_names_equal_collated) == 904); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_update_cleanup_checked) == 912); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_declare_publish) == 920); assert!(core::mem::offset_of!(R4XStartR4Sys, r#module_resource_stat) == 928); assert!(core::mem::offset_of!(R4XStartR4Sys, r#module_resource_read) == 936); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_module_path) == 944); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_module_running) == 952); assert!(core::mem::offset_of!(R4XStartR4Sys, r#monotonic_clock) == 960); assert!(core::mem::offset_of!(R4XStartR4Sys, r#boot_ready) == 968); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_snapshot_begin) == 976); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_snapshot_page) == 984); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_batch_mutate) == 992); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_write_at) == 1000); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_info) == 1008); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_lock) == 1016); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_inventory) == 1024); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_device) == 1032); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_partition) == 1040); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_volume) == 1048); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_begin) == 1056); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_end) == 1064); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_read) == 1072); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_read) == 1080); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_write) == 1088); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_flush) == 1096); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_rescan) == 1104); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_mount) == 1112); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_unmount) == 1120); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_use_begin) == 1128); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_use_end) == 1136); assert!(core::mem::offset_of!(R4XStartR4Sys, r#directory_change_begin) == 1144); assert!(core::mem::offset_of!(R4XStartR4Sys, r#directory_change_poll) == 1152); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_copy_buffered) == 1160); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_create) == 1168); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_query) == 1176); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_notify) == 1184); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_wait) == 1192); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_close) == 1200); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_local_get) == 1208); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_local_publish) == 1216); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_current_handle) == 1224); assert!(core::mem::offset_of!(R4XStartR4Sys, r#cpu_capacity) == 1232); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_exit) == 1240); assert!(core::mem::offset_of!(R4XStartR4Sys, r#platform_input_snapshot) == 1248); assert!(core::mem::offset_of!(R4XStartR4Sys, r#directory_next) == 1256); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_placement_get) == 1264); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_placement_set) == 1272); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_power_transition) == 1280); assert!(core::mem::offset_of!(R4XStartR4Sys, r#entropy_source_info) == 1288); assert!(core::mem::offset_of!(R4XStartR4Sys, r#entropy_fill) == 1296); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_lifecycle_begin) == 1304); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_lifecycle_programs) == 1312); assert!(core::mem::offset_of!(R4XStartR4Sys, r#drive_info_geometry) == 1320); assert!(core::mem::offset_of!(R4XStartR4Sys, r#directory_batch) == 1328); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_observation_retain) == 1336); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_observation_wait) == 1344); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_observation_read) == 1352); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_observation_release) == 1360); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_name_limits) == 1368); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_bound_detail) == 1376); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_stop_bound) == 1384); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_inventory_page) == 1392); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_control_bound) == 1400); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_update_target_supported) == 1408); };
+const _: () = { assert!(core::mem::size_of::<R4XStartR4Sys>() == 1560); assert!(core::mem::align_of::<R4XStartR4Sys>() == 8); assert!(core::mem::offset_of!(R4XStartR4Sys, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Sys, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Sys, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Sys, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Sys, r#write) == 16); assert!(core::mem::offset_of!(R4XStartR4Sys, r#putc) == 24); assert!(core::mem::offset_of!(R4XStartR4Sys, r#sleep_ticks) == 32); assert!(core::mem::offset_of!(R4XStartR4Sys, r#ticks) == 40); assert!(core::mem::offset_of!(R4XStartR4Sys, r#env_get) == 48); assert!(core::mem::offset_of!(R4XStartR4Sys, r#dir_entry) == 56); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_should_close) == 64); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_class) == 72); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_instance) == 80); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_status) == 88); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_open) == 96); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_close) == 104); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_call) == 112); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_register) == 120); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_unregister) == 128); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_poll) == 136); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_recv) == 144); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_reply) == 152); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_detail_by_name) == 160); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_start) == 168); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_stop) == 176); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_restart) == 184); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_install) == 192); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_remove) == 200); assert!(core::mem::offset_of!(R4XStartR4Sys, r#reserved0) == 208); assert!(core::mem::offset_of!(R4XStartR4Sys, r#reserved1) == 216); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_reserve) == 224); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_commit) == 232); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_decommit) == 240); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_release) == 248); assert!(core::mem::offset_of!(R4XStartR4Sys, r#vm_query) == 256); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_create) == 264); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_exit) == 272); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_join) == 280); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_current) == 288); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_status) == 296); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_read) == 304); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_read_at) == 312); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_write) == 320); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_append) == 328); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_stream_begin) == 336); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_stream_write) == 344); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_stream_finish) == 352); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_stream_abort) == 360); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_service_call) == 368); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_status) == 376); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_wait) == 384); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_close) == 392); assert!(core::mem::offset_of!(R4XStartR4Sys, r#task_yield) == 400); assert!(core::mem::offset_of!(R4XStartR4Sys, r#reserved_shell_run) == 408); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_halt) == 416); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_reboot) == 424); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_poweroff) == 432); assert!(core::mem::offset_of!(R4XStartR4Sys, r#time_state) == 440); assert!(core::mem::offset_of!(R4XStartR4Sys, r#time_set_state) == 448); assert!(core::mem::offset_of!(R4XStartR4Sys, r#time_seconds_since_midnight) == 456); assert!(core::mem::offset_of!(R4XStartR4Sys, r#dir_list) == 464); assert!(core::mem::offset_of!(R4XStartR4Sys, r#dir_create) == 472); assert!(core::mem::offset_of!(R4XStartR4Sys, r#dir_delete) == 480); assert!(core::mem::offset_of!(R4XStartR4Sys, r#drive_info) == 488); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_info) == 496); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_delete) == 504); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_rename) == 512); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_copy) == 520); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_move) == 528); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_read) == 536); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_write) == 544); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_read_at) == 552); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_append) == 560); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_begin) == 568); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_write) == 576); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_finish) == 584); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_abort) == 592); assert!(core::mem::offset_of!(R4XStartR4Sys, r#env_set) == 600); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_key_info) == 608); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_enum_key) == 616); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_enum_value) == 624); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_get_value) == 632); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_set_value) == 640); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_delete_value) == 648); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_info) == 656); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_detail) == 664); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_set_start_mode) == 672); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_endpoint_wait) == 680); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_run) == 688); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_launch) == 696); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_spawn) == 704); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_kill) == 712); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_status) == 720); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_request_close) == 728); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_reap_instance) == 736); assert!(core::mem::offset_of!(R4XStartR4Sys, r#boot_log_info) == 744); assert!(core::mem::offset_of!(R4XStartR4Sys, r#boot_log_read) == 752); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_spawn_handle) == 760); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_open_handle) == 768); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_status) == 776); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_request_close) == 784); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_kill) == 792); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_wait) == 800); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_handle_reap) == 808); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_completion_read) == 816); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_inventory_begin) == 824); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_inventory_programs) == 832); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_inventory_tasks) == 840); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_inventory_threads) == 848); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_create_handle) == 856); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_handle_join) == 864); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_handle_status) == 872); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_replace_atomic) == 880); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_delete_if_match) == 888); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_update_atomic_checked) == 896); assert!(core::mem::offset_of!(R4XStartR4Sys, r#path_names_equal_collated) == 904); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_update_cleanup_checked) == 912); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_stream_declare_publish) == 920); assert!(core::mem::offset_of!(R4XStartR4Sys, r#module_resource_stat) == 928); assert!(core::mem::offset_of!(R4XStartR4Sys, r#module_resource_read) == 936); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_module_path) == 944); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_module_running) == 952); assert!(core::mem::offset_of!(R4XStartR4Sys, r#monotonic_clock) == 960); assert!(core::mem::offset_of!(R4XStartR4Sys, r#boot_ready) == 968); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_snapshot_begin) == 976); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_snapshot_page) == 984); assert!(core::mem::offset_of!(R4XStartR4Sys, r#registry_batch_mutate) == 992); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_write_at) == 1000); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_info) == 1008); assert!(core::mem::offset_of!(R4XStartR4Sys, r#io_file_lock) == 1016); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_inventory) == 1024); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_device) == 1032); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_partition) == 1040); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_volume) == 1048); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_begin) == 1056); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_end) == 1064); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_read) == 1072); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_read) == 1080); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_write) == 1088); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_claim_flush) == 1096); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_rescan) == 1104); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_mount) == 1112); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_unmount) == 1120); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_use_begin) == 1128); assert!(core::mem::offset_of!(R4XStartR4Sys, r#storage_use_end) == 1136); assert!(core::mem::offset_of!(R4XStartR4Sys, r#directory_change_begin) == 1144); assert!(core::mem::offset_of!(R4XStartR4Sys, r#directory_change_poll) == 1152); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_copy_buffered) == 1160); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_create) == 1168); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_query) == 1176); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_notify) == 1184); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_wait) == 1192); assert!(core::mem::offset_of!(R4XStartR4Sys, r#notification_close) == 1200); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_local_get) == 1208); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_local_publish) == 1216); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_current_handle) == 1224); assert!(core::mem::offset_of!(R4XStartR4Sys, r#cpu_capacity) == 1232); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_exit) == 1240); assert!(core::mem::offset_of!(R4XStartR4Sys, r#platform_input_snapshot) == 1248); assert!(core::mem::offset_of!(R4XStartR4Sys, r#directory_next) == 1256); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_placement_get) == 1264); assert!(core::mem::offset_of!(R4XStartR4Sys, r#thread_placement_set) == 1272); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_power_transition) == 1280); assert!(core::mem::offset_of!(R4XStartR4Sys, r#entropy_source_info) == 1288); assert!(core::mem::offset_of!(R4XStartR4Sys, r#entropy_fill) == 1296); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_lifecycle_begin) == 1304); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_lifecycle_programs) == 1312); assert!(core::mem::offset_of!(R4XStartR4Sys, r#drive_info_geometry) == 1320); assert!(core::mem::offset_of!(R4XStartR4Sys, r#directory_batch) == 1328); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_observation_retain) == 1336); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_observation_wait) == 1344); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_observation_read) == 1352); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_observation_release) == 1360); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_name_limits) == 1368); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_bound_detail) == 1376); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_stop_bound) == 1384); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_inventory_page) == 1392); assert!(core::mem::offset_of!(R4XStartR4Sys, r#service_control_bound) == 1400); assert!(core::mem::offset_of!(R4XStartR4Sys, r#system_update_target_supported) == 1408); assert!(core::mem::offset_of!(R4XStartR4Sys, r#file_metadata2) == 1416); assert!(core::mem::offset_of!(R4XStartR4Sys, r#directory_metadata_batch2) == 1424); assert!(core::mem::offset_of!(R4XStartR4Sys, r#waitset_create) == 1432); assert!(core::mem::offset_of!(R4XStartR4Sys, r#waitset_enroll) == 1440); assert!(core::mem::offset_of!(R4XStartR4Sys, r#waitset_rearm) == 1448); assert!(core::mem::offset_of!(R4XStartR4Sys, r#waitset_remove) == 1456); assert!(core::mem::offset_of!(R4XStartR4Sys, r#waitset_wait) == 1464); assert!(core::mem::offset_of!(R4XStartR4Sys, r#waitset_close) == 1472); assert!(core::mem::offset_of!(R4XStartR4Sys, r#waitset_source_prepare) == 1480); assert!(core::mem::offset_of!(R4XStartR4Sys, r#byte_pipe_create) == 1488); assert!(core::mem::offset_of!(R4XStartR4Sys, r#byte_pipe_dup) == 1496); assert!(core::mem::offset_of!(R4XStartR4Sys, r#byte_pipe_read) == 1504); assert!(core::mem::offset_of!(R4XStartR4Sys, r#byte_pipe_write) == 1512); assert!(core::mem::offset_of!(R4XStartR4Sys, r#byte_pipe_cancel) == 1520); assert!(core::mem::offset_of!(R4XStartR4Sys, r#byte_pipe_close) == 1528); assert!(core::mem::offset_of!(R4XStartR4Sys, r#byte_pipe_info) == 1536); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_launch_io) == 1544); assert!(core::mem::offset_of!(R4XStartR4Sys, r#program_stdio) == 1552); };
 pub type R4XStartR4Desk = crate::abi::R4XStartR4Desk;
 const _: () = { assert!(core::mem::size_of::<R4XStartR4Desk>() == 632); assert!(core::mem::align_of::<R4XStartR4Desk>() == 8); assert!(core::mem::offset_of!(R4XStartR4Desk, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Desk, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Desk, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Desk, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Desk, r#read_key) == 16); assert!(core::mem::offset_of!(R4XStartR4Desk, r#mouse_state) == 24); assert!(core::mem::offset_of!(R4XStartR4Desk, r#mouse_show) == 32); assert!(core::mem::offset_of!(R4XStartR4Desk, r#mouse_hide) == 40); assert!(core::mem::offset_of!(R4XStartR4Desk, r#keyboard_layout_current) == 48); assert!(core::mem::offset_of!(R4XStartR4Desk, r#keyboard_layout_at) == 56); assert!(core::mem::offset_of!(R4XStartR4Desk, r#keyboard_layout_set) == 64); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_set_window) == 72); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_set_console_host) == 80); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_request_host_launch) == 88); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_take_host_launch) == 96); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_window_id) == 104); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_window_info) == 112); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_set_window_info) == 120); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_poll_event) == 128); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_push_event) == 136); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_set_text) == 144); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_text) == 152); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_revision) == 160); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_command) == 168); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_set_title) == 176); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_title) == 184); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_set_min_size) == 192); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_min_size) == 200); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_output) == 208); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_revision) == 216); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_state) == 224); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_set_metrics) == 232); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_push_key) == 240); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_write) == 248); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_read) == 256); assert!(core::mem::offset_of!(R4XStartR4Desk, r#clipboard_write) == 264); assert!(core::mem::offset_of!(R4XStartR4Desk, r#clipboard_read) == 272); assert!(core::mem::offset_of!(R4XStartR4Desk, r#clipboard_revision) == 280); assert!(core::mem::offset_of!(R4XStartR4Desk, r#clipboard_info) == 288); assert!(core::mem::offset_of!(R4XStartR4Desk, r#clipboard_clear) == 296); assert!(core::mem::offset_of!(R4XStartR4Desk, r#read_key_codepoint) == 304); assert!(core::mem::offset_of!(R4XStartR4Desk, r#reserved1) == 312); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_info) == 320); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_read) == 328); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_wait) == 336); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_publish) == 344); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_input_push) == 352); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_input_poll) == 360); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_input_status) == 368); assert!(core::mem::offset_of!(R4XStartR4Desk, r#desktop_activity_wait) == 376); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_map) == 384); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_current_console_host) == 392); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_request_desktop) == 400); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_spawn_with_console_host) == 408); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_spawn_with_console_host_handle) == 416); assert!(core::mem::offset_of!(R4XStartR4Desk, r#program_set_window_handle) == 424); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_push_input) == 432); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_acquire) == 440); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_release) == 448); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_consumers) == 456); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_publish_regions) == 464); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_input_wait) == 472); assert!(core::mem::offset_of!(R4XStartR4Desk, r#physical_key_poll) == 480); assert!(core::mem::offset_of!(R4XStartR4Desk, r#mouse_motion) == 488); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_snapshot_acquire) == 496); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_snapshot_release) == 504); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_source_reset) == 512); assert!(core::mem::offset_of!(R4XStartR4Desk, r#remote_frame_capture_stats) == 520); assert!(core::mem::offset_of!(R4XStartR4Desk, r#desktop_activity_notify) == 528); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_read_events) == 536); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_push_events) == 544); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_text_info) == 552); assert!(core::mem::offset_of!(R4XStartR4Desk, r#console_set_encoding) == 560); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_activity_wait) == 568); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_activity_notify) == 576); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_pointer_capture_info) == 584); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_pointer_capture_acquire) == 592); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_pointer_capture_release) == 600); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_pointer_capture_host) == 608); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_host_input) == 616); assert!(core::mem::offset_of!(R4XStartR4Desk, r#gui_window_appearance) == 624); };
 pub type R4XStartR4Draw = crate::abi::R4XStartR4Draw;
-const _: () = { assert!(core::mem::size_of::<R4XStartR4Draw>() == 912); assert!(core::mem::align_of::<R4XStartR4Draw>() == 8); assert!(core::mem::offset_of!(R4XStartR4Draw, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Draw, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Draw, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Draw, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Draw, r#screen_width) == 16); assert!(core::mem::offset_of!(R4XStartR4Draw, r#screen_height) == 24); assert!(core::mem::offset_of!(R4XStartR4Draw, r#clear) == 32); assert!(core::mem::offset_of!(R4XStartR4Draw, r#rect) == 40); assert!(core::mem::offset_of!(R4XStartR4Draw, r#text) == 48); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_revision) == 56); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_begin_frame) == 64); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_begin_frame_rect) == 72); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_present) == 80); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_blit_xrgb32) == 88); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_clear) == 96); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_rect) == 104); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_draw_text) == 112); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_draw_text_ex) == 120); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_blit) == 128); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_raster_read) == 136); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_present) == 144); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_count) == 152); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_info) == 160); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_measure) == 168); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_set_font) == 176); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_font) == 184); assert!(core::mem::offset_of!(R4XStartR4Draw, r#text_font) == 192); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_reload) == 200); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_glyph_row) == 208); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_blend_alpha8) == 216); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_begin) == 224); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_append) == 232); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_commit) == 240); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_cancel) == 248); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_info) == 256); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_read) == 264); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_blit_xrgb32_stride) == 272); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_present_regions) == 280); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_present_capabilities) == 288); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_present_completion) == 296); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_begin_damage) == 304); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_generation_info) == 312); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_generation_read) == 320); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_glyph_bitmap) == 328); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_revision) == 336); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_begin_replace) == 344); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_stream_info) == 352); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_create) == 360); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_destroy) == 368); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_map_write) == 376); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_publish) == 384); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_acquire) == 392); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_release) == 400); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_create) == 408); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_describe) == 416); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_import) == 424); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_release) == 432); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_map) == 440); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_unmap) == 448); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_export_raster) == 456); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_stats) == 464); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_open) == 472); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_close) == 480); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit) == 488); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_fence_query) == 496); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_fence_wait) == 504); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_fence_cancel) == 512); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_fence_release) == 520); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_backend) == 528); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_revision) == 536); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_info) == 544); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_mode) == 552); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_edid) == 560); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_test) == 568); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_commit) == 576); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_submit) == 584); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_status) == 592); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_resolve) == 600); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_presentation_stats) == 608); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_cursor_info) == 616); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_cursor_submit) == 624); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_cursor_status) == 632); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_backend_info) == 640); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_start) == 648); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_query) == 656); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_receive) == 664); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_close) == 672); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_wait) == 680); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_render_list) == 688); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_presentation_info) == 696); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_presentation_feedback) == 704); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_output_target) == 712); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_output) == 720); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_output_presentation_info) == 728); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_output_presentation_feedback) == 736); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_render_grid_list) == 744); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_color) == 752); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_render_color_list) == 760); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_test_color) == 768); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_submit_color) == 776); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_refresh) == 784); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_refresh_request) == 792); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_memory_budget) == 800); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_telemetry) == 808); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_power) == 816); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_power_request) == 824); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_virtual_start) == 832); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_virtual_query) == 840); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_virtual_close) == 848); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_virtual_wait) == 856); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_map_persistent) == 864); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_backend_properties) == 872); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_native) == 880); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_render_color_grid_list) == 888); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_brightness) == 896); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_brightness_request) == 904); };
+const _: () = { assert!(core::mem::size_of::<R4XStartR4Draw>() == 920); assert!(core::mem::align_of::<R4XStartR4Draw>() == 8); assert!(core::mem::offset_of!(R4XStartR4Draw, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Draw, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Draw, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Draw, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Draw, r#screen_width) == 16); assert!(core::mem::offset_of!(R4XStartR4Draw, r#screen_height) == 24); assert!(core::mem::offset_of!(R4XStartR4Draw, r#clear) == 32); assert!(core::mem::offset_of!(R4XStartR4Draw, r#rect) == 40); assert!(core::mem::offset_of!(R4XStartR4Draw, r#text) == 48); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_revision) == 56); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_begin_frame) == 64); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_begin_frame_rect) == 72); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_present) == 80); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_blit_xrgb32) == 88); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_clear) == 96); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_rect) == 104); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_draw_text) == 112); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_draw_text_ex) == 120); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_blit) == 128); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_raster_read) == 136); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_present) == 144); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_count) == 152); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_info) == 160); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_measure) == 168); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_set_font) == 176); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_font) == 184); assert!(core::mem::offset_of!(R4XStartR4Draw, r#text_font) == 192); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_reload) == 200); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_glyph_row) == 208); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_blend_alpha8) == 216); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_begin) == 224); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_append) == 232); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_commit) == 240); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_cancel) == 248); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_info) == 256); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_read) == 264); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_blit_xrgb32_stride) == 272); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_present_regions) == 280); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_present_capabilities) == 288); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_present_completion) == 296); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_begin_damage) == 304); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_generation_info) == 312); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_generation_read) == 320); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_glyph_bitmap) == 328); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_revision) == 336); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_begin_replace) == 344); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_frame_stream_info) == 352); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_create) == 360); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_destroy) == 368); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_map_write) == 376); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_publish) == 384); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_acquire) == 392); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gui_shared_raster_release) == 400); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_create) == 408); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_describe) == 416); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_import) == 424); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_release) == 432); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_map) == 440); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_unmap) == 448); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_export_raster) == 456); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_stats) == 464); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_open) == 472); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_close) == 480); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit) == 488); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_fence_query) == 496); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_fence_wait) == 504); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_fence_cancel) == 512); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_fence_release) == 520); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_backend) == 528); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_revision) == 536); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_info) == 544); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_mode) == 552); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_edid) == 560); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_test) == 568); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_commit) == 576); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_submit) == 584); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_status) == 592); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_resolve) == 600); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_presentation_stats) == 608); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_cursor_info) == 616); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_cursor_submit) == 624); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_cursor_status) == 632); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_backend_info) == 640); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_start) == 648); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_query) == 656); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_receive) == 664); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_close) == 672); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_native_wait) == 680); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_render_list) == 688); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_presentation_info) == 696); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_presentation_feedback) == 704); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_output_target) == 712); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_output) == 720); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_output_presentation_info) == 728); assert!(core::mem::offset_of!(R4XStartR4Draw, r#display_output_presentation_feedback) == 736); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_render_grid_list) == 744); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_color) == 752); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_render_color_list) == 760); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_test_color) == 768); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_atomic_submit_color) == 776); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_refresh) == 784); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_refresh_request) == 792); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_memory_budget) == 800); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_telemetry) == 808); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_power) == 816); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_power_request) == 824); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_virtual_start) == 832); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_virtual_query) == 840); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_virtual_close) == 848); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_virtual_wait) == 856); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_buffer_map_persistent) == 864); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_backend_properties) == 872); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_native) == 880); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_queue_submit_render_color_grid_list) == 888); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_output_brightness) == 896); assert!(core::mem::offset_of!(R4XStartR4Draw, r#gfx_brightness_request) == 904); assert!(core::mem::offset_of!(R4XStartR4Draw, r#font_prefix_metrics2) == 912); };
 pub type R4XStartR4Net = crate::abi::R4XStartR4Net;
 const _: () = { assert!(core::mem::size_of::<R4XStartR4Net>() == 296); assert!(core::mem::align_of::<R4XStartR4Net>() == 8); assert!(core::mem::offset_of!(R4XStartR4Net, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Net, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Net, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Net, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Net, r#tcp_connect) == 16); assert!(core::mem::offset_of!(R4XStartR4Net, r#tcp_write) == 24); assert!(core::mem::offset_of!(R4XStartR4Net, r#tcp_read) == 32); assert!(core::mem::offset_of!(R4XStartR4Net, r#tcp_close) == 40); assert!(core::mem::offset_of!(R4XStartR4Net, r#tcp_summary) == 48); assert!(core::mem::offset_of!(R4XStartR4Net, r#tcp_connection) == 56); assert!(core::mem::offset_of!(R4XStartR4Net, r#tcp_echo_listen_once) == 64); assert!(core::mem::offset_of!(R4XStartR4Net, r#tcp_accept_read_once) == 72); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_ipv4_send) == 80); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_ipv4_recv) == 88); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_config_get) == 96); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_config_set) == 104); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_dns_resolve) == 112); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_dns_resolve_server) == 120); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_dhcp_acquire) == 128); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_dhcp_renew) == 136); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_dhcp_release) == 144); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_dhcp_status) == 152); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_detail_get) == 160); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_diag_run) == 168); assert!(core::mem::offset_of!(R4XStartR4Net, r#ipc_open) == 176); assert!(core::mem::offset_of!(R4XStartR4Net, r#ipc_send) == 184); assert!(core::mem::offset_of!(R4XStartR4Net, r#ipc_recv) == 192); assert!(core::mem::offset_of!(R4XStartR4Net, r#ipc_poll) == 200); assert!(core::mem::offset_of!(R4XStartR4Net, r#ipc_close) == 208); assert!(core::mem::offset_of!(R4XStartR4Net, r#ipc_summary) == 216); assert!(core::mem::offset_of!(R4XStartR4Net, r#ipc_channel) == 224); assert!(core::mem::offset_of!(R4XStartR4Net, r#serial_link_status) == 232); assert!(core::mem::offset_of!(R4XStartR4Net, r#serial_link_poll) == 240); assert!(core::mem::offset_of!(R4XStartR4Net, r#serial_link_send_message) == 248); assert!(core::mem::offset_of!(R4XStartR4Net, r#serial_link_host_test) == 256); assert!(core::mem::offset_of!(R4XStartR4Net, r#serial_link_inbox) == 264); assert!(core::mem::offset_of!(R4XStartR4Net, r#net_service_request) == 272); assert!(core::mem::offset_of!(R4XStartR4Net, r#ipc_performance) == 280); assert!(core::mem::offset_of!(R4XStartR4Net, r#tcp_performance) == 288); };
 pub type R4XStartR4Audio = crate::abi::R4XStartR4Audio;
-const _: () = { assert!(core::mem::size_of::<R4XStartR4Audio>() == 232); assert!(core::mem::align_of::<R4XStartR4Audio>() == 8); assert!(core::mem::offset_of!(R4XStartR4Audio, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Audio, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Audio, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Audio, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_open_stream) == 16); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_write) == 24); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_close) == 32); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_set_volume) == 40); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_acquire) == 48); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_write_register) == 56); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_release) == 64); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_load_data) == 72); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_init) == 80); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_play_frame) == 88); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_stop) == 96); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_model_name) == 104); assert!(core::mem::offset_of!(R4XStartR4Audio, r#midi_open_synth) == 112); assert!(core::mem::offset_of!(R4XStartR4Audio, r#midi_send) == 120); assert!(core::mem::offset_of!(R4XStartR4Audio, r#midi_close) == 128); assert!(core::mem::offset_of!(R4XStartR4Audio, r#opl3_write_register) == 136); assert!(core::mem::offset_of!(R4XStartR4Audio, r#opl3_reset) == 144); assert!(core::mem::offset_of!(R4XStartR4Audio, r#opl3_render_block) == 152); assert!(core::mem::offset_of!(R4XStartR4Audio, r#opl3_stop) == 160); assert!(core::mem::offset_of!(R4XStartR4Audio, r#reserved0) == 168); assert!(core::mem::offset_of!(R4XStartR4Audio, r#reserved1) == 176); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_output_info) == 184); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_select_output) == 192); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_stream_progress) == 200); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_set_stream_expectation) == 208); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_close_stream_progress) == 216); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_output_catalog) == 224); };
+const _: () = { assert!(core::mem::size_of::<R4XStartR4Audio>() == 240); assert!(core::mem::align_of::<R4XStartR4Audio>() == 8); assert!(core::mem::offset_of!(R4XStartR4Audio, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Audio, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Audio, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Audio, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_open_stream) == 16); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_write) == 24); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_close) == 32); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_set_volume) == 40); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_acquire) == 48); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_write_register) == 56); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_release) == 64); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_load_data) == 72); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_init) == 80); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_play_frame) == 88); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_stop) == 96); assert!(core::mem::offset_of!(R4XStartR4Audio, r#sid_model_name) == 104); assert!(core::mem::offset_of!(R4XStartR4Audio, r#midi_open_synth) == 112); assert!(core::mem::offset_of!(R4XStartR4Audio, r#midi_send) == 120); assert!(core::mem::offset_of!(R4XStartR4Audio, r#midi_close) == 128); assert!(core::mem::offset_of!(R4XStartR4Audio, r#opl3_write_register) == 136); assert!(core::mem::offset_of!(R4XStartR4Audio, r#opl3_reset) == 144); assert!(core::mem::offset_of!(R4XStartR4Audio, r#opl3_render_block) == 152); assert!(core::mem::offset_of!(R4XStartR4Audio, r#opl3_stop) == 160); assert!(core::mem::offset_of!(R4XStartR4Audio, r#reserved0) == 168); assert!(core::mem::offset_of!(R4XStartR4Audio, r#reserved1) == 176); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_output_info) == 184); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_select_output) == 192); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_stream_progress) == 200); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_set_stream_expectation) == 208); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_close_stream_progress) == 216); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_output_catalog) == 224); assert!(core::mem::offset_of!(R4XStartR4Audio, r#audio_capture_io) == 232); };
 pub type R4XStartR4Dev = crate::abi::R4XStartR4Dev;
-const _: () = { assert!(core::mem::size_of::<R4XStartR4Dev>() == 736); assert!(core::mem::align_of::<R4XStartR4Dev>() == 8); assert!(core::mem::offset_of!(R4XStartR4Dev, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Dev, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Dev, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Dev, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Dev, r#device_inventory_summary) == 16); assert!(core::mem::offset_of!(R4XStartR4Dev, r#device_inventory_record) == 24); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_summary) == 32); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_block_count) == 40); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_block) == 48); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_pressure_snapshot) == 56); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_reclaim_probe) == 64); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_backing_store_probe) == 72); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_backing_store_slot_probe) == 80); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_pager_gate_probe) == 88); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_page_io_probe) == 96); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_vm_page_state_probe) == 104); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_vm_reserve_probe) == 112); assert!(core::mem::offset_of!(R4XStartR4Dev, r#paging_summary) == 120); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_summary) == 128); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_task) == 136); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_storage) == 144); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_boot_phase) == 152); assert!(core::mem::offset_of!(R4XStartR4Dev, r#protocol_status) == 160); assert!(core::mem::offset_of!(R4XStartR4Dev, r#protocol_dispatch) == 168); assert!(core::mem::offset_of!(R4XStartR4Dev, r#display_summary) == 176); assert!(core::mem::offset_of!(R4XStartR4Dev, r#hardware_summary) == 184); assert!(core::mem::offset_of!(R4XStartR4Dev, r#boot_info_summary) == 192); assert!(core::mem::offset_of!(R4XStartR4Dev, r#boot_info_memory_count) == 200); assert!(core::mem::offset_of!(R4XStartR4Dev, r#boot_info_memory_entry) == 208); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved0) == 216); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved1) == 224); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved_program_instance_storage_summary_v1) == 232); assert!(core::mem::offset_of!(R4XStartR4Dev, r#program_instance_storage_self_test) == 240); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved_program_registry_summary_v1) == 248); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved_program_registry_self_test_v1) == 256); assert!(core::mem::offset_of!(R4XStartR4Dev, r#program_registry_summary_v2) == 264); assert!(core::mem::offset_of!(R4XStartR4Dev, r#program_registry_self_test_v2) == 272); assert!(core::mem::offset_of!(R4XStartR4Dev, r#execution_inventory_summary) == 280); assert!(core::mem::offset_of!(R4XStartR4Dev, r#program_instance_storage_summary_v2) == 288); assert!(core::mem::offset_of!(R4XStartR4Dev, r#kernel_version) == 296); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_boot_phase_clock) == 304); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_irq_timing) == 312); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_boot_summary) == 320); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_driver_work) == 328); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_pci_inventory) == 336); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_input) == 344); assert!(core::mem::offset_of!(R4XStartR4Dev, r#display_state) == 352); assert!(core::mem::offset_of!(R4XStartR4Dev, r#driver_module_info) == 360); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_instrumentation) == 368); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_lock) == 376); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_stack) == 384); assert!(core::mem::offset_of!(R4XStartR4Dev, r#stack_fault) == 392); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_kernel_heap_check) == 400); assert!(core::mem::offset_of!(R4XStartR4Dev, r#scheduler_kernel_check) == 408); assert!(core::mem::offset_of!(R4XStartR4Dev, r#smp_kernel_check) == 416); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_smp_tlb) == 424); assert!(core::mem::offset_of!(R4XStartR4Dev, r#storage_block_queue_check) == 432); assert!(core::mem::offset_of!(R4XStartR4Dev, r#storage_nvme_check) == 440); assert!(core::mem::offset_of!(R4XStartR4Dev, r#usb_contract_check) == 448); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_count) == 456); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_port_at) == 464); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_open) == 472); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_configure) == 480); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_read) == 488); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_write) == 496); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_drain) == 504); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_status) == 512); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_cancel) == 520); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_close) == 528); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_topology) == 536); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_cache_topology) == 544); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_lifecycle) == 552); assert!(core::mem::offset_of!(R4XStartR4Dev, r#kernel_cpu_lifecycle_check) == 560); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_capabilities) == 568); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_feature) == 576); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_register_read) == 584); assert!(core::mem::offset_of!(R4XStartR4Dev, r#kernel_cpu_register_check) == 592); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_power_info) == 600); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_power_capture) == 608); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_performance) == 616); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_cppc) == 624); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_performance_hint) == 632); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_firmware_performance) == 640); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_idle_info) == 648); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_machine_info) == 656); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_machine_bank) == 664); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_microcode_info) == 672); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_pmu_info) == 680); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_pmu_measure) == 688); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_pmu_result) == 696); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_acceleration_info) == 704); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_acceleration_work) == 712); assert!(core::mem::offset_of!(R4XStartR4Dev, r#fpu_observation) == 720); assert!(core::mem::offset_of!(R4XStartR4Dev, r#firmware_system_uuid) == 728); };
+const _: () = { assert!(core::mem::size_of::<R4XStartR4Dev>() == 744); assert!(core::mem::align_of::<R4XStartR4Dev>() == 8); assert!(core::mem::offset_of!(R4XStartR4Dev, r#magic) == 0); assert!(core::mem::offset_of!(R4XStartR4Dev, r#abi_version) == 4); assert!(core::mem::offset_of!(R4XStartR4Dev, r#size) == 8); assert!(core::mem::offset_of!(R4XStartR4Dev, r#flags) == 12); assert!(core::mem::offset_of!(R4XStartR4Dev, r#device_inventory_summary) == 16); assert!(core::mem::offset_of!(R4XStartR4Dev, r#device_inventory_record) == 24); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_summary) == 32); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_block_count) == 40); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_block) == 48); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_pressure_snapshot) == 56); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_reclaim_probe) == 64); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_backing_store_probe) == 72); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_backing_store_slot_probe) == 80); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_pager_gate_probe) == 88); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_page_io_probe) == 96); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_vm_page_state_probe) == 104); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_vm_reserve_probe) == 112); assert!(core::mem::offset_of!(R4XStartR4Dev, r#paging_summary) == 120); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_summary) == 128); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_task) == 136); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_storage) == 144); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_boot_phase) == 152); assert!(core::mem::offset_of!(R4XStartR4Dev, r#protocol_status) == 160); assert!(core::mem::offset_of!(R4XStartR4Dev, r#protocol_dispatch) == 168); assert!(core::mem::offset_of!(R4XStartR4Dev, r#display_summary) == 176); assert!(core::mem::offset_of!(R4XStartR4Dev, r#hardware_summary) == 184); assert!(core::mem::offset_of!(R4XStartR4Dev, r#boot_info_summary) == 192); assert!(core::mem::offset_of!(R4XStartR4Dev, r#boot_info_memory_count) == 200); assert!(core::mem::offset_of!(R4XStartR4Dev, r#boot_info_memory_entry) == 208); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved0) == 216); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved1) == 224); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved_program_instance_storage_summary_v1) == 232); assert!(core::mem::offset_of!(R4XStartR4Dev, r#program_instance_storage_self_test) == 240); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved_program_registry_summary_v1) == 248); assert!(core::mem::offset_of!(R4XStartR4Dev, r#reserved_program_registry_self_test_v1) == 256); assert!(core::mem::offset_of!(R4XStartR4Dev, r#program_registry_summary_v2) == 264); assert!(core::mem::offset_of!(R4XStartR4Dev, r#program_registry_self_test_v2) == 272); assert!(core::mem::offset_of!(R4XStartR4Dev, r#execution_inventory_summary) == 280); assert!(core::mem::offset_of!(R4XStartR4Dev, r#program_instance_storage_summary_v2) == 288); assert!(core::mem::offset_of!(R4XStartR4Dev, r#kernel_version) == 296); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_boot_phase_clock) == 304); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_irq_timing) == 312); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_boot_summary) == 320); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_driver_work) == 328); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_pci_inventory) == 336); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_input) == 344); assert!(core::mem::offset_of!(R4XStartR4Dev, r#display_state) == 352); assert!(core::mem::offset_of!(R4XStartR4Dev, r#driver_module_info) == 360); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_instrumentation) == 368); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_lock) == 376); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_stack) == 384); assert!(core::mem::offset_of!(R4XStartR4Dev, r#stack_fault) == 392); assert!(core::mem::offset_of!(R4XStartR4Dev, r#memory_kernel_heap_check) == 400); assert!(core::mem::offset_of!(R4XStartR4Dev, r#scheduler_kernel_check) == 408); assert!(core::mem::offset_of!(R4XStartR4Dev, r#smp_kernel_check) == 416); assert!(core::mem::offset_of!(R4XStartR4Dev, r#performance_smp_tlb) == 424); assert!(core::mem::offset_of!(R4XStartR4Dev, r#storage_block_queue_check) == 432); assert!(core::mem::offset_of!(R4XStartR4Dev, r#storage_nvme_check) == 440); assert!(core::mem::offset_of!(R4XStartR4Dev, r#usb_contract_check) == 448); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_count) == 456); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_port_at) == 464); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_open) == 472); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_configure) == 480); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_read) == 488); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_write) == 496); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_drain) == 504); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_status) == 512); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_cancel) == 520); assert!(core::mem::offset_of!(R4XStartR4Dev, r#serial_close) == 528); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_topology) == 536); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_cache_topology) == 544); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_lifecycle) == 552); assert!(core::mem::offset_of!(R4XStartR4Dev, r#kernel_cpu_lifecycle_check) == 560); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_capabilities) == 568); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_feature) == 576); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_register_read) == 584); assert!(core::mem::offset_of!(R4XStartR4Dev, r#kernel_cpu_register_check) == 592); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_power_info) == 600); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_power_capture) == 608); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_performance) == 616); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_cppc) == 624); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_performance_hint) == 632); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_firmware_performance) == 640); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_idle_info) == 648); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_machine_info) == 656); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_machine_bank) == 664); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_microcode_info) == 672); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_pmu_info) == 680); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_pmu_measure) == 688); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_pmu_result) == 696); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_acceleration_info) == 704); assert!(core::mem::offset_of!(R4XStartR4Dev, r#cpu_acceleration_work) == 712); assert!(core::mem::offset_of!(R4XStartR4Dev, r#fpu_observation) == 720); assert!(core::mem::offset_of!(R4XStartR4Dev, r#firmware_system_uuid) == 728); assert!(core::mem::offset_of!(R4XStartR4Dev, r#device_inventory_capture) == 736); };
 pub type R4LABISnapshot = crate::abi::R4LABISnapshot;
 const _: () = { assert!(core::mem::size_of::<R4LABISnapshot>() == 40); assert!(core::mem::align_of::<R4LABISnapshot>() == 8); assert!(core::mem::offset_of!(R4LABISnapshot, r#magic) == 0); assert!(core::mem::offset_of!(R4LABISnapshot, r#abi_version) == 4); assert!(core::mem::offset_of!(R4LABISnapshot, r#size) == 8); assert!(core::mem::offset_of!(R4LABISnapshot, r#pointer_size) == 12); assert!(core::mem::offset_of!(R4LABISnapshot, r#handle_value) == 16); assert!(core::mem::offset_of!(R4LABISnapshot, r#error_not_found) == 24); assert!(core::mem::offset_of!(R4LABISnapshot, r#flags) == 28); assert!(core::mem::offset_of!(R4LABISnapshot, r#string_ptr) == 32); };
 pub type R4ProgramMemoryStats = crate::abi::ProgramMemoryStats;
@@ -1014,6 +1142,16 @@ pub type R4NetTxRequest = crate::abi::NetTxRequest;
 const _: () = { assert!(core::mem::size_of::<R4NetTxRequest>() == 80); assert!(core::mem::align_of::<R4NetTxRequest>() == 8); assert!(core::mem::offset_of!(R4NetTxRequest, r#version) == 0); assert!(core::mem::offset_of!(R4NetTxRequest, r#size) == 4); assert!(core::mem::offset_of!(R4NetTxRequest, r#packet) == 8); assert!(core::mem::offset_of!(R4NetTxRequest, r#complete) == 72); };
 pub type R4NetBackend = crate::abi::NetBackend;
 const _: () = { assert!(core::mem::size_of::<R4NetBackend>() == 120); assert!(core::mem::align_of::<R4NetBackend>() == 8); assert!(core::mem::offset_of!(R4NetBackend, r#version) == 0); assert!(core::mem::offset_of!(R4NetBackend, r#size) == 4); assert!(core::mem::offset_of!(R4NetBackend, r#flags) == 8); assert!(core::mem::offset_of!(R4NetBackend, r#mtu) == 12); assert!(core::mem::offset_of!(R4NetBackend, r#bus_kind) == 14); assert!(core::mem::offset_of!(R4NetBackend, r#reserved0) == 15); assert!(core::mem::offset_of!(R4NetBackend, r#bus) == 16); assert!(core::mem::offset_of!(R4NetBackend, r#device) == 17); assert!(core::mem::offset_of!(R4NetBackend, r#function) == 18); assert!(core::mem::offset_of!(R4NetBackend, r#reserved1) == 19); assert!(core::mem::offset_of!(R4NetBackend, r#vendor_id) == 20); assert!(core::mem::offset_of!(R4NetBackend, r#device_id) == 22); assert!(core::mem::offset_of!(R4NetBackend, r#mac) == 24); assert!(core::mem::offset_of!(R4NetBackend, r#context) == 32); assert!(core::mem::offset_of!(R4NetBackend, r#transmit) == 40); assert!(core::mem::offset_of!(R4NetBackend, r#poll) == 48); assert!(core::mem::offset_of!(R4NetBackend, r#shutdown) == 56); assert!(core::mem::offset_of!(R4NetBackend, r#status) == 64); assert!(core::mem::offset_of!(R4NetBackend, r#offered_capabilities) == 72); assert!(core::mem::offset_of!(R4NetBackend, r#required_capabilities) == 80); assert!(core::mem::offset_of!(R4NetBackend, r#rx_queue_count) == 88); assert!(core::mem::offset_of!(R4NetBackend, r#tx_queue_count) == 90); assert!(core::mem::offset_of!(R4NetBackend, r#max_rx_segments) == 92); assert!(core::mem::offset_of!(R4NetBackend, r#max_tx_segments) == 94); assert!(core::mem::offset_of!(R4NetBackend, r#rx_ownership) == 96); assert!(core::mem::offset_of!(R4NetBackend, r#tx_ownership) == 100); assert!(core::mem::offset_of!(R4NetBackend, r#interrupt_moderation_us) == 104); assert!(core::mem::offset_of!(R4NetBackend, r#reserved2) == 108); assert!(core::mem::offset_of!(R4NetBackend, r#transmit_packet) == 112); };
+pub type R4AudioBackendStatus2 = crate::abi::AudioBackendStatus2;
+const _: () = { assert!(core::mem::size_of::<R4AudioBackendStatus2>() == 80); assert!(core::mem::align_of::<R4AudioBackendStatus2>() == 8); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#active) == 0); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#writes) == 8); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#underruns) == 16); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#errors) == 24); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#last_result) == 32); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#reserved) == 36); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#refills) == 40); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#silence_refills) == 48); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#buffer_bytes) == 56); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#queued_buffers) == 64); assert!(core::mem::offset_of!(R4AudioBackendStatus2, r#last_buffer_bytes) == 72); };
+pub type R4AudioBackend2 = crate::abi::AudioBackend2;
+const _: () = { assert!(core::mem::size_of::<R4AudioBackend2>() == 136); assert!(core::mem::align_of::<R4AudioBackend2>() == 8); assert!(core::mem::offset_of!(R4AudioBackend2, r#magic) == 0); assert!(core::mem::offset_of!(R4AudioBackend2, r#version) == 4); assert!(core::mem::offset_of!(R4AudioBackend2, r#size) == 8); assert!(core::mem::offset_of!(R4AudioBackend2, r#flags) == 12); assert!(core::mem::offset_of!(R4AudioBackend2, r#formats) == 16); assert!(core::mem::offset_of!(R4AudioBackend2, r#min_rate) == 20); assert!(core::mem::offset_of!(R4AudioBackend2, r#max_rate) == 24); assert!(core::mem::offset_of!(R4AudioBackend2, r#preferred_rate) == 28); assert!(core::mem::offset_of!(R4AudioBackend2, r#max_channels) == 32); assert!(core::mem::offset_of!(R4AudioBackend2, r#reserved) == 34); assert!(core::mem::offset_of!(R4AudioBackend2, r#context) == 40); assert!(core::mem::offset_of!(R4AudioBackend2, r#write_pcm) == 48); assert!(core::mem::offset_of!(R4AudioBackend2, r#stop) == 56); assert!(core::mem::offset_of!(R4AudioBackend2, r#shutdown) == 64); assert!(core::mem::offset_of!(R4AudioBackend2, r#status) == 72); assert!(core::mem::offset_of!(R4AudioBackend2, r#output_query) == 80); assert!(core::mem::offset_of!(R4AudioBackend2, r#output_select) == 88); assert!(core::mem::offset_of!(R4AudioBackend2, r#output_active) == 96); assert!(core::mem::offset_of!(R4AudioBackend2, r#idle) == 104); assert!(core::mem::offset_of!(R4AudioBackend2, r#write_tracked) == 112); assert!(core::mem::offset_of!(R4AudioBackend2, r#playback) == 120); assert!(core::mem::offset_of!(R4AudioBackend2, r#flow) == 128); };
+pub type R4AudioCaptureBackend2 = crate::abi::AudioCaptureBackend2;
+const _: () = { assert!(core::mem::size_of::<R4AudioCaptureBackend2>() == 40); assert!(core::mem::align_of::<R4AudioCaptureBackend2>() == 8); assert!(core::mem::offset_of!(R4AudioCaptureBackend2, r#magic) == 0); assert!(core::mem::offset_of!(R4AudioCaptureBackend2, r#version) == 4); assert!(core::mem::offset_of!(R4AudioCaptureBackend2, r#size) == 8); assert!(core::mem::offset_of!(R4AudioCaptureBackend2, r#flags) == 12); assert!(core::mem::offset_of!(R4AudioCaptureBackend2, r#context) == 16); assert!(core::mem::offset_of!(R4AudioCaptureBackend2, r#io) == 24); assert!(core::mem::offset_of!(R4AudioCaptureBackend2, r#shutdown) == 32); };
+pub type R4DriverApi2 = crate::abi::DriverApi2;
+const _: () = { assert!(core::mem::size_of::<R4DriverApi2>() == 664); assert!(core::mem::align_of::<R4DriverApi2>() == 8); assert!(core::mem::offset_of!(R4DriverApi2, r#magic) == 0); assert!(core::mem::offset_of!(R4DriverApi2, r#version) == 4); assert!(core::mem::offset_of!(R4DriverApi2, r#size) == 8); assert!(core::mem::offset_of!(R4DriverApi2, r#reserved) == 12); assert!(core::mem::offset_of!(R4DriverApi2, r#log_info) == 16); assert!(core::mem::offset_of!(R4DriverApi2, r#log_warn) == 24); assert!(core::mem::offset_of!(R4DriverApi2, r#log_error) == 32); assert!(core::mem::offset_of!(R4DriverApi2, r#port_inb) == 40); assert!(core::mem::offset_of!(R4DriverApi2, r#port_outb) == 48); assert!(core::mem::offset_of!(R4DriverApi2, r#alloc_dma_buffer) == 56); assert!(core::mem::offset_of!(R4DriverApi2, r#free_dma_buffer) == 64); assert!(core::mem::offset_of!(R4DriverApi2, r#request_irq) == 72); assert!(core::mem::offset_of!(R4DriverApi2, r#release_irq) == 80); assert!(core::mem::offset_of!(R4DriverApi2, r#get_option) == 88); assert!(core::mem::offset_of!(R4DriverApi2, r#register_storage_backend) == 96); assert!(core::mem::offset_of!(R4DriverApi2, r#register_input_backend) == 104); assert!(core::mem::offset_of!(R4DriverApi2, r#register_mixer_backend) == 112); assert!(core::mem::offset_of!(R4DriverApi2, r#register_net_backend) == 120); assert!(core::mem::offset_of!(R4DriverApi2, r#alloc_dma_region) == 128); assert!(core::mem::offset_of!(R4DriverApi2, r#free_dma_region) == 136); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_device_count) == 144); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_device_at) == 152); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_find_by_class) == 160); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_read_config32) == 168); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_write_config32) == 176); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_read_bar) == 184); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_enable_bus_master) == 192); assert!(core::mem::offset_of!(R4DriverApi2, r#irq_register) == 200); assert!(core::mem::offset_of!(R4DriverApi2, r#irq_unregister) == 208); assert!(core::mem::offset_of!(R4DriverApi2, r#irq_stats) == 216); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_map_bar) == 224); assert!(core::mem::offset_of!(R4DriverApi2, r#port_inw) == 232); assert!(core::mem::offset_of!(R4DriverApi2, r#port_outw) == 240); assert!(core::mem::offset_of!(R4DriverApi2, r#port_inl) == 248); assert!(core::mem::offset_of!(R4DriverApi2, r#port_outl) == 256); assert!(core::mem::offset_of!(R4DriverApi2, r#net_receive_frame) == 264); assert!(core::mem::offset_of!(R4DriverApi2, r#register_audio_output_backend) == 272); assert!(core::mem::offset_of!(R4DriverApi2, r#unregister_audio_backend) == 280); assert!(core::mem::offset_of!(R4DriverApi2, r#tick_count) == 288); assert!(core::mem::offset_of!(R4DriverApi2, r#timer_frequency) == 296); assert!(core::mem::offset_of!(R4DriverApi2, r#wait_ticks) == 304); assert!(core::mem::offset_of!(R4DriverApi2, r#register_synth_engine_v2) == 312); assert!(core::mem::offset_of!(R4DriverApi2, r#unregister_storage_backend) == 320); assert!(core::mem::offset_of!(R4DriverApi2, r#storage_backend_recovery_begin) == 328); assert!(core::mem::offset_of!(R4DriverApi2, r#storage_backend_recovery_finish) == 336); assert!(core::mem::offset_of!(R4DriverApi2, r#register_usb_host_controller) == 344); assert!(core::mem::offset_of!(R4DriverApi2, r#unregister_usb_host_controller) == 352); assert!(core::mem::offset_of!(R4DriverApi2, r#driver_work_submit) == 360); assert!(core::mem::offset_of!(R4DriverApi2, r#driver_work_cancel) == 368); assert!(core::mem::offset_of!(R4DriverApi2, r#driver_completion_wait) == 376); assert!(core::mem::offset_of!(R4DriverApi2, r#driver_completion_status) == 384); assert!(core::mem::offset_of!(R4DriverApi2, r#driver_completion_release) == 392); assert!(core::mem::offset_of!(R4DriverApi2, r#driver_work_summary) == 400); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_enable_msi) == 408); assert!(core::mem::offset_of!(R4DriverApi2, r#alloc_dma_region_constrained) == 416); assert!(core::mem::offset_of!(R4DriverApi2, r#pci_disable_msi) == 424); assert!(core::mem::offset_of!(R4DriverApi2, r#protocol_dispatch) == 432); assert!(core::mem::offset_of!(R4DriverApi2, r#dma_pin_buffer) == 440); assert!(core::mem::offset_of!(R4DriverApi2, r#dma_map_pinned) == 448); assert!(core::mem::offset_of!(R4DriverApi2, r#dma_sync_for_device) == 456); assert!(core::mem::offset_of!(R4DriverApi2, r#dma_sync_for_cpu) == 464); assert!(core::mem::offset_of!(R4DriverApi2, r#dma_unmap) == 472); assert!(core::mem::offset_of!(R4DriverApi2, r#dma_unpin_buffer) == 480); assert!(core::mem::offset_of!(R4DriverApi2, r#driver_work_submit_request) == 488); assert!(core::mem::offset_of!(R4DriverApi2, r#activate_usb_host_controller) == 496); assert!(core::mem::offset_of!(R4DriverApi2, r#register_display_blit_backend) == 504); assert!(core::mem::offset_of!(R4DriverApi2, r#unregister_display_blit_backend) == 512); assert!(core::mem::offset_of!(R4DriverApi2, r#net_schedule_rx) == 520); assert!(core::mem::offset_of!(R4DriverApi2, r#net_backend_query) == 528); assert!(core::mem::offset_of!(R4DriverApi2, r#net_receive_packet) == 536); assert!(core::mem::offset_of!(R4DriverApi2, r#gfx_memory_query) == 544); assert!(core::mem::offset_of!(R4DriverApi2, r#gfx_queue_query) == 552); assert!(core::mem::offset_of!(R4DriverApi2, r#gfx_output_query) == 560); assert!(core::mem::offset_of!(R4DriverApi2, r#gfx_display_query) == 568); assert!(core::mem::offset_of!(R4DriverApi2, r#resource_query) == 576); assert!(core::mem::offset_of!(R4DriverApi2, r#heap_query) == 584); assert!(core::mem::offset_of!(R4DriverApi2, r#monotonic_clock) == 592); assert!(core::mem::offset_of!(R4DriverApi2, r#thread_query) == 600); assert!(core::mem::offset_of!(R4DriverApi2, r#semaphore_query) == 608); assert!(core::mem::offset_of!(R4DriverApi2, r#dma_sync_range_for_device) == 616); assert!(core::mem::offset_of!(R4DriverApi2, r#dma_sync_range_for_cpu) == 624); assert!(core::mem::offset_of!(R4DriverApi2, r#driver_work_submit_owned) == 632); assert!(core::mem::offset_of!(R4DriverApi2, r#serial_query) == 640); assert!(core::mem::offset_of!(R4DriverApi2, r#register_audio_output_epoch) == 648); assert!(core::mem::offset_of!(R4DriverApi2, r#register_audio_capture_backend) == 656); };
+pub type R4ProtocolApi2 = crate::abi::ProtocolApi2;
+const _: () = { assert!(core::mem::size_of::<R4ProtocolApi2>() == 144); assert!(core::mem::align_of::<R4ProtocolApi2>() == 8); assert!(core::mem::offset_of!(R4ProtocolApi2, r#magic) == 0); assert!(core::mem::offset_of!(R4ProtocolApi2, r#version) == 4); assert!(core::mem::offset_of!(R4ProtocolApi2, r#size) == 8); assert!(core::mem::offset_of!(R4ProtocolApi2, r#reserved) == 12); assert!(core::mem::offset_of!(R4ProtocolApi2, r#log_info) == 16); assert!(core::mem::offset_of!(R4ProtocolApi2, r#log_warn) == 24); assert!(core::mem::offset_of!(R4ProtocolApi2, r#log_error) == 32); assert!(core::mem::offset_of!(R4ProtocolApi2, r#register_role) == 40); assert!(core::mem::offset_of!(R4ProtocolApi2, r#set_status) == 48); assert!(core::mem::offset_of!(R4ProtocolApi2, r#dependency_status) == 56); assert!(core::mem::offset_of!(R4ProtocolApi2, r#alloc) == 64); assert!(core::mem::offset_of!(R4ProtocolApi2, r#free) == 72); assert!(core::mem::offset_of!(R4ProtocolApi2, r#file_read) == 80); assert!(core::mem::offset_of!(R4ProtocolApi2, r#cpu_acceleration_info) == 88); assert!(core::mem::offset_of!(R4ProtocolApi2, r#cpu_acceleration_work) == 96); assert!(core::mem::offset_of!(R4ProtocolApi2, r#entropy_source_info) == 104); assert!(core::mem::offset_of!(R4ProtocolApi2, r#entropy_fill) == 112); assert!(core::mem::offset_of!(R4ProtocolApi2, r#protocol_dispatch) == 120); assert!(core::mem::offset_of!(R4ProtocolApi2, r#link_io) == 128); assert!(core::mem::offset_of!(R4ProtocolApi2, r#process_status) == 136); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4LibrariesSlot {
@@ -1030,6 +1168,18 @@ pub struct R4Lib_Value0 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value0>() == 8); assert!(core::mem::align_of::<R4Lib_Value0>() == 8); assert!(core::mem::offset_of!(R4Lib_Value0, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value2 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value2>() == 8); assert!(core::mem::align_of::<R4Lib_Value2>() == 8); assert!(core::mem::offset_of!(R4Lib_Value2, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_abi_R4XStartContext2 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 120],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_abi_R4XStartContext2>() == 120); assert!(core::mem::align_of::<R4Lib_abi_R4XStartContext2>() == 8); assert!(core::mem::offset_of!(R4Lib_abi_R4XStartContext2, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdTextEncoding {
@@ -1050,10 +1200,10 @@ pub struct R4StdTextBytes {
 const _: () = { assert!(core::mem::size_of::<R4StdTextBytes>() == 16); assert!(core::mem::align_of::<R4StdTextBytes>() == 8); assert!(core::mem::offset_of!(R4StdTextBytes, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value5 {
+pub struct R4Lib_Value7 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value5>() == 16); assert!(core::mem::align_of::<R4Lib_Value5>() == 8); assert!(core::mem::offset_of!(R4Lib_Value5, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value7>() == 16); assert!(core::mem::align_of::<R4Lib_Value7>() == 8); assert!(core::mem::offset_of!(R4Lib_Value7, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4StdTextUtf8Text {
@@ -1080,46 +1230,46 @@ pub struct R4StdTextDocumentText {
 const _: () = { assert!(core::mem::size_of::<R4StdTextDocumentText>() == 24); assert!(core::mem::align_of::<R4StdTextDocumentText>() == 8); assert!(core::mem::offset_of!(R4StdTextDocumentText, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value11 {
+pub struct R4Lib_Value13 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value11>() == 2); assert!(core::mem::align_of::<R4Lib_Value11>() == 2); assert!(core::mem::offset_of!(R4Lib_Value11, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value12 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value12>() == 32); assert!(core::mem::align_of::<R4Lib_Value12>() == 8); assert!(core::mem::offset_of!(R4Lib_Value12, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value13 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value13>() == 48); assert!(core::mem::align_of::<R4Lib_Value13>() == 8); assert!(core::mem::offset_of!(R4Lib_Value13, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value13>() == 2); assert!(core::mem::align_of::<R4Lib_Value13>() == 2); assert!(core::mem::offset_of!(R4Lib_Value13, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value14 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value14>() == 16); assert!(core::mem::align_of::<R4Lib_Value14>() == 8); assert!(core::mem::offset_of!(R4Lib_Value14, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value14>() == 32); assert!(core::mem::align_of::<R4Lib_Value14>() == 8); assert!(core::mem::offset_of!(R4Lib_Value14, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value15 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value15>() == 24); assert!(core::mem::align_of::<R4Lib_Value15>() == 8); assert!(core::mem::offset_of!(R4Lib_Value15, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value15>() == 48); assert!(core::mem::align_of::<R4Lib_Value15>() == 8); assert!(core::mem::offset_of!(R4Lib_Value15, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value16 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value16>() == 32); assert!(core::mem::align_of::<R4Lib_Value16>() == 8); assert!(core::mem::offset_of!(R4Lib_Value16, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value16>() == 16); assert!(core::mem::align_of::<R4Lib_Value16>() == 8); assert!(core::mem::offset_of!(R4Lib_Value16, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value17 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value17>() == 24); assert!(core::mem::align_of::<R4Lib_Value17>() == 8); assert!(core::mem::offset_of!(R4Lib_Value17, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value18 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value18>() == 32); assert!(core::mem::align_of::<R4Lib_Value18>() == 8); assert!(core::mem::offset_of!(R4Lib_Value18, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value19 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value19>() == 24); assert!(core::mem::align_of::<R4Lib_Value19>() == 8); assert!(core::mem::offset_of!(R4Lib_Value19, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdSettingspaths {
@@ -1182,34 +1332,34 @@ pub struct R4StdSettingsWriteback {
 const _: () = { assert!(core::mem::size_of::<R4StdSettingsWriteback>() == 48); assert!(core::mem::align_of::<R4StdSettingsWriteback>() == 8); assert!(core::mem::offset_of!(R4StdSettingsWriteback, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value28 {
+pub struct R4Lib_Value30 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value28>() == 16); assert!(core::mem::align_of::<R4Lib_Value28>() == 8); assert!(core::mem::offset_of!(R4Lib_Value28, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value30>() == 16); assert!(core::mem::align_of::<R4Lib_Value30>() == 8); assert!(core::mem::offset_of!(R4Lib_Value30, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value29 {
+pub struct R4Lib_Value31 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value29>() == 40); assert!(core::mem::align_of::<R4Lib_Value29>() == 8); assert!(core::mem::offset_of!(R4Lib_Value29, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value31>() == 40); assert!(core::mem::align_of::<R4Lib_Value31>() == 8); assert!(core::mem::offset_of!(R4Lib_Value31, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value30 {
+pub struct R4Lib_Value32 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value30>() == 2); assert!(core::mem::align_of::<R4Lib_Value30>() == 1); assert!(core::mem::offset_of!(R4Lib_Value30, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value32>() == 2); assert!(core::mem::align_of::<R4Lib_Value32>() == 1); assert!(core::mem::offset_of!(R4Lib_Value32, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value31 {
+pub struct R4Lib_Value33 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value31>() == 8); assert!(core::mem::align_of::<R4Lib_Value31>() == 4); assert!(core::mem::offset_of!(R4Lib_Value31, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value33>() == 8); assert!(core::mem::align_of::<R4Lib_Value33>() == 4); assert!(core::mem::offset_of!(R4Lib_Value33, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value32 {
+pub struct R4Lib_Value34 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value32>() == 8); assert!(core::mem::align_of::<R4Lib_Value32>() == 4); assert!(core::mem::offset_of!(R4Lib_Value32, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value34>() == 8); assert!(core::mem::align_of::<R4Lib_Value34>() == 4); assert!(core::mem::offset_of!(R4Lib_Value34, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4StdDateDate {
@@ -1248,46 +1398,46 @@ pub struct R4StdDateFatDateTime {
 const _: () = { assert!(core::mem::size_of::<R4StdDateFatDateTime>() == 4); assert!(core::mem::align_of::<R4StdDateFatDateTime>() == 2); assert!(core::mem::offset_of!(R4StdDateFatDateTime, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value39 {
+pub struct R4Lib_Value41 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value39>() == 2); assert!(core::mem::align_of::<R4Lib_Value39>() == 1); assert!(core::mem::offset_of!(R4Lib_Value39, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value41>() == 2); assert!(core::mem::align_of::<R4Lib_Value41>() == 1); assert!(core::mem::offset_of!(R4Lib_Value41, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value40 {
+pub struct R4Lib_Value42 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value40>() == 16); assert!(core::mem::align_of::<R4Lib_Value40>() == 4); assert!(core::mem::offset_of!(R4Lib_Value40, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value42>() == 16); assert!(core::mem::align_of::<R4Lib_Value42>() == 4); assert!(core::mem::offset_of!(R4Lib_Value42, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value42 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 10],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value42>() == 10); assert!(core::mem::align_of::<R4Lib_Value42>() == 2); assert!(core::mem::offset_of!(R4Lib_Value42, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value43 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value43>() == 40); assert!(core::mem::align_of::<R4Lib_Value43>() == 8); assert!(core::mem::offset_of!(R4Lib_Value43, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value44 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 10],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value44>() == 24); assert!(core::mem::align_of::<R4Lib_Value44>() == 8); assert!(core::mem::offset_of!(R4Lib_Value44, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value44>() == 10); assert!(core::mem::align_of::<R4Lib_Value44>() == 2); assert!(core::mem::offset_of!(R4Lib_Value44, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value45 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value45>() == 40); assert!(core::mem::align_of::<R4Lib_Value45>() == 8); assert!(core::mem::offset_of!(R4Lib_Value45, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value46 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value46>() == 24); assert!(core::mem::align_of::<R4Lib_Value46>() == 8); assert!(core::mem::offset_of!(R4Lib_Value46, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value48 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 6],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value46>() == 6); assert!(core::mem::align_of::<R4Lib_Value46>() == 2); assert!(core::mem::offset_of!(R4Lib_Value46, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value48>() == 6); assert!(core::mem::align_of::<R4Lib_Value48>() == 2); assert!(core::mem::offset_of!(R4Lib_Value48, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value47 {
+pub struct R4Lib_Value49 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value47>() == 4); assert!(core::mem::align_of::<R4Lib_Value47>() == 1); assert!(core::mem::offset_of!(R4Lib_Value47, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value49>() == 4); assert!(core::mem::align_of::<R4Lib_Value49>() == 1); assert!(core::mem::offset_of!(R4Lib_Value49, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdDateTime {
@@ -1320,22 +1470,10 @@ pub struct R4StdTimeHelpersConfig {
 const _: () = { assert!(core::mem::size_of::<R4StdTimeHelpersConfig>() == 16); assert!(core::mem::align_of::<R4StdTimeHelpersConfig>() == 8); assert!(core::mem::offset_of!(R4StdTimeHelpersConfig, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value53 {
+pub struct R4Lib_Value55 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value53>() == 16); assert!(core::mem::align_of::<R4Lib_Value53>() == 8); assert!(core::mem::offset_of!(R4Lib_Value53, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value54 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1030],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value54>() == 1030); assert!(core::mem::align_of::<R4Lib_Value54>() == 2); assert!(core::mem::offset_of!(R4Lib_Value54, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_r4os_path_FilePath {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1028],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_path_FilePath>() == 1028); assert!(core::mem::align_of::<R4Lib_r4os_path_FilePath>() == 2); assert!(core::mem::offset_of!(R4Lib_r4os_path_FilePath, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value55>() == 16); assert!(core::mem::align_of::<R4Lib_Value55>() == 8); assert!(core::mem::offset_of!(R4Lib_Value55, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value56 {
@@ -1344,10 +1482,10 @@ pub struct R4Lib_Value56 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value56>() == 1030); assert!(core::mem::align_of::<R4Lib_Value56>() == 2); assert!(core::mem::offset_of!(R4Lib_Value56, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_r4os_path_AbsoluteFilePath {
+pub struct R4Lib_r4os_path_FilePath {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1028],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_path_AbsoluteFilePath>() == 1028); assert!(core::mem::align_of::<R4Lib_r4os_path_AbsoluteFilePath>() == 2); assert!(core::mem::offset_of!(R4Lib_r4os_path_AbsoluteFilePath, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_path_FilePath>() == 1028); assert!(core::mem::align_of::<R4Lib_r4os_path_FilePath>() == 2); assert!(core::mem::offset_of!(R4Lib_r4os_path_FilePath, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value58 {
@@ -1356,16 +1494,28 @@ pub struct R4Lib_Value58 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value58>() == 1030); assert!(core::mem::align_of::<R4Lib_Value58>() == 2); assert!(core::mem::offset_of!(R4Lib_Value58, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
+pub struct R4Lib_r4os_path_AbsoluteFilePath {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1028],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_path_AbsoluteFilePath>() == 1028); assert!(core::mem::align_of::<R4Lib_r4os_path_AbsoluteFilePath>() == 2); assert!(core::mem::offset_of!(R4Lib_r4os_path_AbsoluteFilePath, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value60 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1030],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value60>() == 1030); assert!(core::mem::align_of::<R4Lib_Value60>() == 2); assert!(core::mem::offset_of!(R4Lib_Value60, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
 pub struct R4Lib_r4os_path_RelativeFilePath {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1028],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_path_RelativeFilePath>() == 1028); assert!(core::mem::align_of::<R4Lib_r4os_path_RelativeFilePath>() == 2); assert!(core::mem::offset_of!(R4Lib_r4os_path_RelativeFilePath, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value60 {
+pub struct R4Lib_Value62 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 262],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value60>() == 262); assert!(core::mem::align_of::<R4Lib_Value60>() == 2); assert!(core::mem::offset_of!(R4Lib_Value60, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value62>() == 262); assert!(core::mem::align_of::<R4Lib_Value62>() == 2); assert!(core::mem::offset_of!(R4Lib_Value62, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_path_RegistryPath {
@@ -1404,28 +1554,28 @@ pub struct R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type__
 const _: () = { assert!(core::mem::size_of::<R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type__>() == 1); assert!(core::mem::align_of::<R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type__>() == 1); assert!(core::mem::offset_of!(R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type__, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value67 {
+pub struct R4Lib_Value69 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value67>() == 8); assert!(core::mem::align_of::<R4Lib_Value67>() == 4); assert!(core::mem::offset_of!(R4Lib_Value67, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value69>() == 8); assert!(core::mem::align_of::<R4Lib_Value69>() == 4); assert!(core::mem::offset_of!(R4Lib_Value69, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value68 {
+pub struct R4Lib_Value70 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value68>() == 4); assert!(core::mem::align_of::<R4Lib_Value68>() == 2); assert!(core::mem::offset_of!(R4Lib_Value68, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value70>() == 4); assert!(core::mem::align_of::<R4Lib_Value70>() == 2); assert!(core::mem::offset_of!(R4Lib_Value70, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value69 {
+pub struct R4Lib_Value71 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value69>() == 32); assert!(core::mem::align_of::<R4Lib_Value69>() == 8); assert!(core::mem::offset_of!(R4Lib_Value69, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value71>() == 32); assert!(core::mem::align_of::<R4Lib_Value71>() == 8); assert!(core::mem::offset_of!(R4Lib_Value71, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value70 {
+pub struct R4Lib_Value72 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value70>() == 24); assert!(core::mem::align_of::<R4Lib_Value70>() == 8); assert!(core::mem::offset_of!(R4Lib_Value70, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value72>() == 24); assert!(core::mem::align_of::<R4Lib_Value72>() == 8); assert!(core::mem::offset_of!(R4Lib_Value72, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4StdCodecStream {
@@ -1440,10 +1590,10 @@ pub struct R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State>() == 16); assert!(core::mem::align_of::<R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State>() == 4); assert!(core::mem::offset_of!(R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value73 {
+pub struct R4Lib_Value75 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value73>() == 16); assert!(core::mem::align_of::<R4Lib_Value73>() == 8); assert!(core::mem::offset_of!(R4Lib_Value73, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value75>() == 16); assert!(core::mem::align_of::<R4Lib_Value75>() == 8); assert!(core::mem::offset_of!(R4Lib_Value75, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdGraphemeState {
@@ -1452,10 +1602,10 @@ pub struct R4StdGraphemeState {
 const _: () = { assert!(core::mem::size_of::<R4StdGraphemeState>() == 6); assert!(core::mem::align_of::<R4StdGraphemeState>() == 1); assert!(core::mem::offset_of!(R4StdGraphemeState, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value75 {
+pub struct R4Lib_Value77 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value75>() == 2); assert!(core::mem::align_of::<R4Lib_Value75>() == 1); assert!(core::mem::offset_of!(R4Lib_Value75, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value77>() == 2); assert!(core::mem::align_of::<R4Lib_Value77>() == 1); assert!(core::mem::offset_of!(R4Lib_Value77, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb {
@@ -1464,10 +1614,10 @@ pub struct R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb>() == 1); assert!(core::mem::align_of::<R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb>() == 1); assert!(core::mem::offset_of!(R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value77 {
+pub struct R4Lib_Value79 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value77>() == 1); assert!(core::mem::align_of::<R4Lib_Value77>() == 1); assert!(core::mem::offset_of!(R4Lib_Value77, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value79>() == 1); assert!(core::mem::align_of::<R4Lib_Value79>() == 1); assert!(core::mem::offset_of!(R4Lib_Value79, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4StdGraphemeRange {
@@ -1482,10 +1632,10 @@ pub struct R4StdGraphemeIterator {
 const _: () = { assert!(core::mem::size_of::<R4StdGraphemeIterator>() == 32); assert!(core::mem::align_of::<R4StdGraphemeIterator>() == 8); assert!(core::mem::offset_of!(R4StdGraphemeIterator, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value80 {
+pub struct R4Lib_Value82 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value80>() == 16); assert!(core::mem::align_of::<R4Lib_Value80>() == 8); assert!(core::mem::offset_of!(R4Lib_Value80, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value82>() == 16); assert!(core::mem::align_of::<R4Lib_Value82>() == 8); assert!(core::mem::offset_of!(R4Lib_Value82, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4StdGraphemeStream {
@@ -1494,10 +1644,10 @@ pub struct R4StdGraphemeStream {
 const _: () = { assert!(core::mem::size_of::<R4StdGraphemeStream>() == 32); assert!(core::mem::align_of::<R4StdGraphemeStream>() == 8); assert!(core::mem::offset_of!(R4StdGraphemeStream, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value82 {
+pub struct R4Lib_Value84 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value82>() == 4); assert!(core::mem::align_of::<R4Lib_Value82>() == 1); assert!(core::mem::offset_of!(R4Lib_Value82, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value84>() == 4); assert!(core::mem::align_of::<R4Lib_Value84>() == 1); assert!(core::mem::offset_of!(R4Lib_Value84, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4StdConsoleTextScalar {
@@ -1506,10 +1656,10 @@ pub struct R4StdConsoleTextScalar {
 const _: () = { assert!(core::mem::size_of::<R4StdConsoleTextScalar>() == 16); assert!(core::mem::align_of::<R4StdConsoleTextScalar>() == 8); assert!(core::mem::offset_of!(R4StdConsoleTextScalar, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value84 {
+pub struct R4Lib_Value86 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value84>() == 24); assert!(core::mem::align_of::<R4Lib_Value84>() == 8); assert!(core::mem::offset_of!(R4Lib_Value84, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value86>() == 24); assert!(core::mem::align_of::<R4Lib_Value86>() == 8); assert!(core::mem::offset_of!(R4Lib_Value86, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdShortcutForeignEntry {
@@ -1518,16 +1668,16 @@ pub struct R4StdShortcutForeignEntry {
 const _: () = { assert!(core::mem::size_of::<R4StdShortcutForeignEntry>() == 160); assert!(core::mem::align_of::<R4StdShortcutForeignEntry>() == 1); assert!(core::mem::offset_of!(R4StdShortcutForeignEntry, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value86 {
+pub struct R4Lib_Value88 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value86>() == 32); assert!(core::mem::align_of::<R4Lib_Value86>() == 1); assert!(core::mem::offset_of!(R4Lib_Value86, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value88>() == 32); assert!(core::mem::align_of::<R4Lib_Value88>() == 1); assert!(core::mem::offset_of!(R4Lib_Value88, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value87 {
+pub struct R4Lib_Value89 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 128],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value87>() == 128); assert!(core::mem::align_of::<R4Lib_Value87>() == 1); assert!(core::mem::offset_of!(R4Lib_Value87, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value89>() == 128); assert!(core::mem::align_of::<R4Lib_Value89>() == 1); assert!(core::mem::offset_of!(R4Lib_Value89, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdShortcutTargetKind {
@@ -1548,34 +1698,34 @@ pub struct R4StdShortcutShortcut {
 const _: () = { assert!(core::mem::size_of::<R4StdShortcutShortcut>() == 4552); assert!(core::mem::align_of::<R4StdShortcutShortcut>() == 4); assert!(core::mem::offset_of!(R4StdShortcutShortcut, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value92 {
+pub struct R4Lib_Value94 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1024],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value92>() == 1024); assert!(core::mem::align_of::<R4Lib_Value92>() == 1); assert!(core::mem::offset_of!(R4Lib_Value92, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value94>() == 1024); assert!(core::mem::align_of::<R4Lib_Value94>() == 1); assert!(core::mem::offset_of!(R4Lib_Value94, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value93 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 64],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value93>() == 64); assert!(core::mem::align_of::<R4Lib_Value93>() == 1); assert!(core::mem::offset_of!(R4Lib_Value93, r#opaque_bytes) == 0); };
-#[repr(C, align(1))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value94 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1280],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value94>() == 1280); assert!(core::mem::align_of::<R4Lib_Value94>() == 1); assert!(core::mem::offset_of!(R4Lib_Value94, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value95 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4556],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 64],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value95>() == 4556); assert!(core::mem::align_of::<R4Lib_Value95>() == 4); assert!(core::mem::offset_of!(R4Lib_Value95, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value95>() == 64); assert!(core::mem::align_of::<R4Lib_Value95>() == 1); assert!(core::mem::offset_of!(R4Lib_Value95, r#opaque_bytes) == 0); };
+#[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value96 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1280],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value96>() == 1280); assert!(core::mem::align_of::<R4Lib_Value96>() == 1); assert!(core::mem::offset_of!(R4Lib_Value96, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value97 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4556],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value97>() == 4556); assert!(core::mem::align_of::<R4Lib_Value97>() == 4); assert!(core::mem::offset_of!(R4Lib_Value97, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value98 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value96>() == 8); assert!(core::mem::align_of::<R4Lib_Value96>() == 4); assert!(core::mem::offset_of!(R4Lib_Value96, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value98>() == 8); assert!(core::mem::align_of::<R4Lib_Value98>() == 4); assert!(core::mem::offset_of!(R4Lib_Value98, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdAssociationForeignEntry {
@@ -1584,10 +1734,10 @@ pub struct R4StdAssociationForeignEntry {
 const _: () = { assert!(core::mem::size_of::<R4StdAssociationForeignEntry>() == 208); assert!(core::mem::align_of::<R4StdAssociationForeignEntry>() == 1); assert!(core::mem::offset_of!(R4StdAssociationForeignEntry, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value98 {
+pub struct R4Lib_Value100 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value98>() == 80); assert!(core::mem::align_of::<R4Lib_Value98>() == 1); assert!(core::mem::offset_of!(R4Lib_Value98, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value100>() == 80); assert!(core::mem::align_of::<R4Lib_Value100>() == 1); assert!(core::mem::offset_of!(R4Lib_Value100, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdAssociationLaunchKind {
@@ -1608,16 +1758,16 @@ pub struct R4StdAssociationAppEntry {
 const _: () = { assert!(core::mem::size_of::<R4StdAssociationAppEntry>() == 1176); assert!(core::mem::align_of::<R4StdAssociationAppEntry>() == 4); assert!(core::mem::offset_of!(R4StdAssociationAppEntry, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value102 {
+pub struct R4Lib_Value104 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value102>() == 16); assert!(core::mem::align_of::<R4Lib_Value102>() == 1); assert!(core::mem::offset_of!(R4Lib_Value102, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value104>() == 16); assert!(core::mem::align_of::<R4Lib_Value104>() == 1); assert!(core::mem::offset_of!(R4Lib_Value104, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value103 {
+pub struct R4Lib_Value105 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 96],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value103>() == 96); assert!(core::mem::align_of::<R4Lib_Value103>() == 1); assert!(core::mem::offset_of!(R4Lib_Value103, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value105>() == 96); assert!(core::mem::align_of::<R4Lib_Value105>() == 1); assert!(core::mem::offset_of!(R4Lib_Value105, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdAssociationExtEntry {
@@ -1626,22 +1776,22 @@ pub struct R4StdAssociationExtEntry {
 const _: () = { assert!(core::mem::size_of::<R4StdAssociationExtEntry>() == 199); assert!(core::mem::align_of::<R4StdAssociationExtEntry>() == 1); assert!(core::mem::offset_of!(R4StdAssociationExtEntry, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value105 {
+pub struct R4Lib_Value107 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value105>() == 8); assert!(core::mem::align_of::<R4Lib_Value105>() == 1); assert!(core::mem::offset_of!(R4Lib_Value105, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value107>() == 8); assert!(core::mem::align_of::<R4Lib_Value107>() == 1); assert!(core::mem::offset_of!(R4Lib_Value107, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value106 {
+pub struct R4Lib_Value108 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value106>() == 24); assert!(core::mem::align_of::<R4Lib_Value106>() == 1); assert!(core::mem::offset_of!(R4Lib_Value106, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value108>() == 24); assert!(core::mem::align_of::<R4Lib_Value108>() == 1); assert!(core::mem::offset_of!(R4Lib_Value108, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value107 {
+pub struct R4Lib_Value109 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value107>() == 12); assert!(core::mem::align_of::<R4Lib_Value107>() == 1); assert!(core::mem::offset_of!(R4Lib_Value107, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value109>() == 12); assert!(core::mem::align_of::<R4Lib_Value109>() == 1); assert!(core::mem::offset_of!(R4Lib_Value109, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4StdAssociationLaunchTarget {
@@ -1656,22 +1806,22 @@ pub struct R4StdAssociationConfig {
 const _: () = { assert!(core::mem::size_of::<R4StdAssociationConfig>() == 15944); assert!(core::mem::align_of::<R4StdAssociationConfig>() == 8); assert!(core::mem::offset_of!(R4StdAssociationConfig, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value110 {
+pub struct R4Lib_Value112 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 9408],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value110>() == 9408); assert!(core::mem::align_of::<R4Lib_Value110>() == 4); assert!(core::mem::offset_of!(R4Lib_Value110, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value112>() == 9408); assert!(core::mem::align_of::<R4Lib_Value112>() == 4); assert!(core::mem::offset_of!(R4Lib_Value112, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value111 {
+pub struct R4Lib_Value113 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 3184],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value111>() == 3184); assert!(core::mem::align_of::<R4Lib_Value111>() == 1); assert!(core::mem::offset_of!(R4Lib_Value111, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value113>() == 3184); assert!(core::mem::align_of::<R4Lib_Value113>() == 1); assert!(core::mem::offset_of!(R4Lib_Value113, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value112 {
+pub struct R4Lib_Value114 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 3328],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value112>() == 3328); assert!(core::mem::align_of::<R4Lib_Value112>() == 1); assert!(core::mem::offset_of!(R4Lib_Value112, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value114>() == 3328); assert!(core::mem::align_of::<R4Lib_Value114>() == 1); assert!(core::mem::offset_of!(R4Lib_Value114, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_subsystem_catalog_Input {
@@ -1704,10 +1854,10 @@ pub struct R4StdFileHandlerResolution {
 const _: () = { assert!(core::mem::size_of::<R4StdFileHandlerResolution>() == 104); assert!(core::mem::align_of::<R4StdFileHandlerResolution>() == 8); assert!(core::mem::offset_of!(R4StdFileHandlerResolution, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value118 {
+pub struct R4Lib_Value120 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 96],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value118>() == 96); assert!(core::mem::align_of::<R4Lib_Value118>() == 8); assert!(core::mem::offset_of!(R4Lib_Value118, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value120>() == 96); assert!(core::mem::align_of::<R4Lib_Value120>() == 8); assert!(core::mem::offset_of!(R4Lib_Value120, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdFileHandlerChoiceKind {
@@ -1722,16 +1872,16 @@ pub struct R4StdFileHandlerChoice {
 const _: () = { assert!(core::mem::size_of::<R4StdFileHandlerChoice>() == 80); assert!(core::mem::align_of::<R4StdFileHandlerChoice>() == 8); assert!(core::mem::offset_of!(R4StdFileHandlerChoice, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value121 {
+pub struct R4Lib_Value123 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value121>() == 8); assert!(core::mem::align_of::<R4Lib_Value121>() == 8); assert!(core::mem::offset_of!(R4Lib_Value121, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value123>() == 8); assert!(core::mem::align_of::<R4Lib_Value123>() == 8); assert!(core::mem::offset_of!(R4Lib_Value123, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value122 {
+pub struct R4Lib_Value124 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value122>() == 8); assert!(core::mem::align_of::<R4Lib_Value122>() == 8); assert!(core::mem::offset_of!(R4Lib_Value122, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value124>() == 8); assert!(core::mem::align_of::<R4Lib_Value124>() == 8); assert!(core::mem::offset_of!(R4Lib_Value124, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4StdFileHandlerChoiceList {
@@ -1740,22 +1890,22 @@ pub struct R4StdFileHandlerChoiceList {
 const _: () = { assert!(core::mem::size_of::<R4StdFileHandlerChoiceList>() == 1928); assert!(core::mem::align_of::<R4StdFileHandlerChoiceList>() == 8); assert!(core::mem::offset_of!(R4StdFileHandlerChoiceList, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value124 {
+pub struct R4Lib_Value126 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1920],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value124>() == 1920); assert!(core::mem::align_of::<R4Lib_Value124>() == 8); assert!(core::mem::offset_of!(R4Lib_Value124, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value126>() == 1920); assert!(core::mem::align_of::<R4Lib_Value126>() == 8); assert!(core::mem::offset_of!(R4Lib_Value126, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value125 {
+pub struct R4Lib_Value127 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value125>() == 8); assert!(core::mem::align_of::<R4Lib_Value125>() == 8); assert!(core::mem::offset_of!(R4Lib_Value125, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value127>() == 8); assert!(core::mem::align_of::<R4Lib_Value127>() == 8); assert!(core::mem::offset_of!(R4Lib_Value127, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value126 {
+pub struct R4Lib_Value128 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value126>() == 8); assert!(core::mem::align_of::<R4Lib_Value126>() == 8); assert!(core::mem::offset_of!(R4Lib_Value126, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value128>() == 8); assert!(core::mem::align_of::<R4Lib_Value128>() == 8); assert!(core::mem::offset_of!(R4Lib_Value128, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_subsystem_catalog_Catalog {
@@ -1764,28 +1914,28 @@ pub struct R4Lib_r4os_subsystem_catalog_Catalog {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_subsystem_catalog_Catalog>() == 24592); assert!(core::mem::align_of::<R4Lib_r4os_subsystem_catalog_Catalog>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_subsystem_catalog_Catalog, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value128 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value128>() == 8); assert!(core::mem::align_of::<R4Lib_Value128>() == 8); assert!(core::mem::offset_of!(R4Lib_Value128, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value129 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value129>() == 2); assert!(core::mem::align_of::<R4Lib_Value129>() == 2); assert!(core::mem::offset_of!(R4Lib_Value129, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
 pub struct R4Lib_Value130 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value130>() == 8); assert!(core::mem::align_of::<R4Lib_Value130>() == 8); assert!(core::mem::offset_of!(R4Lib_Value130, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+#[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value131 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value131>() == 2); assert!(core::mem::align_of::<R4Lib_Value131>() == 2); assert!(core::mem::offset_of!(R4Lib_Value131, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value132 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value132>() == 8); assert!(core::mem::align_of::<R4Lib_Value132>() == 8); assert!(core::mem::offset_of!(R4Lib_Value132, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value133 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 96],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value131>() == 96); assert!(core::mem::align_of::<R4Lib_Value131>() == 8); assert!(core::mem::offset_of!(R4Lib_Value131, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value133>() == 96); assert!(core::mem::align_of::<R4Lib_Value133>() == 8); assert!(core::mem::offset_of!(R4Lib_Value133, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4StdSubsystemLoadStatus {
@@ -1818,22 +1968,10 @@ pub struct R4ImgHelpersSvgGlyphProvider {
 const _: () = { assert!(core::mem::size_of::<R4ImgHelpersSvgGlyphProvider>() == 24); assert!(core::mem::align_of::<R4ImgHelpersSvgGlyphProvider>() == 8); assert!(core::mem::offset_of!(R4ImgHelpersSvgGlyphProvider, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value137 {
+pub struct R4Lib_Value139 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value137>() == 8); assert!(core::mem::align_of::<R4Lib_Value137>() == 8); assert!(core::mem::offset_of!(R4Lib_Value137, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value138 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value138>() == 8); assert!(core::mem::align_of::<R4Lib_Value138>() == 8); assert!(core::mem::offset_of!(R4Lib_Value138, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4ImgHelpersSvgLinkSink {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
-}
-const _: () = { assert!(core::mem::size_of::<R4ImgHelpersSvgLinkSink>() == 16); assert!(core::mem::align_of::<R4ImgHelpersSvgLinkSink>() == 8); assert!(core::mem::offset_of!(R4ImgHelpersSvgLinkSink, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value139>() == 8); assert!(core::mem::align_of::<R4Lib_Value139>() == 8); assert!(core::mem::offset_of!(R4Lib_Value139, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value140 {
@@ -1842,22 +1980,34 @@ pub struct R4Lib_Value140 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value140>() == 8); assert!(core::mem::align_of::<R4Lib_Value140>() == 8); assert!(core::mem::offset_of!(R4Lib_Value140, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
+pub struct R4ImgHelpersSvgLinkSink {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+}
+const _: () = { assert!(core::mem::size_of::<R4ImgHelpersSvgLinkSink>() == 16); assert!(core::mem::align_of::<R4ImgHelpersSvgLinkSink>() == 8); assert!(core::mem::offset_of!(R4ImgHelpersSvgLinkSink, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value142 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value142>() == 8); assert!(core::mem::align_of::<R4Lib_Value142>() == 8); assert!(core::mem::offset_of!(R4Lib_Value142, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
 pub struct R4ImgHelpersSvgRenderOptions {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 64],
 }
 const _: () = { assert!(core::mem::size_of::<R4ImgHelpersSvgRenderOptions>() == 64); assert!(core::mem::align_of::<R4ImgHelpersSvgRenderOptions>() == 8); assert!(core::mem::offset_of!(R4ImgHelpersSvgRenderOptions, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value142 {
+pub struct R4Lib_Value144 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value142>() == 32); assert!(core::mem::align_of::<R4Lib_Value142>() == 8); assert!(core::mem::offset_of!(R4Lib_Value142, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value144>() == 32); assert!(core::mem::align_of::<R4Lib_Value144>() == 8); assert!(core::mem::offset_of!(R4Lib_Value144, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value143 {
+pub struct R4Lib_Value145 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value143>() == 24); assert!(core::mem::align_of::<R4Lib_Value143>() == 8); assert!(core::mem::offset_of!(R4Lib_Value143, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value145>() == 24); assert!(core::mem::align_of::<R4Lib_Value145>() == 8); assert!(core::mem::offset_of!(R4Lib_Value145, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4ImgHelpersInfo {
@@ -1872,10 +2022,10 @@ pub struct R4ImgHelpersImage {
 const _: () = { assert!(core::mem::size_of::<R4ImgHelpersImage>() == 32); assert!(core::mem::align_of::<R4ImgHelpersImage>() == 8); assert!(core::mem::offset_of!(R4ImgHelpersImage, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value146 {
+pub struct R4Lib_Value148 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value146>() == 16); assert!(core::mem::align_of::<R4Lib_Value146>() == 8); assert!(core::mem::offset_of!(R4Lib_Value146, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value148>() == 16); assert!(core::mem::align_of::<R4Lib_Value148>() == 8); assert!(core::mem::offset_of!(R4Lib_Value148, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor {
@@ -1908,10 +2058,10 @@ pub struct R4ImgHelpersImage16 {
 const _: () = { assert!(core::mem::size_of::<R4ImgHelpersImage16>() == 160); assert!(core::mem::align_of::<R4ImgHelpersImage16>() == 8); assert!(core::mem::offset_of!(R4ImgHelpersImage16, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value152 {
+pub struct R4Lib_Value154 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value152>() == 16); assert!(core::mem::align_of::<R4Lib_Value152>() == 8); assert!(core::mem::offset_of!(R4Lib_Value152, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value154>() == 16); assert!(core::mem::align_of::<R4Lib_Value154>() == 8); assert!(core::mem::offset_of!(R4Lib_Value154, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4ImgHelpersDecoderDiagnostic {
@@ -1962,10 +2112,10 @@ pub struct R4Lib_r4gfx_abi_R4GfxColorDescription {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4gfx_abi_R4GfxColorDescription>() == 48); assert!(core::mem::align_of::<R4Lib_r4gfx_abi_R4GfxColorDescription>() == 4); assert!(core::mem::offset_of!(R4Lib_r4gfx_abi_R4GfxColorDescription, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value161 {
+pub struct R4Lib_Value163 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 68],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value161>() == 68); assert!(core::mem::align_of::<R4Lib_Value161>() == 4); assert!(core::mem::offset_of!(R4Lib_Value161, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value163>() == 68); assert!(core::mem::align_of::<R4Lib_Value163>() == 4); assert!(core::mem::offset_of!(R4Lib_Value163, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4gfx_abi_R4GfxColorProfileDefinition {
@@ -1986,10 +2136,10 @@ pub struct R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult>() == 104); assert!(core::mem::align_of::<R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult>() == 4); assert!(core::mem::offset_of!(R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value165 {
+pub struct R4Lib_Value167 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 128],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value165>() == 128); assert!(core::mem::align_of::<R4Lib_Value165>() == 4); assert!(core::mem::offset_of!(R4Lib_Value165, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value167>() == 128); assert!(core::mem::align_of::<R4Lib_Value167>() == 4); assert!(core::mem::offset_of!(R4Lib_Value167, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4LibraryAllocator {
@@ -1998,22 +2148,22 @@ pub struct R4LibraryAllocator {
 const _: () = { assert!(core::mem::size_of::<R4LibraryAllocator>() == 16); assert!(core::mem::align_of::<R4LibraryAllocator>() == 8); assert!(core::mem::offset_of!(R4LibraryAllocator, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value167 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value167>() == 8); assert!(core::mem::align_of::<R4Lib_Value167>() == 8); assert!(core::mem::offset_of!(R4Lib_Value167, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value168 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value168>() == 8); assert!(core::mem::align_of::<R4Lib_Value168>() == 8); assert!(core::mem::offset_of!(R4Lib_Value168, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
 pub struct R4Lib_Value169 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value169>() == 8); assert!(core::mem::align_of::<R4Lib_Value169>() == 8); assert!(core::mem::offset_of!(R4Lib_Value169, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value170 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value170>() == 8); assert!(core::mem::align_of::<R4Lib_Value170>() == 8); assert!(core::mem::offset_of!(R4Lib_Value170, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value171 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value171>() == 8); assert!(core::mem::align_of::<R4Lib_Value171>() == 8); assert!(core::mem::offset_of!(R4Lib_Value171, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4LibraryColorClient {
@@ -2022,10 +2172,10 @@ pub struct R4LibraryColorClient {
 const _: () = { assert!(core::mem::size_of::<R4LibraryColorClient>() == 8); assert!(core::mem::align_of::<R4LibraryColorClient>() == 8); assert!(core::mem::offset_of!(R4LibraryColorClient, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value171 {
+pub struct R4Lib_Value173 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value171>() == 8); assert!(core::mem::align_of::<R4Lib_Value171>() == 8); assert!(core::mem::offset_of!(R4Lib_Value171, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value173>() == 8); assert!(core::mem::align_of::<R4Lib_Value173>() == 8); assert!(core::mem::offset_of!(R4Lib_Value173, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4gfx_abi_R4GfxColorImage {
@@ -2046,10 +2196,10 @@ pub struct R4Lib_r4gfx_abi_R4GfxColorProfile {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4gfx_abi_R4GfxColorProfile>() == 16); assert!(core::mem::align_of::<R4Lib_r4gfx_abi_R4GfxColorProfile>() == 8); assert!(core::mem::offset_of!(R4Lib_r4gfx_abi_R4GfxColorProfile, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value175 {
+pub struct R4Lib_Value177 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value175>() == 8); assert!(core::mem::align_of::<R4Lib_Value175>() == 8); assert!(core::mem::offset_of!(R4Lib_Value175, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value177>() == 8); assert!(core::mem::align_of::<R4Lib_Value177>() == 8); assert!(core::mem::offset_of!(R4Lib_Value177, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4gfx_abi_R4GfxColorTransform {
@@ -2064,22 +2214,22 @@ pub struct R4Lib_r4gfx_abi_R4GfxRect {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4gfx_abi_R4GfxRect>() == 16); assert!(core::mem::align_of::<R4Lib_r4gfx_abi_R4GfxRect>() == 4); assert!(core::mem::offset_of!(R4Lib_r4gfx_abi_R4GfxRect, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value178 {
+pub struct R4Lib_Value180 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 148],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value178>() == 148); assert!(core::mem::align_of::<R4Lib_Value178>() == 4); assert!(core::mem::offset_of!(R4Lib_Value178, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value180>() == 148); assert!(core::mem::align_of::<R4Lib_Value180>() == 4); assert!(core::mem::offset_of!(R4Lib_Value180, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value179 {
+pub struct R4Lib_Value181 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value179>() == 8); assert!(core::mem::align_of::<R4Lib_Value179>() == 8); assert!(core::mem::offset_of!(R4Lib_Value179, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value181>() == 8); assert!(core::mem::align_of::<R4Lib_Value181>() == 8); assert!(core::mem::offset_of!(R4Lib_Value181, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value180 {
+pub struct R4Lib_Value182 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 108],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value180>() == 108); assert!(core::mem::align_of::<R4Lib_Value180>() == 4); assert!(core::mem::offset_of!(R4Lib_Value180, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value182>() == 108); assert!(core::mem::align_of::<R4Lib_Value182>() == 4); assert!(core::mem::offset_of!(R4Lib_Value182, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client {
@@ -2088,10 +2238,10 @@ pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client>() == 8); assert!(core::mem::align_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client>() == 8); assert!(core::mem::offset_of!(R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value182 {
+pub struct R4Lib_Value184 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value182>() == 8); assert!(core::mem::align_of::<R4Lib_Value182>() == 8); assert!(core::mem::offset_of!(R4Lib_Value182, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value184>() == 8); assert!(core::mem::align_of::<R4Lib_Value184>() == 8); assert!(core::mem::offset_of!(R4Lib_Value184, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime {
@@ -2100,10 +2250,10 @@ pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime>() == 16); assert!(core::mem::align_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime>() == 8); assert!(core::mem::offset_of!(R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value184 {
+pub struct R4Lib_Value186 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value184>() == 8); assert!(core::mem::align_of::<R4Lib_Value184>() == 8); assert!(core::mem::offset_of!(R4Lib_Value184, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value186>() == 8); assert!(core::mem::align_of::<R4Lib_Value186>() == 8); assert!(core::mem::offset_of!(R4Lib_Value186, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps {
@@ -2118,10 +2268,10 @@ pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery>() == 32); assert!(core::mem::align_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery>() == 4); assert!(core::mem::offset_of!(R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value187 {
+pub struct R4Lib_Value189 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value187>() == 8); assert!(core::mem::align_of::<R4Lib_Value187>() == 8); assert!(core::mem::offset_of!(R4Lib_Value187, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value189>() == 8); assert!(core::mem::align_of::<R4Lib_Value189>() == 8); assert!(core::mem::offset_of!(R4Lib_Value189, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4ImgNativeJpeg {
@@ -2136,10 +2286,10 @@ pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder>() == 16); assert!(core::mem::align_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder>() == 8); assert!(core::mem::offset_of!(R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value190 {
+pub struct R4Lib_Value192 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value190>() == 40); assert!(core::mem::align_of::<R4Lib_Value190>() == 8); assert!(core::mem::offset_of!(R4Lib_Value190, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value192>() == 40); assert!(core::mem::align_of::<R4Lib_Value192>() == 8); assert!(core::mem::offset_of!(R4Lib_Value192, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease {
@@ -2148,10 +2298,10 @@ pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease>() == 32); assert!(core::mem::align_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease>() == 8); assert!(core::mem::offset_of!(R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value192 {
+pub struct R4Lib_Value194 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value192>() == 8); assert!(core::mem::align_of::<R4Lib_Value192>() == 8); assert!(core::mem::offset_of!(R4Lib_Value192, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value194>() == 8); assert!(core::mem::align_of::<R4Lib_Value194>() == 8); assert!(core::mem::offset_of!(R4Lib_Value194, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame {
@@ -2184,10 +2334,10 @@ pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence>() == 40); assert!(core::mem::align_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence>() == 8); assert!(core::mem::offset_of!(R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value198 {
+pub struct R4Lib_Value200 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value198>() == 8); assert!(core::mem::align_of::<R4Lib_Value198>() == 8); assert!(core::mem::offset_of!(R4Lib_Value198, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value200>() == 8); assert!(core::mem::align_of::<R4Lib_Value200>() == 8); assert!(core::mem::offset_of!(R4Lib_Value200, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt {
@@ -2202,10 +2352,10 @@ pub struct R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions>() == 8); assert!(core::mem::align_of::<R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions>() == 4); assert!(core::mem::offset_of!(R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value201 {
+pub struct R4Lib_Value203 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value201>() == 12); assert!(core::mem::align_of::<R4Lib_Value201>() == 4); assert!(core::mem::offset_of!(R4Lib_Value201, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value203>() == 12); assert!(core::mem::align_of::<R4Lib_Value203>() == 4); assert!(core::mem::offset_of!(R4Lib_Value203, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4FontHelpersFormat {
@@ -2262,10 +2412,10 @@ pub struct R4FontHelpersDecoder {
 const _: () = { assert!(core::mem::size_of::<R4FontHelpersDecoder>() == 24); assert!(core::mem::align_of::<R4FontHelpersDecoder>() == 8); assert!(core::mem::offset_of!(R4FontHelpersDecoder, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value211 {
+pub struct R4Lib_Value213 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value211>() == 8); assert!(core::mem::align_of::<R4Lib_Value211>() == 8); assert!(core::mem::offset_of!(R4Lib_Value211, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value213>() == 8); assert!(core::mem::align_of::<R4Lib_Value213>() == 8); assert!(core::mem::offset_of!(R4Lib_Value213, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4FontHelpersAllocatorState {
@@ -2304,10 +2454,10 @@ pub struct R4FontStoreGlyphMetrics26_6 {
 const _: () = { assert!(core::mem::size_of::<R4FontStoreGlyphMetrics26_6>() == 24); assert!(core::mem::align_of::<R4FontStoreGlyphMetrics26_6>() == 4); assert!(core::mem::offset_of!(R4FontStoreGlyphMetrics26_6, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value218 {
+pub struct R4Lib_Value220 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value218>() == 8); assert!(core::mem::align_of::<R4Lib_Value218>() == 4); assert!(core::mem::offset_of!(R4Lib_Value218, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value220>() == 8); assert!(core::mem::align_of::<R4Lib_Value220>() == 4); assert!(core::mem::offset_of!(R4Lib_Value220, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4FontStoreBorrowedRaster {
@@ -2352,10 +2502,10 @@ pub struct R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_CacheEntry_nul
 const _: () = { assert!(core::mem::size_of::<R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_CacheEntry_null_>() == 24); assert!(core::mem::align_of::<R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_CacheEntry_null_>() == 8); assert!(core::mem::offset_of!(R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_CacheEntry_null_, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value226 {
+pub struct R4Lib_Value228 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value226>() == 16); assert!(core::mem::align_of::<R4Lib_Value226>() == 8); assert!(core::mem::offset_of!(R4Lib_Value226, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value228>() == 16); assert!(core::mem::align_of::<R4Lib_Value228>() == 8); assert!(core::mem::offset_of!(R4Lib_Value228, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4FontImportFaceInfo {
@@ -2376,46 +2526,46 @@ pub struct R4FontImportPreview {
 const _: () = { assert!(core::mem::size_of::<R4FontImportPreview>() == 4); assert!(core::mem::align_of::<R4FontImportPreview>() == 2); assert!(core::mem::offset_of!(R4FontImportPreview, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value230 {
+pub struct R4Lib_Value232 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 72],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value230>() == 72); assert!(core::mem::align_of::<R4Lib_Value230>() == 8); assert!(core::mem::offset_of!(R4Lib_Value230, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value232>() == 72); assert!(core::mem::align_of::<R4Lib_Value232>() == 8); assert!(core::mem::offset_of!(R4Lib_Value232, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value231 {
+pub struct R4Lib_Value233 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value231>() == 24); assert!(core::mem::align_of::<R4Lib_Value231>() == 8); assert!(core::mem::offset_of!(R4Lib_Value231, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value233>() == 24); assert!(core::mem::align_of::<R4Lib_Value233>() == 8); assert!(core::mem::offset_of!(R4Lib_Value233, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value232 {
+pub struct R4Lib_Value234 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 6],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value232>() == 6); assert!(core::mem::align_of::<R4Lib_Value232>() == 2); assert!(core::mem::offset_of!(R4Lib_Value232, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value234>() == 6); assert!(core::mem::align_of::<R4Lib_Value234>() == 2); assert!(core::mem::offset_of!(R4Lib_Value234, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4LibrarySession {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 64],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
 }
-const _: () = { assert!(core::mem::size_of::<R4LibrarySession>() == 64); assert!(core::mem::align_of::<R4LibrarySession>() == 8); assert!(core::mem::offset_of!(R4LibrarySession, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4LibrarySession>() == 80); assert!(core::mem::align_of::<R4LibrarySession>() == 8); assert!(core::mem::offset_of!(R4LibrarySession, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value234 {
+pub struct R4Lib_Value236 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value234>() == 8); assert!(core::mem::align_of::<R4Lib_Value234>() == 8); assert!(core::mem::offset_of!(R4Lib_Value234, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value236>() == 8); assert!(core::mem::align_of::<R4Lib_Value236>() == 8); assert!(core::mem::offset_of!(R4Lib_Value236, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value235 {
+pub struct R4Lib_Value237 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value235>() == 8); assert!(core::mem::align_of::<R4Lib_Value235>() == 8); assert!(core::mem::offset_of!(R4Lib_Value235, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value237>() == 8); assert!(core::mem::align_of::<R4Lib_Value237>() == 8); assert!(core::mem::offset_of!(R4Lib_Value237, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_r4sys_Context {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_r4sys_Context>() == 8); assert!(core::mem::align_of::<R4Lib_r4os_r4sys_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_r4sys_Context, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_r4sys_Context>() == 24); assert!(core::mem::align_of::<R4Lib_r4os_r4sys_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_r4sys_Context, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4LibraryMemory {
@@ -2424,28 +2574,16 @@ pub struct R4LibraryMemory {
 const _: () = { assert!(core::mem::size_of::<R4LibraryMemory>() == 24); assert!(core::mem::align_of::<R4LibraryMemory>() == 8); assert!(core::mem::offset_of!(R4LibraryMemory, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value238 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value238>() == 16); assert!(core::mem::align_of::<R4Lib_Value238>() == 8); assert!(core::mem::offset_of!(R4Lib_Value238, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value239 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value239>() == 16); assert!(core::mem::align_of::<R4Lib_Value239>() == 8); assert!(core::mem::offset_of!(R4Lib_Value239, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
 pub struct R4Lib_Value240 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value240>() == 16); assert!(core::mem::align_of::<R4Lib_Value240>() == 8); assert!(core::mem::offset_of!(R4Lib_Value240, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4LibraryDeviceClient {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+pub struct R4Lib_Value241 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4LibraryDeviceClient>() == 8); assert!(core::mem::align_of::<R4LibraryDeviceClient>() == 8); assert!(core::mem::offset_of!(R4LibraryDeviceClient, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value241>() == 16); assert!(core::mem::align_of::<R4Lib_Value241>() == 8); assert!(core::mem::offset_of!(R4Lib_Value241, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value242 {
@@ -2454,10 +2592,10 @@ pub struct R4Lib_Value242 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value242>() == 16); assert!(core::mem::align_of::<R4Lib_Value242>() == 8); assert!(core::mem::offset_of!(R4Lib_Value242, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4LibraryRenderClient {
+pub struct R4LibraryDeviceClient {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4LibraryRenderClient>() == 8); assert!(core::mem::align_of::<R4LibraryRenderClient>() == 8); assert!(core::mem::offset_of!(R4LibraryRenderClient, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4LibraryDeviceClient>() == 8); assert!(core::mem::align_of::<R4LibraryDeviceClient>() == 8); assert!(core::mem::offset_of!(R4LibraryDeviceClient, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value244 {
@@ -2466,10 +2604,10 @@ pub struct R4Lib_Value244 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value244>() == 16); assert!(core::mem::align_of::<R4Lib_Value244>() == 8); assert!(core::mem::offset_of!(R4Lib_Value244, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4LibraryGraphicsClient {
+pub struct R4LibraryRenderClient {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4LibraryGraphicsClient>() == 8); assert!(core::mem::align_of::<R4LibraryGraphicsClient>() == 8); assert!(core::mem::offset_of!(R4LibraryGraphicsClient, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4LibraryRenderClient>() == 8); assert!(core::mem::align_of::<R4LibraryRenderClient>() == 8); assert!(core::mem::offset_of!(R4LibraryRenderClient, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value246 {
@@ -2478,10 +2616,10 @@ pub struct R4Lib_Value246 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value246>() == 16); assert!(core::mem::align_of::<R4Lib_Value246>() == 8); assert!(core::mem::offset_of!(R4Lib_Value246, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client {
+pub struct R4LibraryGraphicsClient {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client>() == 8); assert!(core::mem::align_of::<R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client>() == 8); assert!(core::mem::offset_of!(R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4LibraryGraphicsClient>() == 8); assert!(core::mem::align_of::<R4LibraryGraphicsClient>() == 8); assert!(core::mem::offset_of!(R4LibraryGraphicsClient, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value248 {
@@ -2490,10 +2628,10 @@ pub struct R4Lib_Value248 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value248>() == 16); assert!(core::mem::align_of::<R4Lib_Value248>() == 8); assert!(core::mem::offset_of!(R4Lib_Value248, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4LibraryAcoClient {
+pub struct R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4LibraryAcoClient>() == 8); assert!(core::mem::align_of::<R4LibraryAcoClient>() == 8); assert!(core::mem::offset_of!(R4LibraryAcoClient, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client>() == 8); assert!(core::mem::align_of::<R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client>() == 8); assert!(core::mem::offset_of!(R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value250 {
@@ -2502,16 +2640,28 @@ pub struct R4Lib_Value250 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value250>() == 16); assert!(core::mem::align_of::<R4Lib_Value250>() == 8); assert!(core::mem::offset_of!(R4Lib_Value250, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
+pub struct R4LibraryAcoClient {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4LibraryAcoClient>() == 8); assert!(core::mem::align_of::<R4LibraryAcoClient>() == 8); assert!(core::mem::offset_of!(R4LibraryAcoClient, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value252 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value252>() == 16); assert!(core::mem::align_of::<R4Lib_Value252>() == 8); assert!(core::mem::offset_of!(R4Lib_Value252, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
 pub struct R4LibraryNakClient {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4LibraryNakClient>() == 8); assert!(core::mem::align_of::<R4LibraryNakClient>() == 8); assert!(core::mem::offset_of!(R4LibraryNakClient, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value252 {
+pub struct R4Lib_Value254 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value252>() == 8); assert!(core::mem::align_of::<R4Lib_Value252>() == 8); assert!(core::mem::offset_of!(R4Lib_Value252, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value254>() == 8); assert!(core::mem::align_of::<R4Lib_Value254>() == 8); assert!(core::mem::offset_of!(R4Lib_Value254, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_app_contract_App {
@@ -2520,40 +2670,28 @@ pub struct R4Lib_r4os_app_contract_App {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_app_contract_App>() == 72); assert!(core::mem::align_of::<R4Lib_r4os_app_contract_App>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_app_contract_App, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value255 {
+pub struct R4Lib_Value257 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value255>() == 8); assert!(core::mem::align_of::<R4Lib_Value255>() == 8); assert!(core::mem::offset_of!(R4Lib_Value255, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value257>() == 8); assert!(core::mem::align_of::<R4Lib_Value257>() == 8); assert!(core::mem::offset_of!(R4Lib_Value257, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value256 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+pub struct R4Lib_Value258 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value256>() == 16); assert!(core::mem::align_of::<R4Lib_Value256>() == 8); assert!(core::mem::offset_of!(R4Lib_Value256, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value258>() == 32); assert!(core::mem::align_of::<R4Lib_Value258>() == 8); assert!(core::mem::offset_of!(R4Lib_Value258, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_r4draw_Context {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_r4draw_Context>() == 8); assert!(core::mem::align_of::<R4Lib_r4os_r4draw_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_r4draw_Context, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_r4draw_Context>() == 24); assert!(core::mem::align_of::<R4Lib_r4os_r4draw_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_r4draw_Context, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4StdAdaptersSaver {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
 const _: () = { assert!(core::mem::size_of::<R4StdAdaptersSaver>() == 16); assert!(core::mem::align_of::<R4StdAdaptersSaver>() == 8); assert!(core::mem::offset_of!(R4StdAdaptersSaver, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value259 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value259>() == 8); assert!(core::mem::align_of::<R4Lib_Value259>() == 8); assert!(core::mem::offset_of!(R4Lib_Value259, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value260 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value260>() == 8); assert!(core::mem::align_of::<R4Lib_Value260>() == 8); assert!(core::mem::offset_of!(R4Lib_Value260, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value261 {
@@ -2580,6 +2718,18 @@ pub struct R4Lib_Value264 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value264>() == 8); assert!(core::mem::align_of::<R4Lib_Value264>() == 8); assert!(core::mem::offset_of!(R4Lib_Value264, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
+pub struct R4Lib_Value265 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value265>() == 8); assert!(core::mem::align_of::<R4Lib_Value265>() == 8); assert!(core::mem::offset_of!(R4Lib_Value265, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value266 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value266>() == 8); assert!(core::mem::align_of::<R4Lib_Value266>() == 8); assert!(core::mem::offset_of!(R4Lib_Value266, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
 pub struct R4Lib_r4os_gui_TextArea___u8_ {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 128],
 }
@@ -2604,34 +2754,46 @@ pub struct R4Lib_R4STD_Bindings_Zig_text_file_SaveResult {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4STD_Bindings_Zig_text_file_SaveResult>() == 8); assert!(core::mem::align_of::<R4Lib_R4STD_Bindings_Zig_text_file_SaveResult>() == 4); assert!(core::mem::offset_of!(R4Lib_R4STD_Bindings_Zig_text_file_SaveResult, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value269 {
+pub struct R4Lib_Value271 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value269>() == 8); assert!(core::mem::align_of::<R4Lib_Value269>() == 8); assert!(core::mem::offset_of!(R4Lib_Value269, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value271>() == 8); assert!(core::mem::align_of::<R4Lib_Value271>() == 8); assert!(core::mem::offset_of!(R4Lib_Value271, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value270 {
+pub struct R4Lib_Value272 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value270>() == 2); assert!(core::mem::align_of::<R4Lib_Value270>() == 2); assert!(core::mem::offset_of!(R4Lib_Value270, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value272>() == 2); assert!(core::mem::align_of::<R4Lib_Value272>() == 2); assert!(core::mem::offset_of!(R4Lib_Value272, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value271 {
+pub struct R4Lib_Value273 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 72],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value271>() == 72); assert!(core::mem::align_of::<R4Lib_Value271>() == 8); assert!(core::mem::offset_of!(R4Lib_Value271, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value273>() == 72); assert!(core::mem::align_of::<R4Lib_Value273>() == 8); assert!(core::mem::offset_of!(R4Lib_Value273, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value272 {
+pub struct R4Lib_Value274 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 56],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value272>() == 56); assert!(core::mem::align_of::<R4Lib_Value272>() == 8); assert!(core::mem::offset_of!(R4Lib_Value272, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value274>() == 56); assert!(core::mem::align_of::<R4Lib_Value274>() == 8); assert!(core::mem::offset_of!(R4Lib_Value274, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4AcoWorker {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 592],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 648],
 }
-const _: () = { assert!(core::mem::size_of::<R4AcoWorker>() == 592); assert!(core::mem::align_of::<R4AcoWorker>() == 8); assert!(core::mem::offset_of!(R4AcoWorker, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4AcoWorker>() == 648); assert!(core::mem::align_of::<R4AcoWorker>() == 8); assert!(core::mem::offset_of!(R4AcoWorker, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_r4os_inventory_reader_Provider {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_inventory_reader_Provider>() == 32); assert!(core::mem::align_of::<R4Lib_r4os_inventory_reader_Provider>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_inventory_reader_Provider, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_r4os_stream_adapters_PlatformClock {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_stream_adapters_PlatformClock>() == 8); assert!(core::mem::align_of::<R4Lib_r4os_stream_adapters_PlatformClock>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_stream_adapters_PlatformClock, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4aco_R4AcoRequest {
@@ -2664,30 +2826,6 @@ pub struct R4Lib_atomic_Value_bool_ {
 const _: () = { assert!(core::mem::size_of::<R4Lib_atomic_Value_bool_>() == 1); assert!(core::mem::align_of::<R4Lib_atomic_Value_bool_>() == 1); assert!(core::mem::offset_of!(R4Lib_atomic_Value_bool_, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value281 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value281>() == 8); assert!(core::mem::align_of::<R4Lib_Value281>() == 8); assert!(core::mem::offset_of!(R4Lib_Value281, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value282 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value282>() == 8); assert!(core::mem::align_of::<R4Lib_Value282>() == 8); assert!(core::mem::offset_of!(R4Lib_Value282, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value283 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value283>() == 8); assert!(core::mem::align_of::<R4Lib_Value283>() == 8); assert!(core::mem::offset_of!(R4Lib_Value283, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_r4aco_R4AcoCacheKey {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 136],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4aco_R4AcoCacheKey>() == 136); assert!(core::mem::align_of::<R4Lib_r4aco_R4AcoCacheKey>() == 8); assert!(core::mem::offset_of!(R4Lib_r4aco_R4AcoCacheKey, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
 pub struct R4Lib_Value285 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
@@ -2698,6 +2836,30 @@ pub struct R4Lib_Value286 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value286>() == 8); assert!(core::mem::align_of::<R4Lib_Value286>() == 8); assert!(core::mem::offset_of!(R4Lib_Value286, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value287 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value287>() == 8); assert!(core::mem::align_of::<R4Lib_Value287>() == 8); assert!(core::mem::offset_of!(R4Lib_Value287, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_r4aco_R4AcoCacheKey {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 136],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4aco_R4AcoCacheKey>() == 136); assert!(core::mem::align_of::<R4Lib_r4aco_R4AcoCacheKey>() == 8); assert!(core::mem::offset_of!(R4Lib_r4aco_R4AcoCacheKey, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value289 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value289>() == 8); assert!(core::mem::align_of::<R4Lib_Value289>() == 8); assert!(core::mem::offset_of!(R4Lib_Value289, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value290 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value290>() == 8); assert!(core::mem::align_of::<R4Lib_Value290>() == 8); assert!(core::mem::offset_of!(R4Lib_Value290, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4EncMuxColor {
@@ -2712,10 +2874,10 @@ pub struct R4EncMuxWriter {
 const _: () = { assert!(core::mem::size_of::<R4EncMuxWriter>() == 568); assert!(core::mem::align_of::<R4EncMuxWriter>() == 8); assert!(core::mem::offset_of!(R4EncMuxWriter, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value289 {
+pub struct R4Lib_Value293 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 256],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value289>() == 256); assert!(core::mem::align_of::<R4Lib_Value289>() == 1); assert!(core::mem::offset_of!(R4Lib_Value289, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value293>() == 256); assert!(core::mem::align_of::<R4Lib_Value293>() == 1); assert!(core::mem::offset_of!(R4Lib_Value293, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4EncPixelsProfile {
@@ -2730,34 +2892,16 @@ pub struct R4EncPixelsLayout {
 const _: () = { assert!(core::mem::size_of::<R4EncPixelsLayout>() == 40); assert!(core::mem::align_of::<R4EncPixelsLayout>() == 8); assert!(core::mem::offset_of!(R4EncPixelsLayout, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value292 {
+pub struct R4Lib_Value296 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value292>() == 16); assert!(core::mem::align_of::<R4Lib_Value292>() == 8); assert!(core::mem::offset_of!(R4Lib_Value292, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value296>() == 16); assert!(core::mem::align_of::<R4Lib_Value296>() == 8); assert!(core::mem::offset_of!(R4Lib_Value296, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value293 {
+pub struct R4Lib_Value297 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value293>() == 2); assert!(core::mem::align_of::<R4Lib_Value293>() == 2); assert!(core::mem::offset_of!(R4Lib_Value293, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value294 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value294>() == 8); assert!(core::mem::align_of::<R4Lib_Value294>() == 8); assert!(core::mem::offset_of!(R4Lib_Value294, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_r4os_gfx_outputs_Context {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_gfx_outputs_Context>() == 8); assert!(core::mem::align_of::<R4Lib_r4os_gfx_outputs_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_gfx_outputs_Context, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value296 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value296>() == 8); assert!(core::mem::align_of::<R4Lib_Value296>() == 8); assert!(core::mem::offset_of!(R4Lib_Value296, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value297>() == 2); assert!(core::mem::align_of::<R4Lib_Value297>() == 2); assert!(core::mem::offset_of!(R4Lib_Value297, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value298 {
@@ -2766,28 +2910,46 @@ pub struct R4Lib_Value298 {
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value298>() == 8); assert!(core::mem::align_of::<R4Lib_Value298>() == 8); assert!(core::mem::offset_of!(R4Lib_Value298, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
+pub struct R4Lib_r4os_gfx_outputs_Context {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_gfx_outputs_Context>() == 24); assert!(core::mem::align_of::<R4Lib_r4os_gfx_outputs_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_gfx_outputs_Context, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value300 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value300>() == 8); assert!(core::mem::align_of::<R4Lib_Value300>() == 8); assert!(core::mem::offset_of!(R4Lib_Value300, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value302 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value302>() == 8); assert!(core::mem::align_of::<R4Lib_Value302>() == 8); assert!(core::mem::offset_of!(R4Lib_Value302, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
 pub struct R4GfxEdidReport {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 7904],
 }
 const _: () = { assert!(core::mem::size_of::<R4GfxEdidReport>() == 7904); assert!(core::mem::align_of::<R4GfxEdidReport>() == 8); assert!(core::mem::offset_of!(R4GfxEdidReport, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value300 {
+pub struct R4Lib_Value304 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 3],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value300>() == 3); assert!(core::mem::align_of::<R4Lib_Value300>() == 1); assert!(core::mem::offset_of!(R4Lib_Value300, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value304>() == 3); assert!(core::mem::align_of::<R4Lib_Value304>() == 1); assert!(core::mem::offset_of!(R4Lib_Value304, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value301 {
+pub struct R4Lib_Value305 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 13],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value301>() == 13); assert!(core::mem::align_of::<R4Lib_Value301>() == 1); assert!(core::mem::offset_of!(R4Lib_Value301, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value305>() == 13); assert!(core::mem::align_of::<R4Lib_Value305>() == 1); assert!(core::mem::offset_of!(R4Lib_Value305, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value302 {
+pub struct R4Lib_Value306 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value302>() == 16); assert!(core::mem::align_of::<R4Lib_Value302>() == 2); assert!(core::mem::offset_of!(R4Lib_Value302, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value306>() == 16); assert!(core::mem::align_of::<R4Lib_Value306>() == 2); assert!(core::mem::offset_of!(R4Lib_Value306, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxRefreshRangeFacts {
@@ -2796,10 +2958,10 @@ pub struct R4GfxRefreshRangeFacts {
 const _: () = { assert!(core::mem::size_of::<R4GfxRefreshRangeFacts>() == 480); assert!(core::mem::align_of::<R4GfxRefreshRangeFacts>() == 8); assert!(core::mem::offset_of!(R4GfxRefreshRangeFacts, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value304 {
+pub struct R4Lib_Value308 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value304>() == 32); assert!(core::mem::align_of::<R4Lib_Value304>() == 8); assert!(core::mem::offset_of!(R4Lib_Value304, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value308>() == 32); assert!(core::mem::align_of::<R4Lib_Value308>() == 8); assert!(core::mem::offset_of!(R4Lib_Value308, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxRefreshRangeEdidLimits {
@@ -2814,10 +2976,10 @@ pub struct R4GfxRefreshRangeRange {
 const _: () = { assert!(core::mem::size_of::<R4GfxRefreshRangeRange>() == 8); assert!(core::mem::align_of::<R4GfxRefreshRangeRange>() == 4); assert!(core::mem::offset_of!(R4GfxRefreshRangeRange, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value307 {
+pub struct R4Lib_Value311 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value307>() == 16); assert!(core::mem::align_of::<R4Lib_Value307>() == 4); assert!(core::mem::offset_of!(R4Lib_Value307, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value311>() == 16); assert!(core::mem::align_of::<R4Lib_Value311>() == 4); assert!(core::mem::offset_of!(R4Lib_Value311, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4GfxRefreshRangeHdmi {
@@ -2826,10 +2988,10 @@ pub struct R4GfxRefreshRangeHdmi {
 const _: () = { assert!(core::mem::size_of::<R4GfxRefreshRangeHdmi>() == 12); assert!(core::mem::align_of::<R4GfxRefreshRangeHdmi>() == 4); assert!(core::mem::offset_of!(R4GfxRefreshRangeHdmi, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value309 {
+pub struct R4Lib_Value313 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value309>() == 40); assert!(core::mem::align_of::<R4Lib_Value309>() == 8); assert!(core::mem::offset_of!(R4Lib_Value309, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value313>() == 40); assert!(core::mem::align_of::<R4Lib_Value313>() == 8); assert!(core::mem::offset_of!(R4Lib_Value313, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxRefreshRangeDynamicLimits {
@@ -2838,10 +3000,10 @@ pub struct R4GfxRefreshRangeDynamicLimits {
 const _: () = { assert!(core::mem::size_of::<R4GfxRefreshRangeDynamicLimits>() == 32); assert!(core::mem::align_of::<R4GfxRefreshRangeDynamicLimits>() == 8); assert!(core::mem::offset_of!(R4GfxRefreshRangeDynamicLimits, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value311 {
+pub struct R4Lib_Value315 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 384],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value311>() == 384); assert!(core::mem::align_of::<R4Lib_Value311>() == 4); assert!(core::mem::offset_of!(R4Lib_Value311, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value315>() == 384); assert!(core::mem::align_of::<R4Lib_Value315>() == 4); assert!(core::mem::offset_of!(R4Lib_Value315, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4GfxRefreshRangeAdaptive {
@@ -2850,10 +3012,10 @@ pub struct R4GfxRefreshRangeAdaptive {
 const _: () = { assert!(core::mem::size_of::<R4GfxRefreshRangeAdaptive>() == 24); assert!(core::mem::align_of::<R4GfxRefreshRangeAdaptive>() == 4); assert!(core::mem::offset_of!(R4GfxRefreshRangeAdaptive, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value313 {
+pub struct R4Lib_Value317 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value313>() == 24); assert!(core::mem::align_of::<R4Lib_Value313>() == 4); assert!(core::mem::offset_of!(R4Lib_Value313, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value317>() == 24); assert!(core::mem::align_of::<R4Lib_Value317>() == 4); assert!(core::mem::offset_of!(R4Lib_Value317, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4GfxLinksHdmi {
@@ -2874,16 +3036,16 @@ pub struct R4GfxLinksHdmiDsc {
 const _: () = { assert!(core::mem::size_of::<R4GfxLinksHdmiDsc>() == 16); assert!(core::mem::align_of::<R4GfxLinksHdmiDsc>() == 4); assert!(core::mem::offset_of!(R4GfxLinksHdmiDsc, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value317 {
+pub struct R4Lib_Value321 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value317>() == 2); assert!(core::mem::align_of::<R4Lib_Value317>() == 1); assert!(core::mem::offset_of!(R4Lib_Value317, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value321>() == 2); assert!(core::mem::align_of::<R4Lib_Value321>() == 1); assert!(core::mem::offset_of!(R4Lib_Value321, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value318 {
+pub struct R4Lib_Value322 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 7168],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value318>() == 7168); assert!(core::mem::align_of::<R4Lib_Value318>() == 8); assert!(core::mem::offset_of!(R4Lib_Value318, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value322>() == 7168); assert!(core::mem::align_of::<R4Lib_Value322>() == 8); assert!(core::mem::offset_of!(R4Lib_Value322, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxTimingTiming {
@@ -2892,10 +3054,10 @@ pub struct R4GfxTimingTiming {
 const _: () = { assert!(core::mem::size_of::<R4GfxTimingTiming>() == 56); assert!(core::mem::align_of::<R4GfxTimingTiming>() == 8); assert!(core::mem::offset_of!(R4GfxTimingTiming, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value320 {
+pub struct R4Lib_Value324 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 128],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value320>() == 128); assert!(core::mem::align_of::<R4Lib_Value320>() == 1); assert!(core::mem::offset_of!(R4Lib_Value320, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value324>() == 128); assert!(core::mem::align_of::<R4Lib_Value324>() == 1); assert!(core::mem::offset_of!(R4Lib_Value324, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4GfxEdidAudio {
@@ -2904,16 +3066,16 @@ pub struct R4GfxEdidAudio {
 const _: () = { assert!(core::mem::size_of::<R4GfxEdidAudio>() == 4); assert!(core::mem::align_of::<R4GfxEdidAudio>() == 1); assert!(core::mem::offset_of!(R4GfxEdidAudio, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value322 {
+pub struct R4Lib_Value326 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value322>() == 2); assert!(core::mem::align_of::<R4Lib_Value322>() == 2); assert!(core::mem::offset_of!(R4Lib_Value322, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value326>() == 2); assert!(core::mem::align_of::<R4Lib_Value326>() == 2); assert!(core::mem::offset_of!(R4Lib_Value326, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value323 {
+pub struct R4Lib_Value327 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 72],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value323>() == 72); assert!(core::mem::align_of::<R4Lib_Value323>() == 8); assert!(core::mem::offset_of!(R4Lib_Value323, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value327>() == 72); assert!(core::mem::align_of::<R4Lib_Value327>() == 8); assert!(core::mem::offset_of!(R4Lib_Value327, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxQueueCopy {
@@ -2922,22 +3084,22 @@ pub struct R4GfxQueueCopy {
 const _: () = { assert!(core::mem::size_of::<R4GfxQueueCopy>() == 88); assert!(core::mem::align_of::<R4GfxQueueCopy>() == 8); assert!(core::mem::offset_of!(R4GfxQueueCopy, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value327 {
+pub struct R4Lib_Value331 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value327>() == 16); assert!(core::mem::align_of::<R4Lib_Value327>() == 8); assert!(core::mem::offset_of!(R4Lib_Value327, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value331>() == 16); assert!(core::mem::align_of::<R4Lib_Value331>() == 8); assert!(core::mem::offset_of!(R4Lib_Value331, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxQueueQueue {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
 }
-const _: () = { assert!(core::mem::size_of::<R4GfxQueueQueue>() == 24); assert!(core::mem::align_of::<R4GfxQueueQueue>() == 8); assert!(core::mem::offset_of!(R4GfxQueueQueue, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4GfxQueueQueue>() == 40); assert!(core::mem::align_of::<R4GfxQueueQueue>() == 8); assert!(core::mem::offset_of!(R4GfxQueueQueue, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_gfx_queue_Context {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_gfx_queue_Context>() == 8); assert!(core::mem::align_of::<R4Lib_r4os_gfx_queue_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_gfx_queue_Context, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_gfx_queue_Context>() == 24); assert!(core::mem::align_of::<R4Lib_r4os_gfx_queue_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_gfx_queue_Context, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxBrightnessClientClient {
@@ -2964,10 +3126,10 @@ pub struct R4GfxBrightnessPreferencesConfig {
 const _: () = { assert!(core::mem::size_of::<R4GfxBrightnessPreferencesConfig>() == 776); assert!(core::mem::align_of::<R4GfxBrightnessPreferencesConfig>() == 8); assert!(core::mem::offset_of!(R4GfxBrightnessPreferencesConfig, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value336 {
+pub struct R4Lib_Value340 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 768],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value336>() == 768); assert!(core::mem::align_of::<R4Lib_Value336>() == 8); assert!(core::mem::offset_of!(R4Lib_Value336, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value340>() == 768); assert!(core::mem::align_of::<R4Lib_Value340>() == 8); assert!(core::mem::offset_of!(R4Lib_Value340, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxColorControlRestoration {
@@ -2976,16 +3138,16 @@ pub struct R4GfxColorControlRestoration {
 const _: () = { assert!(core::mem::size_of::<R4GfxColorControlRestoration>() == 1152); assert!(core::mem::align_of::<R4GfxColorControlRestoration>() == 8); assert!(core::mem::offset_of!(R4GfxColorControlRestoration, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value340 {
+pub struct R4Lib_Value344 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1152],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value340>() == 1152); assert!(core::mem::align_of::<R4Lib_Value340>() == 8); assert!(core::mem::offset_of!(R4Lib_Value340, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value344>() == 1152); assert!(core::mem::align_of::<R4Lib_Value344>() == 8); assert!(core::mem::offset_of!(R4Lib_Value344, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value341 {
+pub struct R4Lib_Value345 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 144],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value341>() == 144); assert!(core::mem::align_of::<R4Lib_Value341>() == 8); assert!(core::mem::offset_of!(R4Lib_Value341, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value345>() == 144); assert!(core::mem::align_of::<R4Lib_Value345>() == 8); assert!(core::mem::offset_of!(R4Lib_Value345, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxColorControlRestoration_Attempt {
@@ -3006,10 +3168,10 @@ pub struct R4GfxColorPreferencesConfig {
 const _: () = { assert!(core::mem::size_of::<R4GfxColorPreferencesConfig>() == 18312); assert!(core::mem::align_of::<R4GfxColorPreferencesConfig>() == 8); assert!(core::mem::offset_of!(R4GfxColorPreferencesConfig, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value346 {
+pub struct R4Lib_Value350 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 18304],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value346>() == 18304); assert!(core::mem::align_of::<R4Lib_Value346>() == 8); assert!(core::mem::offset_of!(R4Lib_Value346, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value350>() == 18304); assert!(core::mem::align_of::<R4Lib_Value350>() == 8); assert!(core::mem::offset_of!(R4Lib_Value350, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4GfxColorSignalTransfer {
@@ -3042,16 +3204,16 @@ pub struct R4GfxColorSignalMetadata {
 const _: () = { assert!(core::mem::size_of::<R4GfxColorSignalMetadata>() == 24); assert!(core::mem::align_of::<R4GfxColorSignalMetadata>() == 2); assert!(core::mem::offset_of!(R4GfxColorSignalMetadata, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value352 {
+pub struct R4Lib_Value356 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value352>() == 12); assert!(core::mem::align_of::<R4Lib_Value352>() == 2); assert!(core::mem::offset_of!(R4Lib_Value352, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value356>() == 12); assert!(core::mem::align_of::<R4Lib_Value356>() == 2); assert!(core::mem::offset_of!(R4Lib_Value356, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value353 {
+pub struct R4Lib_Value357 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value353>() == 4); assert!(core::mem::align_of::<R4Lib_Value353>() == 2); assert!(core::mem::offset_of!(R4Lib_Value353, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value357>() == 4); assert!(core::mem::align_of::<R4Lib_Value357>() == 2); assert!(core::mem::offset_of!(R4Lib_Value357, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4GfxColorSignalSignal {
@@ -3060,10 +3222,10 @@ pub struct R4GfxColorSignalSignal {
 const _: () = { assert!(core::mem::size_of::<R4GfxColorSignalSignal>() == 44); assert!(core::mem::align_of::<R4GfxColorSignalSignal>() == 4); assert!(core::mem::offset_of!(R4GfxColorSignalSignal, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value355 {
+pub struct R4Lib_Value359 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 26],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value355>() == 26); assert!(core::mem::align_of::<R4Lib_Value355>() == 2); assert!(core::mem::offset_of!(R4Lib_Value355, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value359>() == 26); assert!(core::mem::align_of::<R4Lib_Value359>() == 2); assert!(core::mem::offset_of!(R4Lib_Value359, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4GfxColorSignalSource {
@@ -3096,22 +3258,22 @@ pub struct R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type__ 
 const _: () = { assert!(core::mem::size_of::<R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type__>() == 1); assert!(core::mem::align_of::<R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type__>() == 1); assert!(core::mem::offset_of!(R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type__, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value361 {
+pub struct R4Lib_Value365 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value361>() == 16); assert!(core::mem::align_of::<R4Lib_Value361>() == 8); assert!(core::mem::offset_of!(R4Lib_Value361, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value365>() == 16); assert!(core::mem::align_of::<R4Lib_Value365>() == 8); assert!(core::mem::offset_of!(R4Lib_Value365, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value362 {
+pub struct R4Lib_Value366 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value362>() == 24); assert!(core::mem::align_of::<R4Lib_Value362>() == 8); assert!(core::mem::offset_of!(R4Lib_Value362, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value366>() == 24); assert!(core::mem::align_of::<R4Lib_Value366>() == 8); assert!(core::mem::offset_of!(R4Lib_Value366, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value363 {
+pub struct R4Lib_Value367 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value363>() == 16); assert!(core::mem::align_of::<R4Lib_Value363>() == 8); assert!(core::mem::offset_of!(R4Lib_Value363, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value367>() == 16); assert!(core::mem::align_of::<R4Lib_Value367>() == 8); assert!(core::mem::offset_of!(R4Lib_Value367, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxColorSignalPlan {
@@ -3120,10 +3282,10 @@ pub struct R4GfxColorSignalPlan {
 const _: () = { assert!(core::mem::size_of::<R4GfxColorSignalPlan>() == 48); assert!(core::mem::align_of::<R4GfxColorSignalPlan>() == 8); assert!(core::mem::offset_of!(R4GfxColorSignalPlan, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value365 {
+pub struct R4Lib_Value369 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 36],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value365>() == 36); assert!(core::mem::align_of::<R4Lib_Value365>() == 1); assert!(core::mem::offset_of!(R4Lib_Value365, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value369>() == 36); assert!(core::mem::align_of::<R4Lib_Value369>() == 1); assert!(core::mem::offset_of!(R4Lib_Value369, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxColorSignalLuminance {
@@ -3132,34 +3294,34 @@ pub struct R4GfxColorSignalLuminance {
 const _: () = { assert!(core::mem::size_of::<R4GfxColorSignalLuminance>() == 48); assert!(core::mem::align_of::<R4GfxColorSignalLuminance>() == 8); assert!(core::mem::offset_of!(R4GfxColorSignalLuminance, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value367 {
+pub struct R4Lib_Value371 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value367>() == 16); assert!(core::mem::align_of::<R4Lib_Value367>() == 8); assert!(core::mem::offset_of!(R4Lib_Value367, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value371>() == 16); assert!(core::mem::align_of::<R4Lib_Value371>() == 8); assert!(core::mem::offset_of!(R4Lib_Value371, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value368 {
+pub struct R4Lib_Value372 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value368>() == 32); assert!(core::mem::align_of::<R4Lib_Value368>() == 2); assert!(core::mem::offset_of!(R4Lib_Value368, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value372>() == 32); assert!(core::mem::align_of::<R4Lib_Value372>() == 2); assert!(core::mem::offset_of!(R4Lib_Value372, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value369 {
+pub struct R4Lib_Value373 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 30],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value369>() == 30); assert!(core::mem::align_of::<R4Lib_Value369>() == 1); assert!(core::mem::offset_of!(R4Lib_Value369, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value373>() == 30); assert!(core::mem::align_of::<R4Lib_Value373>() == 1); assert!(core::mem::offset_of!(R4Lib_Value373, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value370 {
+pub struct R4Lib_Value374 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 38],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value370>() == 38); assert!(core::mem::align_of::<R4Lib_Value370>() == 2); assert!(core::mem::offset_of!(R4Lib_Value370, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value374>() == 38); assert!(core::mem::align_of::<R4Lib_Value374>() == 2); assert!(core::mem::offset_of!(R4Lib_Value374, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value371 {
+pub struct R4Lib_Value375 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value371>() == 8); assert!(core::mem::align_of::<R4Lib_Value371>() == 8); assert!(core::mem::offset_of!(R4Lib_Value371, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value375>() == 8); assert!(core::mem::align_of::<R4Lib_Value375>() == 8); assert!(core::mem::offset_of!(R4Lib_Value375, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxTopologyLayout {
@@ -3168,10 +3330,10 @@ pub struct R4GfxTopologyLayout {
 const _: () = { assert!(core::mem::size_of::<R4GfxTopologyLayout>() == 536); assert!(core::mem::align_of::<R4GfxTopologyLayout>() == 8); assert!(core::mem::offset_of!(R4GfxTopologyLayout, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value373 {
+pub struct R4Lib_Value377 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 512],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value373>() == 512); assert!(core::mem::align_of::<R4Lib_Value373>() == 8); assert!(core::mem::offset_of!(R4Lib_Value373, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value377>() == 512); assert!(core::mem::align_of::<R4Lib_Value377>() == 8); assert!(core::mem::offset_of!(R4Lib_Value377, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxTopologyOutput {
@@ -3198,16 +3360,16 @@ pub struct R4GfxTopologyRotation {
 const _: () = { assert!(core::mem::size_of::<R4GfxTopologyRotation>() == 1); assert!(core::mem::align_of::<R4GfxTopologyRotation>() == 1); assert!(core::mem::offset_of!(R4GfxTopologyRotation, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value379 {
+pub struct R4Lib_Value383 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value379>() == 8); assert!(core::mem::align_of::<R4Lib_Value379>() == 8); assert!(core::mem::offset_of!(R4Lib_Value379, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value383>() == 8); assert!(core::mem::align_of::<R4Lib_Value383>() == 8); assert!(core::mem::offset_of!(R4Lib_Value383, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value380 {
+pub struct R4Lib_Value384 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 544],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value380>() == 544); assert!(core::mem::align_of::<R4Lib_Value380>() == 8); assert!(core::mem::offset_of!(R4Lib_Value380, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value384>() == 544); assert!(core::mem::align_of::<R4Lib_Value384>() == 8); assert!(core::mem::offset_of!(R4Lib_Value384, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxControlClient {
@@ -3222,16 +3384,16 @@ pub struct R4GfxDesktopOutputsEntry {
 const _: () = { assert!(core::mem::size_of::<R4GfxDesktopOutputsEntry>() == 584); assert!(core::mem::align_of::<R4GfxDesktopOutputsEntry>() == 8); assert!(core::mem::offset_of!(R4GfxDesktopOutputsEntry, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value385 {
+pub struct R4Lib_Value389 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 200],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value385>() == 200); assert!(core::mem::align_of::<R4Lib_Value385>() == 8); assert!(core::mem::offset_of!(R4Lib_Value385, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value389>() == 200); assert!(core::mem::align_of::<R4Lib_Value389>() == 8); assert!(core::mem::offset_of!(R4Lib_Value389, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value386 {
+pub struct R4Lib_Value390 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 14],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value386>() == 14); assert!(core::mem::align_of::<R4Lib_Value386>() == 1); assert!(core::mem::offset_of!(R4Lib_Value386, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value390>() == 14); assert!(core::mem::align_of::<R4Lib_Value390>() == 1); assert!(core::mem::offset_of!(R4Lib_Value390, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxDesktopOutputsSnapshot {
@@ -3240,10 +3402,10 @@ pub struct R4GfxDesktopOutputsSnapshot {
 const _: () = { assert!(core::mem::size_of::<R4GfxDesktopOutputsSnapshot>() == 4688); assert!(core::mem::align_of::<R4GfxDesktopOutputsSnapshot>() == 8); assert!(core::mem::offset_of!(R4GfxDesktopOutputsSnapshot, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value388 {
+pub struct R4Lib_Value392 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4672],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value388>() == 4672); assert!(core::mem::align_of::<R4Lib_Value388>() == 8); assert!(core::mem::offset_of!(R4Lib_Value388, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value392>() == 4672); assert!(core::mem::align_of::<R4Lib_Value392>() == 8); assert!(core::mem::offset_of!(R4Lib_Value392, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4GfxEdidWarning {
@@ -3252,10 +3414,10 @@ pub struct R4GfxEdidWarning {
 const _: () = { assert!(core::mem::size_of::<R4GfxEdidWarning>() == 1); assert!(core::mem::align_of::<R4GfxEdidWarning>() == 1); assert!(core::mem::offset_of!(R4GfxEdidWarning, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value390 {
+pub struct R4Lib_Value394 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value390>() == 2); assert!(core::mem::align_of::<R4Lib_Value390>() == 2); assert!(core::mem::offset_of!(R4Lib_Value390, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value394>() == 2); assert!(core::mem::align_of::<R4Lib_Value394>() == 2); assert!(core::mem::offset_of!(R4Lib_Value394, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4GfxEldTransport {
@@ -3270,16 +3432,16 @@ pub struct R4GfxEldData {
 const _: () = { assert!(core::mem::size_of::<R4GfxEldData>() == 98); assert!(core::mem::align_of::<R4GfxEldData>() == 1); assert!(core::mem::offset_of!(R4GfxEldData, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value393 {
+pub struct R4Lib_Value397 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value393>() == 8); assert!(core::mem::align_of::<R4Lib_Value393>() == 8); assert!(core::mem::offset_of!(R4Lib_Value393, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value397>() == 8); assert!(core::mem::align_of::<R4Lib_Value397>() == 8); assert!(core::mem::offset_of!(R4Lib_Value397, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value394 {
+pub struct R4Lib_Value398 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 100],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value394>() == 100); assert!(core::mem::align_of::<R4Lib_Value394>() == 2); assert!(core::mem::offset_of!(R4Lib_Value394, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value398>() == 100); assert!(core::mem::align_of::<R4Lib_Value398>() == 2); assert!(core::mem::offset_of!(R4Lib_Value398, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxLinksClock {
@@ -3294,16 +3456,16 @@ pub struct R4GfxLinksDemand {
 const _: () = { assert!(core::mem::size_of::<R4GfxLinksDemand>() == 24); assert!(core::mem::align_of::<R4GfxLinksDemand>() == 8); assert!(core::mem::offset_of!(R4GfxLinksDemand, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value397 {
+pub struct R4Lib_Value401 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value397>() == 32); assert!(core::mem::align_of::<R4Lib_Value397>() == 8); assert!(core::mem::offset_of!(R4Lib_Value397, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value401>() == 32); assert!(core::mem::align_of::<R4Lib_Value401>() == 8); assert!(core::mem::offset_of!(R4Lib_Value401, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value398 {
+pub struct R4Lib_Value402 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value398>() == 16); assert!(core::mem::align_of::<R4Lib_Value398>() == 8); assert!(core::mem::offset_of!(R4Lib_Value398, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value402>() == 16); assert!(core::mem::align_of::<R4Lib_Value402>() == 8); assert!(core::mem::offset_of!(R4Lib_Value402, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxModeControlRestoration {
@@ -3312,16 +3474,16 @@ pub struct R4GfxModeControlRestoration {
 const _: () = { assert!(core::mem::size_of::<R4GfxModeControlRestoration>() == 640); assert!(core::mem::align_of::<R4GfxModeControlRestoration>() == 8); assert!(core::mem::offset_of!(R4GfxModeControlRestoration, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value400 {
+pub struct R4Lib_Value404 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 640],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value400>() == 640); assert!(core::mem::align_of::<R4Lib_Value400>() == 8); assert!(core::mem::offset_of!(R4Lib_Value400, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value404>() == 640); assert!(core::mem::align_of::<R4Lib_Value404>() == 8); assert!(core::mem::offset_of!(R4Lib_Value404, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value401 {
+pub struct R4Lib_Value405 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value401>() == 80); assert!(core::mem::align_of::<R4Lib_Value401>() == 8); assert!(core::mem::offset_of!(R4Lib_Value401, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value405>() == 80); assert!(core::mem::align_of::<R4Lib_Value405>() == 8); assert!(core::mem::offset_of!(R4Lib_Value405, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxModeControlRestoration_Attempt {
@@ -3336,22 +3498,22 @@ pub struct R4GfxModeControlController {
 const _: () = { assert!(core::mem::size_of::<R4GfxModeControlController>() == 4608); assert!(core::mem::align_of::<R4GfxModeControlController>() == 8); assert!(core::mem::offset_of!(R4GfxModeControlController, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value404 {
+pub struct R4Lib_Value408 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 176],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value404>() == 176); assert!(core::mem::align_of::<R4Lib_Value404>() == 8); assert!(core::mem::offset_of!(R4Lib_Value404, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value405 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4096],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value405>() == 4096); assert!(core::mem::align_of::<R4Lib_Value405>() == 8); assert!(core::mem::offset_of!(R4Lib_Value405, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value408>() == 176); assert!(core::mem::align_of::<R4Lib_Value408>() == 8); assert!(core::mem::offset_of!(R4Lib_Value408, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value409 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4096],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value409>() == 4096); assert!(core::mem::align_of::<R4Lib_Value409>() == 8); assert!(core::mem::offset_of!(R4Lib_Value409, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value413 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value409>() == 32); assert!(core::mem::align_of::<R4Lib_Value409>() == 8); assert!(core::mem::offset_of!(R4Lib_Value409, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value413>() == 32); assert!(core::mem::align_of::<R4Lib_Value413>() == 8); assert!(core::mem::offset_of!(R4Lib_Value413, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxPreferencesConfig {
@@ -3360,10 +3522,10 @@ pub struct R4GfxPreferencesConfig {
 const _: () = { assert!(core::mem::size_of::<R4GfxPreferencesConfig>() == 1032); assert!(core::mem::align_of::<R4GfxPreferencesConfig>() == 8); assert!(core::mem::offset_of!(R4GfxPreferencesConfig, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value411 {
+pub struct R4Lib_Value415 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1024],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value411>() == 1024); assert!(core::mem::align_of::<R4Lib_Value411>() == 8); assert!(core::mem::offset_of!(R4Lib_Value411, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value415>() == 1024); assert!(core::mem::align_of::<R4Lib_Value415>() == 8); assert!(core::mem::offset_of!(R4Lib_Value415, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4GfxReadbackPhase {
@@ -3390,16 +3552,16 @@ pub struct R4Lib_r4gfx_abi_R4GfxResource {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4gfx_abi_R4GfxResource>() == 32); assert!(core::mem::align_of::<R4Lib_r4gfx_abi_R4GfxResource>() == 8); assert!(core::mem::offset_of!(R4Lib_r4gfx_abi_R4GfxResource, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value416 {
+pub struct R4Lib_Value420 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value416>() == 16); assert!(core::mem::align_of::<R4Lib_Value416>() == 8); assert!(core::mem::offset_of!(R4Lib_Value416, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value420>() == 16); assert!(core::mem::align_of::<R4Lib_Value420>() == 8); assert!(core::mem::offset_of!(R4Lib_Value420, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value417 {
+pub struct R4Lib_Value421 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value417>() == 16); assert!(core::mem::align_of::<R4Lib_Value417>() == 8); assert!(core::mem::offset_of!(R4Lib_Value417, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value421>() == 16); assert!(core::mem::align_of::<R4Lib_Value421>() == 8); assert!(core::mem::offset_of!(R4Lib_Value421, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4gfx_abi_R4GfxCopyFence {
@@ -3414,16 +3576,16 @@ pub struct R4GfxReadbackOwner {
 const _: () = { assert!(core::mem::size_of::<R4GfxReadbackOwner>() == 1240); assert!(core::mem::align_of::<R4GfxReadbackOwner>() == 8); assert!(core::mem::offset_of!(R4GfxReadbackOwner, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value420 {
+pub struct R4Lib_Value424 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value420>() == 8); assert!(core::mem::align_of::<R4Lib_Value420>() == 8); assert!(core::mem::offset_of!(R4Lib_Value420, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value424>() == 8); assert!(core::mem::align_of::<R4Lib_Value424>() == 8); assert!(core::mem::offset_of!(R4Lib_Value424, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value421 {
+pub struct R4Lib_Value425 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value421>() == 8); assert!(core::mem::align_of::<R4Lib_Value421>() == 8); assert!(core::mem::offset_of!(R4Lib_Value421, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value425>() == 8); assert!(core::mem::align_of::<R4Lib_Value425>() == 8); assert!(core::mem::offset_of!(R4Lib_Value425, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4gfx_abi_R4GfxDevice {
@@ -3432,22 +3594,22 @@ pub struct R4Lib_r4gfx_abi_R4GfxDevice {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4gfx_abi_R4GfxDevice>() == 16); assert!(core::mem::align_of::<R4Lib_r4gfx_abi_R4GfxDevice>() == 8); assert!(core::mem::offset_of!(R4Lib_r4gfx_abi_R4GfxDevice, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value423 {
+pub struct R4Lib_Value427 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value423>() == 2); assert!(core::mem::align_of::<R4Lib_Value423>() == 2); assert!(core::mem::offset_of!(R4Lib_Value423, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value427>() == 2); assert!(core::mem::align_of::<R4Lib_Value427>() == 2); assert!(core::mem::offset_of!(R4Lib_Value427, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value424 {
+pub struct R4Lib_Value428 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 768],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value424>() == 768); assert!(core::mem::align_of::<R4Lib_Value424>() == 8); assert!(core::mem::offset_of!(R4Lib_Value424, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value428>() == 768); assert!(core::mem::align_of::<R4Lib_Value428>() == 8); assert!(core::mem::offset_of!(R4Lib_Value428, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value425 {
+pub struct R4Lib_Value429 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 96],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value425>() == 96); assert!(core::mem::align_of::<R4Lib_Value425>() == 8); assert!(core::mem::offset_of!(R4Lib_Value425, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value429>() == 96); assert!(core::mem::align_of::<R4Lib_Value429>() == 8); assert!(core::mem::offset_of!(R4Lib_Value429, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxReadbackJob {
@@ -3462,10 +3624,10 @@ pub struct R4Lib_r4gfx_abi_R4GfxJob {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4gfx_abi_R4GfxJob>() == 32); assert!(core::mem::align_of::<R4Lib_r4gfx_abi_R4GfxJob>() == 8); assert!(core::mem::offset_of!(R4Lib_r4gfx_abi_R4GfxJob, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value428 {
+pub struct R4Lib_Value432 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 128],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value428>() == 128); assert!(core::mem::align_of::<R4Lib_Value428>() == 4); assert!(core::mem::offset_of!(R4Lib_Value428, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value432>() == 128); assert!(core::mem::align_of::<R4Lib_Value432>() == 4); assert!(core::mem::offset_of!(R4Lib_Value432, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxRefreshClientActivity {
@@ -3498,10 +3660,10 @@ pub struct R4GfxRefreshObserverObserver {
 const _: () = { assert!(core::mem::size_of::<R4GfxRefreshObserverObserver>() == 296); assert!(core::mem::align_of::<R4GfxRefreshObserverObserver>() == 8); assert!(core::mem::offset_of!(R4GfxRefreshObserverObserver, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value434 {
+pub struct R4Lib_Value438 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 256],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value434>() == 256); assert!(core::mem::align_of::<R4Lib_Value434>() == 8); assert!(core::mem::offset_of!(R4Lib_Value434, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value438>() == 256); assert!(core::mem::align_of::<R4Lib_Value438>() == 8); assert!(core::mem::offset_of!(R4Lib_Value438, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxRefreshPreferencesChoice {
@@ -3516,10 +3678,10 @@ pub struct R4GfxRefreshPreferencesConfig {
 const _: () = { assert!(core::mem::size_of::<R4GfxRefreshPreferencesConfig>() == 776); assert!(core::mem::align_of::<R4GfxRefreshPreferencesConfig>() == 8); assert!(core::mem::offset_of!(R4GfxRefreshPreferencesConfig, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value437 {
+pub struct R4Lib_Value441 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 768],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value437>() == 768); assert!(core::mem::align_of::<R4Lib_Value437>() == 8); assert!(core::mem::offset_of!(R4Lib_Value437, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value441>() == 768); assert!(core::mem::align_of::<R4Lib_Value441>() == 8); assert!(core::mem::offset_of!(R4Lib_Value441, r#opaque_bytes) == 0); };
 #[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4GfxTopologyRect {
@@ -3535,27 +3697,27 @@ const _: () = { assert!(core::mem::size_of::<R4GfxTransferPhase>() == 1); assert
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxTransferOwner {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 392],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 408],
 }
-const _: () = { assert!(core::mem::size_of::<R4GfxTransferOwner>() == 392); assert!(core::mem::align_of::<R4GfxTransferOwner>() == 8); assert!(core::mem::offset_of!(R4GfxTransferOwner, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4GfxTransferOwner>() == 408); assert!(core::mem::align_of::<R4GfxTransferOwner>() == 8); assert!(core::mem::offset_of!(R4GfxTransferOwner, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_gfx_buffers_Context {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_gfx_buffers_Context>() == 8); assert!(core::mem::align_of::<R4Lib_r4os_gfx_buffers_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_gfx_buffers_Context, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_gfx_buffers_Context>() == 24); assert!(core::mem::align_of::<R4Lib_r4os_gfx_buffers_Context>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_gfx_buffers_Context, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value442 {
+pub struct R4Lib_Value446 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 64],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value442>() == 64); assert!(core::mem::align_of::<R4Lib_Value442>() == 8); assert!(core::mem::offset_of!(R4Lib_Value442, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value446>() == 64); assert!(core::mem::align_of::<R4Lib_Value446>() == 8); assert!(core::mem::offset_of!(R4Lib_Value446, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value443 {
+pub struct R4Lib_Value447 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value443>() == 80); assert!(core::mem::align_of::<R4Lib_Value443>() == 8); assert!(core::mem::offset_of!(R4Lib_Value443, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value447>() == 80); assert!(core::mem::align_of::<R4Lib_Value447>() == 8); assert!(core::mem::offset_of!(R4Lib_Value447, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxTransferJob {
@@ -3630,16 +3792,16 @@ pub struct R4GfxVrrScheduler {
 const _: () = { assert!(core::mem::size_of::<R4GfxVrrScheduler>() == 112); assert!(core::mem::align_of::<R4GfxVrrScheduler>() == 8); assert!(core::mem::offset_of!(R4GfxVrrScheduler, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value456 {
+pub struct R4Lib_Value460 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 64],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value456>() == 64); assert!(core::mem::align_of::<R4Lib_Value456>() == 8); assert!(core::mem::offset_of!(R4Lib_Value456, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value460>() == 64); assert!(core::mem::align_of::<R4Lib_Value460>() == 8); assert!(core::mem::offset_of!(R4Lib_Value460, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4NakWorker {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 400],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 456],
 }
-const _: () = { assert!(core::mem::size_of::<R4NakWorker>() == 400); assert!(core::mem::align_of::<R4NakWorker>() == 8); assert!(core::mem::offset_of!(R4NakWorker, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4NakWorker>() == 456); assert!(core::mem::align_of::<R4NakWorker>() == 8); assert!(core::mem::offset_of!(R4NakWorker, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4nak_R4NakRequest {
@@ -3666,16 +3828,16 @@ pub struct R4Lib_r4nak_R4NakDigest {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4nak_R4NakDigest>() == 32); assert!(core::mem::align_of::<R4Lib_r4nak_R4NakDigest>() == 8); assert!(core::mem::offset_of!(R4Lib_r4nak_R4NakDigest, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value462 {
+pub struct R4Lib_Value466 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value462>() == 8); assert!(core::mem::align_of::<R4Lib_Value462>() == 8); assert!(core::mem::offset_of!(R4Lib_Value462, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value466>() == 8); assert!(core::mem::align_of::<R4Lib_Value466>() == 8); assert!(core::mem::offset_of!(R4Lib_Value466, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value463 {
+pub struct R4Lib_Value467 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value463>() == 8); assert!(core::mem::align_of::<R4Lib_Value463>() == 8); assert!(core::mem::offset_of!(R4Lib_Value463, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value467>() == 8); assert!(core::mem::align_of::<R4Lib_Value467>() == 8); assert!(core::mem::offset_of!(R4Lib_Value467, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4nak_R4NakCacheKey {
@@ -3684,16 +3846,16 @@ pub struct R4Lib_r4nak_R4NakCacheKey {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4nak_R4NakCacheKey>() == 136); assert!(core::mem::align_of::<R4Lib_r4nak_R4NakCacheKey>() == 8); assert!(core::mem::offset_of!(R4Lib_r4nak_R4NakCacheKey, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value465 {
+pub struct R4Lib_Value469 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value465>() == 8); assert!(core::mem::align_of::<R4Lib_Value465>() == 8); assert!(core::mem::offset_of!(R4Lib_Value465, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value469>() == 8); assert!(core::mem::align_of::<R4Lib_Value469>() == 8); assert!(core::mem::offset_of!(R4Lib_Value469, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value466 {
+pub struct R4Lib_Value470 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value466>() == 8); assert!(core::mem::align_of::<R4Lib_Value466>() == 8); assert!(core::mem::offset_of!(R4Lib_Value466, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value470>() == 8); assert!(core::mem::align_of::<R4Lib_Value470>() == 8); assert!(core::mem::offset_of!(R4Lib_Value470, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video {
@@ -3756,16 +3918,16 @@ pub struct R4VideoPlaybackStep {
 const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackStep>() == 192); assert!(core::mem::align_of::<R4VideoPlaybackStep>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackStep, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value477 {
+pub struct R4Lib_Value481 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 160],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value477>() == 160); assert!(core::mem::align_of::<R4Lib_Value477>() == 8); assert!(core::mem::offset_of!(R4Lib_Value477, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value481>() == 160); assert!(core::mem::align_of::<R4Lib_Value481>() == 8); assert!(core::mem::offset_of!(R4Lib_Value481, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value478 {
+pub struct R4Lib_Value482 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value478>() == 16); assert!(core::mem::align_of::<R4Lib_Value478>() == 8); assert!(core::mem::offset_of!(R4Lib_Value478, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value482>() == 16); assert!(core::mem::align_of::<R4Lib_Value482>() == 8); assert!(core::mem::offset_of!(R4Lib_Value482, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4VideoPlaybackSession {
@@ -3774,22 +3936,22 @@ pub struct R4VideoPlaybackSession {
 const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackSession>() == 2200); assert!(core::mem::align_of::<R4VideoPlaybackSession>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackSession, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value480 {
+pub struct R4Lib_Value484 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value480>() == 8); assert!(core::mem::align_of::<R4Lib_Value480>() == 8); assert!(core::mem::offset_of!(R4Lib_Value480, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value484>() == 8); assert!(core::mem::align_of::<R4Lib_Value484>() == 8); assert!(core::mem::offset_of!(R4Lib_Value484, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4VideoPlaybackCompositionComposition {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2576],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2608],
 }
-const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackCompositionComposition>() == 2576); assert!(core::mem::align_of::<R4VideoPlaybackCompositionComposition>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackCompositionComposition, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackCompositionComposition>() == 2608); assert!(core::mem::align_of::<R4VideoPlaybackCompositionComposition>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackCompositionComposition, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value482 {
+pub struct R4Lib_Value486 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2520],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value482>() == 2520); assert!(core::mem::align_of::<R4Lib_Value482>() == 8); assert!(core::mem::offset_of!(R4Lib_Value482, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value486>() == 2520); assert!(core::mem::align_of::<R4Lib_Value486>() == 8); assert!(core::mem::offset_of!(R4Lib_Value486, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4VideoPlaybackCompositionWork {
@@ -3810,40 +3972,40 @@ pub struct R4Lib_r4gfx_abi_R4GfxYuvDescription {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4gfx_abi_R4GfxYuvDescription>() == 48); assert!(core::mem::align_of::<R4Lib_r4gfx_abi_R4GfxYuvDescription>() == 4); assert!(core::mem::offset_of!(R4Lib_r4gfx_abi_R4GfxYuvDescription, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value486 {
+pub struct R4Lib_Value490 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value486>() == 40); assert!(core::mem::align_of::<R4Lib_Value486>() == 8); assert!(core::mem::offset_of!(R4Lib_Value486, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value490>() == 40); assert!(core::mem::align_of::<R4Lib_Value490>() == 8); assert!(core::mem::offset_of!(R4Lib_Value490, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value487 {
+pub struct R4Lib_Value491 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 144],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value487>() == 144); assert!(core::mem::align_of::<R4Lib_Value487>() == 8); assert!(core::mem::offset_of!(R4Lib_Value487, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value491>() == 144); assert!(core::mem::align_of::<R4Lib_Value491>() == 8); assert!(core::mem::offset_of!(R4Lib_Value491, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value488 {
+pub struct R4Lib_Value492 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value488>() == 8); assert!(core::mem::align_of::<R4Lib_Value488>() == 8); assert!(core::mem::offset_of!(R4Lib_Value488, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value492>() == 8); assert!(core::mem::align_of::<R4Lib_Value492>() == 8); assert!(core::mem::offset_of!(R4Lib_Value492, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value489 {
+pub struct R4Lib_Value493 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value489>() == 8); assert!(core::mem::align_of::<R4Lib_Value489>() == 8); assert!(core::mem::offset_of!(R4Lib_Value489, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value493>() == 8); assert!(core::mem::align_of::<R4Lib_Value493>() == 8); assert!(core::mem::offset_of!(R4Lib_Value493, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4VideoPlaybackAudioAudio {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 352],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 400],
 }
-const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackAudioAudio>() == 352); assert!(core::mem::align_of::<R4VideoPlaybackAudioAudio>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackAudioAudio, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackAudioAudio>() == 400); assert!(core::mem::align_of::<R4VideoPlaybackAudioAudio>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackAudioAudio, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_app_audio_Audio {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_app_audio_Audio>() == 16); assert!(core::mem::align_of::<R4Lib_r4os_app_audio_Audio>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_app_audio_Audio, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_app_audio_Audio>() == 48); assert!(core::mem::align_of::<R4Lib_r4os_app_audio_Audio>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_app_audio_Audio, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4VideoPlaybackAudioState {
@@ -3852,16 +4014,16 @@ pub struct R4VideoPlaybackAudioState {
 const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackAudioState>() == 1); assert!(core::mem::align_of::<R4VideoPlaybackAudioState>() == 1); assert!(core::mem::offset_of!(R4VideoPlaybackAudioState, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value493 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 256],
+pub struct R4Lib_Value497 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 272],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value493>() == 256); assert!(core::mem::align_of::<R4Lib_Value493>() == 8); assert!(core::mem::offset_of!(R4Lib_Value493, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value497>() == 272); assert!(core::mem::align_of::<R4Lib_Value497>() == 8); assert!(core::mem::offset_of!(R4Lib_Value497, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_r4os_app_audio_AudioStream {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 248],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 264],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_app_audio_AudioStream>() == 248); assert!(core::mem::align_of::<R4Lib_r4os_app_audio_AudioStream>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_app_audio_AudioStream, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_app_audio_AudioStream>() == 264); assert!(core::mem::align_of::<R4Lib_r4os_app_audio_AudioStream>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_app_audio_AudioStream, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4VideoPlaybackClockClock {
@@ -3870,10 +4032,10 @@ pub struct R4VideoPlaybackClockClock {
 const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackClockClock>() == 32); assert!(core::mem::align_of::<R4VideoPlaybackClockClock>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackClockClock, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value497 {
+pub struct R4Lib_Value501 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value497>() == 32); assert!(core::mem::align_of::<R4Lib_Value497>() == 8); assert!(core::mem::offset_of!(R4Lib_Value497, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value501>() == 32); assert!(core::mem::align_of::<R4Lib_Value501>() == 8); assert!(core::mem::offset_of!(R4Lib_Value501, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4VideoPlaybackControl {
@@ -3882,10 +4044,10 @@ pub struct R4VideoPlaybackControl {
 const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackControl>() == 24); assert!(core::mem::align_of::<R4VideoPlaybackControl>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackControl, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value499 {
+pub struct R4Lib_Value503 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1872],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value499>() == 1872); assert!(core::mem::align_of::<R4Lib_Value499>() == 8); assert!(core::mem::offset_of!(R4Lib_Value499, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value503>() == 1872); assert!(core::mem::align_of::<R4Lib_Value503>() == 8); assert!(core::mem::offset_of!(R4Lib_Value503, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4VideoPlaybackSlot {
@@ -3894,10 +4056,10 @@ pub struct R4VideoPlaybackSlot {
 const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackSlot>() == 624); assert!(core::mem::align_of::<R4VideoPlaybackSlot>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackSlot, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value501 {
+pub struct R4Lib_Value505 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value501>() == 24); assert!(core::mem::align_of::<R4Lib_Value501>() == 8); assert!(core::mem::offset_of!(R4Lib_Value501, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value505>() == 24); assert!(core::mem::align_of::<R4Lib_Value505>() == 8); assert!(core::mem::offset_of!(R4Lib_Value505, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4VideoPlaybackCompositionTicket {
@@ -3906,22 +4068,22 @@ pub struct R4VideoPlaybackCompositionTicket {
 const _: () = { assert!(core::mem::size_of::<R4VideoPlaybackCompositionTicket>() == 16); assert!(core::mem::align_of::<R4VideoPlaybackCompositionTicket>() == 8); assert!(core::mem::offset_of!(R4VideoPlaybackCompositionTicket, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value503 {
+pub struct R4Lib_Value507 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 128],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value503>() == 128); assert!(core::mem::align_of::<R4Lib_Value503>() == 8); assert!(core::mem::offset_of!(R4Lib_Value503, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value507>() == 128); assert!(core::mem::align_of::<R4Lib_Value507>() == 8); assert!(core::mem::offset_of!(R4Lib_Value507, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value504 {
+pub struct R4Lib_Value508 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value504>() == 16); assert!(core::mem::align_of::<R4Lib_Value504>() == 8); assert!(core::mem::offset_of!(R4Lib_Value504, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value508>() == 16); assert!(core::mem::align_of::<R4Lib_Value508>() == 8); assert!(core::mem::offset_of!(R4Lib_Value508, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value505 {
+pub struct R4Lib_Value509 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value505>() == 80); assert!(core::mem::align_of::<R4Lib_Value505>() == 8); assert!(core::mem::offset_of!(R4Lib_Value505, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value509>() == 80); assert!(core::mem::align_of::<R4Lib_Value509>() == 8); assert!(core::mem::offset_of!(R4Lib_Value509, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4GfxDisplayProfileOwner {
@@ -3930,28 +4092,40 @@ pub struct R4GfxDisplayProfileOwner {
 const _: () = { assert!(core::mem::size_of::<R4GfxDisplayProfileOwner>() == 72); assert!(core::mem::align_of::<R4GfxDisplayProfileOwner>() == 8); assert!(core::mem::offset_of!(R4GfxDisplayProfileOwner, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value507 {
+pub struct R4Lib_Value511 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value507>() == 16); assert!(core::mem::align_of::<R4Lib_Value507>() == 8); assert!(core::mem::offset_of!(R4Lib_Value507, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value511>() == 16); assert!(core::mem::align_of::<R4Lib_Value511>() == 8); assert!(core::mem::offset_of!(R4Lib_Value511, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value508 {
+pub struct R4Lib_Value512 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value508>() == 8); assert!(core::mem::align_of::<R4Lib_Value508>() == 8); assert!(core::mem::offset_of!(R4Lib_Value508, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value512>() == 8); assert!(core::mem::align_of::<R4Lib_Value512>() == 8); assert!(core::mem::offset_of!(R4Lib_Value512, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value509 {
+pub struct R4Lib_Value513 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value509>() == 8); assert!(core::mem::align_of::<R4Lib_Value509>() == 8); assert!(core::mem::offset_of!(R4Lib_Value509, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value513>() == 8); assert!(core::mem::align_of::<R4Lib_Value513>() == 8); assert!(core::mem::offset_of!(R4Lib_Value513, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value510 {
+pub struct R4Lib_Value514 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value510>() == 2); assert!(core::mem::align_of::<R4Lib_Value510>() == 2); assert!(core::mem::offset_of!(R4Lib_Value510, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value514>() == 2); assert!(core::mem::align_of::<R4Lib_Value514>() == 2); assert!(core::mem::offset_of!(R4Lib_Value514, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4MediaCompilerContext2 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 200],
+}
+const _: () = { assert!(core::mem::size_of::<R4MediaCompilerContext2>() == 200); assert!(core::mem::align_of::<R4MediaCompilerContext2>() == 8); assert!(core::mem::offset_of!(R4MediaCompilerContext2, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_r4os_app2_App {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 200],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_app2_App>() == 200); assert!(core::mem::align_of::<R4Lib_r4os_app2_App>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_app2_App, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4MediaSink {
@@ -3960,52 +4134,16 @@ pub struct R4MediaSink {
 const _: () = { assert!(core::mem::size_of::<R4MediaSink>() == 16); assert!(core::mem::align_of::<R4MediaSink>() == 8); assert!(core::mem::offset_of!(R4MediaSink, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value512 {
+pub struct R4Lib_Value518 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value512>() == 8); assert!(core::mem::align_of::<R4Lib_Value512>() == 8); assert!(core::mem::offset_of!(R4Lib_Value512, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value518>() == 8); assert!(core::mem::align_of::<R4Lib_Value518>() == 8); assert!(core::mem::offset_of!(R4Lib_Value518, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value513 {
+pub struct R4Lib_Value519 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value513>() == 2); assert!(core::mem::align_of::<R4Lib_Value513>() == 2); assert!(core::mem::offset_of!(R4Lib_Value513, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value514 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value514>() == 8); assert!(core::mem::align_of::<R4Lib_Value514>() == 8); assert!(core::mem::offset_of!(R4Lib_Value514, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value515 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4696],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value515>() == 4696); assert!(core::mem::align_of::<R4Lib_Value515>() == 8); assert!(core::mem::offset_of!(R4Lib_Value515, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value516 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 7912],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value516>() == 7912); assert!(core::mem::align_of::<R4Lib_Value516>() == 8); assert!(core::mem::offset_of!(R4Lib_Value516, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value517 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value517>() == 8); assert!(core::mem::align_of::<R4Lib_Value517>() == 8); assert!(core::mem::offset_of!(R4Lib_Value517, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value518 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 56],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value518>() == 56); assert!(core::mem::align_of::<R4Lib_Value518>() == 8); assert!(core::mem::offset_of!(R4Lib_Value518, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value519 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value519>() == 8); assert!(core::mem::align_of::<R4Lib_Value519>() == 8); assert!(core::mem::offset_of!(R4Lib_Value519, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value519>() == 2); assert!(core::mem::align_of::<R4Lib_Value519>() == 2); assert!(core::mem::offset_of!(R4Lib_Value519, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value520 {
@@ -4015,75 +4153,111 @@ const _: () = { assert!(core::mem::size_of::<R4Lib_Value520>() == 8); assert!(co
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value521 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1152],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4696],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value521>() == 1152); assert!(core::mem::align_of::<R4Lib_Value521>() == 8); assert!(core::mem::offset_of!(R4Lib_Value521, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value521>() == 4696); assert!(core::mem::align_of::<R4Lib_Value521>() == 8); assert!(core::mem::offset_of!(R4Lib_Value521, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value522 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 7912],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value522>() == 8); assert!(core::mem::align_of::<R4Lib_Value522>() == 8); assert!(core::mem::offset_of!(R4Lib_Value522, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value522>() == 7912); assert!(core::mem::align_of::<R4Lib_Value522>() == 8); assert!(core::mem::offset_of!(R4Lib_Value522, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value523 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value523>() == 8); assert!(core::mem::align_of::<R4Lib_Value523>() == 8); assert!(core::mem::offset_of!(R4Lib_Value523, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value524 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 56],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value524>() == 2); assert!(core::mem::align_of::<R4Lib_Value524>() == 2); assert!(core::mem::offset_of!(R4Lib_Value524, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value524>() == 56); assert!(core::mem::align_of::<R4Lib_Value524>() == 8); assert!(core::mem::offset_of!(R4Lib_Value524, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value525 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 10],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value525>() == 10); assert!(core::mem::align_of::<R4Lib_Value525>() == 2); assert!(core::mem::offset_of!(R4Lib_Value525, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value525>() == 8); assert!(core::mem::align_of::<R4Lib_Value525>() == 8); assert!(core::mem::offset_of!(R4Lib_Value525, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value526 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value526>() == 48); assert!(core::mem::align_of::<R4Lib_Value526>() == 4); assert!(core::mem::offset_of!(R4Lib_Value526, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value526>() == 8); assert!(core::mem::align_of::<R4Lib_Value526>() == 8); assert!(core::mem::offset_of!(R4Lib_Value526, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value527 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 88],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1152],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value527>() == 88); assert!(core::mem::align_of::<R4Lib_Value527>() == 8); assert!(core::mem::offset_of!(R4Lib_Value527, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value527>() == 1152); assert!(core::mem::align_of::<R4Lib_Value527>() == 8); assert!(core::mem::offset_of!(R4Lib_Value527, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value528 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value528>() == 40); assert!(core::mem::align_of::<R4Lib_Value528>() == 8); assert!(core::mem::offset_of!(R4Lib_Value528, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value528>() == 8); assert!(core::mem::align_of::<R4Lib_Value528>() == 8); assert!(core::mem::offset_of!(R4Lib_Value528, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value529 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value529>() == 2); assert!(core::mem::align_of::<R4Lib_Value529>() == 2); assert!(core::mem::offset_of!(R4Lib_Value529, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value529>() == 8); assert!(core::mem::align_of::<R4Lib_Value529>() == 8); assert!(core::mem::offset_of!(R4Lib_Value529, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value530 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 56],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value530>() == 56); assert!(core::mem::align_of::<R4Lib_Value530>() == 8); assert!(core::mem::offset_of!(R4Lib_Value530, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value530>() == 2); assert!(core::mem::align_of::<R4Lib_Value530>() == 2); assert!(core::mem::offset_of!(R4Lib_Value530, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value531 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 64],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 10],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value531>() == 64); assert!(core::mem::align_of::<R4Lib_Value531>() == 8); assert!(core::mem::offset_of!(R4Lib_Value531, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value531>() == 10); assert!(core::mem::align_of::<R4Lib_Value531>() == 2); assert!(core::mem::offset_of!(R4Lib_Value531, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value532 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value532>() == 48); assert!(core::mem::align_of::<R4Lib_Value532>() == 4); assert!(core::mem::offset_of!(R4Lib_Value532, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value533 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 88],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value533>() == 88); assert!(core::mem::align_of::<R4Lib_Value533>() == 8); assert!(core::mem::offset_of!(R4Lib_Value533, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value534 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value534>() == 40); assert!(core::mem::align_of::<R4Lib_Value534>() == 8); assert!(core::mem::offset_of!(R4Lib_Value534, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value535 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value535>() == 2); assert!(core::mem::align_of::<R4Lib_Value535>() == 2); assert!(core::mem::offset_of!(R4Lib_Value535, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value536 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 56],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value536>() == 56); assert!(core::mem::align_of::<R4Lib_Value536>() == 8); assert!(core::mem::offset_of!(R4Lib_Value536, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value537 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 64],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value537>() == 64); assert!(core::mem::align_of::<R4Lib_Value537>() == 8); assert!(core::mem::offset_of!(R4Lib_Value537, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value538 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value532>() == 80); assert!(core::mem::align_of::<R4Lib_Value532>() == 8); assert!(core::mem::offset_of!(R4Lib_Value532, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value538>() == 80); assert!(core::mem::align_of::<R4Lib_Value538>() == 8); assert!(core::mem::offset_of!(R4Lib_Value538, r#opaque_bytes) == 0); };
 #[repr(C, align(1))]
 #[derive(Clone, Copy)]
 pub struct R4MediaBuiltinShader {
@@ -4092,52 +4266,16 @@ pub struct R4MediaBuiltinShader {
 const _: () = { assert!(core::mem::size_of::<R4MediaBuiltinShader>() == 1); assert!(core::mem::align_of::<R4MediaBuiltinShader>() == 1); assert!(core::mem::offset_of!(R4MediaBuiltinShader, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value534 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value534>() == 8); assert!(core::mem::align_of::<R4Lib_Value534>() == 8); assert!(core::mem::offset_of!(R4Lib_Value534, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value535 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value535>() == 8); assert!(core::mem::align_of::<R4Lib_Value535>() == 8); assert!(core::mem::offset_of!(R4Lib_Value535, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value536 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value536>() == 8); assert!(core::mem::align_of::<R4Lib_Value536>() == 8); assert!(core::mem::offset_of!(R4Lib_Value536, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value537 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value537>() == 8); assert!(core::mem::align_of::<R4Lib_Value537>() == 8); assert!(core::mem::offset_of!(R4Lib_Value537, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value538 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value538>() == 8); assert!(core::mem::align_of::<R4Lib_Value538>() == 8); assert!(core::mem::offset_of!(R4Lib_Value538, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value539 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value539>() == 8); assert!(core::mem::align_of::<R4Lib_Value539>() == 8); assert!(core::mem::offset_of!(R4Lib_Value539, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
 pub struct R4Lib_Value540 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value540>() == 8); assert!(core::mem::align_of::<R4Lib_Value540>() == 8); assert!(core::mem::offset_of!(R4Lib_Value540, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value541 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value541>() == 4); assert!(core::mem::align_of::<R4Lib_Value541>() == 2); assert!(core::mem::offset_of!(R4Lib_Value541, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value541>() == 8); assert!(core::mem::align_of::<R4Lib_Value541>() == 8); assert!(core::mem::offset_of!(R4Lib_Value541, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value542 {
@@ -4153,75 +4291,75 @@ const _: () = { assert!(core::mem::size_of::<R4Lib_Value543>() == 8); assert!(co
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value544 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value544>() == 32); assert!(core::mem::align_of::<R4Lib_Value544>() == 8); assert!(core::mem::offset_of!(R4Lib_Value544, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value544>() == 8); assert!(core::mem::align_of::<R4Lib_Value544>() == 8); assert!(core::mem::offset_of!(R4Lib_Value544, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value545 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value545>() == 24); assert!(core::mem::align_of::<R4Lib_Value545>() == 8); assert!(core::mem::offset_of!(R4Lib_Value545, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value545>() == 8); assert!(core::mem::align_of::<R4Lib_Value545>() == 8); assert!(core::mem::offset_of!(R4Lib_Value545, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value546 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value546>() == 8); assert!(core::mem::align_of::<R4Lib_Value546>() == 8); assert!(core::mem::offset_of!(R4Lib_Value546, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+#[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value547 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value547>() == 40); assert!(core::mem::align_of::<R4Lib_Value547>() == 8); assert!(core::mem::offset_of!(R4Lib_Value547, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value547>() == 4); assert!(core::mem::align_of::<R4Lib_Value547>() == 2); assert!(core::mem::offset_of!(R4Lib_Value547, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value548 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value548>() == 8); assert!(core::mem::align_of::<R4Lib_Value548>() == 8); assert!(core::mem::offset_of!(R4Lib_Value548, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value549 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value549>() == 8); assert!(core::mem::align_of::<R4Lib_Value549>() == 8); assert!(core::mem::offset_of!(R4Lib_Value549, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value550 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value548>() == 32); assert!(core::mem::align_of::<R4Lib_Value548>() == 8); assert!(core::mem::offset_of!(R4Lib_Value548, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value550>() == 32); assert!(core::mem::align_of::<R4Lib_Value550>() == 8); assert!(core::mem::offset_of!(R4Lib_Value550, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value551 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value551>() == 24); assert!(core::mem::align_of::<R4Lib_Value551>() == 8); assert!(core::mem::offset_of!(R4Lib_Value551, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value552 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value552>() == 8); assert!(core::mem::align_of::<R4Lib_Value552>() == 8); assert!(core::mem::offset_of!(R4Lib_Value552, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value553 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value553>() == 40); assert!(core::mem::align_of::<R4Lib_Value553>() == 8); assert!(core::mem::offset_of!(R4Lib_Value553, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value554 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value554>() == 32); assert!(core::mem::align_of::<R4Lib_Value554>() == 8); assert!(core::mem::offset_of!(R4Lib_Value554, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4StdGraphemeStream_Event {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
 const _: () = { assert!(core::mem::size_of::<R4StdGraphemeStream_Event>() == 24); assert!(core::mem::align_of::<R4StdGraphemeStream_Event>() == 8); assert!(core::mem::offset_of!(R4StdGraphemeStream_Event, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value550 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value550>() == 8); assert!(core::mem::align_of::<R4Lib_Value550>() == 8); assert!(core::mem::offset_of!(R4Lib_Value550, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value551 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value551>() == 8); assert!(core::mem::align_of::<R4Lib_Value551>() == 8); assert!(core::mem::offset_of!(R4Lib_Value551, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value552 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value552>() == 2); assert!(core::mem::align_of::<R4Lib_Value552>() == 2); assert!(core::mem::offset_of!(R4Lib_Value552, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value553 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value553>() == 8); assert!(core::mem::align_of::<R4Lib_Value553>() == 8); assert!(core::mem::offset_of!(R4Lib_Value553, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value554 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value554>() == 24); assert!(core::mem::align_of::<R4Lib_Value554>() == 8); assert!(core::mem::offset_of!(R4Lib_Value554, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value555 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 96],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value555>() == 96); assert!(core::mem::align_of::<R4Lib_Value555>() == 8); assert!(core::mem::offset_of!(R4Lib_Value555, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value556 {
@@ -4234,114 +4372,150 @@ pub struct R4Lib_Value557 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value557>() == 8); assert!(core::mem::align_of::<R4Lib_Value557>() == 8); assert!(core::mem::offset_of!(R4Lib_Value557, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+#[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value558 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value558>() == 8); assert!(core::mem::align_of::<R4Lib_Value558>() == 8); assert!(core::mem::offset_of!(R4Lib_Value558, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value558>() == 2); assert!(core::mem::align_of::<R4Lib_Value558>() == 2); assert!(core::mem::offset_of!(R4Lib_Value558, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value559 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 128],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value559>() == 128); assert!(core::mem::align_of::<R4Lib_Value559>() == 8); assert!(core::mem::offset_of!(R4Lib_Value559, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value559>() == 8); assert!(core::mem::align_of::<R4Lib_Value559>() == 8); assert!(core::mem::offset_of!(R4Lib_Value559, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value560 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value560>() == 8); assert!(core::mem::align_of::<R4Lib_Value560>() == 8); assert!(core::mem::offset_of!(R4Lib_Value560, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value560>() == 24); assert!(core::mem::align_of::<R4Lib_Value560>() == 8); assert!(core::mem::offset_of!(R4Lib_Value560, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value561 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 96],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value561>() == 16); assert!(core::mem::align_of::<R4Lib_Value561>() == 8); assert!(core::mem::offset_of!(R4Lib_Value561, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value561>() == 96); assert!(core::mem::align_of::<R4Lib_Value561>() == 8); assert!(core::mem::offset_of!(R4Lib_Value561, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value562 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value562>() == 16); assert!(core::mem::align_of::<R4Lib_Value562>() == 8); assert!(core::mem::offset_of!(R4Lib_Value562, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value562>() == 8); assert!(core::mem::align_of::<R4Lib_Value562>() == 8); assert!(core::mem::offset_of!(R4Lib_Value562, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value563 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value563>() == 16); assert!(core::mem::align_of::<R4Lib_Value563>() == 8); assert!(core::mem::offset_of!(R4Lib_Value563, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value563>() == 8); assert!(core::mem::align_of::<R4Lib_Value563>() == 8); assert!(core::mem::offset_of!(R4Lib_Value563, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value564 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 92],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value564>() == 92); assert!(core::mem::align_of::<R4Lib_Value564>() == 4); assert!(core::mem::offset_of!(R4Lib_Value564, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value564>() == 8); assert!(core::mem::align_of::<R4Lib_Value564>() == 8); assert!(core::mem::offset_of!(R4Lib_Value564, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value565 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 128],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value565>() == 24); assert!(core::mem::align_of::<R4Lib_Value565>() == 8); assert!(core::mem::offset_of!(R4Lib_Value565, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value565>() == 128); assert!(core::mem::align_of::<R4Lib_Value565>() == 8); assert!(core::mem::offset_of!(R4Lib_Value565, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value566 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value566>() == 16); assert!(core::mem::align_of::<R4Lib_Value566>() == 8); assert!(core::mem::offset_of!(R4Lib_Value566, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value566>() == 8); assert!(core::mem::align_of::<R4Lib_Value566>() == 8); assert!(core::mem::offset_of!(R4Lib_Value566, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value567 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value567>() == 16); assert!(core::mem::align_of::<R4Lib_Value567>() == 4); assert!(core::mem::offset_of!(R4Lib_Value567, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value567>() == 16); assert!(core::mem::align_of::<R4Lib_Value567>() == 8); assert!(core::mem::offset_of!(R4Lib_Value567, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value568 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value568>() == 40); assert!(core::mem::align_of::<R4Lib_Value568>() == 8); assert!(core::mem::offset_of!(R4Lib_Value568, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value568>() == 16); assert!(core::mem::align_of::<R4Lib_Value568>() == 8); assert!(core::mem::offset_of!(R4Lib_Value568, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value569 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value569>() == 24); assert!(core::mem::align_of::<R4Lib_Value569>() == 8); assert!(core::mem::offset_of!(R4Lib_Value569, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value569>() == 16); assert!(core::mem::align_of::<R4Lib_Value569>() == 8); assert!(core::mem::offset_of!(R4Lib_Value569, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value570 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 92],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value570>() == 24); assert!(core::mem::align_of::<R4Lib_Value570>() == 8); assert!(core::mem::offset_of!(R4Lib_Value570, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value570>() == 92); assert!(core::mem::align_of::<R4Lib_Value570>() == 4); assert!(core::mem::offset_of!(R4Lib_Value570, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value571 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value571>() == 16); assert!(core::mem::align_of::<R4Lib_Value571>() == 8); assert!(core::mem::offset_of!(R4Lib_Value571, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value572 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 132],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value572>() == 132); assert!(core::mem::align_of::<R4Lib_Value572>() == 4); assert!(core::mem::offset_of!(R4Lib_Value572, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value571>() == 24); assert!(core::mem::align_of::<R4Lib_Value571>() == 8); assert!(core::mem::offset_of!(R4Lib_Value571, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value573 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 168],
+pub struct R4Lib_Value572 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value573>() == 168); assert!(core::mem::align_of::<R4Lib_Value573>() == 8); assert!(core::mem::offset_of!(R4Lib_Value573, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value572>() == 16); assert!(core::mem::align_of::<R4Lib_Value572>() == 8); assert!(core::mem::offset_of!(R4Lib_Value572, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value573 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value573>() == 16); assert!(core::mem::align_of::<R4Lib_Value573>() == 4); assert!(core::mem::offset_of!(R4Lib_Value573, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value574 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value574>() == 16); assert!(core::mem::align_of::<R4Lib_Value574>() == 8); assert!(core::mem::offset_of!(R4Lib_Value574, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value574>() == 40); assert!(core::mem::align_of::<R4Lib_Value574>() == 8); assert!(core::mem::offset_of!(R4Lib_Value574, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value575 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value575>() == 24); assert!(core::mem::align_of::<R4Lib_Value575>() == 8); assert!(core::mem::offset_of!(R4Lib_Value575, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value576 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value576>() == 24); assert!(core::mem::align_of::<R4Lib_Value576>() == 8); assert!(core::mem::offset_of!(R4Lib_Value576, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value577 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value577>() == 16); assert!(core::mem::align_of::<R4Lib_Value577>() == 8); assert!(core::mem::offset_of!(R4Lib_Value577, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value578 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 132],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value578>() == 132); assert!(core::mem::align_of::<R4Lib_Value578>() == 4); assert!(core::mem::offset_of!(R4Lib_Value578, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value579 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 168],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value579>() == 168); assert!(core::mem::align_of::<R4Lib_Value579>() == 8); assert!(core::mem::offset_of!(R4Lib_Value579, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value580 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value580>() == 16); assert!(core::mem::align_of::<R4Lib_Value580>() == 8); assert!(core::mem::offset_of!(R4Lib_Value580, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value581 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value575>() == 8); assert!(core::mem::align_of::<R4Lib_Value575>() == 8); assert!(core::mem::offset_of!(R4Lib_Value575, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value581>() == 8); assert!(core::mem::align_of::<R4Lib_Value581>() == 8); assert!(core::mem::offset_of!(R4Lib_Value581, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1 {
@@ -4356,88 +4530,52 @@ pub struct R4Lib_r4os_runtime_r4l_InterfaceHeader {
 const _: () = { assert!(core::mem::size_of::<R4Lib_r4os_runtime_r4l_InterfaceHeader>() == 32); assert!(core::mem::align_of::<R4Lib_r4os_runtime_r4l_InterfaceHeader>() == 8); assert!(core::mem::offset_of!(R4Lib_r4os_runtime_r4l_InterfaceHeader, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value578 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value578>() == 8); assert!(core::mem::align_of::<R4Lib_Value578>() == 8); assert!(core::mem::offset_of!(R4Lib_Value578, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value579 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value579>() == 8); assert!(core::mem::align_of::<R4Lib_Value579>() == 8); assert!(core::mem::offset_of!(R4Lib_Value579, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value580 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value580>() == 8); assert!(core::mem::align_of::<R4Lib_Value580>() == 4); assert!(core::mem::offset_of!(R4Lib_Value580, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value581 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value581>() == 32); assert!(core::mem::align_of::<R4Lib_Value581>() == 8); assert!(core::mem::offset_of!(R4Lib_Value581, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value582 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value582>() == 8); assert!(core::mem::align_of::<R4Lib_Value582>() == 8); assert!(core::mem::offset_of!(R4Lib_Value582, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value583 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value583>() == 8); assert!(core::mem::align_of::<R4Lib_Value583>() == 8); assert!(core::mem::offset_of!(R4Lib_Value583, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
 pub struct R4Lib_Value584 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value584>() == 24); assert!(core::mem::align_of::<R4Lib_Value584>() == 8); assert!(core::mem::offset_of!(R4Lib_Value584, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value584>() == 8); assert!(core::mem::align_of::<R4Lib_Value584>() == 8); assert!(core::mem::offset_of!(R4Lib_Value584, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value585 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value585>() == 8); assert!(core::mem::align_of::<R4Lib_Value585>() == 8); assert!(core::mem::offset_of!(R4Lib_Value585, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value586 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value586>() == 8); assert!(core::mem::align_of::<R4Lib_Value586>() == 8); assert!(core::mem::offset_of!(R4Lib_Value586, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value586>() == 8); assert!(core::mem::align_of::<R4Lib_Value586>() == 4); assert!(core::mem::offset_of!(R4Lib_Value586, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value587 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value587>() == 80); assert!(core::mem::align_of::<R4Lib_Value587>() == 8); assert!(core::mem::offset_of!(R4Lib_Value587, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value588 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value588>() == 32); assert!(core::mem::align_of::<R4Lib_Value588>() == 4); assert!(core::mem::offset_of!(R4Lib_Value588, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value587>() == 32); assert!(core::mem::align_of::<R4Lib_Value587>() == 8); assert!(core::mem::offset_of!(R4Lib_Value587, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value588 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value588>() == 8); assert!(core::mem::align_of::<R4Lib_Value588>() == 8); assert!(core::mem::offset_of!(R4Lib_Value588, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value589 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value589>() == 12); assert!(core::mem::align_of::<R4Lib_Value589>() == 4); assert!(core::mem::offset_of!(R4Lib_Value589, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value589>() == 8); assert!(core::mem::align_of::<R4Lib_Value589>() == 8); assert!(core::mem::offset_of!(R4Lib_Value589, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value590 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value590>() == 48); assert!(core::mem::align_of::<R4Lib_Value590>() == 8); assert!(core::mem::offset_of!(R4Lib_Value590, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value590>() == 24); assert!(core::mem::align_of::<R4Lib_Value590>() == 8); assert!(core::mem::offset_of!(R4Lib_Value590, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value591 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 200],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value591>() == 200); assert!(core::mem::align_of::<R4Lib_Value591>() == 8); assert!(core::mem::offset_of!(R4Lib_Value591, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value591>() == 8); assert!(core::mem::align_of::<R4Lib_Value591>() == 8); assert!(core::mem::offset_of!(R4Lib_Value591, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value592 {
@@ -4447,93 +4585,93 @@ const _: () = { assert!(core::mem::size_of::<R4Lib_Value592>() == 8); assert!(co
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value593 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value593>() == 24); assert!(core::mem::align_of::<R4Lib_Value593>() == 8); assert!(core::mem::offset_of!(R4Lib_Value593, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value593>() == 80); assert!(core::mem::align_of::<R4Lib_Value593>() == 8); assert!(core::mem::offset_of!(R4Lib_Value593, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value594 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value594>() == 8); assert!(core::mem::align_of::<R4Lib_Value594>() == 8); assert!(core::mem::offset_of!(R4Lib_Value594, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value594>() == 32); assert!(core::mem::align_of::<R4Lib_Value594>() == 4); assert!(core::mem::offset_of!(R4Lib_Value594, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value595 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value595>() == 2); assert!(core::mem::align_of::<R4Lib_Value595>() == 2); assert!(core::mem::offset_of!(R4Lib_Value595, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value595>() == 12); assert!(core::mem::align_of::<R4Lib_Value595>() == 4); assert!(core::mem::offset_of!(R4Lib_Value595, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value596 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value596>() == 80); assert!(core::mem::align_of::<R4Lib_Value596>() == 8); assert!(core::mem::offset_of!(R4Lib_Value596, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value596>() == 48); assert!(core::mem::align_of::<R4Lib_Value596>() == 8); assert!(core::mem::offset_of!(R4Lib_Value596, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value597 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 200],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value597>() == 12); assert!(core::mem::align_of::<R4Lib_Value597>() == 4); assert!(core::mem::offset_of!(R4Lib_Value597, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value597>() == 200); assert!(core::mem::align_of::<R4Lib_Value597>() == 8); assert!(core::mem::offset_of!(R4Lib_Value597, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value598 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value598>() == 4); assert!(core::mem::align_of::<R4Lib_Value598>() == 2); assert!(core::mem::offset_of!(R4Lib_Value598, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value598>() == 8); assert!(core::mem::align_of::<R4Lib_Value598>() == 8); assert!(core::mem::offset_of!(R4Lib_Value598, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value599 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 20],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value599>() == 20); assert!(core::mem::align_of::<R4Lib_Value599>() == 4); assert!(core::mem::offset_of!(R4Lib_Value599, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value599>() == 24); assert!(core::mem::align_of::<R4Lib_Value599>() == 8); assert!(core::mem::offset_of!(R4Lib_Value599, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value600 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 28],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value600>() == 28); assert!(core::mem::align_of::<R4Lib_Value600>() == 4); assert!(core::mem::offset_of!(R4Lib_Value600, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value600>() == 8); assert!(core::mem::align_of::<R4Lib_Value600>() == 8); assert!(core::mem::offset_of!(R4Lib_Value600, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value601 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value601>() == 12); assert!(core::mem::align_of::<R4Lib_Value601>() == 4); assert!(core::mem::offset_of!(R4Lib_Value601, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value601>() == 2); assert!(core::mem::align_of::<R4Lib_Value601>() == 2); assert!(core::mem::offset_of!(R4Lib_Value601, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value602 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 80],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value602>() == 48); assert!(core::mem::align_of::<R4Lib_Value602>() == 8); assert!(core::mem::offset_of!(R4Lib_Value602, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value602>() == 80); assert!(core::mem::align_of::<R4Lib_Value602>() == 8); assert!(core::mem::offset_of!(R4Lib_Value602, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value603 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value603>() == 48); assert!(core::mem::align_of::<R4Lib_Value603>() == 8); assert!(core::mem::offset_of!(R4Lib_Value603, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value603>() == 12); assert!(core::mem::align_of::<R4Lib_Value603>() == 4); assert!(core::mem::offset_of!(R4Lib_Value603, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value604 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value604>() == 8); assert!(core::mem::align_of::<R4Lib_Value604>() == 8); assert!(core::mem::offset_of!(R4Lib_Value604, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value604>() == 4); assert!(core::mem::align_of::<R4Lib_Value604>() == 2); assert!(core::mem::offset_of!(R4Lib_Value604, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value605 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 20],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value605>() == 8); assert!(core::mem::align_of::<R4Lib_Value605>() == 8); assert!(core::mem::offset_of!(R4Lib_Value605, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value605>() == 20); assert!(core::mem::align_of::<R4Lib_Value605>() == 4); assert!(core::mem::offset_of!(R4Lib_Value605, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value606 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 600],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 28],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value606>() == 600); assert!(core::mem::align_of::<R4Lib_Value606>() == 8); assert!(core::mem::offset_of!(R4Lib_Value606, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value606>() == 28); assert!(core::mem::align_of::<R4Lib_Value606>() == 4); assert!(core::mem::offset_of!(R4Lib_Value606, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value607 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value607>() == 8); assert!(core::mem::align_of::<R4Lib_Value607>() == 8); assert!(core::mem::offset_of!(R4Lib_Value607, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value607>() == 12); assert!(core::mem::align_of::<R4Lib_Value607>() == 4); assert!(core::mem::offset_of!(R4Lib_Value607, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value608 {
@@ -4543,69 +4681,75 @@ const _: () = { assert!(core::mem::size_of::<R4Lib_Value608>() == 48); assert!(c
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value609 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value609>() == 8); assert!(core::mem::align_of::<R4Lib_Value609>() == 8); assert!(core::mem::offset_of!(R4Lib_Value609, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value609>() == 48); assert!(core::mem::align_of::<R4Lib_Value609>() == 8); assert!(core::mem::offset_of!(R4Lib_Value609, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value610 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value610>() == 24); assert!(core::mem::align_of::<R4Lib_Value610>() == 4); assert!(core::mem::offset_of!(R4Lib_Value610, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value610>() == 8); assert!(core::mem::align_of::<R4Lib_Value610>() == 8); assert!(core::mem::offset_of!(R4Lib_Value610, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value611 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value611>() == 4); assert!(core::mem::align_of::<R4Lib_Value611>() == 2); assert!(core::mem::offset_of!(R4Lib_Value611, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value611>() == 8); assert!(core::mem::align_of::<R4Lib_Value611>() == 8); assert!(core::mem::offset_of!(R4Lib_Value611, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value612 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 656],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value612>() == 656); assert!(core::mem::align_of::<R4Lib_Value612>() == 8); assert!(core::mem::offset_of!(R4Lib_Value612, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value613 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value612>() == 8); assert!(core::mem::align_of::<R4Lib_Value612>() == 8); assert!(core::mem::offset_of!(R4Lib_Value612, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value613>() == 8); assert!(core::mem::align_of::<R4Lib_Value613>() == 8); assert!(core::mem::offset_of!(R4Lib_Value613, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value614 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 656],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value614>() == 8); assert!(core::mem::align_of::<R4Lib_Value614>() == 8); assert!(core::mem::offset_of!(R4Lib_Value614, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value614>() == 656); assert!(core::mem::align_of::<R4Lib_Value614>() == 8); assert!(core::mem::offset_of!(R4Lib_Value614, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value615 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value615>() == 8); assert!(core::mem::align_of::<R4Lib_Value615>() == 8); assert!(core::mem::offset_of!(R4Lib_Value615, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value616 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 48],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value616>() == 48); assert!(core::mem::align_of::<R4Lib_Value616>() == 8); assert!(core::mem::offset_of!(R4Lib_Value616, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value617 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value617>() == 2); assert!(core::mem::align_of::<R4Lib_Value617>() == 2); assert!(core::mem::offset_of!(R4Lib_Value617, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value618 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value618>() == 40); assert!(core::mem::align_of::<R4Lib_Value618>() == 8); assert!(core::mem::offset_of!(R4Lib_Value618, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value619 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value619>() == 8); assert!(core::mem::align_of::<R4Lib_Value619>() == 8); assert!(core::mem::offset_of!(R4Lib_Value619, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value617>() == 8); assert!(core::mem::align_of::<R4Lib_Value617>() == 8); assert!(core::mem::offset_of!(R4Lib_Value617, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value618 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value618>() == 24); assert!(core::mem::align_of::<R4Lib_Value618>() == 4); assert!(core::mem::offset_of!(R4Lib_Value618, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value619 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value619>() == 4); assert!(core::mem::align_of::<R4Lib_Value619>() == 2); assert!(core::mem::offset_of!(R4Lib_Value619, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value620 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 784],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value620>() == 784); assert!(core::mem::align_of::<R4Lib_Value620>() == 8); assert!(core::mem::offset_of!(R4Lib_Value620, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value621 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value621>() == 24); assert!(core::mem::align_of::<R4Lib_Value621>() == 8); assert!(core::mem::offset_of!(R4Lib_Value621, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value620>() == 8); assert!(core::mem::align_of::<R4Lib_Value620>() == 8); assert!(core::mem::offset_of!(R4Lib_Value620, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value622 {
@@ -4618,150 +4762,144 @@ pub struct R4Lib_Value623 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value623>() == 8); assert!(core::mem::align_of::<R4Lib_Value623>() == 8); assert!(core::mem::offset_of!(R4Lib_Value623, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value624 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value624>() == 8); assert!(core::mem::align_of::<R4Lib_Value624>() == 8); assert!(core::mem::offset_of!(R4Lib_Value624, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value625 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value625>() == 8); assert!(core::mem::align_of::<R4Lib_Value625>() == 8); assert!(core::mem::offset_of!(R4Lib_Value625, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value626 {
+pub struct R4Lib_Value625 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value626>() == 2); assert!(core::mem::align_of::<R4Lib_Value626>() == 2); assert!(core::mem::offset_of!(R4Lib_Value626, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value625>() == 2); assert!(core::mem::align_of::<R4Lib_Value625>() == 2); assert!(core::mem::offset_of!(R4Lib_Value625, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value626 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 40],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value626>() == 40); assert!(core::mem::align_of::<R4Lib_Value626>() == 8); assert!(core::mem::offset_of!(R4Lib_Value626, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value627 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 18320],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value627>() == 18320); assert!(core::mem::align_of::<R4Lib_Value627>() == 8); assert!(core::mem::offset_of!(R4Lib_Value627, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value627>() == 8); assert!(core::mem::align_of::<R4Lib_Value627>() == 8); assert!(core::mem::offset_of!(R4Lib_Value627, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value628 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 784],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value628>() == 24); assert!(core::mem::align_of::<R4Lib_Value628>() == 8); assert!(core::mem::offset_of!(R4Lib_Value628, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value628>() == 784); assert!(core::mem::align_of::<R4Lib_Value628>() == 8); assert!(core::mem::offset_of!(R4Lib_Value628, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value629 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value629>() == 16); assert!(core::mem::align_of::<R4Lib_Value629>() == 8); assert!(core::mem::offset_of!(R4Lib_Value629, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value629>() == 24); assert!(core::mem::align_of::<R4Lib_Value629>() == 8); assert!(core::mem::offset_of!(R4Lib_Value629, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value630 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 544],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value630>() == 544); assert!(core::mem::align_of::<R4Lib_Value630>() == 8); assert!(core::mem::offset_of!(R4Lib_Value630, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value630>() == 8); assert!(core::mem::align_of::<R4Lib_Value630>() == 8); assert!(core::mem::offset_of!(R4Lib_Value630, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value631 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value631>() == 24); assert!(core::mem::align_of::<R4Lib_Value631>() == 8); assert!(core::mem::offset_of!(R4Lib_Value631, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value631>() == 8); assert!(core::mem::align_of::<R4Lib_Value631>() == 8); assert!(core::mem::offset_of!(R4Lib_Value631, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value632 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value632>() == 16); assert!(core::mem::align_of::<R4Lib_Value632>() == 8); assert!(core::mem::offset_of!(R4Lib_Value632, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value633 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 20],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value633>() == 20); assert!(core::mem::align_of::<R4Lib_Value633>() == 4); assert!(core::mem::offset_of!(R4Lib_Value633, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value632>() == 8); assert!(core::mem::align_of::<R4Lib_Value632>() == 8); assert!(core::mem::offset_of!(R4Lib_Value632, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value634 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+pub struct R4Lib_Value633 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value634>() == 16); assert!(core::mem::align_of::<R4Lib_Value634>() == 8); assert!(core::mem::offset_of!(R4Lib_Value634, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value633>() == 8); assert!(core::mem::align_of::<R4Lib_Value633>() == 8); assert!(core::mem::offset_of!(R4Lib_Value633, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value635 {
+pub struct R4Lib_Value634 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value635>() == 2); assert!(core::mem::align_of::<R4Lib_Value635>() == 2); assert!(core::mem::offset_of!(R4Lib_Value635, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value634>() == 2); assert!(core::mem::align_of::<R4Lib_Value634>() == 2); assert!(core::mem::offset_of!(R4Lib_Value634, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value635 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 18320],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value635>() == 18320); assert!(core::mem::align_of::<R4Lib_Value635>() == 8); assert!(core::mem::offset_of!(R4Lib_Value635, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value636 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value636>() == 12); assert!(core::mem::align_of::<R4Lib_Value636>() == 4); assert!(core::mem::offset_of!(R4Lib_Value636, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value637 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value637>() == 24); assert!(core::mem::align_of::<R4Lib_Value637>() == 4); assert!(core::mem::offset_of!(R4Lib_Value637, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value636>() == 24); assert!(core::mem::align_of::<R4Lib_Value636>() == 8); assert!(core::mem::offset_of!(R4Lib_Value636, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value637 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value637>() == 16); assert!(core::mem::align_of::<R4Lib_Value637>() == 8); assert!(core::mem::offset_of!(R4Lib_Value637, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value638 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 20],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 544],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value638>() == 20); assert!(core::mem::align_of::<R4Lib_Value638>() == 4); assert!(core::mem::offset_of!(R4Lib_Value638, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value638>() == 544); assert!(core::mem::align_of::<R4Lib_Value638>() == 8); assert!(core::mem::offset_of!(R4Lib_Value638, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value639 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value639>() == 8); assert!(core::mem::align_of::<R4Lib_Value639>() == 8); assert!(core::mem::offset_of!(R4Lib_Value639, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value639>() == 24); assert!(core::mem::align_of::<R4Lib_Value639>() == 8); assert!(core::mem::offset_of!(R4Lib_Value639, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value640 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value640>() == 8); assert!(core::mem::align_of::<R4Lib_Value640>() == 8); assert!(core::mem::offset_of!(R4Lib_Value640, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value640>() == 16); assert!(core::mem::align_of::<R4Lib_Value640>() == 8); assert!(core::mem::offset_of!(R4Lib_Value640, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value641 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 20],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value641>() == 8); assert!(core::mem::align_of::<R4Lib_Value641>() == 8); assert!(core::mem::offset_of!(R4Lib_Value641, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value641>() == 20); assert!(core::mem::align_of::<R4Lib_Value641>() == 4); assert!(core::mem::offset_of!(R4Lib_Value641, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value642 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value642>() == 8); assert!(core::mem::align_of::<R4Lib_Value642>() == 8); assert!(core::mem::offset_of!(R4Lib_Value642, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value642>() == 16); assert!(core::mem::align_of::<R4Lib_Value642>() == 8); assert!(core::mem::offset_of!(R4Lib_Value642, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value643 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value643>() == 8); assert!(core::mem::align_of::<R4Lib_Value643>() == 8); assert!(core::mem::offset_of!(R4Lib_Value643, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value643>() == 2); assert!(core::mem::align_of::<R4Lib_Value643>() == 2); assert!(core::mem::offset_of!(R4Lib_Value643, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value644 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 12],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value644>() == 8); assert!(core::mem::align_of::<R4Lib_Value644>() == 8); assert!(core::mem::offset_of!(R4Lib_Value644, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value644>() == 12); assert!(core::mem::align_of::<R4Lib_Value644>() == 4); assert!(core::mem::offset_of!(R4Lib_Value644, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value645 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 72],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value645>() == 72); assert!(core::mem::align_of::<R4Lib_Value645>() == 8); assert!(core::mem::offset_of!(R4Lib_Value645, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value645>() == 24); assert!(core::mem::align_of::<R4Lib_Value645>() == 4); assert!(core::mem::offset_of!(R4Lib_Value645, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value646 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1040],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 20],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value646>() == 1040); assert!(core::mem::align_of::<R4Lib_Value646>() == 8); assert!(core::mem::offset_of!(R4Lib_Value646, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value646>() == 20); assert!(core::mem::align_of::<R4Lib_Value646>() == 4); assert!(core::mem::offset_of!(R4Lib_Value646, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value647 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value647>() == 24); assert!(core::mem::align_of::<R4Lib_Value647>() == 8); assert!(core::mem::offset_of!(R4Lib_Value647, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value647>() == 8); assert!(core::mem::align_of::<R4Lib_Value647>() == 8); assert!(core::mem::offset_of!(R4Lib_Value647, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value648 {
@@ -4774,12 +4912,12 @@ pub struct R4Lib_Value649 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value649>() == 8); assert!(core::mem::align_of::<R4Lib_Value649>() == 8); assert!(core::mem::offset_of!(R4Lib_Value649, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value650 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value650>() == 2); assert!(core::mem::align_of::<R4Lib_Value650>() == 2); assert!(core::mem::offset_of!(R4Lib_Value650, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value650>() == 8); assert!(core::mem::align_of::<R4Lib_Value650>() == 8); assert!(core::mem::offset_of!(R4Lib_Value650, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value651 {
@@ -4795,39 +4933,39 @@ const _: () = { assert!(core::mem::size_of::<R4Lib_Value652>() == 8); assert!(co
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value653 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 72],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value653>() == 8); assert!(core::mem::align_of::<R4Lib_Value653>() == 8); assert!(core::mem::offset_of!(R4Lib_Value653, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value653>() == 72); assert!(core::mem::align_of::<R4Lib_Value653>() == 8); assert!(core::mem::offset_of!(R4Lib_Value653, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value654 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 1040],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value654>() == 8); assert!(core::mem::align_of::<R4Lib_Value654>() == 8); assert!(core::mem::offset_of!(R4Lib_Value654, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value654>() == 1040); assert!(core::mem::align_of::<R4Lib_Value654>() == 8); assert!(core::mem::offset_of!(R4Lib_Value654, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value655 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value655>() == 8); assert!(core::mem::align_of::<R4Lib_Value655>() == 8); assert!(core::mem::offset_of!(R4Lib_Value655, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value655>() == 24); assert!(core::mem::align_of::<R4Lib_Value655>() == 8); assert!(core::mem::offset_of!(R4Lib_Value655, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value656 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 56],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value656>() == 56); assert!(core::mem::align_of::<R4Lib_Value656>() == 8); assert!(core::mem::offset_of!(R4Lib_Value656, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value656>() == 8); assert!(core::mem::align_of::<R4Lib_Value656>() == 8); assert!(core::mem::offset_of!(R4Lib_Value656, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value657 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 784],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value657>() == 784); assert!(core::mem::align_of::<R4Lib_Value657>() == 8); assert!(core::mem::offset_of!(R4Lib_Value657, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value658 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value658>() == 8); assert!(core::mem::align_of::<R4Lib_Value658>() == 8); assert!(core::mem::offset_of!(R4Lib_Value658, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value657>() == 8); assert!(core::mem::align_of::<R4Lib_Value657>() == 8); assert!(core::mem::offset_of!(R4Lib_Value657, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value658 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value658>() == 2); assert!(core::mem::align_of::<R4Lib_Value658>() == 2); assert!(core::mem::offset_of!(R4Lib_Value658, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value659 {
@@ -4840,42 +4978,42 @@ pub struct R4Lib_Value660 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value660>() == 8); assert!(core::mem::align_of::<R4Lib_Value660>() == 8); assert!(core::mem::offset_of!(R4Lib_Value660, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value661 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value661>() == 2); assert!(core::mem::align_of::<R4Lib_Value661>() == 2); assert!(core::mem::offset_of!(R4Lib_Value661, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value661>() == 8); assert!(core::mem::align_of::<R4Lib_Value661>() == 8); assert!(core::mem::offset_of!(R4Lib_Value661, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value662 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value662>() == 32); assert!(core::mem::align_of::<R4Lib_Value662>() == 8); assert!(core::mem::offset_of!(R4Lib_Value662, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value662>() == 8); assert!(core::mem::align_of::<R4Lib_Value662>() == 8); assert!(core::mem::offset_of!(R4Lib_Value662, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value663 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 408],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value663>() == 408); assert!(core::mem::align_of::<R4Lib_Value663>() == 8); assert!(core::mem::offset_of!(R4Lib_Value663, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value663>() == 8); assert!(core::mem::align_of::<R4Lib_Value663>() == 8); assert!(core::mem::offset_of!(R4Lib_Value663, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value664 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 56],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value664>() == 8); assert!(core::mem::align_of::<R4Lib_Value664>() == 8); assert!(core::mem::offset_of!(R4Lib_Value664, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value664>() == 56); assert!(core::mem::align_of::<R4Lib_Value664>() == 8); assert!(core::mem::offset_of!(R4Lib_Value664, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value665 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 52],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 784],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value665>() == 52); assert!(core::mem::align_of::<R4Lib_Value665>() == 4); assert!(core::mem::offset_of!(R4Lib_Value665, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value665>() == 784); assert!(core::mem::align_of::<R4Lib_Value665>() == 8); assert!(core::mem::offset_of!(R4Lib_Value665, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value666 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2208],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value666>() == 2208); assert!(core::mem::align_of::<R4Lib_Value666>() == 8); assert!(core::mem::offset_of!(R4Lib_Value666, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value666>() == 8); assert!(core::mem::align_of::<R4Lib_Value666>() == 8); assert!(core::mem::offset_of!(R4Lib_Value666, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value667 {
@@ -4888,6 +5026,60 @@ pub struct R4Lib_Value668 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
 }
 const _: () = { assert!(core::mem::size_of::<R4Lib_Value668>() == 8); assert!(core::mem::align_of::<R4Lib_Value668>() == 8); assert!(core::mem::offset_of!(R4Lib_Value668, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value669 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value669>() == 2); assert!(core::mem::align_of::<R4Lib_Value669>() == 2); assert!(core::mem::offset_of!(R4Lib_Value669, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value670 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 32],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value670>() == 32); assert!(core::mem::align_of::<R4Lib_Value670>() == 8); assert!(core::mem::offset_of!(R4Lib_Value670, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value671 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 464],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value671>() == 464); assert!(core::mem::align_of::<R4Lib_Value671>() == 8); assert!(core::mem::offset_of!(R4Lib_Value671, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value672 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 464],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value672>() == 464); assert!(core::mem::align_of::<R4Lib_Value672>() == 8); assert!(core::mem::offset_of!(R4Lib_Value672, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value673 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value673>() == 8); assert!(core::mem::align_of::<R4Lib_Value673>() == 8); assert!(core::mem::offset_of!(R4Lib_Value673, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value674 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 52],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value674>() == 52); assert!(core::mem::align_of::<R4Lib_Value674>() == 4); assert!(core::mem::offset_of!(R4Lib_Value674, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value675 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2208],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value675>() == 2208); assert!(core::mem::align_of::<R4Lib_Value675>() == 8); assert!(core::mem::offset_of!(R4Lib_Value675, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value676 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value676>() == 8); assert!(core::mem::align_of::<R4Lib_Value676>() == 8); assert!(core::mem::offset_of!(R4Lib_Value676, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value677 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value677>() == 8); assert!(core::mem::align_of::<R4Lib_Value677>() == 8); assert!(core::mem::offset_of!(R4Lib_Value677, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket {
@@ -4896,583 +5088,607 @@ pub struct R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket {
 const _: () = { assert!(core::mem::size_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket>() == 72); assert!(core::mem::align_of::<R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket>() == 8); assert!(core::mem::offset_of!(R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
-pub struct R4Lib_Value670 {
+pub struct R4Lib_Value679 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value670>() == 16); assert!(core::mem::align_of::<R4Lib_Value670>() == 8); assert!(core::mem::offset_of!(R4Lib_Value670, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value679>() == 16); assert!(core::mem::align_of::<R4Lib_Value679>() == 8); assert!(core::mem::offset_of!(R4Lib_Value679, r#opaque_bytes) == 0); };
 #[repr(C, align(2))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value671 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value671>() == 2); assert!(core::mem::align_of::<R4Lib_Value671>() == 2); assert!(core::mem::offset_of!(R4Lib_Value671, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value672 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value672>() == 8); assert!(core::mem::align_of::<R4Lib_Value672>() == 8); assert!(core::mem::offset_of!(R4Lib_Value672, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value673 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 96],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value673>() == 96); assert!(core::mem::align_of::<R4Lib_Value673>() == 8); assert!(core::mem::offset_of!(R4Lib_Value673, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value674 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value674>() == 24); assert!(core::mem::align_of::<R4Lib_Value674>() == 8); assert!(core::mem::offset_of!(R4Lib_Value674, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value675 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value675>() == 2); assert!(core::mem::align_of::<R4Lib_Value675>() == 2); assert!(core::mem::offset_of!(R4Lib_Value675, r#opaque_bytes) == 0); };
-#[repr(C, align(4))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value676 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value676>() == 8); assert!(core::mem::align_of::<R4Lib_Value676>() == 4); assert!(core::mem::offset_of!(R4Lib_Value676, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value677 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value677>() == 4); assert!(core::mem::align_of::<R4Lib_Value677>() == 2); assert!(core::mem::offset_of!(R4Lib_Value677, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value678 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 360],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value678>() == 360); assert!(core::mem::align_of::<R4Lib_Value678>() == 8); assert!(core::mem::offset_of!(R4Lib_Value678, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value679 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value679>() == 8); assert!(core::mem::align_of::<R4Lib_Value679>() == 8); assert!(core::mem::offset_of!(R4Lib_Value679, r#opaque_bytes) == 0); };
-#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value680 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
-}
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value680>() == 16); assert!(core::mem::align_of::<R4Lib_Value680>() == 8); assert!(core::mem::offset_of!(R4Lib_Value680, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
-#[derive(Clone, Copy)]
-pub struct R4Lib_Value681 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value681>() == 2); assert!(core::mem::align_of::<R4Lib_Value681>() == 2); assert!(core::mem::offset_of!(R4Lib_Value681, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value680>() == 2); assert!(core::mem::align_of::<R4Lib_Value680>() == 2); assert!(core::mem::offset_of!(R4Lib_Value680, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value681 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value681>() == 8); assert!(core::mem::align_of::<R4Lib_Value681>() == 8); assert!(core::mem::offset_of!(R4Lib_Value681, r#opaque_bytes) == 0); };
 #[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value682 {
-    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 96],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value682>() == 8); assert!(core::mem::align_of::<R4Lib_Value682>() == 8); assert!(core::mem::offset_of!(R4Lib_Value682, r#opaque_bytes) == 0); };
-#[repr(C, align(2))]
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value682>() == 96); assert!(core::mem::align_of::<R4Lib_Value682>() == 8); assert!(core::mem::offset_of!(R4Lib_Value682, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
 #[derive(Clone, Copy)]
 pub struct R4Lib_Value683 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 24],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value683>() == 24); assert!(core::mem::align_of::<R4Lib_Value683>() == 8); assert!(core::mem::offset_of!(R4Lib_Value683, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value684 {
     pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
 }
-const _: () = { assert!(core::mem::size_of::<R4Lib_Value683>() == 2); assert!(core::mem::align_of::<R4Lib_Value683>() == 2); assert!(core::mem::offset_of!(R4Lib_Value683, r#opaque_bytes) == 0); };
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value684>() == 2); assert!(core::mem::align_of::<R4Lib_Value684>() == 2); assert!(core::mem::offset_of!(R4Lib_Value684, r#opaque_bytes) == 0); };
+#[repr(C, align(4))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value685 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value685>() == 8); assert!(core::mem::align_of::<R4Lib_Value685>() == 4); assert!(core::mem::offset_of!(R4Lib_Value685, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value686 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 4],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value686>() == 4); assert!(core::mem::align_of::<R4Lib_Value686>() == 2); assert!(core::mem::offset_of!(R4Lib_Value686, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value687 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 408],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value687>() == 408); assert!(core::mem::align_of::<R4Lib_Value687>() == 8); assert!(core::mem::offset_of!(R4Lib_Value687, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value688 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value688>() == 8); assert!(core::mem::align_of::<R4Lib_Value688>() == 8); assert!(core::mem::offset_of!(R4Lib_Value688, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value689 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 16],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value689>() == 16); assert!(core::mem::align_of::<R4Lib_Value689>() == 8); assert!(core::mem::offset_of!(R4Lib_Value689, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value690 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value690>() == 2); assert!(core::mem::align_of::<R4Lib_Value690>() == 2); assert!(core::mem::offset_of!(R4Lib_Value690, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value691 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value691>() == 8); assert!(core::mem::align_of::<R4Lib_Value691>() == 8); assert!(core::mem::offset_of!(R4Lib_Value691, r#opaque_bytes) == 0); };
+#[repr(C, align(2))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value692 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 2],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value692>() == 2); assert!(core::mem::align_of::<R4Lib_Value692>() == 2); assert!(core::mem::offset_of!(R4Lib_Value692, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value693 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 208],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value693>() == 208); assert!(core::mem::align_of::<R4Lib_Value693>() == 8); assert!(core::mem::offset_of!(R4Lib_Value693, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value694 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 8],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value694>() == 8); assert!(core::mem::align_of::<R4Lib_Value694>() == 8); assert!(core::mem::offset_of!(R4Lib_Value694, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value695 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 464],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value695>() == 464); assert!(core::mem::align_of::<R4Lib_Value695>() == 8); assert!(core::mem::offset_of!(R4Lib_Value695, r#opaque_bytes) == 0); };
+#[repr(C, align(8))]
+#[derive(Clone, Copy)]
+pub struct R4Lib_Value696 {
+    pub r#opaque_bytes: [core::mem::MaybeUninit<u8>; 656],
+}
+const _: () = { assert!(core::mem::size_of::<R4Lib_Value696>() == 656); assert!(core::mem::align_of::<R4Lib_Value696>() == 8); assert!(core::mem::offset_of!(R4Lib_Value696, r#opaque_bytes) == 0); };
 pub const R4Lib_Value0_TYPE: u32 = 0;
-pub const R4StdTextEncoding_TYPE: u32 = 2;
-pub const R4StdTextLineEnding_TYPE: u32 = 3;
-pub const R4StdTextBytes_TYPE: u32 = 4;
-pub const R4Lib_Value5_TYPE: u32 = 5;
-pub const R4StdTextUtf8Text_TYPE: u32 = 6;
-pub const R4StdTextUiText8_TYPE: u32 = 7;
-pub const R4StdTextSystemText_TYPE: u32 = 8;
-pub const R4StdTextDocumentText_TYPE: u32 = 9;
-pub const R4Lib_Value11_TYPE: u32 = 11;
-pub const R4Lib_Value12_TYPE: u32 = 12;
+pub const R4Lib_Value2_TYPE: u32 = 2;
+pub const R4Lib_abi_R4XStartContext2_TYPE: u32 = 3;
+pub const R4StdTextEncoding_TYPE: u32 = 4;
+pub const R4StdTextLineEnding_TYPE: u32 = 5;
+pub const R4StdTextBytes_TYPE: u32 = 6;
+pub const R4Lib_Value7_TYPE: u32 = 7;
+pub const R4StdTextUtf8Text_TYPE: u32 = 8;
+pub const R4StdTextUiText8_TYPE: u32 = 9;
+pub const R4StdTextSystemText_TYPE: u32 = 10;
+pub const R4StdTextDocumentText_TYPE: u32 = 11;
 pub const R4Lib_Value13_TYPE: u32 = 13;
 pub const R4Lib_Value14_TYPE: u32 = 14;
 pub const R4Lib_Value15_TYPE: u32 = 15;
 pub const R4Lib_Value16_TYPE: u32 = 16;
 pub const R4Lib_Value17_TYPE: u32 = 17;
-pub const R4StdSettingspaths_TYPE: u32 = 18;
-pub const R4StdSettingsEntry_TYPE: u32 = 19;
-pub const R4StdSettingsEntryIterator_TYPE: u32 = 20;
-pub const R4StdSettingsDocument_TYPE: u32 = 21;
-pub const R4StdSettingsWriter_TYPE: u32 = 22;
-pub const R4StdSettingsWritebackDurability_TYPE: u32 = 23;
-pub const R4StdSettingsWritebackAction_TYPE: u32 = 24;
-pub const R4StdSettingsWritebackFlush_TYPE: u32 = 25;
-pub const R4StdSettingsWritebackPolicy_TYPE: u32 = 26;
-pub const R4StdSettingsWriteback_TYPE: u32 = 27;
-pub const R4Lib_Value28_TYPE: u32 = 28;
-pub const R4Lib_Value29_TYPE: u32 = 29;
+pub const R4Lib_Value18_TYPE: u32 = 18;
+pub const R4Lib_Value19_TYPE: u32 = 19;
+pub const R4StdSettingspaths_TYPE: u32 = 20;
+pub const R4StdSettingsEntry_TYPE: u32 = 21;
+pub const R4StdSettingsEntryIterator_TYPE: u32 = 22;
+pub const R4StdSettingsDocument_TYPE: u32 = 23;
+pub const R4StdSettingsWriter_TYPE: u32 = 24;
+pub const R4StdSettingsWritebackDurability_TYPE: u32 = 25;
+pub const R4StdSettingsWritebackAction_TYPE: u32 = 26;
+pub const R4StdSettingsWritebackFlush_TYPE: u32 = 27;
+pub const R4StdSettingsWritebackPolicy_TYPE: u32 = 28;
+pub const R4StdSettingsWriteback_TYPE: u32 = 29;
 pub const R4Lib_Value30_TYPE: u32 = 30;
 pub const R4Lib_Value31_TYPE: u32 = 31;
 pub const R4Lib_Value32_TYPE: u32 = 32;
-pub const R4StdDateDate_TYPE: u32 = 33;
-pub const R4StdDateTimeOfDay_TYPE: u32 = 34;
-pub const R4StdDateDateTime_TYPE: u32 = 35;
-pub const R4StdDateWeekday_TYPE: u32 = 36;
-pub const R4StdDateShiftedDateTime_TYPE: u32 = 37;
-pub const R4StdDateFatDateTime_TYPE: u32 = 38;
-pub const R4Lib_Value39_TYPE: u32 = 39;
-pub const R4Lib_Value40_TYPE: u32 = 40;
+pub const R4Lib_Value33_TYPE: u32 = 33;
+pub const R4Lib_Value34_TYPE: u32 = 34;
+pub const R4StdDateDate_TYPE: u32 = 35;
+pub const R4StdDateTimeOfDay_TYPE: u32 = 36;
+pub const R4StdDateDateTime_TYPE: u32 = 37;
+pub const R4StdDateWeekday_TYPE: u32 = 38;
+pub const R4StdDateShiftedDateTime_TYPE: u32 = 39;
+pub const R4StdDateFatDateTime_TYPE: u32 = 40;
+pub const R4Lib_Value41_TYPE: u32 = 41;
 pub const R4Lib_Value42_TYPE: u32 = 42;
-pub const R4Lib_Value43_TYPE: u32 = 43;
 pub const R4Lib_Value44_TYPE: u32 = 44;
+pub const R4Lib_Value45_TYPE: u32 = 45;
 pub const R4Lib_Value46_TYPE: u32 = 46;
-pub const R4Lib_Value47_TYPE: u32 = 47;
-pub const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdDateTime_TYPE: u32 = 48;
-pub const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdTimeState_TYPE: u32 = 49;
-pub const R4StdTimeZone_TYPE: u32 = 50;
-pub const R4StdTimeClockTime_TYPE: u32 = 51;
-pub const R4StdTimeHelpersConfig_TYPE: u32 = 52;
-pub const R4Lib_Value53_TYPE: u32 = 53;
-pub const R4Lib_Value54_TYPE: u32 = 54;
-pub const R4Lib_r4os_path_FilePath_TYPE: u32 = 55;
+pub const R4Lib_Value48_TYPE: u32 = 48;
+pub const R4Lib_Value49_TYPE: u32 = 49;
+pub const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdDateTime_TYPE: u32 = 50;
+pub const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdTimeState_TYPE: u32 = 51;
+pub const R4StdTimeZone_TYPE: u32 = 52;
+pub const R4StdTimeClockTime_TYPE: u32 = 53;
+pub const R4StdTimeHelpersConfig_TYPE: u32 = 54;
+pub const R4Lib_Value55_TYPE: u32 = 55;
 pub const R4Lib_Value56_TYPE: u32 = 56;
-pub const R4Lib_r4os_path_AbsoluteFilePath_TYPE: u32 = 57;
+pub const R4Lib_r4os_path_FilePath_TYPE: u32 = 57;
 pub const R4Lib_Value58_TYPE: u32 = 58;
-pub const R4Lib_r4os_path_RelativeFilePath_TYPE: u32 = 59;
+pub const R4Lib_r4os_path_AbsoluteFilePath_TYPE: u32 = 59;
 pub const R4Lib_Value60_TYPE: u32 = 60;
-pub const R4Lib_r4os_path_RegistryPath_TYPE: u32 = 61;
-pub const R4StdCodecCodepage_TYPE: u32 = 62;
-pub const R4StdCodecMode_TYPE: u32 = 63;
-pub const R4StdCodecScalar_TYPE: u32 = 64;
-pub const R4StdCodecDecoded_TYPE: u32 = 65;
-pub const R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type___TYPE: u32 = 66;
-pub const R4Lib_Value67_TYPE: u32 = 67;
-pub const R4Lib_Value68_TYPE: u32 = 68;
+pub const R4Lib_r4os_path_RelativeFilePath_TYPE: u32 = 61;
+pub const R4Lib_Value62_TYPE: u32 = 62;
+pub const R4Lib_r4os_path_RegistryPath_TYPE: u32 = 63;
+pub const R4StdCodecCodepage_TYPE: u32 = 64;
+pub const R4StdCodecMode_TYPE: u32 = 65;
+pub const R4StdCodecScalar_TYPE: u32 = 66;
+pub const R4StdCodecDecoded_TYPE: u32 = 67;
+pub const R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type___TYPE: u32 = 68;
 pub const R4Lib_Value69_TYPE: u32 = 69;
 pub const R4Lib_Value70_TYPE: u32 = 70;
-pub const R4StdCodecStream_TYPE: u32 = 71;
-pub const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State_TYPE: u32 = 72;
-pub const R4Lib_Value73_TYPE: u32 = 73;
-pub const R4StdGraphemeState_TYPE: u32 = 74;
+pub const R4Lib_Value71_TYPE: u32 = 71;
+pub const R4Lib_Value72_TYPE: u32 = 72;
+pub const R4StdCodecStream_TYPE: u32 = 73;
+pub const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State_TYPE: u32 = 74;
 pub const R4Lib_Value75_TYPE: u32 = 75;
-pub const R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_TYPE: u32 = 76;
+pub const R4StdGraphemeState_TYPE: u32 = 76;
 pub const R4Lib_Value77_TYPE: u32 = 77;
-pub const R4StdGraphemeRange_TYPE: u32 = 78;
-pub const R4StdGraphemeIterator_TYPE: u32 = 79;
-pub const R4Lib_Value80_TYPE: u32 = 80;
-pub const R4StdGraphemeStream_TYPE: u32 = 81;
+pub const R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_TYPE: u32 = 78;
+pub const R4Lib_Value79_TYPE: u32 = 79;
+pub const R4StdGraphemeRange_TYPE: u32 = 80;
+pub const R4StdGraphemeIterator_TYPE: u32 = 81;
 pub const R4Lib_Value82_TYPE: u32 = 82;
-pub const R4StdConsoleTextScalar_TYPE: u32 = 83;
+pub const R4StdGraphemeStream_TYPE: u32 = 83;
 pub const R4Lib_Value84_TYPE: u32 = 84;
-pub const R4StdShortcutForeignEntry_TYPE: u32 = 85;
+pub const R4StdConsoleTextScalar_TYPE: u32 = 85;
 pub const R4Lib_Value86_TYPE: u32 = 86;
-pub const R4Lib_Value87_TYPE: u32 = 87;
-pub const R4StdShortcutTargetKind_TYPE: u32 = 88;
-pub const R4StdShortcutResolvedTarget_TYPE: u32 = 89;
-pub const R4StdShortcutShortcut_TYPE: u32 = 91;
-pub const R4Lib_Value92_TYPE: u32 = 92;
-pub const R4Lib_Value93_TYPE: u32 = 93;
+pub const R4StdShortcutForeignEntry_TYPE: u32 = 87;
+pub const R4Lib_Value88_TYPE: u32 = 88;
+pub const R4Lib_Value89_TYPE: u32 = 89;
+pub const R4StdShortcutTargetKind_TYPE: u32 = 90;
+pub const R4StdShortcutResolvedTarget_TYPE: u32 = 91;
+pub const R4StdShortcutShortcut_TYPE: u32 = 93;
 pub const R4Lib_Value94_TYPE: u32 = 94;
 pub const R4Lib_Value95_TYPE: u32 = 95;
 pub const R4Lib_Value96_TYPE: u32 = 96;
-pub const R4StdAssociationForeignEntry_TYPE: u32 = 97;
+pub const R4Lib_Value97_TYPE: u32 = 97;
 pub const R4Lib_Value98_TYPE: u32 = 98;
-pub const R4StdAssociationLaunchKind_TYPE: u32 = 99;
-pub const R4StdAssociationHandlerKind_TYPE: u32 = 100;
-pub const R4StdAssociationAppEntry_TYPE: u32 = 101;
-pub const R4Lib_Value102_TYPE: u32 = 102;
-pub const R4Lib_Value103_TYPE: u32 = 103;
-pub const R4StdAssociationExtEntry_TYPE: u32 = 104;
+pub const R4StdAssociationForeignEntry_TYPE: u32 = 99;
+pub const R4Lib_Value100_TYPE: u32 = 100;
+pub const R4StdAssociationLaunchKind_TYPE: u32 = 101;
+pub const R4StdAssociationHandlerKind_TYPE: u32 = 102;
+pub const R4StdAssociationAppEntry_TYPE: u32 = 103;
+pub const R4Lib_Value104_TYPE: u32 = 104;
 pub const R4Lib_Value105_TYPE: u32 = 105;
-pub const R4Lib_Value106_TYPE: u32 = 106;
+pub const R4StdAssociationExtEntry_TYPE: u32 = 106;
 pub const R4Lib_Value107_TYPE: u32 = 107;
-pub const R4StdAssociationLaunchTarget_TYPE: u32 = 108;
-pub const R4StdAssociationConfig_TYPE: u32 = 109;
-pub const R4Lib_Value110_TYPE: u32 = 110;
-pub const R4Lib_Value111_TYPE: u32 = 111;
+pub const R4Lib_Value108_TYPE: u32 = 108;
+pub const R4Lib_Value109_TYPE: u32 = 109;
+pub const R4StdAssociationLaunchTarget_TYPE: u32 = 110;
+pub const R4StdAssociationConfig_TYPE: u32 = 111;
 pub const R4Lib_Value112_TYPE: u32 = 112;
-pub const R4Lib_r4os_subsystem_catalog_Input_TYPE: u32 = 113;
-pub const R4StdFileHandlerTargetKind_TYPE: u32 = 114;
-pub const R4StdFileHandlerTarget_TYPE: u32 = 115;
-pub const R4StdFileHandlerResolutionState_TYPE: u32 = 116;
-pub const R4StdFileHandlerResolution_TYPE: u32 = 117;
-pub const R4Lib_Value118_TYPE: u32 = 118;
-pub const R4StdFileHandlerChoiceKind_TYPE: u32 = 119;
-pub const R4StdFileHandlerChoice_TYPE: u32 = 120;
-pub const R4Lib_Value121_TYPE: u32 = 121;
-pub const R4Lib_Value122_TYPE: u32 = 122;
-pub const R4StdFileHandlerChoiceList_TYPE: u32 = 123;
+pub const R4Lib_Value113_TYPE: u32 = 113;
+pub const R4Lib_Value114_TYPE: u32 = 114;
+pub const R4Lib_r4os_subsystem_catalog_Input_TYPE: u32 = 115;
+pub const R4StdFileHandlerTargetKind_TYPE: u32 = 116;
+pub const R4StdFileHandlerTarget_TYPE: u32 = 117;
+pub const R4StdFileHandlerResolutionState_TYPE: u32 = 118;
+pub const R4StdFileHandlerResolution_TYPE: u32 = 119;
+pub const R4Lib_Value120_TYPE: u32 = 120;
+pub const R4StdFileHandlerChoiceKind_TYPE: u32 = 121;
+pub const R4StdFileHandlerChoice_TYPE: u32 = 122;
+pub const R4Lib_Value123_TYPE: u32 = 123;
 pub const R4Lib_Value124_TYPE: u32 = 124;
-pub const R4Lib_Value125_TYPE: u32 = 125;
+pub const R4StdFileHandlerChoiceList_TYPE: u32 = 125;
 pub const R4Lib_Value126_TYPE: u32 = 126;
-pub const R4Lib_r4os_subsystem_catalog_Catalog_TYPE: u32 = 127;
+pub const R4Lib_Value127_TYPE: u32 = 127;
 pub const R4Lib_Value128_TYPE: u32 = 128;
-pub const R4Lib_Value129_TYPE: u32 = 129;
+pub const R4Lib_r4os_subsystem_catalog_Catalog_TYPE: u32 = 129;
 pub const R4Lib_Value130_TYPE: u32 = 130;
 pub const R4Lib_Value131_TYPE: u32 = 131;
-pub const R4StdSubsystemLoadStatus_TYPE: u32 = 132;
-pub const R4StdSubsystemAccessStats_TYPE: u32 = 133;
-pub const R4StdSubsystemInspection_TYPE: u32 = 134;
-pub const R4ImgHelpersFormat_TYPE: u32 = 135;
-pub const R4ImgHelpersSvgGlyphProvider_TYPE: u32 = 136;
-pub const R4Lib_Value137_TYPE: u32 = 137;
-pub const R4Lib_Value138_TYPE: u32 = 138;
-pub const R4ImgHelpersSvgLinkSink_TYPE: u32 = 139;
+pub const R4Lib_Value132_TYPE: u32 = 132;
+pub const R4Lib_Value133_TYPE: u32 = 133;
+pub const R4StdSubsystemLoadStatus_TYPE: u32 = 134;
+pub const R4StdSubsystemAccessStats_TYPE: u32 = 135;
+pub const R4StdSubsystemInspection_TYPE: u32 = 136;
+pub const R4ImgHelpersFormat_TYPE: u32 = 137;
+pub const R4ImgHelpersSvgGlyphProvider_TYPE: u32 = 138;
+pub const R4Lib_Value139_TYPE: u32 = 139;
 pub const R4Lib_Value140_TYPE: u32 = 140;
-pub const R4ImgHelpersSvgRenderOptions_TYPE: u32 = 141;
+pub const R4ImgHelpersSvgLinkSink_TYPE: u32 = 141;
 pub const R4Lib_Value142_TYPE: u32 = 142;
-pub const R4Lib_Value143_TYPE: u32 = 143;
-pub const R4ImgHelpersInfo_TYPE: u32 = 144;
-pub const R4ImgHelpersImage_TYPE: u32 = 145;
-pub const R4Lib_Value146_TYPE: u32 = 146;
-pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor_TYPE: u32 = 147;
-pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgRasterColor_TYPE: u32 = 148;
-pub const R4ImgHelpersRasterContext_TYPE: u32 = 149;
-pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_RasterV1Client_TYPE: u32 = 150;
-pub const R4ImgHelpersImage16_TYPE: u32 = 151;
-pub const R4Lib_Value152_TYPE: u32 = 152;
-pub const R4ImgHelpersDecoderDiagnostic_TYPE: u32 = 153;
-pub const R4ImgHelpersContext_TYPE: u32 = 154;
-pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_ApiV1Client_TYPE: u32 = 155;
-pub const R4ImgHelpersPngContext_TYPE: u32 = 156;
-pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_PngV1Client_TYPE: u32 = 157;
-pub const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Policy_TYPE: u32 = 158;
-pub const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Characterization_TYPE: u32 = 159;
-pub const R4Lib_r4gfx_abi_R4GfxColorDescription_TYPE: u32 = 160;
-pub const R4Lib_Value161_TYPE: u32 = 161;
-pub const R4Lib_r4gfx_abi_R4GfxColorProfileDefinition_TYPE: u32 = 162;
-pub const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Result_TYPE: u32 = 163;
-pub const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult_TYPE: u32 = 164;
-pub const R4Lib_Value165_TYPE: u32 = 165;
-pub const R4LibraryAllocator_TYPE: u32 = 166;
+pub const R4ImgHelpersSvgRenderOptions_TYPE: u32 = 143;
+pub const R4Lib_Value144_TYPE: u32 = 144;
+pub const R4Lib_Value145_TYPE: u32 = 145;
+pub const R4ImgHelpersInfo_TYPE: u32 = 146;
+pub const R4ImgHelpersImage_TYPE: u32 = 147;
+pub const R4Lib_Value148_TYPE: u32 = 148;
+pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor_TYPE: u32 = 149;
+pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgRasterColor_TYPE: u32 = 150;
+pub const R4ImgHelpersRasterContext_TYPE: u32 = 151;
+pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_RasterV1Client_TYPE: u32 = 152;
+pub const R4ImgHelpersImage16_TYPE: u32 = 153;
+pub const R4Lib_Value154_TYPE: u32 = 154;
+pub const R4ImgHelpersDecoderDiagnostic_TYPE: u32 = 155;
+pub const R4ImgHelpersContext_TYPE: u32 = 156;
+pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_ApiV1Client_TYPE: u32 = 157;
+pub const R4ImgHelpersPngContext_TYPE: u32 = 158;
+pub const R4Lib_R4IMG_Bindings_Zig_r4img_abi_PngV1Client_TYPE: u32 = 159;
+pub const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Policy_TYPE: u32 = 160;
+pub const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Characterization_TYPE: u32 = 161;
+pub const R4Lib_r4gfx_abi_R4GfxColorDescription_TYPE: u32 = 162;
+pub const R4Lib_Value163_TYPE: u32 = 163;
+pub const R4Lib_r4gfx_abi_R4GfxColorProfileDefinition_TYPE: u32 = 164;
+pub const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Result_TYPE: u32 = 165;
+pub const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult_TYPE: u32 = 166;
 pub const R4Lib_Value167_TYPE: u32 = 167;
-pub const R4Lib_Value168_TYPE: u32 = 168;
+pub const R4LibraryAllocator_TYPE: u32 = 168;
 pub const R4Lib_Value169_TYPE: u32 = 169;
-pub const R4LibraryColorClient_TYPE: u32 = 170;
+pub const R4Lib_Value170_TYPE: u32 = 170;
 pub const R4Lib_Value171_TYPE: u32 = 171;
-pub const R4Lib_r4gfx_abi_R4GfxColorImage_TYPE: u32 = 172;
-pub const R4Lib_r4gfx_abi_R4GfxCpuImage_TYPE: u32 = 173;
-pub const R4Lib_r4gfx_abi_R4GfxColorProfile_TYPE: u32 = 174;
-pub const R4Lib_Value175_TYPE: u32 = 175;
-pub const R4Lib_r4gfx_abi_R4GfxColorTransform_TYPE: u32 = 176;
-pub const R4Lib_r4gfx_abi_R4GfxRect_TYPE: u32 = 177;
-pub const R4Lib_Value178_TYPE: u32 = 178;
-pub const R4Lib_Value179_TYPE: u32 = 179;
+pub const R4LibraryColorClient_TYPE: u32 = 172;
+pub const R4Lib_Value173_TYPE: u32 = 173;
+pub const R4Lib_r4gfx_abi_R4GfxColorImage_TYPE: u32 = 174;
+pub const R4Lib_r4gfx_abi_R4GfxCpuImage_TYPE: u32 = 175;
+pub const R4Lib_r4gfx_abi_R4GfxColorProfile_TYPE: u32 = 176;
+pub const R4Lib_Value177_TYPE: u32 = 177;
+pub const R4Lib_r4gfx_abi_R4GfxColorTransform_TYPE: u32 = 178;
+pub const R4Lib_r4gfx_abi_R4GfxRect_TYPE: u32 = 179;
 pub const R4Lib_Value180_TYPE: u32 = 180;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client_TYPE: u32 = 181;
+pub const R4Lib_Value181_TYPE: u32 = 181;
 pub const R4Lib_Value182_TYPE: u32 = 182;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime_TYPE: u32 = 183;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client_TYPE: u32 = 183;
 pub const R4Lib_Value184_TYPE: u32 = 184;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps_TYPE: u32 = 185;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery_TYPE: u32 = 186;
-pub const R4Lib_Value187_TYPE: u32 = 187;
-pub const R4ImgNativeJpeg_TYPE: u32 = 188;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder_TYPE: u32 = 189;
-pub const R4Lib_Value190_TYPE: u32 = 190;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease_TYPE: u32 = 191;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime_TYPE: u32 = 185;
+pub const R4Lib_Value186_TYPE: u32 = 186;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps_TYPE: u32 = 187;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery_TYPE: u32 = 188;
+pub const R4Lib_Value189_TYPE: u32 = 189;
+pub const R4ImgNativeJpeg_TYPE: u32 = 190;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder_TYPE: u32 = 191;
 pub const R4Lib_Value192_TYPE: u32 = 192;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame_TYPE: u32 = 193;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoColor_TYPE: u32 = 194;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPlane_TYPE: u32 = 195;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoBuffer_TYPE: u32 = 196;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence_TYPE: u32 = 197;
-pub const R4Lib_Value198_TYPE: u32 = 198;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt_TYPE: u32 = 199;
-pub const R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions_TYPE: u32 = 200;
-pub const R4Lib_Value201_TYPE: u32 = 201;
-pub const R4FontHelpersFormat_TYPE: u32 = 202;
-pub const R4FontHelpersDiagnostics_TYPE: u32 = 203;
-pub const R4FontHelpersTestingFaultInjection_TYPE: u32 = 204;
-pub const R4FontHelpersFaceInfo_TYPE: u32 = 205;
-pub const R4FontHelpersGlyphMetrics_TYPE: u32 = 206;
-pub const R4FontHelpersRaster_TYPE: u32 = 207;
-pub const R4FontHelpersContext_TYPE: u32 = 208;
-pub const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1Client_TYPE: u32 = 209;
-pub const R4FontHelpersDecoder_TYPE: u32 = 210;
-pub const R4Lib_Value211_TYPE: u32 = 211;
-pub const R4FontHelpersAllocatorState_TYPE: u32 = 212;
-pub const R4FontHelpersFace_TYPE: u32 = 213;
-pub const R4FontStoreFaceHandle_TYPE: u32 = 214;
-pub const R4FontStoreOptions_TYPE: u32 = 215;
-pub const R4FontStoreFaceMetrics26_6_TYPE: u32 = 216;
-pub const R4FontStoreGlyphMetrics26_6_TYPE: u32 = 217;
-pub const R4Lib_Value218_TYPE: u32 = 218;
-pub const R4FontStoreBorrowedRaster_TYPE: u32 = 219;
-pub const R4FontStoreCacheStats_TYPE: u32 = 220;
-pub const R4FontStoreDiagnostics_TYPE: u32 = 221;
-pub const R4FontStoreFaceStore_TYPE: u32 = 222;
-pub const R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_Slot_null__TYPE: u32 = 223;
-pub const R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_SourceSlot_null__TYPE: u32 = 224;
-pub const R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_CacheEntry_null__TYPE: u32 = 225;
-pub const R4Lib_Value226_TYPE: u32 = 226;
-pub const R4FontImportFaceInfo_TYPE: u32 = 227;
-pub const R4FontImportRasterGlyph_TYPE: u32 = 228;
-pub const R4FontImportPreview_TYPE: u32 = 229;
-pub const R4Lib_Value230_TYPE: u32 = 230;
-pub const R4Lib_Value231_TYPE: u32 = 231;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease_TYPE: u32 = 193;
+pub const R4Lib_Value194_TYPE: u32 = 194;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame_TYPE: u32 = 195;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoColor_TYPE: u32 = 196;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPlane_TYPE: u32 = 197;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoBuffer_TYPE: u32 = 198;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence_TYPE: u32 = 199;
+pub const R4Lib_Value200_TYPE: u32 = 200;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt_TYPE: u32 = 201;
+pub const R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions_TYPE: u32 = 202;
+pub const R4Lib_Value203_TYPE: u32 = 203;
+pub const R4FontHelpersFormat_TYPE: u32 = 204;
+pub const R4FontHelpersDiagnostics_TYPE: u32 = 205;
+pub const R4FontHelpersTestingFaultInjection_TYPE: u32 = 206;
+pub const R4FontHelpersFaceInfo_TYPE: u32 = 207;
+pub const R4FontHelpersGlyphMetrics_TYPE: u32 = 208;
+pub const R4FontHelpersRaster_TYPE: u32 = 209;
+pub const R4FontHelpersContext_TYPE: u32 = 210;
+pub const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1Client_TYPE: u32 = 211;
+pub const R4FontHelpersDecoder_TYPE: u32 = 212;
+pub const R4Lib_Value213_TYPE: u32 = 213;
+pub const R4FontHelpersAllocatorState_TYPE: u32 = 214;
+pub const R4FontHelpersFace_TYPE: u32 = 215;
+pub const R4FontStoreFaceHandle_TYPE: u32 = 216;
+pub const R4FontStoreOptions_TYPE: u32 = 217;
+pub const R4FontStoreFaceMetrics26_6_TYPE: u32 = 218;
+pub const R4FontStoreGlyphMetrics26_6_TYPE: u32 = 219;
+pub const R4Lib_Value220_TYPE: u32 = 220;
+pub const R4FontStoreBorrowedRaster_TYPE: u32 = 221;
+pub const R4FontStoreCacheStats_TYPE: u32 = 222;
+pub const R4FontStoreDiagnostics_TYPE: u32 = 223;
+pub const R4FontStoreFaceStore_TYPE: u32 = 224;
+pub const R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_Slot_null__TYPE: u32 = 225;
+pub const R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_SourceSlot_null__TYPE: u32 = 226;
+pub const R4Lib_array_list_Aligned_R4FONT_Bindings_Zig_app_fonts_CacheEntry_null__TYPE: u32 = 227;
+pub const R4Lib_Value228_TYPE: u32 = 228;
+pub const R4FontImportFaceInfo_TYPE: u32 = 229;
+pub const R4FontImportRasterGlyph_TYPE: u32 = 230;
+pub const R4FontImportPreview_TYPE: u32 = 231;
 pub const R4Lib_Value232_TYPE: u32 = 232;
-pub const R4LibrarySession_TYPE: u32 = 233;
+pub const R4Lib_Value233_TYPE: u32 = 233;
 pub const R4Lib_Value234_TYPE: u32 = 234;
-pub const R4Lib_Value235_TYPE: u32 = 235;
-pub const R4Lib_r4os_r4sys_Context_TYPE: u32 = 236;
-pub const R4LibraryMemory_TYPE: u32 = 237;
-pub const R4Lib_Value238_TYPE: u32 = 238;
-pub const R4Lib_Value239_TYPE: u32 = 239;
+pub const R4LibrarySession_TYPE: u32 = 235;
+pub const R4Lib_Value236_TYPE: u32 = 236;
+pub const R4Lib_Value237_TYPE: u32 = 237;
+pub const R4Lib_r4os_r4sys_Context_TYPE: u32 = 238;
+pub const R4LibraryMemory_TYPE: u32 = 239;
 pub const R4Lib_Value240_TYPE: u32 = 240;
-pub const R4LibraryDeviceClient_TYPE: u32 = 241;
+pub const R4Lib_Value241_TYPE: u32 = 241;
 pub const R4Lib_Value242_TYPE: u32 = 242;
-pub const R4LibraryRenderClient_TYPE: u32 = 243;
+pub const R4LibraryDeviceClient_TYPE: u32 = 243;
 pub const R4Lib_Value244_TYPE: u32 = 244;
-pub const R4LibraryGraphicsClient_TYPE: u32 = 245;
+pub const R4LibraryRenderClient_TYPE: u32 = 245;
 pub const R4Lib_Value246_TYPE: u32 = 246;
-pub const R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client_TYPE: u32 = 247;
+pub const R4LibraryGraphicsClient_TYPE: u32 = 247;
 pub const R4Lib_Value248_TYPE: u32 = 248;
-pub const R4LibraryAcoClient_TYPE: u32 = 249;
+pub const R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client_TYPE: u32 = 249;
 pub const R4Lib_Value250_TYPE: u32 = 250;
-pub const R4LibraryNakClient_TYPE: u32 = 251;
+pub const R4LibraryAcoClient_TYPE: u32 = 251;
 pub const R4Lib_Value252_TYPE: u32 = 252;
-pub const R4Lib_r4os_app_contract_App_TYPE: u32 = 253;
-pub const R4Lib_Value255_TYPE: u32 = 255;
-pub const R4Lib_Value256_TYPE: u32 = 256;
-pub const R4Lib_r4os_r4draw_Context_TYPE: u32 = 257;
-pub const R4StdAdaptersSaver_TYPE: u32 = 258;
-pub const R4Lib_Value259_TYPE: u32 = 259;
-pub const R4Lib_Value260_TYPE: u32 = 260;
+pub const R4LibraryNakClient_TYPE: u32 = 253;
+pub const R4Lib_Value254_TYPE: u32 = 254;
+pub const R4Lib_r4os_app_contract_App_TYPE: u32 = 255;
+pub const R4Lib_Value257_TYPE: u32 = 257;
+pub const R4Lib_Value258_TYPE: u32 = 258;
+pub const R4Lib_r4os_r4draw_Context_TYPE: u32 = 259;
+pub const R4StdAdaptersSaver_TYPE: u32 = 260;
 pub const R4Lib_Value261_TYPE: u32 = 261;
 pub const R4Lib_Value262_TYPE: u32 = 262;
 pub const R4Lib_Value263_TYPE: u32 = 263;
 pub const R4Lib_Value264_TYPE: u32 = 264;
-pub const R4Lib_r4os_gui_TextArea___u8__TYPE: u32 = 265;
-pub const R4Lib_r4os_gui_TextAreaView_TYPE: u32 = 266;
-pub const R4Lib_R4STD_Bindings_Zig_text_file_LoadResult_TYPE: u32 = 267;
-pub const R4Lib_R4STD_Bindings_Zig_text_file_SaveResult_TYPE: u32 = 268;
-pub const R4Lib_Value269_TYPE: u32 = 269;
-pub const R4Lib_Value270_TYPE: u32 = 270;
+pub const R4Lib_Value265_TYPE: u32 = 265;
+pub const R4Lib_Value266_TYPE: u32 = 266;
+pub const R4Lib_r4os_gui_TextArea___u8__TYPE: u32 = 267;
+pub const R4Lib_r4os_gui_TextAreaView_TYPE: u32 = 268;
+pub const R4Lib_R4STD_Bindings_Zig_text_file_LoadResult_TYPE: u32 = 269;
+pub const R4Lib_R4STD_Bindings_Zig_text_file_SaveResult_TYPE: u32 = 270;
 pub const R4Lib_Value271_TYPE: u32 = 271;
 pub const R4Lib_Value272_TYPE: u32 = 272;
-pub const R4AcoWorker_TYPE: u32 = 273;
-pub const R4Lib_r4aco_R4AcoRequest_TYPE: u32 = 276;
-pub const R4Lib_r4aco_R4AcoBinary_TYPE: u32 = 277;
-pub const R4Lib_r4aco_R4AcoDigest_TYPE: u32 = 278;
-pub const R4Lib_r4aco_R4AcoSymbols_TYPE: u32 = 279;
-pub const R4Lib_atomic_Value_bool__TYPE: u32 = 280;
-pub const R4Lib_Value281_TYPE: u32 = 281;
-pub const R4Lib_Value282_TYPE: u32 = 282;
-pub const R4Lib_Value283_TYPE: u32 = 283;
-pub const R4Lib_r4aco_R4AcoCacheKey_TYPE: u32 = 284;
+pub const R4Lib_Value273_TYPE: u32 = 273;
+pub const R4Lib_Value274_TYPE: u32 = 274;
+pub const R4AcoWorker_TYPE: u32 = 275;
+pub const R4Lib_r4os_inventory_reader_Provider_TYPE: u32 = 277;
+pub const R4Lib_r4os_stream_adapters_PlatformClock_TYPE: u32 = 278;
+pub const R4Lib_r4aco_R4AcoRequest_TYPE: u32 = 280;
+pub const R4Lib_r4aco_R4AcoBinary_TYPE: u32 = 281;
+pub const R4Lib_r4aco_R4AcoDigest_TYPE: u32 = 282;
+pub const R4Lib_r4aco_R4AcoSymbols_TYPE: u32 = 283;
+pub const R4Lib_atomic_Value_bool__TYPE: u32 = 284;
 pub const R4Lib_Value285_TYPE: u32 = 285;
 pub const R4Lib_Value286_TYPE: u32 = 286;
-pub const R4EncMuxColor_TYPE: u32 = 287;
-pub const R4EncMuxWriter_TYPE: u32 = 288;
+pub const R4Lib_Value287_TYPE: u32 = 287;
+pub const R4Lib_r4aco_R4AcoCacheKey_TYPE: u32 = 288;
 pub const R4Lib_Value289_TYPE: u32 = 289;
-pub const R4EncPixelsProfile_TYPE: u32 = 290;
-pub const R4EncPixelsLayout_TYPE: u32 = 291;
-pub const R4Lib_Value292_TYPE: u32 = 292;
+pub const R4Lib_Value290_TYPE: u32 = 290;
+pub const R4EncMuxColor_TYPE: u32 = 291;
+pub const R4EncMuxWriter_TYPE: u32 = 292;
 pub const R4Lib_Value293_TYPE: u32 = 293;
-pub const R4Lib_Value294_TYPE: u32 = 294;
-pub const R4Lib_r4os_gfx_outputs_Context_TYPE: u32 = 295;
+pub const R4EncPixelsProfile_TYPE: u32 = 294;
+pub const R4EncPixelsLayout_TYPE: u32 = 295;
 pub const R4Lib_Value296_TYPE: u32 = 296;
+pub const R4Lib_Value297_TYPE: u32 = 297;
 pub const R4Lib_Value298_TYPE: u32 = 298;
-pub const R4GfxEdidReport_TYPE: u32 = 299;
+pub const R4Lib_r4os_gfx_outputs_Context_TYPE: u32 = 299;
 pub const R4Lib_Value300_TYPE: u32 = 300;
-pub const R4Lib_Value301_TYPE: u32 = 301;
 pub const R4Lib_Value302_TYPE: u32 = 302;
-pub const R4GfxRefreshRangeFacts_TYPE: u32 = 303;
+pub const R4GfxEdidReport_TYPE: u32 = 303;
 pub const R4Lib_Value304_TYPE: u32 = 304;
-pub const R4GfxRefreshRangeEdidLimits_TYPE: u32 = 305;
-pub const R4GfxRefreshRangeRange_TYPE: u32 = 306;
-pub const R4Lib_Value307_TYPE: u32 = 307;
-pub const R4GfxRefreshRangeHdmi_TYPE: u32 = 308;
-pub const R4Lib_Value309_TYPE: u32 = 309;
-pub const R4GfxRefreshRangeDynamicLimits_TYPE: u32 = 310;
+pub const R4Lib_Value305_TYPE: u32 = 305;
+pub const R4Lib_Value306_TYPE: u32 = 306;
+pub const R4GfxRefreshRangeFacts_TYPE: u32 = 307;
+pub const R4Lib_Value308_TYPE: u32 = 308;
+pub const R4GfxRefreshRangeEdidLimits_TYPE: u32 = 309;
+pub const R4GfxRefreshRangeRange_TYPE: u32 = 310;
 pub const R4Lib_Value311_TYPE: u32 = 311;
-pub const R4GfxRefreshRangeAdaptive_TYPE: u32 = 312;
+pub const R4GfxRefreshRangeHdmi_TYPE: u32 = 312;
 pub const R4Lib_Value313_TYPE: u32 = 313;
-pub const R4GfxLinksHdmi_TYPE: u32 = 314;
-pub const R4GfxLinksFrl_TYPE: u32 = 315;
-pub const R4GfxLinksHdmiDsc_TYPE: u32 = 316;
+pub const R4GfxRefreshRangeDynamicLimits_TYPE: u32 = 314;
+pub const R4Lib_Value315_TYPE: u32 = 315;
+pub const R4GfxRefreshRangeAdaptive_TYPE: u32 = 316;
 pub const R4Lib_Value317_TYPE: u32 = 317;
-pub const R4Lib_Value318_TYPE: u32 = 318;
-pub const R4GfxTimingTiming_TYPE: u32 = 319;
-pub const R4Lib_Value320_TYPE: u32 = 320;
-pub const R4GfxEdidAudio_TYPE: u32 = 321;
+pub const R4GfxLinksHdmi_TYPE: u32 = 318;
+pub const R4GfxLinksFrl_TYPE: u32 = 319;
+pub const R4GfxLinksHdmiDsc_TYPE: u32 = 320;
+pub const R4Lib_Value321_TYPE: u32 = 321;
 pub const R4Lib_Value322_TYPE: u32 = 322;
-pub const R4Lib_Value323_TYPE: u32 = 323;
-pub const R4GfxQueueCopy_TYPE: u32 = 325;
+pub const R4GfxTimingTiming_TYPE: u32 = 323;
+pub const R4Lib_Value324_TYPE: u32 = 324;
+pub const R4GfxEdidAudio_TYPE: u32 = 325;
+pub const R4Lib_Value326_TYPE: u32 = 326;
 pub const R4Lib_Value327_TYPE: u32 = 327;
-pub const R4GfxQueueQueue_TYPE: u32 = 329;
-pub const R4Lib_r4os_gfx_queue_Context_TYPE: u32 = 330;
-pub const R4GfxBrightnessClientClient_TYPE: u32 = 332;
-pub const R4GfxBrightnessPreferencesChoice_TYPE: u32 = 333;
-pub const R4GfxTopologyKey_TYPE: u32 = 334;
-pub const R4GfxBrightnessPreferencesConfig_TYPE: u32 = 335;
-pub const R4Lib_Value336_TYPE: u32 = 336;
-pub const R4GfxColorControlRestoration_TYPE: u32 = 339;
+pub const R4GfxQueueCopy_TYPE: u32 = 329;
+pub const R4Lib_Value331_TYPE: u32 = 331;
+pub const R4GfxQueueQueue_TYPE: u32 = 333;
+pub const R4Lib_r4os_gfx_queue_Context_TYPE: u32 = 334;
+pub const R4GfxBrightnessClientClient_TYPE: u32 = 336;
+pub const R4GfxBrightnessPreferencesChoice_TYPE: u32 = 337;
+pub const R4GfxTopologyKey_TYPE: u32 = 338;
+pub const R4GfxBrightnessPreferencesConfig_TYPE: u32 = 339;
 pub const R4Lib_Value340_TYPE: u32 = 340;
-pub const R4Lib_Value341_TYPE: u32 = 341;
-pub const R4GfxColorControlRestoration_Attempt_TYPE: u32 = 342;
-pub const R4GfxColorPreferencesChoice_TYPE: u32 = 344;
-pub const R4GfxColorPreferencesConfig_TYPE: u32 = 345;
-pub const R4Lib_Value346_TYPE: u32 = 346;
-pub const R4GfxColorSignalTransfer_TYPE: u32 = 347;
-pub const R4GfxColorSignalPrimaries_TYPE: u32 = 348;
-pub const R4GfxColorSignalRange_TYPE: u32 = 349;
-pub const R4GfxColorSignalFormat_TYPE: u32 = 350;
-pub const R4GfxColorSignalMetadata_TYPE: u32 = 351;
-pub const R4Lib_Value352_TYPE: u32 = 352;
-pub const R4Lib_Value353_TYPE: u32 = 353;
-pub const R4GfxColorSignalSignal_TYPE: u32 = 354;
-pub const R4Lib_Value355_TYPE: u32 = 355;
-pub const R4GfxColorSignalSource_TYPE: u32 = 356;
-pub const R4GfxColorSignalTransport_TYPE: u32 = 357;
-pub const R4GfxColorSignalPipeline_TYPE: u32 = 358;
-pub const R4GfxColorSignalLink_TYPE: u32 = 359;
-pub const R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type___TYPE: u32 = 360;
-pub const R4Lib_Value361_TYPE: u32 = 361;
-pub const R4Lib_Value362_TYPE: u32 = 362;
-pub const R4Lib_Value363_TYPE: u32 = 363;
-pub const R4GfxColorSignalPlan_TYPE: u32 = 364;
+pub const R4GfxColorControlRestoration_TYPE: u32 = 343;
+pub const R4Lib_Value344_TYPE: u32 = 344;
+pub const R4Lib_Value345_TYPE: u32 = 345;
+pub const R4GfxColorControlRestoration_Attempt_TYPE: u32 = 346;
+pub const R4GfxColorPreferencesChoice_TYPE: u32 = 348;
+pub const R4GfxColorPreferencesConfig_TYPE: u32 = 349;
+pub const R4Lib_Value350_TYPE: u32 = 350;
+pub const R4GfxColorSignalTransfer_TYPE: u32 = 351;
+pub const R4GfxColorSignalPrimaries_TYPE: u32 = 352;
+pub const R4GfxColorSignalRange_TYPE: u32 = 353;
+pub const R4GfxColorSignalFormat_TYPE: u32 = 354;
+pub const R4GfxColorSignalMetadata_TYPE: u32 = 355;
+pub const R4Lib_Value356_TYPE: u32 = 356;
+pub const R4Lib_Value357_TYPE: u32 = 357;
+pub const R4GfxColorSignalSignal_TYPE: u32 = 358;
+pub const R4Lib_Value359_TYPE: u32 = 359;
+pub const R4GfxColorSignalSource_TYPE: u32 = 360;
+pub const R4GfxColorSignalTransport_TYPE: u32 = 361;
+pub const R4GfxColorSignalPipeline_TYPE: u32 = 362;
+pub const R4GfxColorSignalLink_TYPE: u32 = 363;
+pub const R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type___TYPE: u32 = 364;
 pub const R4Lib_Value365_TYPE: u32 = 365;
-pub const R4GfxColorSignalLuminance_TYPE: u32 = 366;
+pub const R4Lib_Value366_TYPE: u32 = 366;
 pub const R4Lib_Value367_TYPE: u32 = 367;
-pub const R4Lib_Value368_TYPE: u32 = 368;
+pub const R4GfxColorSignalPlan_TYPE: u32 = 368;
 pub const R4Lib_Value369_TYPE: u32 = 369;
-pub const R4Lib_Value370_TYPE: u32 = 370;
+pub const R4GfxColorSignalLuminance_TYPE: u32 = 370;
 pub const R4Lib_Value371_TYPE: u32 = 371;
-pub const R4GfxTopologyLayout_TYPE: u32 = 372;
+pub const R4Lib_Value372_TYPE: u32 = 372;
 pub const R4Lib_Value373_TYPE: u32 = 373;
-pub const R4GfxTopologyOutput_TYPE: u32 = 374;
-pub const R4GfxTopologyViewport_TYPE: u32 = 375;
-pub const R4GfxTopologyPoint_TYPE: u32 = 376;
-pub const R4GfxTopologyRotation_TYPE: u32 = 377;
-pub const R4Lib_Value379_TYPE: u32 = 379;
-pub const R4Lib_Value380_TYPE: u32 = 380;
-pub const R4GfxControlClient_TYPE: u32 = 381;
-pub const R4GfxDesktopOutputsEntry_TYPE: u32 = 382;
-pub const R4Lib_Value385_TYPE: u32 = 385;
-pub const R4Lib_Value386_TYPE: u32 = 386;
-pub const R4GfxDesktopOutputsSnapshot_TYPE: u32 = 387;
-pub const R4Lib_Value388_TYPE: u32 = 388;
-pub const R4GfxEdidWarning_TYPE: u32 = 389;
+pub const R4Lib_Value374_TYPE: u32 = 374;
+pub const R4Lib_Value375_TYPE: u32 = 375;
+pub const R4GfxTopologyLayout_TYPE: u32 = 376;
+pub const R4Lib_Value377_TYPE: u32 = 377;
+pub const R4GfxTopologyOutput_TYPE: u32 = 378;
+pub const R4GfxTopologyViewport_TYPE: u32 = 379;
+pub const R4GfxTopologyPoint_TYPE: u32 = 380;
+pub const R4GfxTopologyRotation_TYPE: u32 = 381;
+pub const R4Lib_Value383_TYPE: u32 = 383;
+pub const R4Lib_Value384_TYPE: u32 = 384;
+pub const R4GfxControlClient_TYPE: u32 = 385;
+pub const R4GfxDesktopOutputsEntry_TYPE: u32 = 386;
+pub const R4Lib_Value389_TYPE: u32 = 389;
 pub const R4Lib_Value390_TYPE: u32 = 390;
-pub const R4GfxEldTransport_TYPE: u32 = 391;
-pub const R4GfxEldData_TYPE: u32 = 392;
-pub const R4Lib_Value393_TYPE: u32 = 393;
+pub const R4GfxDesktopOutputsSnapshot_TYPE: u32 = 391;
+pub const R4Lib_Value392_TYPE: u32 = 392;
+pub const R4GfxEdidWarning_TYPE: u32 = 393;
 pub const R4Lib_Value394_TYPE: u32 = 394;
-pub const R4GfxLinksClock_TYPE: u32 = 395;
-pub const R4GfxLinksDemand_TYPE: u32 = 396;
+pub const R4GfxEldTransport_TYPE: u32 = 395;
+pub const R4GfxEldData_TYPE: u32 = 396;
 pub const R4Lib_Value397_TYPE: u32 = 397;
 pub const R4Lib_Value398_TYPE: u32 = 398;
-pub const R4GfxModeControlRestoration_TYPE: u32 = 399;
-pub const R4Lib_Value400_TYPE: u32 = 400;
+pub const R4GfxLinksClock_TYPE: u32 = 399;
+pub const R4GfxLinksDemand_TYPE: u32 = 400;
 pub const R4Lib_Value401_TYPE: u32 = 401;
-pub const R4GfxModeControlRestoration_Attempt_TYPE: u32 = 402;
-pub const R4GfxModeControlController_TYPE: u32 = 403;
+pub const R4Lib_Value402_TYPE: u32 = 402;
+pub const R4GfxModeControlRestoration_TYPE: u32 = 403;
 pub const R4Lib_Value404_TYPE: u32 = 404;
 pub const R4Lib_Value405_TYPE: u32 = 405;
+pub const R4GfxModeControlRestoration_Attempt_TYPE: u32 = 406;
+pub const R4GfxModeControlController_TYPE: u32 = 407;
+pub const R4Lib_Value408_TYPE: u32 = 408;
 pub const R4Lib_Value409_TYPE: u32 = 409;
-pub const R4GfxPreferencesConfig_TYPE: u32 = 410;
-pub const R4Lib_Value411_TYPE: u32 = 411;
-pub const R4GfxReadbackPhase_TYPE: u32 = 412;
-pub const R4GfxReadbackStats_TYPE: u32 = 413;
-pub const R4GfxReadbackRequest_TYPE: u32 = 414;
-pub const R4Lib_r4gfx_abi_R4GfxResource_TYPE: u32 = 415;
-pub const R4Lib_Value416_TYPE: u32 = 416;
-pub const R4Lib_Value417_TYPE: u32 = 417;
-pub const R4Lib_r4gfx_abi_R4GfxCopyFence_TYPE: u32 = 418;
-pub const R4GfxReadbackOwner_TYPE: u32 = 419;
+pub const R4Lib_Value413_TYPE: u32 = 413;
+pub const R4GfxPreferencesConfig_TYPE: u32 = 414;
+pub const R4Lib_Value415_TYPE: u32 = 415;
+pub const R4GfxReadbackPhase_TYPE: u32 = 416;
+pub const R4GfxReadbackStats_TYPE: u32 = 417;
+pub const R4GfxReadbackRequest_TYPE: u32 = 418;
+pub const R4Lib_r4gfx_abi_R4GfxResource_TYPE: u32 = 419;
 pub const R4Lib_Value420_TYPE: u32 = 420;
 pub const R4Lib_Value421_TYPE: u32 = 421;
-pub const R4Lib_r4gfx_abi_R4GfxDevice_TYPE: u32 = 422;
-pub const R4Lib_Value423_TYPE: u32 = 423;
+pub const R4Lib_r4gfx_abi_R4GfxCopyFence_TYPE: u32 = 422;
+pub const R4GfxReadbackOwner_TYPE: u32 = 423;
 pub const R4Lib_Value424_TYPE: u32 = 424;
 pub const R4Lib_Value425_TYPE: u32 = 425;
-pub const R4GfxReadbackJob_TYPE: u32 = 426;
-pub const R4Lib_r4gfx_abi_R4GfxJob_TYPE: u32 = 427;
+pub const R4Lib_r4gfx_abi_R4GfxDevice_TYPE: u32 = 426;
+pub const R4Lib_Value427_TYPE: u32 = 427;
 pub const R4Lib_Value428_TYPE: u32 = 428;
-pub const R4GfxRefreshClientActivity_TYPE: u32 = 429;
-pub const R4GfxRefreshClientClient_TYPE: u32 = 430;
-pub const R4GfxRefreshObserverResult_TYPE: u32 = 431;
-pub const R4GfxRefreshObserverSummary_TYPE: u32 = 432;
-pub const R4GfxRefreshObserverObserver_TYPE: u32 = 433;
-pub const R4Lib_Value434_TYPE: u32 = 434;
-pub const R4GfxRefreshPreferencesChoice_TYPE: u32 = 435;
-pub const R4GfxRefreshPreferencesConfig_TYPE: u32 = 436;
-pub const R4Lib_Value437_TYPE: u32 = 437;
-pub const R4GfxTopologyRect_TYPE: u32 = 438;
-pub const R4GfxTransferPhase_TYPE: u32 = 439;
-pub const R4GfxTransferOwner_TYPE: u32 = 440;
-pub const R4Lib_r4os_gfx_buffers_Context_TYPE: u32 = 441;
-pub const R4Lib_Value442_TYPE: u32 = 442;
-pub const R4Lib_Value443_TYPE: u32 = 443;
-pub const R4GfxTransferJob_TYPE: u32 = 444;
-pub const R4GfxVrrLink_TYPE: u32 = 445;
-pub const R4GfxVrrSource_TYPE: u32 = 446;
-pub const R4GfxVrrOrigin_TYPE: u32 = 447;
-pub const R4GfxVrrPlan_TYPE: u32 = 448;
-pub const R4GfxVrrPolicy_TYPE: u32 = 449;
-pub const R4GfxVrrReason_TYPE: u32 = 450;
-pub const R4GfxVrrScene_TYPE: u32 = 451;
-pub const R4GfxVrrState_TYPE: u32 = 452;
-pub const R4GfxVrrSwitch_TYPE: u32 = 453;
-pub const R4GfxVrrFrame_TYPE: u32 = 454;
-pub const R4GfxVrrScheduler_TYPE: u32 = 455;
-pub const R4Lib_Value456_TYPE: u32 = 456;
-pub const R4NakWorker_TYPE: u32 = 457;
-pub const R4Lib_r4nak_R4NakRequest_TYPE: u32 = 458;
-pub const R4Lib_r4nak_R4NakBinary_TYPE: u32 = 459;
-pub const R4Lib_r4nak_R4NakHeader_TYPE: u32 = 460;
-pub const R4Lib_r4nak_R4NakDigest_TYPE: u32 = 461;
-pub const R4Lib_Value462_TYPE: u32 = 462;
-pub const R4Lib_Value463_TYPE: u32 = 463;
-pub const R4Lib_r4nak_R4NakCacheKey_TYPE: u32 = 464;
-pub const R4Lib_Value465_TYPE: u32 = 465;
+pub const R4Lib_Value429_TYPE: u32 = 429;
+pub const R4GfxReadbackJob_TYPE: u32 = 430;
+pub const R4Lib_r4gfx_abi_R4GfxJob_TYPE: u32 = 431;
+pub const R4Lib_Value432_TYPE: u32 = 432;
+pub const R4GfxRefreshClientActivity_TYPE: u32 = 433;
+pub const R4GfxRefreshClientClient_TYPE: u32 = 434;
+pub const R4GfxRefreshObserverResult_TYPE: u32 = 435;
+pub const R4GfxRefreshObserverSummary_TYPE: u32 = 436;
+pub const R4GfxRefreshObserverObserver_TYPE: u32 = 437;
+pub const R4Lib_Value438_TYPE: u32 = 438;
+pub const R4GfxRefreshPreferencesChoice_TYPE: u32 = 439;
+pub const R4GfxRefreshPreferencesConfig_TYPE: u32 = 440;
+pub const R4Lib_Value441_TYPE: u32 = 441;
+pub const R4GfxTopologyRect_TYPE: u32 = 442;
+pub const R4GfxTransferPhase_TYPE: u32 = 443;
+pub const R4GfxTransferOwner_TYPE: u32 = 444;
+pub const R4Lib_r4os_gfx_buffers_Context_TYPE: u32 = 445;
+pub const R4Lib_Value446_TYPE: u32 = 446;
+pub const R4Lib_Value447_TYPE: u32 = 447;
+pub const R4GfxTransferJob_TYPE: u32 = 448;
+pub const R4GfxVrrLink_TYPE: u32 = 449;
+pub const R4GfxVrrSource_TYPE: u32 = 450;
+pub const R4GfxVrrOrigin_TYPE: u32 = 451;
+pub const R4GfxVrrPlan_TYPE: u32 = 452;
+pub const R4GfxVrrPolicy_TYPE: u32 = 453;
+pub const R4GfxVrrReason_TYPE: u32 = 454;
+pub const R4GfxVrrScene_TYPE: u32 = 455;
+pub const R4GfxVrrState_TYPE: u32 = 456;
+pub const R4GfxVrrSwitch_TYPE: u32 = 457;
+pub const R4GfxVrrFrame_TYPE: u32 = 458;
+pub const R4GfxVrrScheduler_TYPE: u32 = 459;
+pub const R4Lib_Value460_TYPE: u32 = 460;
+pub const R4NakWorker_TYPE: u32 = 461;
+pub const R4Lib_r4nak_R4NakRequest_TYPE: u32 = 462;
+pub const R4Lib_r4nak_R4NakBinary_TYPE: u32 = 463;
+pub const R4Lib_r4nak_R4NakHeader_TYPE: u32 = 464;
+pub const R4Lib_r4nak_R4NakDigest_TYPE: u32 = 465;
 pub const R4Lib_Value466_TYPE: u32 = 466;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_TYPE: u32 = 467;
-pub const R4VideoPlaybackPhase_TYPE: u32 = 468;
-pub const R4VideoPlaybackConfig_TYPE: u32 = 469;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoConfig_TYPE: u32 = 470;
-pub const R4VideoPlaybackCompositionColorPolicy_TYPE: u32 = 471;
-pub const R4VideoPlaybackOutput_TYPE: u32 = 472;
-pub const R4VideoPlaybackCompositionTarget_TYPE: u32 = 473;
-pub const R4Lib__typeInfo_R4VIDEO_Bindings_Zig_playback_composition_Target____union__tag_type___TYPE: u32 = 474;
-pub const R4VideoPlaybackFrameInfo_TYPE: u32 = 475;
-pub const R4VideoPlaybackStep_TYPE: u32 = 476;
-pub const R4Lib_Value477_TYPE: u32 = 477;
-pub const R4Lib_Value478_TYPE: u32 = 478;
-pub const R4VideoPlaybackSession_TYPE: u32 = 479;
-pub const R4Lib_Value480_TYPE: u32 = 480;
-pub const R4VideoPlaybackCompositionComposition_TYPE: u32 = 481;
+pub const R4Lib_Value467_TYPE: u32 = 467;
+pub const R4Lib_r4nak_R4NakCacheKey_TYPE: u32 = 468;
+pub const R4Lib_Value469_TYPE: u32 = 469;
+pub const R4Lib_Value470_TYPE: u32 = 470;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_TYPE: u32 = 471;
+pub const R4VideoPlaybackPhase_TYPE: u32 = 472;
+pub const R4VideoPlaybackConfig_TYPE: u32 = 473;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoConfig_TYPE: u32 = 474;
+pub const R4VideoPlaybackCompositionColorPolicy_TYPE: u32 = 475;
+pub const R4VideoPlaybackOutput_TYPE: u32 = 476;
+pub const R4VideoPlaybackCompositionTarget_TYPE: u32 = 477;
+pub const R4Lib__typeInfo_R4VIDEO_Bindings_Zig_playback_composition_Target____union__tag_type___TYPE: u32 = 478;
+pub const R4VideoPlaybackFrameInfo_TYPE: u32 = 479;
+pub const R4VideoPlaybackStep_TYPE: u32 = 480;
+pub const R4Lib_Value481_TYPE: u32 = 481;
 pub const R4Lib_Value482_TYPE: u32 = 482;
-pub const R4VideoPlaybackCompositionWork_TYPE: u32 = 483;
-pub const R4VideoPlaybackCompositionState_TYPE: u32 = 484;
-pub const R4Lib_r4gfx_abi_R4GfxYuvDescription_TYPE: u32 = 485;
+pub const R4VideoPlaybackSession_TYPE: u32 = 483;
+pub const R4Lib_Value484_TYPE: u32 = 484;
+pub const R4VideoPlaybackCompositionComposition_TYPE: u32 = 485;
 pub const R4Lib_Value486_TYPE: u32 = 486;
-pub const R4Lib_Value487_TYPE: u32 = 487;
-pub const R4Lib_Value488_TYPE: u32 = 488;
-pub const R4Lib_Value489_TYPE: u32 = 489;
-pub const R4VideoPlaybackAudioAudio_TYPE: u32 = 490;
-pub const R4Lib_r4os_app_audio_Audio_TYPE: u32 = 491;
-pub const R4VideoPlaybackAudioState_TYPE: u32 = 492;
+pub const R4VideoPlaybackCompositionWork_TYPE: u32 = 487;
+pub const R4VideoPlaybackCompositionState_TYPE: u32 = 488;
+pub const R4Lib_r4gfx_abi_R4GfxYuvDescription_TYPE: u32 = 489;
+pub const R4Lib_Value490_TYPE: u32 = 490;
+pub const R4Lib_Value491_TYPE: u32 = 491;
+pub const R4Lib_Value492_TYPE: u32 = 492;
 pub const R4Lib_Value493_TYPE: u32 = 493;
-pub const R4Lib_r4os_app_audio_AudioStream_TYPE: u32 = 494;
-pub const R4VideoPlaybackClockClock_TYPE: u32 = 496;
+pub const R4VideoPlaybackAudioAudio_TYPE: u32 = 494;
+pub const R4Lib_r4os_app_audio_Audio_TYPE: u32 = 495;
+pub const R4VideoPlaybackAudioState_TYPE: u32 = 496;
 pub const R4Lib_Value497_TYPE: u32 = 497;
-pub const R4VideoPlaybackControl_TYPE: u32 = 498;
-pub const R4Lib_Value499_TYPE: u32 = 499;
-pub const R4VideoPlaybackSlot_TYPE: u32 = 500;
+pub const R4Lib_r4os_app_audio_AudioStream_TYPE: u32 = 498;
+pub const R4VideoPlaybackClockClock_TYPE: u32 = 500;
 pub const R4Lib_Value501_TYPE: u32 = 501;
-pub const R4VideoPlaybackCompositionTicket_TYPE: u32 = 502;
+pub const R4VideoPlaybackControl_TYPE: u32 = 502;
 pub const R4Lib_Value503_TYPE: u32 = 503;
-pub const R4Lib_Value504_TYPE: u32 = 504;
+pub const R4VideoPlaybackSlot_TYPE: u32 = 504;
 pub const R4Lib_Value505_TYPE: u32 = 505;
-pub const R4GfxDisplayProfileOwner_TYPE: u32 = 506;
+pub const R4VideoPlaybackCompositionTicket_TYPE: u32 = 506;
 pub const R4Lib_Value507_TYPE: u32 = 507;
 pub const R4Lib_Value508_TYPE: u32 = 508;
 pub const R4Lib_Value509_TYPE: u32 = 509;
-pub const R4Lib_Value510_TYPE: u32 = 510;
-pub const R4MediaSink_TYPE: u32 = 511;
+pub const R4GfxDisplayProfileOwner_TYPE: u32 = 510;
+pub const R4Lib_Value511_TYPE: u32 = 511;
 pub const R4Lib_Value512_TYPE: u32 = 512;
 pub const R4Lib_Value513_TYPE: u32 = 513;
 pub const R4Lib_Value514_TYPE: u32 = 514;
-pub const R4Lib_Value515_TYPE: u32 = 515;
-pub const R4Lib_Value516_TYPE: u32 = 516;
-pub const R4Lib_Value517_TYPE: u32 = 517;
+pub const R4MediaCompilerContext2_TYPE: u32 = 515;
+pub const R4Lib_r4os_app2_App_TYPE: u32 = 516;
+pub const R4MediaSink_TYPE: u32 = 517;
 pub const R4Lib_Value518_TYPE: u32 = 518;
 pub const R4Lib_Value519_TYPE: u32 = 519;
 pub const R4Lib_Value520_TYPE: u32 = 520;
@@ -5488,13 +5704,13 @@ pub const R4Lib_Value529_TYPE: u32 = 529;
 pub const R4Lib_Value530_TYPE: u32 = 530;
 pub const R4Lib_Value531_TYPE: u32 = 531;
 pub const R4Lib_Value532_TYPE: u32 = 532;
-pub const R4MediaBuiltinShader_TYPE: u32 = 533;
+pub const R4Lib_Value533_TYPE: u32 = 533;
 pub const R4Lib_Value534_TYPE: u32 = 534;
 pub const R4Lib_Value535_TYPE: u32 = 535;
 pub const R4Lib_Value536_TYPE: u32 = 536;
 pub const R4Lib_Value537_TYPE: u32 = 537;
 pub const R4Lib_Value538_TYPE: u32 = 538;
-pub const R4Lib_Value539_TYPE: u32 = 539;
+pub const R4MediaBuiltinShader_TYPE: u32 = 539;
 pub const R4Lib_Value540_TYPE: u32 = 540;
 pub const R4Lib_Value541_TYPE: u32 = 541;
 pub const R4Lib_Value542_TYPE: u32 = 542;
@@ -5504,13 +5720,13 @@ pub const R4Lib_Value545_TYPE: u32 = 545;
 pub const R4Lib_Value546_TYPE: u32 = 546;
 pub const R4Lib_Value547_TYPE: u32 = 547;
 pub const R4Lib_Value548_TYPE: u32 = 548;
-pub const R4StdGraphemeStream_Event_TYPE: u32 = 549;
+pub const R4Lib_Value549_TYPE: u32 = 549;
 pub const R4Lib_Value550_TYPE: u32 = 550;
 pub const R4Lib_Value551_TYPE: u32 = 551;
 pub const R4Lib_Value552_TYPE: u32 = 552;
 pub const R4Lib_Value553_TYPE: u32 = 553;
 pub const R4Lib_Value554_TYPE: u32 = 554;
-pub const R4Lib_Value555_TYPE: u32 = 555;
+pub const R4StdGraphemeStream_Event_TYPE: u32 = 555;
 pub const R4Lib_Value556_TYPE: u32 = 556;
 pub const R4Lib_Value557_TYPE: u32 = 557;
 pub const R4Lib_Value558_TYPE: u32 = 558;
@@ -5531,14 +5747,14 @@ pub const R4Lib_Value572_TYPE: u32 = 572;
 pub const R4Lib_Value573_TYPE: u32 = 573;
 pub const R4Lib_Value574_TYPE: u32 = 574;
 pub const R4Lib_Value575_TYPE: u32 = 575;
-pub const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_TYPE: u32 = 576;
-pub const R4Lib_r4os_runtime_r4l_InterfaceHeader_TYPE: u32 = 577;
+pub const R4Lib_Value576_TYPE: u32 = 576;
+pub const R4Lib_Value577_TYPE: u32 = 577;
 pub const R4Lib_Value578_TYPE: u32 = 578;
 pub const R4Lib_Value579_TYPE: u32 = 579;
 pub const R4Lib_Value580_TYPE: u32 = 580;
 pub const R4Lib_Value581_TYPE: u32 = 581;
-pub const R4Lib_Value582_TYPE: u32 = 582;
-pub const R4Lib_Value583_TYPE: u32 = 583;
+pub const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_TYPE: u32 = 582;
+pub const R4Lib_r4os_runtime_r4l_InterfaceHeader_TYPE: u32 = 583;
 pub const R4Lib_Value584_TYPE: u32 = 584;
 pub const R4Lib_Value585_TYPE: u32 = 585;
 pub const R4Lib_Value586_TYPE: u32 = 586;
@@ -5568,16 +5784,16 @@ pub const R4Lib_Value609_TYPE: u32 = 609;
 pub const R4Lib_Value610_TYPE: u32 = 610;
 pub const R4Lib_Value611_TYPE: u32 = 611;
 pub const R4Lib_Value612_TYPE: u32 = 612;
+pub const R4Lib_Value613_TYPE: u32 = 613;
 pub const R4Lib_Value614_TYPE: u32 = 614;
 pub const R4Lib_Value615_TYPE: u32 = 615;
+pub const R4Lib_Value616_TYPE: u32 = 616;
 pub const R4Lib_Value617_TYPE: u32 = 617;
 pub const R4Lib_Value618_TYPE: u32 = 618;
 pub const R4Lib_Value619_TYPE: u32 = 619;
 pub const R4Lib_Value620_TYPE: u32 = 620;
-pub const R4Lib_Value621_TYPE: u32 = 621;
 pub const R4Lib_Value622_TYPE: u32 = 622;
 pub const R4Lib_Value623_TYPE: u32 = 623;
-pub const R4Lib_Value624_TYPE: u32 = 624;
 pub const R4Lib_Value625_TYPE: u32 = 625;
 pub const R4Lib_Value626_TYPE: u32 = 626;
 pub const R4Lib_Value627_TYPE: u32 = 627;
@@ -5622,7 +5838,7 @@ pub const R4Lib_Value665_TYPE: u32 = 665;
 pub const R4Lib_Value666_TYPE: u32 = 666;
 pub const R4Lib_Value667_TYPE: u32 = 667;
 pub const R4Lib_Value668_TYPE: u32 = 668;
-pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket_TYPE: u32 = 669;
+pub const R4Lib_Value669_TYPE: u32 = 669;
 pub const R4Lib_Value670_TYPE: u32 = 670;
 pub const R4Lib_Value671_TYPE: u32 = 671;
 pub const R4Lib_Value672_TYPE: u32 = 672;
@@ -5631,13 +5847,26 @@ pub const R4Lib_Value674_TYPE: u32 = 674;
 pub const R4Lib_Value675_TYPE: u32 = 675;
 pub const R4Lib_Value676_TYPE: u32 = 676;
 pub const R4Lib_Value677_TYPE: u32 = 677;
-pub const R4Lib_Value678_TYPE: u32 = 678;
+pub const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket_TYPE: u32 = 678;
 pub const R4Lib_Value679_TYPE: u32 = 679;
 pub const R4Lib_Value680_TYPE: u32 = 680;
 pub const R4Lib_Value681_TYPE: u32 = 681;
 pub const R4Lib_Value682_TYPE: u32 = 682;
 pub const R4Lib_Value683_TYPE: u32 = 683;
-pub const R4Libraries_ABI_FINGERPRINT: u64 = 12995334308968972729;
+pub const R4Lib_Value684_TYPE: u32 = 684;
+pub const R4Lib_Value685_TYPE: u32 = 685;
+pub const R4Lib_Value686_TYPE: u32 = 686;
+pub const R4Lib_Value687_TYPE: u32 = 687;
+pub const R4Lib_Value688_TYPE: u32 = 688;
+pub const R4Lib_Value689_TYPE: u32 = 689;
+pub const R4Lib_Value690_TYPE: u32 = 690;
+pub const R4Lib_Value691_TYPE: u32 = 691;
+pub const R4Lib_Value692_TYPE: u32 = 692;
+pub const R4Lib_Value693_TYPE: u32 = 693;
+pub const R4Lib_Value694_TYPE: u32 = 694;
+pub const R4Lib_Value695_TYPE: u32 = 695;
+pub const R4Lib_Value696_TYPE: u32 = 696;
+pub const R4Libraries_ABI_FINGERPRINT: u64 = 9413615774484170484;
 pub const R4StdSettings_current_format_version: i32 = 1;
 pub const R4StdDate_seconds_per_day: i32 = 86400;
 pub const R4StdTime_zone_count: i32 = 38;
@@ -5823,9 +6052,9 @@ pub const R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_V: u32 = 10;
 pub const R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_T: u32 = 11;
 pub const R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_LV: u32 = 12;
 pub const R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_LVT: u32 = 13;
-pub const R4Lib_Value77_none: u32 = 0;
-pub const R4Lib_Value77_consonant: u32 = 1;
-pub const R4Lib_Value77_linker: u32 = 2;
+pub const R4Lib_Value79_none: u32 = 0;
+pub const R4Lib_Value79_consonant: u32 = 1;
+pub const R4Lib_Value79_linker: u32 = 2;
 pub const R4StdShortcutTargetKind_program: u32 = 0;
 pub const R4StdShortcutTargetKind_directory: u32 = 1;
 pub const R4StdShortcutTargetKind_file: u32 = 2;
@@ -6105,6 +6334,7 @@ unsafe extern "C" {
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_constant_module_name() -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_constant_video_v1_export_name() -> R4LibrariesSlot;
     pub fn R4Std_init(p0: u32, p1: *const R4XStartContext) -> R4LibrariesSlot;
+    pub fn R4Std_init2(p0: u32, p1: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
     pub fn R4Std_initialized(p0: u32) -> R4LibrariesSlot;
     pub fn R4StdText_textView(p0: u32, p1: *const u8, p2: u64, p3: *mut R4TextView) -> R4LibrariesSlot;
     pub fn R4StdText_validateUtf8(p0: u32, p1: *const u8, p2: u64) -> R4LibrariesSlot;
@@ -6270,11 +6500,11 @@ unsafe extern "C" {
     pub fn R4GfxBrightnessStatus_reason(p0: u32, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxColorControl_matches(p0: u32, p1: *const R4GfxOutputColorState, p2: *const R4GfxColorSignal) -> R4LibrariesSlot;
     pub fn R4GfxColorControl_canonical(p0: u32, p1: *const R4GfxOutputColorState) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignal_luminance(p0: u32, p1: *const R4Lib_Value300, p2: *mut R4GfxColorSignalLuminance) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignal_hdmiMetadata(p0: u32, p1: u32, p2: *const R4GfxColorSignalMetadata, p3: *mut R4Lib_Value369) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignal_dpMetadata(p0: u32, p1: u32, p2: *const R4GfxColorSignalMetadata, p3: *mut R4Lib_Value365) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignal_dpVsc(p0: u32, p1: *const R4GfxColorSignalSignal, p2: *mut R4Lib_Value365) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignal_dpSdrMetadata(p0: u32, p1: *mut R4Lib_Value365) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignal_luminance(p0: u32, p1: *const R4Lib_Value304, p2: *mut R4GfxColorSignalLuminance) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignal_hdmiMetadata(p0: u32, p1: u32, p2: *const R4GfxColorSignalMetadata, p3: *mut R4Lib_Value373) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignal_dpMetadata(p0: u32, p1: u32, p2: *const R4GfxColorSignalMetadata, p3: *mut R4Lib_Value369) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignal_dpVsc(p0: u32, p1: *const R4GfxColorSignalSignal, p2: *mut R4Lib_Value369) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignal_dpSdrMetadata(p0: u32, p1: *mut R4Lib_Value369) -> R4LibrariesSlot;
     pub fn R4GfxColorSignal_limitedRgb8(p0: u32, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxControl_active(p0: u32, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxControl_encode(p0: u32, p1: *const R4GfxTopologyLayout, p2: *mut R4DisplayLayout) -> R4LibrariesSlot;
@@ -6284,8 +6514,8 @@ unsafe extern "C" {
     pub fn R4GfxControl_matches(p0: u32, p1: *const R4GfxTopologyLayout, p2: *const R4GfxTopologyLayout) -> R4LibrariesSlot;
     pub fn R4GfxControl_persistent(p0: u32, p1: *const R4GfxTopologyLayout) -> R4LibrariesSlot;
     pub fn R4GfxEdid_parse(p0: u32, p1: *const u8, p2: u64, p3: *mut R4GfxEdidReport) -> R4LibrariesSlot;
-    pub fn R4GfxEld_encode(p0: u32, p1: *const R4GfxEdidReport, p2: *const R4Lib_Value105, p3: *mut R4GfxEldData) -> R4LibrariesSlot;
-    pub fn R4GfxEld_encodeTransport(p0: u32, p1: *const R4GfxEdidReport, p2: *const R4Lib_Value105, p3: u32, p4: *mut R4GfxEldData) -> R4LibrariesSlot;
+    pub fn R4GfxEld_encode(p0: u32, p1: *const R4GfxEdidReport, p2: *const R4Lib_Value107, p3: *mut R4GfxEldData) -> R4LibrariesSlot;
+    pub fn R4GfxEld_encodeTransport(p0: u32, p1: *const R4GfxEdidReport, p2: *const R4Lib_Value107, p3: u32, p4: *mut R4GfxEldData) -> R4LibrariesSlot;
     pub fn R4GfxLinks_rgbDemand(p0: u32, p1: *const R4GfxLinksClock, p2: u8, p3: *mut R4GfxLinksDemand) -> R4LibrariesSlot;
     pub fn R4GfxLinks_tmdsFits(p0: u32, p1: *const R4GfxLinksClock, p2: u8, p3: u64) -> R4LibrariesSlot;
     pub fn R4GfxLinks_dp8b10bPayload(p0: u32, p1: u8, p2: u8) -> R4LibrariesSlot;
@@ -6437,9 +6667,11 @@ unsafe extern "C" {
     pub fn R4StdFileHandlerChoiceList_slice(p0: u32, p1: *const R4StdFileHandlerChoiceList) -> R4LibrariesSlot;
     pub fn R4ImgHelpersInfo_pixelCount(p0: u32, p1: *const R4ImgHelpersInfo) -> R4LibrariesSlot;
     pub fn R4ImgHelpersRasterContext_init(p0: u32, p1: *const R4XStartContext, p2: *mut R4ImgHelpersRasterContext) -> R4LibrariesSlot;
+    pub fn R4ImgHelpersRasterContext_init2(p0: u32, p1: *const R4Lib_abi_R4XStartContext2, p2: *mut R4ImgHelpersRasterContext) -> R4LibrariesSlot;
     pub fn R4ImgHelpersRasterContext_color(p0: u32, p1: *const R4ImgHelpersRasterContext, p2: *const u8, p3: u64, p4: *mut R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgRasterColor) -> R4LibrariesSlot;
     pub fn R4ImgHelpersRasterContext_iccProfile(p0: u32, p1: *const R4ImgHelpersRasterContext, p2: *const u8, p3: u64, p4: *mut u8, p5: u64) -> R4LibrariesSlot;
     pub fn R4ImgHelpersContext_init(p0: u32, p1: *const R4XStartContext, p2: *mut R4ImgHelpersContext) -> R4LibrariesSlot;
+    pub fn R4ImgHelpersContext_init2(p0: u32, p1: *const R4Lib_abi_R4XStartContext2, p2: *mut R4ImgHelpersContext) -> R4LibrariesSlot;
     pub fn R4ImgHelpersContext_probe(p0: u32, p1: *const R4ImgHelpersContext, p2: *const u8, p3: u64, p4: *const u8, p5: u64, p6: *mut R4ImgHelpersInfo) -> R4LibrariesSlot;
     pub fn R4ImgHelpersContext_scratchBytesFor(p0: u32, p1: *const R4ImgHelpersContext, p2: *const R4ImgHelpersInfo, p3: u64) -> R4LibrariesSlot;
     pub fn R4ImgHelpersContext_decode(p0: u32, p1: *const R4ImgHelpersContext, p2: *const u8, p3: u64, p4: *const u8, p5: u64, p6: *mut u32, p7: u64, p8: *mut u8, p9: u64, p10: *mut R4ImgHelpersImage) -> R4LibrariesSlot;
@@ -6448,11 +6680,13 @@ unsafe extern "C" {
     pub fn R4ImgHelpersContext_scaleComposite(p0: u32, p1: *const R4ImgHelpersContext, p2: *const R4ImgHelpersImage, p3: *mut u32, p4: u64, p5: u32, p6: u32, p7: u32) -> R4LibrariesSlot;
     pub fn R4ImgHelpersContext_decoderDiagnostic(p0: u32, p1: *const R4ImgHelpersContext, p2: *mut R4ImgHelpersDecoderDiagnostic) -> R4LibrariesSlot;
     pub fn R4ImgHelpersPngContext_init(p0: u32, p1: *const R4XStartContext, p2: *mut R4ImgHelpersPngContext) -> R4LibrariesSlot;
+    pub fn R4ImgHelpersPngContext_init2(p0: u32, p1: *const R4Lib_abi_R4XStartContext2, p2: *mut R4ImgHelpersPngContext) -> R4LibrariesSlot;
     pub fn R4ImgHelpersPngContext_pngColor(p0: u32, p1: *const R4ImgHelpersPngContext, p2: *const u8, p3: u64, p4: *mut R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor) -> R4LibrariesSlot;
     pub fn R4ImgHelpersPngContext_pngIccProfile(p0: u32, p1: *const R4ImgHelpersPngContext, p2: *const u8, p3: u64, p4: *mut u8, p5: u64) -> R4LibrariesSlot;
     pub fn R4ImgHelpersPngContext_pngScratchBytes16(p0: u32, p1: *const R4ImgHelpersPngContext, p2: *const R4ImgHelpersInfo, p3: u64) -> R4LibrariesSlot;
     pub fn R4ImgHelpersPngContext_pngDecode16(p0: u32, p1: *const R4ImgHelpersPngContext, p2: *const u8, p3: u64, p4: *mut u16, p5: u64, p6: *mut u8, p7: u64, p8: *mut R4ImgHelpersImage16) -> R4LibrariesSlot;
     pub fn R4FontHelpersContext_init(p0: u32, p1: *const R4XStartContext, p2: *mut R4FontHelpersContext) -> R4LibrariesSlot;
+    pub fn R4FontHelpersContext_init2(p0: u32, p1: *const R4Lib_abi_R4XStartContext2, p2: *mut R4FontHelpersContext) -> R4LibrariesSlot;
     pub fn R4FontHelpersContext_initTable(p0: u32, p1: *const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1, p2: *mut R4FontHelpersContext) -> R4LibrariesSlot;
     pub fn R4FontHelpersContext_initHeader(p0: u32, p1: *const R4Lib_r4os_runtime_r4l_InterfaceHeader, p2: *mut R4FontHelpersContext) -> R4LibrariesSlot;
     pub fn R4FontHelpersContext_sniff(p0: u32, p1: *const R4FontHelpersContext, p2: *const u8, p3: u64) -> R4LibrariesSlot;
@@ -6464,7 +6698,7 @@ unsafe extern "C" {
     pub fn R4FontHelpersFace_info(p0: u32, p1: *const R4FontHelpersFace, p2: *mut R4FontHelpersFaceInfo) -> R4LibrariesSlot;
     pub fn R4FontHelpersFace_glyphIndex(p0: u32, p1: *const R4FontHelpersFace, p2: u32) -> R4LibrariesSlot;
     pub fn R4FontHelpersFace_glyphMetrics(p0: u32, p1: *const R4FontHelpersFace, p2: u32, p3: *mut R4FontHelpersGlyphMetrics) -> R4LibrariesSlot;
-    pub fn R4FontHelpersFace_kerning(p0: u32, p1: *const R4FontHelpersFace, p2: u32, p3: u32, p4: *mut R4Lib_Value218) -> R4LibrariesSlot;
+    pub fn R4FontHelpersFace_kerning(p0: u32, p1: *const R4FontHelpersFace, p2: u32, p3: u32, p4: *mut R4Lib_Value220) -> R4LibrariesSlot;
     pub fn R4FontHelpersFace_rasterize(p0: u32, p1: *const R4FontHelpersFace, p2: u32, p3: u32, p4: *mut u8, p5: u64, p6: *mut R4FontHelpersRaster) -> R4LibrariesSlot;
     pub fn R4FontStoreFaceStore_init(p0: u32, p1: *const R4FontHelpersContext, p2: *const R4LibraryAllocator, p3: *const R4FontStoreOptions, p4: *mut R4FontStoreFaceStore) -> R4LibrariesSlot;
     pub fn R4FontStoreFaceStore_deinit(p0: u32, p1: *mut R4FontStoreFaceStore) -> R4LibrariesSlot;
@@ -6475,7 +6709,7 @@ unsafe extern "C" {
     pub fn R4FontStoreFaceStore_hasGlyph(p0: u32, p1: *mut R4FontStoreFaceStore, p2: *const R4FontStoreFaceHandle, p3: u32) -> R4LibrariesSlot;
     pub fn R4FontStoreFaceStore_faceMetricsAt(p0: u32, p1: *mut R4FontStoreFaceStore, p2: *const R4FontStoreFaceHandle, p3: u32, p4: *mut R4FontStoreFaceMetrics26_6) -> R4LibrariesSlot;
     pub fn R4FontStoreFaceStore_glyphMetricsAt(p0: u32, p1: *mut R4FontStoreFaceStore, p2: *const R4FontStoreFaceHandle, p3: u32, p4: u32, p5: *mut R4FontStoreGlyphMetrics26_6) -> R4LibrariesSlot;
-    pub fn R4FontStoreFaceStore_kerningAt(p0: u32, p1: *mut R4FontStoreFaceStore, p2: *const R4FontStoreFaceHandle, p3: u32, p4: u32, p5: u32, p6: *mut R4Lib_Value218) -> R4LibrariesSlot;
+    pub fn R4FontStoreFaceStore_kerningAt(p0: u32, p1: *mut R4FontStoreFaceStore, p2: *const R4FontStoreFaceHandle, p3: u32, p4: u32, p5: u32, p6: *mut R4Lib_Value220) -> R4LibrariesSlot;
     pub fn R4FontStoreFaceStore_rasterize(p0: u32, p1: *mut R4FontStoreFaceStore, p2: *const R4FontStoreFaceHandle, p3: u32, p4: u32, p5: *mut u8, p6: u64, p7: *mut R4FontHelpersRaster) -> R4LibrariesSlot;
     pub fn R4FontStoreFaceStore_rasterizeCached(p0: u32, p1: *mut R4FontStoreFaceStore, p2: *const R4FontStoreFaceHandle, p3: u32, p4: u32, p5: *mut R4FontStoreBorrowedRaster) -> R4LibrariesSlot;
     pub fn R4FontStoreFaceStore_cacheStats(p0: u32, p1: *const R4FontStoreFaceStore, p2: *mut R4FontStoreCacheStats) -> R4LibrariesSlot;
@@ -6484,6 +6718,7 @@ unsafe extern "C" {
     pub fn R4LibraryMemory_allocator(p0: u32, p1: *mut R4LibraryMemory, p2: *mut R4LibraryAllocator) -> R4LibrariesSlot;
     pub fn R4StdAdaptersSaver_save(p0: u32, p1: *const R4StdAdaptersSaver) -> R4LibrariesSlot;
     pub fn R4AcoWorker_init(p0: u32, p1: *mut R4Lib_r4os_app_contract_App, p2: *mut R4AcoWorker) -> R4LibrariesSlot;
+    pub fn R4AcoWorker_init2(p0: u32, p1: *mut R4Lib_r4os_app2_App, p2: *mut R4AcoWorker) -> R4LibrariesSlot;
     pub fn R4AcoWorker_start(p0: u32, p1: *mut R4AcoWorker, p2: *const R4Lib_r4aco_R4AcoRequest) -> R4LibrariesSlot;
     pub fn R4AcoWorker_cancel(p0: u32, p1: *mut R4AcoWorker) -> R4LibrariesSlot;
     pub fn R4AcoWorker_join(p0: u32, p1: *mut R4AcoWorker, p2: u64) -> R4LibrariesSlot;
@@ -6526,7 +6761,7 @@ unsafe extern "C" {
     pub fn R4GfxColorSignalMetadata_validate(p0: u32, p1: *const R4GfxColorSignalMetadata) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_init(p0: u32, p1: *const R4GfxTopologyOutput, p2: u64, p3: u64, p4: *mut R4GfxTopologyLayout) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_at(p0: u32, p1: *const R4GfxTopologyLayout, p2: *const R4GfxTopologyPoint) -> R4LibrariesSlot;
-    pub fn R4GfxTopologyLayout_nearest(p0: u32, p1: *const R4GfxTopologyLayout, p2: *const R4GfxTopologyPoint, p3: *mut R4Lib_Value632) -> R4LibrariesSlot;
+    pub fn R4GfxTopologyLayout_nearest(p0: u32, p1: *const R4GfxTopologyLayout, p2: *const R4GfxTopologyPoint, p3: *mut R4Lib_Value640) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_dominant(p0: u32, p1: *const R4GfxTopologyLayout, p2: *const R4GfxTopologyRect) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_rescue(p0: u32, p1: *const R4GfxTopologyLayout, p2: *const R4GfxTopologyRect, p3: u32, p4: *mut R4GfxTopologyRect) -> R4LibrariesSlot;
     pub fn R4GfxTopologyOutput_interval(p0: u32, p1: *const R4GfxTopologyOutput) -> R4LibrariesSlot;
@@ -6596,6 +6831,7 @@ unsafe extern "C" {
     pub fn R4GfxVrrScheduler_fail(p0: u32, p1: *mut R4GfxVrrScheduler, p2: u32) -> R4LibrariesSlot;
     pub fn R4GfxVrrScheduler_frame(p0: u32, p1: *mut R4GfxVrrScheduler, p2: u64, p3: R4LibrariesSlot, p4: *mut R4GfxVrrFrame) -> R4LibrariesSlot;
     pub fn R4NakWorker_init(p0: u32, p1: *mut R4Lib_r4os_app_contract_App, p2: *mut R4NakWorker) -> R4LibrariesSlot;
+    pub fn R4NakWorker_init2(p0: u32, p1: *mut R4Lib_r4os_app2_App, p2: *mut R4NakWorker) -> R4LibrariesSlot;
     pub fn R4NakWorker_start(p0: u32, p1: *mut R4NakWorker, p2: *const R4Lib_r4nak_R4NakRequest) -> R4LibrariesSlot;
     pub fn R4NakWorker_cancel(p0: u32, p1: *mut R4NakWorker) -> R4LibrariesSlot;
     pub fn R4NakWorker_join(p0: u32, p1: *mut R4NakWorker, p2: u64) -> R4LibrariesSlot;
@@ -6626,9 +6862,57 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackClockClock_position(p0: u32, p1: *mut R4VideoPlaybackClockClock, p2: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackClockClock_setPaused(p0: u32, p1: *mut R4VideoPlaybackClockClock, p2: u64, p3: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackClockClock_seek(p0: u32, p1: *mut R4VideoPlaybackClockClock, p2: u64, p3: i64) -> R4LibrariesSlot;
+    pub fn R4MediaCompilerContext2_init(p0: u32, p1: *const core::ffi::c_void, p2: *mut R4MediaCompilerContext2) -> R4LibrariesSlot;
+    pub fn R4MediaCompilerContext2_nakWorker(p0: u32, p1: *mut R4MediaCompilerContext2, p2: *mut R4NakWorker) -> R4LibrariesSlot;
+    pub fn R4MediaCompilerContext2_acoWorker(p0: u32, p1: *mut R4MediaCompilerContext2, p2: *mut R4AcoWorker) -> R4LibrariesSlot;
     pub fn R4MediaSink_write(p0: u32, p1: *const R4MediaSink, p2: *const u8, p3: u64) -> R4LibrariesSlot;
     pub fn R4Lib_Value0_create(p0: *mut R4Lib_Value0, p1: *const R4XStartContext) -> R4LibrariesSlot;
     pub fn R4Lib_Value0_inspect(p0: *const R4Lib_Value0) -> R4LibrariesSlot;
+    pub fn R4Lib_Value2_create(p0: *mut R4Lib_Value2, p1: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_Value2_inspect(p0: *const R4Lib_Value2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_create(p0: *mut R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_from_fields(p0: *mut R4Lib_abi_R4XStartContext2, p1: u32, p2: u16, p3: u16, p4: u32, p5: u32, p6: u64, p7: u32, p8: u32, p9: u64, p10: u64, p11: u64, p12: u64, p13: u32, p14: u32, p15: u64, p16: u64, p17: u64, p18: u64, p19: u64, p20: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_magic(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_magic(p0: *mut R4Lib_abi_R4XStartContext2, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_abi_major(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_abi_major(p0: *mut R4Lib_abi_R4XStartContext2, p1: u16) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_abi_minor(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_abi_minor(p0: *mut R4Lib_abi_R4XStartContext2, p1: u16) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_size(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_size(p0: *mut R4Lib_abi_R4XStartContext2, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_flags(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_flags(p0: *mut R4Lib_abi_R4XStartContext2, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_instance_id(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_instance_id(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_app_class(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_app_class(p0: *mut R4Lib_abi_R4XStartContext2, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_reserved0(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_reserved0(p0: *mut R4Lib_abi_R4XStartContext2, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_program_path(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_program_path(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_args(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_args(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_args_len(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_args_len(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_imports(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_imports(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_import_count(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_import_count(p0: *mut R4Lib_abi_R4XStartContext2, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_reserved1(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_reserved1(p0: *mut R4Lib_abi_R4XStartContext2, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_reserved_memory0(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_reserved_memory0(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_reserved_memory1(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_reserved_memory1(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_exit(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_exit(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_should_close(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_should_close(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_yield(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_yield(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_get_reserved2(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_set_reserved2(p0: *mut R4Lib_abi_R4XStartContext2, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_abi_R4XStartContext2_inspect(p0: *const R4Lib_abi_R4XStartContext2) -> R4LibrariesSlot;
     pub fn R4StdTextEncoding_create(p0: *mut R4StdTextEncoding, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdTextEncoding_inspect(p0: *const R4StdTextEncoding) -> R4LibrariesSlot;
     pub fn R4StdTextLineEnding_create(p0: *mut R4StdTextLineEnding, p1: u32) -> R4LibrariesSlot;
@@ -6638,8 +6922,8 @@ unsafe extern "C" {
     pub fn R4StdTextBytes_get_bytes(p0: *const R4StdTextBytes) -> R4LibrariesSlot;
     pub fn R4StdTextBytes_set_bytes(p0: *mut R4StdTextBytes, p1: *const u8, p2: u64) -> R4LibrariesSlot;
     pub fn R4StdTextBytes_inspect(p0: *const R4StdTextBytes) -> R4LibrariesSlot;
-    pub fn R4Lib_Value5_create(p0: *mut R4Lib_Value5, p1: *const u8, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value5_inspect(p0: *const R4Lib_Value5) -> R4LibrariesSlot;
+    pub fn R4Lib_Value7_create(p0: *mut R4Lib_Value7, p1: *const u8, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value7_inspect(p0: *const R4Lib_Value7) -> R4LibrariesSlot;
     pub fn R4StdTextUtf8Text_create(p0: *mut R4StdTextUtf8Text, p1: *const u8, p2: u64, p3: u64) -> R4LibrariesSlot;
     pub fn R4StdTextUtf8Text_from_fields(p0: *mut R4StdTextUtf8Text, p1: *const u8, p2: u64, p3: u64) -> R4LibrariesSlot;
     pub fn R4StdTextUtf8Text_get_bytes(p0: *const R4StdTextUtf8Text) -> R4LibrariesSlot;
@@ -6670,14 +6954,14 @@ unsafe extern "C" {
     pub fn R4StdTextDocumentText_get_line_ending(p0: *const R4StdTextDocumentText) -> R4LibrariesSlot;
     pub fn R4StdTextDocumentText_set_line_ending(p0: *mut R4StdTextDocumentText, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdTextDocumentText_inspect(p0: *const R4StdTextDocumentText) -> R4LibrariesSlot;
-    pub fn R4Lib_Value11_inspect(p0: *const R4Lib_Value11) -> R4LibrariesSlot;
-    pub fn R4Lib_Value12_inspect(p0: *const R4Lib_Value12, p1: *mut R4StdTextUtf8Text) -> R4LibrariesSlot;
-    pub fn R4Lib_Value13_inspect(p0: *const R4Lib_Value13, p1: *mut R4StdTextSystemText) -> R4LibrariesSlot;
-    pub fn R4Lib_Value14_create(p0: *mut R4Lib_Value14, p1: *mut u8, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value14_inspect(p0: *const R4Lib_Value14) -> R4LibrariesSlot;
-    pub fn R4Lib_Value15_inspect(p0: *const R4Lib_Value15) -> R4LibrariesSlot;
-    pub fn R4Lib_Value16_inspect(p0: *const R4Lib_Value16, p1: *mut R4StdTextDocumentText) -> R4LibrariesSlot;
-    pub fn R4Lib_Value17_inspect(p0: *const R4Lib_Value17, p1: *mut R4StdTextUiText8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value13_inspect(p0: *const R4Lib_Value13) -> R4LibrariesSlot;
+    pub fn R4Lib_Value14_inspect(p0: *const R4Lib_Value14, p1: *mut R4StdTextUtf8Text) -> R4LibrariesSlot;
+    pub fn R4Lib_Value15_inspect(p0: *const R4Lib_Value15, p1: *mut R4StdTextSystemText) -> R4LibrariesSlot;
+    pub fn R4Lib_Value16_create(p0: *mut R4Lib_Value16, p1: *mut u8, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value16_inspect(p0: *const R4Lib_Value16) -> R4LibrariesSlot;
+    pub fn R4Lib_Value17_inspect(p0: *const R4Lib_Value17) -> R4LibrariesSlot;
+    pub fn R4Lib_Value18_inspect(p0: *const R4Lib_Value18, p1: *mut R4StdTextDocumentText) -> R4LibrariesSlot;
+    pub fn R4Lib_Value19_inspect(p0: *const R4Lib_Value19, p1: *mut R4StdTextUiText8) -> R4LibrariesSlot;
     pub fn R4StdSettingspaths_create(p0: *mut R4StdSettingspaths) -> R4LibrariesSlot;
     pub fn R4StdSettingspaths_from_fields(p0: *mut R4StdSettingspaths) -> R4LibrariesSlot;
     pub fn R4StdSettingspaths_inspect(p0: *const R4StdSettingspaths) -> R4LibrariesSlot;
@@ -6748,16 +7032,16 @@ unsafe extern "C" {
     pub fn R4StdSettingsWriteback_get_failure_reported(p0: *const R4StdSettingsWriteback) -> R4LibrariesSlot;
     pub fn R4StdSettingsWriteback_set_failure_reported(p0: *mut R4StdSettingsWriteback, p1: u8) -> R4LibrariesSlot;
     pub fn R4StdSettingsWriteback_inspect(p0: *const R4StdSettingsWriteback) -> R4LibrariesSlot;
-    pub fn R4Lib_Value28_create(p0: *mut R4Lib_Value28, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value28_inspect(p0: *const R4Lib_Value28) -> R4LibrariesSlot;
-    pub fn R4Lib_Value29_create(p0: *mut R4Lib_Value29, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value29_inspect(p0: *const R4Lib_Value29, p1: *mut R4StdSettingsEntry) -> R4LibrariesSlot;
     pub fn R4Lib_Value30_create(p0: *mut R4Lib_Value30, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4Lib_Value30_inspect(p0: *const R4Lib_Value30) -> R4LibrariesSlot;
     pub fn R4Lib_Value31_create(p0: *mut R4Lib_Value31, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value31_inspect(p0: *const R4Lib_Value31) -> R4LibrariesSlot;
+    pub fn R4Lib_Value31_inspect(p0: *const R4Lib_Value31, p1: *mut R4StdSettingsEntry) -> R4LibrariesSlot;
     pub fn R4Lib_Value32_create(p0: *mut R4Lib_Value32, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4Lib_Value32_inspect(p0: *const R4Lib_Value32) -> R4LibrariesSlot;
+    pub fn R4Lib_Value33_create(p0: *mut R4Lib_Value33, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value33_inspect(p0: *const R4Lib_Value33) -> R4LibrariesSlot;
+    pub fn R4Lib_Value34_create(p0: *mut R4Lib_Value34, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value34_inspect(p0: *const R4Lib_Value34) -> R4LibrariesSlot;
     pub fn R4StdDateDate_create(p0: *mut R4StdDateDate) -> R4LibrariesSlot;
     pub fn R4StdDateDate_from_fields(p0: *mut R4StdDateDate, p1: u16, p2: u8, p3: u8) -> R4LibrariesSlot;
     pub fn R4StdDateDate_get_year(p0: *const R4StdDateDate) -> R4LibrariesSlot;
@@ -6799,20 +7083,20 @@ unsafe extern "C" {
     pub fn R4StdDateFatDateTime_get_time(p0: *const R4StdDateFatDateTime) -> R4LibrariesSlot;
     pub fn R4StdDateFatDateTime_set_time(p0: *mut R4StdDateFatDateTime, p1: u16) -> R4LibrariesSlot;
     pub fn R4StdDateFatDateTime_inspect(p0: *const R4StdDateFatDateTime) -> R4LibrariesSlot;
-    pub fn R4Lib_Value39_create(p0: *mut R4Lib_Value39, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value39_inspect(p0: *const R4Lib_Value39) -> R4LibrariesSlot;
-    pub fn R4Lib_Value40_create(p0: *mut R4Lib_Value40, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value40_inspect(p0: *const R4Lib_Value40, p1: *mut R4StdDateShiftedDateTime) -> R4LibrariesSlot;
+    pub fn R4Lib_Value41_create(p0: *mut R4Lib_Value41, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value41_inspect(p0: *const R4Lib_Value41) -> R4LibrariesSlot;
     pub fn R4Lib_Value42_create(p0: *mut R4Lib_Value42, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value42_inspect(p0: *const R4Lib_Value42, p1: *mut R4StdDateDateTime) -> R4LibrariesSlot;
-    pub fn R4Lib_Value43_create(p0: *mut R4Lib_Value43, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value43_inspect(p0: *const R4Lib_Value43, p1: *mut R4TimeState) -> R4LibrariesSlot;
+    pub fn R4Lib_Value42_inspect(p0: *const R4Lib_Value42, p1: *mut R4StdDateShiftedDateTime) -> R4LibrariesSlot;
     pub fn R4Lib_Value44_create(p0: *mut R4Lib_Value44, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value44_inspect(p0: *const R4Lib_Value44, p1: *mut R4UtcTime) -> R4LibrariesSlot;
+    pub fn R4Lib_Value44_inspect(p0: *const R4Lib_Value44, p1: *mut R4StdDateDateTime) -> R4LibrariesSlot;
+    pub fn R4Lib_Value45_create(p0: *mut R4Lib_Value45, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value45_inspect(p0: *const R4Lib_Value45, p1: *mut R4TimeState) -> R4LibrariesSlot;
     pub fn R4Lib_Value46_create(p0: *mut R4Lib_Value46, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value46_inspect(p0: *const R4Lib_Value46, p1: *mut R4StdDateDate) -> R4LibrariesSlot;
-    pub fn R4Lib_Value47_create(p0: *mut R4Lib_Value47, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value47_inspect(p0: *const R4Lib_Value47, p1: *mut R4StdDateTimeOfDay) -> R4LibrariesSlot;
+    pub fn R4Lib_Value46_inspect(p0: *const R4Lib_Value46, p1: *mut R4UtcTime) -> R4LibrariesSlot;
+    pub fn R4Lib_Value48_create(p0: *mut R4Lib_Value48, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value48_inspect(p0: *const R4Lib_Value48, p1: *mut R4StdDateDate) -> R4LibrariesSlot;
+    pub fn R4Lib_Value49_create(p0: *mut R4Lib_Value49, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value49_inspect(p0: *const R4Lib_Value49, p1: *mut R4StdDateTimeOfDay) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdDateTime_create(p0: *mut R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdDateTime, p1: u16, p2: u8, p3: u8, p4: u8, p5: u8, p6: u8, p7: u8) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdDateTime_from_fields(p0: *mut R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdDateTime, p1: u16, p2: u8, p3: u8, p4: u8, p5: u8, p6: u8, p7: u8) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdDateTime_get_year(p0: *const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdDateTime) -> R4LibrariesSlot;
@@ -6882,12 +7166,12 @@ unsafe extern "C" {
     pub fn R4StdTimeHelpersConfig_get_clock_format(p0: *const R4StdTimeHelpersConfig) -> R4LibrariesSlot;
     pub fn R4StdTimeHelpersConfig_set_clock_format(p0: *mut R4StdTimeHelpersConfig, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdTimeHelpersConfig_inspect(p0: *const R4StdTimeHelpersConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value53_create(p0: *mut R4Lib_Value53, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value53_inspect(p0: *const R4Lib_Value53) -> R4LibrariesSlot;
-    pub fn R4Lib_Value54_inspect(p0: *const R4Lib_Value54, p1: *mut R4Lib_r4os_path_FilePath) -> R4LibrariesSlot;
-    pub fn R4Lib_Value56_inspect(p0: *const R4Lib_Value56, p1: *mut R4Lib_r4os_path_AbsoluteFilePath) -> R4LibrariesSlot;
-    pub fn R4Lib_Value58_inspect(p0: *const R4Lib_Value58, p1: *mut R4Lib_r4os_path_RelativeFilePath) -> R4LibrariesSlot;
-    pub fn R4Lib_Value60_inspect(p0: *const R4Lib_Value60, p1: *mut R4Lib_r4os_path_RegistryPath) -> R4LibrariesSlot;
+    pub fn R4Lib_Value55_create(p0: *mut R4Lib_Value55, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value55_inspect(p0: *const R4Lib_Value55) -> R4LibrariesSlot;
+    pub fn R4Lib_Value56_inspect(p0: *const R4Lib_Value56, p1: *mut R4Lib_r4os_path_FilePath) -> R4LibrariesSlot;
+    pub fn R4Lib_Value58_inspect(p0: *const R4Lib_Value58, p1: *mut R4Lib_r4os_path_AbsoluteFilePath) -> R4LibrariesSlot;
+    pub fn R4Lib_Value60_inspect(p0: *const R4Lib_Value60, p1: *mut R4Lib_r4os_path_RelativeFilePath) -> R4LibrariesSlot;
+    pub fn R4Lib_Value62_inspect(p0: *const R4Lib_Value62, p1: *mut R4Lib_r4os_path_RegistryPath) -> R4LibrariesSlot;
     pub fn R4StdCodecCodepage_create(p0: *mut R4StdCodecCodepage, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdCodecCodepage_inspect(p0: *const R4StdCodecCodepage) -> R4LibrariesSlot;
     pub fn R4StdCodecMode_create(p0: *mut R4StdCodecMode, p1: u32) -> R4LibrariesSlot;
@@ -6906,10 +7190,10 @@ unsafe extern "C" {
     pub fn R4StdCodecDecoded_inspect(p0: *const R4StdCodecDecoded) -> R4LibrariesSlot;
     pub fn R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type___create(p0: *mut R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type__, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type___inspect(p0: *const R4Lib__typeInfo_R4STD_Bindings_Zig_codec_Decoded____union__tag_type__) -> R4LibrariesSlot;
-    pub fn R4Lib_Value67_inspect(p0: *const R4Lib_Value67) -> R4LibrariesSlot;
-    pub fn R4Lib_Value68_inspect(p0: *const R4Lib_Value68) -> R4LibrariesSlot;
-    pub fn R4Lib_Value69_inspect(p0: *const R4Lib_Value69, p1: *mut R4StdCodecDecoded) -> R4LibrariesSlot;
+    pub fn R4Lib_Value69_inspect(p0: *const R4Lib_Value69) -> R4LibrariesSlot;
     pub fn R4Lib_Value70_inspect(p0: *const R4Lib_Value70) -> R4LibrariesSlot;
+    pub fn R4Lib_Value71_inspect(p0: *const R4Lib_Value71, p1: *mut R4StdCodecDecoded) -> R4LibrariesSlot;
+    pub fn R4Lib_Value72_inspect(p0: *const R4Lib_Value72) -> R4LibrariesSlot;
     pub fn R4StdCodecStream_create(p0: *mut R4StdCodecStream) -> R4LibrariesSlot;
     pub fn R4StdCodecStream_from_fields(p0: *mut R4StdCodecStream, p1: *const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State) -> R4LibrariesSlot;
     pub fn R4StdCodecStream_get_state(p0: *const R4StdCodecStream, p1: *mut R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State) -> R4LibrariesSlot;
@@ -6926,7 +7210,7 @@ unsafe extern "C" {
     pub fn R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State_get_reserved1(p0: *const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State_set_reserved1(p0: *mut R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State_inspect(p0: *const R4Lib_R4STD_Bindings_Zig_r4std_abi_R4StdUtf8State) -> R4LibrariesSlot;
-    pub fn R4Lib_Value73_inspect(p0: *const R4Lib_Value73) -> R4LibrariesSlot;
+    pub fn R4Lib_Value75_inspect(p0: *const R4Lib_Value75) -> R4LibrariesSlot;
     pub fn R4StdGraphemeState_create(p0: *mut R4StdGraphemeState) -> R4LibrariesSlot;
     pub fn R4StdGraphemeState_from_fields(p0: *mut R4StdGraphemeState, p1: R4LibrariesSlot, p2: u8, p3: u8, p4: u8, p5: u32) -> R4LibrariesSlot;
     pub fn R4StdGraphemeState_get_previous(p0: *const R4StdGraphemeState) -> R4LibrariesSlot;
@@ -6940,12 +7224,12 @@ unsafe extern "C" {
     pub fn R4StdGraphemeState_get_indic(p0: *const R4StdGraphemeState) -> R4LibrariesSlot;
     pub fn R4StdGraphemeState_set_indic(p0: *mut R4StdGraphemeState, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdGraphemeState_inspect(p0: *const R4StdGraphemeState) -> R4LibrariesSlot;
-    pub fn R4Lib_Value75_create(p0: *mut R4Lib_Value75, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value75_inspect(p0: *const R4Lib_Value75) -> R4LibrariesSlot;
+    pub fn R4Lib_Value77_create(p0: *mut R4Lib_Value77, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value77_inspect(p0: *const R4Lib_Value77) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_create(p0: *mut R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb_inspect(p0: *const R4Lib_R4STD_Bindings_Zig_grapheme_properties_Gcb) -> R4LibrariesSlot;
-    pub fn R4Lib_Value77_create(p0: *mut R4Lib_Value77, p1: u32) -> R4LibrariesSlot;
-    pub fn R4Lib_Value77_inspect(p0: *const R4Lib_Value77) -> R4LibrariesSlot;
+    pub fn R4Lib_Value79_create(p0: *mut R4Lib_Value79, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_Value79_inspect(p0: *const R4Lib_Value79) -> R4LibrariesSlot;
     pub fn R4StdGraphemeRange_create(p0: *mut R4StdGraphemeRange, p1: u64, p2: u64) -> R4LibrariesSlot;
     pub fn R4StdGraphemeRange_from_fields(p0: *mut R4StdGraphemeRange, p1: u64, p2: u64) -> R4LibrariesSlot;
     pub fn R4StdGraphemeRange_get_start(p0: *const R4StdGraphemeRange) -> R4LibrariesSlot;
@@ -6962,13 +7246,13 @@ unsafe extern "C" {
     pub fn R4StdGraphemeIterator_get_state(p0: *const R4StdGraphemeIterator, p1: *mut R4StdGraphemeState) -> R4LibrariesSlot;
     pub fn R4StdGraphemeIterator_set_state(p0: *mut R4StdGraphemeIterator, p1: *const R4StdGraphemeState) -> R4LibrariesSlot;
     pub fn R4StdGraphemeIterator_inspect(p0: *const R4StdGraphemeIterator) -> R4LibrariesSlot;
-    pub fn R4Lib_Value80_inspect(p0: *const R4Lib_Value80) -> R4LibrariesSlot;
+    pub fn R4Lib_Value82_inspect(p0: *const R4Lib_Value82) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_create(p0: *mut R4StdGraphemeStream) -> R4LibrariesSlot;
-    pub fn R4StdGraphemeStream_from_fields(p0: *mut R4StdGraphemeStream, p1: *const R4StdGraphemeState, p2: *const R4Lib_Value82, p3: u64, p4: u64, p5: u8) -> R4LibrariesSlot;
+    pub fn R4StdGraphemeStream_from_fields(p0: *mut R4StdGraphemeStream, p1: *const R4StdGraphemeState, p2: *const R4Lib_Value84, p3: u64, p4: u64, p5: u8) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_get_state(p0: *const R4StdGraphemeStream, p1: *mut R4StdGraphemeState) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_set_state(p0: *mut R4StdGraphemeStream, p1: *const R4StdGraphemeState) -> R4LibrariesSlot;
-    pub fn R4StdGraphemeStream_get_pending(p0: *const R4StdGraphemeStream, p1: *mut R4Lib_Value82) -> R4LibrariesSlot;
-    pub fn R4StdGraphemeStream_set_pending(p0: *mut R4StdGraphemeStream, p1: *const R4Lib_Value82) -> R4LibrariesSlot;
+    pub fn R4StdGraphemeStream_get_pending(p0: *const R4StdGraphemeStream, p1: *mut R4Lib_Value84) -> R4LibrariesSlot;
+    pub fn R4StdGraphemeStream_set_pending(p0: *mut R4StdGraphemeStream, p1: *const R4Lib_Value84) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_get_len(p0: *const R4StdGraphemeStream) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_set_len(p0: *mut R4StdGraphemeStream, p1: u64) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_get_offset(p0: *const R4StdGraphemeStream) -> R4LibrariesSlot;
@@ -6976,8 +7260,8 @@ unsafe extern "C" {
     pub fn R4StdGraphemeStream_get_failed(p0: *const R4StdGraphemeStream) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_set_failed(p0: *mut R4StdGraphemeStream, p1: u8) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_inspect(p0: *const R4StdGraphemeStream) -> R4LibrariesSlot;
-    pub fn R4Lib_Value82_create(p0: *mut R4Lib_Value82, p1: *const R4Lib_Value82) -> R4LibrariesSlot;
-    pub fn R4Lib_Value82_inspect(p0: *const R4Lib_Value82, p1: *mut R4Lib_Value82) -> R4LibrariesSlot;
+    pub fn R4Lib_Value84_create(p0: *mut R4Lib_Value84, p1: *const R4Lib_Value84) -> R4LibrariesSlot;
+    pub fn R4Lib_Value84_inspect(p0: *const R4Lib_Value84, p1: *mut R4Lib_Value84) -> R4LibrariesSlot;
     pub fn R4StdConsoleTextScalar_create(p0: *mut R4StdConsoleTextScalar, p1: u32, p2: u64) -> R4LibrariesSlot;
     pub fn R4StdConsoleTextScalar_from_fields(p0: *mut R4StdConsoleTextScalar, p1: u32, p2: u64) -> R4LibrariesSlot;
     pub fn R4StdConsoleTextScalar_get_value(p0: *const R4StdConsoleTextScalar) -> R4LibrariesSlot;
@@ -6985,18 +7269,18 @@ unsafe extern "C" {
     pub fn R4StdConsoleTextScalar_get_len(p0: *const R4StdConsoleTextScalar) -> R4LibrariesSlot;
     pub fn R4StdConsoleTextScalar_set_len(p0: *mut R4StdConsoleTextScalar, p1: u64) -> R4LibrariesSlot;
     pub fn R4StdConsoleTextScalar_inspect(p0: *const R4StdConsoleTextScalar) -> R4LibrariesSlot;
-    pub fn R4Lib_Value84_inspect(p0: *const R4Lib_Value84, p1: *mut R4StdConsoleTextScalar) -> R4LibrariesSlot;
+    pub fn R4Lib_Value86_inspect(p0: *const R4Lib_Value86, p1: *mut R4StdConsoleTextScalar) -> R4LibrariesSlot;
     pub fn R4StdShortcutForeignEntry_create(p0: *mut R4StdShortcutForeignEntry) -> R4LibrariesSlot;
-    pub fn R4StdShortcutForeignEntry_from_fields(p0: *mut R4StdShortcutForeignEntry, p1: *const R4Lib_Value86, p2: *const R4Lib_Value87) -> R4LibrariesSlot;
-    pub fn R4StdShortcutForeignEntry_get_key(p0: *const R4StdShortcutForeignEntry, p1: *mut R4Lib_Value86) -> R4LibrariesSlot;
-    pub fn R4StdShortcutForeignEntry_set_key(p0: *mut R4StdShortcutForeignEntry, p1: *const R4Lib_Value86) -> R4LibrariesSlot;
-    pub fn R4StdShortcutForeignEntry_get_value(p0: *const R4StdShortcutForeignEntry, p1: *mut R4Lib_Value87) -> R4LibrariesSlot;
-    pub fn R4StdShortcutForeignEntry_set_value(p0: *mut R4StdShortcutForeignEntry, p1: *const R4Lib_Value87) -> R4LibrariesSlot;
+    pub fn R4StdShortcutForeignEntry_from_fields(p0: *mut R4StdShortcutForeignEntry, p1: *const R4Lib_Value88, p2: *const R4Lib_Value89) -> R4LibrariesSlot;
+    pub fn R4StdShortcutForeignEntry_get_key(p0: *const R4StdShortcutForeignEntry, p1: *mut R4Lib_Value88) -> R4LibrariesSlot;
+    pub fn R4StdShortcutForeignEntry_set_key(p0: *mut R4StdShortcutForeignEntry, p1: *const R4Lib_Value88) -> R4LibrariesSlot;
+    pub fn R4StdShortcutForeignEntry_get_value(p0: *const R4StdShortcutForeignEntry, p1: *mut R4Lib_Value89) -> R4LibrariesSlot;
+    pub fn R4StdShortcutForeignEntry_set_value(p0: *mut R4StdShortcutForeignEntry, p1: *const R4Lib_Value89) -> R4LibrariesSlot;
     pub fn R4StdShortcutForeignEntry_inspect(p0: *const R4StdShortcutForeignEntry) -> R4LibrariesSlot;
-    pub fn R4Lib_Value86_create(p0: *mut R4Lib_Value86, p1: *const R4Lib_Value86) -> R4LibrariesSlot;
-    pub fn R4Lib_Value86_inspect(p0: *const R4Lib_Value86, p1: *mut R4Lib_Value86) -> R4LibrariesSlot;
-    pub fn R4Lib_Value87_create(p0: *mut R4Lib_Value87, p1: *const R4Lib_Value87) -> R4LibrariesSlot;
-    pub fn R4Lib_Value87_inspect(p0: *const R4Lib_Value87, p1: *mut R4Lib_Value87) -> R4LibrariesSlot;
+    pub fn R4Lib_Value88_create(p0: *mut R4Lib_Value88, p1: *const R4Lib_Value88) -> R4LibrariesSlot;
+    pub fn R4Lib_Value88_inspect(p0: *const R4Lib_Value88, p1: *mut R4Lib_Value88) -> R4LibrariesSlot;
+    pub fn R4Lib_Value89_create(p0: *mut R4Lib_Value89, p1: *const R4Lib_Value89) -> R4LibrariesSlot;
+    pub fn R4Lib_Value89_inspect(p0: *const R4Lib_Value89, p1: *mut R4Lib_Value89) -> R4LibrariesSlot;
     pub fn R4StdShortcutTargetKind_create(p0: *mut R4StdShortcutTargetKind, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdShortcutTargetKind_inspect(p0: *const R4StdShortcutTargetKind) -> R4LibrariesSlot;
     pub fn R4StdShortcutResolvedTarget_create(p0: *mut R4StdShortcutResolvedTarget, p1: u32, p2: *const u8, p3: u64, p4: *const u8, p5: u64, p6: *const u8, p7: u64, p8: u32, p9: *const u8, p10: u64, p11: *const u8, p12: u64) -> R4LibrariesSlot;
@@ -7017,94 +7301,94 @@ unsafe extern "C" {
     pub fn R4StdShortcutResolvedTarget_set_workdir(p0: *mut R4StdShortcutResolvedTarget, p1: *const u8, p2: u64) -> R4LibrariesSlot;
     pub fn R4StdShortcutResolvedTarget_inspect(p0: *const R4StdShortcutResolvedTarget) -> R4LibrariesSlot;
     pub fn R4StdShortcutShortcut_create(p0: *mut R4StdShortcutShortcut) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_from_fields(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value92, p2: *const R4Lib_Value93, p3: *const R4Lib_Value87, p4: u32, p5: *const R4Lib_Value92, p6: *const R4Lib_Value92, p7: *const R4Lib_Value94, p8: u8) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_get_target(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_set_target(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_get_title(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value93) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_set_title(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value93) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_get_args(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value87) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_set_args(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value87) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_from_fields(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value94, p2: *const R4Lib_Value95, p3: *const R4Lib_Value89, p4: u32, p5: *const R4Lib_Value94, p6: *const R4Lib_Value94, p7: *const R4Lib_Value96, p8: u8) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_get_target(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value94) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_set_target(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value94) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_get_title(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value95) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_set_title(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value95) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_get_args(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value89) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_set_args(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value89) -> R4LibrariesSlot;
     pub fn R4StdShortcutShortcut_get_policy(p0: *const R4StdShortcutShortcut) -> R4LibrariesSlot;
     pub fn R4StdShortcutShortcut_set_policy(p0: *mut R4StdShortcutShortcut, p1: u32) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_get_icon(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_set_icon(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_get_workdir(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_set_workdir(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_get_foreign(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value94) -> R4LibrariesSlot;
-    pub fn R4StdShortcutShortcut_set_foreign(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value94) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_get_icon(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value94) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_set_icon(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value94) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_get_workdir(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value94) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_set_workdir(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value94) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_get_foreign(p0: *const R4StdShortcutShortcut, p1: *mut R4Lib_Value96) -> R4LibrariesSlot;
+    pub fn R4StdShortcutShortcut_set_foreign(p0: *mut R4StdShortcutShortcut, p1: *const R4Lib_Value96) -> R4LibrariesSlot;
     pub fn R4StdShortcutShortcut_get_foreign_count(p0: *const R4StdShortcutShortcut) -> R4LibrariesSlot;
     pub fn R4StdShortcutShortcut_set_foreign_count(p0: *mut R4StdShortcutShortcut, p1: u8) -> R4LibrariesSlot;
     pub fn R4StdShortcutShortcut_inspect(p0: *const R4StdShortcutShortcut) -> R4LibrariesSlot;
-    pub fn R4Lib_Value92_create(p0: *mut R4Lib_Value92, p1: *const R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4Lib_Value92_inspect(p0: *const R4Lib_Value92, p1: *mut R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4Lib_Value93_create(p0: *mut R4Lib_Value93, p1: *const R4Lib_Value93) -> R4LibrariesSlot;
-    pub fn R4Lib_Value93_inspect(p0: *const R4Lib_Value93, p1: *mut R4Lib_Value93) -> R4LibrariesSlot;
     pub fn R4Lib_Value94_create(p0: *mut R4Lib_Value94, p1: *const R4Lib_Value94) -> R4LibrariesSlot;
     pub fn R4Lib_Value94_inspect(p0: *const R4Lib_Value94, p1: *mut R4Lib_Value94) -> R4LibrariesSlot;
-    pub fn R4Lib_Value95_inspect(p0: *const R4Lib_Value95, p1: *mut R4StdShortcutShortcut) -> R4LibrariesSlot;
-    pub fn R4Lib_Value96_create(p0: *mut R4Lib_Value96, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value96_inspect(p0: *const R4Lib_Value96) -> R4LibrariesSlot;
+    pub fn R4Lib_Value95_create(p0: *mut R4Lib_Value95, p1: *const R4Lib_Value95) -> R4LibrariesSlot;
+    pub fn R4Lib_Value95_inspect(p0: *const R4Lib_Value95, p1: *mut R4Lib_Value95) -> R4LibrariesSlot;
+    pub fn R4Lib_Value96_create(p0: *mut R4Lib_Value96, p1: *const R4Lib_Value96) -> R4LibrariesSlot;
+    pub fn R4Lib_Value96_inspect(p0: *const R4Lib_Value96, p1: *mut R4Lib_Value96) -> R4LibrariesSlot;
+    pub fn R4Lib_Value97_inspect(p0: *const R4Lib_Value97, p1: *mut R4StdShortcutShortcut) -> R4LibrariesSlot;
+    pub fn R4Lib_Value98_create(p0: *mut R4Lib_Value98, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value98_inspect(p0: *const R4Lib_Value98) -> R4LibrariesSlot;
     pub fn R4StdAssociationForeignEntry_create(p0: *mut R4StdAssociationForeignEntry) -> R4LibrariesSlot;
-    pub fn R4StdAssociationForeignEntry_from_fields(p0: *mut R4StdAssociationForeignEntry, p1: *const R4Lib_Value98, p2: *const R4Lib_Value87) -> R4LibrariesSlot;
-    pub fn R4StdAssociationForeignEntry_get_key(p0: *const R4StdAssociationForeignEntry, p1: *mut R4Lib_Value98) -> R4LibrariesSlot;
-    pub fn R4StdAssociationForeignEntry_set_key(p0: *mut R4StdAssociationForeignEntry, p1: *const R4Lib_Value98) -> R4LibrariesSlot;
-    pub fn R4StdAssociationForeignEntry_get_value(p0: *const R4StdAssociationForeignEntry, p1: *mut R4Lib_Value87) -> R4LibrariesSlot;
-    pub fn R4StdAssociationForeignEntry_set_value(p0: *mut R4StdAssociationForeignEntry, p1: *const R4Lib_Value87) -> R4LibrariesSlot;
+    pub fn R4StdAssociationForeignEntry_from_fields(p0: *mut R4StdAssociationForeignEntry, p1: *const R4Lib_Value100, p2: *const R4Lib_Value89) -> R4LibrariesSlot;
+    pub fn R4StdAssociationForeignEntry_get_key(p0: *const R4StdAssociationForeignEntry, p1: *mut R4Lib_Value100) -> R4LibrariesSlot;
+    pub fn R4StdAssociationForeignEntry_set_key(p0: *mut R4StdAssociationForeignEntry, p1: *const R4Lib_Value100) -> R4LibrariesSlot;
+    pub fn R4StdAssociationForeignEntry_get_value(p0: *const R4StdAssociationForeignEntry, p1: *mut R4Lib_Value89) -> R4LibrariesSlot;
+    pub fn R4StdAssociationForeignEntry_set_value(p0: *mut R4StdAssociationForeignEntry, p1: *const R4Lib_Value89) -> R4LibrariesSlot;
     pub fn R4StdAssociationForeignEntry_inspect(p0: *const R4StdAssociationForeignEntry) -> R4LibrariesSlot;
-    pub fn R4Lib_Value98_create(p0: *mut R4Lib_Value98, p1: *const R4Lib_Value98) -> R4LibrariesSlot;
-    pub fn R4Lib_Value98_inspect(p0: *const R4Lib_Value98, p1: *mut R4Lib_Value98) -> R4LibrariesSlot;
+    pub fn R4Lib_Value100_create(p0: *mut R4Lib_Value100, p1: *const R4Lib_Value100) -> R4LibrariesSlot;
+    pub fn R4Lib_Value100_inspect(p0: *const R4Lib_Value100, p1: *mut R4Lib_Value100) -> R4LibrariesSlot;
     pub fn R4StdAssociationLaunchKind_create(p0: *mut R4StdAssociationLaunchKind, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdAssociationLaunchKind_inspect(p0: *const R4StdAssociationLaunchKind) -> R4LibrariesSlot;
     pub fn R4StdAssociationHandlerKind_create(p0: *mut R4StdAssociationHandlerKind, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdAssociationHandlerKind_inspect(p0: *const R4StdAssociationHandlerKind) -> R4LibrariesSlot;
     pub fn R4StdAssociationAppEntry_create(p0: *mut R4StdAssociationAppEntry) -> R4LibrariesSlot;
-    pub fn R4StdAssociationAppEntry_from_fields(p0: *mut R4StdAssociationAppEntry, p1: u8, p2: *const R4Lib_Value102, p3: *const R4Lib_Value86, p4: *const R4Lib_Value92, p5: u32, p6: *const R4Lib_Value103) -> R4LibrariesSlot;
+    pub fn R4StdAssociationAppEntry_from_fields(p0: *mut R4StdAssociationAppEntry, p1: u8, p2: *const R4Lib_Value104, p3: *const R4Lib_Value88, p4: *const R4Lib_Value94, p5: u32, p6: *const R4Lib_Value105) -> R4LibrariesSlot;
     pub fn R4StdAssociationAppEntry_get_valid(p0: *const R4StdAssociationAppEntry) -> R4LibrariesSlot;
     pub fn R4StdAssociationAppEntry_set_valid(p0: *mut R4StdAssociationAppEntry, p1: u8) -> R4LibrariesSlot;
-    pub fn R4StdAssociationAppEntry_get_id(p0: *const R4StdAssociationAppEntry, p1: *mut R4Lib_Value102) -> R4LibrariesSlot;
-    pub fn R4StdAssociationAppEntry_set_id(p0: *mut R4StdAssociationAppEntry, p1: *const R4Lib_Value102) -> R4LibrariesSlot;
-    pub fn R4StdAssociationAppEntry_get_title(p0: *const R4StdAssociationAppEntry, p1: *mut R4Lib_Value86) -> R4LibrariesSlot;
-    pub fn R4StdAssociationAppEntry_set_title(p0: *mut R4StdAssociationAppEntry, p1: *const R4Lib_Value86) -> R4LibrariesSlot;
-    pub fn R4StdAssociationAppEntry_get_path(p0: *const R4StdAssociationAppEntry, p1: *mut R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4StdAssociationAppEntry_set_path(p0: *mut R4StdAssociationAppEntry, p1: *const R4Lib_Value92) -> R4LibrariesSlot;
+    pub fn R4StdAssociationAppEntry_get_id(p0: *const R4StdAssociationAppEntry, p1: *mut R4Lib_Value104) -> R4LibrariesSlot;
+    pub fn R4StdAssociationAppEntry_set_id(p0: *mut R4StdAssociationAppEntry, p1: *const R4Lib_Value104) -> R4LibrariesSlot;
+    pub fn R4StdAssociationAppEntry_get_title(p0: *const R4StdAssociationAppEntry, p1: *mut R4Lib_Value88) -> R4LibrariesSlot;
+    pub fn R4StdAssociationAppEntry_set_title(p0: *mut R4StdAssociationAppEntry, p1: *const R4Lib_Value88) -> R4LibrariesSlot;
+    pub fn R4StdAssociationAppEntry_get_path(p0: *const R4StdAssociationAppEntry, p1: *mut R4Lib_Value94) -> R4LibrariesSlot;
+    pub fn R4StdAssociationAppEntry_set_path(p0: *mut R4StdAssociationAppEntry, p1: *const R4Lib_Value94) -> R4LibrariesSlot;
     pub fn R4StdAssociationAppEntry_get_policy(p0: *const R4StdAssociationAppEntry) -> R4LibrariesSlot;
     pub fn R4StdAssociationAppEntry_set_policy(p0: *mut R4StdAssociationAppEntry, p1: u32) -> R4LibrariesSlot;
-    pub fn R4StdAssociationAppEntry_get_args(p0: *const R4StdAssociationAppEntry, p1: *mut R4Lib_Value103) -> R4LibrariesSlot;
-    pub fn R4StdAssociationAppEntry_set_args(p0: *mut R4StdAssociationAppEntry, p1: *const R4Lib_Value103) -> R4LibrariesSlot;
+    pub fn R4StdAssociationAppEntry_get_args(p0: *const R4StdAssociationAppEntry, p1: *mut R4Lib_Value105) -> R4LibrariesSlot;
+    pub fn R4StdAssociationAppEntry_set_args(p0: *mut R4StdAssociationAppEntry, p1: *const R4Lib_Value105) -> R4LibrariesSlot;
     pub fn R4StdAssociationAppEntry_inspect(p0: *const R4StdAssociationAppEntry) -> R4LibrariesSlot;
-    pub fn R4Lib_Value102_create(p0: *mut R4Lib_Value102, p1: *const R4Lib_Value102) -> R4LibrariesSlot;
-    pub fn R4Lib_Value102_inspect(p0: *const R4Lib_Value102, p1: *mut R4Lib_Value102) -> R4LibrariesSlot;
-    pub fn R4Lib_Value103_create(p0: *mut R4Lib_Value103, p1: *const R4Lib_Value103) -> R4LibrariesSlot;
-    pub fn R4Lib_Value103_inspect(p0: *const R4Lib_Value103, p1: *mut R4Lib_Value103) -> R4LibrariesSlot;
+    pub fn R4Lib_Value104_create(p0: *mut R4Lib_Value104, p1: *const R4Lib_Value104) -> R4LibrariesSlot;
+    pub fn R4Lib_Value104_inspect(p0: *const R4Lib_Value104, p1: *mut R4Lib_Value104) -> R4LibrariesSlot;
+    pub fn R4Lib_Value105_create(p0: *mut R4Lib_Value105, p1: *const R4Lib_Value105) -> R4LibrariesSlot;
+    pub fn R4Lib_Value105_inspect(p0: *const R4Lib_Value105, p1: *mut R4Lib_Value105) -> R4LibrariesSlot;
     pub fn R4StdAssociationExtEntry_create(p0: *mut R4StdAssociationExtEntry) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_from_fields(p0: *mut R4StdAssociationExtEntry, p1: u8, p2: *const R4Lib_Value105, p3: u32, p4: *const R4Lib_Value102, p5: *const R4Lib_Value93, p6: *const R4Lib_Value93, p7: *const R4Lib_Value106, p8: *const R4Lib_Value107, p9: *const R4Lib_Value105, p10: u8) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_from_fields(p0: *mut R4StdAssociationExtEntry, p1: u8, p2: *const R4Lib_Value107, p3: u32, p4: *const R4Lib_Value104, p5: *const R4Lib_Value95, p6: *const R4Lib_Value95, p7: *const R4Lib_Value108, p8: *const R4Lib_Value109, p9: *const R4Lib_Value107, p10: u8) -> R4LibrariesSlot;
     pub fn R4StdAssociationExtEntry_get_valid(p0: *const R4StdAssociationExtEntry) -> R4LibrariesSlot;
     pub fn R4StdAssociationExtEntry_set_valid(p0: *mut R4StdAssociationExtEntry, p1: u8) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_get_ext(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value105) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_set_ext(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value105) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_get_ext(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value107) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_set_ext(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value107) -> R4LibrariesSlot;
     pub fn R4StdAssociationExtEntry_get_handler_kind(p0: *const R4StdAssociationExtEntry) -> R4LibrariesSlot;
     pub fn R4StdAssociationExtEntry_set_handler_kind(p0: *mut R4StdAssociationExtEntry, p1: u32) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_get_app_id(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value102) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_set_app_id(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value102) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_get_subsystem_id(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value93) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_set_subsystem_id(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value93) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_get_format_id(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value93) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_set_format_id(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value93) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_get_type_name(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value106) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_set_type_name(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value106) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_get_short_name(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value107) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_set_short_name(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value107) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_get_prefix(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value105) -> R4LibrariesSlot;
-    pub fn R4StdAssociationExtEntry_set_prefix(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value105) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_get_app_id(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value104) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_set_app_id(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value104) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_get_subsystem_id(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value95) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_set_subsystem_id(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value95) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_get_format_id(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value95) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_set_format_id(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value95) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_get_type_name(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value108) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_set_type_name(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value108) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_get_short_name(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value109) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_set_short_name(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value109) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_get_prefix(p0: *const R4StdAssociationExtEntry, p1: *mut R4Lib_Value107) -> R4LibrariesSlot;
+    pub fn R4StdAssociationExtEntry_set_prefix(p0: *mut R4StdAssociationExtEntry, p1: *const R4Lib_Value107) -> R4LibrariesSlot;
     pub fn R4StdAssociationExtEntry_get_rank(p0: *const R4StdAssociationExtEntry) -> R4LibrariesSlot;
     pub fn R4StdAssociationExtEntry_set_rank(p0: *mut R4StdAssociationExtEntry, p1: u8) -> R4LibrariesSlot;
     pub fn R4StdAssociationExtEntry_inspect(p0: *const R4StdAssociationExtEntry) -> R4LibrariesSlot;
-    pub fn R4Lib_Value105_create(p0: *mut R4Lib_Value105, p1: *const R4Lib_Value105) -> R4LibrariesSlot;
-    pub fn R4Lib_Value105_inspect(p0: *const R4Lib_Value105, p1: *mut R4Lib_Value105) -> R4LibrariesSlot;
-    pub fn R4Lib_Value106_create(p0: *mut R4Lib_Value106, p1: *const R4Lib_Value106) -> R4LibrariesSlot;
-    pub fn R4Lib_Value106_inspect(p0: *const R4Lib_Value106, p1: *mut R4Lib_Value106) -> R4LibrariesSlot;
     pub fn R4Lib_Value107_create(p0: *mut R4Lib_Value107, p1: *const R4Lib_Value107) -> R4LibrariesSlot;
     pub fn R4Lib_Value107_inspect(p0: *const R4Lib_Value107, p1: *mut R4Lib_Value107) -> R4LibrariesSlot;
+    pub fn R4Lib_Value108_create(p0: *mut R4Lib_Value108, p1: *const R4Lib_Value108) -> R4LibrariesSlot;
+    pub fn R4Lib_Value108_inspect(p0: *const R4Lib_Value108, p1: *mut R4Lib_Value108) -> R4LibrariesSlot;
+    pub fn R4Lib_Value109_create(p0: *mut R4Lib_Value109, p1: *const R4Lib_Value109) -> R4LibrariesSlot;
+    pub fn R4Lib_Value109_inspect(p0: *const R4Lib_Value109, p1: *mut R4Lib_Value109) -> R4LibrariesSlot;
     pub fn R4StdAssociationLaunchTarget_create(p0: *mut R4StdAssociationLaunchTarget, p1: u32, p2: *const u8, p3: u64, p4: *const u8, p5: u64, p6: *const u8, p7: u64, p8: *const u8, p9: u64, p10: u32, p11: *const u8, p12: u64, p13: *const u8, p14: u64, p15: *const u8, p16: u64, p17: u8) -> R4LibrariesSlot;
     pub fn R4StdAssociationLaunchTarget_from_fields(p0: *mut R4StdAssociationLaunchTarget, p1: u32, p2: *const u8, p3: u64, p4: *const u8, p5: u64, p6: *const u8, p7: u64, p8: *const u8, p9: u64, p10: u32, p11: *const u8, p12: u64, p13: *const u8, p14: u64, p15: *const u8, p16: u64, p17: u8) -> R4LibrariesSlot;
     pub fn R4StdAssociationLaunchTarget_get_kind(p0: *const R4StdAssociationLaunchTarget) -> R4LibrariesSlot;
@@ -7129,26 +7413,26 @@ unsafe extern "C" {
     pub fn R4StdAssociationLaunchTarget_set_rank(p0: *mut R4StdAssociationLaunchTarget, p1: u8) -> R4LibrariesSlot;
     pub fn R4StdAssociationLaunchTarget_inspect(p0: *const R4StdAssociationLaunchTarget) -> R4LibrariesSlot;
     pub fn R4StdAssociationConfig_create(p0: *mut R4StdAssociationConfig) -> R4LibrariesSlot;
-    pub fn R4StdAssociationConfig_from_fields(p0: *mut R4StdAssociationConfig, p1: *const R4Lib_Value110, p2: u64, p3: *const R4Lib_Value111, p4: u64, p5: *const R4Lib_Value112, p6: u64) -> R4LibrariesSlot;
-    pub fn R4StdAssociationConfig_get_apps(p0: *const R4StdAssociationConfig, p1: *mut R4Lib_Value110) -> R4LibrariesSlot;
-    pub fn R4StdAssociationConfig_set_apps(p0: *mut R4StdAssociationConfig, p1: *const R4Lib_Value110) -> R4LibrariesSlot;
+    pub fn R4StdAssociationConfig_from_fields(p0: *mut R4StdAssociationConfig, p1: *const R4Lib_Value112, p2: u64, p3: *const R4Lib_Value113, p4: u64, p5: *const R4Lib_Value114, p6: u64) -> R4LibrariesSlot;
+    pub fn R4StdAssociationConfig_get_apps(p0: *const R4StdAssociationConfig, p1: *mut R4Lib_Value112) -> R4LibrariesSlot;
+    pub fn R4StdAssociationConfig_set_apps(p0: *mut R4StdAssociationConfig, p1: *const R4Lib_Value112) -> R4LibrariesSlot;
     pub fn R4StdAssociationConfig_get_app_count(p0: *const R4StdAssociationConfig) -> R4LibrariesSlot;
     pub fn R4StdAssociationConfig_set_app_count(p0: *mut R4StdAssociationConfig, p1: u64) -> R4LibrariesSlot;
-    pub fn R4StdAssociationConfig_get_extensions(p0: *const R4StdAssociationConfig, p1: *mut R4Lib_Value111) -> R4LibrariesSlot;
-    pub fn R4StdAssociationConfig_set_extensions(p0: *mut R4StdAssociationConfig, p1: *const R4Lib_Value111) -> R4LibrariesSlot;
+    pub fn R4StdAssociationConfig_get_extensions(p0: *const R4StdAssociationConfig, p1: *mut R4Lib_Value113) -> R4LibrariesSlot;
+    pub fn R4StdAssociationConfig_set_extensions(p0: *mut R4StdAssociationConfig, p1: *const R4Lib_Value113) -> R4LibrariesSlot;
     pub fn R4StdAssociationConfig_get_extension_count(p0: *const R4StdAssociationConfig) -> R4LibrariesSlot;
     pub fn R4StdAssociationConfig_set_extension_count(p0: *mut R4StdAssociationConfig, p1: u64) -> R4LibrariesSlot;
-    pub fn R4StdAssociationConfig_get_foreign(p0: *const R4StdAssociationConfig, p1: *mut R4Lib_Value112) -> R4LibrariesSlot;
-    pub fn R4StdAssociationConfig_set_foreign(p0: *mut R4StdAssociationConfig, p1: *const R4Lib_Value112) -> R4LibrariesSlot;
+    pub fn R4StdAssociationConfig_get_foreign(p0: *const R4StdAssociationConfig, p1: *mut R4Lib_Value114) -> R4LibrariesSlot;
+    pub fn R4StdAssociationConfig_set_foreign(p0: *mut R4StdAssociationConfig, p1: *const R4Lib_Value114) -> R4LibrariesSlot;
     pub fn R4StdAssociationConfig_get_foreign_count(p0: *const R4StdAssociationConfig) -> R4LibrariesSlot;
     pub fn R4StdAssociationConfig_set_foreign_count(p0: *mut R4StdAssociationConfig, p1: u64) -> R4LibrariesSlot;
     pub fn R4StdAssociationConfig_inspect(p0: *const R4StdAssociationConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value110_create(p0: *mut R4Lib_Value110, p1: *const R4Lib_Value110) -> R4LibrariesSlot;
-    pub fn R4Lib_Value110_inspect(p0: *const R4Lib_Value110, p1: *mut R4Lib_Value110) -> R4LibrariesSlot;
-    pub fn R4Lib_Value111_create(p0: *mut R4Lib_Value111, p1: *const R4Lib_Value111) -> R4LibrariesSlot;
-    pub fn R4Lib_Value111_inspect(p0: *const R4Lib_Value111, p1: *mut R4Lib_Value111) -> R4LibrariesSlot;
     pub fn R4Lib_Value112_create(p0: *mut R4Lib_Value112, p1: *const R4Lib_Value112) -> R4LibrariesSlot;
     pub fn R4Lib_Value112_inspect(p0: *const R4Lib_Value112, p1: *mut R4Lib_Value112) -> R4LibrariesSlot;
+    pub fn R4Lib_Value113_create(p0: *mut R4Lib_Value113, p1: *const R4Lib_Value113) -> R4LibrariesSlot;
+    pub fn R4Lib_Value113_inspect(p0: *const R4Lib_Value113, p1: *mut R4Lib_Value113) -> R4LibrariesSlot;
+    pub fn R4Lib_Value114_create(p0: *mut R4Lib_Value114, p1: *const R4Lib_Value114) -> R4LibrariesSlot;
+    pub fn R4Lib_Value114_inspect(p0: *const R4Lib_Value114, p1: *mut R4Lib_Value114) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerTargetKind_create(p0: *mut R4StdFileHandlerTargetKind, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerTargetKind_inspect(p0: *const R4StdFileHandlerTargetKind) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerTarget_create(p0: *mut R4StdFileHandlerTarget, p1: u32, p2: *const u8, p3: u64, p4: *const u8, p5: u64, p6: *const u8, p7: u64, p8: *const u8, p9: u64, p10: u32) -> R4LibrariesSlot;
@@ -7177,8 +7461,8 @@ unsafe extern "C" {
     pub fn R4StdFileHandlerResolution_get_target(p0: *const R4StdFileHandlerResolution, p1: *mut R4StdFileHandlerTarget) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerResolution_set_target(p0: *mut R4StdFileHandlerResolution, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerResolution_inspect(p0: *const R4StdFileHandlerResolution) -> R4LibrariesSlot;
-    pub fn R4Lib_Value118_create(p0: *mut R4Lib_Value118, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value118_inspect(p0: *const R4Lib_Value118, p1: *mut R4StdFileHandlerTarget) -> R4LibrariesSlot;
+    pub fn R4Lib_Value120_create(p0: *mut R4Lib_Value120, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value120_inspect(p0: *const R4Lib_Value120, p1: *mut R4StdFileHandlerTarget) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerChoiceKind_create(p0: *mut R4StdFileHandlerChoiceKind, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerChoiceKind_inspect(p0: *const R4StdFileHandlerChoiceKind) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerChoice_create(p0: *mut R4StdFileHandlerChoice, p1: u32, p2: *const u8, p3: u64, p4: *const u8, p5: u64, p6: *const u8, p7: u64) -> R4LibrariesSlot;
@@ -7198,29 +7482,29 @@ unsafe extern "C" {
     pub fn R4StdFileHandlerChoice_get_app(p0: *const R4StdFileHandlerChoice) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerChoice_set_app(p0: *mut R4StdFileHandlerChoice, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerChoice_inspect(p0: *const R4StdFileHandlerChoice) -> R4LibrariesSlot;
-    pub fn R4Lib_Value121_create(p0: *mut R4Lib_Value121, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value121_inspect(p0: *const R4Lib_Value121) -> R4LibrariesSlot;
-    pub fn R4Lib_Value122_create(p0: *mut R4Lib_Value122, p1: *const R4StdAssociationAppEntry) -> R4LibrariesSlot;
-    pub fn R4Lib_Value122_inspect(p0: *const R4Lib_Value122) -> R4LibrariesSlot;
+    pub fn R4Lib_Value123_create(p0: *mut R4Lib_Value123, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value123_inspect(p0: *const R4Lib_Value123) -> R4LibrariesSlot;
+    pub fn R4Lib_Value124_create(p0: *mut R4Lib_Value124, p1: *const R4StdAssociationAppEntry) -> R4LibrariesSlot;
+    pub fn R4Lib_Value124_inspect(p0: *const R4Lib_Value124) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerChoiceList_create(p0: *mut R4StdFileHandlerChoiceList) -> R4LibrariesSlot;
-    pub fn R4StdFileHandlerChoiceList_from_fields(p0: *mut R4StdFileHandlerChoiceList, p1: *const R4Lib_Value124, p2: u64) -> R4LibrariesSlot;
-    pub fn R4StdFileHandlerChoiceList_get_items(p0: *const R4StdFileHandlerChoiceList, p1: *mut R4Lib_Value124) -> R4LibrariesSlot;
-    pub fn R4StdFileHandlerChoiceList_set_items(p0: *mut R4StdFileHandlerChoiceList, p1: *const R4Lib_Value124) -> R4LibrariesSlot;
+    pub fn R4StdFileHandlerChoiceList_from_fields(p0: *mut R4StdFileHandlerChoiceList, p1: *const R4Lib_Value126, p2: u64) -> R4LibrariesSlot;
+    pub fn R4StdFileHandlerChoiceList_get_items(p0: *const R4StdFileHandlerChoiceList, p1: *mut R4Lib_Value126) -> R4LibrariesSlot;
+    pub fn R4StdFileHandlerChoiceList_set_items(p0: *mut R4StdFileHandlerChoiceList, p1: *const R4Lib_Value126) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerChoiceList_get_count(p0: *const R4StdFileHandlerChoiceList) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerChoiceList_set_count(p0: *mut R4StdFileHandlerChoiceList, p1: u64) -> R4LibrariesSlot;
     pub fn R4StdFileHandlerChoiceList_inspect(p0: *const R4StdFileHandlerChoiceList) -> R4LibrariesSlot;
-    pub fn R4Lib_Value124_create(p0: *mut R4Lib_Value124, p1: *const R4Lib_Value124) -> R4LibrariesSlot;
-    pub fn R4Lib_Value124_inspect(p0: *const R4Lib_Value124, p1: *mut R4Lib_Value124) -> R4LibrariesSlot;
-    pub fn R4Lib_Value125_create(p0: *mut R4Lib_Value125, p1: *const R4StdAssociationConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value125_inspect(p0: *const R4Lib_Value125) -> R4LibrariesSlot;
-    pub fn R4Lib_Value126_create(p0: *mut R4Lib_Value126, p1: *const R4Lib_r4os_subsystem_catalog_Catalog) -> R4LibrariesSlot;
-    pub fn R4Lib_Value126_inspect(p0: *const R4Lib_Value126) -> R4LibrariesSlot;
-    pub fn R4Lib_Value128_create(p0: *mut R4Lib_Value128, p1: *mut R4StdFileHandlerResolution) -> R4LibrariesSlot;
+    pub fn R4Lib_Value126_create(p0: *mut R4Lib_Value126, p1: *const R4Lib_Value126) -> R4LibrariesSlot;
+    pub fn R4Lib_Value126_inspect(p0: *const R4Lib_Value126, p1: *mut R4Lib_Value126) -> R4LibrariesSlot;
+    pub fn R4Lib_Value127_create(p0: *mut R4Lib_Value127, p1: *const R4StdAssociationConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value127_inspect(p0: *const R4Lib_Value127) -> R4LibrariesSlot;
+    pub fn R4Lib_Value128_create(p0: *mut R4Lib_Value128, p1: *const R4Lib_r4os_subsystem_catalog_Catalog) -> R4LibrariesSlot;
     pub fn R4Lib_Value128_inspect(p0: *const R4Lib_Value128) -> R4LibrariesSlot;
-    pub fn R4Lib_Value129_inspect(p0: *const R4Lib_Value129) -> R4LibrariesSlot;
-    pub fn R4Lib_Value130_create(p0: *mut R4Lib_Value130, p1: *mut R4StdFileHandlerChoiceList) -> R4LibrariesSlot;
+    pub fn R4Lib_Value130_create(p0: *mut R4Lib_Value130, p1: *mut R4StdFileHandlerResolution) -> R4LibrariesSlot;
     pub fn R4Lib_Value130_inspect(p0: *const R4Lib_Value130) -> R4LibrariesSlot;
-    pub fn R4Lib_Value131_inspect(p0: *const R4Lib_Value131, p1: *mut R4StdFileHandlerTarget) -> R4LibrariesSlot;
+    pub fn R4Lib_Value131_inspect(p0: *const R4Lib_Value131) -> R4LibrariesSlot;
+    pub fn R4Lib_Value132_create(p0: *mut R4Lib_Value132, p1: *mut R4StdFileHandlerChoiceList) -> R4LibrariesSlot;
+    pub fn R4Lib_Value132_inspect(p0: *const R4Lib_Value132) -> R4LibrariesSlot;
+    pub fn R4Lib_Value133_inspect(p0: *const R4Lib_Value133, p1: *mut R4StdFileHandlerTarget) -> R4LibrariesSlot;
     pub fn R4StdSubsystemLoadStatus_create(p0: *mut R4StdSubsystemLoadStatus, p1: u32) -> R4LibrariesSlot;
     pub fn R4StdSubsystemLoadStatus_inspect(p0: *const R4StdSubsystemLoadStatus) -> R4LibrariesSlot;
     pub fn R4StdSubsystemAccessStats_create(p0: *mut R4StdSubsystemAccessStats) -> R4LibrariesSlot;
@@ -7256,10 +7540,10 @@ unsafe extern "C" {
     pub fn R4ImgHelpersSvgGlyphProvider_get_row(p0: *const R4ImgHelpersSvgGlyphProvider) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgGlyphProvider_set_row(p0: *mut R4ImgHelpersSvgGlyphProvider, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgGlyphProvider_inspect(p0: *const R4ImgHelpersSvgGlyphProvider) -> R4LibrariesSlot;
-    pub fn R4Lib_Value137_create(p0: *mut R4Lib_Value137, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value137_inspect(p0: *const R4Lib_Value137) -> R4LibrariesSlot;
-    pub fn R4Lib_Value138_create(p0: *mut R4Lib_Value138, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value138_inspect(p0: *const R4Lib_Value138) -> R4LibrariesSlot;
+    pub fn R4Lib_Value139_create(p0: *mut R4Lib_Value139, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value139_inspect(p0: *const R4Lib_Value139) -> R4LibrariesSlot;
+    pub fn R4Lib_Value140_create(p0: *mut R4Lib_Value140, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value140_inspect(p0: *const R4Lib_Value140) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgLinkSink_create(p0: *mut R4ImgHelpersSvgLinkSink) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgLinkSink_from_fields(p0: *mut R4ImgHelpersSvgLinkSink, p1: R4LibrariesSlot, p2: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgLinkSink_get_context(p0: *const R4ImgHelpersSvgLinkSink) -> R4LibrariesSlot;
@@ -7267,8 +7551,8 @@ unsafe extern "C" {
     pub fn R4ImgHelpersSvgLinkSink_get_record(p0: *const R4ImgHelpersSvgLinkSink) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgLinkSink_set_record(p0: *mut R4ImgHelpersSvgLinkSink, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgLinkSink_inspect(p0: *const R4ImgHelpersSvgLinkSink) -> R4LibrariesSlot;
-    pub fn R4Lib_Value140_create(p0: *mut R4Lib_Value140, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value140_inspect(p0: *const R4Lib_Value140) -> R4LibrariesSlot;
+    pub fn R4Lib_Value142_create(p0: *mut R4Lib_Value142, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value142_inspect(p0: *const R4Lib_Value142) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgRenderOptions_create(p0: *mut R4ImgHelpersSvgRenderOptions) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgRenderOptions_from_fields(p0: *mut R4ImgHelpersSvgRenderOptions, p1: R4LibrariesSlot, p2: R4LibrariesSlot, p3: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgRenderOptions_get_glyphs(p0: *const R4ImgHelpersSvgRenderOptions, p1: *mut R4ImgHelpersSvgGlyphProvider) -> R4LibrariesSlot;
@@ -7278,10 +7562,10 @@ unsafe extern "C" {
     pub fn R4ImgHelpersSvgRenderOptions_get_background(p0: *const R4ImgHelpersSvgRenderOptions) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgRenderOptions_set_background(p0: *mut R4ImgHelpersSvgRenderOptions, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4ImgHelpersSvgRenderOptions_inspect(p0: *const R4ImgHelpersSvgRenderOptions) -> R4LibrariesSlot;
-    pub fn R4Lib_Value142_create(p0: *mut R4Lib_Value142, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value142_inspect(p0: *const R4Lib_Value142, p1: *mut R4ImgHelpersSvgGlyphProvider) -> R4LibrariesSlot;
-    pub fn R4Lib_Value143_create(p0: *mut R4Lib_Value143, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value143_inspect(p0: *const R4Lib_Value143, p1: *mut R4ImgHelpersSvgLinkSink) -> R4LibrariesSlot;
+    pub fn R4Lib_Value144_create(p0: *mut R4Lib_Value144, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value144_inspect(p0: *const R4Lib_Value144, p1: *mut R4ImgHelpersSvgGlyphProvider) -> R4LibrariesSlot;
+    pub fn R4Lib_Value145_create(p0: *mut R4Lib_Value145, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value145_inspect(p0: *const R4Lib_Value145, p1: *mut R4ImgHelpersSvgLinkSink) -> R4LibrariesSlot;
     pub fn R4ImgHelpersInfo_create(p0: *mut R4ImgHelpersInfo, p1: u32, p2: u32, p3: u32, p4: u8) -> R4LibrariesSlot;
     pub fn R4ImgHelpersInfo_from_fields(p0: *mut R4ImgHelpersInfo, p1: u32, p2: u32, p3: u32, p4: u8) -> R4LibrariesSlot;
     pub fn R4ImgHelpersInfo_get_format(p0: *const R4ImgHelpersInfo) -> R4LibrariesSlot;
@@ -7300,8 +7584,8 @@ unsafe extern "C" {
     pub fn R4ImgHelpersImage_get_pixels(p0: *const R4ImgHelpersImage) -> R4LibrariesSlot;
     pub fn R4ImgHelpersImage_set_pixels(p0: *mut R4ImgHelpersImage, p1: *mut u32, p2: u64) -> R4LibrariesSlot;
     pub fn R4ImgHelpersImage_inspect(p0: *const R4ImgHelpersImage) -> R4LibrariesSlot;
-    pub fn R4Lib_Value146_create(p0: *mut R4Lib_Value146, p1: *mut u32, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value146_inspect(p0: *const R4Lib_Value146) -> R4LibrariesSlot;
+    pub fn R4Lib_Value148_create(p0: *mut R4Lib_Value148, p1: *mut u32, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value148_inspect(p0: *const R4Lib_Value148) -> R4LibrariesSlot;
     pub fn R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor_create(p0: *mut R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor, p1: u32, p2: u32, p3: u32, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u32, p14: u32, p15: u32, p16: u32, p17: u32, p18: u32, p19: u32, p20: u32, p21: u32, p22: u32, p23: u32, p24: u32, p25: u32, p26: u32, p27: u32, p28: u32, p29: u32, p30: u32, p31: u32, p32: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor_from_fields(p0: *mut R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor, p1: u32, p2: u32, p3: u32, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u32, p14: u32, p15: u32, p16: u32, p17: u32, p18: u32, p19: u32, p20: u32, p21: u32, p22: u32, p23: u32, p24: u32, p25: u32, p26: u32, p27: u32, p28: u32, p29: u32, p30: u32, p31: u32, p32: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor_get_version(p0: *const R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor) -> R4LibrariesSlot;
@@ -7430,8 +7714,8 @@ unsafe extern "C" {
     pub fn R4ImgHelpersImage16_get_rgba(p0: *const R4ImgHelpersImage16) -> R4LibrariesSlot;
     pub fn R4ImgHelpersImage16_set_rgba(p0: *mut R4ImgHelpersImage16, p1: *mut u16, p2: u64) -> R4LibrariesSlot;
     pub fn R4ImgHelpersImage16_inspect(p0: *const R4ImgHelpersImage16) -> R4LibrariesSlot;
-    pub fn R4Lib_Value152_create(p0: *mut R4Lib_Value152, p1: *mut u16, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value152_inspect(p0: *const R4Lib_Value152) -> R4LibrariesSlot;
+    pub fn R4Lib_Value154_create(p0: *mut R4Lib_Value154, p1: *mut u16, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value154_inspect(p0: *const R4Lib_Value154) -> R4LibrariesSlot;
     pub fn R4ImgHelpersDecoderDiagnostic_create(p0: *mut R4ImgHelpersDecoderDiagnostic, p1: u64, p2: u8) -> R4LibrariesSlot;
     pub fn R4ImgHelpersDecoderDiagnostic_from_fields(p0: *mut R4ImgHelpersDecoderDiagnostic, p1: u64, p2: u8) -> R4LibrariesSlot;
     pub fn R4ImgHelpersDecoderDiagnostic_get_scratch_peak(p0: *const R4ImgHelpersDecoderDiagnostic) -> R4LibrariesSlot;
@@ -7506,8 +7790,8 @@ unsafe extern "C" {
     pub fn R4Lib_r4gfx_abi_R4GfxColorDescription_get_reserved(p0: *const R4Lib_r4gfx_abi_R4GfxColorDescription) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorDescription_set_reserved(p0: *mut R4Lib_r4gfx_abi_R4GfxColorDescription, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorDescription_inspect(p0: *const R4Lib_r4gfx_abi_R4GfxColorDescription) -> R4LibrariesSlot;
-    pub fn R4Lib_Value161_create(p0: *mut R4Lib_Value161, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value161_inspect(p0: *const R4Lib_Value161, p1: *mut R4Lib_r4gfx_abi_R4GfxColorProfileDefinition) -> R4LibrariesSlot;
+    pub fn R4Lib_Value163_create(p0: *mut R4Lib_Value163, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value163_inspect(p0: *const R4Lib_Value163, p1: *mut R4Lib_r4gfx_abi_R4GfxColorProfileDefinition) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorProfileDefinition_create(p0: *mut R4Lib_r4gfx_abi_R4GfxColorProfileDefinition, p1: u32, p2: u32, p3: u32, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u32, p14: u32, p15: u32, p16: u32) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorProfileDefinition_from_fields(p0: *mut R4Lib_r4gfx_abi_R4GfxColorProfileDefinition, p1: u32, p2: u32, p3: u32, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u32, p14: u32, p15: u32, p16: u32) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorProfileDefinition_get_version(p0: *const R4Lib_r4gfx_abi_R4GfxColorProfileDefinition) -> R4LibrariesSlot;
@@ -7561,15 +7845,15 @@ unsafe extern "C" {
     pub fn R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult_get_assumed(p0: *const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult) -> R4LibrariesSlot;
     pub fn R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult_set_assumed(p0: *mut R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult, p1: u8) -> R4LibrariesSlot;
     pub fn R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult_inspect(p0: *const R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult) -> R4LibrariesSlot;
-    pub fn R4Lib_Value165_inspect(p0: *const R4Lib_Value165, p1: *mut R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Characterization) -> R4LibrariesSlot;
-    pub fn R4Lib_Value167_create(p0: *mut R4Lib_Value167, p1: *const R4ImgHelpersContext) -> R4LibrariesSlot;
-    pub fn R4Lib_Value167_inspect(p0: *const R4Lib_Value167) -> R4LibrariesSlot;
-    pub fn R4Lib_Value168_create(p0: *mut R4Lib_Value168, p1: *const R4ImgHelpersPngContext) -> R4LibrariesSlot;
-    pub fn R4Lib_Value168_inspect(p0: *const R4Lib_Value168) -> R4LibrariesSlot;
-    pub fn R4Lib_Value169_create(p0: *mut R4Lib_Value169, p1: *const R4LibraryColorClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value167_inspect(p0: *const R4Lib_Value167, p1: *mut R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Characterization) -> R4LibrariesSlot;
+    pub fn R4Lib_Value169_create(p0: *mut R4Lib_Value169, p1: *const R4ImgHelpersContext) -> R4LibrariesSlot;
     pub fn R4Lib_Value169_inspect(p0: *const R4Lib_Value169) -> R4LibrariesSlot;
-    pub fn R4Lib_Value171_create(p0: *mut R4Lib_Value171, p1: *const R4Lib_r4gfx_abi_R4GfxColorImage) -> R4LibrariesSlot;
+    pub fn R4Lib_Value170_create(p0: *mut R4Lib_Value170, p1: *const R4ImgHelpersPngContext) -> R4LibrariesSlot;
+    pub fn R4Lib_Value170_inspect(p0: *const R4Lib_Value170) -> R4LibrariesSlot;
+    pub fn R4Lib_Value171_create(p0: *mut R4Lib_Value171, p1: *const R4LibraryColorClient) -> R4LibrariesSlot;
     pub fn R4Lib_Value171_inspect(p0: *const R4Lib_Value171) -> R4LibrariesSlot;
+    pub fn R4Lib_Value173_create(p0: *mut R4Lib_Value173, p1: *const R4Lib_r4gfx_abi_R4GfxColorImage) -> R4LibrariesSlot;
+    pub fn R4Lib_Value173_inspect(p0: *const R4Lib_Value173) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorImage_create(p0: *mut R4Lib_r4gfx_abi_R4GfxColorImage, p1: u32, p2: u32, p3: *const R4Lib_r4gfx_abi_R4GfxCpuImage, p4: *const R4Lib_r4gfx_abi_R4GfxColorDescription, p5: *const R4Lib_r4gfx_abi_R4GfxColorProfile) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorImage_from_fields(p0: *mut R4Lib_r4gfx_abi_R4GfxColorImage, p1: u32, p2: u32, p3: *const R4Lib_r4gfx_abi_R4GfxCpuImage, p4: *const R4Lib_r4gfx_abi_R4GfxColorDescription, p5: *const R4Lib_r4gfx_abi_R4GfxColorProfile) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorImage_get_version(p0: *const R4Lib_r4gfx_abi_R4GfxColorImage) -> R4LibrariesSlot;
@@ -7607,8 +7891,8 @@ unsafe extern "C" {
     pub fn R4Lib_r4gfx_abi_R4GfxColorProfile_get_generation(p0: *const R4Lib_r4gfx_abi_R4GfxColorProfile) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorProfile_set_generation(p0: *mut R4Lib_r4gfx_abi_R4GfxColorProfile, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorProfile_inspect(p0: *const R4Lib_r4gfx_abi_R4GfxColorProfile) -> R4LibrariesSlot;
-    pub fn R4Lib_Value175_create(p0: *mut R4Lib_Value175, p1: *const R4Lib_r4gfx_abi_R4GfxColorTransform) -> R4LibrariesSlot;
-    pub fn R4Lib_Value175_inspect(p0: *const R4Lib_Value175) -> R4LibrariesSlot;
+    pub fn R4Lib_Value177_create(p0: *mut R4Lib_Value177, p1: *const R4Lib_r4gfx_abi_R4GfxColorTransform) -> R4LibrariesSlot;
+    pub fn R4Lib_Value177_inspect(p0: *const R4Lib_Value177) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorTransform_create(p0: *mut R4Lib_r4gfx_abi_R4GfxColorTransform, p1: u32, p2: u32, p3: *const R4Lib_r4gfx_abi_R4GfxRect, p4: *const R4Lib_r4gfx_abi_R4GfxRect, p5: u32, p6: u32, p7: u32, p8: u32, p9: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorTransform_from_fields(p0: *mut R4Lib_r4gfx_abi_R4GfxColorTransform, p1: u32, p2: u32, p3: *const R4Lib_r4gfx_abi_R4GfxRect, p4: *const R4Lib_r4gfx_abi_R4GfxRect, p5: u32, p6: u32, p7: u32, p8: u32, p9: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxColorTransform_get_version(p0: *const R4Lib_r4gfx_abi_R4GfxColorTransform) -> R4LibrariesSlot;
@@ -7641,12 +7925,12 @@ unsafe extern "C" {
     pub fn R4Lib_r4gfx_abi_R4GfxRect_get_height(p0: *const R4Lib_r4gfx_abi_R4GfxRect) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxRect_set_height(p0: *mut R4Lib_r4gfx_abi_R4GfxRect, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxRect_inspect(p0: *const R4Lib_r4gfx_abi_R4GfxRect) -> R4LibrariesSlot;
-    pub fn R4Lib_Value178_inspect(p0: *const R4Lib_Value178, p1: *mut R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Result) -> R4LibrariesSlot;
-    pub fn R4Lib_Value179_create(p0: *mut R4Lib_Value179, p1: *const R4ImgHelpersRasterContext) -> R4LibrariesSlot;
-    pub fn R4Lib_Value179_inspect(p0: *const R4Lib_Value179) -> R4LibrariesSlot;
-    pub fn R4Lib_Value180_inspect(p0: *const R4Lib_Value180, p1: *mut R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult) -> R4LibrariesSlot;
-    pub fn R4Lib_Value182_create(p0: *mut R4Lib_Value182, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime) -> R4LibrariesSlot;
-    pub fn R4Lib_Value182_inspect(p0: *const R4Lib_Value182) -> R4LibrariesSlot;
+    pub fn R4Lib_Value180_inspect(p0: *const R4Lib_Value180, p1: *mut R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__Result) -> R4LibrariesSlot;
+    pub fn R4Lib_Value181_create(p0: *mut R4Lib_Value181, p1: *const R4ImgHelpersRasterContext) -> R4LibrariesSlot;
+    pub fn R4Lib_Value181_inspect(p0: *const R4Lib_Value181) -> R4LibrariesSlot;
+    pub fn R4Lib_Value182_inspect(p0: *const R4Lib_Value182, p1: *mut R4Lib_R4IMG_Bindings_Zig_color_Decoder_r4gfx_abi__RasterResult) -> R4LibrariesSlot;
+    pub fn R4Lib_Value184_create(p0: *mut R4Lib_Value184, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime) -> R4LibrariesSlot;
+    pub fn R4Lib_Value184_inspect(p0: *const R4Lib_Value184) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime_create(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime, p1: u64, p2: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime_from_fields(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime, p1: u64, p2: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime_get_address(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime) -> R4LibrariesSlot;
@@ -7654,8 +7938,8 @@ unsafe extern "C" {
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime_get_generation(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime_set_generation(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime_inspect(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime) -> R4LibrariesSlot;
-    pub fn R4Lib_Value184_create(p0: *mut R4Lib_Value184, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps) -> R4LibrariesSlot;
-    pub fn R4Lib_Value184_inspect(p0: *const R4Lib_Value184) -> R4LibrariesSlot;
+    pub fn R4Lib_Value186_create(p0: *mut R4Lib_Value186, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps) -> R4LibrariesSlot;
+    pub fn R4Lib_Value186_inspect(p0: *const R4Lib_Value186) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps_create(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps, p1: u32, p2: u32, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u64, p11: u32, p12: u32, p13: u64, p14: u64, p15: u32, p16: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps_from_fields(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps, p1: u32, p2: u32, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u64, p11: u32, p12: u32, p13: u64, p14: u64, p15: u32, p16: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps_get_version(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCaps) -> R4LibrariesSlot;
@@ -7710,8 +7994,8 @@ unsafe extern "C" {
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery_get_chroma(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery_set_chroma(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery_inspect(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoCapsQuery) -> R4LibrariesSlot;
-    pub fn R4Lib_Value187_create(p0: *mut R4Lib_Value187, p1: *mut R4ImgNativeJpeg) -> R4LibrariesSlot;
-    pub fn R4Lib_Value187_inspect(p0: *const R4Lib_Value187) -> R4LibrariesSlot;
+    pub fn R4Lib_Value189_create(p0: *mut R4Lib_Value189, p1: *mut R4ImgNativeJpeg) -> R4LibrariesSlot;
+    pub fn R4Lib_Value189_inspect(p0: *const R4Lib_Value189) -> R4LibrariesSlot;
     pub fn R4ImgNativeJpeg_create(p0: *mut R4ImgNativeJpeg, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client, p2: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder, p3: *const u8, p4: u64) -> R4LibrariesSlot;
     pub fn R4ImgNativeJpeg_from_fields(p0: *mut R4ImgNativeJpeg, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client, p2: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder, p3: *const u8, p4: u64, p5: u8, p6: u8, p7: u8, p8: u8, p9: u8, p10: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4ImgNativeJpeg_get_api(p0: *const R4ImgNativeJpeg, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client) -> R4LibrariesSlot;
@@ -7740,8 +8024,8 @@ unsafe extern "C" {
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder_get_generation(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder_set_generation(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder_inspect(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder) -> R4LibrariesSlot;
-    pub fn R4Lib_Value190_create(p0: *mut R4Lib_Value190, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value190_inspect(p0: *const R4Lib_Value190, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease) -> R4LibrariesSlot;
+    pub fn R4Lib_Value192_create(p0: *mut R4Lib_Value192, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value192_inspect(p0: *const R4Lib_Value192, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease_create(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder, p2: u64, p3: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease_from_fields(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder, p2: u64, p3: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease_get_decoder(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder) -> R4LibrariesSlot;
@@ -7751,8 +8035,8 @@ unsafe extern "C" {
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease_get_stream_generation(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease_set_stream_generation(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease_inspect(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease) -> R4LibrariesSlot;
-    pub fn R4Lib_Value192_create(p0: *mut R4Lib_Value192, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame) -> R4LibrariesSlot;
-    pub fn R4Lib_Value192_inspect(p0: *const R4Lib_Value192) -> R4LibrariesSlot;
+    pub fn R4Lib_Value194_create(p0: *mut R4Lib_Value194, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame) -> R4LibrariesSlot;
+    pub fn R4Lib_Value194_inspect(p0: *const R4Lib_Value194) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame_create(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame, p1: u32, p2: u32, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease, p4: u64, p5: i64, p6: i64, p7: u64, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u32, p14: u32, p15: u32, p16: u32, p17: u32, p18: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoColor, p19: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPlane, p20: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPlane, p21: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPlane, p22: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence, p23: u32, p24: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame_from_fields(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame, p1: u32, p2: u32, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoLease, p4: u64, p5: i64, p6: i64, p7: u64, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u32, p14: u32, p15: u32, p16: u32, p17: u32, p18: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoColor, p19: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPlane, p20: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPlane, p21: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPlane, p22: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence, p23: u32, p24: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame_get_version(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame) -> R4LibrariesSlot;
@@ -7872,8 +8156,8 @@ unsafe extern "C" {
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence_get_reset_generation(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence_set_reset_generation(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence_inspect(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence) -> R4LibrariesSlot;
-    pub fn R4Lib_Value198_create(p0: *mut R4Lib_Value198, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt) -> R4LibrariesSlot;
-    pub fn R4Lib_Value198_inspect(p0: *const R4Lib_Value198) -> R4LibrariesSlot;
+    pub fn R4Lib_Value200_create(p0: *mut R4Lib_Value200, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt) -> R4LibrariesSlot;
+    pub fn R4Lib_Value200_inspect(p0: *const R4Lib_Value200) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt_create(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt, p1: u32, p2: u32, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence, p4: i32, p5: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt_from_fields(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt, p1: u32, p2: u32, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFence, p4: i32, p5: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt_get_version(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt) -> R4LibrariesSlot;
@@ -7894,7 +8178,7 @@ unsafe extern "C" {
     pub fn R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions_get_height(p0: *const R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions) -> R4LibrariesSlot;
     pub fn R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions_set_height(p0: *mut R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions_inspect(p0: *const R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions) -> R4LibrariesSlot;
-    pub fn R4Lib_Value201_inspect(p0: *const R4Lib_Value201, p1: *mut R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions) -> R4LibrariesSlot;
+    pub fn R4Lib_Value203_inspect(p0: *const R4Lib_Value203, p1: *mut R4Lib_R4IMG_Bindings_Zig_native_jpeg_Dimensions) -> R4LibrariesSlot;
     pub fn R4FontHelpersFormat_create(p0: *mut R4FontHelpersFormat, p1: u32) -> R4LibrariesSlot;
     pub fn R4FontHelpersFormat_inspect(p0: *const R4FontHelpersFormat) -> R4LibrariesSlot;
     pub fn R4FontHelpersDiagnostics_create(p0: *mut R4FontHelpersDiagnostics, p1: u64, p2: u64, p3: u64, p4: u64, p5: u64, p6: u64, p7: u8) -> R4LibrariesSlot;
@@ -7996,8 +8280,8 @@ unsafe extern "C" {
     pub fn R4FontHelpersDecoder_get_state(p0: *const R4FontHelpersDecoder) -> R4LibrariesSlot;
     pub fn R4FontHelpersDecoder_set_state(p0: *mut R4FontHelpersDecoder, p1: *mut R4FontHelpersAllocatorState) -> R4LibrariesSlot;
     pub fn R4FontHelpersDecoder_inspect(p0: *const R4FontHelpersDecoder) -> R4LibrariesSlot;
-    pub fn R4Lib_Value211_create(p0: *mut R4Lib_Value211, p1: *mut R4FontHelpersAllocatorState) -> R4LibrariesSlot;
-    pub fn R4Lib_Value211_inspect(p0: *const R4Lib_Value211) -> R4LibrariesSlot;
+    pub fn R4Lib_Value213_create(p0: *mut R4Lib_Value213, p1: *mut R4FontHelpersAllocatorState) -> R4LibrariesSlot;
+    pub fn R4Lib_Value213_inspect(p0: *const R4Lib_Value213) -> R4LibrariesSlot;
     pub fn R4FontHelpersAllocatorState_create(p0: *mut R4FontHelpersAllocatorState, p1: *const R4LibraryAllocator) -> R4LibrariesSlot;
     pub fn R4FontHelpersAllocatorState_from_fields(p0: *mut R4FontHelpersAllocatorState, p1: *const R4LibraryAllocator, p2: R4LibrariesSlot, p3: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4FontHelpersAllocatorState_get_allocator(p0: *const R4FontHelpersAllocatorState, p1: *mut R4LibraryAllocator) -> R4LibrariesSlot;
@@ -8058,8 +8342,8 @@ unsafe extern "C" {
     pub fn R4FontStoreGlyphMetrics26_6_get_height(p0: *const R4FontStoreGlyphMetrics26_6) -> R4LibrariesSlot;
     pub fn R4FontStoreGlyphMetrics26_6_set_height(p0: *mut R4FontStoreGlyphMetrics26_6, p1: i32) -> R4LibrariesSlot;
     pub fn R4FontStoreGlyphMetrics26_6_inspect(p0: *const R4FontStoreGlyphMetrics26_6) -> R4LibrariesSlot;
-    pub fn R4Lib_Value218_create(p0: *mut R4Lib_Value218, p1: *const R4Lib_Value218) -> R4LibrariesSlot;
-    pub fn R4Lib_Value218_inspect(p0: *const R4Lib_Value218, p1: *mut R4Lib_Value218) -> R4LibrariesSlot;
+    pub fn R4Lib_Value220_create(p0: *mut R4Lib_Value220, p1: *const R4Lib_Value220) -> R4LibrariesSlot;
+    pub fn R4Lib_Value220_inspect(p0: *const R4Lib_Value220, p1: *mut R4Lib_Value220) -> R4LibrariesSlot;
     pub fn R4FontStoreBorrowedRaster_create(p0: *mut R4FontStoreBorrowedRaster, p1: u32, p2: u32, p3: u32, p4: i32, p5: i32, p6: i32, p7: *const u8, p8: u64) -> R4LibrariesSlot;
     pub fn R4FontStoreBorrowedRaster_from_fields(p0: *mut R4FontStoreBorrowedRaster, p1: u32, p2: u32, p3: u32, p4: i32, p5: i32, p6: i32, p7: *const u8, p8: u64) -> R4LibrariesSlot;
     pub fn R4FontStoreBorrowedRaster_get_glyph_index(p0: *const R4FontStoreBorrowedRaster) -> R4LibrariesSlot;
@@ -8138,8 +8422,8 @@ unsafe extern "C" {
     pub fn R4FontStoreFaceStore_get_scratch(p0: *const R4FontStoreFaceStore) -> R4LibrariesSlot;
     pub fn R4FontStoreFaceStore_set_scratch(p0: *mut R4FontStoreFaceStore, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4FontStoreFaceStore_inspect(p0: *const R4FontStoreFaceStore) -> R4LibrariesSlot;
-    pub fn R4Lib_Value226_create(p0: *mut R4Lib_Value226, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value226_inspect(p0: *const R4Lib_Value226) -> R4LibrariesSlot;
+    pub fn R4Lib_Value228_create(p0: *mut R4Lib_Value228, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value228_inspect(p0: *const R4Lib_Value228) -> R4LibrariesSlot;
     pub fn R4FontImportFaceInfo_create(p0: *mut R4FontImportFaceInfo, p1: *const u8, p2: u64, p3: *const u8, p4: u64, p5: u64, p6: u64, p7: u16, p8: u16, p9: u16, p10: u16, p11: u8) -> R4LibrariesSlot;
     pub fn R4FontImportFaceInfo_from_fields(p0: *mut R4FontImportFaceInfo, p1: *const u8, p2: u64, p3: *const u8, p4: u64, p5: u64, p6: u64, p7: u16, p8: u16, p9: u16, p10: u16, p11: u8) -> R4LibrariesSlot;
     pub fn R4FontImportFaceInfo_get_family(p0: *const R4FontImportFaceInfo) -> R4LibrariesSlot;
@@ -8181,13 +8465,13 @@ unsafe extern "C" {
     pub fn R4FontImportPreview_get_height(p0: *const R4FontImportPreview) -> R4LibrariesSlot;
     pub fn R4FontImportPreview_set_height(p0: *mut R4FontImportPreview, p1: u16) -> R4LibrariesSlot;
     pub fn R4FontImportPreview_inspect(p0: *const R4FontImportPreview) -> R4LibrariesSlot;
-    pub fn R4Lib_Value230_inspect(p0: *const R4Lib_Value230, p1: *mut R4FontImportFaceInfo) -> R4LibrariesSlot;
-    pub fn R4Lib_Value231_inspect(p0: *const R4Lib_Value231) -> R4LibrariesSlot;
-    pub fn R4Lib_Value232_inspect(p0: *const R4Lib_Value232, p1: *mut R4FontImportPreview) -> R4LibrariesSlot;
-    pub fn R4Lib_Value234_create(p0: *mut R4Lib_Value234, p1: *mut R4LibrarySession) -> R4LibrariesSlot;
-    pub fn R4Lib_Value234_inspect(p0: *const R4Lib_Value234) -> R4LibrariesSlot;
-    pub fn R4Lib_Value235_create(p0: *mut R4Lib_Value235, p1: *mut R4Lib_r4os_r4sys_Context) -> R4LibrariesSlot;
-    pub fn R4Lib_Value235_inspect(p0: *const R4Lib_Value235) -> R4LibrariesSlot;
+    pub fn R4Lib_Value232_inspect(p0: *const R4Lib_Value232, p1: *mut R4FontImportFaceInfo) -> R4LibrariesSlot;
+    pub fn R4Lib_Value233_inspect(p0: *const R4Lib_Value233) -> R4LibrariesSlot;
+    pub fn R4Lib_Value234_inspect(p0: *const R4Lib_Value234, p1: *mut R4FontImportPreview) -> R4LibrariesSlot;
+    pub fn R4Lib_Value236_create(p0: *mut R4Lib_Value236, p1: *mut R4LibrarySession) -> R4LibrariesSlot;
+    pub fn R4Lib_Value236_inspect(p0: *const R4Lib_Value236) -> R4LibrariesSlot;
+    pub fn R4Lib_Value237_create(p0: *mut R4Lib_Value237, p1: *mut R4Lib_r4os_r4sys_Context) -> R4LibrariesSlot;
+    pub fn R4Lib_Value237_inspect(p0: *const R4Lib_Value237) -> R4LibrariesSlot;
     pub fn R4LibraryMemory_create(p0: *mut R4LibraryMemory, p1: u64, p2: u64) -> R4LibrariesSlot;
     pub fn R4LibraryMemory_from_fields(p0: *mut R4LibraryMemory, p1: R4LibrariesSlot, p2: u64, p3: u64) -> R4LibrariesSlot;
     pub fn R4LibraryMemory_get_user(p0: *const R4LibraryMemory) -> R4LibrariesSlot;
@@ -8197,20 +8481,20 @@ unsafe extern "C" {
     pub fn R4LibraryMemory_get_release(p0: *const R4LibraryMemory) -> R4LibrariesSlot;
     pub fn R4LibraryMemory_set_release(p0: *mut R4LibraryMemory, p1: u64) -> R4LibrariesSlot;
     pub fn R4LibraryMemory_inspect(p0: *const R4LibraryMemory) -> R4LibrariesSlot;
-    pub fn R4Lib_Value238_inspect(p0: *const R4Lib_Value238, p1: *mut R4LibraryColorClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value239_inspect(p0: *const R4Lib_Value239, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client) -> R4LibrariesSlot;
-    pub fn R4Lib_Value240_inspect(p0: *const R4Lib_Value240, p1: *mut R4LibraryDeviceClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value242_inspect(p0: *const R4Lib_Value242, p1: *mut R4LibraryRenderClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value244_inspect(p0: *const R4Lib_Value244, p1: *mut R4LibraryGraphicsClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value246_inspect(p0: *const R4Lib_Value246, p1: *mut R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client) -> R4LibrariesSlot;
-    pub fn R4Lib_Value248_inspect(p0: *const R4Lib_Value248, p1: *mut R4LibraryAcoClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value250_inspect(p0: *const R4Lib_Value250, p1: *mut R4LibraryNakClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value252_create(p0: *mut R4Lib_Value252, p1: *mut R4Lib_r4os_app_contract_App) -> R4LibrariesSlot;
-    pub fn R4Lib_Value252_inspect(p0: *const R4Lib_Value252) -> R4LibrariesSlot;
-    pub fn R4Lib_Value255_create(p0: *mut R4Lib_Value255, p1: *const R4Lib_r4os_app_contract_App) -> R4LibrariesSlot;
-    pub fn R4Lib_Value255_inspect(p0: *const R4Lib_Value255) -> R4LibrariesSlot;
-    pub fn R4Lib_Value256_create(p0: *mut R4Lib_Value256, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value256_inspect(p0: *const R4Lib_Value256, p1: *mut R4Lib_r4os_r4draw_Context) -> R4LibrariesSlot;
+    pub fn R4Lib_Value240_inspect(p0: *const R4Lib_Value240, p1: *mut R4LibraryColorClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value241_inspect(p0: *const R4Lib_Value241, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client) -> R4LibrariesSlot;
+    pub fn R4Lib_Value242_inspect(p0: *const R4Lib_Value242, p1: *mut R4LibraryDeviceClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value244_inspect(p0: *const R4Lib_Value244, p1: *mut R4LibraryRenderClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value246_inspect(p0: *const R4Lib_Value246, p1: *mut R4LibraryGraphicsClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value248_inspect(p0: *const R4Lib_Value248, p1: *mut R4Lib_R4ENC_Bindings_Zig_r4enc_EncodeV1Client) -> R4LibrariesSlot;
+    pub fn R4Lib_Value250_inspect(p0: *const R4Lib_Value250, p1: *mut R4LibraryAcoClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value252_inspect(p0: *const R4Lib_Value252, p1: *mut R4LibraryNakClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value254_create(p0: *mut R4Lib_Value254, p1: *mut R4Lib_r4os_app_contract_App) -> R4LibrariesSlot;
+    pub fn R4Lib_Value254_inspect(p0: *const R4Lib_Value254) -> R4LibrariesSlot;
+    pub fn R4Lib_Value257_create(p0: *mut R4Lib_Value257, p1: *const R4Lib_r4os_app_contract_App) -> R4LibrariesSlot;
+    pub fn R4Lib_Value257_inspect(p0: *const R4Lib_Value257) -> R4LibrariesSlot;
+    pub fn R4Lib_Value258_create(p0: *mut R4Lib_Value258, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value258_inspect(p0: *const R4Lib_Value258, p1: *mut R4Lib_r4os_r4draw_Context) -> R4LibrariesSlot;
     pub fn R4StdAdaptersSaver_create(p0: *mut R4StdAdaptersSaver, p1: u64) -> R4LibrariesSlot;
     pub fn R4StdAdaptersSaver_from_fields(p0: *mut R4StdAdaptersSaver, p1: R4LibrariesSlot, p2: u64) -> R4LibrariesSlot;
     pub fn R4StdAdaptersSaver_get_user(p0: *const R4StdAdaptersSaver) -> R4LibrariesSlot;
@@ -8218,18 +8502,18 @@ unsafe extern "C" {
     pub fn R4StdAdaptersSaver_get_callback(p0: *const R4StdAdaptersSaver) -> R4LibrariesSlot;
     pub fn R4StdAdaptersSaver_set_callback(p0: *mut R4StdAdaptersSaver, p1: u64) -> R4LibrariesSlot;
     pub fn R4StdAdaptersSaver_inspect(p0: *const R4StdAdaptersSaver) -> R4LibrariesSlot;
-    pub fn R4Lib_Value259_create(p0: *mut R4Lib_Value259, p1: *const u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value259_inspect(p0: *const R4Lib_Value259) -> R4LibrariesSlot;
-    pub fn R4Lib_Value260_create(p0: *mut R4Lib_Value260, p1: *mut u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value260_inspect(p0: *const R4Lib_Value260) -> R4LibrariesSlot;
-    pub fn R4Lib_Value261_create(p0: *mut R4Lib_Value261, p1: *mut u32) -> R4LibrariesSlot;
+    pub fn R4Lib_Value261_create(p0: *mut R4Lib_Value261, p1: *const u8) -> R4LibrariesSlot;
     pub fn R4Lib_Value261_inspect(p0: *const R4Lib_Value261) -> R4LibrariesSlot;
-    pub fn R4Lib_Value262_create(p0: *mut R4Lib_Value262, p1: *mut i32) -> R4LibrariesSlot;
+    pub fn R4Lib_Value262_create(p0: *mut R4Lib_Value262, p1: *mut u8) -> R4LibrariesSlot;
     pub fn R4Lib_Value262_inspect(p0: *const R4Lib_Value262) -> R4LibrariesSlot;
-    pub fn R4Lib_Value263_create(p0: *mut R4Lib_Value263, p1: *mut R4StdSettingsWriteback) -> R4LibrariesSlot;
+    pub fn R4Lib_Value263_create(p0: *mut R4Lib_Value263, p1: *mut u32) -> R4LibrariesSlot;
     pub fn R4Lib_Value263_inspect(p0: *const R4Lib_Value263) -> R4LibrariesSlot;
-    pub fn R4Lib_Value264_create(p0: *mut R4Lib_Value264, p1: *mut R4Lib_r4os_gui_TextArea___u8_) -> R4LibrariesSlot;
+    pub fn R4Lib_Value264_create(p0: *mut R4Lib_Value264, p1: *mut i32) -> R4LibrariesSlot;
     pub fn R4Lib_Value264_inspect(p0: *const R4Lib_Value264) -> R4LibrariesSlot;
+    pub fn R4Lib_Value265_create(p0: *mut R4Lib_Value265, p1: *mut R4StdSettingsWriteback) -> R4LibrariesSlot;
+    pub fn R4Lib_Value265_inspect(p0: *const R4Lib_Value265) -> R4LibrariesSlot;
+    pub fn R4Lib_Value266_create(p0: *mut R4Lib_Value266, p1: *mut R4Lib_r4os_gui_TextArea___u8_) -> R4LibrariesSlot;
+    pub fn R4Lib_Value266_inspect(p0: *const R4Lib_Value266) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_text_file_LoadResult_create(p0: *mut R4Lib_R4STD_Bindings_Zig_text_file_LoadResult) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_text_file_LoadResult_from_fields(p0: *mut R4Lib_R4STD_Bindings_Zig_text_file_LoadResult, p1: u8, p2: u8, p3: u32, p4: i32) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_text_file_LoadResult_get_ok(p0: *const R4Lib_R4STD_Bindings_Zig_text_file_LoadResult) -> R4LibrariesSlot;
@@ -8248,19 +8532,23 @@ unsafe extern "C" {
     pub fn R4Lib_R4STD_Bindings_Zig_text_file_SaveResult_get_bytes_written(p0: *const R4Lib_R4STD_Bindings_Zig_text_file_SaveResult) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_text_file_SaveResult_set_bytes_written(p0: *mut R4Lib_R4STD_Bindings_Zig_text_file_SaveResult, p1: i32) -> R4LibrariesSlot;
     pub fn R4Lib_R4STD_Bindings_Zig_text_file_SaveResult_inspect(p0: *const R4Lib_R4STD_Bindings_Zig_text_file_SaveResult) -> R4LibrariesSlot;
-    pub fn R4Lib_Value269_create(p0: *mut R4Lib_Value269, p1: *mut R4StdSubsystemAccessStats) -> R4LibrariesSlot;
-    pub fn R4Lib_Value269_inspect(p0: *const R4Lib_Value269) -> R4LibrariesSlot;
-    pub fn R4Lib_Value270_inspect(p0: *const R4Lib_Value270) -> R4LibrariesSlot;
-    pub fn R4Lib_Value271_inspect(p0: *const R4Lib_Value271, p1: *mut R4StdSubsystemInspection) -> R4LibrariesSlot;
-    pub fn R4Lib_Value272_inspect(p0: *const R4Lib_Value272, p1: *mut R4Lib_r4os_subsystem_catalog_Input) -> R4LibrariesSlot;
-    pub fn R4AcoWorker_create(p0: *mut R4AcoWorker, p1: *const R4Lib_r4os_r4sys_Context, p2: *const R4LibraryAcoClient, p3: *const R4ProgramProcessHandle) -> R4LibrariesSlot;
-    pub fn R4AcoWorker_from_fields(p0: *mut R4AcoWorker, p1: *const R4Lib_r4os_r4sys_Context, p2: *const R4LibraryAcoClient, p3: *const R4ProgramProcessHandle, p4: *const R4ProgramJoinHandle, p5: *const R4Lib_r4aco_R4AcoRequest, p6: *const R4Lib_r4aco_R4AcoBinary, p7: *const R4Lib_atomic_Value_bool_, p8: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value271_create(p0: *mut R4Lib_Value271, p1: *mut R4StdSubsystemAccessStats) -> R4LibrariesSlot;
+    pub fn R4Lib_Value271_inspect(p0: *const R4Lib_Value271) -> R4LibrariesSlot;
+    pub fn R4Lib_Value272_inspect(p0: *const R4Lib_Value272) -> R4LibrariesSlot;
+    pub fn R4Lib_Value273_inspect(p0: *const R4Lib_Value273, p1: *mut R4StdSubsystemInspection) -> R4LibrariesSlot;
+    pub fn R4Lib_Value274_inspect(p0: *const R4Lib_Value274, p1: *mut R4Lib_r4os_subsystem_catalog_Input) -> R4LibrariesSlot;
+    pub fn R4AcoWorker_create(p0: *mut R4AcoWorker, p1: *const R4Lib_r4os_r4sys_Context, p2: *const R4LibraryAcoClient, p3: *const R4ProgramProcessHandle, p4: *const R4Lib_r4os_inventory_reader_Provider, p5: *const R4Lib_r4os_stream_adapters_PlatformClock) -> R4LibrariesSlot;
+    pub fn R4AcoWorker_from_fields(p0: *mut R4AcoWorker, p1: *const R4Lib_r4os_r4sys_Context, p2: *const R4LibraryAcoClient, p3: *const R4ProgramProcessHandle, p4: *const R4Lib_r4os_inventory_reader_Provider, p5: *const R4Lib_r4os_stream_adapters_PlatformClock, p6: *const R4ProgramJoinHandle, p7: *const R4Lib_r4aco_R4AcoRequest, p8: *const R4Lib_r4aco_R4AcoBinary, p9: *const R4Lib_atomic_Value_bool_, p10: u64) -> R4LibrariesSlot;
     pub fn R4AcoWorker_get_sys(p0: *const R4AcoWorker, p1: *mut R4Lib_r4os_r4sys_Context) -> R4LibrariesSlot;
     pub fn R4AcoWorker_set_sys(p0: *mut R4AcoWorker, p1: *const R4Lib_r4os_r4sys_Context) -> R4LibrariesSlot;
     pub fn R4AcoWorker_get_client(p0: *const R4AcoWorker, p1: *mut R4LibraryAcoClient) -> R4LibrariesSlot;
     pub fn R4AcoWorker_set_client(p0: *mut R4AcoWorker, p1: *const R4LibraryAcoClient) -> R4LibrariesSlot;
     pub fn R4AcoWorker_get_program(p0: *const R4AcoWorker, p1: *mut R4ProgramProcessHandle) -> R4LibrariesSlot;
     pub fn R4AcoWorker_set_program(p0: *mut R4AcoWorker, p1: *const R4ProgramProcessHandle) -> R4LibrariesSlot;
+    pub fn R4AcoWorker_get_retirement_provider(p0: *const R4AcoWorker, p1: *mut R4Lib_r4os_inventory_reader_Provider) -> R4LibrariesSlot;
+    pub fn R4AcoWorker_set_retirement_provider(p0: *mut R4AcoWorker, p1: *const R4Lib_r4os_inventory_reader_Provider) -> R4LibrariesSlot;
+    pub fn R4AcoWorker_get_retirement_clock(p0: *const R4AcoWorker, p1: *mut R4Lib_r4os_stream_adapters_PlatformClock) -> R4LibrariesSlot;
+    pub fn R4AcoWorker_set_retirement_clock(p0: *mut R4AcoWorker, p1: *const R4Lib_r4os_stream_adapters_PlatformClock) -> R4LibrariesSlot;
     pub fn R4AcoWorker_get_handle(p0: *const R4AcoWorker, p1: *mut R4ProgramJoinHandle) -> R4LibrariesSlot;
     pub fn R4AcoWorker_set_handle(p0: *mut R4AcoWorker, p1: *const R4ProgramJoinHandle) -> R4LibrariesSlot;
     pub fn R4AcoWorker_get_request(p0: *const R4AcoWorker, p1: *mut R4Lib_r4aco_R4AcoRequest) -> R4LibrariesSlot;
@@ -8452,12 +8740,12 @@ unsafe extern "C" {
     pub fn R4Lib_r4aco_R4AcoSymbols_get_s31(p0: *const R4Lib_r4aco_R4AcoSymbols) -> R4LibrariesSlot;
     pub fn R4Lib_r4aco_R4AcoSymbols_set_s31(p0: *mut R4Lib_r4aco_R4AcoSymbols, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4aco_R4AcoSymbols_inspect(p0: *const R4Lib_r4aco_R4AcoSymbols) -> R4LibrariesSlot;
-    pub fn R4Lib_Value281_create(p0: *mut R4Lib_Value281, p1: *const R4Lib_r4os_r4sys_Context) -> R4LibrariesSlot;
-    pub fn R4Lib_Value281_inspect(p0: *const R4Lib_Value281) -> R4LibrariesSlot;
-    pub fn R4Lib_Value282_create(p0: *mut R4Lib_Value282, p1: *const R4LibraryAcoClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value282_inspect(p0: *const R4Lib_Value282) -> R4LibrariesSlot;
-    pub fn R4Lib_Value283_create(p0: *mut R4Lib_Value283, p1: *const R4Lib_r4aco_R4AcoCacheKey) -> R4LibrariesSlot;
-    pub fn R4Lib_Value283_inspect(p0: *const R4Lib_Value283) -> R4LibrariesSlot;
+    pub fn R4Lib_Value285_create(p0: *mut R4Lib_Value285, p1: *const R4Lib_r4os_r4sys_Context) -> R4LibrariesSlot;
+    pub fn R4Lib_Value285_inspect(p0: *const R4Lib_Value285) -> R4LibrariesSlot;
+    pub fn R4Lib_Value286_create(p0: *mut R4Lib_Value286, p1: *const R4LibraryAcoClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value286_inspect(p0: *const R4Lib_Value286) -> R4LibrariesSlot;
+    pub fn R4Lib_Value287_create(p0: *mut R4Lib_Value287, p1: *const R4Lib_r4aco_R4AcoCacheKey) -> R4LibrariesSlot;
+    pub fn R4Lib_Value287_inspect(p0: *const R4Lib_Value287) -> R4LibrariesSlot;
     pub fn R4Lib_r4aco_R4AcoCacheKey_create(p0: *mut R4Lib_r4aco_R4AcoCacheKey, p1: u32, p2: u32, p3: u32, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u64, p14: u64, p15: u64, p16: *const R4Lib_r4aco_R4AcoDigest, p17: *const R4Lib_r4aco_R4AcoDigest) -> R4LibrariesSlot;
     pub fn R4Lib_r4aco_R4AcoCacheKey_from_fields(p0: *mut R4Lib_r4aco_R4AcoCacheKey, p1: u32, p2: u32, p3: u32, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u64, p14: u64, p15: u64, p16: *const R4Lib_r4aco_R4AcoDigest, p17: *const R4Lib_r4aco_R4AcoDigest) -> R4LibrariesSlot;
     pub fn R4Lib_r4aco_R4AcoCacheKey_get_version(p0: *const R4Lib_r4aco_R4AcoCacheKey) -> R4LibrariesSlot;
@@ -8495,10 +8783,10 @@ unsafe extern "C" {
     pub fn R4Lib_r4aco_R4AcoCacheKey_get_pipeline_hash(p0: *const R4Lib_r4aco_R4AcoCacheKey, p1: *mut R4Lib_r4aco_R4AcoDigest) -> R4LibrariesSlot;
     pub fn R4Lib_r4aco_R4AcoCacheKey_set_pipeline_hash(p0: *mut R4Lib_r4aco_R4AcoCacheKey, p1: *const R4Lib_r4aco_R4AcoDigest) -> R4LibrariesSlot;
     pub fn R4Lib_r4aco_R4AcoCacheKey_inspect(p0: *const R4Lib_r4aco_R4AcoCacheKey) -> R4LibrariesSlot;
-    pub fn R4Lib_Value285_create(p0: *mut R4Lib_Value285, p1: *mut R4Lib_r4aco_R4AcoBinary) -> R4LibrariesSlot;
-    pub fn R4Lib_Value285_inspect(p0: *const R4Lib_Value285) -> R4LibrariesSlot;
-    pub fn R4Lib_Value286_create(p0: *mut R4Lib_Value286, p1: *const R4Lib_r4aco_R4AcoBinary) -> R4LibrariesSlot;
-    pub fn R4Lib_Value286_inspect(p0: *const R4Lib_Value286) -> R4LibrariesSlot;
+    pub fn R4Lib_Value289_create(p0: *mut R4Lib_Value289, p1: *mut R4Lib_r4aco_R4AcoBinary) -> R4LibrariesSlot;
+    pub fn R4Lib_Value289_inspect(p0: *const R4Lib_Value289) -> R4LibrariesSlot;
+    pub fn R4Lib_Value290_create(p0: *mut R4Lib_Value290, p1: *const R4Lib_r4aco_R4AcoBinary) -> R4LibrariesSlot;
+    pub fn R4Lib_Value290_inspect(p0: *const R4Lib_Value290) -> R4LibrariesSlot;
     pub fn R4EncMuxColor_create(p0: *mut R4EncMuxColor) -> R4LibrariesSlot;
     pub fn R4EncMuxColor_from_fields(p0: *mut R4EncMuxColor, p1: u8, p2: u8) -> R4LibrariesSlot;
     pub fn R4EncMuxColor_get_transfer(p0: *const R4EncMuxColor) -> R4LibrariesSlot;
@@ -8507,17 +8795,17 @@ unsafe extern "C" {
     pub fn R4EncMuxColor_set_centered_chroma(p0: *mut R4EncMuxColor, p1: u8) -> R4LibrariesSlot;
     pub fn R4EncMuxColor_inspect(p0: *const R4EncMuxColor) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_create(p0: *mut R4EncMuxWriter, p1: u32, p2: u32) -> R4LibrariesSlot;
-    pub fn R4EncMuxWriter_from_fields(p0: *mut R4EncMuxWriter, p1: u32, p2: u32, p3: *const R4EncMuxColor, p4: *const R4Lib_Value289, p5: *const R4Lib_Value289, p6: u64, p7: u64, p8: u8, p9: u8, p10: i64, p11: u64, p12: u64) -> R4LibrariesSlot;
+    pub fn R4EncMuxWriter_from_fields(p0: *mut R4EncMuxWriter, p1: u32, p2: u32, p3: *const R4EncMuxColor, p4: *const R4Lib_Value293, p5: *const R4Lib_Value293, p6: u64, p7: u64, p8: u8, p9: u8, p10: i64, p11: u64, p12: u64) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_get_width(p0: *const R4EncMuxWriter) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_set_width(p0: *mut R4EncMuxWriter, p1: u32) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_get_height(p0: *const R4EncMuxWriter) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_set_height(p0: *mut R4EncMuxWriter, p1: u32) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_get_color(p0: *const R4EncMuxWriter, p1: *mut R4EncMuxColor) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_set_color(p0: *mut R4EncMuxWriter, p1: *const R4EncMuxColor) -> R4LibrariesSlot;
-    pub fn R4EncMuxWriter_get_sps(p0: *const R4EncMuxWriter, p1: *mut R4Lib_Value289) -> R4LibrariesSlot;
-    pub fn R4EncMuxWriter_set_sps(p0: *mut R4EncMuxWriter, p1: *const R4Lib_Value289) -> R4LibrariesSlot;
-    pub fn R4EncMuxWriter_get_pps(p0: *const R4EncMuxWriter, p1: *mut R4Lib_Value289) -> R4LibrariesSlot;
-    pub fn R4EncMuxWriter_set_pps(p0: *mut R4EncMuxWriter, p1: *const R4Lib_Value289) -> R4LibrariesSlot;
+    pub fn R4EncMuxWriter_get_sps(p0: *const R4EncMuxWriter, p1: *mut R4Lib_Value293) -> R4LibrariesSlot;
+    pub fn R4EncMuxWriter_set_sps(p0: *mut R4EncMuxWriter, p1: *const R4Lib_Value293) -> R4LibrariesSlot;
+    pub fn R4EncMuxWriter_get_pps(p0: *const R4EncMuxWriter, p1: *mut R4Lib_Value293) -> R4LibrariesSlot;
+    pub fn R4EncMuxWriter_set_pps(p0: *mut R4EncMuxWriter, p1: *const R4Lib_Value293) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_get_sps_len(p0: *const R4EncMuxWriter) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_set_sps_len(p0: *mut R4EncMuxWriter, p1: u64) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_get_pps_len(p0: *const R4EncMuxWriter) -> R4LibrariesSlot;
@@ -8533,8 +8821,8 @@ unsafe extern "C" {
     pub fn R4EncMuxWriter_get_frames(p0: *const R4EncMuxWriter) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_set_frames(p0: *mut R4EncMuxWriter, p1: u64) -> R4LibrariesSlot;
     pub fn R4EncMuxWriter_inspect(p0: *const R4EncMuxWriter) -> R4LibrariesSlot;
-    pub fn R4Lib_Value289_create(p0: *mut R4Lib_Value289, p1: *const R4Lib_Value289) -> R4LibrariesSlot;
-    pub fn R4Lib_Value289_inspect(p0: *const R4Lib_Value289, p1: *mut R4Lib_Value289) -> R4LibrariesSlot;
+    pub fn R4Lib_Value293_create(p0: *mut R4Lib_Value293, p1: *const R4Lib_Value293) -> R4LibrariesSlot;
+    pub fn R4Lib_Value293_inspect(p0: *const R4Lib_Value293, p1: *mut R4Lib_Value293) -> R4LibrariesSlot;
     pub fn R4EncPixelsProfile_create(p0: *mut R4EncPixelsProfile, p1: u32) -> R4LibrariesSlot;
     pub fn R4EncPixelsProfile_inspect(p0: *const R4EncPixelsProfile) -> R4LibrariesSlot;
     pub fn R4EncPixelsLayout_create(p0: *mut R4EncPixelsLayout, p1: u32, p2: u32, p3: u32, p4: u64, p5: u64, p6: u32, p7: u32) -> R4LibrariesSlot;
@@ -8554,31 +8842,31 @@ unsafe extern "C" {
     pub fn R4EncPixelsLayout_get_coded_rows(p0: *const R4EncPixelsLayout) -> R4LibrariesSlot;
     pub fn R4EncPixelsLayout_set_coded_rows(p0: *mut R4EncPixelsLayout, p1: u32) -> R4LibrariesSlot;
     pub fn R4EncPixelsLayout_inspect(p0: *const R4EncPixelsLayout) -> R4LibrariesSlot;
-    pub fn R4Lib_Value292_create(p0: *mut R4Lib_Value292, p1: *const u32, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value292_inspect(p0: *const R4Lib_Value292) -> R4LibrariesSlot;
-    pub fn R4Lib_Value293_inspect(p0: *const R4Lib_Value293) -> R4LibrariesSlot;
-    pub fn R4Lib_Value294_create(p0: *mut R4Lib_Value294, p1: *const R4Lib_r4os_gfx_outputs_Context) -> R4LibrariesSlot;
-    pub fn R4Lib_Value294_inspect(p0: *const R4Lib_Value294) -> R4LibrariesSlot;
-    pub fn R4Lib_Value296_create(p0: *mut R4Lib_Value296, p1: *const R4GfxOutputInfo) -> R4LibrariesSlot;
+    pub fn R4Lib_Value296_create(p0: *mut R4Lib_Value296, p1: *const u32, p2: u64) -> R4LibrariesSlot;
     pub fn R4Lib_Value296_inspect(p0: *const R4Lib_Value296) -> R4LibrariesSlot;
-    pub fn R4Lib_Value298_create(p0: *mut R4Lib_Value298, p1: *mut R4GfxEdidReport) -> R4LibrariesSlot;
+    pub fn R4Lib_Value297_inspect(p0: *const R4Lib_Value297) -> R4LibrariesSlot;
+    pub fn R4Lib_Value298_create(p0: *mut R4Lib_Value298, p1: *const R4Lib_r4os_gfx_outputs_Context) -> R4LibrariesSlot;
     pub fn R4Lib_Value298_inspect(p0: *const R4Lib_Value298) -> R4LibrariesSlot;
+    pub fn R4Lib_Value300_create(p0: *mut R4Lib_Value300, p1: *const R4GfxOutputInfo) -> R4LibrariesSlot;
+    pub fn R4Lib_Value300_inspect(p0: *const R4Lib_Value300) -> R4LibrariesSlot;
+    pub fn R4Lib_Value302_create(p0: *mut R4Lib_Value302, p1: *mut R4GfxEdidReport) -> R4LibrariesSlot;
+    pub fn R4Lib_Value302_inspect(p0: *const R4Lib_Value302) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_create(p0: *mut R4GfxEdidReport) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_from_fields(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value300, p2: u16, p3: u32, p4: *const R4Lib_Value301, p5: u8, p6: u8, p7: *const R4Lib_Value302, p8: u16, p9: u8, p10: *const R4GfxRefreshRangeFacts, p11: u8, p12: u8, p13: u8, p14: u32, p15: u8, p16: u8, p17: u8, p18: u8, p19: u8, p20: R4LibrariesSlot, p21: u64, p22: u8, p23: u8, p24: u8, p25: u8, p26: u8, p27: R4LibrariesSlot, p28: u8, p29: u8, p30: u16, p31: u8, p32: u8, p33: u8, p34: *const R4Lib_Value300, p35: u8, p36: u32, p37: *const R4Lib_Value318, p38: u64, p39: *const R4Lib_Value320, p40: u64) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_get_manufacturer(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value300) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_set_manufacturer(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value300) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_from_fields(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value304, p2: u16, p3: u32, p4: *const R4Lib_Value305, p5: u8, p6: u8, p7: *const R4Lib_Value306, p8: u16, p9: u8, p10: *const R4GfxRefreshRangeFacts, p11: u8, p12: u8, p13: u8, p14: u32, p15: u8, p16: u8, p17: u8, p18: u8, p19: u8, p20: R4LibrariesSlot, p21: u64, p22: u8, p23: u8, p24: u8, p25: u8, p26: u8, p27: R4LibrariesSlot, p28: u8, p29: u8, p30: u16, p31: u8, p32: u8, p33: u8, p34: *const R4Lib_Value304, p35: u8, p36: u32, p37: *const R4Lib_Value322, p38: u64, p39: *const R4Lib_Value324, p40: u64) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_get_manufacturer(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value304) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_set_manufacturer(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value304) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_product(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_product(p0: *mut R4GfxEdidReport, p1: u16) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_serial(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_serial(p0: *mut R4GfxEdidReport, p1: u32) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_get_name(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value301) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_set_name(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value301) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_get_name(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value305) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_set_name(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value305) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_digital(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_digital(p0: *mut R4GfxEdidReport, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_bits_per_color(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_bits_per_color(p0: *mut R4GfxEdidReport, p1: u8) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_get_chromaticity(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value302) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_set_chromaticity(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value302) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_get_chromaticity(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value306) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_set_chromaticity(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value306) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_gamma_hundredths(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_gamma_hundredths(p0: *mut R4GfxEdidReport, p1: u16) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_srgb_default(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
@@ -8631,29 +8919,29 @@ unsafe extern "C" {
     pub fn R4GfxEdidReport_set_hdr_static(p0: *mut R4GfxEdidReport, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_hdr_present(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_hdr_present(p0: *mut R4GfxEdidReport, p1: u8) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_get_hdr_luminance(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value300) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_set_hdr_luminance(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value300) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_get_hdr_luminance(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value304) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_set_hdr_luminance(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value304) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_hdr_luminance_count(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_hdr_luminance_count(p0: *mut R4GfxEdidReport, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_speakers(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_speakers(p0: *mut R4GfxEdidReport, p1: u32) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_get_modes(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value318) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_set_modes(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value318) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_get_modes(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value322) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_set_modes(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value322) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_mode_count(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_mode_count(p0: *mut R4GfxEdidReport, p1: u64) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_get_audio(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value320) -> R4LibrariesSlot;
-    pub fn R4GfxEdidReport_set_audio(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value320) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_get_audio(p0: *const R4GfxEdidReport, p1: *mut R4Lib_Value324) -> R4LibrariesSlot;
+    pub fn R4GfxEdidReport_set_audio(p0: *mut R4GfxEdidReport, p1: *const R4Lib_Value324) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_get_audio_count(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_set_audio_count(p0: *mut R4GfxEdidReport, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxEdidReport_inspect(p0: *const R4GfxEdidReport) -> R4LibrariesSlot;
-    pub fn R4Lib_Value300_create(p0: *mut R4Lib_Value300, p1: *const R4Lib_Value300) -> R4LibrariesSlot;
-    pub fn R4Lib_Value300_inspect(p0: *const R4Lib_Value300, p1: *mut R4Lib_Value300) -> R4LibrariesSlot;
-    pub fn R4Lib_Value301_create(p0: *mut R4Lib_Value301, p1: *const R4Lib_Value301) -> R4LibrariesSlot;
-    pub fn R4Lib_Value301_inspect(p0: *const R4Lib_Value301, p1: *mut R4Lib_Value301) -> R4LibrariesSlot;
-    pub fn R4Lib_Value302_create(p0: *mut R4Lib_Value302, p1: *const R4Lib_Value302) -> R4LibrariesSlot;
-    pub fn R4Lib_Value302_inspect(p0: *const R4Lib_Value302, p1: *mut R4Lib_Value302) -> R4LibrariesSlot;
+    pub fn R4Lib_Value304_create(p0: *mut R4Lib_Value304, p1: *const R4Lib_Value304) -> R4LibrariesSlot;
+    pub fn R4Lib_Value304_inspect(p0: *const R4Lib_Value304, p1: *mut R4Lib_Value304) -> R4LibrariesSlot;
+    pub fn R4Lib_Value305_create(p0: *mut R4Lib_Value305, p1: *const R4Lib_Value305) -> R4LibrariesSlot;
+    pub fn R4Lib_Value305_inspect(p0: *const R4Lib_Value305, p1: *mut R4Lib_Value305) -> R4LibrariesSlot;
+    pub fn R4Lib_Value306_create(p0: *mut R4Lib_Value306, p1: *const R4Lib_Value306) -> R4LibrariesSlot;
+    pub fn R4Lib_Value306_inspect(p0: *const R4Lib_Value306, p1: *mut R4Lib_Value306) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeFacts_create(p0: *mut R4GfxRefreshRangeFacts) -> R4LibrariesSlot;
-    pub fn R4GfxRefreshRangeFacts_from_fields(p0: *mut R4GfxRefreshRangeFacts, p1: u8, p2: R4LibrariesSlot, p3: R4LibrariesSlot, p4: R4LibrariesSlot, p5: *const R4Lib_Value311, p6: u8) -> R4LibrariesSlot;
+    pub fn R4GfxRefreshRangeFacts_from_fields(p0: *mut R4GfxRefreshRangeFacts, p1: u8, p2: R4LibrariesSlot, p3: R4LibrariesSlot, p4: R4LibrariesSlot, p5: *const R4Lib_Value315, p6: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeFacts_get_continuous_frequency(p0: *const R4GfxRefreshRangeFacts) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeFacts_set_continuous_frequency(p0: *mut R4GfxRefreshRangeFacts, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeFacts_get_edid(p0: *const R4GfxRefreshRangeFacts, p1: *mut R4GfxRefreshRangeEdidLimits) -> R4LibrariesSlot;
@@ -8662,13 +8950,13 @@ unsafe extern "C" {
     pub fn R4GfxRefreshRangeFacts_set_hdmi(p0: *mut R4GfxRefreshRangeFacts, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeFacts_get_dynamic(p0: *const R4GfxRefreshRangeFacts, p1: *mut R4GfxRefreshRangeDynamicLimits) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeFacts_set_dynamic(p0: *mut R4GfxRefreshRangeFacts, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4GfxRefreshRangeFacts_get_adaptive(p0: *const R4GfxRefreshRangeFacts, p1: *mut R4Lib_Value311) -> R4LibrariesSlot;
-    pub fn R4GfxRefreshRangeFacts_set_adaptive(p0: *mut R4GfxRefreshRangeFacts, p1: *const R4Lib_Value311) -> R4LibrariesSlot;
+    pub fn R4GfxRefreshRangeFacts_get_adaptive(p0: *const R4GfxRefreshRangeFacts, p1: *mut R4Lib_Value315) -> R4LibrariesSlot;
+    pub fn R4GfxRefreshRangeFacts_set_adaptive(p0: *mut R4GfxRefreshRangeFacts, p1: *const R4Lib_Value315) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeFacts_get_adaptive_count(p0: *const R4GfxRefreshRangeFacts) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeFacts_set_adaptive_count(p0: *mut R4GfxRefreshRangeFacts, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeFacts_inspect(p0: *const R4GfxRefreshRangeFacts) -> R4LibrariesSlot;
-    pub fn R4Lib_Value304_create(p0: *mut R4Lib_Value304, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value304_inspect(p0: *const R4Lib_Value304, p1: *mut R4GfxRefreshRangeEdidLimits) -> R4LibrariesSlot;
+    pub fn R4Lib_Value308_create(p0: *mut R4Lib_Value308, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value308_inspect(p0: *const R4Lib_Value308, p1: *mut R4GfxRefreshRangeEdidLimits) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeEdidLimits_create(p0: *mut R4GfxRefreshRangeEdidLimits, p1: *const R4GfxRefreshRangeRange, p2: u32, p3: u32, p4: u64) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeEdidLimits_from_fields(p0: *mut R4GfxRefreshRangeEdidLimits, p1: *const R4GfxRefreshRangeRange, p2: u32, p3: u32, p4: u64) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeEdidLimits_get_refresh(p0: *const R4GfxRefreshRangeEdidLimits, p1: *mut R4GfxRefreshRangeRange) -> R4LibrariesSlot;
@@ -8687,8 +8975,8 @@ unsafe extern "C" {
     pub fn R4GfxRefreshRangeRange_get_max_millihz(p0: *const R4GfxRefreshRangeRange) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeRange_set_max_millihz(p0: *mut R4GfxRefreshRangeRange, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeRange_inspect(p0: *const R4GfxRefreshRangeRange) -> R4LibrariesSlot;
-    pub fn R4Lib_Value307_create(p0: *mut R4Lib_Value307, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value307_inspect(p0: *const R4Lib_Value307, p1: *mut R4GfxRefreshRangeHdmi) -> R4LibrariesSlot;
+    pub fn R4Lib_Value311_create(p0: *mut R4Lib_Value311, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value311_inspect(p0: *const R4Lib_Value311, p1: *mut R4GfxRefreshRangeHdmi) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeHdmi_create(p0: *mut R4GfxRefreshRangeHdmi) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeHdmi_from_fields(p0: *mut R4GfxRefreshRangeHdmi, p1: *const R4GfxRefreshRangeRange, p2: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeHdmi_get_refresh(p0: *const R4GfxRefreshRangeHdmi, p1: *mut R4GfxRefreshRangeRange) -> R4LibrariesSlot;
@@ -8696,8 +8984,8 @@ unsafe extern "C" {
     pub fn R4GfxRefreshRangeHdmi_get_flags(p0: *const R4GfxRefreshRangeHdmi) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeHdmi_set_flags(p0: *mut R4GfxRefreshRangeHdmi, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeHdmi_inspect(p0: *const R4GfxRefreshRangeHdmi) -> R4LibrariesSlot;
-    pub fn R4Lib_Value309_create(p0: *mut R4Lib_Value309, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value309_inspect(p0: *const R4Lib_Value309, p1: *mut R4GfxRefreshRangeDynamicLimits) -> R4LibrariesSlot;
+    pub fn R4Lib_Value313_create(p0: *mut R4Lib_Value313, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value313_inspect(p0: *const R4Lib_Value313, p1: *mut R4GfxRefreshRangeDynamicLimits) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeDynamicLimits_create(p0: *mut R4GfxRefreshRangeDynamicLimits, p1: *const R4GfxRefreshRangeRange, p2: u64, p3: u64, p4: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeDynamicLimits_from_fields(p0: *mut R4GfxRefreshRangeDynamicLimits, p1: *const R4GfxRefreshRangeRange, p2: u64, p3: u64, p4: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeDynamicLimits_get_refresh(p0: *const R4GfxRefreshRangeDynamicLimits, p1: *mut R4GfxRefreshRangeRange) -> R4LibrariesSlot;
@@ -8709,8 +8997,8 @@ unsafe extern "C" {
     pub fn R4GfxRefreshRangeDynamicLimits_get_seamless(p0: *const R4GfxRefreshRangeDynamicLimits) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeDynamicLimits_set_seamless(p0: *mut R4GfxRefreshRangeDynamicLimits, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeDynamicLimits_inspect(p0: *const R4GfxRefreshRangeDynamicLimits) -> R4LibrariesSlot;
-    pub fn R4Lib_Value311_create(p0: *mut R4Lib_Value311, p1: *const R4Lib_Value311) -> R4LibrariesSlot;
-    pub fn R4Lib_Value311_inspect(p0: *const R4Lib_Value311, p1: *mut R4Lib_Value311) -> R4LibrariesSlot;
+    pub fn R4Lib_Value315_create(p0: *mut R4Lib_Value315, p1: *const R4Lib_Value315) -> R4LibrariesSlot;
+    pub fn R4Lib_Value315_inspect(p0: *const R4Lib_Value315, p1: *mut R4Lib_Value315) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeAdaptive_create(p0: *mut R4GfxRefreshRangeAdaptive) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeAdaptive_from_fields(p0: *mut R4GfxRefreshRangeAdaptive, p1: *const R4GfxRefreshRangeRange, p2: u8, p3: u8, p4: u8, p5: u8, p6: u8, p7: u32, p8: u32) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeAdaptive_get_refresh(p0: *const R4GfxRefreshRangeAdaptive, p1: *mut R4GfxRefreshRangeRange) -> R4LibrariesSlot;
@@ -8730,8 +9018,8 @@ unsafe extern "C" {
     pub fn R4GfxRefreshRangeAdaptive_get_max_decrease_us(p0: *const R4GfxRefreshRangeAdaptive) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeAdaptive_set_max_decrease_us(p0: *mut R4GfxRefreshRangeAdaptive, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxRefreshRangeAdaptive_inspect(p0: *const R4GfxRefreshRangeAdaptive) -> R4LibrariesSlot;
-    pub fn R4Lib_Value313_create(p0: *mut R4Lib_Value313, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value313_inspect(p0: *const R4Lib_Value313, p1: *mut R4GfxLinksHdmi) -> R4LibrariesSlot;
+    pub fn R4Lib_Value317_create(p0: *mut R4Lib_Value317, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value317_inspect(p0: *const R4Lib_Value317, p1: *mut R4GfxLinksHdmi) -> R4LibrariesSlot;
     pub fn R4GfxLinksHdmi_create(p0: *mut R4GfxLinksHdmi) -> R4LibrariesSlot;
     pub fn R4GfxLinksHdmi_from_fields(p0: *mut R4GfxLinksHdmi, p1: u8, p2: u32, p3: u8, p4: *const R4GfxLinksHdmiDsc) -> R4LibrariesSlot;
     pub fn R4GfxLinksHdmi_get_max_frl_raw(p0: *const R4GfxLinksHdmi) -> R4LibrariesSlot;
@@ -8766,10 +9054,10 @@ unsafe extern "C" {
     pub fn R4GfxLinksHdmiDsc_get_max_chunk_bytes(p0: *const R4GfxLinksHdmiDsc) -> R4LibrariesSlot;
     pub fn R4GfxLinksHdmiDsc_set_max_chunk_bytes(p0: *mut R4GfxLinksHdmiDsc, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxLinksHdmiDsc_inspect(p0: *const R4GfxLinksHdmiDsc) -> R4LibrariesSlot;
-    pub fn R4Lib_Value317_create(p0: *mut R4Lib_Value317, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value317_inspect(p0: *const R4Lib_Value317) -> R4LibrariesSlot;
-    pub fn R4Lib_Value318_create(p0: *mut R4Lib_Value318, p1: *const R4Lib_Value318) -> R4LibrariesSlot;
-    pub fn R4Lib_Value318_inspect(p0: *const R4Lib_Value318, p1: *mut R4Lib_Value318) -> R4LibrariesSlot;
+    pub fn R4Lib_Value321_create(p0: *mut R4Lib_Value321, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value321_inspect(p0: *const R4Lib_Value321) -> R4LibrariesSlot;
+    pub fn R4Lib_Value322_create(p0: *mut R4Lib_Value322, p1: *const R4Lib_Value322) -> R4LibrariesSlot;
+    pub fn R4Lib_Value322_inspect(p0: *const R4Lib_Value322, p1: *mut R4Lib_Value322) -> R4LibrariesSlot;
     pub fn R4GfxTimingTiming_create(p0: *mut R4GfxTimingTiming) -> R4LibrariesSlot;
     pub fn R4GfxTimingTiming_from_fields(p0: *mut R4GfxTimingTiming, p1: u32, p2: u32, p3: u32, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u64, p10: u32, p11: u16, p12: u32) -> R4LibrariesSlot;
     pub fn R4GfxTimingTiming_get_width(p0: *const R4GfxTimingTiming) -> R4LibrariesSlot;
@@ -8797,8 +9085,8 @@ unsafe extern "C" {
     pub fn R4GfxTimingTiming_get_nominal_millihz(p0: *const R4GfxTimingTiming) -> R4LibrariesSlot;
     pub fn R4GfxTimingTiming_set_nominal_millihz(p0: *mut R4GfxTimingTiming, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxTimingTiming_inspect(p0: *const R4GfxTimingTiming) -> R4LibrariesSlot;
-    pub fn R4Lib_Value320_create(p0: *mut R4Lib_Value320, p1: *const R4Lib_Value320) -> R4LibrariesSlot;
-    pub fn R4Lib_Value320_inspect(p0: *const R4Lib_Value320, p1: *mut R4Lib_Value320) -> R4LibrariesSlot;
+    pub fn R4Lib_Value324_create(p0: *mut R4Lib_Value324, p1: *const R4Lib_Value324) -> R4LibrariesSlot;
+    pub fn R4Lib_Value324_inspect(p0: *const R4Lib_Value324, p1: *mut R4Lib_Value324) -> R4LibrariesSlot;
     pub fn R4GfxEdidAudio_create(p0: *mut R4GfxEdidAudio) -> R4LibrariesSlot;
     pub fn R4GfxEdidAudio_from_fields(p0: *mut R4GfxEdidAudio, p1: u8, p2: u8, p3: u8, p4: u8) -> R4LibrariesSlot;
     pub fn R4GfxEdidAudio_get_format(p0: *const R4GfxEdidAudio) -> R4LibrariesSlot;
@@ -8810,9 +9098,9 @@ unsafe extern "C" {
     pub fn R4GfxEdidAudio_get_detail(p0: *const R4GfxEdidAudio) -> R4LibrariesSlot;
     pub fn R4GfxEdidAudio_set_detail(p0: *mut R4GfxEdidAudio, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxEdidAudio_inspect(p0: *const R4GfxEdidAudio) -> R4LibrariesSlot;
-    pub fn R4Lib_Value322_inspect(p0: *const R4Lib_Value322) -> R4LibrariesSlot;
-    pub fn R4Lib_Value323_create(p0: *mut R4Lib_Value323, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value323_inspect(p0: *const R4Lib_Value323, p1: *mut R4GfxOutputMode) -> R4LibrariesSlot;
+    pub fn R4Lib_Value326_inspect(p0: *const R4Lib_Value326) -> R4LibrariesSlot;
+    pub fn R4Lib_Value327_create(p0: *mut R4Lib_Value327, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value327_inspect(p0: *const R4Lib_Value327, p1: *mut R4GfxOutputMode) -> R4LibrariesSlot;
     pub fn R4GfxQueueCopy_create(p0: *mut R4GfxQueueCopy, p1: *const R4GfxBufferHandle, p2: *const R4GfxBufferHandle, p3: u64, p4: u64) -> R4LibrariesSlot;
     pub fn R4GfxQueueCopy_from_fields(p0: *mut R4GfxQueueCopy, p1: *const R4GfxBufferHandle, p2: *const R4GfxBufferHandle, p3: u64, p4: u64, p5: u64, p6: u64, p7: u64, p8: *const R4GfxFence, p9: u64) -> R4LibrariesSlot;
     pub fn R4GfxQueueCopy_get_source(p0: *const R4GfxQueueCopy, p1: *mut R4GfxBufferHandle) -> R4LibrariesSlot;
@@ -8832,8 +9120,8 @@ unsafe extern "C" {
     pub fn R4GfxQueueCopy_get_dependencies(p0: *const R4GfxQueueCopy) -> R4LibrariesSlot;
     pub fn R4GfxQueueCopy_set_dependencies(p0: *mut R4GfxQueueCopy, p1: *const R4GfxFence, p2: u64) -> R4LibrariesSlot;
     pub fn R4GfxQueueCopy_inspect(p0: *const R4GfxQueueCopy) -> R4LibrariesSlot;
-    pub fn R4Lib_Value327_create(p0: *mut R4Lib_Value327, p1: *const R4GfxFence, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value327_inspect(p0: *const R4Lib_Value327) -> R4LibrariesSlot;
+    pub fn R4Lib_Value331_create(p0: *mut R4Lib_Value331, p1: *const R4GfxFence, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value331_inspect(p0: *const R4Lib_Value331) -> R4LibrariesSlot;
     pub fn R4GfxQueueQueue_create(p0: *mut R4GfxQueueQueue, p1: *const R4Lib_r4os_gfx_queue_Context) -> R4LibrariesSlot;
     pub fn R4GfxQueueQueue_from_fields(p0: *mut R4GfxQueueQueue, p1: *const R4Lib_r4os_gfx_queue_Context, p2: *const R4GfxQueueHandle) -> R4LibrariesSlot;
     pub fn R4GfxQueueQueue_get_context(p0: *const R4GfxQueueQueue, p1: *mut R4Lib_r4os_gfx_queue_Context) -> R4LibrariesSlot;
@@ -8851,32 +9139,32 @@ unsafe extern "C" {
     pub fn R4GfxBrightnessPreferencesChoice_set_serial(p0: *mut R4GfxBrightnessPreferencesChoice, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxBrightnessPreferencesChoice_inspect(p0: *const R4GfxBrightnessPreferencesChoice) -> R4LibrariesSlot;
     pub fn R4GfxTopologyKey_create(p0: *mut R4GfxTopologyKey) -> R4LibrariesSlot;
-    pub fn R4GfxTopologyKey_from_fields(p0: *mut R4GfxTopologyKey, p1: u64, p2: u32, p3: *const R4Lib_Value102) -> R4LibrariesSlot;
+    pub fn R4GfxTopologyKey_from_fields(p0: *mut R4GfxTopologyKey, p1: u64, p2: u32, p3: *const R4Lib_Value104) -> R4LibrariesSlot;
     pub fn R4GfxTopologyKey_get_adapter(p0: *const R4GfxTopologyKey) -> R4LibrariesSlot;
     pub fn R4GfxTopologyKey_set_adapter(p0: *mut R4GfxTopologyKey, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxTopologyKey_get_connector(p0: *const R4GfxTopologyKey) -> R4LibrariesSlot;
     pub fn R4GfxTopologyKey_set_connector(p0: *mut R4GfxTopologyKey, p1: u32) -> R4LibrariesSlot;
-    pub fn R4GfxTopologyKey_get_receiver(p0: *const R4GfxTopologyKey, p1: *mut R4Lib_Value102) -> R4LibrariesSlot;
-    pub fn R4GfxTopologyKey_set_receiver(p0: *mut R4GfxTopologyKey, p1: *const R4Lib_Value102) -> R4LibrariesSlot;
+    pub fn R4GfxTopologyKey_get_receiver(p0: *const R4GfxTopologyKey, p1: *mut R4Lib_Value104) -> R4LibrariesSlot;
+    pub fn R4GfxTopologyKey_set_receiver(p0: *mut R4GfxTopologyKey, p1: *const R4Lib_Value104) -> R4LibrariesSlot;
     pub fn R4GfxTopologyKey_inspect(p0: *const R4GfxTopologyKey) -> R4LibrariesSlot;
     pub fn R4GfxBrightnessPreferencesConfig_create(p0: *mut R4GfxBrightnessPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4GfxBrightnessPreferencesConfig_from_fields(p0: *mut R4GfxBrightnessPreferencesConfig, p1: *const R4Lib_Value336, p2: u64) -> R4LibrariesSlot;
-    pub fn R4GfxBrightnessPreferencesConfig_get_choices(p0: *const R4GfxBrightnessPreferencesConfig, p1: *mut R4Lib_Value336) -> R4LibrariesSlot;
-    pub fn R4GfxBrightnessPreferencesConfig_set_choices(p0: *mut R4GfxBrightnessPreferencesConfig, p1: *const R4Lib_Value336) -> R4LibrariesSlot;
+    pub fn R4GfxBrightnessPreferencesConfig_from_fields(p0: *mut R4GfxBrightnessPreferencesConfig, p1: *const R4Lib_Value340, p2: u64) -> R4LibrariesSlot;
+    pub fn R4GfxBrightnessPreferencesConfig_get_choices(p0: *const R4GfxBrightnessPreferencesConfig, p1: *mut R4Lib_Value340) -> R4LibrariesSlot;
+    pub fn R4GfxBrightnessPreferencesConfig_set_choices(p0: *mut R4GfxBrightnessPreferencesConfig, p1: *const R4Lib_Value340) -> R4LibrariesSlot;
     pub fn R4GfxBrightnessPreferencesConfig_get_count(p0: *const R4GfxBrightnessPreferencesConfig) -> R4LibrariesSlot;
     pub fn R4GfxBrightnessPreferencesConfig_set_count(p0: *mut R4GfxBrightnessPreferencesConfig, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxBrightnessPreferencesConfig_inspect(p0: *const R4GfxBrightnessPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value336_create(p0: *mut R4Lib_Value336, p1: *const R4Lib_Value336) -> R4LibrariesSlot;
-    pub fn R4Lib_Value336_inspect(p0: *const R4Lib_Value336, p1: *mut R4Lib_Value336) -> R4LibrariesSlot;
-    pub fn R4GfxColorControlRestoration_create(p0: *mut R4GfxColorControlRestoration) -> R4LibrariesSlot;
-    pub fn R4GfxColorControlRestoration_from_fields(p0: *mut R4GfxColorControlRestoration, p1: *const R4Lib_Value340) -> R4LibrariesSlot;
-    pub fn R4GfxColorControlRestoration_get_entries(p0: *const R4GfxColorControlRestoration, p1: *mut R4Lib_Value340) -> R4LibrariesSlot;
-    pub fn R4GfxColorControlRestoration_set_entries(p0: *mut R4GfxColorControlRestoration, p1: *const R4Lib_Value340) -> R4LibrariesSlot;
-    pub fn R4GfxColorControlRestoration_inspect(p0: *const R4GfxColorControlRestoration) -> R4LibrariesSlot;
     pub fn R4Lib_Value340_create(p0: *mut R4Lib_Value340, p1: *const R4Lib_Value340) -> R4LibrariesSlot;
     pub fn R4Lib_Value340_inspect(p0: *const R4Lib_Value340, p1: *mut R4Lib_Value340) -> R4LibrariesSlot;
-    pub fn R4Lib_Value341_create(p0: *mut R4Lib_Value341, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value341_inspect(p0: *const R4Lib_Value341, p1: *mut R4GfxColorControlRestoration_Attempt) -> R4LibrariesSlot;
+    pub fn R4GfxColorControlRestoration_create(p0: *mut R4GfxColorControlRestoration) -> R4LibrariesSlot;
+    pub fn R4GfxColorControlRestoration_from_fields(p0: *mut R4GfxColorControlRestoration, p1: *const R4Lib_Value344) -> R4LibrariesSlot;
+    pub fn R4GfxColorControlRestoration_get_entries(p0: *const R4GfxColorControlRestoration, p1: *mut R4Lib_Value344) -> R4LibrariesSlot;
+    pub fn R4GfxColorControlRestoration_set_entries(p0: *mut R4GfxColorControlRestoration, p1: *const R4Lib_Value344) -> R4LibrariesSlot;
+    pub fn R4GfxColorControlRestoration_inspect(p0: *const R4GfxColorControlRestoration) -> R4LibrariesSlot;
+    pub fn R4Lib_Value344_create(p0: *mut R4Lib_Value344, p1: *const R4Lib_Value344) -> R4LibrariesSlot;
+    pub fn R4Lib_Value344_inspect(p0: *const R4Lib_Value344, p1: *mut R4Lib_Value344) -> R4LibrariesSlot;
+    pub fn R4Lib_Value345_create(p0: *mut R4Lib_Value345, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value345_inspect(p0: *const R4Lib_Value345, p1: *mut R4GfxColorControlRestoration_Attempt) -> R4LibrariesSlot;
     pub fn R4GfxColorControlRestoration_Attempt_create(p0: *mut R4GfxColorControlRestoration_Attempt, p1: *const R4GfxTopologyKey, p2: *const R4GfxOutputId, p3: *const R4GfxColorSignal) -> R4LibrariesSlot;
     pub fn R4GfxColorControlRestoration_Attempt_from_fields(p0: *mut R4GfxColorControlRestoration_Attempt, p1: *const R4GfxTopologyKey, p2: *const R4GfxOutputId, p3: *const R4GfxColorSignal) -> R4LibrariesSlot;
     pub fn R4GfxColorControlRestoration_Attempt_get_key(p0: *const R4GfxColorControlRestoration_Attempt, p1: *mut R4GfxTopologyKey) -> R4LibrariesSlot;
@@ -8887,11 +9175,11 @@ unsafe extern "C" {
     pub fn R4GfxColorControlRestoration_Attempt_set_signal(p0: *mut R4GfxColorControlRestoration_Attempt, p1: *const R4GfxColorSignal) -> R4LibrariesSlot;
     pub fn R4GfxColorControlRestoration_Attempt_inspect(p0: *const R4GfxColorControlRestoration_Attempt) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesChoice_create(p0: *mut R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
-    pub fn R4GfxColorPreferencesChoice_from_fields(p0: *mut R4GfxColorPreferencesChoice, p1: *const R4GfxTopologyKey, p2: *const R4Lib_Value92, p3: u32, p4: u32, p5: *const R4GfxColorSignal) -> R4LibrariesSlot;
+    pub fn R4GfxColorPreferencesChoice_from_fields(p0: *mut R4GfxColorPreferencesChoice, p1: *const R4GfxTopologyKey, p2: *const R4Lib_Value94, p3: u32, p4: u32, p5: *const R4GfxColorSignal) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesChoice_get_key(p0: *const R4GfxColorPreferencesChoice, p1: *mut R4GfxTopologyKey) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesChoice_set_key(p0: *mut R4GfxColorPreferencesChoice, p1: *const R4GfxTopologyKey) -> R4LibrariesSlot;
-    pub fn R4GfxColorPreferencesChoice_get_filename(p0: *const R4GfxColorPreferencesChoice, p1: *mut R4Lib_Value92) -> R4LibrariesSlot;
-    pub fn R4GfxColorPreferencesChoice_set_filename(p0: *mut R4GfxColorPreferencesChoice, p1: *const R4Lib_Value92) -> R4LibrariesSlot;
+    pub fn R4GfxColorPreferencesChoice_get_filename(p0: *const R4GfxColorPreferencesChoice, p1: *mut R4Lib_Value94) -> R4LibrariesSlot;
+    pub fn R4GfxColorPreferencesChoice_set_filename(p0: *mut R4GfxColorPreferencesChoice, p1: *const R4Lib_Value94) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesChoice_get_intent(p0: *const R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesChoice_set_intent(p0: *mut R4GfxColorPreferencesChoice, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesChoice_get_flags(p0: *const R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
@@ -8900,14 +9188,14 @@ unsafe extern "C" {
     pub fn R4GfxColorPreferencesChoice_set_signal(p0: *mut R4GfxColorPreferencesChoice, p1: *const R4GfxColorSignal) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesChoice_inspect(p0: *const R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesConfig_create(p0: *mut R4GfxColorPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4GfxColorPreferencesConfig_from_fields(p0: *mut R4GfxColorPreferencesConfig, p1: *const R4Lib_Value346, p2: u64) -> R4LibrariesSlot;
-    pub fn R4GfxColorPreferencesConfig_get_choices(p0: *const R4GfxColorPreferencesConfig, p1: *mut R4Lib_Value346) -> R4LibrariesSlot;
-    pub fn R4GfxColorPreferencesConfig_set_choices(p0: *mut R4GfxColorPreferencesConfig, p1: *const R4Lib_Value346) -> R4LibrariesSlot;
+    pub fn R4GfxColorPreferencesConfig_from_fields(p0: *mut R4GfxColorPreferencesConfig, p1: *const R4Lib_Value350, p2: u64) -> R4LibrariesSlot;
+    pub fn R4GfxColorPreferencesConfig_get_choices(p0: *const R4GfxColorPreferencesConfig, p1: *mut R4Lib_Value350) -> R4LibrariesSlot;
+    pub fn R4GfxColorPreferencesConfig_set_choices(p0: *mut R4GfxColorPreferencesConfig, p1: *const R4Lib_Value350) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesConfig_get_count(p0: *const R4GfxColorPreferencesConfig) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesConfig_set_count(p0: *mut R4GfxColorPreferencesConfig, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxColorPreferencesConfig_inspect(p0: *const R4GfxColorPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value346_create(p0: *mut R4Lib_Value346, p1: *const R4Lib_Value346) -> R4LibrariesSlot;
-    pub fn R4Lib_Value346_inspect(p0: *const R4Lib_Value346, p1: *mut R4Lib_Value346) -> R4LibrariesSlot;
+    pub fn R4Lib_Value350_create(p0: *mut R4Lib_Value350, p1: *const R4Lib_Value350) -> R4LibrariesSlot;
+    pub fn R4Lib_Value350_inspect(p0: *const R4Lib_Value350, p1: *mut R4Lib_Value350) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalTransfer_create(p0: *mut R4GfxColorSignalTransfer, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalTransfer_inspect(p0: *const R4GfxColorSignalTransfer) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPrimaries_create(p0: *mut R4GfxColorSignalPrimaries, p1: u32) -> R4LibrariesSlot;
@@ -8917,11 +9205,11 @@ unsafe extern "C" {
     pub fn R4GfxColorSignalFormat_create(p0: *mut R4GfxColorSignalFormat, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalFormat_inspect(p0: *const R4GfxColorSignalFormat) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalMetadata_create(p0: *mut R4GfxColorSignalMetadata) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalMetadata_from_fields(p0: *mut R4GfxColorSignalMetadata, p1: *const R4Lib_Value352, p2: *const R4Lib_Value353, p3: u16, p4: u16, p5: u16, p6: u16) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalMetadata_get_primaries(p0: *const R4GfxColorSignalMetadata, p1: *mut R4Lib_Value352) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalMetadata_set_primaries(p0: *mut R4GfxColorSignalMetadata, p1: *const R4Lib_Value352) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalMetadata_get_white(p0: *const R4GfxColorSignalMetadata, p1: *mut R4Lib_Value353) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalMetadata_set_white(p0: *mut R4GfxColorSignalMetadata, p1: *const R4Lib_Value353) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalMetadata_from_fields(p0: *mut R4GfxColorSignalMetadata, p1: *const R4Lib_Value356, p2: *const R4Lib_Value357, p3: u16, p4: u16, p5: u16, p6: u16) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalMetadata_get_primaries(p0: *const R4GfxColorSignalMetadata, p1: *mut R4Lib_Value356) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalMetadata_set_primaries(p0: *mut R4GfxColorSignalMetadata, p1: *const R4Lib_Value356) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalMetadata_get_white(p0: *const R4GfxColorSignalMetadata, p1: *mut R4Lib_Value357) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalMetadata_set_white(p0: *mut R4GfxColorSignalMetadata, p1: *const R4Lib_Value357) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalMetadata_get_max_mastering(p0: *const R4GfxColorSignalMetadata) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalMetadata_set_max_mastering(p0: *mut R4GfxColorSignalMetadata, p1: u16) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalMetadata_get_min_mastering(p0: *const R4GfxColorSignalMetadata) -> R4LibrariesSlot;
@@ -8931,10 +9219,10 @@ unsafe extern "C" {
     pub fn R4GfxColorSignalMetadata_get_max_fall(p0: *const R4GfxColorSignalMetadata) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalMetadata_set_max_fall(p0: *mut R4GfxColorSignalMetadata, p1: u16) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalMetadata_inspect(p0: *const R4GfxColorSignalMetadata) -> R4LibrariesSlot;
-    pub fn R4Lib_Value352_create(p0: *mut R4Lib_Value352, p1: *const R4Lib_Value352) -> R4LibrariesSlot;
-    pub fn R4Lib_Value352_inspect(p0: *const R4Lib_Value352, p1: *mut R4Lib_Value352) -> R4LibrariesSlot;
-    pub fn R4Lib_Value353_create(p0: *mut R4Lib_Value353, p1: *const R4Lib_Value353) -> R4LibrariesSlot;
-    pub fn R4Lib_Value353_inspect(p0: *const R4Lib_Value353, p1: *mut R4Lib_Value353) -> R4LibrariesSlot;
+    pub fn R4Lib_Value356_create(p0: *mut R4Lib_Value356, p1: *const R4Lib_Value356) -> R4LibrariesSlot;
+    pub fn R4Lib_Value356_inspect(p0: *const R4Lib_Value356, p1: *mut R4Lib_Value356) -> R4LibrariesSlot;
+    pub fn R4Lib_Value357_create(p0: *mut R4Lib_Value357, p1: *const R4Lib_Value357) -> R4LibrariesSlot;
+    pub fn R4Lib_Value357_inspect(p0: *const R4Lib_Value357, p1: *mut R4Lib_Value357) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalSignal_create(p0: *mut R4GfxColorSignalSignal, p1: u32, p2: u32, p3: u32, p4: u32, p5: u8, p6: u32, p7: u32) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalSignal_from_fields(p0: *mut R4GfxColorSignalSignal, p1: u32, p2: u32, p3: u32, p4: u32, p5: u8, p6: u32, p7: u32, p8: u32, p9: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalSignal_get_format(p0: *const R4GfxColorSignalSignal) -> R4LibrariesSlot;
@@ -8956,8 +9244,8 @@ unsafe extern "C" {
     pub fn R4GfxColorSignalSignal_get_metadata(p0: *const R4GfxColorSignalSignal, p1: *mut R4GfxColorSignalMetadata) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalSignal_set_metadata(p0: *mut R4GfxColorSignalSignal, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalSignal_inspect(p0: *const R4GfxColorSignalSignal) -> R4LibrariesSlot;
-    pub fn R4Lib_Value355_create(p0: *mut R4Lib_Value355, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value355_inspect(p0: *const R4Lib_Value355, p1: *mut R4GfxColorSignalMetadata) -> R4LibrariesSlot;
+    pub fn R4Lib_Value359_create(p0: *mut R4Lib_Value359, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value359_inspect(p0: *const R4Lib_Value359, p1: *mut R4GfxColorSignalMetadata) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalSource_create(p0: *mut R4GfxColorSignalSource) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalSource_from_fields(p0: *mut R4GfxColorSignalSource, p1: u8, p2: u8, p3: u8, p4: u8, p5: u8, p6: u8, p7: u8) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalSource_get_formats(p0: *const R4GfxColorSignalSource) -> R4LibrariesSlot;
@@ -8988,63 +9276,63 @@ unsafe extern "C" {
     pub fn R4GfxColorSignalPipeline_inspect(p0: *const R4GfxColorSignalPipeline) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalLink_get_dvi(p0: *const R4GfxColorSignalLink) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalLink_set_dvi(p0: *mut R4GfxColorSignalLink, p1: u64) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalLink_get_hdmi(p0: *const R4GfxColorSignalLink, p1: *mut R4Lib_Value361) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalLink_set_hdmi(p0: *mut R4GfxColorSignalLink, p1: *const R4Lib_Value361) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalLink_get_hdmi_frl(p0: *const R4GfxColorSignalLink, p1: *mut R4Lib_Value362) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalLink_set_hdmi_frl(p0: *mut R4GfxColorSignalLink, p1: *const R4Lib_Value362) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalLink_get_displayport(p0: *const R4GfxColorSignalLink, p1: *mut R4Lib_Value363) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalLink_set_displayport(p0: *mut R4GfxColorSignalLink, p1: *const R4Lib_Value363) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalLink_get_hdmi(p0: *const R4GfxColorSignalLink, p1: *mut R4Lib_Value365) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalLink_set_hdmi(p0: *mut R4GfxColorSignalLink, p1: *const R4Lib_Value365) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalLink_get_hdmi_frl(p0: *const R4GfxColorSignalLink, p1: *mut R4Lib_Value366) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalLink_set_hdmi_frl(p0: *mut R4GfxColorSignalLink, p1: *const R4Lib_Value366) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalLink_get_displayport(p0: *const R4GfxColorSignalLink, p1: *mut R4Lib_Value367) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalLink_set_displayport(p0: *mut R4GfxColorSignalLink, p1: *const R4Lib_Value367) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalLink_inspect(p0: *const R4GfxColorSignalLink) -> R4LibrariesSlot;
     pub fn R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type___create(p0: *mut R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type__, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type___inspect(p0: *const R4Lib__typeInfo_R4GFX_Display_color_signal_Link____union__tag_type__) -> R4LibrariesSlot;
-    pub fn R4Lib_Value361_create(p0: *mut R4Lib_Value361, p1: u64, p2: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value361_from_fields(p0: *mut R4Lib_Value361, p1: u64, p2: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value361_get_max_tmds_hz(p0: *const R4Lib_Value361) -> R4LibrariesSlot;
-    pub fn R4Lib_Value361_set_max_tmds_hz(p0: *mut R4Lib_Value361, p1: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value361_get_scdc(p0: *const R4Lib_Value361) -> R4LibrariesSlot;
-    pub fn R4Lib_Value361_set_scdc(p0: *mut R4Lib_Value361, p1: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value361_inspect(p0: *const R4Lib_Value361) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_create(p0: *mut R4Lib_Value362, p1: u64, p2: u32, p3: u32) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_from_fields(p0: *mut R4Lib_Value362, p1: u64, p2: u32, p3: u32, p4: u16, p5: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_get_payload_bits_per_second(p0: *const R4Lib_Value362) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_set_payload_bits_per_second(p0: *mut R4Lib_Value362, p1: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_get_h_total(p0: *const R4Lib_Value362) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_set_h_total(p0: *mut R4Lib_Value362, p1: u32) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_get_h_active(p0: *const R4Lib_Value362) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_set_h_active(p0: *mut R4Lib_Value362, p1: u32) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_get_compressed_bpp_x16(p0: *const R4Lib_Value362) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_set_compressed_bpp_x16(p0: *mut R4Lib_Value362, p1: u16) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_get_compressed_bpc(p0: *const R4Lib_Value362) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_set_compressed_bpc(p0: *mut R4Lib_Value362, p1: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value362_inspect(p0: *const R4Lib_Value362) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_create(p0: *mut R4Lib_Value363, p1: u64, p2: u8, p3: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_from_fields(p0: *mut R4Lib_Value363, p1: u64, p2: u8, p3: u8, p4: u16, p5: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_get_payload_bits_per_second(p0: *const R4Lib_Value363) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_set_payload_bits_per_second(p0: *mut R4Lib_Value363, p1: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_get_vsc(p0: *const R4Lib_Value363) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_set_vsc(p0: *mut R4Lib_Value363, p1: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_get_hdr_sdp(p0: *const R4Lib_Value363) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_set_hdr_sdp(p0: *mut R4Lib_Value363, p1: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_get_compressed_bpp_x16(p0: *const R4Lib_Value363) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_set_compressed_bpp_x16(p0: *mut R4Lib_Value363, p1: u16) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_get_compressed_bpc(p0: *const R4Lib_Value363) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_set_compressed_bpc(p0: *mut R4Lib_Value363, p1: u8) -> R4LibrariesSlot;
-    pub fn R4Lib_Value363_inspect(p0: *const R4Lib_Value363) -> R4LibrariesSlot;
+    pub fn R4Lib_Value365_create(p0: *mut R4Lib_Value365, p1: u64, p2: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value365_from_fields(p0: *mut R4Lib_Value365, p1: u64, p2: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value365_get_max_tmds_hz(p0: *const R4Lib_Value365) -> R4LibrariesSlot;
+    pub fn R4Lib_Value365_set_max_tmds_hz(p0: *mut R4Lib_Value365, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value365_get_scdc(p0: *const R4Lib_Value365) -> R4LibrariesSlot;
+    pub fn R4Lib_Value365_set_scdc(p0: *mut R4Lib_Value365, p1: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value365_inspect(p0: *const R4Lib_Value365) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_create(p0: *mut R4Lib_Value366, p1: u64, p2: u32, p3: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_from_fields(p0: *mut R4Lib_Value366, p1: u64, p2: u32, p3: u32, p4: u16, p5: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_get_payload_bits_per_second(p0: *const R4Lib_Value366) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_set_payload_bits_per_second(p0: *mut R4Lib_Value366, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_get_h_total(p0: *const R4Lib_Value366) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_set_h_total(p0: *mut R4Lib_Value366, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_get_h_active(p0: *const R4Lib_Value366) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_set_h_active(p0: *mut R4Lib_Value366, p1: u32) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_get_compressed_bpp_x16(p0: *const R4Lib_Value366) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_set_compressed_bpp_x16(p0: *mut R4Lib_Value366, p1: u16) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_get_compressed_bpc(p0: *const R4Lib_Value366) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_set_compressed_bpc(p0: *mut R4Lib_Value366, p1: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value366_inspect(p0: *const R4Lib_Value366) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_create(p0: *mut R4Lib_Value367, p1: u64, p2: u8, p3: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_from_fields(p0: *mut R4Lib_Value367, p1: u64, p2: u8, p3: u8, p4: u16, p5: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_get_payload_bits_per_second(p0: *const R4Lib_Value367) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_set_payload_bits_per_second(p0: *mut R4Lib_Value367, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_get_vsc(p0: *const R4Lib_Value367) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_set_vsc(p0: *mut R4Lib_Value367, p1: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_get_hdr_sdp(p0: *const R4Lib_Value367) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_set_hdr_sdp(p0: *mut R4Lib_Value367, p1: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_get_compressed_bpp_x16(p0: *const R4Lib_Value367) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_set_compressed_bpp_x16(p0: *mut R4Lib_Value367, p1: u16) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_get_compressed_bpc(p0: *const R4Lib_Value367) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_set_compressed_bpc(p0: *mut R4Lib_Value367, p1: u8) -> R4LibrariesSlot;
+    pub fn R4Lib_Value367_inspect(p0: *const R4Lib_Value367) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_create(p0: *mut R4GfxColorSignalPlan, p1: u8, p2: u8) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalPlan_from_fields(p0: *mut R4GfxColorSignalPlan, p1: u8, p2: u64, p3: *const R4Lib_Value365, p4: u8, p5: u8) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalPlan_from_fields(p0: *mut R4GfxColorSignalPlan, p1: u8, p2: u64, p3: *const R4Lib_Value369, p4: u8, p5: u8) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_get_bpp(p0: *const R4GfxColorSignalPlan) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_set_bpp(p0: *mut R4GfxColorSignalPlan, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_get_tmds_hz(p0: *const R4GfxColorSignalPlan) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_set_tmds_hz(p0: *mut R4GfxColorSignalPlan, p1: u64) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalPlan_get_metadata(p0: *const R4GfxColorSignalPlan, p1: *mut R4Lib_Value365) -> R4LibrariesSlot;
-    pub fn R4GfxColorSignalPlan_set_metadata(p0: *mut R4GfxColorSignalPlan, p1: *const R4Lib_Value365) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalPlan_get_metadata(p0: *const R4GfxColorSignalPlan, p1: *mut R4Lib_Value369) -> R4LibrariesSlot;
+    pub fn R4GfxColorSignalPlan_set_metadata(p0: *mut R4GfxColorSignalPlan, p1: *const R4Lib_Value369) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_get_metadata_bytes(p0: *const R4GfxColorSignalPlan) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_set_metadata_bytes(p0: *mut R4GfxColorSignalPlan, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_get_clear_hdr(p0: *const R4GfxColorSignalPlan) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_set_clear_hdr(p0: *mut R4GfxColorSignalPlan, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalPlan_inspect(p0: *const R4GfxColorSignalPlan) -> R4LibrariesSlot;
-    pub fn R4Lib_Value365_create(p0: *mut R4Lib_Value365, p1: *const R4Lib_Value365) -> R4LibrariesSlot;
-    pub fn R4Lib_Value365_inspect(p0: *const R4Lib_Value365, p1: *mut R4Lib_Value365) -> R4LibrariesSlot;
+    pub fn R4Lib_Value369_create(p0: *mut R4Lib_Value369, p1: *const R4Lib_Value369) -> R4LibrariesSlot;
+    pub fn R4Lib_Value369_inspect(p0: *const R4Lib_Value369, p1: *mut R4Lib_Value369) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalLuminance_create(p0: *mut R4GfxColorSignalLuminance) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalLuminance_from_fields(p0: *mut R4GfxColorSignalLuminance, p1: R4LibrariesSlot, p2: R4LibrariesSlot, p3: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalLuminance_get_maximum(p0: *const R4GfxColorSignalLuminance, p1: *mut f64) -> R4LibrariesSlot;
@@ -9054,18 +9342,18 @@ unsafe extern "C" {
     pub fn R4GfxColorSignalLuminance_get_minimum(p0: *const R4GfxColorSignalLuminance, p1: *mut f64) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalLuminance_set_minimum(p0: *mut R4GfxColorSignalLuminance, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4GfxColorSignalLuminance_inspect(p0: *const R4GfxColorSignalLuminance) -> R4LibrariesSlot;
-    pub fn R4Lib_Value367_create(p0: *mut R4Lib_Value367, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value367_inspect(p0: *const R4Lib_Value367, p1: *mut f64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value368_inspect(p0: *const R4Lib_Value368, p1: *mut R4Lib_Value369) -> R4LibrariesSlot;
-    pub fn R4Lib_Value369_create(p0: *mut R4Lib_Value369, p1: *const R4Lib_Value369) -> R4LibrariesSlot;
-    pub fn R4Lib_Value369_inspect(p0: *const R4Lib_Value369, p1: *mut R4Lib_Value369) -> R4LibrariesSlot;
-    pub fn R4Lib_Value370_inspect(p0: *const R4Lib_Value370, p1: *mut R4Lib_Value365) -> R4LibrariesSlot;
-    pub fn R4Lib_Value371_create(p0: *mut R4Lib_Value371, p1: *const R4GfxTopologyLayout) -> R4LibrariesSlot;
-    pub fn R4Lib_Value371_inspect(p0: *const R4Lib_Value371) -> R4LibrariesSlot;
+    pub fn R4Lib_Value371_create(p0: *mut R4Lib_Value371, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value371_inspect(p0: *const R4Lib_Value371, p1: *mut f64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value372_inspect(p0: *const R4Lib_Value372, p1: *mut R4Lib_Value373) -> R4LibrariesSlot;
+    pub fn R4Lib_Value373_create(p0: *mut R4Lib_Value373, p1: *const R4Lib_Value373) -> R4LibrariesSlot;
+    pub fn R4Lib_Value373_inspect(p0: *const R4Lib_Value373, p1: *mut R4Lib_Value373) -> R4LibrariesSlot;
+    pub fn R4Lib_Value374_inspect(p0: *const R4Lib_Value374, p1: *mut R4Lib_Value369) -> R4LibrariesSlot;
+    pub fn R4Lib_Value375_create(p0: *mut R4Lib_Value375, p1: *const R4GfxTopologyLayout) -> R4LibrariesSlot;
+    pub fn R4Lib_Value375_inspect(p0: *const R4Lib_Value375) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_create(p0: *mut R4GfxTopologyLayout) -> R4LibrariesSlot;
-    pub fn R4GfxTopologyLayout_from_fields(p0: *mut R4GfxTopologyLayout, p1: *const R4Lib_Value373, p2: u64, p3: u64, p4: u64) -> R4LibrariesSlot;
-    pub fn R4GfxTopologyLayout_get_outputs(p0: *const R4GfxTopologyLayout, p1: *mut R4Lib_Value373) -> R4LibrariesSlot;
-    pub fn R4GfxTopologyLayout_set_outputs(p0: *mut R4GfxTopologyLayout, p1: *const R4Lib_Value373) -> R4LibrariesSlot;
+    pub fn R4GfxTopologyLayout_from_fields(p0: *mut R4GfxTopologyLayout, p1: *const R4Lib_Value377, p2: u64, p3: u64, p4: u64) -> R4LibrariesSlot;
+    pub fn R4GfxTopologyLayout_get_outputs(p0: *const R4GfxTopologyLayout, p1: *mut R4Lib_Value377) -> R4LibrariesSlot;
+    pub fn R4GfxTopologyLayout_set_outputs(p0: *mut R4GfxTopologyLayout, p1: *const R4Lib_Value377) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_get_count(p0: *const R4GfxTopologyLayout) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_set_count(p0: *mut R4GfxTopologyLayout, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_get_primary(p0: *const R4GfxTopologyLayout) -> R4LibrariesSlot;
@@ -9073,8 +9361,8 @@ unsafe extern "C" {
     pub fn R4GfxTopologyLayout_get_revision(p0: *const R4GfxTopologyLayout) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_set_revision(p0: *mut R4GfxTopologyLayout, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxTopologyLayout_inspect(p0: *const R4GfxTopologyLayout) -> R4LibrariesSlot;
-    pub fn R4Lib_Value373_create(p0: *mut R4Lib_Value373, p1: *const R4Lib_Value373) -> R4LibrariesSlot;
-    pub fn R4Lib_Value373_inspect(p0: *const R4Lib_Value373, p1: *mut R4Lib_Value373) -> R4LibrariesSlot;
+    pub fn R4Lib_Value377_create(p0: *mut R4Lib_Value377, p1: *const R4Lib_Value377) -> R4LibrariesSlot;
+    pub fn R4Lib_Value377_inspect(p0: *const R4Lib_Value377, p1: *mut R4Lib_Value377) -> R4LibrariesSlot;
     pub fn R4GfxTopologyOutput_create(p0: *mut R4GfxTopologyOutput, p1: *const R4GfxTopologyKey, p2: *const R4GfxTopologyViewport) -> R4LibrariesSlot;
     pub fn R4GfxTopologyOutput_from_fields(p0: *mut R4GfxTopologyOutput, p1: *const R4GfxTopologyKey, p2: *const R4GfxTopologyViewport, p3: u8, p4: u8, p5: u8, p6: u32) -> R4LibrariesSlot;
     pub fn R4GfxTopologyOutput_get_key(p0: *const R4GfxTopologyOutput, p1: *mut R4GfxTopologyKey) -> R4LibrariesSlot;
@@ -9112,11 +9400,11 @@ unsafe extern "C" {
     pub fn R4GfxTopologyPoint_inspect(p0: *const R4GfxTopologyPoint) -> R4LibrariesSlot;
     pub fn R4GfxTopologyRotation_create(p0: *mut R4GfxTopologyRotation, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxTopologyRotation_inspect(p0: *const R4GfxTopologyRotation) -> R4LibrariesSlot;
-    pub fn R4Lib_Value379_create(p0: *mut R4Lib_Value379, p1: *const R4DisplayLayout) -> R4LibrariesSlot;
-    pub fn R4Lib_Value379_inspect(p0: *const R4Lib_Value379) -> R4LibrariesSlot;
-    pub fn R4Lib_Value380_inspect(p0: *const R4Lib_Value380, p1: *mut R4GfxTopologyLayout) -> R4LibrariesSlot;
+    pub fn R4Lib_Value383_create(p0: *mut R4Lib_Value383, p1: *const R4DisplayLayout) -> R4LibrariesSlot;
+    pub fn R4Lib_Value383_inspect(p0: *const R4Lib_Value383) -> R4LibrariesSlot;
+    pub fn R4Lib_Value384_inspect(p0: *const R4Lib_Value384, p1: *mut R4GfxTopologyLayout) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsEntry_create(p0: *mut R4GfxDesktopOutputsEntry) -> R4LibrariesSlot;
-    pub fn R4GfxDesktopOutputsEntry_from_fields(p0: *mut R4GfxDesktopOutputsEntry, p1: *const R4GfxOutputInfo, p2: *const R4GfxOutputTarget, p3: *const R4DisplayPresentationInfo, p4: R4LibrariesSlot, p5: *const R4GfxTopologyKey, p6: *const R4Lib_Value386) -> R4LibrariesSlot;
+    pub fn R4GfxDesktopOutputsEntry_from_fields(p0: *mut R4GfxDesktopOutputsEntry, p1: *const R4GfxOutputInfo, p2: *const R4GfxOutputTarget, p3: *const R4DisplayPresentationInfo, p4: R4LibrariesSlot, p5: *const R4GfxTopologyKey, p6: *const R4Lib_Value390) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsEntry_get_info(p0: *const R4GfxDesktopOutputsEntry, p1: *mut R4GfxOutputInfo) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsEntry_set_info(p0: *mut R4GfxDesktopOutputsEntry, p1: *const R4GfxOutputInfo) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsEntry_get_target(p0: *const R4GfxDesktopOutputsEntry, p1: *mut R4GfxOutputTarget) -> R4LibrariesSlot;
@@ -9127,42 +9415,42 @@ unsafe extern "C" {
     pub fn R4GfxDesktopOutputsEntry_set_color(p0: *mut R4GfxDesktopOutputsEntry, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsEntry_get_key(p0: *const R4GfxDesktopOutputsEntry, p1: *mut R4GfxTopologyKey) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsEntry_set_key(p0: *mut R4GfxDesktopOutputsEntry, p1: *const R4GfxTopologyKey) -> R4LibrariesSlot;
-    pub fn R4GfxDesktopOutputsEntry_get_name(p0: *const R4GfxDesktopOutputsEntry, p1: *mut R4Lib_Value386) -> R4LibrariesSlot;
-    pub fn R4GfxDesktopOutputsEntry_set_name(p0: *mut R4GfxDesktopOutputsEntry, p1: *const R4Lib_Value386) -> R4LibrariesSlot;
+    pub fn R4GfxDesktopOutputsEntry_get_name(p0: *const R4GfxDesktopOutputsEntry, p1: *mut R4Lib_Value390) -> R4LibrariesSlot;
+    pub fn R4GfxDesktopOutputsEntry_set_name(p0: *mut R4GfxDesktopOutputsEntry, p1: *const R4Lib_Value390) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsEntry_inspect(p0: *const R4GfxDesktopOutputsEntry) -> R4LibrariesSlot;
-    pub fn R4Lib_Value385_create(p0: *mut R4Lib_Value385, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value385_inspect(p0: *const R4Lib_Value385, p1: *mut R4GfxOutputColorState) -> R4LibrariesSlot;
-    pub fn R4Lib_Value386_create(p0: *mut R4Lib_Value386, p1: *const R4Lib_Value386) -> R4LibrariesSlot;
-    pub fn R4Lib_Value386_inspect(p0: *const R4Lib_Value386, p1: *mut R4Lib_Value386) -> R4LibrariesSlot;
+    pub fn R4Lib_Value389_create(p0: *mut R4Lib_Value389, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value389_inspect(p0: *const R4Lib_Value389, p1: *mut R4GfxOutputColorState) -> R4LibrariesSlot;
+    pub fn R4Lib_Value390_create(p0: *mut R4Lib_Value390, p1: *const R4Lib_Value390) -> R4LibrariesSlot;
+    pub fn R4Lib_Value390_inspect(p0: *const R4Lib_Value390, p1: *mut R4Lib_Value390) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsSnapshot_create(p0: *mut R4GfxDesktopOutputsSnapshot) -> R4LibrariesSlot;
-    pub fn R4GfxDesktopOutputsSnapshot_from_fields(p0: *mut R4GfxDesktopOutputsSnapshot, p1: *const R4Lib_Value388, p2: u64, p3: u64) -> R4LibrariesSlot;
-    pub fn R4GfxDesktopOutputsSnapshot_get_entries(p0: *const R4GfxDesktopOutputsSnapshot, p1: *mut R4Lib_Value388) -> R4LibrariesSlot;
-    pub fn R4GfxDesktopOutputsSnapshot_set_entries(p0: *mut R4GfxDesktopOutputsSnapshot, p1: *const R4Lib_Value388) -> R4LibrariesSlot;
+    pub fn R4GfxDesktopOutputsSnapshot_from_fields(p0: *mut R4GfxDesktopOutputsSnapshot, p1: *const R4Lib_Value392, p2: u64, p3: u64) -> R4LibrariesSlot;
+    pub fn R4GfxDesktopOutputsSnapshot_get_entries(p0: *const R4GfxDesktopOutputsSnapshot, p1: *mut R4Lib_Value392) -> R4LibrariesSlot;
+    pub fn R4GfxDesktopOutputsSnapshot_set_entries(p0: *mut R4GfxDesktopOutputsSnapshot, p1: *const R4Lib_Value392) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsSnapshot_get_count(p0: *const R4GfxDesktopOutputsSnapshot) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsSnapshot_set_count(p0: *mut R4GfxDesktopOutputsSnapshot, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsSnapshot_get_revision(p0: *const R4GfxDesktopOutputsSnapshot) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsSnapshot_set_revision(p0: *mut R4GfxDesktopOutputsSnapshot, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxDesktopOutputsSnapshot_inspect(p0: *const R4GfxDesktopOutputsSnapshot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value388_create(p0: *mut R4Lib_Value388, p1: *const R4Lib_Value388) -> R4LibrariesSlot;
-    pub fn R4Lib_Value388_inspect(p0: *const R4Lib_Value388, p1: *mut R4Lib_Value388) -> R4LibrariesSlot;
+    pub fn R4Lib_Value392_create(p0: *mut R4Lib_Value392, p1: *const R4Lib_Value392) -> R4LibrariesSlot;
+    pub fn R4Lib_Value392_inspect(p0: *const R4Lib_Value392, p1: *mut R4Lib_Value392) -> R4LibrariesSlot;
     pub fn R4GfxEdidWarning_create(p0: *mut R4GfxEdidWarning) -> R4LibrariesSlot;
     pub fn R4GfxEdidWarning_from_fields(p0: *mut R4GfxEdidWarning) -> R4LibrariesSlot;
     pub fn R4GfxEdidWarning_inspect(p0: *const R4GfxEdidWarning) -> R4LibrariesSlot;
-    pub fn R4Lib_Value390_inspect(p0: *const R4Lib_Value390) -> R4LibrariesSlot;
+    pub fn R4Lib_Value394_inspect(p0: *const R4Lib_Value394) -> R4LibrariesSlot;
     pub fn R4GfxEldTransport_create(p0: *mut R4GfxEldTransport, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxEldTransport_inspect(p0: *const R4GfxEldTransport) -> R4LibrariesSlot;
     pub fn R4GfxEldData_create(p0: *mut R4GfxEldData) -> R4LibrariesSlot;
-    pub fn R4GfxEldData_from_fields(p0: *mut R4GfxEldData, p1: *const R4Lib_Value103, p2: u8, p3: u8) -> R4LibrariesSlot;
-    pub fn R4GfxEldData_get_bytes(p0: *const R4GfxEldData, p1: *mut R4Lib_Value103) -> R4LibrariesSlot;
-    pub fn R4GfxEldData_set_bytes(p0: *mut R4GfxEldData, p1: *const R4Lib_Value103) -> R4LibrariesSlot;
+    pub fn R4GfxEldData_from_fields(p0: *mut R4GfxEldData, p1: *const R4Lib_Value105, p2: u8, p3: u8) -> R4LibrariesSlot;
+    pub fn R4GfxEldData_get_bytes(p0: *const R4GfxEldData, p1: *mut R4Lib_Value105) -> R4LibrariesSlot;
+    pub fn R4GfxEldData_set_bytes(p0: *mut R4GfxEldData, p1: *const R4Lib_Value105) -> R4LibrariesSlot;
     pub fn R4GfxEldData_get_max_frequency(p0: *const R4GfxEldData) -> R4LibrariesSlot;
     pub fn R4GfxEldData_set_max_frequency(p0: *mut R4GfxEldData, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxEldData_get_stereo_48k_s16(p0: *const R4GfxEldData) -> R4LibrariesSlot;
     pub fn R4GfxEldData_set_stereo_48k_s16(p0: *mut R4GfxEldData, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxEldData_inspect(p0: *const R4GfxEldData) -> R4LibrariesSlot;
-    pub fn R4Lib_Value393_create(p0: *mut R4Lib_Value393, p1: *const R4GfxEdidReport) -> R4LibrariesSlot;
-    pub fn R4Lib_Value393_inspect(p0: *const R4Lib_Value393) -> R4LibrariesSlot;
-    pub fn R4Lib_Value394_inspect(p0: *const R4Lib_Value394, p1: *mut R4GfxEldData) -> R4LibrariesSlot;
+    pub fn R4Lib_Value397_create(p0: *mut R4Lib_Value397, p1: *const R4GfxEdidReport) -> R4LibrariesSlot;
+    pub fn R4Lib_Value397_inspect(p0: *const R4Lib_Value397) -> R4LibrariesSlot;
+    pub fn R4Lib_Value398_inspect(p0: *const R4Lib_Value398, p1: *mut R4GfxEldData) -> R4LibrariesSlot;
     pub fn R4GfxLinksClock_create(p0: *mut R4GfxLinksClock, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxLinksClock_from_fields(p0: *mut R4GfxLinksClock, p1: u64, p2: u32) -> R4LibrariesSlot;
     pub fn R4GfxLinksClock_get_numerator(p0: *const R4GfxLinksClock) -> R4LibrariesSlot;
@@ -9177,17 +9465,17 @@ unsafe extern "C" {
     pub fn R4GfxLinksDemand_get_bpp_x16(p0: *const R4GfxLinksDemand) -> R4LibrariesSlot;
     pub fn R4GfxLinksDemand_set_bpp_x16(p0: *mut R4GfxLinksDemand, p1: u16) -> R4LibrariesSlot;
     pub fn R4GfxLinksDemand_inspect(p0: *const R4GfxLinksDemand) -> R4LibrariesSlot;
-    pub fn R4Lib_Value397_inspect(p0: *const R4Lib_Value397, p1: *mut R4GfxLinksDemand) -> R4LibrariesSlot;
-    pub fn R4Lib_Value398_inspect(p0: *const R4Lib_Value398) -> R4LibrariesSlot;
+    pub fn R4Lib_Value401_inspect(p0: *const R4Lib_Value401, p1: *mut R4GfxLinksDemand) -> R4LibrariesSlot;
+    pub fn R4Lib_Value402_inspect(p0: *const R4Lib_Value402) -> R4LibrariesSlot;
     pub fn R4GfxModeControlRestoration_create(p0: *mut R4GfxModeControlRestoration) -> R4LibrariesSlot;
-    pub fn R4GfxModeControlRestoration_from_fields(p0: *mut R4GfxModeControlRestoration, p1: *const R4Lib_Value400) -> R4LibrariesSlot;
-    pub fn R4GfxModeControlRestoration_get_attempts(p0: *const R4GfxModeControlRestoration, p1: *mut R4Lib_Value400) -> R4LibrariesSlot;
-    pub fn R4GfxModeControlRestoration_set_attempts(p0: *mut R4GfxModeControlRestoration, p1: *const R4Lib_Value400) -> R4LibrariesSlot;
+    pub fn R4GfxModeControlRestoration_from_fields(p0: *mut R4GfxModeControlRestoration, p1: *const R4Lib_Value404) -> R4LibrariesSlot;
+    pub fn R4GfxModeControlRestoration_get_attempts(p0: *const R4GfxModeControlRestoration, p1: *mut R4Lib_Value404) -> R4LibrariesSlot;
+    pub fn R4GfxModeControlRestoration_set_attempts(p0: *mut R4GfxModeControlRestoration, p1: *const R4Lib_Value404) -> R4LibrariesSlot;
     pub fn R4GfxModeControlRestoration_inspect(p0: *const R4GfxModeControlRestoration) -> R4LibrariesSlot;
-    pub fn R4Lib_Value400_create(p0: *mut R4Lib_Value400, p1: *const R4Lib_Value400) -> R4LibrariesSlot;
-    pub fn R4Lib_Value400_inspect(p0: *const R4Lib_Value400, p1: *mut R4Lib_Value400) -> R4LibrariesSlot;
-    pub fn R4Lib_Value401_create(p0: *mut R4Lib_Value401, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value401_inspect(p0: *const R4Lib_Value401, p1: *mut R4GfxModeControlRestoration_Attempt) -> R4LibrariesSlot;
+    pub fn R4Lib_Value404_create(p0: *mut R4Lib_Value404, p1: *const R4Lib_Value404) -> R4LibrariesSlot;
+    pub fn R4Lib_Value404_inspect(p0: *const R4Lib_Value404, p1: *mut R4Lib_Value404) -> R4LibrariesSlot;
+    pub fn R4Lib_Value405_create(p0: *mut R4Lib_Value405, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value405_inspect(p0: *const R4Lib_Value405, p1: *mut R4GfxModeControlRestoration_Attempt) -> R4LibrariesSlot;
     pub fn R4GfxModeControlRestoration_Attempt_create(p0: *mut R4GfxModeControlRestoration_Attempt, p1: *const R4GfxTopologyKey, p2: *const R4GfxOutputId, p3: u32, p4: u32, p5: u32) -> R4LibrariesSlot;
     pub fn R4GfxModeControlRestoration_Attempt_from_fields(p0: *mut R4GfxModeControlRestoration_Attempt, p1: *const R4GfxTopologyKey, p2: *const R4GfxOutputId, p3: u32, p4: u32, p5: u32) -> R4LibrariesSlot;
     pub fn R4GfxModeControlRestoration_Attempt_get_key(p0: *const R4GfxModeControlRestoration_Attempt, p1: *mut R4GfxTopologyKey) -> R4LibrariesSlot;
@@ -9202,11 +9490,11 @@ unsafe extern "C" {
     pub fn R4GfxModeControlRestoration_Attempt_set_refresh(p0: *mut R4GfxModeControlRestoration_Attempt, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxModeControlRestoration_Attempt_inspect(p0: *const R4GfxModeControlRestoration_Attempt) -> R4LibrariesSlot;
     pub fn R4GfxModeControlController_create(p0: *mut R4GfxModeControlController) -> R4LibrariesSlot;
-    pub fn R4GfxModeControlController_from_fields(p0: *mut R4GfxModeControlController, p1: R4LibrariesSlot, p2: *const R4Lib_Value405, p3: u64, p4: u64, p5: *const R4GfxModeStatus, p6: i32, p7: *const R4GfxBufferReference, p8: *const R4GfxBufferMap, p9: *const R4GfxBufferReference, p10: *const R4GfxBufferMap, p11: u8, p12: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4GfxModeControlController_from_fields(p0: *mut R4GfxModeControlController, p1: R4LibrariesSlot, p2: *const R4Lib_Value409, p3: u64, p4: u64, p5: *const R4GfxModeStatus, p6: i32, p7: *const R4GfxBufferReference, p8: *const R4GfxBufferMap, p9: *const R4GfxBufferReference, p10: *const R4GfxBufferMap, p11: u8, p12: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4GfxModeControlController_get_output(p0: *const R4GfxModeControlController, p1: *mut R4GfxOutputInfo) -> R4LibrariesSlot;
     pub fn R4GfxModeControlController_set_output(p0: *mut R4GfxModeControlController, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4GfxModeControlController_get_modes(p0: *const R4GfxModeControlController, p1: *mut R4Lib_Value405) -> R4LibrariesSlot;
-    pub fn R4GfxModeControlController_set_modes(p0: *mut R4GfxModeControlController, p1: *const R4Lib_Value405) -> R4LibrariesSlot;
+    pub fn R4GfxModeControlController_get_modes(p0: *const R4GfxModeControlController, p1: *mut R4Lib_Value409) -> R4LibrariesSlot;
+    pub fn R4GfxModeControlController_set_modes(p0: *mut R4GfxModeControlController, p1: *const R4Lib_Value409) -> R4LibrariesSlot;
     pub fn R4GfxModeControlController_get_count(p0: *const R4GfxModeControlController) -> R4LibrariesSlot;
     pub fn R4GfxModeControlController_set_count(p0: *mut R4GfxModeControlController, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxModeControlController_get_selected(p0: *const R4GfxModeControlController) -> R4LibrariesSlot;
@@ -9228,21 +9516,21 @@ unsafe extern "C" {
     pub fn R4GfxModeControlController_get_selected_output(p0: *const R4GfxModeControlController, p1: *mut R4GfxOutputId) -> R4LibrariesSlot;
     pub fn R4GfxModeControlController_set_selected_output(p0: *mut R4GfxModeControlController, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4GfxModeControlController_inspect(p0: *const R4GfxModeControlController) -> R4LibrariesSlot;
-    pub fn R4Lib_Value404_create(p0: *mut R4Lib_Value404, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value404_inspect(p0: *const R4Lib_Value404, p1: *mut R4GfxOutputInfo) -> R4LibrariesSlot;
-    pub fn R4Lib_Value405_create(p0: *mut R4Lib_Value405, p1: *const R4Lib_Value405) -> R4LibrariesSlot;
-    pub fn R4Lib_Value405_inspect(p0: *const R4Lib_Value405, p1: *mut R4Lib_Value405) -> R4LibrariesSlot;
-    pub fn R4Lib_Value409_create(p0: *mut R4Lib_Value409, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value409_inspect(p0: *const R4Lib_Value409, p1: *mut R4GfxOutputId) -> R4LibrariesSlot;
+    pub fn R4Lib_Value408_create(p0: *mut R4Lib_Value408, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value408_inspect(p0: *const R4Lib_Value408, p1: *mut R4GfxOutputInfo) -> R4LibrariesSlot;
+    pub fn R4Lib_Value409_create(p0: *mut R4Lib_Value409, p1: *const R4Lib_Value409) -> R4LibrariesSlot;
+    pub fn R4Lib_Value409_inspect(p0: *const R4Lib_Value409, p1: *mut R4Lib_Value409) -> R4LibrariesSlot;
+    pub fn R4Lib_Value413_create(p0: *mut R4Lib_Value413, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value413_inspect(p0: *const R4Lib_Value413, p1: *mut R4GfxOutputId) -> R4LibrariesSlot;
     pub fn R4GfxPreferencesConfig_create(p0: *mut R4GfxPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4GfxPreferencesConfig_from_fields(p0: *mut R4GfxPreferencesConfig, p1: *const R4Lib_Value411, p2: u64) -> R4LibrariesSlot;
-    pub fn R4GfxPreferencesConfig_get_values(p0: *const R4GfxPreferencesConfig, p1: *mut R4Lib_Value411) -> R4LibrariesSlot;
-    pub fn R4GfxPreferencesConfig_set_values(p0: *mut R4GfxPreferencesConfig, p1: *const R4Lib_Value411) -> R4LibrariesSlot;
+    pub fn R4GfxPreferencesConfig_from_fields(p0: *mut R4GfxPreferencesConfig, p1: *const R4Lib_Value415, p2: u64) -> R4LibrariesSlot;
+    pub fn R4GfxPreferencesConfig_get_values(p0: *const R4GfxPreferencesConfig, p1: *mut R4Lib_Value415) -> R4LibrariesSlot;
+    pub fn R4GfxPreferencesConfig_set_values(p0: *mut R4GfxPreferencesConfig, p1: *const R4Lib_Value415) -> R4LibrariesSlot;
     pub fn R4GfxPreferencesConfig_get_count(p0: *const R4GfxPreferencesConfig) -> R4LibrariesSlot;
     pub fn R4GfxPreferencesConfig_set_count(p0: *mut R4GfxPreferencesConfig, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxPreferencesConfig_inspect(p0: *const R4GfxPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value411_create(p0: *mut R4Lib_Value411, p1: *const R4Lib_Value411) -> R4LibrariesSlot;
-    pub fn R4Lib_Value411_inspect(p0: *const R4Lib_Value411, p1: *mut R4Lib_Value411) -> R4LibrariesSlot;
+    pub fn R4Lib_Value415_create(p0: *mut R4Lib_Value415, p1: *const R4Lib_Value415) -> R4LibrariesSlot;
+    pub fn R4Lib_Value415_inspect(p0: *const R4Lib_Value415, p1: *mut R4Lib_Value415) -> R4LibrariesSlot;
     pub fn R4GfxReadbackPhase_create(p0: *mut R4GfxReadbackPhase, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxReadbackPhase_inspect(p0: *const R4GfxReadbackPhase) -> R4LibrariesSlot;
     pub fn R4GfxReadbackStats_create(p0: *mut R4GfxReadbackStats) -> R4LibrariesSlot;
@@ -9294,10 +9582,10 @@ unsafe extern "C" {
     pub fn R4Lib_r4gfx_abi_R4GfxResource_get_device_address(p0: *const R4Lib_r4gfx_abi_R4GfxResource) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxResource_set_device_address(p0: *mut R4Lib_r4gfx_abi_R4GfxResource, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxResource_inspect(p0: *const R4Lib_r4gfx_abi_R4GfxResource) -> R4LibrariesSlot;
-    pub fn R4Lib_Value416_create(p0: *mut R4Lib_Value416, p1: *const R4Lib_r4gfx_abi_R4GfxRect, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value416_inspect(p0: *const R4Lib_Value416) -> R4LibrariesSlot;
-    pub fn R4Lib_Value417_create(p0: *mut R4Lib_Value417, p1: *const R4Lib_r4gfx_abi_R4GfxCopyFence, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value417_inspect(p0: *const R4Lib_Value417) -> R4LibrariesSlot;
+    pub fn R4Lib_Value420_create(p0: *mut R4Lib_Value420, p1: *const R4Lib_r4gfx_abi_R4GfxRect, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value420_inspect(p0: *const R4Lib_Value420) -> R4LibrariesSlot;
+    pub fn R4Lib_Value421_create(p0: *mut R4Lib_Value421, p1: *const R4Lib_r4gfx_abi_R4GfxCopyFence, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value421_inspect(p0: *const R4Lib_Value421) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxCopyFence_create(p0: *mut R4Lib_r4gfx_abi_R4GfxCopyFence, p1: u32, p2: u32, p3: u64, p4: u64, p5: u64, p6: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxCopyFence_from_fields(p0: *mut R4Lib_r4gfx_abi_R4GfxCopyFence, p1: u32, p2: u32, p3: u64, p4: u64, p5: u64, p6: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxCopyFence_get_slot(p0: *const R4Lib_r4gfx_abi_R4GfxCopyFence) -> R4LibrariesSlot;
@@ -9314,7 +9602,7 @@ unsafe extern "C" {
     pub fn R4Lib_r4gfx_abi_R4GfxCopyFence_set_reset_generation(p0: *mut R4Lib_r4gfx_abi_R4GfxCopyFence, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxCopyFence_inspect(p0: *const R4Lib_r4gfx_abi_R4GfxCopyFence) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_create(p0: *mut R4GfxReadbackOwner, p1: *const R4LibraryAllocator, p2: *const R4LibraryDeviceClient, p3: *const R4LibraryColorClient, p4: *const R4Lib_r4gfx_abi_R4GfxDevice) -> R4LibrariesSlot;
-    pub fn R4GfxReadbackOwner_from_fields(p0: *mut R4GfxReadbackOwner, p1: *const R4LibraryAllocator, p2: *const R4LibraryDeviceClient, p3: *const R4LibraryColorClient, p4: *const R4Lib_r4gfx_abi_R4GfxDevice, p5: u32, p6: R4LibrariesSlot, p7: *const R4Lib_r4gfx_abi_R4GfxResource, p8: *const R4Lib_r4gfx_abi_R4GfxResource, p9: *const R4Lib_r4gfx_abi_R4GfxResource, p10: *mut u32, p11: u64, p12: u32, p13: u32, p14: u32, p15: *const R4Lib_r4gfx_abi_R4GfxColorDescription, p16: *const R4Lib_Value424, p17: *const R4Lib_Value428, p18: u64, p19: u64, p20: u32, p21: u64, p22: u64, p23: u64, p24: u8, p25: u64, p26: u64, p27: u64, p28: *const R4GfxReadbackStats) -> R4LibrariesSlot;
+    pub fn R4GfxReadbackOwner_from_fields(p0: *mut R4GfxReadbackOwner, p1: *const R4LibraryAllocator, p2: *const R4LibraryDeviceClient, p3: *const R4LibraryColorClient, p4: *const R4Lib_r4gfx_abi_R4GfxDevice, p5: u32, p6: R4LibrariesSlot, p7: *const R4Lib_r4gfx_abi_R4GfxResource, p8: *const R4Lib_r4gfx_abi_R4GfxResource, p9: *const R4Lib_r4gfx_abi_R4GfxResource, p10: *mut u32, p11: u64, p12: u32, p13: u32, p14: u32, p15: *const R4Lib_r4gfx_abi_R4GfxColorDescription, p16: *const R4Lib_Value428, p17: *const R4Lib_Value432, p18: u64, p19: u64, p20: u32, p21: u64, p22: u64, p23: u64, p24: u8, p25: u64, p26: u64, p27: u64, p28: *const R4GfxReadbackStats) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_get_allocator(p0: *const R4GfxReadbackOwner, p1: *mut R4LibraryAllocator) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_set_allocator(p0: *mut R4GfxReadbackOwner, p1: *const R4LibraryAllocator) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_get_client(p0: *const R4GfxReadbackOwner) -> R4LibrariesSlot;
@@ -9343,10 +9631,10 @@ unsafe extern "C" {
     pub fn R4GfxReadbackOwner_set_format(p0: *mut R4GfxReadbackOwner, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_get_description(p0: *const R4GfxReadbackOwner, p1: *mut R4Lib_r4gfx_abi_R4GfxColorDescription) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_set_description(p0: *mut R4GfxReadbackOwner, p1: *const R4Lib_r4gfx_abi_R4GfxColorDescription) -> R4LibrariesSlot;
-    pub fn R4GfxReadbackOwner_get_jobs(p0: *const R4GfxReadbackOwner, p1: *mut R4Lib_Value424) -> R4LibrariesSlot;
-    pub fn R4GfxReadbackOwner_set_jobs(p0: *mut R4GfxReadbackOwner, p1: *const R4Lib_Value424) -> R4LibrariesSlot;
-    pub fn R4GfxReadbackOwner_get_regions(p0: *const R4GfxReadbackOwner, p1: *mut R4Lib_Value428) -> R4LibrariesSlot;
-    pub fn R4GfxReadbackOwner_set_regions(p0: *mut R4GfxReadbackOwner, p1: *const R4Lib_Value428) -> R4LibrariesSlot;
+    pub fn R4GfxReadbackOwner_get_jobs(p0: *const R4GfxReadbackOwner, p1: *mut R4Lib_Value428) -> R4LibrariesSlot;
+    pub fn R4GfxReadbackOwner_set_jobs(p0: *mut R4GfxReadbackOwner, p1: *const R4Lib_Value428) -> R4LibrariesSlot;
+    pub fn R4GfxReadbackOwner_get_regions(p0: *const R4GfxReadbackOwner, p1: *mut R4Lib_Value432) -> R4LibrariesSlot;
+    pub fn R4GfxReadbackOwner_set_regions(p0: *mut R4GfxReadbackOwner, p1: *const R4Lib_Value432) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_get_region_count(p0: *const R4GfxReadbackOwner) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_set_region_count(p0: *mut R4GfxReadbackOwner, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_get_convert_index(p0: *const R4GfxReadbackOwner) -> R4LibrariesSlot;
@@ -9370,10 +9658,10 @@ unsafe extern "C" {
     pub fn R4GfxReadbackOwner_get_stats(p0: *const R4GfxReadbackOwner, p1: *mut R4GfxReadbackStats) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_set_stats(p0: *mut R4GfxReadbackOwner, p1: *const R4GfxReadbackStats) -> R4LibrariesSlot;
     pub fn R4GfxReadbackOwner_inspect(p0: *const R4GfxReadbackOwner) -> R4LibrariesSlot;
-    pub fn R4Lib_Value420_create(p0: *mut R4Lib_Value420, p1: *const R4LibraryDeviceClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value420_inspect(p0: *const R4Lib_Value420) -> R4LibrariesSlot;
-    pub fn R4Lib_Value421_create(p0: *mut R4Lib_Value421, p1: *const R4Lib_r4gfx_abi_R4GfxDevice) -> R4LibrariesSlot;
-    pub fn R4Lib_Value421_inspect(p0: *const R4Lib_Value421) -> R4LibrariesSlot;
+    pub fn R4Lib_Value424_create(p0: *mut R4Lib_Value424, p1: *const R4LibraryDeviceClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value424_inspect(p0: *const R4Lib_Value424) -> R4LibrariesSlot;
+    pub fn R4Lib_Value425_create(p0: *mut R4Lib_Value425, p1: *const R4Lib_r4gfx_abi_R4GfxDevice) -> R4LibrariesSlot;
+    pub fn R4Lib_Value425_inspect(p0: *const R4Lib_Value425) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxDevice_create(p0: *mut R4Lib_r4gfx_abi_R4GfxDevice, p1: u64, p2: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxDevice_from_fields(p0: *mut R4Lib_r4gfx_abi_R4GfxDevice, p1: u64, p2: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxDevice_get_address(p0: *const R4Lib_r4gfx_abi_R4GfxDevice) -> R4LibrariesSlot;
@@ -9381,12 +9669,12 @@ unsafe extern "C" {
     pub fn R4Lib_r4gfx_abi_R4GfxDevice_get_generation(p0: *const R4Lib_r4gfx_abi_R4GfxDevice) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxDevice_set_generation(p0: *mut R4Lib_r4gfx_abi_R4GfxDevice, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxDevice_inspect(p0: *const R4Lib_r4gfx_abi_R4GfxDevice) -> R4LibrariesSlot;
-    pub fn R4Lib_Value423_create(p0: *mut R4Lib_Value423, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value423_inspect(p0: *const R4Lib_Value423) -> R4LibrariesSlot;
-    pub fn R4Lib_Value424_create(p0: *mut R4Lib_Value424, p1: *const R4Lib_Value424) -> R4LibrariesSlot;
-    pub fn R4Lib_Value424_inspect(p0: *const R4Lib_Value424, p1: *mut R4Lib_Value424) -> R4LibrariesSlot;
-    pub fn R4Lib_Value425_create(p0: *mut R4Lib_Value425, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value425_inspect(p0: *const R4Lib_Value425, p1: *mut R4GfxReadbackJob) -> R4LibrariesSlot;
+    pub fn R4Lib_Value427_create(p0: *mut R4Lib_Value427, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value427_inspect(p0: *const R4Lib_Value427) -> R4LibrariesSlot;
+    pub fn R4Lib_Value428_create(p0: *mut R4Lib_Value428, p1: *const R4Lib_Value428) -> R4LibrariesSlot;
+    pub fn R4Lib_Value428_inspect(p0: *const R4Lib_Value428, p1: *mut R4Lib_Value428) -> R4LibrariesSlot;
+    pub fn R4Lib_Value429_create(p0: *mut R4Lib_Value429, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value429_inspect(p0: *const R4Lib_Value429, p1: *mut R4GfxReadbackJob) -> R4LibrariesSlot;
     pub fn R4GfxReadbackJob_create(p0: *mut R4GfxReadbackJob, p1: *const R4Lib_r4gfx_abi_R4GfxJob, p2: *const R4Lib_r4gfx_abi_R4GfxCopyFence, p3: u64) -> R4LibrariesSlot;
     pub fn R4GfxReadbackJob_from_fields(p0: *mut R4GfxReadbackJob, p1: *const R4Lib_r4gfx_abi_R4GfxJob, p2: *const R4Lib_r4gfx_abi_R4GfxCopyFence, p3: u64, p4: u8) -> R4LibrariesSlot;
     pub fn R4GfxReadbackJob_get_handle(p0: *const R4GfxReadbackJob, p1: *mut R4Lib_r4gfx_abi_R4GfxJob) -> R4LibrariesSlot;
@@ -9411,8 +9699,8 @@ unsafe extern "C" {
     pub fn R4Lib_r4gfx_abi_R4GfxJob_get_device_address(p0: *const R4Lib_r4gfx_abi_R4GfxJob) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxJob_set_device_address(p0: *mut R4Lib_r4gfx_abi_R4GfxJob, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxJob_inspect(p0: *const R4Lib_r4gfx_abi_R4GfxJob) -> R4LibrariesSlot;
-    pub fn R4Lib_Value428_create(p0: *mut R4Lib_Value428, p1: *const R4Lib_Value428) -> R4LibrariesSlot;
-    pub fn R4Lib_Value428_inspect(p0: *const R4Lib_Value428, p1: *mut R4Lib_Value428) -> R4LibrariesSlot;
+    pub fn R4Lib_Value432_create(p0: *mut R4Lib_Value432, p1: *const R4Lib_Value432) -> R4LibrariesSlot;
+    pub fn R4Lib_Value432_inspect(p0: *const R4Lib_Value432, p1: *mut R4Lib_Value432) -> R4LibrariesSlot;
     pub fn R4GfxRefreshClientActivity_create(p0: *mut R4GfxRefreshClientActivity) -> R4LibrariesSlot;
     pub fn R4GfxRefreshClientActivity_from_fields(p0: *mut R4GfxRefreshClientActivity, p1: u64, p2: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshClientActivity_get_last_ns(p0: *const R4GfxRefreshClientActivity) -> R4LibrariesSlot;
@@ -9438,7 +9726,7 @@ unsafe extern "C" {
     pub fn R4GfxRefreshObserverSummary_set_millihz(p0: *mut R4GfxRefreshObserverSummary, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverSummary_inspect(p0: *const R4GfxRefreshObserverSummary) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_create(p0: *mut R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
-    pub fn R4GfxRefreshObserverObserver_from_fields(p0: *mut R4GfxRefreshObserverObserver, p1: u64, p2: u64, p3: u16, p4: u64, p5: *const R4Lib_Value434, p6: u8, p7: u8, p8: u64) -> R4LibrariesSlot;
+    pub fn R4GfxRefreshObserverObserver_from_fields(p0: *mut R4GfxRefreshObserverObserver, p1: u64, p2: u64, p3: u16, p4: u64, p5: *const R4Lib_Value438, p6: u8, p7: u8, p8: u64) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_get_generation(p0: *const R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_set_generation(p0: *mut R4GfxRefreshObserverObserver, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_get_sequence(p0: *const R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
@@ -9447,8 +9735,8 @@ unsafe extern "C" {
     pub fn R4GfxRefreshObserverObserver_set_frame_counter(p0: *mut R4GfxRefreshObserverObserver, p1: u16) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_get_observed_ns(p0: *const R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_set_observed_ns(p0: *mut R4GfxRefreshObserverObserver, p1: u64) -> R4LibrariesSlot;
-    pub fn R4GfxRefreshObserverObserver_get_periods(p0: *const R4GfxRefreshObserverObserver, p1: *mut R4Lib_Value434) -> R4LibrariesSlot;
-    pub fn R4GfxRefreshObserverObserver_set_periods(p0: *mut R4GfxRefreshObserverObserver, p1: *const R4Lib_Value434) -> R4LibrariesSlot;
+    pub fn R4GfxRefreshObserverObserver_get_periods(p0: *const R4GfxRefreshObserverObserver, p1: *mut R4Lib_Value438) -> R4LibrariesSlot;
+    pub fn R4GfxRefreshObserverObserver_set_periods(p0: *mut R4GfxRefreshObserverObserver, p1: *const R4Lib_Value438) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_get_count(p0: *const R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_set_count(p0: *mut R4GfxRefreshObserverObserver, p1: u8) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_get_index(p0: *const R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
@@ -9456,8 +9744,8 @@ unsafe extern "C" {
     pub fn R4GfxRefreshObserverObserver_get_gaps(p0: *const R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_set_gaps(p0: *mut R4GfxRefreshObserverObserver, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxRefreshObserverObserver_inspect(p0: *const R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
-    pub fn R4Lib_Value434_create(p0: *mut R4Lib_Value434, p1: *const R4Lib_Value434) -> R4LibrariesSlot;
-    pub fn R4Lib_Value434_inspect(p0: *const R4Lib_Value434, p1: *mut R4Lib_Value434) -> R4LibrariesSlot;
+    pub fn R4Lib_Value438_create(p0: *mut R4Lib_Value438, p1: *const R4Lib_Value438) -> R4LibrariesSlot;
+    pub fn R4Lib_Value438_inspect(p0: *const R4Lib_Value438, p1: *mut R4Lib_Value438) -> R4LibrariesSlot;
     pub fn R4GfxRefreshPreferencesChoice_create(p0: *mut R4GfxRefreshPreferencesChoice) -> R4LibrariesSlot;
     pub fn R4GfxRefreshPreferencesChoice_from_fields(p0: *mut R4GfxRefreshPreferencesChoice, p1: *const R4GfxTopologyKey, p2: u32, p3: u8, p4: u64) -> R4LibrariesSlot;
     pub fn R4GfxRefreshPreferencesChoice_get_key(p0: *const R4GfxRefreshPreferencesChoice, p1: *mut R4GfxTopologyKey) -> R4LibrariesSlot;
@@ -9470,14 +9758,14 @@ unsafe extern "C" {
     pub fn R4GfxRefreshPreferencesChoice_set_serial(p0: *mut R4GfxRefreshPreferencesChoice, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxRefreshPreferencesChoice_inspect(p0: *const R4GfxRefreshPreferencesChoice) -> R4LibrariesSlot;
     pub fn R4GfxRefreshPreferencesConfig_create(p0: *mut R4GfxRefreshPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4GfxRefreshPreferencesConfig_from_fields(p0: *mut R4GfxRefreshPreferencesConfig, p1: *const R4Lib_Value437, p2: u64) -> R4LibrariesSlot;
-    pub fn R4GfxRefreshPreferencesConfig_get_choices(p0: *const R4GfxRefreshPreferencesConfig, p1: *mut R4Lib_Value437) -> R4LibrariesSlot;
-    pub fn R4GfxRefreshPreferencesConfig_set_choices(p0: *mut R4GfxRefreshPreferencesConfig, p1: *const R4Lib_Value437) -> R4LibrariesSlot;
+    pub fn R4GfxRefreshPreferencesConfig_from_fields(p0: *mut R4GfxRefreshPreferencesConfig, p1: *const R4Lib_Value441, p2: u64) -> R4LibrariesSlot;
+    pub fn R4GfxRefreshPreferencesConfig_get_choices(p0: *const R4GfxRefreshPreferencesConfig, p1: *mut R4Lib_Value441) -> R4LibrariesSlot;
+    pub fn R4GfxRefreshPreferencesConfig_set_choices(p0: *mut R4GfxRefreshPreferencesConfig, p1: *const R4Lib_Value441) -> R4LibrariesSlot;
     pub fn R4GfxRefreshPreferencesConfig_get_count(p0: *const R4GfxRefreshPreferencesConfig) -> R4LibrariesSlot;
     pub fn R4GfxRefreshPreferencesConfig_set_count(p0: *mut R4GfxRefreshPreferencesConfig, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxRefreshPreferencesConfig_inspect(p0: *const R4GfxRefreshPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value437_create(p0: *mut R4Lib_Value437, p1: *const R4Lib_Value437) -> R4LibrariesSlot;
-    pub fn R4Lib_Value437_inspect(p0: *const R4Lib_Value437, p1: *mut R4Lib_Value437) -> R4LibrariesSlot;
+    pub fn R4Lib_Value441_create(p0: *mut R4Lib_Value441, p1: *const R4Lib_Value441) -> R4LibrariesSlot;
+    pub fn R4Lib_Value441_inspect(p0: *const R4Lib_Value441, p1: *mut R4Lib_Value441) -> R4LibrariesSlot;
     pub fn R4GfxTopologyRect_create(p0: *mut R4GfxTopologyRect) -> R4LibrariesSlot;
     pub fn R4GfxTopologyRect_from_fields(p0: *mut R4GfxTopologyRect, p1: i32, p2: i32, p3: u32, p4: u32) -> R4LibrariesSlot;
     pub fn R4GfxTopologyRect_get_x(p0: *const R4GfxTopologyRect) -> R4LibrariesSlot;
@@ -9492,7 +9780,7 @@ unsafe extern "C" {
     pub fn R4GfxTransferPhase_create(p0: *mut R4GfxTransferPhase, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxTransferPhase_inspect(p0: *const R4GfxTransferPhase) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_create(p0: *mut R4GfxTransferOwner, p1: *const R4LibraryDeviceClient, p2: *const R4LibraryColorClient, p3: *const R4Lib_r4gfx_abi_R4GfxDevice, p4: *const R4Lib_r4gfx_abi_R4GfxDevice, p5: *const R4Lib_r4os_gfx_buffers_Context) -> R4LibrariesSlot;
-    pub fn R4GfxTransferOwner_from_fields(p0: *mut R4GfxTransferOwner, p1: *const R4LibraryDeviceClient, p2: *const R4LibraryColorClient, p3: *const R4Lib_r4gfx_abi_R4GfxDevice, p4: *const R4Lib_r4gfx_abi_R4GfxDevice, p5: *const R4Lib_r4os_gfx_buffers_Context, p6: u32, p7: R4LibrariesSlot, p8: *const R4GfxBufferReference, p9: *const R4Lib_Value442, p10: *const R4Lib_r4gfx_abi_R4GfxResource, p11: *const R4Lib_r4gfx_abi_R4GfxResource, p12: *const R4Lib_r4gfx_abi_R4GfxColorDescription, p13: u32, p14: u32, p15: u32, p16: u64, p17: u64, p18: u64, p19: R4LibrariesSlot, p20: u8, p21: u64) -> R4LibrariesSlot;
+    pub fn R4GfxTransferOwner_from_fields(p0: *mut R4GfxTransferOwner, p1: *const R4LibraryDeviceClient, p2: *const R4LibraryColorClient, p3: *const R4Lib_r4gfx_abi_R4GfxDevice, p4: *const R4Lib_r4gfx_abi_R4GfxDevice, p5: *const R4Lib_r4os_gfx_buffers_Context, p6: u32, p7: R4LibrariesSlot, p8: *const R4GfxBufferReference, p9: *const R4Lib_Value446, p10: *const R4Lib_r4gfx_abi_R4GfxResource, p11: *const R4Lib_r4gfx_abi_R4GfxResource, p12: *const R4Lib_r4gfx_abi_R4GfxColorDescription, p13: u32, p14: u32, p15: u32, p16: u64, p17: u64, p18: u64, p19: R4LibrariesSlot, p20: u8, p21: u64) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_get_client(p0: *const R4GfxTransferOwner) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_set_client(p0: *mut R4GfxTransferOwner, p1: *const R4LibraryDeviceClient) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_get_colors(p0: *const R4GfxTransferOwner) -> R4LibrariesSlot;
@@ -9509,8 +9797,8 @@ unsafe extern "C" {
     pub fn R4GfxTransferOwner_set_failure(p0: *mut R4GfxTransferOwner, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_get_reference(p0: *const R4GfxTransferOwner, p1: *mut R4GfxBufferReference) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_set_reference(p0: *mut R4GfxTransferOwner, p1: *const R4GfxBufferReference) -> R4LibrariesSlot;
-    pub fn R4GfxTransferOwner_get_imports(p0: *const R4GfxTransferOwner, p1: *mut R4Lib_Value442) -> R4LibrariesSlot;
-    pub fn R4GfxTransferOwner_set_imports(p0: *mut R4GfxTransferOwner, p1: *const R4Lib_Value442) -> R4LibrariesSlot;
+    pub fn R4GfxTransferOwner_get_imports(p0: *const R4GfxTransferOwner, p1: *mut R4Lib_Value446) -> R4LibrariesSlot;
+    pub fn R4GfxTransferOwner_set_imports(p0: *mut R4GfxTransferOwner, p1: *const R4Lib_Value446) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_get_source(p0: *const R4GfxTransferOwner, p1: *mut R4Lib_r4gfx_abi_R4GfxResource) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_set_source(p0: *mut R4GfxTransferOwner, p1: *const R4Lib_r4gfx_abi_R4GfxResource) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_get_target(p0: *const R4GfxTransferOwner, p1: *mut R4Lib_r4gfx_abi_R4GfxResource) -> R4LibrariesSlot;
@@ -9536,10 +9824,10 @@ unsafe extern "C" {
     pub fn R4GfxTransferOwner_get_completed_bytes(p0: *const R4GfxTransferOwner) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_set_completed_bytes(p0: *mut R4GfxTransferOwner, p1: u64) -> R4LibrariesSlot;
     pub fn R4GfxTransferOwner_inspect(p0: *const R4GfxTransferOwner) -> R4LibrariesSlot;
-    pub fn R4Lib_Value442_create(p0: *mut R4Lib_Value442, p1: *const R4Lib_Value442) -> R4LibrariesSlot;
-    pub fn R4Lib_Value442_inspect(p0: *const R4Lib_Value442, p1: *mut R4Lib_Value442) -> R4LibrariesSlot;
-    pub fn R4Lib_Value443_create(p0: *mut R4Lib_Value443, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value443_inspect(p0: *const R4Lib_Value443, p1: *mut R4GfxTransferJob) -> R4LibrariesSlot;
+    pub fn R4Lib_Value446_create(p0: *mut R4Lib_Value446, p1: *const R4Lib_Value446) -> R4LibrariesSlot;
+    pub fn R4Lib_Value446_inspect(p0: *const R4Lib_Value446, p1: *mut R4Lib_Value446) -> R4LibrariesSlot;
+    pub fn R4Lib_Value447_create(p0: *mut R4Lib_Value447, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value447_inspect(p0: *const R4Lib_Value447, p1: *mut R4GfxTransferJob) -> R4LibrariesSlot;
     pub fn R4GfxTransferJob_create(p0: *mut R4GfxTransferJob, p1: *const R4Lib_r4gfx_abi_R4GfxJob) -> R4LibrariesSlot;
     pub fn R4GfxTransferJob_from_fields(p0: *mut R4GfxTransferJob, p1: *const R4Lib_r4gfx_abi_R4GfxJob, p2: *const R4Lib_r4gfx_abi_R4GfxCopyFence) -> R4LibrariesSlot;
     pub fn R4GfxTransferJob_get_handle(p0: *const R4GfxTransferJob, p1: *mut R4Lib_r4gfx_abi_R4GfxJob) -> R4LibrariesSlot;
@@ -9654,16 +9942,20 @@ unsafe extern "C" {
     pub fn R4GfxVrrScheduler_get_fault(p0: *const R4GfxVrrScheduler) -> R4LibrariesSlot;
     pub fn R4GfxVrrScheduler_set_fault(p0: *mut R4GfxVrrScheduler, p1: u32) -> R4LibrariesSlot;
     pub fn R4GfxVrrScheduler_inspect(p0: *const R4GfxVrrScheduler) -> R4LibrariesSlot;
-    pub fn R4Lib_Value456_create(p0: *mut R4Lib_Value456, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value456_inspect(p0: *const R4Lib_Value456, p1: *mut R4GfxVrrPlan) -> R4LibrariesSlot;
-    pub fn R4NakWorker_create(p0: *mut R4NakWorker, p1: *const R4Lib_r4os_r4sys_Context, p2: *const R4LibraryNakClient, p3: *const R4ProgramProcessHandle) -> R4LibrariesSlot;
-    pub fn R4NakWorker_from_fields(p0: *mut R4NakWorker, p1: *const R4Lib_r4os_r4sys_Context, p2: *const R4LibraryNakClient, p3: *const R4ProgramProcessHandle, p4: *const R4ProgramJoinHandle, p5: *const R4Lib_r4nak_R4NakRequest, p6: *const R4Lib_r4nak_R4NakBinary, p7: *const R4Lib_atomic_Value_bool_, p8: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value460_create(p0: *mut R4Lib_Value460, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value460_inspect(p0: *const R4Lib_Value460, p1: *mut R4GfxVrrPlan) -> R4LibrariesSlot;
+    pub fn R4NakWorker_create(p0: *mut R4NakWorker, p1: *const R4Lib_r4os_r4sys_Context, p2: *const R4LibraryNakClient, p3: *const R4ProgramProcessHandle, p4: *const R4Lib_r4os_inventory_reader_Provider, p5: *const R4Lib_r4os_stream_adapters_PlatformClock) -> R4LibrariesSlot;
+    pub fn R4NakWorker_from_fields(p0: *mut R4NakWorker, p1: *const R4Lib_r4os_r4sys_Context, p2: *const R4LibraryNakClient, p3: *const R4ProgramProcessHandle, p4: *const R4Lib_r4os_inventory_reader_Provider, p5: *const R4Lib_r4os_stream_adapters_PlatformClock, p6: *const R4ProgramJoinHandle, p7: *const R4Lib_r4nak_R4NakRequest, p8: *const R4Lib_r4nak_R4NakBinary, p9: *const R4Lib_atomic_Value_bool_, p10: u64) -> R4LibrariesSlot;
     pub fn R4NakWorker_get_sys(p0: *const R4NakWorker, p1: *mut R4Lib_r4os_r4sys_Context) -> R4LibrariesSlot;
     pub fn R4NakWorker_set_sys(p0: *mut R4NakWorker, p1: *const R4Lib_r4os_r4sys_Context) -> R4LibrariesSlot;
     pub fn R4NakWorker_get_client(p0: *const R4NakWorker, p1: *mut R4LibraryNakClient) -> R4LibrariesSlot;
     pub fn R4NakWorker_set_client(p0: *mut R4NakWorker, p1: *const R4LibraryNakClient) -> R4LibrariesSlot;
     pub fn R4NakWorker_get_program(p0: *const R4NakWorker, p1: *mut R4ProgramProcessHandle) -> R4LibrariesSlot;
     pub fn R4NakWorker_set_program(p0: *mut R4NakWorker, p1: *const R4ProgramProcessHandle) -> R4LibrariesSlot;
+    pub fn R4NakWorker_get_retirement_provider(p0: *const R4NakWorker, p1: *mut R4Lib_r4os_inventory_reader_Provider) -> R4LibrariesSlot;
+    pub fn R4NakWorker_set_retirement_provider(p0: *mut R4NakWorker, p1: *const R4Lib_r4os_inventory_reader_Provider) -> R4LibrariesSlot;
+    pub fn R4NakWorker_get_retirement_clock(p0: *const R4NakWorker, p1: *mut R4Lib_r4os_stream_adapters_PlatformClock) -> R4LibrariesSlot;
+    pub fn R4NakWorker_set_retirement_clock(p0: *mut R4NakWorker, p1: *const R4Lib_r4os_stream_adapters_PlatformClock) -> R4LibrariesSlot;
     pub fn R4NakWorker_get_handle(p0: *const R4NakWorker, p1: *mut R4ProgramJoinHandle) -> R4LibrariesSlot;
     pub fn R4NakWorker_set_handle(p0: *mut R4NakWorker, p1: *const R4ProgramJoinHandle) -> R4LibrariesSlot;
     pub fn R4NakWorker_get_request(p0: *const R4NakWorker, p1: *mut R4Lib_r4nak_R4NakRequest) -> R4LibrariesSlot;
@@ -9821,10 +10113,10 @@ unsafe extern "C" {
     pub fn R4Lib_r4nak_R4NakDigest_get_h3(p0: *const R4Lib_r4nak_R4NakDigest) -> R4LibrariesSlot;
     pub fn R4Lib_r4nak_R4NakDigest_set_h3(p0: *mut R4Lib_r4nak_R4NakDigest, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_r4nak_R4NakDigest_inspect(p0: *const R4Lib_r4nak_R4NakDigest) -> R4LibrariesSlot;
-    pub fn R4Lib_Value462_create(p0: *mut R4Lib_Value462, p1: *const R4LibraryNakClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value462_inspect(p0: *const R4Lib_Value462) -> R4LibrariesSlot;
-    pub fn R4Lib_Value463_create(p0: *mut R4Lib_Value463, p1: *const R4Lib_r4nak_R4NakCacheKey) -> R4LibrariesSlot;
-    pub fn R4Lib_Value463_inspect(p0: *const R4Lib_Value463) -> R4LibrariesSlot;
+    pub fn R4Lib_Value466_create(p0: *mut R4Lib_Value466, p1: *const R4LibraryNakClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value466_inspect(p0: *const R4Lib_Value466) -> R4LibrariesSlot;
+    pub fn R4Lib_Value467_create(p0: *mut R4Lib_Value467, p1: *const R4Lib_r4nak_R4NakCacheKey) -> R4LibrariesSlot;
+    pub fn R4Lib_Value467_inspect(p0: *const R4Lib_Value467) -> R4LibrariesSlot;
     pub fn R4Lib_r4nak_R4NakCacheKey_create(p0: *mut R4Lib_r4nak_R4NakCacheKey, p1: u32, p2: u32, p3: u32, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u64, p14: u64, p15: u64, p16: *const R4Lib_r4nak_R4NakDigest, p17: *const R4Lib_r4nak_R4NakDigest) -> R4LibrariesSlot;
     pub fn R4Lib_r4nak_R4NakCacheKey_from_fields(p0: *mut R4Lib_r4nak_R4NakCacheKey, p1: u32, p2: u32, p3: u32, p4: u32, p5: u32, p6: u32, p7: u32, p8: u32, p9: u32, p10: u32, p11: u32, p12: u32, p13: u64, p14: u64, p15: u64, p16: *const R4Lib_r4nak_R4NakDigest, p17: *const R4Lib_r4nak_R4NakDigest) -> R4LibrariesSlot;
     pub fn R4Lib_r4nak_R4NakCacheKey_get_version(p0: *const R4Lib_r4nak_R4NakCacheKey) -> R4LibrariesSlot;
@@ -9862,10 +10154,10 @@ unsafe extern "C" {
     pub fn R4Lib_r4nak_R4NakCacheKey_get_pipeline_hash(p0: *const R4Lib_r4nak_R4NakCacheKey, p1: *mut R4Lib_r4nak_R4NakDigest) -> R4LibrariesSlot;
     pub fn R4Lib_r4nak_R4NakCacheKey_set_pipeline_hash(p0: *mut R4Lib_r4nak_R4NakCacheKey, p1: *const R4Lib_r4nak_R4NakDigest) -> R4LibrariesSlot;
     pub fn R4Lib_r4nak_R4NakCacheKey_inspect(p0: *const R4Lib_r4nak_R4NakCacheKey) -> R4LibrariesSlot;
-    pub fn R4Lib_Value465_create(p0: *mut R4Lib_Value465, p1: *mut R4Lib_r4nak_R4NakBinary) -> R4LibrariesSlot;
-    pub fn R4Lib_Value465_inspect(p0: *const R4Lib_Value465) -> R4LibrariesSlot;
-    pub fn R4Lib_Value466_create(p0: *mut R4Lib_Value466, p1: *const R4Lib_r4nak_R4NakBinary) -> R4LibrariesSlot;
-    pub fn R4Lib_Value466_inspect(p0: *const R4Lib_Value466) -> R4LibrariesSlot;
+    pub fn R4Lib_Value469_create(p0: *mut R4Lib_Value469, p1: *mut R4Lib_r4nak_R4NakBinary) -> R4LibrariesSlot;
+    pub fn R4Lib_Value469_inspect(p0: *const R4Lib_Value469) -> R4LibrariesSlot;
+    pub fn R4Lib_Value470_create(p0: *mut R4Lib_Value470, p1: *const R4Lib_r4nak_R4NakBinary) -> R4LibrariesSlot;
+    pub fn R4Lib_Value470_inspect(p0: *const R4Lib_Value470) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_create(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_from_fields(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_inspect(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video) -> R4LibrariesSlot;
@@ -9984,12 +10276,12 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackStep_get_audio_degraded(p0: *const R4VideoPlaybackStep) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackStep_set_audio_degraded(p0: *mut R4VideoPlaybackStep, p1: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackStep_inspect(p0: *const R4VideoPlaybackStep) -> R4LibrariesSlot;
-    pub fn R4Lib_Value477_create(p0: *mut R4Lib_Value477, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value477_inspect(p0: *const R4Lib_Value477, p1: *mut R4VideoPlaybackOutput) -> R4LibrariesSlot;
-    pub fn R4Lib_Value478_create(p0: *mut R4Lib_Value478, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value478_inspect(p0: *const R4Lib_Value478) -> R4LibrariesSlot;
+    pub fn R4Lib_Value481_create(p0: *mut R4Lib_Value481, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value481_inspect(p0: *const R4Lib_Value481, p1: *mut R4VideoPlaybackOutput) -> R4LibrariesSlot;
+    pub fn R4Lib_Value482_create(p0: *mut R4Lib_Value482, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value482_inspect(p0: *const R4Lib_Value482) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_create(p0: *mut R4VideoPlaybackSession, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client, p2: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder, p4: *const R4VideoPlaybackConfig, p5: *mut R4VideoPlaybackCompositionComposition, p6: *const R4VideoPlaybackClockClock, p7: u32, p8: i64, p9: i64) -> R4LibrariesSlot;
-    pub fn R4VideoPlaybackSession_from_fields(p0: *mut R4VideoPlaybackSession, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client, p2: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder, p4: *const R4VideoPlaybackConfig, p5: *mut R4VideoPlaybackCompositionComposition, p6: R4LibrariesSlot, p7: *const R4VideoPlaybackClockClock, p8: u32, p9: u32, p10: u64, p11: u64, p12: R4LibrariesSlot, p13: u8, p14: u8, p15: u64, p16: *const R4Lib_Value499, p17: u64, p18: i32, p19: i64, p20: u8, p21: u8, p22: i64, p23: u8, p24: u8) -> R4LibrariesSlot;
+    pub fn R4VideoPlaybackSession_from_fields(p0: *mut R4VideoPlaybackSession, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client, p2: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoDecoder, p4: *const R4VideoPlaybackConfig, p5: *mut R4VideoPlaybackCompositionComposition, p6: R4LibrariesSlot, p7: *const R4VideoPlaybackClockClock, p8: u32, p9: u32, p10: u64, p11: u64, p12: R4LibrariesSlot, p13: u8, p14: u8, p15: u64, p16: *const R4Lib_Value503, p17: u64, p18: i32, p19: i64, p20: u8, p21: u8, p22: i64, p23: u8, p24: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_get_api(p0: *const R4VideoPlaybackSession, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_set_api(p0: *mut R4VideoPlaybackSession, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_VideoV1Client) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_get_runtime(p0: *const R4VideoPlaybackSession, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoRuntime) -> R4LibrariesSlot;
@@ -10020,8 +10312,8 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackSession_set_decoder_closed(p0: *mut R4VideoPlaybackSession, p1: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_get_order(p0: *const R4VideoPlaybackSession) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_set_order(p0: *mut R4VideoPlaybackSession, p1: u64) -> R4LibrariesSlot;
-    pub fn R4VideoPlaybackSession_get_slots(p0: *const R4VideoPlaybackSession, p1: *mut R4Lib_Value499) -> R4LibrariesSlot;
-    pub fn R4VideoPlaybackSession_set_slots(p0: *mut R4VideoPlaybackSession, p1: *const R4Lib_Value499) -> R4LibrariesSlot;
+    pub fn R4VideoPlaybackSession_get_slots(p0: *const R4VideoPlaybackSession, p1: *mut R4Lib_Value503) -> R4LibrariesSlot;
+    pub fn R4VideoPlaybackSession_set_slots(p0: *mut R4VideoPlaybackSession, p1: *const R4Lib_Value503) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_get_cursor(p0: *const R4VideoPlaybackSession) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_set_cursor(p0: *mut R4VideoPlaybackSession, p1: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_get_last_error(p0: *const R4VideoPlaybackSession) -> R4LibrariesSlot;
@@ -10039,10 +10331,10 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackSession_get_output_eos(p0: *const R4VideoPlaybackSession) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_set_output_eos(p0: *mut R4VideoPlaybackSession, p1: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSession_inspect(p0: *const R4VideoPlaybackSession) -> R4LibrariesSlot;
-    pub fn R4Lib_Value480_create(p0: *mut R4Lib_Value480, p1: *mut R4VideoPlaybackCompositionComposition) -> R4LibrariesSlot;
-    pub fn R4Lib_Value480_inspect(p0: *const R4Lib_Value480) -> R4LibrariesSlot;
+    pub fn R4Lib_Value484_create(p0: *mut R4Lib_Value484, p1: *mut R4VideoPlaybackCompositionComposition) -> R4LibrariesSlot;
+    pub fn R4Lib_Value484_inspect(p0: *const R4Lib_Value484) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionComposition_create(p0: *mut R4VideoPlaybackCompositionComposition, p1: *const R4Lib_r4os_gfx_buffers_Context, p2: *const R4Lib_r4os_gfx_queue_Context, p3: *const R4LibraryColorClient, p4: *const R4LibraryDeviceClient, p5: *const R4Lib_r4gfx_abi_R4GfxDevice) -> R4LibrariesSlot;
-    pub fn R4VideoPlaybackCompositionComposition_from_fields(p0: *mut R4VideoPlaybackCompositionComposition, p1: *const R4Lib_r4os_gfx_buffers_Context, p2: *const R4Lib_r4os_gfx_queue_Context, p3: *const R4LibraryColorClient, p4: *const R4LibraryDeviceClient, p5: *const R4Lib_r4gfx_abi_R4GfxDevice, p6: *const R4Lib_Value482, p7: u64) -> R4LibrariesSlot;
+    pub fn R4VideoPlaybackCompositionComposition_from_fields(p0: *mut R4VideoPlaybackCompositionComposition, p1: *const R4Lib_r4os_gfx_buffers_Context, p2: *const R4Lib_r4os_gfx_queue_Context, p3: *const R4LibraryColorClient, p4: *const R4LibraryDeviceClient, p5: *const R4Lib_r4gfx_abi_R4GfxDevice, p6: *const R4Lib_Value486, p7: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionComposition_get_buffers(p0: *const R4VideoPlaybackCompositionComposition, p1: *mut R4Lib_r4os_gfx_buffers_Context) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionComposition_set_buffers(p0: *mut R4VideoPlaybackCompositionComposition, p1: *const R4Lib_r4os_gfx_buffers_Context) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionComposition_get_queues(p0: *const R4VideoPlaybackCompositionComposition, p1: *mut R4Lib_r4os_gfx_queue_Context) -> R4LibrariesSlot;
@@ -10053,15 +10345,15 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackCompositionComposition_set_graphics(p0: *mut R4VideoPlaybackCompositionComposition, p1: *const R4LibraryDeviceClient) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionComposition_get_device(p0: *const R4VideoPlaybackCompositionComposition, p1: *mut R4Lib_r4gfx_abi_R4GfxDevice) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionComposition_set_device(p0: *mut R4VideoPlaybackCompositionComposition, p1: *const R4Lib_r4gfx_abi_R4GfxDevice) -> R4LibrariesSlot;
-    pub fn R4VideoPlaybackCompositionComposition_get_work(p0: *const R4VideoPlaybackCompositionComposition, p1: *mut R4Lib_Value482) -> R4LibrariesSlot;
-    pub fn R4VideoPlaybackCompositionComposition_set_work(p0: *mut R4VideoPlaybackCompositionComposition, p1: *const R4Lib_Value482) -> R4LibrariesSlot;
+    pub fn R4VideoPlaybackCompositionComposition_get_work(p0: *const R4VideoPlaybackCompositionComposition, p1: *mut R4Lib_Value486) -> R4LibrariesSlot;
+    pub fn R4VideoPlaybackCompositionComposition_set_work(p0: *mut R4VideoPlaybackCompositionComposition, p1: *const R4Lib_Value486) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionComposition_get_serial(p0: *const R4VideoPlaybackCompositionComposition) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionComposition_set_serial(p0: *mut R4VideoPlaybackCompositionComposition, p1: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionComposition_inspect(p0: *const R4VideoPlaybackCompositionComposition) -> R4LibrariesSlot;
-    pub fn R4Lib_Value482_create(p0: *mut R4Lib_Value482, p1: *const R4Lib_Value482) -> R4LibrariesSlot;
-    pub fn R4Lib_Value482_inspect(p0: *const R4Lib_Value482, p1: *mut R4Lib_Value482) -> R4LibrariesSlot;
+    pub fn R4Lib_Value486_create(p0: *mut R4Lib_Value486, p1: *const R4Lib_Value486) -> R4LibrariesSlot;
+    pub fn R4Lib_Value486_inspect(p0: *const R4Lib_Value486, p1: *mut R4Lib_Value486) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionWork_create(p0: *mut R4VideoPlaybackCompositionWork) -> R4LibrariesSlot;
-    pub fn R4VideoPlaybackCompositionWork_from_fields(p0: *mut R4VideoPlaybackCompositionWork, p1: u64, p2: u32, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame, p4: *const R4VideoPlaybackCompositionTarget, p5: *const R4Lib_r4gfx_abi_R4GfxColorTransform, p6: *const R4Lib_r4gfx_abi_R4GfxYuvDescription, p7: u64, p8: R4LibrariesSlot, p9: *const R4Lib_Value487, p10: u8, p11: i32) -> R4LibrariesSlot;
+    pub fn R4VideoPlaybackCompositionWork_from_fields(p0: *mut R4VideoPlaybackCompositionWork, p1: u64, p2: u32, p3: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame, p4: *const R4VideoPlaybackCompositionTarget, p5: *const R4Lib_r4gfx_abi_R4GfxColorTransform, p6: *const R4Lib_r4gfx_abi_R4GfxYuvDescription, p7: u64, p8: R4LibrariesSlot, p9: *const R4Lib_Value491, p10: u8, p11: i32) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionWork_get_serial(p0: *const R4VideoPlaybackCompositionWork) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionWork_set_serial(p0: *mut R4VideoPlaybackCompositionWork, p1: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionWork_get_state(p0: *const R4VideoPlaybackCompositionWork) -> R4LibrariesSlot;
@@ -10078,8 +10370,8 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackCompositionWork_set_deadline(p0: *mut R4VideoPlaybackCompositionWork, p1: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionWork_get_job(p0: *const R4VideoPlaybackCompositionWork, p1: *mut R4Lib_r4gfx_abi_R4GfxJob) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionWork_set_job(p0: *mut R4VideoPlaybackCompositionWork, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4VideoPlaybackCompositionWork_get_maps(p0: *const R4VideoPlaybackCompositionWork, p1: *mut R4Lib_Value487) -> R4LibrariesSlot;
-    pub fn R4VideoPlaybackCompositionWork_set_maps(p0: *mut R4VideoPlaybackCompositionWork, p1: *const R4Lib_Value487) -> R4LibrariesSlot;
+    pub fn R4VideoPlaybackCompositionWork_get_maps(p0: *const R4VideoPlaybackCompositionWork, p1: *mut R4Lib_Value491) -> R4LibrariesSlot;
+    pub fn R4VideoPlaybackCompositionWork_set_maps(p0: *mut R4VideoPlaybackCompositionWork, p1: *const R4Lib_Value491) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionWork_get_cancel(p0: *const R4VideoPlaybackCompositionWork) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionWork_set_cancel(p0: *mut R4VideoPlaybackCompositionWork, p1: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionWork_get_result(p0: *const R4VideoPlaybackCompositionWork) -> R4LibrariesSlot;
@@ -10114,14 +10406,14 @@ unsafe extern "C" {
     pub fn R4Lib_r4gfx_abi_R4GfxYuvDescription_get_reserved(p0: *const R4Lib_r4gfx_abi_R4GfxYuvDescription) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxYuvDescription_set_reserved(p0: *mut R4Lib_r4gfx_abi_R4GfxYuvDescription, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib_r4gfx_abi_R4GfxYuvDescription_inspect(p0: *const R4Lib_r4gfx_abi_R4GfxYuvDescription) -> R4LibrariesSlot;
-    pub fn R4Lib_Value486_create(p0: *mut R4Lib_Value486, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value486_inspect(p0: *const R4Lib_Value486, p1: *mut R4Lib_r4gfx_abi_R4GfxJob) -> R4LibrariesSlot;
-    pub fn R4Lib_Value487_create(p0: *mut R4Lib_Value487, p1: *const R4Lib_Value487) -> R4LibrariesSlot;
-    pub fn R4Lib_Value487_inspect(p0: *const R4Lib_Value487, p1: *mut R4Lib_Value487) -> R4LibrariesSlot;
-    pub fn R4Lib_Value488_create(p0: *mut R4Lib_Value488, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value488_inspect(p0: *const R4Lib_Value488) -> R4LibrariesSlot;
-    pub fn R4Lib_Value489_create(p0: *mut R4Lib_Value489, p1: *mut R4VideoPlaybackAudioAudio) -> R4LibrariesSlot;
-    pub fn R4Lib_Value489_inspect(p0: *const R4Lib_Value489) -> R4LibrariesSlot;
+    pub fn R4Lib_Value490_create(p0: *mut R4Lib_Value490, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value490_inspect(p0: *const R4Lib_Value490, p1: *mut R4Lib_r4gfx_abi_R4GfxJob) -> R4LibrariesSlot;
+    pub fn R4Lib_Value491_create(p0: *mut R4Lib_Value491, p1: *const R4Lib_Value491) -> R4LibrariesSlot;
+    pub fn R4Lib_Value491_inspect(p0: *const R4Lib_Value491, p1: *mut R4Lib_Value491) -> R4LibrariesSlot;
+    pub fn R4Lib_Value492_create(p0: *mut R4Lib_Value492, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value492_inspect(p0: *const R4Lib_Value492) -> R4LibrariesSlot;
+    pub fn R4Lib_Value493_create(p0: *mut R4Lib_Value493, p1: *mut R4VideoPlaybackAudioAudio) -> R4LibrariesSlot;
+    pub fn R4Lib_Value493_inspect(p0: *const R4Lib_Value493) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackAudioAudio_create(p0: *mut R4VideoPlaybackAudioAudio, p1: *const R4Lib_r4os_app_audio_Audio, p2: *mut u8, p3: u64, p4: u32, p5: u16) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackAudioAudio_from_fields(p0: *mut R4VideoPlaybackAudioAudio, p1: *const R4Lib_r4os_app_audio_Audio, p2: *mut u8, p3: u64, p4: u32, p5: u16, p6: u64, p7: u32, p8: R4LibrariesSlot, p9: u64, p10: u64, p11: i64, p12: i32, p13: u32, p14: *const R4Timeout) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackAudioAudio_get_api(p0: *const R4VideoPlaybackAudioAudio, p1: *mut R4Lib_r4os_app_audio_Audio) -> R4LibrariesSlot;
@@ -10153,8 +10445,8 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackAudioAudio_inspect(p0: *const R4VideoPlaybackAudioAudio) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackAudioState_create(p0: *mut R4VideoPlaybackAudioState, p1: u32) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackAudioState_inspect(p0: *const R4VideoPlaybackAudioState) -> R4LibrariesSlot;
-    pub fn R4Lib_Value493_create(p0: *mut R4Lib_Value493, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value493_inspect(p0: *const R4Lib_Value493, p1: *mut R4Lib_r4os_app_audio_AudioStream) -> R4LibrariesSlot;
+    pub fn R4Lib_Value497_create(p0: *mut R4Lib_Value497, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value497_inspect(p0: *const R4Lib_Value497, p1: *mut R4Lib_r4os_app_audio_AudioStream) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackClockClock_create(p0: *mut R4VideoPlaybackClockClock, p1: u64, p2: i64, p3: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackClockClock_from_fields(p0: *mut R4VideoPlaybackClockClock, p1: u64, p2: i64, p3: u64, p4: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackClockClock_get_anchor_ns(p0: *const R4VideoPlaybackClockClock) -> R4LibrariesSlot;
@@ -10166,8 +10458,8 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackClockClock_get_paused(p0: *const R4VideoPlaybackClockClock) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackClockClock_set_paused(p0: *mut R4VideoPlaybackClockClock, p1: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackClockClock_inspect(p0: *const R4VideoPlaybackClockClock) -> R4LibrariesSlot;
-    pub fn R4Lib_Value497_create(p0: *mut R4Lib_Value497, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value497_inspect(p0: *const R4Lib_Value497, p1: *mut R4VideoPlaybackControl) -> R4LibrariesSlot;
+    pub fn R4Lib_Value501_create(p0: *mut R4Lib_Value501, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value501_inspect(p0: *const R4Lib_Value501, p1: *mut R4VideoPlaybackControl) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackControl_create(p0: *mut R4VideoPlaybackControl, p1: u32, p2: u64, p3: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackControl_from_fields(p0: *mut R4VideoPlaybackControl, p1: u32, p2: u64, p3: u64, p4: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackControl_get_operation(p0: *const R4VideoPlaybackControl) -> R4LibrariesSlot;
@@ -10179,8 +10471,8 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackControl_get_accepted(p0: *const R4VideoPlaybackControl) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackControl_set_accepted(p0: *mut R4VideoPlaybackControl, p1: u8) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackControl_inspect(p0: *const R4VideoPlaybackControl) -> R4LibrariesSlot;
-    pub fn R4Lib_Value499_create(p0: *mut R4Lib_Value499, p1: *const R4Lib_Value499) -> R4LibrariesSlot;
-    pub fn R4Lib_Value499_inspect(p0: *const R4Lib_Value499, p1: *mut R4Lib_Value499) -> R4LibrariesSlot;
+    pub fn R4Lib_Value503_create(p0: *mut R4Lib_Value503, p1: *const R4Lib_Value503) -> R4LibrariesSlot;
+    pub fn R4Lib_Value503_inspect(p0: *const R4Lib_Value503, p1: *mut R4Lib_Value503) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSlot_create(p0: *mut R4VideoPlaybackSlot) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSlot_from_fields(p0: *mut R4VideoPlaybackSlot, p1: u64, p2: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoFrame, p3: R4LibrariesSlot, p4: R4LibrariesSlot, p5: u8, p6: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSlot_get_order(p0: *const R4VideoPlaybackSlot) -> R4LibrariesSlot;
@@ -10196,8 +10488,8 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackSlot_get_receipt(p0: *const R4VideoPlaybackSlot, p1: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSlot_set_receipt(p0: *mut R4VideoPlaybackSlot, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoReceipt) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackSlot_inspect(p0: *const R4VideoPlaybackSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value501_create(p0: *mut R4Lib_Value501, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value501_inspect(p0: *const R4Lib_Value501, p1: *mut R4VideoPlaybackCompositionTicket) -> R4LibrariesSlot;
+    pub fn R4Lib_Value505_create(p0: *mut R4Lib_Value505, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value505_inspect(p0: *const R4Lib_Value505, p1: *mut R4VideoPlaybackCompositionTicket) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionTicket_create(p0: *mut R4VideoPlaybackCompositionTicket, p1: u8, p2: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionTicket_from_fields(p0: *mut R4VideoPlaybackCompositionTicket, p1: u8, p2: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionTicket_get_slot(p0: *const R4VideoPlaybackCompositionTicket) -> R4LibrariesSlot;
@@ -10205,10 +10497,10 @@ unsafe extern "C" {
     pub fn R4VideoPlaybackCompositionTicket_get_serial(p0: *const R4VideoPlaybackCompositionTicket) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionTicket_set_serial(p0: *mut R4VideoPlaybackCompositionTicket, p1: u64) -> R4LibrariesSlot;
     pub fn R4VideoPlaybackCompositionTicket_inspect(p0: *const R4VideoPlaybackCompositionTicket) -> R4LibrariesSlot;
-    pub fn R4Lib_Value503_create(p0: *mut R4Lib_Value503, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value503_inspect(p0: *const R4Lib_Value503, p1: *mut R4VideoPlaybackCompositionTarget) -> R4LibrariesSlot;
-    pub fn R4Lib_Value504_inspect(p0: *const R4Lib_Value504) -> R4LibrariesSlot;
-    pub fn R4Lib_Value505_inspect(p0: *const R4Lib_Value505, p1: *mut R4GfxDisplayProfileOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value507_create(p0: *mut R4Lib_Value507, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value507_inspect(p0: *const R4Lib_Value507, p1: *mut R4VideoPlaybackCompositionTarget) -> R4LibrariesSlot;
+    pub fn R4Lib_Value508_inspect(p0: *const R4Lib_Value508) -> R4LibrariesSlot;
+    pub fn R4Lib_Value509_inspect(p0: *const R4Lib_Value509, p1: *mut R4GfxDisplayProfileOwner) -> R4LibrariesSlot;
     pub fn R4GfxDisplayProfileOwner_create(p0: *mut R4GfxDisplayProfileOwner, p1: *const R4LibraryAllocator, p2: *const R4LibraryColorClient, p3: *mut u8, p4: u64, p5: *mut u8, p6: u64, p7: *const R4Lib_r4gfx_abi_R4GfxColorProfile) -> R4LibrariesSlot;
     pub fn R4GfxDisplayProfileOwner_from_fields(p0: *mut R4GfxDisplayProfileOwner, p1: *const R4LibraryAllocator, p2: *const R4LibraryColorClient, p3: *mut u8, p4: u64, p5: *mut u8, p6: u64, p7: *const R4Lib_r4gfx_abi_R4GfxColorProfile) -> R4LibrariesSlot;
     pub fn R4GfxDisplayProfileOwner_get_allocator(p0: *const R4GfxDisplayProfileOwner, p1: *mut R4LibraryAllocator) -> R4LibrariesSlot;
@@ -10222,13 +10514,18 @@ unsafe extern "C" {
     pub fn R4GfxDisplayProfileOwner_get_handle(p0: *const R4GfxDisplayProfileOwner, p1: *mut R4Lib_r4gfx_abi_R4GfxColorProfile) -> R4LibrariesSlot;
     pub fn R4GfxDisplayProfileOwner_set_handle(p0: *mut R4GfxDisplayProfileOwner, p1: *const R4Lib_r4gfx_abi_R4GfxColorProfile) -> R4LibrariesSlot;
     pub fn R4GfxDisplayProfileOwner_inspect(p0: *const R4GfxDisplayProfileOwner) -> R4LibrariesSlot;
-    pub fn R4Lib_Value507_create(p0: *mut R4Lib_Value507, p1: *mut u8, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value507_inspect(p0: *const R4Lib_Value507) -> R4LibrariesSlot;
-    pub fn R4Lib_Value508_create(p0: *mut R4Lib_Value508, p1: *mut R4GfxDisplayProfileOwner) -> R4LibrariesSlot;
-    pub fn R4Lib_Value508_inspect(p0: *const R4Lib_Value508) -> R4LibrariesSlot;
-    pub fn R4Lib_Value509_create(p0: *mut R4Lib_Value509, p1: *const R4GfxDisplayProfileOwner) -> R4LibrariesSlot;
-    pub fn R4Lib_Value509_inspect(p0: *const R4Lib_Value509) -> R4LibrariesSlot;
-    pub fn R4Lib_Value510_inspect(p0: *const R4Lib_Value510) -> R4LibrariesSlot;
+    pub fn R4Lib_Value511_create(p0: *mut R4Lib_Value511, p1: *mut u8, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value511_inspect(p0: *const R4Lib_Value511) -> R4LibrariesSlot;
+    pub fn R4Lib_Value512_create(p0: *mut R4Lib_Value512, p1: *mut R4GfxDisplayProfileOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value512_inspect(p0: *const R4Lib_Value512) -> R4LibrariesSlot;
+    pub fn R4Lib_Value513_create(p0: *mut R4Lib_Value513, p1: *const R4GfxDisplayProfileOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value513_inspect(p0: *const R4Lib_Value513) -> R4LibrariesSlot;
+    pub fn R4Lib_Value514_inspect(p0: *const R4Lib_Value514) -> R4LibrariesSlot;
+    pub fn R4MediaCompilerContext2_create(p0: *mut R4MediaCompilerContext2, p1: *const R4Lib_r4os_app2_App) -> R4LibrariesSlot;
+    pub fn R4MediaCompilerContext2_from_fields(p0: *mut R4MediaCompilerContext2, p1: *const R4Lib_r4os_app2_App) -> R4LibrariesSlot;
+    pub fn R4MediaCompilerContext2_get_app(p0: *const R4MediaCompilerContext2, p1: *mut R4Lib_r4os_app2_App) -> R4LibrariesSlot;
+    pub fn R4MediaCompilerContext2_set_app(p0: *mut R4MediaCompilerContext2, p1: *const R4Lib_r4os_app2_App) -> R4LibrariesSlot;
+    pub fn R4MediaCompilerContext2_inspect(p0: *const R4MediaCompilerContext2) -> R4LibrariesSlot;
     pub fn R4MediaSink_create(p0: *mut R4MediaSink, p1: u64) -> R4LibrariesSlot;
     pub fn R4MediaSink_from_fields(p0: *mut R4MediaSink, p1: R4LibrariesSlot, p2: u64) -> R4LibrariesSlot;
     pub fn R4MediaSink_get_context(p0: *const R4MediaSink) -> R4LibrariesSlot;
@@ -10236,65 +10533,65 @@ unsafe extern "C" {
     pub fn R4MediaSink_get_callback(p0: *const R4MediaSink) -> R4LibrariesSlot;
     pub fn R4MediaSink_set_callback(p0: *mut R4MediaSink, p1: u64) -> R4LibrariesSlot;
     pub fn R4MediaSink_inspect(p0: *const R4MediaSink) -> R4LibrariesSlot;
-    pub fn R4Lib_Value512_create(p0: *mut R4Lib_Value512, p1: *mut R4EncMuxWriter) -> R4LibrariesSlot;
-    pub fn R4Lib_Value512_inspect(p0: *const R4Lib_Value512) -> R4LibrariesSlot;
-    pub fn R4Lib_Value513_inspect(p0: *const R4Lib_Value513) -> R4LibrariesSlot;
-    pub fn R4Lib_Value514_create(p0: *mut R4Lib_Value514, p1: *const R4Lib_r4os_r4draw_Context) -> R4LibrariesSlot;
-    pub fn R4Lib_Value514_inspect(p0: *const R4Lib_Value514) -> R4LibrariesSlot;
-    pub fn R4Lib_Value515_inspect(p0: *const R4Lib_Value515, p1: *mut R4GfxDesktopOutputsSnapshot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value516_inspect(p0: *const R4Lib_Value516, p1: *mut R4GfxEdidReport) -> R4LibrariesSlot;
-    pub fn R4Lib_Value517_create(p0: *mut R4Lib_Value517, p1: *mut R4GfxBrightnessClientClient) -> R4LibrariesSlot;
-    pub fn R4Lib_Value517_inspect(p0: *const R4Lib_Value517) -> R4LibrariesSlot;
-    pub fn R4Lib_Value518_create(p0: *mut R4Lib_Value518, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value518_inspect(p0: *const R4Lib_Value518, p1: *mut R4GfxBrightnessPreferencesChoice) -> R4LibrariesSlot;
-    pub fn R4Lib_Value519_create(p0: *mut R4Lib_Value519, p1: *mut R4GfxRefreshClientClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value518_create(p0: *mut R4Lib_Value518, p1: *mut R4EncMuxWriter) -> R4LibrariesSlot;
+    pub fn R4Lib_Value518_inspect(p0: *const R4Lib_Value518) -> R4LibrariesSlot;
     pub fn R4Lib_Value519_inspect(p0: *const R4Lib_Value519) -> R4LibrariesSlot;
-    pub fn R4Lib_Value520_create(p0: *mut R4Lib_Value520, p1: *const R4GfxColorPreferencesConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value520_create(p0: *mut R4Lib_Value520, p1: *const R4Lib_r4os_r4draw_Context) -> R4LibrariesSlot;
     pub fn R4Lib_Value520_inspect(p0: *const R4Lib_Value520) -> R4LibrariesSlot;
-    pub fn R4Lib_Value521_create(p0: *mut R4Lib_Value521, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value521_inspect(p0: *const R4Lib_Value521, p1: *mut R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
-    pub fn R4Lib_Value522_create(p0: *mut R4Lib_Value522, p1: *mut R4GfxModeControlController) -> R4LibrariesSlot;
-    pub fn R4Lib_Value522_inspect(p0: *const R4Lib_Value522) -> R4LibrariesSlot;
-    pub fn R4Lib_Value523_create(p0: *mut R4Lib_Value523, p1: *const R4GfxDesktopOutputsEntry) -> R4LibrariesSlot;
+    pub fn R4Lib_Value521_inspect(p0: *const R4Lib_Value521, p1: *mut R4GfxDesktopOutputsSnapshot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value522_inspect(p0: *const R4Lib_Value522, p1: *mut R4GfxEdidReport) -> R4LibrariesSlot;
+    pub fn R4Lib_Value523_create(p0: *mut R4Lib_Value523, p1: *mut R4GfxBrightnessClientClient) -> R4LibrariesSlot;
     pub fn R4Lib_Value523_inspect(p0: *const R4Lib_Value523) -> R4LibrariesSlot;
-    pub fn R4Lib_Value524_inspect(p0: *const R4Lib_Value524) -> R4LibrariesSlot;
-    pub fn R4Lib_Value525_inspect(p0: *const R4Lib_Value525, p1: *mut R4GfxColorSignalSource) -> R4LibrariesSlot;
-    pub fn R4Lib_Value526_inspect(p0: *const R4Lib_Value526, p1: *mut R4GfxColorSignalSignal) -> R4LibrariesSlot;
-    pub fn R4Lib_Value527_inspect(p0: *const R4Lib_Value527, p1: *mut R4GfxColorSignal) -> R4LibrariesSlot;
-    pub fn R4Lib_Value528_inspect(p0: *const R4Lib_Value528, p1: *mut R4GfxColorSignalLink) -> R4LibrariesSlot;
+    pub fn R4Lib_Value524_create(p0: *mut R4Lib_Value524, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value524_inspect(p0: *const R4Lib_Value524, p1: *mut R4GfxBrightnessPreferencesChoice) -> R4LibrariesSlot;
+    pub fn R4Lib_Value525_create(p0: *mut R4Lib_Value525, p1: *mut R4GfxRefreshClientClient) -> R4LibrariesSlot;
+    pub fn R4Lib_Value525_inspect(p0: *const R4Lib_Value525) -> R4LibrariesSlot;
+    pub fn R4Lib_Value526_create(p0: *mut R4Lib_Value526, p1: *const R4GfxColorPreferencesConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value526_inspect(p0: *const R4Lib_Value526) -> R4LibrariesSlot;
+    pub fn R4Lib_Value527_create(p0: *mut R4Lib_Value527, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value527_inspect(p0: *const R4Lib_Value527, p1: *mut R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
+    pub fn R4Lib_Value528_create(p0: *mut R4Lib_Value528, p1: *mut R4GfxModeControlController) -> R4LibrariesSlot;
+    pub fn R4Lib_Value528_inspect(p0: *const R4Lib_Value528) -> R4LibrariesSlot;
+    pub fn R4Lib_Value529_create(p0: *mut R4Lib_Value529, p1: *const R4GfxDesktopOutputsEntry) -> R4LibrariesSlot;
     pub fn R4Lib_Value529_inspect(p0: *const R4Lib_Value529) -> R4LibrariesSlot;
-    pub fn R4Lib_Value530_inspect(p0: *const R4Lib_Value530, p1: *mut R4GfxColorSignalPlan) -> R4LibrariesSlot;
-    pub fn R4Lib_Value531_inspect(p0: *const R4Lib_Value531, p1: *mut R4GfxVrrPlan) -> R4LibrariesSlot;
-    pub fn R4Lib_Value532_inspect(p0: *const R4Lib_Value532, p1: *mut R4GfxDisplayProfileOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value530_inspect(p0: *const R4Lib_Value530) -> R4LibrariesSlot;
+    pub fn R4Lib_Value531_inspect(p0: *const R4Lib_Value531, p1: *mut R4GfxColorSignalSource) -> R4LibrariesSlot;
+    pub fn R4Lib_Value532_inspect(p0: *const R4Lib_Value532, p1: *mut R4GfxColorSignalSignal) -> R4LibrariesSlot;
+    pub fn R4Lib_Value533_inspect(p0: *const R4Lib_Value533, p1: *mut R4GfxColorSignal) -> R4LibrariesSlot;
+    pub fn R4Lib_Value534_inspect(p0: *const R4Lib_Value534, p1: *mut R4GfxColorSignalLink) -> R4LibrariesSlot;
+    pub fn R4Lib_Value535_inspect(p0: *const R4Lib_Value535) -> R4LibrariesSlot;
+    pub fn R4Lib_Value536_inspect(p0: *const R4Lib_Value536, p1: *mut R4GfxColorSignalPlan) -> R4LibrariesSlot;
+    pub fn R4Lib_Value537_inspect(p0: *const R4Lib_Value537, p1: *mut R4GfxVrrPlan) -> R4LibrariesSlot;
+    pub fn R4Lib_Value538_inspect(p0: *const R4Lib_Value538, p1: *mut R4GfxDisplayProfileOwner) -> R4LibrariesSlot;
     pub fn R4MediaBuiltinShader_create(p0: *mut R4MediaBuiltinShader, p1: u32) -> R4LibrariesSlot;
     pub fn R4MediaBuiltinShader_inspect(p0: *const R4MediaBuiltinShader) -> R4LibrariesSlot;
-    pub fn R4Lib_Value534_create(p0: *mut R4Lib_Value534, p1: *mut R4StdSettingsEntryIterator) -> R4LibrariesSlot;
-    pub fn R4Lib_Value534_inspect(p0: *const R4Lib_Value534) -> R4LibrariesSlot;
-    pub fn R4Lib_Value535_create(p0: *mut R4Lib_Value535, p1: *mut R4StdSettingsWriter) -> R4LibrariesSlot;
-    pub fn R4Lib_Value535_inspect(p0: *const R4Lib_Value535) -> R4LibrariesSlot;
-    pub fn R4Lib_Value536_create(p0: *mut R4Lib_Value536, p1: *const R4StdSettingsWriter) -> R4LibrariesSlot;
-    pub fn R4Lib_Value536_inspect(p0: *const R4Lib_Value536) -> R4LibrariesSlot;
-    pub fn R4Lib_Value537_create(p0: *mut R4Lib_Value537, p1: *const R4StdSettingsWriteback) -> R4LibrariesSlot;
-    pub fn R4Lib_Value537_inspect(p0: *const R4Lib_Value537) -> R4LibrariesSlot;
-    pub fn R4Lib_Value538_create(p0: *mut R4Lib_Value538, p1: *mut R4StdTimeHelpersConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value538_inspect(p0: *const R4Lib_Value538) -> R4LibrariesSlot;
-    pub fn R4Lib_Value539_create(p0: *mut R4Lib_Value539, p1: *mut R4StdCodecStream) -> R4LibrariesSlot;
-    pub fn R4Lib_Value539_inspect(p0: *const R4Lib_Value539) -> R4LibrariesSlot;
-    pub fn R4Lib_Value540_create(p0: *mut R4Lib_Value540, p1: *const R4StdCodecStream) -> R4LibrariesSlot;
+    pub fn R4Lib_Value540_create(p0: *mut R4Lib_Value540, p1: *mut R4StdSettingsEntryIterator) -> R4LibrariesSlot;
     pub fn R4Lib_Value540_inspect(p0: *const R4Lib_Value540) -> R4LibrariesSlot;
+    pub fn R4Lib_Value541_create(p0: *mut R4Lib_Value541, p1: *mut R4StdSettingsWriter) -> R4LibrariesSlot;
     pub fn R4Lib_Value541_inspect(p0: *const R4Lib_Value541) -> R4LibrariesSlot;
-    pub fn R4Lib_Value542_create(p0: *mut R4Lib_Value542, p1: *mut R4StdGraphemeState) -> R4LibrariesSlot;
+    pub fn R4Lib_Value542_create(p0: *mut R4Lib_Value542, p1: *const R4StdSettingsWriter) -> R4LibrariesSlot;
     pub fn R4Lib_Value542_inspect(p0: *const R4Lib_Value542) -> R4LibrariesSlot;
-    pub fn R4Lib_Value543_create(p0: *mut R4Lib_Value543, p1: *mut R4StdGraphemeIterator) -> R4LibrariesSlot;
+    pub fn R4Lib_Value543_create(p0: *mut R4Lib_Value543, p1: *const R4StdSettingsWriteback) -> R4LibrariesSlot;
     pub fn R4Lib_Value543_inspect(p0: *const R4Lib_Value543) -> R4LibrariesSlot;
-    pub fn R4Lib_Value544_inspect(p0: *const R4Lib_Value544, p1: *mut R4StdGraphemeRange) -> R4LibrariesSlot;
-    pub fn R4Lib_Value545_create(p0: *mut R4Lib_Value545, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value545_inspect(p0: *const R4Lib_Value545, p1: *mut R4StdGraphemeRange) -> R4LibrariesSlot;
-    pub fn R4Lib_Value546_create(p0: *mut R4Lib_Value546, p1: *mut R4StdGraphemeStream) -> R4LibrariesSlot;
+    pub fn R4Lib_Value544_create(p0: *mut R4Lib_Value544, p1: *mut R4StdTimeHelpersConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value544_inspect(p0: *const R4Lib_Value544) -> R4LibrariesSlot;
+    pub fn R4Lib_Value545_create(p0: *mut R4Lib_Value545, p1: *mut R4StdCodecStream) -> R4LibrariesSlot;
+    pub fn R4Lib_Value545_inspect(p0: *const R4Lib_Value545) -> R4LibrariesSlot;
+    pub fn R4Lib_Value546_create(p0: *mut R4Lib_Value546, p1: *const R4StdCodecStream) -> R4LibrariesSlot;
     pub fn R4Lib_Value546_inspect(p0: *const R4Lib_Value546) -> R4LibrariesSlot;
-    pub fn R4Lib_Value547_inspect(p0: *const R4Lib_Value547, p1: *mut R4StdGraphemeStream_Event) -> R4LibrariesSlot;
-    pub fn R4Lib_Value548_create(p0: *mut R4Lib_Value548, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value548_inspect(p0: *const R4Lib_Value548, p1: *mut R4StdGraphemeStream_Event) -> R4LibrariesSlot;
+    pub fn R4Lib_Value547_inspect(p0: *const R4Lib_Value547) -> R4LibrariesSlot;
+    pub fn R4Lib_Value548_create(p0: *mut R4Lib_Value548, p1: *mut R4StdGraphemeState) -> R4LibrariesSlot;
+    pub fn R4Lib_Value548_inspect(p0: *const R4Lib_Value548) -> R4LibrariesSlot;
+    pub fn R4Lib_Value549_create(p0: *mut R4Lib_Value549, p1: *mut R4StdGraphemeIterator) -> R4LibrariesSlot;
+    pub fn R4Lib_Value549_inspect(p0: *const R4Lib_Value549) -> R4LibrariesSlot;
+    pub fn R4Lib_Value550_inspect(p0: *const R4Lib_Value550, p1: *mut R4StdGraphemeRange) -> R4LibrariesSlot;
+    pub fn R4Lib_Value551_create(p0: *mut R4Lib_Value551, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value551_inspect(p0: *const R4Lib_Value551, p1: *mut R4StdGraphemeRange) -> R4LibrariesSlot;
+    pub fn R4Lib_Value552_create(p0: *mut R4Lib_Value552, p1: *mut R4StdGraphemeStream) -> R4LibrariesSlot;
+    pub fn R4Lib_Value552_inspect(p0: *const R4Lib_Value552) -> R4LibrariesSlot;
+    pub fn R4Lib_Value553_inspect(p0: *const R4Lib_Value553, p1: *mut R4StdGraphemeStream_Event) -> R4LibrariesSlot;
+    pub fn R4Lib_Value554_create(p0: *mut R4Lib_Value554, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value554_inspect(p0: *const R4Lib_Value554, p1: *mut R4StdGraphemeStream_Event) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_Event_create(p0: *mut R4StdGraphemeStream_Event, p1: u64, p2: u32, p3: u64, p4: u8) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_Event_from_fields(p0: *mut R4StdGraphemeStream_Event, p1: u64, p2: u32, p3: u64, p4: u8) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_Event_get_offset(p0: *const R4StdGraphemeStream_Event) -> R4LibrariesSlot;
@@ -10306,46 +10603,46 @@ unsafe extern "C" {
     pub fn R4StdGraphemeStream_Event_get_break_before(p0: *const R4StdGraphemeStream_Event) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_Event_set_break_before(p0: *mut R4StdGraphemeStream_Event, p1: u8) -> R4LibrariesSlot;
     pub fn R4StdGraphemeStream_Event_inspect(p0: *const R4StdGraphemeStream_Event) -> R4LibrariesSlot;
-    pub fn R4Lib_Value550_create(p0: *mut R4Lib_Value550, p1: *const R4StdGraphemeStream) -> R4LibrariesSlot;
-    pub fn R4Lib_Value550_inspect(p0: *const R4Lib_Value550) -> R4LibrariesSlot;
-    pub fn R4Lib_Value551_create(p0: *mut R4Lib_Value551, p1: *mut R4StdShortcutShortcut) -> R4LibrariesSlot;
-    pub fn R4Lib_Value551_inspect(p0: *const R4Lib_Value551) -> R4LibrariesSlot;
-    pub fn R4Lib_Value552_inspect(p0: *const R4Lib_Value552) -> R4LibrariesSlot;
-    pub fn R4Lib_Value553_create(p0: *mut R4Lib_Value553, p1: *const R4StdShortcutShortcut) -> R4LibrariesSlot;
-    pub fn R4Lib_Value553_inspect(p0: *const R4Lib_Value553) -> R4LibrariesSlot;
-    pub fn R4Lib_Value554_inspect(p0: *const R4Lib_Value554) -> R4LibrariesSlot;
-    pub fn R4Lib_Value555_inspect(p0: *const R4Lib_Value555, p1: *mut R4StdShortcutResolvedTarget) -> R4LibrariesSlot;
-    pub fn R4Lib_Value556_create(p0: *mut R4Lib_Value556, p1: *const R4StdAssociationExtEntry) -> R4LibrariesSlot;
+    pub fn R4Lib_Value556_create(p0: *mut R4Lib_Value556, p1: *const R4StdGraphemeStream) -> R4LibrariesSlot;
     pub fn R4Lib_Value556_inspect(p0: *const R4Lib_Value556) -> R4LibrariesSlot;
-    pub fn R4Lib_Value557_create(p0: *mut R4Lib_Value557, p1: *mut R4StdAssociationConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value557_create(p0: *mut R4Lib_Value557, p1: *mut R4StdShortcutShortcut) -> R4LibrariesSlot;
     pub fn R4Lib_Value557_inspect(p0: *const R4Lib_Value557) -> R4LibrariesSlot;
-    pub fn R4Lib_Value558_create(p0: *mut R4Lib_Value558, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4Lib_Value558_inspect(p0: *const R4Lib_Value558) -> R4LibrariesSlot;
-    pub fn R4Lib_Value559_create(p0: *mut R4Lib_Value559, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value559_inspect(p0: *const R4Lib_Value559, p1: *mut R4StdAssociationLaunchTarget) -> R4LibrariesSlot;
-    pub fn R4Lib_Value560_create(p0: *mut R4Lib_Value560, p1: *const R4StdFileHandlerChoiceList) -> R4LibrariesSlot;
+    pub fn R4Lib_Value559_create(p0: *mut R4Lib_Value559, p1: *const R4StdShortcutShortcut) -> R4LibrariesSlot;
+    pub fn R4Lib_Value559_inspect(p0: *const R4Lib_Value559) -> R4LibrariesSlot;
     pub fn R4Lib_Value560_inspect(p0: *const R4Lib_Value560) -> R4LibrariesSlot;
-    pub fn R4Lib_Value561_create(p0: *mut R4Lib_Value561, p1: *const R4StdFileHandlerChoice, p2: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value561_inspect(p0: *const R4Lib_Value561) -> R4LibrariesSlot;
+    pub fn R4Lib_Value561_inspect(p0: *const R4Lib_Value561, p1: *mut R4StdShortcutResolvedTarget) -> R4LibrariesSlot;
+    pub fn R4Lib_Value562_create(p0: *mut R4Lib_Value562, p1: *const R4StdAssociationExtEntry) -> R4LibrariesSlot;
     pub fn R4Lib_Value562_inspect(p0: *const R4Lib_Value562) -> R4LibrariesSlot;
-    pub fn R4Lib_Value563_create(p0: *mut R4Lib_Value563, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value563_inspect(p0: *const R4Lib_Value563, p1: *mut R4ImgHelpersRasterContext) -> R4LibrariesSlot;
-    pub fn R4Lib_Value564_inspect(p0: *const R4Lib_Value564, p1: *mut R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgRasterColor) -> R4LibrariesSlot;
-    pub fn R4Lib_Value565_inspect(p0: *const R4Lib_Value565) -> R4LibrariesSlot;
-    pub fn R4Lib_Value566_create(p0: *mut R4Lib_Value566, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value566_inspect(p0: *const R4Lib_Value566, p1: *mut R4ImgHelpersContext) -> R4LibrariesSlot;
-    pub fn R4Lib_Value567_inspect(p0: *const R4Lib_Value567, p1: *mut R4ImgHelpersInfo) -> R4LibrariesSlot;
-    pub fn R4Lib_Value568_inspect(p0: *const R4Lib_Value568, p1: *mut R4ImgHelpersImage) -> R4LibrariesSlot;
-    pub fn R4Lib_Value569_inspect(p0: *const R4Lib_Value569) -> R4LibrariesSlot;
-    pub fn R4Lib_Value570_inspect(p0: *const R4Lib_Value570, p1: *mut R4ImgHelpersDecoderDiagnostic) -> R4LibrariesSlot;
-    pub fn R4Lib_Value571_create(p0: *mut R4Lib_Value571, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value571_inspect(p0: *const R4Lib_Value571, p1: *mut R4ImgHelpersPngContext) -> R4LibrariesSlot;
-    pub fn R4Lib_Value572_inspect(p0: *const R4Lib_Value572, p1: *mut R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor) -> R4LibrariesSlot;
-    pub fn R4Lib_Value573_inspect(p0: *const R4Lib_Value573, p1: *mut R4ImgHelpersImage16) -> R4LibrariesSlot;
-    pub fn R4Lib_Value574_create(p0: *mut R4Lib_Value574, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value574_inspect(p0: *const R4Lib_Value574, p1: *mut R4FontHelpersContext) -> R4LibrariesSlot;
-    pub fn R4Lib_Value575_create(p0: *mut R4Lib_Value575, p1: *const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1) -> R4LibrariesSlot;
+    pub fn R4Lib_Value563_create(p0: *mut R4Lib_Value563, p1: *mut R4StdAssociationConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value563_inspect(p0: *const R4Lib_Value563) -> R4LibrariesSlot;
+    pub fn R4Lib_Value564_create(p0: *mut R4Lib_Value564, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value564_inspect(p0: *const R4Lib_Value564) -> R4LibrariesSlot;
+    pub fn R4Lib_Value565_create(p0: *mut R4Lib_Value565, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value565_inspect(p0: *const R4Lib_Value565, p1: *mut R4StdAssociationLaunchTarget) -> R4LibrariesSlot;
+    pub fn R4Lib_Value566_create(p0: *mut R4Lib_Value566, p1: *const R4StdFileHandlerChoiceList) -> R4LibrariesSlot;
+    pub fn R4Lib_Value566_inspect(p0: *const R4Lib_Value566) -> R4LibrariesSlot;
+    pub fn R4Lib_Value567_create(p0: *mut R4Lib_Value567, p1: *const R4StdFileHandlerChoice, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value567_inspect(p0: *const R4Lib_Value567) -> R4LibrariesSlot;
+    pub fn R4Lib_Value568_inspect(p0: *const R4Lib_Value568) -> R4LibrariesSlot;
+    pub fn R4Lib_Value569_create(p0: *mut R4Lib_Value569, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value569_inspect(p0: *const R4Lib_Value569, p1: *mut R4ImgHelpersRasterContext) -> R4LibrariesSlot;
+    pub fn R4Lib_Value570_inspect(p0: *const R4Lib_Value570, p1: *mut R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgRasterColor) -> R4LibrariesSlot;
+    pub fn R4Lib_Value571_inspect(p0: *const R4Lib_Value571) -> R4LibrariesSlot;
+    pub fn R4Lib_Value572_create(p0: *mut R4Lib_Value572, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value572_inspect(p0: *const R4Lib_Value572, p1: *mut R4ImgHelpersContext) -> R4LibrariesSlot;
+    pub fn R4Lib_Value573_inspect(p0: *const R4Lib_Value573, p1: *mut R4ImgHelpersInfo) -> R4LibrariesSlot;
+    pub fn R4Lib_Value574_inspect(p0: *const R4Lib_Value574, p1: *mut R4ImgHelpersImage) -> R4LibrariesSlot;
     pub fn R4Lib_Value575_inspect(p0: *const R4Lib_Value575) -> R4LibrariesSlot;
+    pub fn R4Lib_Value576_inspect(p0: *const R4Lib_Value576, p1: *mut R4ImgHelpersDecoderDiagnostic) -> R4LibrariesSlot;
+    pub fn R4Lib_Value577_create(p0: *mut R4Lib_Value577, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value577_inspect(p0: *const R4Lib_Value577, p1: *mut R4ImgHelpersPngContext) -> R4LibrariesSlot;
+    pub fn R4Lib_Value578_inspect(p0: *const R4Lib_Value578, p1: *mut R4Lib_R4IMG_Bindings_Zig_r4img_abi_R4ImgPngColor) -> R4LibrariesSlot;
+    pub fn R4Lib_Value579_inspect(p0: *const R4Lib_Value579, p1: *mut R4ImgHelpersImage16) -> R4LibrariesSlot;
+    pub fn R4Lib_Value580_create(p0: *mut R4Lib_Value580, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value580_inspect(p0: *const R4Lib_Value580, p1: *mut R4FontHelpersContext) -> R4LibrariesSlot;
+    pub fn R4Lib_Value581_create(p0: *mut R4Lib_Value581, p1: *const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1) -> R4LibrariesSlot;
+    pub fn R4Lib_Value581_inspect(p0: *const R4Lib_Value581) -> R4LibrariesSlot;
     pub fn R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_create(p0: *mut R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1, p1: *const R4Lib_r4os_runtime_r4l_InterfaceHeader, p2: u64, p3: u64, p4: u64, p5: u64, p6: u64, p7: u64, p8: u64, p9: u64, p10: u64, p11: u64, p12: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_from_fields(p0: *mut R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1, p1: *const R4Lib_r4os_runtime_r4l_InterfaceHeader, p2: u64, p3: u64, p4: u64, p5: u64, p6: u64, p7: u64, p8: u64, p9: u64, p10: u64, p11: u64, p12: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_header(p0: *const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1, p1: *mut R4Lib_r4os_runtime_r4l_InterfaceHeader) -> R4LibrariesSlot;
@@ -10373,147 +10670,151 @@ unsafe extern "C" {
     pub fn R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_get_rasterize(p0: *const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1) -> R4LibrariesSlot;
     pub fn R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_set_rasterize(p0: *mut R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1, p1: u64) -> R4LibrariesSlot;
     pub fn R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1_inspect(p0: *const R4Lib_R4FONT_Bindings_Zig_r4font_abi_ApiV1) -> R4LibrariesSlot;
-    pub fn R4Lib_Value578_create(p0: *mut R4Lib_Value578, p1: *const R4Lib_r4os_runtime_r4l_InterfaceHeader) -> R4LibrariesSlot;
-    pub fn R4Lib_Value578_inspect(p0: *const R4Lib_Value578) -> R4LibrariesSlot;
-    pub fn R4Lib_Value579_create(p0: *mut R4Lib_Value579, p1: *const R4FontHelpersContext) -> R4LibrariesSlot;
-    pub fn R4Lib_Value579_inspect(p0: *const R4Lib_Value579) -> R4LibrariesSlot;
-    pub fn R4Lib_Value580_create(p0: *mut R4Lib_Value580, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value580_inspect(p0: *const R4Lib_Value580) -> R4LibrariesSlot;
-    pub fn R4Lib_Value581_inspect(p0: *const R4Lib_Value581, p1: *mut R4FontHelpersDecoder) -> R4LibrariesSlot;
-    pub fn R4Lib_Value582_create(p0: *mut R4Lib_Value582, p1: *mut R4FontHelpersDecoder) -> R4LibrariesSlot;
-    pub fn R4Lib_Value582_inspect(p0: *const R4Lib_Value582) -> R4LibrariesSlot;
-    pub fn R4Lib_Value583_create(p0: *mut R4Lib_Value583, p1: *const R4FontHelpersDecoder) -> R4LibrariesSlot;
-    pub fn R4Lib_Value583_inspect(p0: *const R4Lib_Value583) -> R4LibrariesSlot;
-    pub fn R4Lib_Value584_inspect(p0: *const R4Lib_Value584, p1: *mut R4FontHelpersFace) -> R4LibrariesSlot;
-    pub fn R4Lib_Value585_create(p0: *mut R4Lib_Value585, p1: *mut R4FontHelpersFace) -> R4LibrariesSlot;
+    pub fn R4Lib_Value584_create(p0: *mut R4Lib_Value584, p1: *const R4Lib_r4os_runtime_r4l_InterfaceHeader) -> R4LibrariesSlot;
+    pub fn R4Lib_Value584_inspect(p0: *const R4Lib_Value584) -> R4LibrariesSlot;
+    pub fn R4Lib_Value585_create(p0: *mut R4Lib_Value585, p1: *const R4FontHelpersContext) -> R4LibrariesSlot;
     pub fn R4Lib_Value585_inspect(p0: *const R4Lib_Value585) -> R4LibrariesSlot;
-    pub fn R4Lib_Value586_create(p0: *mut R4Lib_Value586, p1: *const R4FontHelpersFace) -> R4LibrariesSlot;
+    pub fn R4Lib_Value586_create(p0: *mut R4Lib_Value586, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4Lib_Value586_inspect(p0: *const R4Lib_Value586) -> R4LibrariesSlot;
-    pub fn R4Lib_Value587_inspect(p0: *const R4Lib_Value587, p1: *mut R4FontHelpersFaceInfo) -> R4LibrariesSlot;
-    pub fn R4Lib_Value588_inspect(p0: *const R4Lib_Value588, p1: *mut R4FontHelpersGlyphMetrics) -> R4LibrariesSlot;
-    pub fn R4Lib_Value589_inspect(p0: *const R4Lib_Value589, p1: *mut R4Lib_Value218) -> R4LibrariesSlot;
-    pub fn R4Lib_Value590_inspect(p0: *const R4Lib_Value590, p1: *mut R4FontHelpersRaster) -> R4LibrariesSlot;
-    pub fn R4Lib_Value591_inspect(p0: *const R4Lib_Value591, p1: *mut R4FontStoreFaceStore) -> R4LibrariesSlot;
-    pub fn R4Lib_Value592_create(p0: *mut R4Lib_Value592, p1: *mut R4FontStoreFaceStore) -> R4LibrariesSlot;
+    pub fn R4Lib_Value587_inspect(p0: *const R4Lib_Value587, p1: *mut R4FontHelpersDecoder) -> R4LibrariesSlot;
+    pub fn R4Lib_Value588_create(p0: *mut R4Lib_Value588, p1: *mut R4FontHelpersDecoder) -> R4LibrariesSlot;
+    pub fn R4Lib_Value588_inspect(p0: *const R4Lib_Value588) -> R4LibrariesSlot;
+    pub fn R4Lib_Value589_create(p0: *mut R4Lib_Value589, p1: *const R4FontHelpersDecoder) -> R4LibrariesSlot;
+    pub fn R4Lib_Value589_inspect(p0: *const R4Lib_Value589) -> R4LibrariesSlot;
+    pub fn R4Lib_Value590_inspect(p0: *const R4Lib_Value590, p1: *mut R4FontHelpersFace) -> R4LibrariesSlot;
+    pub fn R4Lib_Value591_create(p0: *mut R4Lib_Value591, p1: *mut R4FontHelpersFace) -> R4LibrariesSlot;
+    pub fn R4Lib_Value591_inspect(p0: *const R4Lib_Value591) -> R4LibrariesSlot;
+    pub fn R4Lib_Value592_create(p0: *mut R4Lib_Value592, p1: *const R4FontHelpersFace) -> R4LibrariesSlot;
     pub fn R4Lib_Value592_inspect(p0: *const R4Lib_Value592) -> R4LibrariesSlot;
-    pub fn R4Lib_Value593_inspect(p0: *const R4Lib_Value593, p1: *mut R4FontStoreFaceHandle) -> R4LibrariesSlot;
-    pub fn R4Lib_Value594_create(p0: *mut R4Lib_Value594, p1: *mut R4FontStoreFaceHandle) -> R4LibrariesSlot;
-    pub fn R4Lib_Value594_inspect(p0: *const R4Lib_Value594) -> R4LibrariesSlot;
-    pub fn R4Lib_Value595_inspect(p0: *const R4Lib_Value595) -> R4LibrariesSlot;
-    pub fn R4Lib_Value596_inspect(p0: *const R4Lib_Value596, p1: *mut R4FontHelpersFaceInfo) -> R4LibrariesSlot;
-    pub fn R4Lib_Value597_inspect(p0: *const R4Lib_Value597) -> R4LibrariesSlot;
+    pub fn R4Lib_Value593_inspect(p0: *const R4Lib_Value593, p1: *mut R4FontHelpersFaceInfo) -> R4LibrariesSlot;
+    pub fn R4Lib_Value594_inspect(p0: *const R4Lib_Value594, p1: *mut R4FontHelpersGlyphMetrics) -> R4LibrariesSlot;
+    pub fn R4Lib_Value595_inspect(p0: *const R4Lib_Value595, p1: *mut R4Lib_Value220) -> R4LibrariesSlot;
+    pub fn R4Lib_Value596_inspect(p0: *const R4Lib_Value596, p1: *mut R4FontHelpersRaster) -> R4LibrariesSlot;
+    pub fn R4Lib_Value597_inspect(p0: *const R4Lib_Value597, p1: *mut R4FontStoreFaceStore) -> R4LibrariesSlot;
+    pub fn R4Lib_Value598_create(p0: *mut R4Lib_Value598, p1: *mut R4FontStoreFaceStore) -> R4LibrariesSlot;
     pub fn R4Lib_Value598_inspect(p0: *const R4Lib_Value598) -> R4LibrariesSlot;
-    pub fn R4Lib_Value599_inspect(p0: *const R4Lib_Value599, p1: *mut R4FontStoreFaceMetrics26_6) -> R4LibrariesSlot;
-    pub fn R4Lib_Value600_inspect(p0: *const R4Lib_Value600, p1: *mut R4FontStoreGlyphMetrics26_6) -> R4LibrariesSlot;
-    pub fn R4Lib_Value601_inspect(p0: *const R4Lib_Value601, p1: *mut R4Lib_Value218) -> R4LibrariesSlot;
-    pub fn R4Lib_Value602_inspect(p0: *const R4Lib_Value602, p1: *mut R4FontHelpersRaster) -> R4LibrariesSlot;
-    pub fn R4Lib_Value603_inspect(p0: *const R4Lib_Value603, p1: *mut R4FontStoreBorrowedRaster) -> R4LibrariesSlot;
-    pub fn R4Lib_Value604_create(p0: *mut R4Lib_Value604, p1: *const R4FontStoreFaceStore) -> R4LibrariesSlot;
+    pub fn R4Lib_Value599_inspect(p0: *const R4Lib_Value599, p1: *mut R4FontStoreFaceHandle) -> R4LibrariesSlot;
+    pub fn R4Lib_Value600_create(p0: *mut R4Lib_Value600, p1: *mut R4FontStoreFaceHandle) -> R4LibrariesSlot;
+    pub fn R4Lib_Value600_inspect(p0: *const R4Lib_Value600) -> R4LibrariesSlot;
+    pub fn R4Lib_Value601_inspect(p0: *const R4Lib_Value601) -> R4LibrariesSlot;
+    pub fn R4Lib_Value602_inspect(p0: *const R4Lib_Value602, p1: *mut R4FontHelpersFaceInfo) -> R4LibrariesSlot;
+    pub fn R4Lib_Value603_inspect(p0: *const R4Lib_Value603) -> R4LibrariesSlot;
     pub fn R4Lib_Value604_inspect(p0: *const R4Lib_Value604) -> R4LibrariesSlot;
-    pub fn R4Lib_Value605_create(p0: *mut R4Lib_Value605, p1: *mut R4LibraryMemory) -> R4LibrariesSlot;
-    pub fn R4Lib_Value605_inspect(p0: *const R4Lib_Value605) -> R4LibrariesSlot;
-    pub fn R4Lib_Value606_inspect(p0: *const R4Lib_Value606, p1: *mut R4AcoWorker) -> R4LibrariesSlot;
-    pub fn R4Lib_Value607_create(p0: *mut R4Lib_Value607, p1: *mut R4AcoWorker) -> R4LibrariesSlot;
-    pub fn R4Lib_Value607_inspect(p0: *const R4Lib_Value607) -> R4LibrariesSlot;
-    pub fn R4Lib_Value608_inspect(p0: *const R4Lib_Value608, p1: *mut R4EncPixelsLayout) -> R4LibrariesSlot;
-    pub fn R4Lib_Value609_create(p0: *mut R4Lib_Value609, p1: *mut R4GfxRefreshRangeFacts) -> R4LibrariesSlot;
-    pub fn R4Lib_Value609_inspect(p0: *const R4Lib_Value609) -> R4LibrariesSlot;
-    pub fn R4Lib_Value610_inspect(p0: *const R4Lib_Value610, p1: *mut R4GfxLinksHdmi) -> R4LibrariesSlot;
+    pub fn R4Lib_Value605_inspect(p0: *const R4Lib_Value605, p1: *mut R4FontStoreFaceMetrics26_6) -> R4LibrariesSlot;
+    pub fn R4Lib_Value606_inspect(p0: *const R4Lib_Value606, p1: *mut R4FontStoreGlyphMetrics26_6) -> R4LibrariesSlot;
+    pub fn R4Lib_Value607_inspect(p0: *const R4Lib_Value607, p1: *mut R4Lib_Value220) -> R4LibrariesSlot;
+    pub fn R4Lib_Value608_inspect(p0: *const R4Lib_Value608, p1: *mut R4FontHelpersRaster) -> R4LibrariesSlot;
+    pub fn R4Lib_Value609_inspect(p0: *const R4Lib_Value609, p1: *mut R4FontStoreBorrowedRaster) -> R4LibrariesSlot;
+    pub fn R4Lib_Value610_create(p0: *mut R4Lib_Value610, p1: *const R4FontStoreFaceStore) -> R4LibrariesSlot;
+    pub fn R4Lib_Value610_inspect(p0: *const R4Lib_Value610) -> R4LibrariesSlot;
+    pub fn R4Lib_Value611_create(p0: *mut R4Lib_Value611, p1: *mut R4LibraryMemory) -> R4LibrariesSlot;
     pub fn R4Lib_Value611_inspect(p0: *const R4Lib_Value611) -> R4LibrariesSlot;
-    pub fn R4Lib_Value612_create(p0: *mut R4Lib_Value612, p1: *mut R4GfxQueueQueue) -> R4LibrariesSlot;
-    pub fn R4Lib_Value612_inspect(p0: *const R4Lib_Value612) -> R4LibrariesSlot;
-    pub fn R4Lib_Value614_create(p0: *mut R4Lib_Value614, p1: *const R4GfxQueueQueue) -> R4LibrariesSlot;
-    pub fn R4Lib_Value614_inspect(p0: *const R4Lib_Value614) -> R4LibrariesSlot;
-    pub fn R4Lib_Value615_create(p0: *mut R4Lib_Value615, p1: *mut R4GfxFenceStatus) -> R4LibrariesSlot;
+    pub fn R4Lib_Value612_inspect(p0: *const R4Lib_Value612, p1: *mut R4AcoWorker) -> R4LibrariesSlot;
+    pub fn R4Lib_Value613_create(p0: *mut R4Lib_Value613, p1: *mut R4Lib_r4os_app2_App) -> R4LibrariesSlot;
+    pub fn R4Lib_Value613_inspect(p0: *const R4Lib_Value613) -> R4LibrariesSlot;
+    pub fn R4Lib_Value614_inspect(p0: *const R4Lib_Value614, p1: *mut R4AcoWorker) -> R4LibrariesSlot;
+    pub fn R4Lib_Value615_create(p0: *mut R4Lib_Value615, p1: *mut R4AcoWorker) -> R4LibrariesSlot;
     pub fn R4Lib_Value615_inspect(p0: *const R4Lib_Value615) -> R4LibrariesSlot;
+    pub fn R4Lib_Value616_inspect(p0: *const R4Lib_Value616, p1: *mut R4EncPixelsLayout) -> R4LibrariesSlot;
+    pub fn R4Lib_Value617_create(p0: *mut R4Lib_Value617, p1: *mut R4GfxRefreshRangeFacts) -> R4LibrariesSlot;
     pub fn R4Lib_Value617_inspect(p0: *const R4Lib_Value617) -> R4LibrariesSlot;
-    pub fn R4Lib_Value618_inspect(p0: *const R4Lib_Value618, p1: *mut R4GfxTopologyKey) -> R4LibrariesSlot;
-    pub fn R4Lib_Value619_create(p0: *mut R4Lib_Value619, p1: *const R4GfxBrightnessPreferencesConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value618_inspect(p0: *const R4Lib_Value618, p1: *mut R4GfxLinksHdmi) -> R4LibrariesSlot;
     pub fn R4Lib_Value619_inspect(p0: *const R4Lib_Value619) -> R4LibrariesSlot;
-    pub fn R4Lib_Value620_inspect(p0: *const R4Lib_Value620, p1: *mut R4GfxBrightnessPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value621_inspect(p0: *const R4Lib_Value621) -> R4LibrariesSlot;
-    pub fn R4Lib_Value622_create(p0: *mut R4Lib_Value622, p1: *const R4GfxColorControlRestoration) -> R4LibrariesSlot;
+    pub fn R4Lib_Value620_create(p0: *mut R4Lib_Value620, p1: *mut R4GfxQueueQueue) -> R4LibrariesSlot;
+    pub fn R4Lib_Value620_inspect(p0: *const R4Lib_Value620) -> R4LibrariesSlot;
+    pub fn R4Lib_Value622_create(p0: *mut R4Lib_Value622, p1: *const R4GfxQueueQueue) -> R4LibrariesSlot;
     pub fn R4Lib_Value622_inspect(p0: *const R4Lib_Value622) -> R4LibrariesSlot;
-    pub fn R4Lib_Value623_create(p0: *mut R4Lib_Value623, p1: *mut R4GfxColorControlRestoration) -> R4LibrariesSlot;
+    pub fn R4Lib_Value623_create(p0: *mut R4Lib_Value623, p1: *mut R4GfxFenceStatus) -> R4LibrariesSlot;
     pub fn R4Lib_Value623_inspect(p0: *const R4Lib_Value623) -> R4LibrariesSlot;
-    pub fn R4Lib_Value624_create(p0: *mut R4Lib_Value624, p1: *const R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
-    pub fn R4Lib_Value624_inspect(p0: *const R4Lib_Value624) -> R4LibrariesSlot;
-    pub fn R4Lib_Value625_create(p0: *mut R4Lib_Value625, p1: *mut R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
     pub fn R4Lib_Value625_inspect(p0: *const R4Lib_Value625) -> R4LibrariesSlot;
-    pub fn R4Lib_Value626_inspect(p0: *const R4Lib_Value626) -> R4LibrariesSlot;
-    pub fn R4Lib_Value627_inspect(p0: *const R4Lib_Value627, p1: *mut R4GfxColorPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value628_inspect(p0: *const R4Lib_Value628) -> R4LibrariesSlot;
-    pub fn R4Lib_Value629_create(p0: *mut R4Lib_Value629, p1: *const R4GfxTopologyOutput, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value626_inspect(p0: *const R4Lib_Value626, p1: *mut R4GfxTopologyKey) -> R4LibrariesSlot;
+    pub fn R4Lib_Value627_create(p0: *mut R4Lib_Value627, p1: *const R4GfxBrightnessPreferencesConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value627_inspect(p0: *const R4Lib_Value627) -> R4LibrariesSlot;
+    pub fn R4Lib_Value628_inspect(p0: *const R4Lib_Value628, p1: *mut R4GfxBrightnessPreferencesConfig) -> R4LibrariesSlot;
     pub fn R4Lib_Value629_inspect(p0: *const R4Lib_Value629) -> R4LibrariesSlot;
-    pub fn R4Lib_Value630_inspect(p0: *const R4Lib_Value630, p1: *mut R4GfxTopologyLayout) -> R4LibrariesSlot;
-    pub fn R4Lib_Value631_create(p0: *mut R4Lib_Value631, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value631_inspect(p0: *const R4Lib_Value631, p1: *mut R4Lib_Value632) -> R4LibrariesSlot;
-    pub fn R4Lib_Value632_create(p0: *mut R4Lib_Value632, p1: u64, p2: *const R4GfxTopologyPoint) -> R4LibrariesSlot;
-    pub fn R4Lib_Value632_from_fields(p0: *mut R4Lib_Value632, p1: u64, p2: *const R4GfxTopologyPoint) -> R4LibrariesSlot;
-    pub fn R4Lib_Value632_get_index(p0: *const R4Lib_Value632) -> R4LibrariesSlot;
-    pub fn R4Lib_Value632_set_index(p0: *mut R4Lib_Value632, p1: u64) -> R4LibrariesSlot;
-    pub fn R4Lib_Value632_get_point(p0: *const R4Lib_Value632, p1: *mut R4GfxTopologyPoint) -> R4LibrariesSlot;
-    pub fn R4Lib_Value632_set_point(p0: *mut R4Lib_Value632, p1: *const R4GfxTopologyPoint) -> R4LibrariesSlot;
+    pub fn R4Lib_Value630_create(p0: *mut R4Lib_Value630, p1: *const R4GfxColorControlRestoration) -> R4LibrariesSlot;
+    pub fn R4Lib_Value630_inspect(p0: *const R4Lib_Value630) -> R4LibrariesSlot;
+    pub fn R4Lib_Value631_create(p0: *mut R4Lib_Value631, p1: *mut R4GfxColorControlRestoration) -> R4LibrariesSlot;
+    pub fn R4Lib_Value631_inspect(p0: *const R4Lib_Value631) -> R4LibrariesSlot;
+    pub fn R4Lib_Value632_create(p0: *mut R4Lib_Value632, p1: *const R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
     pub fn R4Lib_Value632_inspect(p0: *const R4Lib_Value632) -> R4LibrariesSlot;
-    pub fn R4Lib_Value633_inspect(p0: *const R4Lib_Value633, p1: *mut R4GfxTopologyRect) -> R4LibrariesSlot;
-    pub fn R4Lib_Value634_create(p0: *mut R4Lib_Value634, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value633_create(p0: *mut R4Lib_Value633, p1: *mut R4GfxColorPreferencesChoice) -> R4LibrariesSlot;
+    pub fn R4Lib_Value633_inspect(p0: *const R4Lib_Value633) -> R4LibrariesSlot;
     pub fn R4Lib_Value634_inspect(p0: *const R4Lib_Value634) -> R4LibrariesSlot;
-    pub fn R4Lib_Value635_inspect(p0: *const R4Lib_Value635) -> R4LibrariesSlot;
-    pub fn R4Lib_Value636_inspect(p0: *const R4Lib_Value636, p1: *mut R4GfxTopologyPoint) -> R4LibrariesSlot;
-    pub fn R4Lib_Value637_inspect(p0: *const R4Lib_Value637, p1: *mut R4GfxTopologyRect) -> R4LibrariesSlot;
-    pub fn R4Lib_Value638_create(p0: *mut R4Lib_Value638, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value638_inspect(p0: *const R4Lib_Value638, p1: *mut R4GfxTopologyRect) -> R4LibrariesSlot;
-    pub fn R4Lib_Value639_create(p0: *mut R4Lib_Value639, p1: *const R4GfxDesktopOutputsSnapshot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value639_inspect(p0: *const R4Lib_Value639) -> R4LibrariesSlot;
-    pub fn R4Lib_Value640_create(p0: *mut R4Lib_Value640, p1: *const R4GfxEldData) -> R4LibrariesSlot;
+    pub fn R4Lib_Value635_inspect(p0: *const R4Lib_Value635, p1: *mut R4GfxColorPreferencesConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value636_inspect(p0: *const R4Lib_Value636) -> R4LibrariesSlot;
+    pub fn R4Lib_Value637_create(p0: *mut R4Lib_Value637, p1: *const R4GfxTopologyOutput, p2: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value637_inspect(p0: *const R4Lib_Value637) -> R4LibrariesSlot;
+    pub fn R4Lib_Value638_inspect(p0: *const R4Lib_Value638, p1: *mut R4GfxTopologyLayout) -> R4LibrariesSlot;
+    pub fn R4Lib_Value639_create(p0: *mut R4Lib_Value639, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value639_inspect(p0: *const R4Lib_Value639, p1: *mut R4Lib_Value640) -> R4LibrariesSlot;
+    pub fn R4Lib_Value640_create(p0: *mut R4Lib_Value640, p1: u64, p2: *const R4GfxTopologyPoint) -> R4LibrariesSlot;
+    pub fn R4Lib_Value640_from_fields(p0: *mut R4Lib_Value640, p1: u64, p2: *const R4GfxTopologyPoint) -> R4LibrariesSlot;
+    pub fn R4Lib_Value640_get_index(p0: *const R4Lib_Value640) -> R4LibrariesSlot;
+    pub fn R4Lib_Value640_set_index(p0: *mut R4Lib_Value640, p1: u64) -> R4LibrariesSlot;
+    pub fn R4Lib_Value640_get_point(p0: *const R4Lib_Value640, p1: *mut R4GfxTopologyPoint) -> R4LibrariesSlot;
+    pub fn R4Lib_Value640_set_point(p0: *mut R4Lib_Value640, p1: *const R4GfxTopologyPoint) -> R4LibrariesSlot;
     pub fn R4Lib_Value640_inspect(p0: *const R4Lib_Value640) -> R4LibrariesSlot;
-    pub fn R4Lib_Value641_create(p0: *mut R4Lib_Value641, p1: *const R4GfxModeControlRestoration) -> R4LibrariesSlot;
-    pub fn R4Lib_Value641_inspect(p0: *const R4Lib_Value641) -> R4LibrariesSlot;
-    pub fn R4Lib_Value642_create(p0: *mut R4Lib_Value642, p1: *mut R4GfxModeControlRestoration) -> R4LibrariesSlot;
+    pub fn R4Lib_Value641_inspect(p0: *const R4Lib_Value641, p1: *mut R4GfxTopologyRect) -> R4LibrariesSlot;
+    pub fn R4Lib_Value642_create(p0: *mut R4Lib_Value642, p1: R4LibrariesSlot) -> R4LibrariesSlot;
     pub fn R4Lib_Value642_inspect(p0: *const R4Lib_Value642) -> R4LibrariesSlot;
-    pub fn R4Lib_Value643_create(p0: *mut R4Lib_Value643, p1: *const R4GfxModeControlController) -> R4LibrariesSlot;
     pub fn R4Lib_Value643_inspect(p0: *const R4Lib_Value643) -> R4LibrariesSlot;
-    pub fn R4Lib_Value644_create(p0: *mut R4Lib_Value644, p1: *const R4GfxPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value644_inspect(p0: *const R4Lib_Value644) -> R4LibrariesSlot;
-    pub fn R4Lib_Value645_create(p0: *mut R4Lib_Value645, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value645_inspect(p0: *const R4Lib_Value645, p1: *mut R4GfxTopologyOutput) -> R4LibrariesSlot;
-    pub fn R4Lib_Value646_inspect(p0: *const R4Lib_Value646, p1: *mut R4GfxPreferencesConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value644_inspect(p0: *const R4Lib_Value644, p1: *mut R4GfxTopologyPoint) -> R4LibrariesSlot;
+    pub fn R4Lib_Value645_inspect(p0: *const R4Lib_Value645, p1: *mut R4GfxTopologyRect) -> R4LibrariesSlot;
+    pub fn R4Lib_Value646_create(p0: *mut R4Lib_Value646, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value646_inspect(p0: *const R4Lib_Value646, p1: *mut R4GfxTopologyRect) -> R4LibrariesSlot;
+    pub fn R4Lib_Value647_create(p0: *mut R4Lib_Value647, p1: *const R4GfxDesktopOutputsSnapshot) -> R4LibrariesSlot;
     pub fn R4Lib_Value647_inspect(p0: *const R4Lib_Value647) -> R4LibrariesSlot;
-    pub fn R4Lib_Value648_create(p0: *mut R4Lib_Value648, p1: *const R4GfxReadbackOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value648_create(p0: *mut R4Lib_Value648, p1: *const R4GfxEldData) -> R4LibrariesSlot;
     pub fn R4Lib_Value648_inspect(p0: *const R4Lib_Value648) -> R4LibrariesSlot;
-    pub fn R4Lib_Value649_create(p0: *mut R4Lib_Value649, p1: *mut R4GfxReadbackOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value649_create(p0: *mut R4Lib_Value649, p1: *const R4GfxModeControlRestoration) -> R4LibrariesSlot;
     pub fn R4Lib_Value649_inspect(p0: *const R4Lib_Value649) -> R4LibrariesSlot;
+    pub fn R4Lib_Value650_create(p0: *mut R4Lib_Value650, p1: *mut R4GfxModeControlRestoration) -> R4LibrariesSlot;
     pub fn R4Lib_Value650_inspect(p0: *const R4Lib_Value650) -> R4LibrariesSlot;
-    pub fn R4Lib_Value651_create(p0: *mut R4Lib_Value651, p1: *mut R4GfxRefreshClientActivity) -> R4LibrariesSlot;
+    pub fn R4Lib_Value651_create(p0: *mut R4Lib_Value651, p1: *const R4GfxModeControlController) -> R4LibrariesSlot;
     pub fn R4Lib_Value651_inspect(p0: *const R4Lib_Value651) -> R4LibrariesSlot;
-    pub fn R4Lib_Value652_create(p0: *mut R4Lib_Value652, p1: *const R4GfxRefreshClientActivity) -> R4LibrariesSlot;
+    pub fn R4Lib_Value652_create(p0: *mut R4Lib_Value652, p1: *const R4GfxPreferencesConfig) -> R4LibrariesSlot;
     pub fn R4Lib_Value652_inspect(p0: *const R4Lib_Value652) -> R4LibrariesSlot;
-    pub fn R4Lib_Value653_create(p0: *mut R4Lib_Value653, p1: *mut R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
-    pub fn R4Lib_Value653_inspect(p0: *const R4Lib_Value653) -> R4LibrariesSlot;
-    pub fn R4Lib_Value654_create(p0: *mut R4Lib_Value654, p1: *const R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
-    pub fn R4Lib_Value654_inspect(p0: *const R4Lib_Value654) -> R4LibrariesSlot;
-    pub fn R4Lib_Value655_create(p0: *mut R4Lib_Value655, p1: *const R4GfxRefreshPreferencesConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value653_create(p0: *mut R4Lib_Value653, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value653_inspect(p0: *const R4Lib_Value653, p1: *mut R4GfxTopologyOutput) -> R4LibrariesSlot;
+    pub fn R4Lib_Value654_inspect(p0: *const R4Lib_Value654, p1: *mut R4GfxPreferencesConfig) -> R4LibrariesSlot;
     pub fn R4Lib_Value655_inspect(p0: *const R4Lib_Value655) -> R4LibrariesSlot;
-    pub fn R4Lib_Value656_create(p0: *mut R4Lib_Value656, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value656_inspect(p0: *const R4Lib_Value656, p1: *mut R4GfxRefreshPreferencesChoice) -> R4LibrariesSlot;
-    pub fn R4Lib_Value657_inspect(p0: *const R4Lib_Value657, p1: *mut R4GfxRefreshPreferencesConfig) -> R4LibrariesSlot;
-    pub fn R4Lib_Value658_create(p0: *mut R4Lib_Value658, p1: *mut R4GfxTransferOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value656_create(p0: *mut R4Lib_Value656, p1: *const R4GfxReadbackOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value656_inspect(p0: *const R4Lib_Value656) -> R4LibrariesSlot;
+    pub fn R4Lib_Value657_create(p0: *mut R4Lib_Value657, p1: *mut R4GfxReadbackOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value657_inspect(p0: *const R4Lib_Value657) -> R4LibrariesSlot;
     pub fn R4Lib_Value658_inspect(p0: *const R4Lib_Value658) -> R4LibrariesSlot;
-    pub fn R4Lib_Value659_create(p0: *mut R4Lib_Value659, p1: *const R4GfxTransferOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value659_create(p0: *mut R4Lib_Value659, p1: *mut R4GfxRefreshClientActivity) -> R4LibrariesSlot;
     pub fn R4Lib_Value659_inspect(p0: *const R4Lib_Value659) -> R4LibrariesSlot;
-    pub fn R4Lib_Value660_create(p0: *mut R4Lib_Value660, p1: *mut R4GfxVrrScheduler) -> R4LibrariesSlot;
+    pub fn R4Lib_Value660_create(p0: *mut R4Lib_Value660, p1: *const R4GfxRefreshClientActivity) -> R4LibrariesSlot;
     pub fn R4Lib_Value660_inspect(p0: *const R4Lib_Value660) -> R4LibrariesSlot;
+    pub fn R4Lib_Value661_create(p0: *mut R4Lib_Value661, p1: *mut R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
     pub fn R4Lib_Value661_inspect(p0: *const R4Lib_Value661) -> R4LibrariesSlot;
-    pub fn R4Lib_Value662_inspect(p0: *const R4Lib_Value662, p1: *mut R4GfxVrrFrame) -> R4LibrariesSlot;
-    pub fn R4Lib_Value663_inspect(p0: *const R4Lib_Value663, p1: *mut R4NakWorker) -> R4LibrariesSlot;
-    pub fn R4Lib_Value664_create(p0: *mut R4Lib_Value664, p1: *mut R4NakWorker) -> R4LibrariesSlot;
-    pub fn R4Lib_Value664_inspect(p0: *const R4Lib_Value664) -> R4LibrariesSlot;
-    pub fn R4Lib_Value665_inspect(p0: *const R4Lib_Value665, p1: *mut R4Lib_r4gfx_abi_R4GfxYuvDescription) -> R4LibrariesSlot;
-    pub fn R4Lib_Value666_inspect(p0: *const R4Lib_Value666, p1: *mut R4VideoPlaybackSession) -> R4LibrariesSlot;
-    pub fn R4Lib_Value667_create(p0: *mut R4Lib_Value667, p1: *mut R4VideoPlaybackSession) -> R4LibrariesSlot;
+    pub fn R4Lib_Value662_create(p0: *mut R4Lib_Value662, p1: *const R4GfxRefreshObserverObserver) -> R4LibrariesSlot;
+    pub fn R4Lib_Value662_inspect(p0: *const R4Lib_Value662) -> R4LibrariesSlot;
+    pub fn R4Lib_Value663_create(p0: *mut R4Lib_Value663, p1: *const R4GfxRefreshPreferencesConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value663_inspect(p0: *const R4Lib_Value663) -> R4LibrariesSlot;
+    pub fn R4Lib_Value664_create(p0: *mut R4Lib_Value664, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value664_inspect(p0: *const R4Lib_Value664, p1: *mut R4GfxRefreshPreferencesChoice) -> R4LibrariesSlot;
+    pub fn R4Lib_Value665_inspect(p0: *const R4Lib_Value665, p1: *mut R4GfxRefreshPreferencesConfig) -> R4LibrariesSlot;
+    pub fn R4Lib_Value666_create(p0: *mut R4Lib_Value666, p1: *mut R4GfxTransferOwner) -> R4LibrariesSlot;
+    pub fn R4Lib_Value666_inspect(p0: *const R4Lib_Value666) -> R4LibrariesSlot;
+    pub fn R4Lib_Value667_create(p0: *mut R4Lib_Value667, p1: *const R4GfxTransferOwner) -> R4LibrariesSlot;
     pub fn R4Lib_Value667_inspect(p0: *const R4Lib_Value667) -> R4LibrariesSlot;
-    pub fn R4Lib_Value668_create(p0: *mut R4Lib_Value668, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket) -> R4LibrariesSlot;
+    pub fn R4Lib_Value668_create(p0: *mut R4Lib_Value668, p1: *mut R4GfxVrrScheduler) -> R4LibrariesSlot;
     pub fn R4Lib_Value668_inspect(p0: *const R4Lib_Value668) -> R4LibrariesSlot;
+    pub fn R4Lib_Value669_inspect(p0: *const R4Lib_Value669) -> R4LibrariesSlot;
+    pub fn R4Lib_Value670_inspect(p0: *const R4Lib_Value670, p1: *mut R4GfxVrrFrame) -> R4LibrariesSlot;
+    pub fn R4Lib_Value671_inspect(p0: *const R4Lib_Value671, p1: *mut R4NakWorker) -> R4LibrariesSlot;
+    pub fn R4Lib_Value672_inspect(p0: *const R4Lib_Value672, p1: *mut R4NakWorker) -> R4LibrariesSlot;
+    pub fn R4Lib_Value673_create(p0: *mut R4Lib_Value673, p1: *mut R4NakWorker) -> R4LibrariesSlot;
+    pub fn R4Lib_Value673_inspect(p0: *const R4Lib_Value673) -> R4LibrariesSlot;
+    pub fn R4Lib_Value674_inspect(p0: *const R4Lib_Value674, p1: *mut R4Lib_r4gfx_abi_R4GfxYuvDescription) -> R4LibrariesSlot;
+    pub fn R4Lib_Value675_inspect(p0: *const R4Lib_Value675, p1: *mut R4VideoPlaybackSession) -> R4LibrariesSlot;
+    pub fn R4Lib_Value676_create(p0: *mut R4Lib_Value676, p1: *mut R4VideoPlaybackSession) -> R4LibrariesSlot;
+    pub fn R4Lib_Value676_inspect(p0: *const R4Lib_Value676) -> R4LibrariesSlot;
+    pub fn R4Lib_Value677_create(p0: *mut R4Lib_Value677, p1: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket) -> R4LibrariesSlot;
+    pub fn R4Lib_Value677_inspect(p0: *const R4Lib_Value677) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket_create(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket, p1: u32, p2: u32, p3: u64, p4: u64, p5: u64, p6: u64, p7: i64, p8: i64, p9: u64, p10: u32, p11: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket_from_fields(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket, p1: u32, p2: u32, p3: u64, p4: u64, p5: u64, p6: u64, p7: i64, p8: i64, p9: u64, p10: u32, p11: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket_get_version(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket) -> R4LibrariesSlot;
@@ -10539,22 +10840,27 @@ unsafe extern "C" {
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket_get_reserved(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket_set_reserved(p0: *mut R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket, p1: u32) -> R4LibrariesSlot;
     pub fn R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket_inspect(p0: *const R4Lib_R4VIDEO_Bindings_Zig_r4video_R4VideoPacket) -> R4LibrariesSlot;
-    pub fn R4Lib_Value670_inspect(p0: *const R4Lib_Value670) -> R4LibrariesSlot;
-    pub fn R4Lib_Value671_inspect(p0: *const R4Lib_Value671) -> R4LibrariesSlot;
-    pub fn R4Lib_Value672_create(p0: *mut R4Lib_Value672, p1: *const R4VideoPlaybackSession) -> R4LibrariesSlot;
-    pub fn R4Lib_Value672_inspect(p0: *const R4Lib_Value672) -> R4LibrariesSlot;
-    pub fn R4Lib_Value673_create(p0: *mut R4Lib_Value673, p1: R4LibrariesSlot) -> R4LibrariesSlot;
-    pub fn R4Lib_Value673_inspect(p0: *const R4Lib_Value673, p1: *mut R4VideoPlaybackFrameInfo) -> R4LibrariesSlot;
-    pub fn R4Lib_Value674_inspect(p0: *const R4Lib_Value674, p1: *mut R4VideoPlaybackCompositionTicket) -> R4LibrariesSlot;
-    pub fn R4Lib_Value675_inspect(p0: *const R4Lib_Value675) -> R4LibrariesSlot;
-    pub fn R4Lib_Value676_inspect(p0: *const R4Lib_Value676) -> R4LibrariesSlot;
-    pub fn R4Lib_Value677_inspect(p0: *const R4Lib_Value677) -> R4LibrariesSlot;
-    pub fn R4Lib_Value678_inspect(p0: *const R4Lib_Value678, p1: *mut R4VideoPlaybackAudioAudio) -> R4LibrariesSlot;
-    pub fn R4Lib_Value679_create(p0: *mut R4Lib_Value679, p1: *const R4VideoPlaybackAudioAudio) -> R4LibrariesSlot;
     pub fn R4Lib_Value679_inspect(p0: *const R4Lib_Value679) -> R4LibrariesSlot;
     pub fn R4Lib_Value680_inspect(p0: *const R4Lib_Value680) -> R4LibrariesSlot;
+    pub fn R4Lib_Value681_create(p0: *mut R4Lib_Value681, p1: *const R4VideoPlaybackSession) -> R4LibrariesSlot;
     pub fn R4Lib_Value681_inspect(p0: *const R4Lib_Value681) -> R4LibrariesSlot;
-    pub fn R4Lib_Value682_create(p0: *mut R4Lib_Value682, p1: *mut R4VideoPlaybackClockClock) -> R4LibrariesSlot;
-    pub fn R4Lib_Value682_inspect(p0: *const R4Lib_Value682) -> R4LibrariesSlot;
-    pub fn R4Lib_Value683_inspect(p0: *const R4Lib_Value683) -> R4LibrariesSlot;
+    pub fn R4Lib_Value682_create(p0: *mut R4Lib_Value682, p1: R4LibrariesSlot) -> R4LibrariesSlot;
+    pub fn R4Lib_Value682_inspect(p0: *const R4Lib_Value682, p1: *mut R4VideoPlaybackFrameInfo) -> R4LibrariesSlot;
+    pub fn R4Lib_Value683_inspect(p0: *const R4Lib_Value683, p1: *mut R4VideoPlaybackCompositionTicket) -> R4LibrariesSlot;
+    pub fn R4Lib_Value684_inspect(p0: *const R4Lib_Value684) -> R4LibrariesSlot;
+    pub fn R4Lib_Value685_inspect(p0: *const R4Lib_Value685) -> R4LibrariesSlot;
+    pub fn R4Lib_Value686_inspect(p0: *const R4Lib_Value686) -> R4LibrariesSlot;
+    pub fn R4Lib_Value687_inspect(p0: *const R4Lib_Value687, p1: *mut R4VideoPlaybackAudioAudio) -> R4LibrariesSlot;
+    pub fn R4Lib_Value688_create(p0: *mut R4Lib_Value688, p1: *const R4VideoPlaybackAudioAudio) -> R4LibrariesSlot;
+    pub fn R4Lib_Value688_inspect(p0: *const R4Lib_Value688) -> R4LibrariesSlot;
+    pub fn R4Lib_Value689_inspect(p0: *const R4Lib_Value689) -> R4LibrariesSlot;
+    pub fn R4Lib_Value690_inspect(p0: *const R4Lib_Value690) -> R4LibrariesSlot;
+    pub fn R4Lib_Value691_create(p0: *mut R4Lib_Value691, p1: *mut R4VideoPlaybackClockClock) -> R4LibrariesSlot;
+    pub fn R4Lib_Value691_inspect(p0: *const R4Lib_Value691) -> R4LibrariesSlot;
+    pub fn R4Lib_Value692_inspect(p0: *const R4Lib_Value692) -> R4LibrariesSlot;
+    pub fn R4Lib_Value693_inspect(p0: *const R4Lib_Value693, p1: *mut R4MediaCompilerContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_Value694_create(p0: *mut R4Lib_Value694, p1: *mut R4MediaCompilerContext2) -> R4LibrariesSlot;
+    pub fn R4Lib_Value694_inspect(p0: *const R4Lib_Value694) -> R4LibrariesSlot;
+    pub fn R4Lib_Value695_inspect(p0: *const R4Lib_Value695, p1: *mut R4NakWorker) -> R4LibrariesSlot;
+    pub fn R4Lib_Value696_inspect(p0: *const R4Lib_Value696, p1: *mut R4AcoWorker) -> R4LibrariesSlot;
 }

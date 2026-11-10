@@ -4,6 +4,44 @@
 #include <r4aco_helpers.h>
 #include <r4nak_helpers.h>
 #include <string.h>
+/* Actual public Start2 record crosses the C boundary; the private Zig App2
+ * is constructed by its owner. No C/foreign App layout is reinterpreted. */
+const void *r4libraries47_start2(void) {
+    static R4XStartR4Sys2 sys;
+    static R4XStartImport item;
+    static R4XStartContext2 start;
+    sys=(R4XStartR4Sys2){.magic=R4OS2_R4SYS_MAGIC,.abi_version=R4OS2_R4SYS_VERSION,.size=sizeof(sys)};
+    item=(R4XStartImport){.group_id=1,.resolved_version=2,.table=(uintptr_t)&sys};
+    start=(R4XStartContext2){.magic=R4OS2_START_MAGIC,.abi_major=2,.size=sizeof(start),
+        .flags=R4XSTART_FLAG_IMPORTS_VALID,.instance_id=71,.app_class=R4XSTART_APP_CLASS_CONSOLE,
+        .imports=(uintptr_t)&item,.import_count=1};
+    return &start;
+}
+int32_t r4libraries47_compiler_context(void) {
+    R4MediaCompilerContext2 context,original;
+    const R4XStartContext2 *start=r4libraries47_start2();
+    R4LibrariesSlot value=R4MediaCompilerContext2_init(0,start,&context);
+    if(value.status || (value.flags&R4LIBRARIES_NATIVE_ERROR))return 1;
+    R4XStartR4Desk2 desk={.magic=R4OS2_R4DESK_MAGIC,.abi_version=1,.size=sizeof(desk)};
+    R4XStartR4Draw2 draw={.magic=R4OS2_R4DRAW_MAGIC,.abi_version=1,.size=sizeof(draw)};
+    R4XStartImport imports[3]={*(const R4XStartImport *)(uintptr_t)start->imports,
+        {.group_id=2,.resolved_version=2,.table=(uintptr_t)&desk},
+        {.group_id=3,.resolved_version=2,.table=(uintptr_t)&draw}};
+    R4XStartContext2 gui=*start;gui.app_class=2;gui.imports=(uintptr_t)imports;gui.import_count=3;
+    value=R4MediaCompilerContext2_init(0,&gui,&context);
+    if(value.status || (value.flags&R4LIBRARIES_NATIVE_ERROR))return 4;
+    R4XStartContext2 service=*start;service.app_class=3;
+    value=R4MediaCompilerContext2_init(0,&service,&context);
+    if(value.status || (value.flags&R4LIBRARIES_NATIVE_ERROR))return 5;
+    memset(&original,0xa5,sizeof(original));context=original;
+    R4XStartContext2 wrong=*start;wrong.abi_major=1;
+    value=R4MediaCompilerContext2_init(0,&wrong,&context);
+    if(!(value.status || (value.flags&R4LIBRARIES_NATIVE_ERROR)) || memcmp(&context,&original,sizeof(context)))return 2;
+    wrong=*start;wrong.size=16;
+    value=R4MediaCompilerContext2_init(0,&wrong,&context);
+    if(!(value.status || (value.flags&R4LIBRARIES_NATIVE_ERROR)) || memcmp(&context,&original,sizeof(context)))return 3;
+    return 0;
+}
 int32_t r4libraries60_transport(void) {
     /* Only the initialized field is inspected; no resource owner is started. */
     R4GfxReadbackOwner readback;

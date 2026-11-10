@@ -1,6 +1,7 @@
 // Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 //! Consumer-owned asynchronous compiler worker. Keep this object, its inputs
-//! and outputs at stable addresses until join succeeds. No frame-path waits.
+//! and outputs at stable addresses until join succeeds. The App and its
+//! context must also outlive every worker and cache operation. No frame waits.
 const std = @import("std");
 const r4os = @import("r4os");
 const c = @import("r4aco");
@@ -9,19 +10,37 @@ pub const Worker = struct {
     sys: r4os.r4sys.Context,
     client: c.CompilerV1Client,
     program: a.ProgramProcessHandle,
+    retirement_provider: r4os.inventory_reader.Provider,
+    retirement_clock: r4os.inventory_reader.PlatformClock,
     handle: a.ProgramJoinHandle = .{},
     request: c.R4AcoRequest = std.mem.zeroes(c.R4AcoRequest),
     result: c.R4AcoBinary = std.mem.zeroes(c.R4AcoBinary),
     cancel_requested: std.atomic.Value(bool) = .init(false),
     live_bytes: u64 = 0,
 
+    /// Explicit transitional generation1 entry for consumers awaiting migration.
     pub fn init(app: *r4os.App) !Worker {
         const sys = app.system();
-        const client = try c.CompilerV1Client.init(app.startContext());
+        if (!sys.hasFn("program_lifecycle_begin") or !sys.hasFn("program_lifecycle_programs") or
+            !sys.hasFn("monotonic_clock")) return error.RuntimeUnavailable;
+        const table = sys.base.bundle.?.sys.?;
+        return initialize(sys, try c.CompilerV1Client.init(app.startContext()), app.startContext().instance_id, .{
+            .lifecycle_begin = @ptrFromInt(table.program_lifecycle_begin),
+            .lifecycle_page = @ptrFromInt(table.program_lifecycle_programs),
+        }, .{ .read = @ptrFromInt(table.monotonic_clock) });
+    }
+    /// Real generation2 slots and independent library binding; no old-table cast.
+    pub fn init2(app: *r4os.App2) !Worker {
+        return initialize(app.system(), try c.CompilerV1Client.init2(app.startContext()), app.startContext().instance_id, try app.inventoryProvider(.lifecycle), try app.clock());
+    }
+    fn initialize(sys: r4os.r4sys.Context, client: c.CompilerV1Client, instance_id: u64, provider: r4os.inventory_reader.Provider, clock_value: r4os.inventory_reader.PlatformClock) !Worker {
+        if (instance_id == 0 or instance_id > std.math.maxInt(u32)) return error.RuntimeUnavailable;
+        var clock_copy = clock_value;
+        var sample: r4os.time_contract.checked.ClockSample = .{};
         var program: a.ProgramProcessHandle = .{};
-        if (sys.programOpenHandle(@intCast(app.startContext().instance_id), &program) != a.program_handle_ok or
-            sys.monotonicNanoseconds() == null) return error.RuntimeUnavailable;
-        return .{ .sys = sys, .client = client, .program = program };
+        if (sys.programOpenHandle(@intCast(instance_id), &program) != a.program_handle_ok or
+            r4os.inventory_reader.PlatformClock.sample(&clock_copy, &sample) != 0) return error.RuntimeUnavailable;
+        return .{ .sys = sys, .client = client, .program = program, .retirement_provider = provider, .retirement_clock = clock_value };
     }
     pub fn start(self: *Worker, request: c.R4AcoRequest) i32 {
         if (self.handle.thread_id != 0 or self.live_bytes != 0) return c.status_busy;
@@ -71,20 +90,29 @@ pub const Worker = struct {
     fn retired(user: u64, generation: u64) callconv(.c) u32 {
         const self = at(user);
         if (generation == self.program.generation) return 0;
-        var cursor: a.ProgramInventoryCursor = .{};
-        var summary: a.ProgramInventorySummary = .{};
-        if (self.sys.programInventoryBegin(&cursor, &summary) != a.program_handle_ok) return 0;
-        var rows: [32]a.ProgramInstanceSnapshot = undefined;
-        for (0..64) |_| {
-            var page: a.ProgramInventoryPageInfo = .{};
-            if (self.sys.programInventoryPrograms(&cursor, &rows, &page) != a.program_handle_ok or
-                page.status == a.program_inventory_status_restart or page.returned > rows.len) return 0;
-            for (rows[0..page.returned]) |row| if (row.handle.generation == generation) {
-                // Program inventory exposes done(2) only after heavy retirement
-                // is ready. close_requested(1) is deliberately insufficient.
-                return @intFromBool(row.info.state == 2);
-            };
-            if (page.status == a.program_inventory_status_complete and page.has_more == 0) return 1;
+        // A partial, restarted, busy or failed snapshot grants no authority.
+        // A complete lightweight view excludes diagnostic task/VM collection.
+        // Preserve the former64 pages of32 rows without collecting full
+        // diagnostic/VM records or creating a second allocation owner.
+        var rows: [2048]a.ProgramLifecycleSnapshot = undefined;
+        var sample: r4os.time_contract.checked.ClockSample = .{};
+        if (r4os.inventory_reader.PlatformClock.sample(&self.retirement_clock, &sample) != 0) return 0;
+        var reader = r4os.inventory_reader.Reader.init(.lifecycle, .{ .address = @intFromPtr(&rows), .length = @sizeOf(@TypeOf(rows)) }, rows.len, 32, self.retirement_provider, sample, r4os.time_contract.timeoutFinite(.{ .nanoseconds = 100_000_000 })) catch return 0;
+        for (0..65) |_| {
+            const progress = reader.step(false, r4os.inventory_reader.PlatformClock.sample, &self.retirement_clock) catch return 0;
+            switch (@as(r4os.inventory_reader.Status, @enumFromInt(progress.status))) {
+                .more => continue,
+                .complete => {
+                    const view = reader.lifecycleView() catch return 0;
+                    for (view) |row| if (row.handle.generation == generation) {
+                        // This is the program-state domain: done=2. A close
+                        // request or completion-domain value is insufficient.
+                        return @intFromBool(row.state == 2);
+                    };
+                    return 1;
+                },
+                else => return 0,
+            }
         }
         return 0;
     }

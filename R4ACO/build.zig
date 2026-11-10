@@ -22,6 +22,7 @@ pub fn build(b: *std.Build) void {
     conformance.addIncludePath(b.path("Bindings/C"));
     conformance.addIncludePath(sdk.profile.c_include_root);
     conformance.addIncludePath(sdk.profile.contract_c_include_root);
+    conformance.addIncludePath(sdk.profile.contract_c_include_root2);
     conformance.addCSourceFile(.{ .file = b.path("Tests/Generated/contract_conformance.c"), .flags = &.{ "-std=c11", "-Werror" } });
     const abi_check = b.addRunArtifact(b.addTest(.{ .root_module = conformance }));
     // Freestanding ELF objects run directly on the Linux host. Windows uses

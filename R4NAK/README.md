@@ -1,6 +1,6 @@
 ﻿# R4NAK runtime compiler
 
-R4NAK.R4L 0.1.2 translates caller-provided SPIR-V through pinned Mesa 26.2.2
+R4NAK.R4L translates caller-provided SPIR-V through pinned Mesa 26.2.2
 NIR and NAK into NVIDIA machine code. It runs on R4OS, independently of R4NV's
 nine fixed shader profiles. Its `COMPILER_V1` contract, generated C/Zig
 bindings and ABI baseline are owned by this unit.
@@ -43,7 +43,15 @@ timing and the archive hash. These files are build products, not sources.
 
 `Bindings/Zig/worker.zig` supplies a consumer-owned asynchronous worker using
 R4SYS thread handles, program generations, allocation, monotonic time and
-atomic file replacement. Keep the worker, request, source, code and log at
+atomic file replacement. `Worker.init2` resolves the actual generation2 system
+slots and independent `COMPILER_V1` binding from an `App2`. `Worker.init` is the
+explicit transitional entry for generation1 applications. Both use the SDK's
+complete lightweight lifecycle reader: busy, restart, invalid, partial or
+over-capacity snapshots never authorize stale-owner reclamation. A close
+request is insufficient; only program state `done=2` or absence from a fully
+validated snapshot proves retirement. No full task/VM diagnostic scan is used.
+
+Keep the App/context, worker, request, source, code and log at
 stable addresses until `join` succeeds. Never compile or wait in a frame
 callback. Contention for the library-wide compiler owner returns `busy`.
 
@@ -55,6 +63,11 @@ boundary. A timeout does not permit early release of caller storage. Close
 requests propagate as cancellation. After whole-program forced retirement,
 a new caller can reclaim a stale owner only with a coherent proof that its
 exact program generation is fully retired; old callbacks are never invoked.
+
+The compiler-typed C/Rust helper boundary exposes `CompilerContext2.init`
+over the real Start2 record and its `nakWorker` constructor. The bridge
+constructs the private Zig App2; foreign App layouts are never cast to it.
+Keep that context and its start record stable until every worker joins.
 
 The linked target uses freestanding Rust core/alloc/compiler_builtins and a
 small serial C/Rust runtime, without Linux, host libc, TLS, files, dynamic

@@ -1,6 +1,6 @@
 ﻿# R4ACO
 
-R4ACO 0.1.3 is the CPU shader compiler for Picasso gfx902 and Raven2 gfx909.
+R4ACO is the CPU shader compiler for Picasso gfx902 and Raven2 gfx909.
 It links the real Mesa 26.2.2 SPIR-V frontend, NIR and ACO into R4ACO.R4L.
 `INFO_V1:1` reports CPU compilation; `COMPILER_V1:1` compiles and serializes
 shader caches. Physical device access belongs to AMDGPU.R4D. External ASIC revisions select the exact Mesa family; Raven2 omits the Raven LS-VGPR initialization workaround. Cache identity and generated metadata distinguish gfx902/909. The offline compiler accepts an optional final external-revision argument (for example 0x82); omitted means Picasso 0x41.
@@ -18,7 +18,19 @@ clock, cancellation and retirement callbacks. Allocation graphs and emulated
 TLS belong to the job. OOM, deadline and compiler abort release that graph
 before terminating the worker; callers retain all storage until join.
 Bindings/Zig/worker.zig supplies the R4SYS integration and atomic file-cache
-helpers. Prepare shaders before rendering; never compile or join in a frame.
+helpers. `Worker.init2` uses actual generation2 system slots and the independent
+`COMPILER_V1` binding; `Worker.init` explicitly supports applications awaiting
+migration. The App/context and all worker storage must remain at stable
+addresses until join. The common complete lightweight lifecycle reader grants
+no retirement authority on partial, busy, restarted, invalid or over-capacity
+snapshots. Program state `done=2` or coherent final absence is required; a close
+request is insufficient. Full task/VM diagnostics are not used for membership.
+Prepare shaders before rendering; never compile or join in a frame.
+
+The compiler-typed C/Rust helpers provide `CompilerContext2.init` over the
+actual Start2 record and `acoWorker`. The original owner constructs its Zig
+App2 without reinterpreting a foreign App layout. Keep the context and start
+record stable until every derived worker joins.
 
 Native resource ABI 1 supports vertex pulling through buffers, one fragment
 color output, compute, static shared memory, 16 buffer bindings and 256 bytes

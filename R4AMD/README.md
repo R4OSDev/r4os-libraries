@@ -1,12 +1,18 @@
 ﻿# R4AMD
 
-R4AMD 0.1.8 owns AMD image geometry, descriptors and command encoders.
+R4AMD owns AMD image geometry, descriptors and command encoders.
 `INFO_V1:1` and `BACKEND_V1:4` retain their layouts and slots; `IMAGE_V1:1`
 provides stateless image layout, address, metadata, import and descriptor
 calls. `RENDER_V1:1` provides six actual ACO shader roles per ASIC profile and transactional
 GFX9 pipeline/direct/indexed draw encoding.
 AMDGPU.R4D owns devices and publishes measured architecture and memory
 versions through the common graphics backend properties.
+
+Generation2 consumers resolve the generated clients with `init2` and the
+library's `Query2` descriptor. Its independent tables, generated shader bytes
+and device identities keep their existing revisions. Caller scratch belongs
+to each call; this provider needs no platform table, process inventory or
+additional worker/heap owner.
 
 GC9 ACQUIRE_MEM uses a 40-bit size in 256-byte blocks: the high size word
 contains only eight implemented bits. The PM4 encoder clears its reserved

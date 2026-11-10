@@ -11,6 +11,34 @@ const Receiver = m.r4gfx_edid.Report;
 const color = m.r4gfx_color_signal;
 const Ctl = m.r4gfx_mode_control.Controller;
 
+/// Library-owned C/Rust bridge to the same App2 worker implementations.
+/// Keep this value and the kernel start record at stable addresses until
+/// every derived worker has joined. No private Zig App layout is cast from C.
+pub const CompilerContext2 = struct {
+    app: r4os.App2,
+
+    pub fn init(start: *const anyopaque) error{InvalidStart}!CompilerContext2 {
+        if (@intFromPtr(start) % @alignOf(r4os.platform2.abi.R4XStartContext2) != 0) return error.InvalidStart;
+        const raw: *const r4os.platform2.abi.R4XStartContext2 = @ptrCast(@alignCast(start));
+        // The worker needs system facilities for every application class.
+        // Let the SDK validate a matching console, GUI, hybrid or service
+        // profile instead of imposing a console-only foreign entry.
+        inline for (std.meta.tags(a.R4AppProfile)) |profile| {
+            switch (r4os.App2.init(raw, profile)) {
+                .value => |app| return .{ .app = app },
+                .failure => {},
+            }
+        }
+        return error.InvalidStart;
+    }
+    pub fn nakWorker(self: *CompilerContext2) !m.r4nak_worker.Worker {
+        return m.r4nak_worker.Worker.init2(&self.app);
+    }
+    pub fn acoWorker(self: *CompilerContext2) !m.r4aco_worker.Worker {
+        return m.r4aco_worker.Worker.init2(&self.app);
+    }
+};
+
 pub const Sink = struct {
     context: ?*anyopaque = null,
     callback: *const fn (?*anyopaque, [*]const u8, usize) callconv(.c) u8,

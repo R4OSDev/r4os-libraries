@@ -7,6 +7,8 @@ use r4os_library_helpers::{
 #[path = "native.rs"]
 mod previous;
 unsafe extern "C" {
+    fn r4libraries47_start2() -> *const core::ffi::c_void;
+    fn r4libraries47_compiler_context() -> i32;
     fn r4libraries60_transport() -> i32;
     fn r4libraries60_mux(bytes: *const u8, length: usize) -> u64;
     fn r4libraries60_mux_color(bytes: *const u8, length: usize, transfer: u8, centered: u8) -> u64;
@@ -15,9 +17,26 @@ unsafe extern "C" {
 }
 #[test]
 fn aligned_storage_and_named_error_are_not_private_layout_guesses() {
+    assert_eq!(unsafe { r4libraries47_compiler_context() }, 0);
     assert_eq!(unsafe { r4libraries60_transport() }, 0);
     use core::mem::MaybeUninit;
     use r4os_library_helpers::raw as c;
+    let mut compiler = MaybeUninit::<c::R4MediaCompilerContext2>::uninit();
+    unsafe {
+        let admitted = c::R4MediaCompilerContext2_init(0, r4libraries47_start2(), compiler.as_mut_ptr());
+        assert_eq!(admitted.status, 0);
+        assert_eq!(admitted.flags & 2, 0);
+        // The host fixture supplies no independent compiler imports. Missing
+        // providers must fail without producing an apparently valid worker.
+        let mut nak = MaybeUninit::<c::R4NakWorker>::uninit();
+        let mut aco = MaybeUninit::<c::R4AcoWorker>::uninit();
+        for rejected in [
+            c::R4MediaCompilerContext2_nakWorker(0, compiler.as_mut_ptr(), nak.as_mut_ptr()),
+            c::R4MediaCompilerContext2_acoWorker(0, compiler.as_mut_ptr(), aco.as_mut_ptr()),
+        ] {
+            assert!(rejected.status != 0 || rejected.flags & 2 != 0);
+        }
+    }
     let mut refresh = MaybeUninit::<c::R4GfxRefreshClientClient>::uninit();
     let mut choice = MaybeUninit::<c::R4GfxRefreshPreferencesChoice>::uninit();
     let mut brightness = MaybeUninit::<c::R4GfxBrightnessClientClient>::uninit();

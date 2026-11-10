@@ -23,6 +23,7 @@ pub fn build(b: *std.Build) void {
     conformance.addIncludePath(b.path("Bindings/C"));
     conformance.addIncludePath(sdk.profile.c_include_root);
     conformance.addIncludePath(sdk.profile.contract_c_include_root);
+    conformance.addIncludePath(sdk.profile.contract_c_include_root2);
     conformance.addCSourceFile(.{ .file = b.path("Tests/Generated/contract_conformance.c"), .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" } });
     const step = b.step("test", "R4NV backend boundary and C/Zig ABI conformance");
     for ([_]*std.Build.Module{ provider, conformance }) |module| {
