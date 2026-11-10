@@ -37,6 +37,7 @@ pub fn build(b: *std.Build) void {
     conformance_root.addIncludePath(b.path("Bindings/C"));
     conformance_root.addIncludePath(sdk.profile.c_include_root);
     conformance_root.addIncludePath(sdk.profile.contract_c_include_root);
+    conformance_root.addIncludePath(sdk.profile.contract_c_include_root2);
     conformance_root.addCSourceFile(.{
         .file = b.path("Tests/Generated/contract_conformance.c"),
         .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" },
@@ -74,6 +75,7 @@ pub fn build(b: *std.Build) void {
     runtime_root.addIncludePath(b.path("Bindings/C"));
     runtime_root.addIncludePath(sdk.profile.c_include_root);
     runtime_root.addIncludePath(sdk.profile.contract_c_include_root);
+    runtime_root.addIncludePath(sdk.profile.contract_c_include_root2);
     runtime_root.addCSourceFile(.{ .file = b.path("Tests/codec_transport.c"), .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" } });
     const runtime_tests = b.addTest(.{ .root_module = runtime_root });
     const run_runtime = b.addRunArtifact(runtime_tests);

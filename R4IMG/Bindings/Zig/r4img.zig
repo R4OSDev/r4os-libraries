@@ -84,6 +84,9 @@ pub const RasterContext = struct {
     pub fn init(raw: *const r4os.abi.R4XStartContext) ?RasterContext {
         return .{ .client = abi.RasterV1Client.init(raw) catch return null };
     }
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) ?RasterContext {
+        return .{ .client = abi.RasterV1Client.init2(raw) catch return null };
+    }
     pub fn color(self: *const RasterContext, bytes: []const u8) Error!RasterColor {
         var output: RasterColor = undefined;
         try errorForStatus(self.client.raster_color_info(bytes.ptr, bytes.len, &output));
@@ -194,6 +197,9 @@ pub const Context = struct {
     pub fn init(raw: *const r4os.abi.R4XStartContext) ?Context {
         return .{ .client = abi.ApiV1Client.init(raw) catch return null };
     }
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) ?Context {
+        return .{ .client = abi.ApiV1Client.init2(raw) catch return null };
+    }
 
     pub fn probe(self: *const Context, bytes: []const u8, content_type: []const u8) Error!Info {
         var output = std.mem.zeroes(abi.R4ImgInfo);
@@ -301,6 +307,9 @@ pub const PngContext = struct {
     client: abi.PngV1Client,
     pub fn init(raw: *const r4os.abi.R4XStartContext) ?PngContext {
         return .{ .client = abi.PngV1Client.init(raw) catch return null };
+    }
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) ?PngContext {
+        return .{ .client = abi.PngV1Client.init2(raw) catch return null };
     }
     pub fn pngColor(self: *const PngContext, bytes: []const u8) Error!PngColor {
         var output: PngColor = undefined;

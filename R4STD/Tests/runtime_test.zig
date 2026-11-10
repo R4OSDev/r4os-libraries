@@ -6,6 +6,47 @@ const r4os = @import("r4os");
 const module_name: [:0]const u8 = "R4STD";
 const export_names = [_][:0]const u8{ "TEXT_V1", "SETTINGS_V1", "DATE_V1", "TIME_V1", "CONFIG_V1" };
 
+test "CONFIG_V1 uses actual generation2 caller and refuses invalid admission before IO" {
+    const Backend = struct {
+        var calls: u32 = 0;
+        const document = "\xef\xbb\xbfNAME=Generation2\r\n";
+        fn read(_: [*:0]const u8, output: [*]u8, capacity: u32) callconv(.c) i32 {
+            calls += 1;
+            if (capacity < document.len) return -1;
+            @memcpy(output[0..document.len], document);
+            return document.len;
+        }
+    };
+    Backend.calls = 0;
+    const read: r4os.abi.R4SysFns.file_read = &Backend.read;
+    const sys: r4os.platform2.abi.R4XStartR4Sys2 = .{ .file_read = @intFromPtr(read) };
+    var descriptor = project.r4std_query2;
+    const imports = [_]r4os.abi.R4XStartImport{
+        .{ .group_id = 1, .resolved_version = 2, .table = @intFromPtr(&sys) },
+        .{ .module_name = @intFromPtr(module_name.ptr), .symbol_name = @intFromPtr(@as([*:0]const u8, "Query2")), .min_version = 2, .resolved_version = 2, .table = @intFromPtr(&descriptor) },
+        .{ .module_name = @intFromPtr(module_name.ptr), .symbol_name = @intFromPtr(export_names[4].ptr), .min_version = 1, .resolved_version = 1, .table = @intFromPtr(&project.r4std_config_v1) },
+    };
+    const raw: r4os.platform2.abi.R4XStartContext2 = .{ .imports = @intFromPtr(&imports), .import_count = imports.len };
+    const client = try r4std.abi.ConfigV1Client.init2(&raw);
+    var output: [32]u8 = @splat(0xa5);
+    var scalar: u64 = 77;
+    const path = "C:\\TEST.R4S";
+    try std.testing.expectEqual(r4std.config.result_ok, client.read(@intFromPtr(&raw), path, path.len, "NAME", 4, r4std.abi.config_kind_string, "fallback", 8, 0, &output, output.len, &scalar));
+    try std.testing.expectEqualStrings("Generation2", std.mem.sliceTo(&output, 0));
+    try std.testing.expectEqual(@as(u32, 1), Backend.calls);
+    descriptor.size = 16;
+    try std.testing.expectError(error.InvalidQuery, r4std.abi.ConfigV1Client.init2(&raw));
+    try std.testing.expectEqual(@as(u32, 1), Backend.calls);
+    var invalid = raw;
+    invalid.size = 16;
+    output = @splat(0xa5);
+    scalar = 77;
+    try std.testing.expectEqual(r4std.abi.status_unavailable, project.r4std_config_read_impl(@intFromPtr(&invalid), path, path.len, "NAME", 4, r4std.abi.config_kind_string, "fallback", 8, 0, &output, output.len, &scalar));
+    try std.testing.expectEqual(@as(u64, 77), scalar);
+    try std.testing.expectEqualSlices(u8, &@as([32]u8, @splat(0xa5)), &output);
+    try std.testing.expectEqual(@as(u32, 1), Backend.calls);
+}
+
 fn makeContext(imports: []const r4os.abi.R4XStartImport) r4os.abi.R4XStartContext {
     return .{
         .flags = r4os.abi.r4xstart_flag_imports_valid,

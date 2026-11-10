@@ -407,7 +407,16 @@ pub const TextV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !TextV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, text_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, text_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !TextV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, text_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !TextV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x20e30ebdcef27d92,
             .interface_id_hi = 0x4f8b90dbd3e7d113,
@@ -436,7 +445,16 @@ pub const SettingsV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !SettingsV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, settings_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, settings_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !SettingsV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, settings_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !SettingsV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0xa72d3a94f53635bc,
             .interface_id_hi = 0xad6417547bbd0509,
@@ -525,7 +543,16 @@ pub const DateV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !DateV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, date_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, date_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !DateV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, date_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !DateV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x114c12ba386e91b3,
             .interface_id_hi = 0xbb8b0547d242bbc4,
@@ -614,7 +641,16 @@ pub const TimeV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !TimeV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, time_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, time_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !TimeV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, time_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !TimeV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x968f346a4240a924,
             .interface_id_hi = 0x288ef4aa6232d1c7,
@@ -721,7 +757,16 @@ pub const ConfigV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !ConfigV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, config_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, config_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !ConfigV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, config_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !ConfigV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x8fd66db6fcbe1c43,
             .interface_id_hi = 0xfca1d800ccd28cbc,
@@ -774,7 +819,16 @@ pub const CodecV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !CodecV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, codec_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, codec_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !CodecV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, codec_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !CodecV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x5244535444434f44,
             .interface_id_hi = 0x4543544558543031,

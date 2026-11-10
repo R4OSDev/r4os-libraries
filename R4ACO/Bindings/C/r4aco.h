@@ -302,10 +302,9 @@ _Static_assert(sizeof(R4AcoInfoV1) == 40u, "R4AcoInfoV1 size mismatch");
 _Static_assert(offsetof(R4AcoInfoV1, get_info) == 32u, "R4AcoInfoV1.get_info offset mismatch");
 typedef struct R4AcoInfoV1Client { const R4LInterfaceHeader *header; } R4AcoInfoV1Client;
 
-static inline int32_t r4aco_info_v1_init(const R4XStartContext *ctx, R4AcoInfoV1Client *out_client) {
+static inline int32_t r4aco_info_v1_from_import(const R4XStartImport *item, R4AcoInfoV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4ACO", "INFO_V1");
     const R4LInterfaceExpectation expected = { 0x41434f31ull, 0x52344f53ull, 1u, 1u, 40u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -313,6 +312,31 @@ static inline int32_t r4aco_info_v1_init(const R4XStartContext *ctx, R4AcoInfoV1
     if (r4l_slot_address(header, 32u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4aco_info_v1_init(const R4XStartContext *ctx, R4AcoInfoV1Client *out_client) {
+    return r4aco_info_v1_from_import(r4xstart_find_import_named(ctx, "R4ACO", "INFO_V1"), out_client);
+}
+
+static inline int32_t r4aco_info_v1_init2(const R4XStartContext2 *raw, R4AcoInfoV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4ACO", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4aco_info_v1_from_import(r4xstart2_find_import_named(&ctx, "R4ACO", "INFO_V1"), out_client);
+}
+
+static inline int32_t r4aco_info_v1_init2_optional(const R4XStartContext2 *raw, R4AcoInfoV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4ACO", "INFO_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4aco_info_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4aco_info_v1_init_optional(const R4XStartContext *ctx, R4AcoInfoV1Client *out_client) {
@@ -351,10 +375,9 @@ _Static_assert(offsetof(R4AcoCompilerV1, cache_write) == 40u, "R4AcoCompilerV1.c
 _Static_assert(offsetof(R4AcoCompilerV1, cache_read) == 48u, "R4AcoCompilerV1.cache_read offset mismatch");
 typedef struct R4AcoCompilerV1Client { const R4LInterfaceHeader *header; } R4AcoCompilerV1Client;
 
-static inline int32_t r4aco_compiler_v1_init(const R4XStartContext *ctx, R4AcoCompilerV1Client *out_client) {
+static inline int32_t r4aco_compiler_v1_from_import(const R4XStartImport *item, R4AcoCompilerV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4ACO", "COMPILER_V1");
     const R4LInterfaceExpectation expected = { 0x41434f32ull, 0x52344f53ull, 1u, 1u, 56u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -364,6 +387,31 @@ static inline int32_t r4aco_compiler_v1_init(const R4XStartContext *ctx, R4AcoCo
     if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4aco_compiler_v1_init(const R4XStartContext *ctx, R4AcoCompilerV1Client *out_client) {
+    return r4aco_compiler_v1_from_import(r4xstart_find_import_named(ctx, "R4ACO", "COMPILER_V1"), out_client);
+}
+
+static inline int32_t r4aco_compiler_v1_init2(const R4XStartContext2 *raw, R4AcoCompilerV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4ACO", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4aco_compiler_v1_from_import(r4xstart2_find_import_named(&ctx, "R4ACO", "COMPILER_V1"), out_client);
+}
+
+static inline int32_t r4aco_compiler_v1_init2_optional(const R4XStartContext2 *raw, R4AcoCompilerV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4ACO", "COMPILER_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4aco_compiler_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4aco_compiler_v1_init_optional(const R4XStartContext *ctx, R4AcoCompilerV1Client *out_client) {

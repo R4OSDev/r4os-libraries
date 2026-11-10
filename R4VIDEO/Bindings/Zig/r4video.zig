@@ -294,7 +294,16 @@ pub const VideoV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !VideoV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, video_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, video_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !VideoV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, video_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !VideoV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x314f454449563452,
             .interface_id_hi = 0x313045444f434544,

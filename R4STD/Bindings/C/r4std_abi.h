@@ -303,10 +303,9 @@ _Static_assert(offsetof(R4StdTextV1, inspect) == 32u, "R4StdTextV1.inspect offse
 _Static_assert(offsetof(R4StdTextV1, write) == 40u, "R4StdTextV1.write offset mismatch");
 typedef struct R4StdTextV1Client { const R4LInterfaceHeader *header; } R4StdTextV1Client;
 
-static inline int32_t r4std_text_v1_init(const R4XStartContext *ctx, R4StdTextV1Client *out_client) {
+static inline int32_t r4std_text_v1_from_import(const R4XStartImport *item, R4StdTextV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4STD", "TEXT_V1");
     const R4LInterfaceExpectation expected = { 0x20e30ebdcef27d92ull, 0x4f8b90dbd3e7d113ull, 1u, 1u, 48u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -315,6 +314,31 @@ static inline int32_t r4std_text_v1_init(const R4XStartContext *ctx, R4StdTextV1
     if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4std_text_v1_init(const R4XStartContext *ctx, R4StdTextV1Client *out_client) {
+    return r4std_text_v1_from_import(r4xstart_find_import_named(ctx, "R4STD", "TEXT_V1"), out_client);
+}
+
+static inline int32_t r4std_text_v1_init2(const R4XStartContext2 *raw, R4StdTextV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4STD", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4std_text_v1_from_import(r4xstart2_find_import_named(&ctx, "R4STD", "TEXT_V1"), out_client);
+}
+
+static inline int32_t r4std_text_v1_init2_optional(const R4XStartContext2 *raw, R4StdTextV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4STD", "TEXT_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4std_text_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4std_text_v1_init_optional(const R4XStartContext *ctx, R4StdTextV1Client *out_client) {
@@ -385,10 +409,9 @@ _Static_assert(offsetof(R4StdSettingsV1, writeback_prepare) == 112u, "R4StdSetti
 _Static_assert(offsetof(R4StdSettingsV1, writeback_complete) == 120u, "R4StdSettingsV1.writeback_complete offset mismatch");
 typedef struct R4StdSettingsV1Client { const R4LInterfaceHeader *header; } R4StdSettingsV1Client;
 
-static inline int32_t r4std_settings_v1_init(const R4XStartContext *ctx, R4StdSettingsV1Client *out_client) {
+static inline int32_t r4std_settings_v1_from_import(const R4XStartImport *item, R4StdSettingsV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4STD", "SETTINGS_V1");
     const R4LInterfaceExpectation expected = { 0xa72d3a94f53635bcull, 0xad6417547bbd0509ull, 1u, 1u, 128u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -407,6 +430,31 @@ static inline int32_t r4std_settings_v1_init(const R4XStartContext *ctx, R4StdSe
     if (r4l_slot_address(header, 120u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4std_settings_v1_init(const R4XStartContext *ctx, R4StdSettingsV1Client *out_client) {
+    return r4std_settings_v1_from_import(r4xstart_find_import_named(ctx, "R4STD", "SETTINGS_V1"), out_client);
+}
+
+static inline int32_t r4std_settings_v1_init2(const R4XStartContext2 *raw, R4StdSettingsV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4STD", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4std_settings_v1_from_import(r4xstart2_find_import_named(&ctx, "R4STD", "SETTINGS_V1"), out_client);
+}
+
+static inline int32_t r4std_settings_v1_init2_optional(const R4XStartContext2 *raw, R4StdSettingsV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4STD", "SETTINGS_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4std_settings_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4std_settings_v1_init_optional(const R4XStartContext *ctx, R4StdSettingsV1Client *out_client) {
@@ -527,10 +575,9 @@ _Static_assert(offsetof(R4StdDateV1, parse) == 112u, "R4StdDateV1.parse offset m
 _Static_assert(offsetof(R4StdDateV1, decode_fat) == 120u, "R4StdDateV1.decode_fat offset mismatch");
 typedef struct R4StdDateV1Client { const R4LInterfaceHeader *header; } R4StdDateV1Client;
 
-static inline int32_t r4std_date_v1_init(const R4XStartContext *ctx, R4StdDateV1Client *out_client) {
+static inline int32_t r4std_date_v1_from_import(const R4XStartImport *item, R4StdDateV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4STD", "DATE_V1");
     const R4LInterfaceExpectation expected = { 0x114c12ba386e91b3ull, 0xbb8b0547d242bbc4ull, 1u, 1u, 128u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -549,6 +596,31 @@ static inline int32_t r4std_date_v1_init(const R4XStartContext *ctx, R4StdDateV1
     if (r4l_slot_address(header, 120u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4std_date_v1_init(const R4XStartContext *ctx, R4StdDateV1Client *out_client) {
+    return r4std_date_v1_from_import(r4xstart_find_import_named(ctx, "R4STD", "DATE_V1"), out_client);
+}
+
+static inline int32_t r4std_date_v1_init2(const R4XStartContext2 *raw, R4StdDateV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4STD", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4std_date_v1_from_import(r4xstart2_find_import_named(&ctx, "R4STD", "DATE_V1"), out_client);
+}
+
+static inline int32_t r4std_date_v1_init2_optional(const R4XStartContext2 *raw, R4StdDateV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4STD", "DATE_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4std_date_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4std_date_v1_init_optional(const R4XStartContext *ctx, R4StdDateV1Client *out_client) {
@@ -678,10 +750,9 @@ _Static_assert(offsetof(R4StdTimeV1, config_offset) == 136u, "R4StdTimeV1.config
 _Static_assert(offsetof(R4StdTimeV1, standard_offset) == 144u, "R4StdTimeV1.standard_offset offset mismatch");
 typedef struct R4StdTimeV1Client { const R4LInterfaceHeader *header; } R4StdTimeV1Client;
 
-static inline int32_t r4std_time_v1_init(const R4XStartContext *ctx, R4StdTimeV1Client *out_client) {
+static inline int32_t r4std_time_v1_from_import(const R4XStartImport *item, R4StdTimeV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4STD", "TIME_V1");
     const R4LInterfaceExpectation expected = { 0x968f346a4240a924ull, 0x288ef4aa6232d1c7ull, 1u, 1u, 152u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -703,6 +774,31 @@ static inline int32_t r4std_time_v1_init(const R4XStartContext *ctx, R4StdTimeV1
     if (r4l_slot_address(header, 144u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4std_time_v1_init(const R4XStartContext *ctx, R4StdTimeV1Client *out_client) {
+    return r4std_time_v1_from_import(r4xstart_find_import_named(ctx, "R4STD", "TIME_V1"), out_client);
+}
+
+static inline int32_t r4std_time_v1_init2(const R4XStartContext2 *raw, R4StdTimeV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4STD", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4std_time_v1_from_import(r4xstart2_find_import_named(&ctx, "R4STD", "TIME_V1"), out_client);
+}
+
+static inline int32_t r4std_time_v1_init2_optional(const R4XStartContext2 *raw, R4StdTimeV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4STD", "TIME_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4std_time_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4std_time_v1_init_optional(const R4XStartContext *ctx, R4StdTimeV1Client *out_client) {
@@ -820,10 +916,9 @@ _Static_assert(offsetof(R4StdConfigV1, has_leftovers) == 64u, "R4StdConfigV1.has
 _Static_assert(offsetof(R4StdConfigV1, ensure_dirs) == 72u, "R4StdConfigV1.ensure_dirs offset mismatch");
 typedef struct R4StdConfigV1Client { const R4LInterfaceHeader *header; } R4StdConfigV1Client;
 
-static inline int32_t r4std_config_v1_init(const R4XStartContext *ctx, R4StdConfigV1Client *out_client) {
+static inline int32_t r4std_config_v1_from_import(const R4XStartImport *item, R4StdConfigV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4STD", "CONFIG_V1");
     const R4LInterfaceExpectation expected = { 0x8fd66db6fcbe1c43ull, 0xfca1d800ccd28cbcull, 1u, 1u, 80u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -836,6 +931,31 @@ static inline int32_t r4std_config_v1_init(const R4XStartContext *ctx, R4StdConf
     if (r4l_slot_address(header, 72u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4std_config_v1_init(const R4XStartContext *ctx, R4StdConfigV1Client *out_client) {
+    return r4std_config_v1_from_import(r4xstart_find_import_named(ctx, "R4STD", "CONFIG_V1"), out_client);
+}
+
+static inline int32_t r4std_config_v1_init2(const R4XStartContext2 *raw, R4StdConfigV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4STD", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4std_config_v1_from_import(r4xstart2_find_import_named(&ctx, "R4STD", "CONFIG_V1"), out_client);
+}
+
+static inline int32_t r4std_config_v1_init2_optional(const R4XStartContext2 *raw, R4StdConfigV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4STD", "CONFIG_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4std_config_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4std_config_v1_init_optional(const R4XStartContext *ctx, R4StdConfigV1Client *out_client) {
@@ -908,10 +1028,9 @@ _Static_assert(offsetof(R4StdCodecV1, utf8_push) == 64u, "R4StdCodecV1.utf8_push
 _Static_assert(offsetof(R4StdCodecV1, utf8_finish) == 72u, "R4StdCodecV1.utf8_finish offset mismatch");
 typedef struct R4StdCodecV1Client { const R4LInterfaceHeader *header; } R4StdCodecV1Client;
 
-static inline int32_t r4std_codec_v1_init(const R4XStartContext *ctx, R4StdCodecV1Client *out_client) {
+static inline int32_t r4std_codec_v1_from_import(const R4XStartImport *item, R4StdCodecV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4STD", "CODEC_V1");
     const R4LInterfaceExpectation expected = { 0x5244535444434f44ull, 0x4543544558543031ull, 1u, 1u, 80u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -924,6 +1043,31 @@ static inline int32_t r4std_codec_v1_init(const R4XStartContext *ctx, R4StdCodec
     if (r4l_slot_address(header, 72u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4std_codec_v1_init(const R4XStartContext *ctx, R4StdCodecV1Client *out_client) {
+    return r4std_codec_v1_from_import(r4xstart_find_import_named(ctx, "R4STD", "CODEC_V1"), out_client);
+}
+
+static inline int32_t r4std_codec_v1_init2(const R4XStartContext2 *raw, R4StdCodecV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4STD", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4std_codec_v1_from_import(r4xstart2_find_import_named(&ctx, "R4STD", "CODEC_V1"), out_client);
+}
+
+static inline int32_t r4std_codec_v1_init2_optional(const R4XStartContext2 *raw, R4StdCodecV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4STD", "CODEC_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4std_codec_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4std_codec_v1_init_optional(const R4XStartContext *ctx, R4StdCodecV1Client *out_client) {

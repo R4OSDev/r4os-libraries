@@ -57,10 +57,9 @@ _Static_assert(offsetof(R4GlEglV1, release_thread) == 40u, "R4GlEglV1.release_th
 _Static_assert(offsetof(R4GlEglV1, finish) == 48u, "R4GlEglV1.finish offset mismatch");
 typedef struct R4GlEglV1Client { const R4LInterfaceHeader *header; } R4GlEglV1Client;
 
-static inline int32_t r4gl_egl_v1_init(const R4XStartContext *ctx, R4GlEglV1Client *out_client) {
+static inline int32_t r4gl_egl_v1_from_import(const R4XStartImport *item, R4GlEglV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4GL", "EGL_V1");
     const R4LInterfaceExpectation expected = { 0x314c4745523448ull, 0x314c4734534full, 1u, 1u, 56u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -70,6 +69,31 @@ static inline int32_t r4gl_egl_v1_init(const R4XStartContext *ctx, R4GlEglV1Clie
     if (r4l_slot_address(header, 48u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4gl_egl_v1_init(const R4XStartContext *ctx, R4GlEglV1Client *out_client) {
+    return r4gl_egl_v1_from_import(r4xstart_find_import_named(ctx, "R4GL", "EGL_V1"), out_client);
+}
+
+static inline int32_t r4gl_egl_v1_init2(const R4XStartContext2 *raw, R4GlEglV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4GL", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4gl_egl_v1_from_import(r4xstart2_find_import_named(&ctx, "R4GL", "EGL_V1"), out_client);
+}
+
+static inline int32_t r4gl_egl_v1_init2_optional(const R4XStartContext2 *raw, R4GlEglV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4GL", "EGL_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4gl_egl_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4gl_egl_v1_init_optional(const R4XStartContext *ctx, R4GlEglV1Client *out_client) {

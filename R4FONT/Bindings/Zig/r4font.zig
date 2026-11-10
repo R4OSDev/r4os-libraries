@@ -93,6 +93,10 @@ pub const Context = struct {
         return .{ .client = abi.ApiV1Client.init(raw) catch return null };
     }
 
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) ?Context {
+        return .{ .client = abi.ApiV1Client.init2(raw) catch return null };
+    }
+
     pub fn initTable(table: *const abi.ApiV1) ?Context {
         return initHeader(&table.header);
     }

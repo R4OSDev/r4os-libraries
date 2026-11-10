@@ -3,7 +3,8 @@ const r4os = @import("r4os");
 pub const abi = @import("r4std_abi.zig");
 
 pub const Runtime = struct {
-    raw: *const r4os.abi.R4XStartContext,
+    raw_address: u64,
+    generation: u8,
     text: ?abi.TextV1Client,
     settings: ?abi.SettingsV1Client,
     date: ?abi.DateV1Client,
@@ -16,17 +17,34 @@ var storage: Runtime = undefined;
 var ready: bool = false;
 
 pub fn init(raw: *const r4os.abi.R4XStartContext) bool {
-    const candidate = Runtime{
-        .raw = raw,
+    return install(.{
+        .raw_address = @intFromPtr(raw),
+        .generation = 1,
         .text = abi.TextV1Client.init(raw) catch null,
         .settings = abi.SettingsV1Client.init(raw) catch null,
         .date = abi.DateV1Client.init(raw) catch null,
         .time = abi.TimeV1Client.init(raw) catch null,
         .config = abi.ConfigV1Client.init(raw) catch null,
         .codec = abi.CodecV1Client.init(raw) catch null,
-    };
+    });
+}
+
+pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) bool {
+    return install(.{
+        .raw_address = @intFromPtr(raw),
+        .generation = 2,
+        .text = abi.TextV1Client.init2(raw) catch null,
+        .settings = abi.SettingsV1Client.init2(raw) catch null,
+        .date = abi.DateV1Client.init2(raw) catch null,
+        .time = abi.TimeV1Client.init2(raw) catch null,
+        .config = abi.ConfigV1Client.init2(raw) catch null,
+        .codec = abi.CodecV1Client.init2(raw) catch null,
+    });
+}
+
+fn install(candidate: Runtime) bool {
     if (candidate.text == null and candidate.settings == null and candidate.date == null and candidate.time == null and candidate.config == null and candidate.codec == null) return false;
-    if (ready and storage.raw != raw) return false;
+    if (ready and (storage.raw_address != candidate.raw_address or storage.generation != candidate.generation)) return false;
     storage = candidate;
     ready = true;
     return true;
@@ -87,7 +105,7 @@ pub fn hasConfig() bool {
 }
 
 pub fn rawAddress() u64 {
-    return @intFromPtr(get().raw);
+    return get().raw_address;
 }
 
 pub fn hasCodec() bool {

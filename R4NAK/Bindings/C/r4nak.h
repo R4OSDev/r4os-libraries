@@ -278,10 +278,9 @@ _Static_assert(offsetof(R4NakCompilerV1, cache_read) == 48u, "R4NakCompilerV1.ca
 _Static_assert(offsetof(R4NakCompilerV1, format_info) == 56u, "R4NakCompilerV1.format_info offset mismatch");
 typedef struct R4NakCompilerV1Client { const R4LInterfaceHeader *header; } R4NakCompilerV1Client;
 
-static inline int32_t r4nak_compiler_v1_init(const R4XStartContext *ctx, R4NakCompilerV1Client *out_client) {
+static inline int32_t r4nak_compiler_v1_from_import(const R4XStartImport *item, R4NakCompilerV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4NAK", "COMPILER_V1");
     const R4LInterfaceExpectation expected = { 0x52344e414b434f4dull, 0x50494c4552303031ull, 1u, 1u, 64u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -292,6 +291,31 @@ static inline int32_t r4nak_compiler_v1_init(const R4XStartContext *ctx, R4NakCo
     if (r4l_slot_address(header, 56u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4nak_compiler_v1_init(const R4XStartContext *ctx, R4NakCompilerV1Client *out_client) {
+    return r4nak_compiler_v1_from_import(r4xstart_find_import_named(ctx, "R4NAK", "COMPILER_V1"), out_client);
+}
+
+static inline int32_t r4nak_compiler_v1_init2(const R4XStartContext2 *raw, R4NakCompilerV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4NAK", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4nak_compiler_v1_from_import(r4xstart2_find_import_named(&ctx, "R4NAK", "COMPILER_V1"), out_client);
+}
+
+static inline int32_t r4nak_compiler_v1_init2_optional(const R4XStartContext2 *raw, R4NakCompilerV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4NAK", "COMPILER_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4nak_compiler_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4nak_compiler_v1_init_optional(const R4XStartContext *ctx, R4NakCompilerV1Client *out_client) {

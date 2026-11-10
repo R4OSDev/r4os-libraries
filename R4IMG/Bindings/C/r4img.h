@@ -248,10 +248,9 @@ _Static_assert(offsetof(R4ImgApiV1, scale_composite) == 64u, "R4ImgApiV1.scale_c
 _Static_assert(offsetof(R4ImgApiV1, decoder_diagnostic) == 72u, "R4ImgApiV1.decoder_diagnostic offset mismatch");
 typedef struct R4ImgApiV1Client { const R4LInterfaceHeader *header; } R4ImgApiV1Client;
 
-static inline int32_t r4img_api_v1_init(const R4XStartContext *ctx, R4ImgApiV1Client *out_client) {
+static inline int32_t r4img_api_v1_from_import(const R4XStartImport *item, R4ImgApiV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4IMG", "API_V1");
     const R4LInterfaceExpectation expected = { 0x5233f7f0fb63b451ull, 0x315346a3a7ea4152ull, 1u, 1u, 80u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -264,6 +263,31 @@ static inline int32_t r4img_api_v1_init(const R4XStartContext *ctx, R4ImgApiV1Cl
     if (r4l_slot_address(header, 72u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4img_api_v1_init(const R4XStartContext *ctx, R4ImgApiV1Client *out_client) {
+    return r4img_api_v1_from_import(r4xstart_find_import_named(ctx, "R4IMG", "API_V1"), out_client);
+}
+
+static inline int32_t r4img_api_v1_init2(const R4XStartContext2 *raw, R4ImgApiV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4IMG", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4img_api_v1_from_import(r4xstart2_find_import_named(&ctx, "R4IMG", "API_V1"), out_client);
+}
+
+static inline int32_t r4img_api_v1_init2_optional(const R4XStartContext2 *raw, R4ImgApiV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4IMG", "API_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4img_api_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4img_api_v1_init_optional(const R4XStartContext *ctx, R4ImgApiV1Client *out_client) {
@@ -330,10 +354,9 @@ _Static_assert(offsetof(R4ImgPngV1, png_scratch_bytes16) == 48u, "R4ImgPngV1.png
 _Static_assert(offsetof(R4ImgPngV1, png_decode16) == 56u, "R4ImgPngV1.png_decode16 offset mismatch");
 typedef struct R4ImgPngV1Client { const R4LInterfaceHeader *header; } R4ImgPngV1Client;
 
-static inline int32_t r4img_png_v1_init(const R4XStartContext *ctx, R4ImgPngV1Client *out_client) {
+static inline int32_t r4img_png_v1_from_import(const R4XStartImport *item, R4ImgPngV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4IMG", "PNG_V1");
     const R4LInterfaceExpectation expected = { 0x52494d47504e4731ull, 0x52434f4c4f525031ull, 1u, 1u, 64u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -344,6 +367,31 @@ static inline int32_t r4img_png_v1_init(const R4XStartContext *ctx, R4ImgPngV1Cl
     if (r4l_slot_address(header, 56u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4img_png_v1_init(const R4XStartContext *ctx, R4ImgPngV1Client *out_client) {
+    return r4img_png_v1_from_import(r4xstart_find_import_named(ctx, "R4IMG", "PNG_V1"), out_client);
+}
+
+static inline int32_t r4img_png_v1_init2(const R4XStartContext2 *raw, R4ImgPngV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4IMG", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4img_png_v1_from_import(r4xstart2_find_import_named(&ctx, "R4IMG", "PNG_V1"), out_client);
+}
+
+static inline int32_t r4img_png_v1_init2_optional(const R4XStartContext2 *raw, R4ImgPngV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4IMG", "PNG_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4img_png_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4img_png_v1_init_optional(const R4XStartContext *ctx, R4ImgPngV1Client *out_client) {
@@ -394,10 +442,9 @@ _Static_assert(offsetof(R4ImgRasterV1, raster_color_info) == 32u, "R4ImgRasterV1
 _Static_assert(offsetof(R4ImgRasterV1, raster_icc_profile) == 40u, "R4ImgRasterV1.raster_icc_profile offset mismatch");
 typedef struct R4ImgRasterV1Client { const R4LInterfaceHeader *header; } R4ImgRasterV1Client;
 
-static inline int32_t r4img_raster_v1_init(const R4XStartContext *ctx, R4ImgRasterV1Client *out_client) {
+static inline int32_t r4img_raster_v1_from_import(const R4XStartImport *item, R4ImgRasterV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4XStartImport *item = r4xstart_find_import_named(ctx, "R4IMG", "RASTER_V1");
     const R4LInterfaceExpectation expected = { 0x5241535445523031ull, 0x5234494d47434f31ull, 1u, 1u, 48u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
@@ -406,6 +453,31 @@ static inline int32_t r4img_raster_v1_init(const R4XStartContext *ctx, R4ImgRast
     if (r4l_slot_address(header, 40u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
+}
+
+static inline int32_t r4img_raster_v1_init(const R4XStartContext *ctx, R4ImgRasterV1Client *out_client) {
+    return r4img_raster_v1_from_import(r4xstart_find_import_named(ctx, "R4IMG", "RASTER_V1"), out_client);
+}
+
+static inline int32_t r4img_raster_v1_init2(const R4XStartContext2 *raw, R4ImgRasterV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4LQuery2 *query = 0;
+    int32_t status = r4l_query2(&ctx, "R4IMG", &query);
+    if (status != R4L_BINDING_OK) return status;
+    return r4img_raster_v1_from_import(r4xstart2_find_import_named(&ctx, "R4IMG", "RASTER_V1"), out_client);
+}
+
+static inline int32_t r4img_raster_v1_init2_optional(const R4XStartContext2 *raw, R4ImgRasterV1Client *out_client) {
+    if (!out_client) return R4L_BINDING_INVALID_EXPECTATION;
+    out_client->header = 0;
+    R4OS2Context ctx;
+    if (R4OS2ContextInit(raw, &ctx) != R4OS2_CONTEXT_OK) return R4L_BINDING_INVALID_IMPORT;
+    const R4XStartImport *item = r4xstart2_find_import_named(&ctx, "R4IMG", "RASTER_V1");
+    if (!item || (item->table == 0 && item->resolved_version == 0 && item->group_id == 0 && item->flags == 0 && item->min_version != 0)) return R4L_BINDING_ABSENT;
+    return r4img_raster_v1_init2(raw, out_client);
 }
 
 static inline int32_t r4img_raster_v1_init_optional(const R4XStartContext *ctx, R4ImgRasterV1Client *out_client) {

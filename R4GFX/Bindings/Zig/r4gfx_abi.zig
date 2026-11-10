@@ -963,7 +963,16 @@ pub const ApiV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !ApiV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, api_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, api_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !ApiV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, api_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !ApiV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x34584647,
             .interface_id_hi = 0x35393730,
@@ -992,7 +1001,16 @@ pub const RenderV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !RenderV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, render_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, render_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !RenderV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, render_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !RenderV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x52454e4445523147,
             .interface_id_hi = 0x52344f5352474658,
@@ -1021,7 +1039,16 @@ pub const DeviceV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !DeviceV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, device_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, device_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !DeviceV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, device_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !DeviceV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x5234474658444556,
             .interface_id_hi = 0x52344f5330373931,
@@ -1242,7 +1269,16 @@ pub const ColorV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !ColorV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, color_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, color_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !ColorV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, color_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !ColorV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x524f4c43,
             .interface_id_hi = 0x31584647,

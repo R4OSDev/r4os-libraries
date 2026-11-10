@@ -214,7 +214,16 @@ pub const ApiV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !ApiV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, api_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, api_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !ApiV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, api_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !ApiV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x5233f7f0fb63b451,
             .interface_id_hi = 0x315346a3a7ea4152,
@@ -267,7 +276,16 @@ pub const PngV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !PngV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, png_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, png_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !PngV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, png_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !PngV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x52494d47504e4731,
             .interface_id_hi = 0x52434f4c4f525031,
@@ -308,7 +326,16 @@ pub const RasterV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !RasterV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, raster_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, raster_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !RasterV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, raster_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !RasterV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x5241535445523031,
             .interface_id_hi = 0x5234494d47434f31,

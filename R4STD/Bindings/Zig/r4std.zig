@@ -26,6 +26,10 @@ pub fn init(raw: *const r4os.abi.R4XStartContext) bool {
     return runtime.init(raw);
 }
 
+pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) bool {
+    return runtime.init2(raw);
+}
+
 pub fn initialized() bool {
     return runtime.initialized();
 }

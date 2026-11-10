@@ -390,7 +390,16 @@ pub const BackendV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !BackendV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, backend_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, backend_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !BackendV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, backend_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !BackendV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x52344e5642454e44,
             .interface_id_hi = 0x52344f5330373931,
@@ -431,7 +440,16 @@ pub const ShaderV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !ShaderV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, shader_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, shader_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !ShaderV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, shader_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !ShaderV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x52344e5653484452,
             .interface_id_hi = 0x52344f5330373934,
@@ -466,7 +484,16 @@ pub const RenderV1Client = struct {
     header: *const InterfaceHeader,
 
     pub fn init(raw: *const r4os.abi.R4XStartContext) !RenderV1Client {
-        const item = r4os.r4xstart.Context.init(raw).findImportNamed(module_name, render_v1_export_name) orelse return error.MissingImport;
+        return fromImport(r4os.r4xstart.Context.init(raw).findImportNamed(module_name, render_v1_export_name) orelse return error.MissingImport);
+    }
+
+    pub fn init2(raw: *const r4os.platform2.abi.R4XStartContext2) !RenderV1Client {
+        const context = try r4os.platform2.Context.init(raw);
+        _ = try r4os.runtime_r4l.query2(&context, module_name);
+        return fromImport(context.findImportNamed(module_name, render_v1_export_name) orelse return error.MissingImport);
+    }
+
+    fn fromImport(item: *const r4os.abi.R4XStartImport) !RenderV1Client {
         const header = try r4os.runtime_r4l.validateImport(item, .{
             .interface_id_lo = 0x52344e56524e4452,
             .interface_id_hi = 0x52344f5330373934,

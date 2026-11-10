@@ -53,6 +53,7 @@ pub fn build(b: *std.Build) void {
     conformance_root.addIncludePath(b.path("Bindings/C"));
     conformance_root.addIncludePath(sdk.profile.c_include_root);
     conformance_root.addIncludePath(sdk.profile.contract_c_include_root);
+    conformance_root.addIncludePath(sdk.profile.contract_c_include_root2);
     conformance_root.addCSourceFile(.{
         .file = b.path("Tests/Generated/contract_conformance.c"),
         .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" },

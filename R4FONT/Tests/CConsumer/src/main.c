@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <r4os/r4os.h>
+#include <r4os/app2.h>
 #include <r4font.h>
 
 static uint8_t font_arena[256u * 1024u];
@@ -33,7 +33,7 @@ static void font_free(void *user, void *block, size_t size, size_t alignment) {
     (void)alignment;
 }
 
-int32_t r4_app_main(R4App *app) {
+int32_t r4_app_main(R4App2 *app) {
     static const uint8_t font_probe[] = { 0x00, 0x01, 0x00, 0x00 };
     R4FontApiV1Client fonts;
     R4FontAllocator allocator = {
@@ -45,7 +45,7 @@ int32_t r4_app_main(R4App *app) {
     uint32_t format = R4FONT_FORMAT_UNKNOWN;
     uint64_t decoder = 0;
 
-    if (r4font_api_v1_init(app->context, &fonts) != R4L_BINDING_OK) return 41;
+    if (r4font_api_v1_init2(app->context.raw, &fonts) != R4L_BINDING_OK) return 41;
     if (r4font_sniff(&fonts, font_probe, sizeof(font_probe), &format) != R4FONT_STATUS_OK) return 42;
     if (format != R4FONT_FORMAT_TTF) return 43;
     if (r4font_decoder_create(&fonts, &allocator, sizeof(font_arena), &decoder) == R4FONT_STATUS_OK)

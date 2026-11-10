@@ -573,10 +573,30 @@ pub export fn r4std_time_config_offset_impl(value: *const contract.R4StdTimeConf
     return configFromAbi(value.*).offsetMinutesForState(stateFromAbi(state.*));
 }
 
-fn callerBundle(address: u64) ?r4os.program.Bundle {
-    if (address == 0) return null;
-    const raw: *const r4os.abi.R4XStartContext = @ptrFromInt(@as(usize, @intCast(address)));
-    return r4os.program.bundleValueFromR4XStart(raw);
+const Caller = union(enum) {
+    legacy: r4os.program.Bundle,
+    generation2: r4os.platform2.Context,
+
+    fn system(self: *const Caller) r4os.r4sys.Context {
+        return switch (self.*) {
+            .legacy => r4os.r4sys.Context.init(&self.legacy),
+            .generation2 => r4os.r4sys.Context.fromProgram(.{ .generation2 = &self.generation2 }),
+        };
+    }
+};
+
+// CONFIG_V1 carries a caller-owned opaque context address. Admit its actual
+// generation before taking a typed view; retain that view for this call only.
+fn callerContext(address: u64) ?Caller {
+    if (address == 0 or address % @alignOf(u64) != 0) return null;
+    const magic: *const u32 = @ptrFromInt(address);
+    if (magic.* == r4os.platform2.abi.start_magic) {
+        const raw: *const r4os.platform2.abi.R4XStartContext2 = @ptrFromInt(address);
+        return .{ .generation2 = r4os.platform2.Context.init(raw) catch return null };
+    }
+    if (magic.* != r4os.abi.r4xstart_magic) return null;
+    const raw: *const r4os.abi.R4XStartContext = @ptrFromInt(address);
+    return .{ .legacy = r4os.program.bundleValueFromR4XStart(raw) orelse return null };
 }
 
 fn pathZ(pointer: [*]const u8, raw_length: u64, storage: *[config.max_path_len + 1]u8) ?[*:0]const u8 {
@@ -590,8 +610,8 @@ fn pathZ(pointer: [*]const u8, raw_length: u64, storage: *[config.max_path_len +
 }
 
 pub export fn r4std_config_read_impl(caller_context: u64, path: [*]const u8, path_length: u64, key: [*]const u8, key_length: u64, kind: u32, fallback: [*]const u8, fallback_length: u64, fallback_scalar: i64, output: [*]u8, output_capacity: u64, output_scalar: *u64) linksection(".text.r4l_exports") callconv(.c) i32 {
-    var bundle = callerBundle(caller_context) orelse return contract.status_unavailable;
-    const sys = r4os.r4sys.Context.init(&bundle);
+    const caller = callerContext(caller_context) orelse return contract.status_unavailable;
+    const sys = caller.system();
     var path_storage: [config.max_path_len + 1]u8 = undefined;
     const file_path = pathZ(path, path_length, &path_storage) orelse return config.error_invalid_path;
     const key_len = length(key_length) orelse return config.error_invalid_key;
@@ -630,8 +650,8 @@ pub export fn r4std_config_read_impl(caller_context: u64, path: [*]const u8, pat
 }
 
 pub export fn r4std_config_write_impl(caller_context: u64, path: [*]const u8, path_length: u64, key: [*]const u8, key_length: u64, kind: u32, value: [*]const u8, value_length: u64, scalar_value: i64) linksection(".text.r4l_exports") callconv(.c) i32 {
-    var bundle = callerBundle(caller_context) orelse return contract.status_unavailable;
-    const sys = r4os.r4sys.Context.init(&bundle);
+    const caller = callerContext(caller_context) orelse return contract.status_unavailable;
+    const sys = caller.system();
     var path_storage: [config.max_path_len + 1]u8 = undefined;
     const file_path = pathZ(path, path_length, &path_storage) orelse return config.error_invalid_path;
     const key_len = length(key_length) orelse return config.error_invalid_key;
@@ -648,8 +668,8 @@ pub export fn r4std_config_write_impl(caller_context: u64, path: [*]const u8, pa
 }
 
 pub export fn r4std_config_save_document_impl(caller_context: u64, path: [*]const u8, path_length: u64, input: [*]const u8, input_length: u64) linksection(".text.r4l_exports") callconv(.c) i32 {
-    var bundle = callerBundle(caller_context) orelse return contract.status_unavailable;
-    const sys = r4os.r4sys.Context.init(&bundle);
+    const caller = callerContext(caller_context) orelse return contract.status_unavailable;
+    const sys = caller.system();
     var path_storage: [config.max_path_len + 1]u8 = undefined;
     const file_path = pathZ(path, path_length, &path_storage) orelse return config.error_invalid_path;
     const len = length(input_length) orelse return config.error_invalid_value;
@@ -657,24 +677,24 @@ pub export fn r4std_config_save_document_impl(caller_context: u64, path: [*]cons
 }
 
 pub export fn r4std_config_recover_document_impl(caller_context: u64, path: [*]const u8, path_length: u64) linksection(".text.r4l_exports") callconv(.c) i32 {
-    var bundle = callerBundle(caller_context) orelse return contract.status_unavailable;
-    const sys = r4os.r4sys.Context.init(&bundle);
+    const caller = callerContext(caller_context) orelse return contract.status_unavailable;
+    const sys = caller.system();
     var path_storage: [config.max_path_len + 1]u8 = undefined;
     const file_path = pathZ(path, path_length, &path_storage) orelse return config.error_invalid_path;
     return config.recoverDocumentSave(&sys, file_path);
 }
 
 pub export fn r4std_config_has_leftovers_impl(caller_context: u64, path: [*]const u8, path_length: u64) linksection(".text.r4l_exports") callconv(.c) u32 {
-    var bundle = callerBundle(caller_context) orelse return 1;
-    const sys = r4os.r4sys.Context.init(&bundle);
+    const caller = callerContext(caller_context) orelse return 1;
+    const sys = caller.system();
     var path_storage: [config.max_path_len + 1]u8 = undefined;
     const file_path = pathZ(path, path_length, &path_storage) orelse return 1;
     return @intFromBool(config.hasDocumentSaveLeftovers(&sys, file_path));
 }
 
 pub export fn r4std_config_ensure_dirs_impl(caller_context: u64, kind: u32) linksection(".text.r4l_exports") callconv(.c) i32 {
-    var bundle = callerBundle(caller_context) orelse return contract.status_unavailable;
-    const sys = r4os.r4sys.Context.init(&bundle);
+    const caller = callerContext(caller_context) orelse return contract.status_unavailable;
+    const sys = caller.system();
     switch (kind) {
         contract.ensure_dirs_system => settings.ensureSystemDirs(&sys),
         contract.ensure_dirs_apps => settings.ensureAppDirs(&sys),
