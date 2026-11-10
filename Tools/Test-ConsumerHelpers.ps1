@@ -35,12 +35,12 @@ try{
         $object=Join-Path $WorkRoot 'media.o'
         $includes=@()
         foreach($lib in @('R4GFX','R4ENC','R4VIDEO','R4ACO','R4NAK')){$includes+=@('-I',(Join-Path $libraries ($lib+'/Bindings/C')))}
-        & $Zig cc -O1 -UNDEBUG -Werror -fPIC -ffunction-sections -fdata-sections @includes -I (Join-Path $libraries 'Shared/C/include') -I (Join-Path $SdkRoot 'Shared/C/include') -I (Join-Path $ContractRoot 'Generated/SDK/C/include') -c (Join-Path $libraries 'Shared/Tests/media.c') -o $object
+        & $Zig cc -O1 -UNDEBUG -Werror -fPIC -ffunction-sections -fdata-sections @includes -I (Join-Path $libraries 'Shared/C/include') -I (Join-Path $SdkRoot 'Shared/C/include') -I (Join-Path $ContractRoot 'Generated/SDK/C/include') -I (Join-Path $ContractRoot 'Generated/Generation2/C/include') -c (Join-Path $libraries 'Shared/Tests/media.c') -o $object
         if($LASTEXITCODE -ne 0){throw 'Combined media/graphics C headers and transport cases failed.'}
         $extra+=$object
     }
     $pure=Join-Path $WorkRoot 'pure.o'
-    & $Zig cc -O1 -UNDEBUG -Werror -fPIC -ffunction-sections -fdata-sections -I (Join-Path $libraries 'R4STD/Bindings/C') -I (Join-Path $libraries 'R4IMG/Bindings/C') -I (Join-Path $libraries 'R4FONT/Bindings/C') -I (Join-Path $libraries 'Shared/C/include') -I (Join-Path $SdkRoot 'Shared/C/include') -I (Join-Path $ContractRoot 'Generated/SDK/C/include') -c (Join-Path $libraries 'Shared/Tests/pure.c') -o $pure
+    & $Zig cc -O1 -UNDEBUG -Werror -fPIC -ffunction-sections -fdata-sections -I (Join-Path $libraries 'R4STD/Bindings/C') -I (Join-Path $libraries 'R4IMG/Bindings/C') -I (Join-Path $libraries 'R4FONT/Bindings/C') -I (Join-Path $libraries 'Shared/C/include') -I (Join-Path $SdkRoot 'Shared/C/include') -I (Join-Path $ContractRoot 'Generated/SDK/C/include') -I (Join-Path $ContractRoot 'Generated/Generation2/C/include') -c (Join-Path $libraries 'Shared/Tests/pure.c') -o $pure
     if($LASTEXITCODE -ne 0){throw 'C library helper consumer failed.'}
     $source=(Join-Path $libraries $(if($Media){'Shared/Tests/media_native.rs'}else{'Shared/Tests/native.rs'})).Replace('\','/')
     $crate=(Join-Path $libraries 'Shared/Rust').Replace('\','/')

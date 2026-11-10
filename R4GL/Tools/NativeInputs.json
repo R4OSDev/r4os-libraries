@@ -4332,7 +4332,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -4457,7 +4458,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -4582,7 +4584,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${zig}/lib/libcxx/include",
@@ -4721,7 +4724,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -4847,7 +4851,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -4970,7 +4975,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -5097,7 +5103,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -5226,7 +5233,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -5356,7 +5364,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${zig}/lib/libcxx/include",
@@ -5504,7 +5513,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -5638,7 +5648,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -5767,7 +5778,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -5896,7 +5908,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -6024,7 +6037,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -6161,7 +6175,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${zig}/lib/libcxx/include",
@@ -6312,7 +6327,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -6445,7 +6461,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -6577,7 +6594,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -6712,7 +6730,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${zig}/lib/libcxx/include",
@@ -6861,7 +6880,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -7000,7 +7020,8 @@
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
       "-I${sdk}/Shared/C/include",
-      "-I${contract}/Generated/SDK/C/include"
+      "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include"
     ],
     [
       "-I${include}",
@@ -7117,6 +7138,7 @@
       "-I${sdk}/Shared/C/include",
       "-I${libraries}/R4GFX/Bindings/C",
       "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include",
       "-std=c11",
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C",
@@ -7241,6 +7263,7 @@
       "-I${sdk}/Shared/C/include",
       "-I${libraries}/R4GFX/Bindings/C",
       "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include",
       "-std=c11",
       "-I${libraries}/Shared/Native",
       "-I${libraries}/R4VK/Bindings/C"
@@ -7359,6 +7382,7 @@
       "-I${sdk}/Shared/C/include",
       "-I${libraries}/R4GFX/Bindings/C",
       "-I${contract}/Generated/SDK/C/include",
+      "-I${contract}/Generated/Generation2/C/include",
       "-std=c11",
       "-DR4NATIVE_FILE_IO",
       "-I${libraries}/Shared/Native",

@@ -39,7 +39,7 @@ $inputs = @($PSCommandPath, (Join-Path $PSScriptRoot 'Common.ps1'), $planPath,
 foreach ($directory in @((Join-Path $paths.unit 'Port'), (Join-Path $paths.unit 'Bindings/C'), $shared,
         (Join-Path $paths.libraries 'R4NAK/ThirdParty/stb'), (Join-Path $paths.libraries 'R4AMD/Port'),
         (Join-Path $paths.libraries 'R4AMD/ThirdParty/Mesa26.2.2/Original/src/amd/common'),
-        (Join-Path $paths.sdk 'Shared/C/include'), (Join-Path $paths.contract 'Generated/SDK/C/include'),
+        (Join-Path $paths.sdk 'Shared/C/include'), (Join-Path $paths.contract 'Generated/SDK/C/include'), (Join-Path $paths.contract 'Generated/Generation2/C/include'),
         (Join-Path $resource.Trim() 'include'))) {
     $inputs += @(Get-ChildItem -LiteralPath $directory -Recurse -File | ForEach-Object FullName)
 }
@@ -79,7 +79,7 @@ if (Test-Path -LiteralPath $record) {
 $flags = @($script:R4SdkNative.data.Build.codegen.'native-flags'.encoder_flags)+@('-isystem',(Join-Path $resource.Trim() 'include'),
     ('-I'+$include),('-I'+$shared),('-I'+(Join-Path $paths.unit 'Port')),('-I'+(Join-Path $paths.libraries 'R4AMD/Port')),
     ('-I'+(Join-Path $paths.unit 'Bindings/C')),('-I'+(Join-Path $paths.sdk 'Shared/C/include')),
-    ('-I'+(Join-Path $paths.contract 'Generated/SDK/C/include')))
+    ('-I'+(Join-Path $paths.contract 'Generated/SDK/C/include')), ('-I'+(Join-Path $paths.contract 'Generated/Generation2/C/include')))
 foreach ($path in @('codec/api/wels','codec/common/inc','codec/encoder/core/inc','codec/encoder/plus/inc',
         'codec/processing/interface','codec/processing/src/common','codec/processing/src/adaptivequantization',
         'codec/processing/src/downsample','codec/processing/src/scrolldetection','codec/processing/src/vaacalc')) {

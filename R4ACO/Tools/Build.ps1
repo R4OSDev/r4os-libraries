@@ -58,7 +58,7 @@ try {
     foreach($directory in @((Join-Path $libraries 'Shared/Native'),$roots.include,(Join-Path $libraries 'R4NAK/Port/Include'),
         (Join-Path $libraries 'R4NAK/ThirdParty/stb'),(Join-Path $roots.zig 'lib/libcxx'),(Join-Path $resource 'include'),
         (Join-Path $roots.zig 'lib/compiler_rt'),(Join-Path $roots.zig 'lib/std/math'),
-        (Join-Path $roots.sdk 'Shared/C/include'),(Join-Path $roots.contract 'Generated/SDK/C/include'))){
+        (Join-Path $roots.sdk 'Shared/C/include'),(Join-Path $roots.contract 'Generated/SDK/C/include'), (Join-Path $roots.contract 'Generated/Generation2/C/include'))){
         $inputs+=@(Get-ChildItem $directory -File -Recurse|ForEach-Object FullName)
     }
     foreach($provider in @('Math','Scan')){

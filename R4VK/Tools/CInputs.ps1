@@ -30,7 +30,7 @@ function Get-R4VKNativeCInputs {
     $contract = Resolve $repositories 'CONTRACT_ROOT'
     $headers = @((Join-Path $Mesa.unit 'Port/Include'), (Join-Path $MesaRoot 'CSource'),
         (Join-Path $ShaderRoot '.'), (Join-Path $MesaRoot 'Generated'),
-        (Join-Path $sdk 'Shared/C/include'), (Join-Path $contract 'Generated/SDK/C/include'),
+        (Join-Path $sdk 'Shared/C/include'), (Join-Path $contract 'Generated/SDK/C/include'), (Join-Path $contract 'Generated/Generation2/C/include'),
         (Join-Path $Mesa.libraries 'R4NV/Bindings/C'), (Join-Path $Mesa.libraries 'R4GFX/Bindings/C'))
     foreach ($directory in @('src/vulkan/util', 'src/vulkan/runtime', 'src/nouveau/vulkan',
                              'src', 'src/compiler', 'src/compiler/nir', 'src/util')) {
@@ -114,7 +114,7 @@ function Get-R4VKNativeCInputs {
     [pscustomobject]@{
         sources = @($files | Sort-Object -Unique); arguments = $cArgs; cpp_arguments = $cppArgs; host_build = $hostBuild; zig_root = $zigRoot
         header_roots = @((Join-Path $unit 'Port/Include'), (Join-Path $CompilerRoot 'NativeBindings'),
-            $hostBuild, (Join-Path $sdk 'Shared/C/include'), (Join-Path $contract 'Generated/SDK/C/include'),
+            $hostBuild, (Join-Path $sdk 'Shared/C/include'), (Join-Path $contract 'Generated/SDK/C/include'), (Join-Path $contract 'Generated/Generation2/C/include'),
             (Join-Path $Mesa.libraries 'R4NV/Bindings/C'), (Join-Path $Mesa.libraries 'R4GFX/Bindings/C'),
             (Join-Path $Mesa.unit 'Bindings/C'), (Join-Path $Mesa.libraries 'R4AMD/Bindings/C'),
             (Join-Path $Mesa.libraries 'R4GL/Port/Include'), (Join-Path $zigRoot 'lib/libcxx/include'),

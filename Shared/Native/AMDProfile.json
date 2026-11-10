@@ -112,6 +112,7 @@
     "-I${libraries}/Shared/Native",
     "-I${libraries}/R4VK/Bindings/C",
     "-I${sdk}/Shared/C/include",
-    "-I${contract}/Generated/SDK/C/include"
+    "-I${contract}/Generated/SDK/C/include",
+    "-I${contract}/Generated/Generation2/C/include"
   ]
 }

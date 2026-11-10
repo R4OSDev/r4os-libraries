@@ -47,7 +47,7 @@ $inputs = @($PSCommandPath, $paths.lock, $clang, $ar, $planPath, (Join-Path $pre
 foreach ($directory in @($roots.port, (Join-Path $paths.libraries 'Shared/Native'),
         (Join-Path $paths.libraries 'R4NAK/Port/Include'), (Join-Path $paths.libraries 'R4GFX/Bindings/C'),
         (Join-Path $paths.libraries 'R4VK/Bindings/C'),
-        (Join-Path $paths.sdk 'Shared/C/include'), (Join-Path $paths.contract 'Generated/SDK/C/include'),
+        (Join-Path $paths.sdk 'Shared/C/include'), (Join-Path $paths.contract 'Generated/SDK/C/include'), (Join-Path $paths.contract 'Generated/Generation2/C/include'),
         (Join-Path $paths.zig 'lib/libcxx'), (Join-Path $paths.zig 'lib/libcxxabi/include'),
         (Join-Path $resource.Trim() 'include'))) {
     $inputs += @(Get-ChildItem -LiteralPath $directory -File -Recurse | Where-Object Extension -ne '.zig' | ForEach-Object FullName)

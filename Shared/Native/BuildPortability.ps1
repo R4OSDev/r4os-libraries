@@ -139,7 +139,7 @@ try {
     $inputs = @($PSCommandPath,$planPath,$sourcesPath,$profilePath,$clang,$nm)
     foreach ($directory in @((Join-Path $unit 'Port'), (Join-Path $libraries 'R4GL/Port/Include'), (Join-Path $libraries 'R4NAK/Port/Include'),
             (Join-Path $libraries 'Shared/Native'), (Join-Path $libraries 'R4VK/Bindings/C'), (Join-Path $roots.sdk 'Shared/C/include'),
-            (Join-Path $roots.contract 'Generated/SDK/C/include'), (Join-Path $roots.zig 'lib/libcxx/include'), (Join-Path $resource.Trim() 'include'))) {
+            (Join-Path $roots.contract 'Generated/SDK/C/include'), (Join-Path $roots.contract 'Generated/Generation2/C/include'), (Join-Path $roots.zig 'lib/libcxx/include'), (Join-Path $resource.Trim() 'include'))) {
         if (Test-Path -LiteralPath $directory) { $inputs += @(Get-ChildItem -LiteralPath $directory -File -Recurse | ForEach-Object FullName) }
     }
     $identities = @(foreach ($path in $inputs | Sort-Object -Unique) { [ordered]@{path=[IO.Path]::GetRelativePath($workspace,$path).Replace('\','/'); sha256=(Hash $path)} })
