@@ -18,6 +18,7 @@ pub fn build(b: *std.Build) void {
     conformance.addIncludePath(b.path("Bindings/C"));
     conformance.addIncludePath(sdk.profile.c_include_root);
     conformance.addIncludePath(sdk.profile.contract_c_include_root);
+    conformance.addIncludePath(sdk.profile.contract_c_include_root2);
     conformance.addCSourceFile(.{ .file = b.path("Tests/Generated/contract_conformance.c"), .flags = &.{ "-std=c11", "-Wall", "-Wextra", "-Werror" } });
     const parity = b.createModule(.{ .root_source_file = b.path("Tests/graphics_parity.zig"), .target = b.graph.host });
     parity.addImport("r4os", host);

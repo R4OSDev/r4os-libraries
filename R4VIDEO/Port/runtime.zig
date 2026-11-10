@@ -61,13 +61,24 @@ pub fn enter(owner: *Owner) ?Scope {
 extern fn r4video_ffmpeg_prepare() callconv(.c) c_int;
 extern fn r4video_ffmpeg_finish() callconv(.c) c_int;
 extern fn r4native_stdio_finish() callconv(.c) c_int;
-pub fn bind(raw: *const a.R4XStartContext) bool {
-    const bundle = r.program.bundleValueFromR4XStart(raw) orelse return false;
-    const sys = bundle.sys orelse return false;
-    if (sys.abi_version < 23 or sys.size < @offsetOf(a.R4XStartR4Sys, "program_exit") + 8) return false;
+fn requiredSystem(sys: anytype) bool {
     inline for (.{ "write", "program_exit", "cpu_capacity", "vm_reserve", "vm_commit", "vm_release", "program_local_get", "program_local_publish", "monotonic_clock", "sleep_ticks" }) |field|
-        if (@field(sys.*, field) == 0) return false;
-    if (!native.threads.bind(sys) or !native.application.bind(raw) or !lifecycle.bind()) return false;
+        if (!native.system.reaches(sys, field)) return false;
+    return true;
+}
+pub fn bindAddress(address: u64) bool {
+    const input = native.caller.Input.init(address) catch return false;
+    switch (input) {
+        .legacy => |view| {
+            const sys = view.sys orelse return false;
+            if (sys.abi_version < 23 or !requiredSystem(sys) or !native.threads.bind(sys)) return false;
+        },
+        .generation2 => |view| {
+            const sys = view.system() orelse return false;
+            if (!requiredSystem(sys) or !native.threads.bind2(sys)) return false;
+        },
+    }
+    if (!native.application.bindAddress(address) or !lifecycle.bind()) return false;
     bound.store(true, .release);
     const value = process() orelse return false;
     if (value.phase.load(.acquire) >= 2) return false;
@@ -78,7 +89,7 @@ pub fn bind(raw: *const a.R4XStartContext) bool {
     return previous == null or previous.? == 1;
 }
 pub fn applicationBound() bool {
-    return bound.load(.acquire) and native.application.bundle() != null;
+    return bound.load(.acquire) and native.application.snapshot() != null;
 }
 // Public calls are non-reentrant and retain no language TLS across return.
 // Native pthread entries instead use the exact thread lifecycle destructor.
@@ -86,7 +97,7 @@ pub fn releaseCaller() bool {
     return native.thread_local.releaseCurrent();
 }
 export fn r4video_thread_tryjoin(handle: *const a.ProgramJoinHandle, output: ?*c_int) callconv(.c) c_int {
-    const join: a.R4SysFns.thread_handle_join = @ptrFromInt(native.threads.table().thread_handle_join);
+    const join = native.system.required("thread_handle_join");
     var result: i32 = 0;
     return switch (join(handle, 0, &result)) {
         a.thread_ok => blk: {
@@ -144,7 +155,7 @@ export fn r4video_worker_release(owner: *Owner) callconv(.c) void {
     owner.workers.release(1);
 }
 export fn r4video_condition_close(condition: *native.threading.Condition) callconv(.c) c_int {
-    const host = native.threading.Host.fromTable(native.threads.table()) orelse return native.threading.failed;
+    const host = native.threading.Host.bound() orelse return native.threading.failed;
     return condition.destroy(&host);
 }
 export fn r4video_process_state(key: *const anyopaque, bytes: usize, alignment: usize, initialize: native.process_local.Initializer) callconv(.c) ?*anyopaque {
@@ -197,10 +208,9 @@ export fn __emutls_get_address(control: *const native.thread_local.Control) call
     return native.thread_local.getAddress(control) orelse fatal("R4VIDEO: TLS unavailable\n");
 }
 pub fn fatal(message: [*:0]const u8) noreturn {
-    const sys = native.threads.table();
-    const write: a.R4SysFns.write = @ptrFromInt(sys.write);
+    const write = native.system.required("write");
     _ = write(message, @intCast(std.mem.len(message)));
-    const stop: a.R4SysFns.program_exit = @ptrFromInt(sys.program_exit);
+    const stop = native.system.required("program_exit");
     _ = stop(-1, a.program_exit_reason_failed);
     @trap();
 }
@@ -208,7 +218,7 @@ export fn abort() callconv(.c) noreturn {
     fatal("R4VIDEO: native abort\n");
 }
 export fn r4native_console_write(bytes: [*]const u8, count: u32) callconv(.c) i32 {
-    const write: a.R4SysFns.write = @ptrFromInt(native.threads.table().write);
+    const write = native.system.required("write");
     return write(bytes, count);
 }
 export fn r4nak_port_assert(message: [*:0]const u8, _: [*:0]const u8, _: c_int) callconv(.c) noreturn {

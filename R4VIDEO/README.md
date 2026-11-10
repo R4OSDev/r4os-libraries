@@ -1,5 +1,13 @@
 ﻿# R4VIDEO
 
+In 0.90.48, the public runtime admits real generation2 application records
+through the shared Native caller snapshot, system and synchronization owners.
+The snapshot stays in process-owned storage; graphics contexts use its actual
+table generation and checked function prefixes. VIDEO_V1:1 and codec sources
+remain independent of the platform Query2:2 binding. Explicit legacy startup
+remains available during the staged consumer migration. Neither accepted
+packets nor returned software frames acknowledge physical presentation.
+
 Independent compressed-video library and compiled media-host facade for roadmap 0.79.40.
 VIDEO_V1 covers bounded input, decoded BO-plane leases, timestamps, reorder,
 Drain/Flush/Close and explicit backend selection. `zig build test` combines

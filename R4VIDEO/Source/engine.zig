@@ -103,7 +103,7 @@ pub fn Implementation(comptime ff: type) type {
             value.* = .{};
         }
         fn host() sync.Host {
-            return sync.Host.fromTable(native.threads.table()).?;
+            return sync.Host.bound().?;
         }
         fn lock(mutex: *sync.Mutex) void {
             if (mutex.lock(&host(), sync.forever) != sync.success) runtime.fatal("R4VIDEO: owner lock failed\n");
@@ -122,10 +122,10 @@ pub fn Implementation(comptime ff: type) type {
             return native.process_local.lookup(Process, &key) catch null;
         }
         fn buffers() r.gfx_buffers.Context {
-            return .{ .base = r.program.Context.initBundle(native.application.bundle().?) };
+            return .{ .base = native.application.snapshot().?.base() };
         }
         fn queues() r.gfx_queue.Context {
-            return .{ .base = r.program.Context.initBundle(native.application.bundle().?) };
+            return .{ .base = native.application.snapshot().?.base() };
         }
         fn payload(value: anytype) bool {
             return value.version == 1 and value.size == @sizeOf(@TypeOf(value));
@@ -276,10 +276,9 @@ pub fn Implementation(comptime ff: type) type {
         }
         fn gpuDevice(adapter: u32, provider: gpu.Provider, codec: u32) !gpu.Device {
             if (adapter == 0) return error.Unsupported;
-            const bundle = native.application.bundle() orelse return error.Unsupported;
-            const base = r.program.Context.initBundle(bundle);
-            const draw = bundle.draw orelse return error.Unsupported;
-            if (draw.abi_version < a.gfx_virtual_layout_api_version) return error.Unsupported;
+            const caller = native.application.snapshot() orelse return error.Unsupported;
+            const base = caller.base();
+            if (caller.* == .legacy and (caller.legacy.bundle.draw orelse return error.Unsupported).abi_version < a.gfx_virtual_layout_api_version) return error.Unsupported;
             inline for (.{ "gfx_queue_backend_info", "gfx_queue_backend_properties", "gfx_queue_open", "gfx_queue_close", "gfx_queue_submit_native", "gfx_fence_query", "gfx_fence_wait", "gfx_fence_cancel", "gfx_fence_release", "gfx_buffer_create", "gfx_buffer_describe", "gfx_buffer_release", "gfx_buffer_map_persistent", "gfx_buffer_unmap", "gfx_native_start", "gfx_native_wait", "gfx_native_receive", "gfx_native_close", "gfx_virtual_start", "gfx_virtual_query", "gfx_virtual_close", "gfx_virtual_wait" }) |field|
                 if (!base.hasDrawFn(field)) return error.Unsupported;
             return gpu.Device.queryProvider(base, adapter, if (codec == c.codec_jpeg) .jpeg else .decode, provider);
@@ -289,14 +288,13 @@ pub fn Implementation(comptime ff: type) type {
             if (!pointerValid(c.R4VideoStartup, input) or !pointerValid(c.R4VideoRuntime, output)) return c.error_invalid;
             const config = input.*;
             if (!payload(config) or config.memory_limit == 0 or config.memory_limit > std.math.maxInt(usize) or
-                config.max_decoders == 0 or config.max_decoders > max_decoders or config.thread_limit > 256 or
-                config.application == 0 or config.application % @alignOf(a.R4XStartContext) != 0) return c.error_invalid;
-            const bundle = r.program.bundleValueFromR4XStart(@ptrFromInt(config.application)) orelse return c.error_invalid;
-            const draw = bundle.draw orelse return c.error_unsupported;
+                config.max_decoders == 0 or config.max_decoders > max_decoders or config.thread_limit > 256) return c.error_invalid;
+            const caller = native.caller.Input.init(config.application) catch return c.error_invalid;
+            const base = caller.base();
             inline for (.{ "gfx_buffer_create", "gfx_buffer_describe", "gfx_buffer_release", "gfx_buffer_map", "gfx_buffer_unmap", "gfx_fence_query", "gfx_fence_release" }) |field| {
-                if (draw.size < @offsetOf(a.R4XStartR4Draw, field) + @sizeOf(usize) or @field(draw.*, field) == 0) return c.error_unsupported;
+                if (!base.hasDrawFn(field)) return c.error_unsupported;
             }
-            if (!runtime.bind(@ptrFromInt(config.application))) return c.error_closed;
+            if (!runtime.bindAddress(config.application)) return c.error_closed;
             const p = native.process_local.getOrCreate(Process, &key, initialize) orelse return c.error_no_memory;
             lock(&p.mutex);
             if (!safeOutput(p, output)) {

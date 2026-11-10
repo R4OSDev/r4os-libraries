@@ -45,19 +45,30 @@ pub fn enter(owner: *Owner) ?Scope {
     thread.owner = owner;
     return result;
 }
-pub fn bind(raw: *const a.R4XStartContext) bool {
-    const bundle = r.program.bundleValueFromR4XStart(raw) orelse return false;
-    const sys = bundle.sys orelse return false;
-    if (sys.abi_version < 23 or sys.size < @offsetOf(a.R4XStartR4Sys, "program_exit") + 8) return false;
+fn requiredSystem(sys: anytype) bool {
     inline for (.{ "write", "program_exit", "cpu_capacity", "vm_reserve", "vm_commit", "vm_release", "program_local_get", "program_local_publish", "monotonic_clock", "sleep_ticks" }) |field|
-        if (@field(sys.*, field) == 0) return false;
-    if (!native.threads.bind(sys) or !native.application.bind(raw)) return false;
+        if (!native.system.reaches(sys, field)) return false;
+    return true;
+}
+pub fn bindAddress(address: u64) bool {
+    const input = native.caller.Input.init(address) catch return false;
+    switch (input) {
+        .legacy => |view| {
+            const sys = view.sys orelse return false;
+            if (sys.abi_version < 23 or !requiredSystem(sys) or !native.threads.bind(sys)) return false;
+        },
+        .generation2 => |view| {
+            const sys = view.system() orelse return false;
+            if (!requiredSystem(sys) or !native.threads.bind2(sys)) return false;
+        },
+    }
+    if (!native.application.bindAddress(address)) return false;
     bound.store(true, .release);
     const capacity = native.process.cpuCapacity() orelse return false;
     return capacity.available_cpus != 0 and native.time.read() != null;
 }
 pub fn applicationBound() bool {
-    return bound.load(.acquire) and native.application.bundle() != null;
+    return bound.load(.acquire) and native.application.snapshot() != null;
 }
 pub fn releaseCaller() bool {
     return native.thread_local.releaseCurrent();
@@ -93,7 +104,7 @@ pub const Worker = struct {
         self.charged = true;
         self.ready = false;
         self.admitted = false;
-        const host = native.threading.Host.fromTable(native.threads.table()).?;
+        const host = native.threading.Host.bound().?;
         if (self.startup_condition.init(&host) != native.threading.success) {
             self.retire() catch fatal("R4ENC: failed startup retirement\n");
             return false;
@@ -124,7 +135,7 @@ pub const Worker = struct {
     fn run(argument: ?*anyopaque) callconv(.c) c_int {
         const self: *Worker = @ptrCast(@alignCast(argument.?));
         const scope = enter(self.owner);
-        const host = native.threading.Host.fromTable(native.threads.table()).?;
+        const host = native.threading.Host.bound().?;
         if (self.startup_mutex.lock(&host, native.threading.forever) != native.threading.success) fatal("R4ENC: startup lock failed\n");
         self.admitted = scope != null;
         self.ready = true;
@@ -138,7 +149,7 @@ pub const Worker = struct {
     pub fn tryJoin(self: *Worker) error{ Busy, Internal }!void {
         if (!self.charged) return error.Internal;
         if (self.handle.thread_generation != 0) {
-            const join: a.R4SysFns.thread_handle_join = @ptrFromInt(native.threads.table().thread_handle_join);
+            const join = native.system.required("thread_handle_join");
             var result: i32 = 0;
             switch (join(&self.handle, 0, &result)) {
                 a.thread_ok => {},
@@ -150,7 +161,7 @@ pub const Worker = struct {
         try self.retire();
     }
     fn retire(self: *Worker) error{Internal}!void {
-        const host = native.threading.Host.fromTable(native.threads.table()).?;
+        const host = native.threading.Host.bound().?;
         // Both objects remain live until exact join, including a successful
         // startup: the child may still be completing its unlock notification.
         if (self.startup_condition.destroy(&host) != native.threading.success or
@@ -183,10 +194,9 @@ export fn __emutls_get_address(value: *const native.thread_local.Control) callco
     return native.thread_local.getAddress(value) orelse fatal("R4ENC: TLS unavailable\n");
 }
 pub fn fatal(message: [*:0]const u8) noreturn {
-    const sys = native.threads.table();
-    const write: a.R4SysFns.write = @ptrFromInt(sys.write);
+    const write = native.system.required("write");
     _ = write(message, @intCast(std.mem.len(message)));
-    const stop: a.R4SysFns.program_exit = @ptrFromInt(sys.program_exit);
+    const stop = native.system.required("program_exit");
     _ = stop(-1, a.program_exit_reason_failed);
     @trap();
 }
@@ -197,7 +207,7 @@ export fn r4nak_port_assert(message: [*:0]const u8, _: [*:0]const u8, _: c_int) 
     fatal(message);
 }
 export fn r4native_console_write(bytes: [*]const u8, count: u32) callconv(.c) i32 {
-    const write: a.R4SysFns.write = @ptrFromInt(native.threads.table().write);
+    const write = native.system.required("write");
     return write(bytes, count);
 }
 export fn r4enc_monotonic_us() callconv(.c) i64 {

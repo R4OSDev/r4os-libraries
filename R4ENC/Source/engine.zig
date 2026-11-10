@@ -61,7 +61,7 @@ pub fn Implementation(comptime codec: type) type {
             value.* = .{};
         }
         fn host() sync.Host {
-            return sync.Host.fromTable(native.threads.table()).?;
+            return sync.Host.bound().?;
         }
         fn lock(mutex: *sync.Mutex) void {
             if (mutex.lock(&host(), sync.forever) != sync.success) runtime.fatal("R4ENC: owner lock failed\n");
@@ -80,7 +80,7 @@ pub fn Implementation(comptime codec: type) type {
             return native.process_local.lookup(Process, &key) catch null;
         }
         fn buffers() r.gfx_buffers.Context {
-            return .{ .base = r.program.Context.initBundle(native.application.bundle().?) };
+            return .{ .base = native.application.snapshot().?.base() };
         }
         fn queues() r.gfx_queue.Context {
             return .{ .base = buffers().base };
@@ -184,15 +184,12 @@ pub fn Implementation(comptime codec: type) type {
             if (!valid(c.R4EncStartup, input_config) or !valid(c.R4EncRuntime, output)) return c.error_invalid;
             const config = input_config.*;
             if (!payload(config) or config.memory_limit == 0 or config.memory_limit > std.math.maxInt(usize) or
-                config.max_encoders == 0 or config.max_encoders > limit or config.thread_limit > limit or
-                config.application == 0 or config.application % @alignOf(a.R4XStartContext) != 0 or
-                config.application > std.math.maxInt(usize) - @sizeOf(a.R4XStartContext)) return c.error_invalid;
-            const raw: *const a.R4XStartContext = @ptrFromInt(config.application);
-            const bundle = r.program.bundleValueFromR4XStart(raw) orelse return c.error_invalid;
-            const draw = bundle.draw orelse return c.error_unsupported;
+                config.max_encoders == 0 or config.max_encoders > limit or config.thread_limit > limit) return c.error_invalid;
+            const caller = native.caller.Input.init(config.application) catch return c.error_invalid;
+            const base = caller.base();
             inline for (.{ "gfx_buffer_import", "gfx_buffer_describe", "gfx_buffer_release", "gfx_buffer_map", "gfx_buffer_unmap", "gfx_fence_query" }) |field|
-                if (draw.size < @offsetOf(a.R4XStartR4Draw, field) + 8 or @field(draw.*, field) == 0) return c.error_unsupported;
-            if (!runtime.bind(raw)) return c.error_unsupported;
+                if (!base.hasDrawFn(field)) return c.error_unsupported;
+            if (!runtime.bindAddress(config.application)) return c.error_unsupported;
             const p = native.process_local.getOrCreate(Process, &key, initialize) orelse return c.error_no_memory;
             lock(&p.mutex);
             defer unlock(&p.mutex);

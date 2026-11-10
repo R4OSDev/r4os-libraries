@@ -1,5 +1,13 @@
 ﻿# R4ENC
 
+In 0.90.48, the public runtime admits real generation2 application records
+through the shared Native caller snapshot, system and synchronization owners.
+The snapshot stays in process-owned storage; graphics contexts use its actual
+table generation and checked function prefixes. ENCODE_V1:1 and codec sources
+remain independent of the platform Query2:2 binding. Explicit legacy startup
+remains available during the staged consumer migration. Packet acceptance
+does not acknowledge physical encoding hardware or file persistence.
+
 Native NVIDIA work in 0.82.31 corrects the picture controls, completion
 semantics and GR-to-NVENC surface handoff. SET_OBJECT selects the original
 NVC56F software engine. The GR preparer awaits each exact asynchronous

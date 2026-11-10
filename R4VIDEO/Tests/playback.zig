@@ -37,7 +37,9 @@ const AudioModel = struct {
     }
     fn close(_: u32) callconv(.c) i32 { return 0; }
     fn clock(output: *a.MonotonicClockInfo) callconv(.c) i32 {
-        output.* = .{ .event_effective_hz = 1000 }; return 1;
+        output.* = .{ .flags = a.monotonic_clock_flag_valid, .source = 1, .generation = 1,
+            .frequency_hz = a.monotonic_clock_frequency_hz, .resolution_ns = 1,
+            .instant_ns = 1_000_000_000, .event_requested_hz = 1000, .event_effective_hz = 1000 }; return 1;
     }
     fn call(_: u32, op: u16, bytes: [*]const u8, len: u32, header: *a.ServiceMessageHeader, response: [*]u8, capacity: u32, _: u64) callconv(.c) i32 {
         std.debug.assert(capacity >= @sizeOf(a.AudioServiceStreamResult));
@@ -69,7 +71,19 @@ const AudioModel = struct {
         table.service_open = @intFromPtr(&open); table.service_close = @intFromPtr(&close);
         table.service_call = @intFromPtr(&call); table.monotonic_clock = @intFromPtr(&clock);
         const bundle: r4os.program.Bundle = .{ .raw = undefined, .sys = &table };
-        const api: r4os.app_audio.Audio = .{ .sys = r4os.r4sys.Context.init(&bundle), .raw = r4os.r4audio.Context.init(&bundle) };
+        try checkBase(r4os.program.Context.initBundle(&bundle));
+        const a2 = r4os.platform2.abi;
+        var table2: a2.R4XStartR4Sys2 = .{};
+        table2.service_open = @intFromPtr(&open); table2.service_close = @intFromPtr(&close);
+        table2.service_call = @intFromPtr(&call); table2.monotonic_clock = @intFromPtr(&clock);
+        var imports = [_]a2.R4XStartImport{.{ .group_id = 1, .resolved_version = a2.query_version, .table = @intFromPtr(&table2) }};
+        var raw: a2.R4XStartContext2 = .{ .imports = @intFromPtr(&imports), .import_count = imports.len };
+        const caller = try r4os.platform2.Context.init(&raw);
+        try checkBase(.{ .generation2 = &caller });
+    }
+    fn checkBase(base: r4os.program.Context) !void {
+        calls = 0; accepted = 0; closes = 0; fail_write = false; missing = false; lost = false;
+        const api: r4os.app_audio.Audio = .{ .sys = .{ .base = base }, .raw = .{ .base = base } };
         var storage: [1920]u8 = undefined;
         for (&expected, 0..) |*byte, i| byte.* = @truncate(i * 137 + 19);
         var owner = try p.audio.Audio.init(api, &storage, 48000, 2);
