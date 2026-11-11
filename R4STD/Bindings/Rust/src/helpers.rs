@@ -37,6 +37,27 @@ impl<'a> Standard<'a> {
             _bytes: PhantomData,
         })
     }
+    pub fn open2(app: &'a r4os_sdk::app2::App<'_>) -> Result<Self> {
+        let mut session = storage();
+        if scalar(unsafe {
+            c::R4Library_openSession2(
+                0,
+                session.as_mut_ptr(),
+                core::ptr::from_ref(app.start_context()).cast(),
+            )
+        })? == 0
+            || scalar(unsafe {
+                c::R4Std_init2(0, core::ptr::from_ref(app.start_context()).cast())
+            })? == 0
+        {
+            return Err(Error::Unavailable);
+        }
+        Ok(Self {
+            session,
+            _app: PhantomData,
+            _local: PhantomData,
+        })
+    }
     pub fn canonicalize<'b>(&self, bytes: &[u8], output: &'b mut [u8]) -> Result<&'b str> {
         let mut native = MaybeUninit::uninit();
         required(unsafe {

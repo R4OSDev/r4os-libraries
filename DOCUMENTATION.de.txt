@@ -111,3 +111,15 @@ Fingerprint bleiben bytegleich, Library-APIs und R4L-Artefakte unveraendert.
 Bestehende C/Rust-Helferfaelle und fuenf Besitz-/Unsafe-Negativfaelle bestehen.
 Der Desktop-Verbrauch besteht mit13 Fensterfaellen und3 Geometriefaellen.
 Anschluss und native Grenze: Docs/API/GuiWindowAppearance.txt.
+
+Start2-Helfer ab Quellpaket0.64.57
+---------------------------------
+Shared/Language/support.zig stellt openSession2, application2 und die
+abgeleiteten System-/Zeichenfassaden sowie colorClient2 und deviceClient2
+bereit. Der Besitzer initialisiert Anwendung und Session an ihrer finalen
+Adresse und haelt sie fuer alle abgeleiteten Leihen resident.
+R4STD/Bindings/Rust bietet Standard::open2 fuer den wirklichen App2-Kontext.
+Der compilergepruefte Helferkatalog erzeugt C-Header, Rust-Projektion und
+Fingerprint gemeinsam. Aufrufer lesen anonyme Ergebnistypen aus der jeweils
+gepinnten Projektion. Fachliche Runtime-R4L-Schnittstellen behalten ihre
+libraryeigenen benannten Vertraege und getrennten technischen Query2-Nachweis.
