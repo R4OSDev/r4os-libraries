@@ -100,6 +100,7 @@ $hostBuild = Join-Path ([IO.Path]::GetDirectoryName($mesa.source)) ('Build-' + $
 # The shared compiler owns ABI flags and freestanding headers. Keep its script
 # variables private; this consumer only takes the C options and macro target.
 function CompilerInputs {
+    $workspace = $mesa.workspace
     $unit = $nakUnit; $buildRoot = $compiler; $source = $mesa.source
     $overlay = Join-Path $compiler 'CSource'
     . (Join-Path $nakUnit 'Tools/CInputs.ps1')
