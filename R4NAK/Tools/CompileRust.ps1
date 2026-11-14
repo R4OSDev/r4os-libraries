@@ -1,12 +1,20 @@
 # Copyright 2026 R4. SPDX-License-Identifier: Apache-2.0
 $target = Join-Path $unit 'Port/Rust/r4os-x86_64.json'
+# Panic locations and crate source names must not embed a host checkout or
+# the hash-named native cache. Apply the same logical roots as the C build.
+$pathMaps = @()
+foreach ($mapping in @(@($workspace,'/R4OS'),@($buildRoot,'/R4NAK/Build'))) {
+    foreach ($prefix in @([string]$mapping[0],([string]$mapping[0]).Replace('\','/')) | Select-Object -Unique) {
+        $pathMaps += "--remap-path-prefix=$prefix=$($mapping[1])"
+    }
+}
 $rustSources = Join-Path $foreign ('rust-src-'+$script:R4SdkNative.data.Tools.tools.graphics.rustc+'/rust-src/lib/rustlib/src/rust/library')
 $out = Join-Path $buildRoot 'Sysroot/lib/rustlib/r4os-x86_64/lib'
 [IO.Directory]::CreateDirectory($out) | Out-Null
 $savedBootstrap = [Environment]::GetEnvironmentVariable('RUSTC_BOOTSTRAP')
 $env:RUSTC_BOOTSTRAP = $script:R4SdkNative.data.Build.codegen.'native-flags'.nak_bootstrap
 try {
-    $common = @(Expand-R4SdkNativeFlags $script:R4SdkNative 'nak_sysroot_flags' @{target=$target;out=$out})
+    $common = @(Expand-R4SdkNativeFlags $script:R4SdkNative 'nak_sysroot_flags' @{target=$target;out=$out}) + $pathMaps
     & $tools.rustc @common --crate-name core (Join-Path $rustSources 'core/src/lib.rs') -o (Join-Path $out 'libcore.rlib')
     if ($LASTEXITCODE) { throw 'core failed' }
     & $tools.rustc @common --crate-name compiler_builtins --extern "core=$(Join-Path $out 'libcore.rlib')" `
@@ -27,7 +35,7 @@ $out = Join-Path $buildRoot 'RustBuild'
 function Compile-Rust([string]$name, [string]$path, [string[]]$deps = @(), [string[]]$flags = @()) {
     $crateType = if ($name -eq 'nak_rs') { 'staticlib' } else { 'rlib' }
     $extension = if ($name -eq 'nak_rs') { '.a' } else { '.rlib' }
-    $argv = @(Expand-R4SdkNativeFlags $script:R4SdkNative 'nak_crate_flags' @{crate_type=$crateType;name=$name;target=$target;sysroot=(Join-Path $buildRoot 'Sysroot');out=$out})
+    $argv = @(Expand-R4SdkNativeFlags $script:R4SdkNative 'nak_crate_flags' @{crate_type=$crateType;name=$name;target=$target;sysroot=(Join-Path $buildRoot 'Sysroot');out=$out}) + $pathMaps
     foreach ($dep in $deps) { $argv += @('--extern', "$dep=$(Join-Path $out ('lib'+$dep+'.rlib'))") }
     $argv += $flags
     $argv += @($path, '-o', (Join-Path $out ('lib'+$name+$extension)))

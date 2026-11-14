@@ -39,6 +39,16 @@ foreach ($a in @('CONST','FLATTEN','MALLOC','PURE','UNUSED','WARN_UNUSED_RESULT'
     $cArgs += "-DHAVE_FUNC_ATTRIBUTE_$a"
 }
 
+# Keep compiler diagnostics independent of the checkout and native cache key.
+# More specific mappings follow the workspace mapping. Both path spellings
+# are accepted because Clang and Meson may normalize Windows source names.
+foreach ($mapping in @(@($workspace,'/R4OS'),@($buildRoot,'/R4NAK/Build'),
+        @($source,'/R4NAK/Mesa'),@($hostBuild,'/R4NAK/Generated'),@($overlay,'/R4NAK/Mesa'))) {
+    foreach ($prefix in @([string]$mapping[0],([string]$mapping[0]).Replace('\','/')) | Select-Object -Unique) {
+        $cArgs += "-ffile-prefix-map=$prefix=$($mapping[1])"
+    }
+}
+
 # Select job-owned overlays and bindings generated for the target ABI.
 $cPaths=@(foreach($path in $cPaths) {
     $relative=[IO.Path]::GetRelativePath($source,$path)
