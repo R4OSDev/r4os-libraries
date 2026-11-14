@@ -9,6 +9,7 @@ function Get-R4VKNativeCInputs {
     )
     # Reuse the compiler owner's ABI flags and NIR/SPIR-V source selection.
     # Dot-sourced variables stay inside this function's scope.
+    $workspace = $Mesa.workspace
     $unit = Join-Path $Mesa.libraries 'R4NAK'
     $buildRoot = $CompilerRoot
     $source = $Mesa.source
