@@ -14,6 +14,8 @@ pub const max_pixels: usize = 4 * 1024 * 1024;
 // input/geometry visits, edge preparation, ordering and sample work, not time.
 pub const max_render_work: u64 = 128 * 1024 * 1024;
 pub const max_render_visits: usize = 16 * 1024;
+pub const max_row_workspace_bytes: usize = (max_clip_depth + 1) * max_path_points *
+    (@sizeOf(RasterEdge) + @sizeOf(usize) + @sizeOf(Crossing)) + 4096;
 
 const none: u16 = std.math.maxInt(u16);
 
@@ -608,6 +610,7 @@ pub fn render(source: []const u8, pixels: []u32, width: u32, height: u32, scratc
     }
     var renderer = Renderer{
         .allocator = allocator,
+        .scratch = &fixed,
         .document = &document,
         .pixels = pixels[0..count],
         .width = width,
@@ -966,6 +969,7 @@ const RasterRows = struct {
 
 const Renderer = struct {
     allocator: std.mem.Allocator,
+    scratch: *std.heap.FixedBufferAllocator,
     document: *const Document,
     pixels: []u32,
     width: u32,
@@ -1239,6 +1243,11 @@ const Renderer = struct {
             bounds.bottom = @min(bounds.bottom, clip_bounds.bottom);
         }
         if (bounds.right <= bounds.left or bounds.bottom <= bounds.top) return;
+        // All row arrays are temporary and no pointer to them escapes paint.
+        // Rewind together: separate allocator frees can retain alignment gaps
+        // and prevent earlier arrays from being reclaimed by the fixed arena.
+        const scratch_start = self.scratch.end_index;
+        defer self.scratch.end_index = scratch_start;
         var rows = try RasterRows.init(self.allocator, geometry, radius != null, radius orelse 0, &self.work);
         defer rows.deinit();
         var clip_rows: [max_clip_depth]RasterRows = undefined;

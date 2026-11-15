@@ -37,7 +37,7 @@ test gate:
 Tests cover the contract, provider, real decoder paths, runtime table, and an
 independent C consumer.
 
-R4IMG 0.3.8 rasterizes SVG fills and clips with sorted active row edges and
+R4IMG 0.3.9 rasterizes SVG fills and clips with sorted active row edges and
 intersection sweeps at the existing four sample positions. Strokes retain
 their distance predicate with a conservative row filter. Glyph pixels use
 stack quads and the same sample/blend path, preserving separate alpha blends.
@@ -45,9 +45,12 @@ Each render shares a budget across shapes, text, clips and use expansions:
 128 * 1024 * 1024 work units and at most 16 * 1024 visited render/clip nodes.
 Work units account for input/geometry visits, edge preparation, ordering and
 sample work; they are not time or CPU-cycle measurements. Exceeding either
-bound returns TooLarge through the existing status. Public ABI layouts and
-scratch calculation remain unchanged. The existing provider test step covers
-the SVG source tests, including one added use/glyph budget regression.
+bound returns TooLarge through the existing status. Public ABI layouts remain
+unchanged. The SVG scratch query includes a bounded row-workspace reserve;
+all temporary row arrays are rewound together after each paint. Detailed
+curves remain decodable at icon sizes using the advertised scratch alone.
+The existing provider step covers the SVG tests, including one added
+use/glyph budget regression; the decoder SVG case covers detailed tiny output.
 
 Color-aware consumers additionally import PNG_V1 for PNG metadata, ICC
 extraction and full-precision RGBA16 samples, or RASTER_V1 for JPEG ICC/Exif

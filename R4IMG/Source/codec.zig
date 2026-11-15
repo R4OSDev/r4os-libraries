@@ -239,7 +239,15 @@ pub fn scratchBytesFor(info: Info, encoded_bytes: usize) Error!usize {
         const total = std.math.add(usize, pixel_work, source_work) catch return error.TooLarge;
         const with_margin = std.math.add(usize, total, 128 * 1024) catch return error.TooLarge;
         if (with_margin > max_scratch_bytes) return error.TooLarge;
-        return with_margin;
+        // Row arrays need at most 40 bytes per point on x86_64 in addition
+        // to the existing geometry's >=8 bytes per point. Reserve at most
+        // five times the original bound, capped by all simultaneous row sets.
+        // Large target images therefore do not multiply their whole reserve.
+        const proportional_rows = std.math.mul(usize, with_margin, 5) catch return error.TooLarge;
+        const row_work = @min(proportional_rows, svg.max_row_workspace_bytes);
+        const required = std.math.add(usize, with_margin, row_work) catch return error.TooLarge;
+        if (required > max_scratch_bytes) return error.TooLarge;
+        return required;
     }
     // stb_image can retain component, coefficient, IDCT and RGBA workspaces at
     // the same time, especially for progressive JPEG. Keep this caller-owned

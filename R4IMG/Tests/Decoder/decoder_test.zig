@@ -214,6 +214,29 @@ test "SVG fixture uses the bounded common decoder and reports links" {
     try std.testing.expectEqual(@as(i32, 56), scaled_links.y);
     try std.testing.expectEqual(@as(i32, 24), scaled_links.width);
     try std.testing.expectEqual(@as(i32, 16), scaled_links.height);
+
+    // Detailed source geometry can remain large at icon output size. The
+    // advertised scratch must include row workspace, independent of pixels.
+    var detailed: [32 * 1024]u8 = undefined;
+    const prefix = "<svg width='1' height='1' viewBox='0 0 4096 4096'><path d='M0 0 ";
+    @memcpy(detailed[0..prefix.len], prefix);
+    var length = prefix.len;
+    for (0..128) |_| {
+        const curves = "C0 4096 4096 0 4096 4096 C4096 0 0 4096 0 0 ";
+        @memcpy(detailed[length .. length + curves.len], curves);
+        length += curves.len;
+    }
+    const suffix = "z'/></svg>";
+    @memcpy(detailed[length .. length + suffix.len], suffix);
+    length += suffix.len;
+    const icon_info = try r4img.r4imgProbe(detailed[0..length], "image/svg+xml");
+    const icon_scratch = try std.testing.allocator.alloc(u8, try r4img.scratchBytesFor(icon_info, length));
+    defer std.testing.allocator.free(icon_scratch);
+    var icon_pixels: [1]u32 = undefined;
+    const icon = try r4img.r4imgDecode(detailed[0..length], "image/svg+xml", &icon_pixels, icon_scratch);
+    try std.testing.expectEqual(@as(u32, 1), icon.info.width);
+    try std.testing.expectEqual(@as(u32, 1), icon.info.height);
+    try std.testing.expectEqual(@as(u32, 0), icon.pixels[0]);
 }
 
 test "malformed MIME truncated data and decoded-size limits fail closed" {
