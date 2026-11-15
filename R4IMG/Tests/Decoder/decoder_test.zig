@@ -246,9 +246,14 @@ test "malformed MIME truncated data and decoded-size limits fail closed" {
     try std.testing.expectError(error.TooLarge, too_large.pixelCount());
     try std.testing.expectError(error.UnsupportedFormat, r4img.r4imgProbe("<!ENTITY x SYSTEM 'file'><svg/>", "image/svg+xml"));
     var invalid_pixels: [64]u32 = undefined;
-    var invalid_scratch: [160 * 1024]u8 = undefined;
+    const unsupported_svg = "<svg width='8' height='8'><use href='https://example.test/remote.svg#x'/></svg>";
+    const unsupported_info = try r4img.r4imgProbe(unsupported_svg, "image/svg+xml");
+    // Satisfy the scratch contract so this case reaches the same unsupported
+    // external-reference boundary even when the workspace estimate changes.
+    const invalid_scratch = try std.testing.allocator.alloc(u8, try r4img.scratchBytesFor(unsupported_info, unsupported_svg.len));
+    defer std.testing.allocator.free(invalid_scratch);
     try std.testing.expectError(error.UnsupportedFeature, r4img.r4imgDecodeSvg(
-        "<svg width='8' height='8'><use href='https://example.test/remote.svg#x'/></svg>",
+        unsupported_svg,
         "image/svg+xml",
         invalid_pixels[0..],
         invalid_scratch[0..],
