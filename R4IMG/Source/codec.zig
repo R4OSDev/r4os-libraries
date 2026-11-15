@@ -58,8 +58,7 @@ extern fn r4img_stbi_decode(
     height: *c_int,
     channels: *c_int,
 ) callconv(.c) c_int;
-extern fn r4img_stbi_arena_peak() callconv(.c) usize;
-extern fn r4img_stbi_arena_failed() callconv(.c) c_int;
+extern fn r4img_stbi_diagnostic(peak: *usize, failed: *c_int) callconv(.c) void;
 extern fn r4img_stbi_decode16(bytes: [*]const u8, length: usize, scratch: [*]u8, scratch_length: usize, pixels: [*]u16, pixel_capacity: usize, width: *c_int, height: *c_int, channels: *c_int) callconv(.c) c_int;
 
 pub const Image16 = struct { info: Info, metadata: color_metadata.Info, rgba: []u16 };
@@ -111,9 +110,12 @@ pub const DecoderDiagnostic = struct {
 };
 
 pub fn decoderDiagnostic() DecoderDiagnostic {
+    var peak: usize = 0;
+    var failed: c_int = 0;
+    r4img_stbi_diagnostic(&peak, &failed);
     return .{
-        .scratch_peak = r4img_stbi_arena_peak(),
-        .allocation_failed = r4img_stbi_arena_failed() != 0,
+        .scratch_peak = peak,
+        .allocation_failed = failed != 0,
     };
 }
 

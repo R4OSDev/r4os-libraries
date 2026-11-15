@@ -320,10 +320,10 @@
           ],
           "operation": {
             "blocking": "may_block",
-            "threading": "caller_serialized",
-            "reentrancy": "not_reentrant",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
             "error_domain": "R4IMG_STATUS",
-            "ownership": "Eingabe, Pixel und Scratch bleiben caller-owned; die Library behaelt keinen Pointer."
+            "ownership": "Eingabe, Pixel und Scratch bleiben caller-owned; die Library behaelt keinen Pointer. Each call owns its allocator context; concurrent calls require disjoint writable scratch, pixel and output buffers."
           },
           "description": "Decodiert PNG, JPEG, BMP oder SVG in ARGB; SVG nutzt dabei Standardoptionen."
         },
@@ -694,12 +694,12 @@
           ],
           "operation": {
             "blocking": "nonblocking",
-            "threading": "caller_serialized",
-            "reentrancy": "not_reentrant",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
             "error_domain": "R4IMG_STATUS",
             "ownership": "Die Ausgabe wird kopiert; es wird kein Pointer behalten."
           },
-          "description": "Liefert Scratch-Spitze und Allokationsfehler des letzten STB-Decodes."
+          "description": "Liefert einen kohaerenten atomaren Snapshot von Scratch-Spitze und Allokationsfehler des zuletzt abgeschlossenen STB-Decodes ueber alle Aufrufer."
         }
       ],
       "description": "Append-only V1-Tabelle fuer Bildprobe, Decoding, SVG-Rendering, Skalierung und Diagnose."
@@ -1067,12 +1067,12 @@
           ],
           "operation": {
             "blocking": "nonblocking",
-            "threading": "caller_serialized",
-            "reentrancy": "not_reentrant",
+            "threading": "thread_safe",
+            "reentrancy": "reentrant",
             "error_domain": "R4IMG_STATUS",
             "ownership": "Only caller storage; no retained pointers. Encoded input, writable pixels, scratch and metadata/count outputs must be mutually separate. Decode/extraction failure leaves the result invalid and unpublished."
           },
-          "description": "Decode PNG into full-precision RGBA uint16 channels in native little-endian order. Four channels per pixel; 8-bit input expands by257. No transfer, gamut or alpha conversion. Metadata/count outputs publish only on success. Serialized with all other raster decoder calls."
+          "description": "Decode PNG into full-precision RGBA uint16 channels in native little-endian order. Four channels per pixel; 8-bit input expands by257. No transfer, gamut or alpha conversion. Metadata/count outputs publish only on success. Independent per-call allocator context; concurrent decodes use separate writable caller buffers."
         }
       ],
       "description": "Bounded PNG color metadata, ICC extraction and RGBA16 source decoding."

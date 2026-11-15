@@ -9,6 +9,12 @@ see Libraries/Shared/Rust/README.md. Consumers import R4IMG:API_V1:1 and call on
 the loaded function table. Pixel and scratch buffers always remain owned by
 the calling process.
 
+R4IMG0.3.7 keeps each raster allocator context on the current call's stack.
+Parallel PNG/JPEG/BMP and full-precision PNG calls use separate caller-owned
+scratch and output buffers. The decoder diagnostic is a coherent atomic
+snapshot of the last completed raster call across callers. API table layouts,
+function signatures, format limits and error statuses retain their revisions.
+
 The current implementation supports PNG, JPEG, BMP, and a bounded static SVG
 2 subset with ARGB output, alpha composition, aspect-ratio handling, software
 rasterization, and bounded scaling. Optional consumer callbacks handle SVG

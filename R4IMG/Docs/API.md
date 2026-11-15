@@ -19,13 +19,13 @@ Append-only V1-Tabelle fuer Bildprobe, Decoding, SVG-Rendering, Skalierung und D
 - Slot 1, Offset 40: `scratch_bytes` - Berechnet die konservative Scratchobergrenze fuer einen Decodeaufruf.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Die Funktion allokiert und behaelt keinen Speicher..
 - Slot 2, Offset 48: `decode` - Decodiert PNG, JPEG, BMP oder SVG in ARGB; SVG nutzt dabei Standardoptionen.
-  Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Eingabe, Pixel und Scratch bleiben caller-owned; die Library behaelt keinen Pointer..
+  Semantik: may_block, thread_safe, reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Eingabe, Pixel und Scratch bleiben caller-owned; die Library behaelt keinen Pointer. Each call owns its allocator context; concurrent calls require disjoint writable scratch, pixel and output buffers..
 - Slot 3, Offset 56: `decode_svg_at` - Rendert SVG in frei waehlbare begrenzte Zieldimensionen und ruft optionale C-ABI-Callbacks auf.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Alle Buffer und Callbackkontexte bleiben caller-owned und gelten nur fuer den Aufruf..
 - Slot 4, Offset 64: `scale_composite` - Skaliert bilinear und komponiert Alpha gegen einen RGB-Hintergrund.
   Semantik: may_block, thread_safe, reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Quell- und Zielpuffer bleiben vollstaendig caller-owned..
-- Slot 5, Offset 72: `decoder_diagnostic` - Liefert Scratch-Spitze und Allokationsfehler des letzten STB-Decodes.
-  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Die Ausgabe wird kopiert; es wird kein Pointer behalten..
+- Slot 5, Offset 72: `decoder_diagnostic` - Liefert einen kohaerenten atomaren Snapshot von Scratch-Spitze und Allokationsfehler des zuletzt abgeschlossenen STB-Decodes ueber alle Aufrufer.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Die Ausgabe wird kopiert; es wird kein Pointer behalten..
 
 PNG_V1
 ------
@@ -44,8 +44,8 @@ Bounded PNG color metadata, ICC extraction and RGBA16 source decoding.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Only caller storage; no retained pointers. Encoded input, writable pixels, scratch and metadata/count outputs must be mutually separate. Decode/extraction failure leaves the result invalid and unpublished..
 - Slot 2, Offset 48: `png_scratch_bytes16` - Conservative scratch bound for PNG RGBA16 decode, within max_scratch_bytes.
   Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Only caller storage; no retained pointers. Encoded input, writable pixels, scratch and metadata/count outputs must be mutually separate. Decode/extraction failure leaves the result invalid and unpublished..
-- Slot 3, Offset 56: `png_decode16` - Decode PNG into full-precision RGBA uint16 channels in native little-endian order. Four channels per pixel; 8-bit input expands by257. No transfer, gamut or alpha conversion. Metadata/count outputs publish only on success. Serialized with all other raster decoder calls.
-  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Only caller storage; no retained pointers. Encoded input, writable pixels, scratch and metadata/count outputs must be mutually separate. Decode/extraction failure leaves the result invalid and unpublished..
+- Slot 3, Offset 56: `png_decode16` - Decode PNG into full-precision RGBA uint16 channels in native little-endian order. Four channels per pixel; 8-bit input expands by257. No transfer, gamut or alpha conversion. Metadata/count outputs publish only on success. Independent per-call allocator context; concurrent decodes use separate writable caller buffers.
+  Semantik: nonblocking, thread_safe, reentrant; Fehlerdomaene `R4IMG_STATUS`; Besitz: Only caller storage; no retained pointers. Encoded input, writable pixels, scratch and metadata/count outputs must be mutually separate. Decode/extraction failure leaves the result invalid and unpublished..
 
 RASTER_V1
 ---------

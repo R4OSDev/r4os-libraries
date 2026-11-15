@@ -399,8 +399,8 @@ impl<'a> ApiV1Client<'a> {
     }
     /// Decodiert PNG, JPEG, BMP oder SVG in ARGB; SVG nutzt dabei Standardoptionen.
     /// # Safety
-    /// Eingabe, Pixel und Scratch bleiben caller-owned; die Library behaelt keinen Pointer.
-    /// Blocking: may_block; threading: caller_serialized; reentrancy: not_reentrant.
+    /// Eingabe, Pixel und Scratch bleiben caller-owned; die Library behaelt keinen Pointer. Each call owns its allocator context; concurrent calls require disjoint writable scratch, pixel and output buffers.
+    /// Blocking: may_block; threading: thread_safe; reentrancy: reentrant.
     /// encoded: input, borrowed, lifetime call, nullable=false.
     /// encoded_length: value, none, lifetime none, nullable=false.
     /// content_type: input, borrowed, lifetime call, nullable=false.
@@ -453,10 +453,10 @@ impl<'a> ApiV1Client<'a> {
         let function: ApiV1_scale_compositeFn = unsafe { self.interface.function(64) }.expect("admitted R4L slot");
         unsafe { function(r#source_info, r#source_pixels, r#source_pixel_count, r#destination, r#destination_capacity, r#width, r#height, r#background, r#output_pixel_count) }
     }
-    /// Liefert Scratch-Spitze und Allokationsfehler des letzten STB-Decodes.
+    /// Liefert einen kohaerenten atomaren Snapshot von Scratch-Spitze und Allokationsfehler des zuletzt abgeschlossenen STB-Decodes ueber alle Aufrufer.
     /// # Safety
     /// Die Ausgabe wird kopiert; es wird kein Pointer behalten.
-    /// Blocking: nonblocking; threading: caller_serialized; reentrancy: not_reentrant.
+    /// Blocking: nonblocking; threading: thread_safe; reentrancy: reentrant.
     /// output: output, caller_owned, lifetime call, nullable=false.
     pub unsafe fn r#decoder_diagnostic(&self, r#output: *mut R4ImgDecoderDiagnostic) -> i32 {
         let function: ApiV1_decoder_diagnosticFn = unsafe { self.interface.function(72) }.expect("admitted R4L slot");
@@ -547,10 +547,10 @@ impl<'a> PngV1Client<'a> {
         let function: PngV1_png_scratch_bytes16Fn = unsafe { self.interface.function(48) }.expect("admitted R4L slot");
         unsafe { function(r#info, r#encoded_length, r#output_bytes) }
     }
-    /// Decode PNG into full-precision RGBA uint16 channels in native little-endian order. Four channels per pixel; 8-bit input expands by257. No transfer, gamut or alpha conversion. Metadata/count outputs publish only on success. Serialized with all other raster decoder calls.
+    /// Decode PNG into full-precision RGBA uint16 channels in native little-endian order. Four channels per pixel; 8-bit input expands by257. No transfer, gamut or alpha conversion. Metadata/count outputs publish only on success. Independent per-call allocator context; concurrent decodes use separate writable caller buffers.
     /// # Safety
     /// Only caller storage; no retained pointers. Encoded input, writable pixels, scratch and metadata/count outputs must be mutually separate. Decode/extraction failure leaves the result invalid and unpublished.
-    /// Blocking: nonblocking; threading: caller_serialized; reentrancy: not_reentrant.
+    /// Blocking: nonblocking; threading: thread_safe; reentrancy: reentrant.
     /// encoded: input, borrowed, lifetime call, nullable=false.
     /// encoded_length: value, none, lifetime none, nullable=false.
     /// channels: output, caller_owned, lifetime call, nullable=false.

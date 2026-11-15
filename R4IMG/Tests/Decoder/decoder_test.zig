@@ -7,6 +7,90 @@ const baseline_jpeg = @embedFile("Fixtures/baseline.jpg");
 const progressive_jpeg = @embedFile("Fixtures/progressive.jpg");
 const basic_svg = @embedFile("Fixtures/basic.svg");
 
+const ParallelDecode = struct {
+    bytes: []const u8,
+    precise: bool,
+    pixels: []u32,
+    rgba: []u16,
+    scratch: []u8,
+    golden: []const u8,
+    ready: *std.atomic.Value(u32),
+    start: *std.atomic.Value(bool),
+    passed: bool = true,
+
+    fn decode(self: *ParallelDecode) ![]const u8 {
+        if (self.precise) {
+            const image = try r4img.pngDecode16(self.bytes, self.rgba, self.scratch);
+            return std.mem.sliceAsBytes(image.rgba);
+        }
+        const image = try r4img.r4imgDecode(self.bytes, "", self.pixels, self.scratch);
+        return std.mem.sliceAsBytes(image.pixels);
+    }
+
+    fn run(self: *ParallelDecode) void {
+        _ = self.ready.fetchAdd(1, .release);
+        while (!self.start.load(.acquire)) std.atomic.spinLoopHint();
+        for (0..400) |_| {
+            const actual = self.decode() catch {
+                self.passed = false;
+                return;
+            };
+            if (!std.mem.eql(u8, self.golden, actual)) {
+                self.passed = false;
+                return;
+            }
+        }
+    }
+};
+
+test "parallel PNG JPEG and full-precision PNG retain their own scratch and pixels" {
+    var fixture = @import("png_fixture.zig").Builder.init();
+    fixture.header();
+    fixture.rgba16(.{ 1, 257, 0x1234, 65535, 0xabcd, 0x8001, 3, 0x7ffd });
+    const sources = [_][]const u8{ rgba_png, baseline_jpeg, fixture.view() };
+    var ready: std.atomic.Value(u32) = .init(0);
+    var start: std.atomic.Value(bool) = .init(false);
+    var workers: [3]ParallelDecode = undefined;
+    var initialized: usize = 0;
+    defer for (workers[0..initialized]) |worker| {
+        std.testing.allocator.free(worker.golden);
+        std.testing.allocator.free(worker.scratch);
+        std.testing.allocator.free(worker.rgba);
+        std.testing.allocator.free(worker.pixels);
+    };
+    for (&workers, sources, 0..) |*worker, encoded, index| {
+        const info = try r4img.r4imgProbe(encoded, "");
+        const count = try info.pixelCount();
+        worker.* = .{
+            .bytes = encoded,
+            .precise = index == 2,
+            .pixels = try std.testing.allocator.alloc(u32, count),
+            .rgba = try std.testing.allocator.alloc(u16, count * 4),
+            .scratch = try std.testing.allocator.alloc(u8, if (index == 2)
+                try r4img.pngScratchBytes16(info, encoded.len)
+            else
+                try r4img.scratchBytesFor(info, encoded.len)),
+            .golden = &.{},
+            .ready = &ready,
+            .start = &start,
+        };
+        initialized += 1;
+        worker.golden = try std.testing.allocator.dupe(u8, try worker.decode());
+    }
+    var threads: [3]std.Thread = undefined;
+    for (&threads, &workers, 0..) |*thread, *worker, index| {
+        thread.* = std.Thread.spawn(.{}, ParallelDecode.run, .{worker}) catch |err| {
+            start.store(true, .release);
+            for (threads[0..index]) |started| started.join();
+            return err;
+        };
+    }
+    while (ready.load(.acquire) != workers.len) std.atomic.spinLoopHint();
+    start.store(true, .release);
+    for (threads) |thread| thread.join();
+    for (workers) |worker| try std.testing.expect(worker.passed);
+}
+
 const SvgLinkCapture = struct {
     count: usize = 0,
     node: u16 = 0,
