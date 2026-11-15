@@ -46,8 +46,8 @@ Each render shares a budget across shapes, text, clips and use expansions:
 Work units account for input/geometry visits, edge preparation, ordering and
 sample work; they are not time or CPU-cycle measurements. Exceeding either
 bound returns TooLarge through the existing status. Public ABI layouts and
-scratch calculation remain unchanged. The existing SVG source tests now run
-in the normal library test step, including one use/glyph budget regression.
+scratch calculation remain unchanged. The existing provider test step covers
+the SVG source tests, including one added use/glyph budget regression.
 
 Color-aware consumers additionally import PNG_V1 for PNG metadata, ICC
 extraction and full-precision RGBA16 samples, or RASTER_V1 for JPEG ICC/Exif
