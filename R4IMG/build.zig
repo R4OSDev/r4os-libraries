@@ -95,6 +95,14 @@ pub fn build(b: *std.Build) void {
     const decoder_tests = b.addTest(.{ .root_module = decoder_root });
     const run_decoder = b.addRunArtifact(decoder_tests);
 
+    const svg_root = b.createModule(.{
+        .root_source_file = b.path("Source/svg.zig"),
+        .target = b.graph.host,
+        .optimize = host_test_optimize,
+    });
+    const svg_tests = b.addTest(.{ .root_module = svg_root });
+    const run_svg = b.addRunArtifact(svg_tests);
+
     const profile_root = b.createModule(.{
         .root_source_file = b.path("Tests/performance_profile.zig"),
         .target = b.graph.host,
@@ -122,11 +130,13 @@ pub fn build(b: *std.Build) void {
     b.getInstallStep().dependOn(&run_conformance.step);
     b.getInstallStep().dependOn(&run_provider.step);
     b.getInstallStep().dependOn(&run_decoder.step);
+    b.getInstallStep().dependOn(&run_svg.step);
     b.getInstallStep().dependOn(&run_runtime.step);
     const test_step = b.step("test", "Run R4IMG contract, provider, decoder and runtime-table tests");
     test_step.dependOn(&run_conformance.step);
     test_step.dependOn(&run_provider.step);
     test_step.dependOn(&run_decoder.step);
+    test_step.dependOn(&run_svg.step);
     test_step.dependOn(&run_runtime.step);
     if (artifact.verification) |verification| test_step.dependOn(verification);
     artifact.output.addStepDependencies(test_step);

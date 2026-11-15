@@ -10,6 +10,10 @@ pub const max_path_points: usize = 32 * 1024;
 pub const max_subpaths: usize = 2048;
 pub const max_dimension: u32 = 4096;
 pub const max_pixels: usize = 4 * 1024 * 1024;
+// Per render, including all <use> and clip expansions. Units account for
+// input/geometry visits, edge preparation, ordering and sample work, not time.
+pub const max_render_work: u64 = 128 * 1024 * 1024;
+pub const max_render_visits: usize = 16 * 1024;
 
 const none: u16 = std.math.maxInt(u16);
 
@@ -738,8 +742,36 @@ const Subpath = struct {
     closed: bool,
 };
 
+const WorkBudget = struct {
+    remaining: u64 = max_render_work,
+    visits: usize = 0,
+
+    fn spend(self: *WorkBudget, units: u64) Error!void {
+        if (units > self.remaining) return error.TooLarge;
+        self.remaining -= units;
+    }
+
+    fn visit(self: *WorkBudget, document: *const Document, index: u16) Error!void {
+        if (self.visits >= max_render_visits) return error.TooLarge;
+        self.visits += 1;
+        const node = document.nodes[index];
+        var units: u64 = 1 + @as(u64, node.text.len);
+        const start: usize = node.attribute_start;
+        for (document.attributes[start .. start + node.attribute_count]) |attribute| {
+            units += @as(u64, attribute.name.len) + attribute.value.len + 1;
+        }
+        try self.spend(units);
+    }
+
+    fn ordering(self: *WorkBudget, count: usize) Error!void {
+        if (count < 2) return;
+        try self.spend(@as(u64, @intCast(count)) * (std.math.log2_int(usize, count) + 1) * 8);
+    }
+};
+
 const Geometry = struct {
     allocator: std.mem.Allocator,
+    work: ?*WorkBudget = null,
     points: std.ArrayList(Point) = .empty,
     subpaths: std.ArrayList(Subpath) = .empty,
     active_start: usize = 0,
@@ -764,6 +796,7 @@ const Geometry = struct {
 
     fn append(self: *Geometry, point: Point) Error!void {
         if (self.points.items.len >= max_path_points) return error.PathLimit;
+        if (self.work) |work| try work.spend(1);
         self.points.append(self.allocator, point) catch return error.ScratchBufferTooSmall;
         self.bounds.x = @min(self.bounds.x, point.x);
         self.bounds.y = @min(self.bounds.y, point.y);
@@ -801,6 +834,136 @@ const Geometry = struct {
     }
 };
 
+const RasterEdge = struct {
+    first: Point,
+    second: Point,
+    lower: f32,
+    upper: f32,
+
+    fn lessThan(_: void, a: RasterEdge, b: RasterEdge) bool {
+        return a.lower < b.lower;
+    }
+};
+
+const Crossing = struct {
+    x: f32,
+    winding: i32,
+
+    fn lessThan(_: void, a: Crossing, b: Crossing) bool {
+        return a.x < b.x;
+    }
+};
+
+// Each geometry is ordered once. Only edges crossing the current sample row
+// remain active; fill intersections are computed once and swept left to right.
+const RasterRows = struct {
+    allocator: std.mem.Allocator,
+    storage: []RasterEdge,
+    edges: []RasterEdge,
+    active: []usize,
+    crossings: []Crossing,
+    next: usize = 0,
+    active_count: usize = 0,
+    crossing_count: usize = 0,
+    cursor: usize = 0,
+    winding: i32 = 0,
+    stroke: bool,
+
+    fn init(allocator: std.mem.Allocator, geometry: *const Geometry, stroke: bool, radius: f32, work: *WorkBudget) Error!RasterRows {
+        const capacity = geometry.points.items.len;
+        try work.spend(@intCast(capacity));
+        const storage = allocator.alloc(RasterEdge, capacity) catch return error.ScratchBufferTooSmall;
+        errdefer allocator.free(storage);
+        const active = allocator.alloc(usize, capacity) catch return error.ScratchBufferTooSmall;
+        errdefer allocator.free(active);
+        const crossings = allocator.alloc(Crossing, if (stroke) 0 else capacity) catch return error.ScratchBufferTooSmall;
+        errdefer allocator.free(crossings);
+        var length: usize = 0;
+        for (geometry.subpaths.items) |subpath| {
+            const start: usize = subpath.start;
+            const count: usize = subpath.count;
+            if (count < 2 or start > capacity or count > capacity - start) continue;
+            const edge_count = if (stroke and !subpath.closed) count - 1 else count;
+            for (0..edge_count) |index| {
+                const first = geometry.points.items[start + index];
+                const second = geometry.points.items[start + ((index + 1) % count)];
+                if (!stroke and first.y == second.y) continue;
+                // Keep a conservative margin for the existing f32 distance
+                // calculation. The actual stroke predicate is unchanged.
+                const margin = if (stroke) radius + 1 + @max(@abs(first.y), @abs(second.y)) * std.math.floatEps(f32) * 8 else 0;
+                storage[length] = .{
+                    .first = first,
+                    .second = second,
+                    .lower = @min(first.y, second.y) - margin,
+                    .upper = @max(first.y, second.y) + margin,
+                };
+                length += 1;
+            }
+        }
+        try work.ordering(length);
+        std.mem.sortUnstable(RasterEdge, storage[0..length], {}, RasterEdge.lessThan);
+        return .{ .allocator = allocator, .storage = storage, .edges = storage[0..length], .active = active, .crossings = crossings, .stroke = stroke };
+    }
+
+    fn deinit(self: *RasterRows) void {
+        self.allocator.free(self.crossings);
+        self.allocator.free(self.active);
+        self.allocator.free(self.storage);
+    }
+
+    fn prepare(self: *RasterRows, y: f32, work: *WorkBudget) Error!void {
+        self.crossing_count = 0;
+        self.cursor = 0;
+        self.winding = 0;
+        while (self.next < self.edges.len and self.edges[self.next].lower <= y) : (self.next += 1) {
+            try work.spend(1);
+            self.active[self.active_count] = self.next;
+            self.active_count += 1;
+        }
+        var index: usize = 0;
+        while (index < self.active_count) {
+            try work.spend(1);
+            const edge = self.edges[self.active[index]];
+            if (edge.upper < y or (!self.stroke and edge.upper == y)) {
+                self.active_count -= 1;
+                self.active[index] = self.active[self.active_count];
+                continue;
+            }
+            index += 1;
+            if (self.stroke) continue;
+            const first = edge.first;
+            const second = edge.second;
+            const x = first.x + (y - first.y) * (second.x - first.x) / (second.y - first.y);
+            // NaN intersections never satisfy the original ray predicate.
+            if (std.math.isNan(x)) continue;
+            const winding: i32 = if (second.y > first.y) 1 else -1;
+            self.crossings[self.crossing_count] = .{ .x = x, .winding = winding };
+            self.crossing_count += 1;
+            self.winding += winding;
+        }
+        if (!self.stroke) {
+            try work.ordering(self.crossing_count);
+            std.mem.sortUnstable(Crossing, self.crossings[0..self.crossing_count], {}, Crossing.lessThan);
+        }
+    }
+
+    fn contains(self: *RasterRows, x: f32, rule: FillRule) bool {
+        while (self.cursor < self.crossing_count and self.crossings[self.cursor].x <= x) : (self.cursor += 1) {
+            self.winding -= self.crossings[self.cursor].winding;
+        }
+        return if (rule == .evenodd) ((self.crossing_count - self.cursor) & 1) != 0 else self.winding != 0;
+    }
+
+    fn distance(self: *const RasterRows, point: Point) f32 {
+        var best = std.math.inf(f32);
+        for (self.active[0..self.active_count]) |index| {
+            const edge = self.edges[index];
+            best = @min(best, distanceToSegment(point, edge.first, edge.second));
+        }
+        return best;
+    }
+};
+
 const Renderer = struct {
     allocator: std.mem.Allocator,
     document: *const Document,
@@ -809,6 +972,12 @@ const Renderer = struct {
     height: u32,
     options: RenderOptions,
     active_link: u16 = none,
+    work: WorkBudget = .{},
+
+    fn findId(self: *Renderer, wanted: []const u8) Error!?u16 {
+        try self.work.spend(@intCast(self.document.source.len + self.document.nodes.len + self.document.attributes.len));
+        return self.document.findId(wanted);
+    }
 
     fn renderNode(
         self: *Renderer,
@@ -821,6 +990,7 @@ const Renderer = struct {
     ) Error!void {
         if (depth >= max_depth) return error.DepthLimit;
         if (node_index >= self.document.nodes.len) return error.InvalidXml;
+        try self.work.visit(self.document, node_index);
         const node = self.document.nodes[node_index];
         if (node.tag == .text_node or node.tag == .script or node.tag == .style or node.tag == .foreign_object) return;
         const parent_link = self.active_link;
@@ -846,14 +1016,14 @@ const Renderer = struct {
             });
         }
 
-        var clip_geometry = Geometry{ .allocator = self.allocator };
+        var clip_geometry = Geometry{ .allocator = self.allocator, .work = &self.work };
         defer clip_geometry.deinit();
         var clip_storage: [max_clip_depth]*const Geometry = undefined;
         var active_clips = clips;
         if (style.clip.len > 0) {
             if (clips.len >= clip_storage.len) return error.DepthLimit;
             const clip_id = functionalId(style.clip) orelse return error.UnsupportedFeature;
-            const clip_node = self.document.findId(clip_id) orelse return error.InvalidXml;
+            const clip_node = (try self.findId(clip_id)) orelse return error.InvalidXml;
             if (self.document.nodes[clip_node].tag != .clip_path) return error.InvalidXml;
             const units = self.document.attribute(clip_node, "clipPathUnits") orelse "userSpaceOnUse";
             if (!std.ascii.eqlIgnoreCase(units, "userSpaceOnUse")) return error.UnsupportedFeature;
@@ -873,23 +1043,24 @@ const Renderer = struct {
             .image => return,
             .filter, .mask, .pattern => return error.UnsupportedFeature,
             .path, .rect, .circle, .ellipse, .line, .polyline, .polygon => {
-                var geometry = Geometry{ .allocator = self.allocator };
+                var geometry = Geometry{ .allocator = self.allocator, .work = &self.work };
                 defer geometry.deinit();
                 try buildGeometry(self.document, node_index, &geometry);
                 try geometry.finalize();
+                try self.work.spend(@intCast(geometry.points.items.len));
                 geometry.transform(matrix);
                 if (geometry.points.items.len == 0) return;
                 switch (style.fill) {
                     .none => {},
-                    .color => |color| self.paintFill(&geometry, active_clips, color, style.opacity * style.fill_opacity, style.fill_rule),
+                    .color => |color| try self.paintFill(&geometry, active_clips, color, style.opacity * style.fill_opacity, style.fill_rule),
                 }
                 switch (style.stroke) {
                     .none => {},
-                    .color => |color| self.paintStroke(&geometry, active_clips, color, style.opacity * style.stroke_opacity, style.stroke_width * matrix.scale()),
+                    .color => |color| try self.paintStroke(&geometry, active_clips, color, style.opacity * style.stroke_opacity, style.stroke_width * matrix.scale()),
                 }
                 const link_padding: i32 = switch (style.stroke) {
                     .none => 0,
-                    .color => @intFromFloat(@ceil(style.stroke_width * matrix.scale() * 0.5)),
+                    .color => boundedPadding(style.stroke_width * matrix.scale() * 0.5),
                 };
                 self.recordLink(&geometry, active_clips, link_padding);
             },
@@ -898,7 +1069,7 @@ const Renderer = struct {
                 if (use_depth >= max_use_depth) return error.DepthLimit;
                 const href = self.document.attribute(node_index, "href") orelse self.document.attribute(node_index, "xlink:href") orelse return;
                 if (href.len < 2 or href[0] != '#') return error.UnsupportedFeature;
-                const target = self.document.findId(href[1..]) orelse return;
+                const target = (try self.findId(href[1..])) orelse return;
                 try self.renderNode(target, style, matrix, active_clips, depth + 1, use_depth + 1);
             },
             else => {
@@ -914,6 +1085,7 @@ const Renderer = struct {
     fn buildClipGeometry(self: *Renderer, node_index: u16, parent_matrix: Matrix, output: *Geometry, depth: usize, use_depth: usize) Error!void {
         if (depth >= max_depth) return error.DepthLimit;
         if (node_index >= self.document.nodes.len) return error.InvalidXml;
+        try self.work.visit(self.document, node_index);
         const node = self.document.nodes[node_index];
         const local = parseTransform(self.document.attribute(node_index, "transform")) catch return error.InvalidNumber;
         var matrix = parent_matrix.multiply(local);
@@ -925,10 +1097,11 @@ const Renderer = struct {
         }
         switch (node.tag) {
             .path, .rect, .circle, .ellipse, .line, .polyline, .polygon => {
-                var geometry = Geometry{ .allocator = self.allocator };
+                var geometry = Geometry{ .allocator = self.allocator, .work = &self.work };
                 defer geometry.deinit();
                 try buildGeometry(self.document, node_index, &geometry);
                 try geometry.finalize();
+                try self.work.spend(@intCast(geometry.points.items.len));
                 geometry.transform(matrix);
                 try appendGeometry(output, &geometry);
             },
@@ -936,7 +1109,7 @@ const Renderer = struct {
                 if (use_depth >= max_use_depth) return error.DepthLimit;
                 const href = self.document.attribute(node_index, "href") orelse self.document.attribute(node_index, "xlink:href") orelse return;
                 if (href.len < 2 or href[0] != '#') return error.UnsupportedFeature;
-                const target = self.document.findId(href[1..]) orelse return error.InvalidXml;
+                const target = (try self.findId(href[1..])) orelse return error.InvalidXml;
                 try self.buildClipGeometry(target, matrix, output, depth + 1, use_depth + 1);
             },
             // An unresolved image contributes no clip geometry.  Other clip
@@ -969,6 +1142,8 @@ const Renderer = struct {
         const y = parseLength(self.document.attribute(node_index, "y"), 0) catch 0;
         const scale = @max(0.01, style.font_size / @as(f32, @floatFromInt(provider.height)));
         const glyph_count = utf8ScalarCount(text);
+        if (provider.width > 64) return error.TooLarge;
+        try self.work.spend(@as(u64, @intCast(glyph_count)) * provider.width * provider.height);
         const total_width = @as(f32, @floatFromInt(glyph_count * provider.advance)) * scale;
         var cursor_x = x - switch (style.text_anchor) {
             .start => 0,
@@ -1001,14 +1176,22 @@ const Renderer = struct {
                 var column: u32 = 0;
                 while (column < provider.width) : (column += 1) {
                     if ((bits & (@as(u64, 1) << @intCast(column))) == 0) continue;
-                    var geometry = Geometry{ .allocator = self.allocator };
-                    defer geometry.deinit();
                     const left = cursor_x + @as(f32, @floatFromInt(column)) * scale;
                     const top = y - @as(f32, @floatFromInt(provider.baseline)) * scale + @as(f32, @floatFromInt(row)) * scale;
-                    try appendRect(&geometry, left, top, scale, scale, 0, 0);
-                    try geometry.finalize();
+                    var points = [_]Point{
+                        .{ .x = left, .y = top },
+                        .{ .x = left + scale, .y = top },
+                        .{ .x = left + scale, .y = top + scale },
+                        .{ .x = left, .y = top + scale },
+                    };
+                    var subpaths = [_]Subpath{.{ .start = 0, .count = 4, .closed = true }};
+                    var geometry = Geometry{
+                        .allocator = self.allocator,
+                        .points = .{ .items = &points, .capacity = points.len },
+                        .subpaths = .{ .items = &subpaths, .capacity = subpaths.len },
+                    };
                     geometry.transform(matrix);
-                    self.paintFill(&geometry, clips, fill, style.opacity * style.fill_opacity, .nonzero);
+                    try self.paintFill(&geometry, clips, fill, style.opacity * style.fill_opacity, .nonzero);
                 }
             }
             cursor_x += @as(f32, @floatFromInt(provider.advance)) * scale;
@@ -1035,39 +1218,71 @@ const Renderer = struct {
         );
     }
 
-    fn paintFill(self: *Renderer, geometry: *const Geometry, clips: []const *const Geometry, color: u32, opacity: f32, rule: FillRule) void {
+    fn paintFill(self: *Renderer, geometry: *const Geometry, clips: []const *const Geometry, color: u32, opacity: f32, rule: FillRule) Error!void {
         if (opacity <= 0) return;
-        const bounds = pixelBounds(geometry.bounds, self.width, self.height, 1);
-        if (bounds.right <= bounds.left or bounds.bottom <= bounds.top) return;
-        var y = bounds.top;
-        while (y < bounds.bottom) : (y += 1) {
-            var x = bounds.left;
-            while (x < bounds.right) : (x += 1) {
-                var covered: u32 = 0;
-                for (sample_offsets) |sample| {
-                    const point = Point{ .x = @as(f32, @floatFromInt(x)) + sample.x, .y = @as(f32, @floatFromInt(y)) + sample.y };
-                    if (insideGeometry(geometry, point, rule) and insideClips(clips, point)) covered += 1;
-                }
-                if (covered == 0) continue;
-                self.blend(@intCast(x), @intCast(y), color, opacity * @as(f32, @floatFromInt(covered)) / sample_offsets.len);
-            }
-        }
+        try self.paint(geometry, clips, color, opacity, rule, null);
     }
 
-    fn paintStroke(self: *Renderer, geometry: *const Geometry, clips: []const *const Geometry, color: u32, opacity: f32, stroke_width: f32) void {
+    fn paintStroke(self: *Renderer, geometry: *const Geometry, clips: []const *const Geometry, color: u32, opacity: f32, stroke_width: f32) Error!void {
         if (opacity <= 0 or stroke_width <= 0) return;
-        const radius = stroke_width * 0.5;
-        const bounds = pixelBounds(geometry.bounds, self.width, self.height, @intFromFloat(@ceil(radius + 1)));
+        if (!std.math.isFinite(stroke_width)) return error.InvalidNumber;
+        try self.paint(geometry, clips, color, opacity, .nonzero, stroke_width * 0.5);
+    }
+
+    fn paint(self: *Renderer, geometry: *const Geometry, clips: []const *const Geometry, color: u32, opacity: f32, rule: FillRule, radius: ?f32) Error!void {
+        var bounds = pixelBounds(geometry.bounds, self.width, self.height, if (radius) |value| boundedPadding(value + 1) else 1);
+        for (clips) |clip| {
+            const clip_bounds = pixelBounds(clip.bounds, self.width, self.height, 1);
+            bounds.left = @max(bounds.left, clip_bounds.left);
+            bounds.top = @max(bounds.top, clip_bounds.top);
+            bounds.right = @min(bounds.right, clip_bounds.right);
+            bounds.bottom = @min(bounds.bottom, clip_bounds.bottom);
+        }
         if (bounds.right <= bounds.left or bounds.bottom <= bounds.top) return;
+        var rows = try RasterRows.init(self.allocator, geometry, radius != null, radius orelse 0, &self.work);
+        defer rows.deinit();
+        var clip_rows: [max_clip_depth]RasterRows = undefined;
+        var clip_count: usize = 0;
+        defer while (clip_count > 0) {
+            clip_count -= 1;
+            clip_rows[clip_count].deinit();
+        };
+        for (clips) |clip| {
+            clip_rows[clip_count] = try RasterRows.init(self.allocator, clip, false, 0, &self.work);
+            clip_count += 1;
+        }
+        var coverage: [max_dimension]u8 = undefined;
+        const left: usize = @intCast(bounds.left);
+        const right: usize = @intCast(bounds.right);
         var y = bounds.top;
         while (y < bounds.bottom) : (y += 1) {
+            @memset(coverage[left..right], 0);
+            for (0..2) |sample_y| {
+                const row_y = @as(f32, @floatFromInt(y)) + sample_offsets[2 * sample_y].y;
+                try rows.prepare(row_y, &self.work);
+                for (clip_rows[0..clip_count]) |*clip| try clip.prepare(row_y, &self.work);
+                const distance_checks: usize = if (radius != null) rows.active_count else 0;
+                try self.work.spend(@as(u64, @intCast(right - left)) * 2 * (1 + clip_count + distance_checks));
+                var x = bounds.left;
+                while (x < bounds.right) : (x += 1) {
+                    for (0..2) |sample_x| {
+                        const point = Point{ .x = @as(f32, @floatFromInt(x)) + sample_offsets[sample_x].x, .y = row_y };
+                        const inside = if (radius) |value| rows.distance(point) <= value else rows.contains(point.x, rule);
+                        if (!inside) continue;
+                        var clipped = false;
+                        for (clip_rows[0..clip_count]) |*clip| {
+                            if (!clip.contains(point.x, .nonzero)) {
+                                clipped = true;
+                                break;
+                            }
+                        }
+                        if (!clipped) coverage[@intCast(x)] += 1;
+                    }
+                }
+            }
             var x = bounds.left;
             while (x < bounds.right) : (x += 1) {
-                var covered: u32 = 0;
-                for (sample_offsets) |sample| {
-                    const point = Point{ .x = @as(f32, @floatFromInt(x)) + sample.x, .y = @as(f32, @floatFromInt(y)) + sample.y };
-                    if (distanceToGeometry(geometry, point) <= radius and insideClips(clips, point)) covered += 1;
-                }
+                const covered = coverage[@intCast(x)];
                 if (covered == 0) continue;
                 self.blend(@intCast(x), @intCast(y), color, opacity * @as(f32, @floatFromInt(covered)) / sample_offsets.len);
             }
@@ -1132,63 +1347,26 @@ const sample_offsets = [_]Point{
 
 const PixelBounds = struct { left: i32, top: i32, right: i32, bottom: i32 };
 
+fn boundedPadding(value: f32) i32 {
+    if (!(value > 0)) return 0;
+    return @intFromFloat(@ceil(@min(value, @as(f32, @floatFromInt(max_dimension + 1)))));
+}
+
 fn pixelBounds(box: Box, width: u32, height: u32, padding: i32) PixelBounds {
     if (!std.math.isFinite(box.x) or !std.math.isFinite(box.y) or !std.math.isFinite(box.w) or !std.math.isFinite(box.h)) {
         return .{ .left = 0, .top = 0, .right = 0, .bottom = 0 };
     }
     const max_width: i32 = @intCast(width);
     const max_height: i32 = @intCast(height);
+    const pad: f32 = @floatFromInt(padding);
+    const limit_x: f32 = @floatFromInt(max_width + padding);
+    const limit_y: f32 = @floatFromInt(max_height + padding);
     return .{
-        .left = std.math.clamp(@as(i32, @intFromFloat(@floor(box.x))) - padding, 0, max_width),
-        .top = std.math.clamp(@as(i32, @intFromFloat(@floor(box.y))) - padding, 0, max_height),
-        .right = std.math.clamp(@as(i32, @intFromFloat(@ceil(box.w))) + padding, 0, max_width),
-        .bottom = std.math.clamp(@as(i32, @intFromFloat(@ceil(box.h))) + padding, 0, max_height),
+        .left = std.math.clamp(@as(i32, @intFromFloat(@floor(std.math.clamp(box.x, -pad, limit_x)))) - padding, 0, max_width),
+        .top = std.math.clamp(@as(i32, @intFromFloat(@floor(std.math.clamp(box.y, -pad, limit_y)))) - padding, 0, max_height),
+        .right = std.math.clamp(@as(i32, @intFromFloat(@ceil(std.math.clamp(box.w, -pad, limit_x)))) + padding, 0, max_width),
+        .bottom = std.math.clamp(@as(i32, @intFromFloat(@ceil(std.math.clamp(box.h, -pad, limit_y)))) + padding, 0, max_height),
     };
-}
-
-fn insideGeometry(geometry: *const Geometry, point: Point, rule: FillRule) bool {
-    var winding: i32 = 0;
-    var crossings: u32 = 0;
-    for (geometry.subpaths.items) |subpath| {
-        const start: usize = subpath.start;
-        const count: usize = subpath.count;
-        if (count < 2 or start > geometry.points.items.len or count > geometry.points.items.len - start) continue;
-        var index: usize = 0;
-        while (index < count) : (index += 1) {
-            const first = geometry.points.items[start + index];
-            const second = geometry.points.items[start + ((index + 1) % count)];
-            if ((first.y <= point.y and second.y > point.y) or (first.y > point.y and second.y <= point.y)) {
-                const intersection = first.x + (point.y - first.y) * (second.x - first.x) / (second.y - first.y);
-                if (intersection > point.x) {
-                    crossings += 1;
-                    winding += if (second.y > first.y) 1 else -1;
-                }
-            }
-        }
-    }
-    return if (rule == .evenodd) (crossings & 1) != 0 else winding != 0;
-}
-
-fn insideClips(clips: []const *const Geometry, point: Point) bool {
-    for (clips) |clip| if (!insideGeometry(clip, point, .nonzero)) return false;
-    return true;
-}
-
-fn distanceToGeometry(geometry: *const Geometry, point: Point) f32 {
-    var best = std.math.inf(f32);
-    for (geometry.subpaths.items) |subpath| {
-        const start: usize = subpath.start;
-        const count: usize = subpath.count;
-        if (count < 2 or start > geometry.points.items.len or count > geometry.points.items.len - start) continue;
-        const edge_count = if (subpath.closed) count else count - 1;
-        var index: usize = 0;
-        while (index < edge_count) : (index += 1) {
-            const first = geometry.points.items[start + index];
-            const second = geometry.points.items[start + ((index + 1) % count)];
-            best = @min(best, distanceToSegment(point, first, second));
-        }
-    }
-    return best;
 }
 
 fn distanceToSegment(point: Point, first: Point, second: Point) f32 {
@@ -2202,4 +2380,32 @@ test "SVG rejects external entities deep trees and oversized dimensions" {
         length += 3;
     }
     try std.testing.expectError(error.DepthLimit, probe(deep[0..length]));
+}
+
+test "SVG bounds total use expansion and glyph work per render" {
+    var source: [4096]u8 = undefined;
+    var length: usize = 0;
+    const prefix = "<svg width='1' height='1'><defs><g id='n0'/>";
+    @memcpy(source[0..prefix.len], prefix);
+    length = prefix.len;
+    // All references are valid and below both recursion limits. A depth
+    // bound alone still expands these fourteen shared groups exponentially.
+    for (1..15) |index| {
+        const part = try std.fmt.bufPrint(source[length..], "<g id='n{d}'><use href='#n{d}'/><use href='#n{d}'/></g>", .{ index, index - 1, index - 1 });
+        length += part.len;
+    }
+    const suffix = "</defs><use href='#n14'/></svg>";
+    @memcpy(source[length .. length + suffix.len], suffix);
+    length += suffix.len;
+    var pixels: [1]u32 = undefined;
+    var scratch: [128 * 1024]u8 = undefined;
+    try std.testing.expectError(error.TooLarge, render(source[0..length], &pixels, 1, 1, &scratch, .{}));
+
+    const text = "<svg width='1' height='1'><text>" ++ ("A" ** 2048) ++ "</text></svg>";
+    try std.testing.expectError(error.TooLarge, render(text, &pixels, 1, 1, &scratch, .{
+        .glyphs = .{ .width = 64, .height = 65535, .row = testGlyphRow },
+    }));
+    // A rejected render does not consume the next call's independent budget.
+    try render("<svg width='1' height='1'><rect width='1' height='1'/></svg>", &pixels, 1, 1, &scratch, .{});
+    try std.testing.expectEqual(@as(u32, 0xFF000000), pixels[0]);
 }
