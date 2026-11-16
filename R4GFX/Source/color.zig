@@ -163,11 +163,39 @@ pub fn chromaticities(primaries: Primaries) Chromaticities {
         .icc => unreachable, // An admitted ICC transform supplies its PCS.
     };
 }
+// These canonical D65 primaries never change at runtime. Keep the original
+// f64 derivation, but evaluate every supported pair once in the binary.
+// ICC transforms continue to supply their own admitted PCS/profile matrices.
+const matrix_spaces = [_]Primaries{ .srgb, .display_p3, .bt2020, .bt601_625, .bt601_525 };
+const primary_matrices = table: {
+    @setEvalBranchQuota(100000);
+    var result: [matrix_spaces.len][matrix_spaces.len]Matrix = undefined;
+    for (matrix_spaces, 0..) |source, i| {
+        for (matrix_spaces, 0..) |target, j| {
+            if (source == target) {
+                result[i][j] = .identity;
+            } else {
+                const to_xyz = chromaticities(source).xyz() catch unreachable;
+                const from_xyz = (chromaticities(target).xyz() catch unreachable).inverse() catch unreachable;
+                result[i][j] = from_xyz.multiply(to_xyz);
+            }
+        }
+    }
+    break :table result;
+};
+fn matrixIndex(space: Primaries) usize {
+    return switch (space) {
+        .srgb => 0,
+        .display_p3 => 1,
+        .bt2020 => 2,
+        .bt601_625 => 3,
+        .bt601_525 => 4,
+        .icc => unreachable,
+    };
+}
 pub fn primariesMatrix(source: Primaries, target: Primaries) Matrix {
     if (source == target) return .identity;
-    const to_xyz = chromaticities(source).xyz() catch unreachable;
-    const from_xyz = (chromaticities(target).xyz() catch unreachable).inverse() catch unreachable;
-    return from_xyz.multiply(to_xyz);
+    return primary_matrices[matrixIndex(source)][matrixIndex(target)];
 }
 
 pub fn srgbDecode(encoded: f32) f32 {
