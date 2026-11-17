@@ -47,6 +47,7 @@ if((Test-Path -LiteralPath $record) -and (Test-Path -LiteralPath $archiveOut)) {
     $previous=Get-Content -LiteralPath $record -Raw | ConvertFrom-Json
     if($previous.identity -ne $id -or $previous.archive_sha256 -ne (Hash $archiveOut)){throw 'Native compiler cache is corrupt; use -Rebuild.'}
 } else {
+    if(Test-Path -LiteralPath $record){Remove-Item -LiteralPath $record}
     $watch=[Diagnostics.Stopwatch]::StartNew()
     [IO.Directory]::CreateDirectory($buildRoot) | Out-Null
     $cache=Join-Path $devkit '.Cache/R4NAK'
@@ -86,7 +87,7 @@ if((Test-Path -LiteralPath $record) -and (Test-Path -LiteralPath $archiveOut)) {
         Copy-Item -LiteralPath (Join-Path $source $relative) -Destination $dest
     }
     Push-Location ([IO.Path]::GetPathRoot($overlay))
-    try { Run $tools.git @('apply','--unsafe-paths',('--directory='+$overlay),'--check',$patch); Run $tools.git @('apply','--unsafe-paths',('--directory='+$overlay),$patch) }
+    try { Run $tools.git @('apply','--unsafe-paths',('--directory='+$overlay),$patch) }
     finally { Pop-Location }
     . (Join-Path $PSScriptRoot 'CInputs.ps1')
     . (Join-Path $PSScriptRoot 'Bindings.ps1')

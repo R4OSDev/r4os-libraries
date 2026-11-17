@@ -92,8 +92,6 @@ try {
         try {
             foreach($patch in $catalog.patches){
                 $path=Join-Path $unit $patch.path
-                & $git apply --unsafe-paths ('--directory='+$source) --check $path
-                if($LASTEXITCODE){throw 'Compiler patch check failed.'}
                 & $git apply --unsafe-paths ('--directory='+$source) $path
                 if($LASTEXITCODE){throw 'Compiler patch failed.'}
             }

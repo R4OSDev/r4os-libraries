@@ -45,8 +45,6 @@ if ($LASTEXITCODE) { throw 'FFmpeg extraction failed.' }
 Push-Location ([IO.Path]::GetPathRoot($source))
 try {
     foreach ($patch in $patches) {
-        & git apply --unsafe-paths ('--directory=' + $source) --check $patch.FullName
-        if ($LASTEXITCODE) { throw "FFmpeg patch check failed: $($patch.Name)" }
         & git apply --unsafe-paths ('--directory=' + $source) $patch.FullName
         if ($LASTEXITCODE) { throw "FFmpeg patch failed: $($patch.Name)" }
     }

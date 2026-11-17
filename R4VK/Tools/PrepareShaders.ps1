@@ -43,6 +43,17 @@ $manifestHash = Get-R4VKFileHash $mesa.manifest_path
 $identity = $manifestHash.Substring(0,16) + '-' + (Get-R4VKFileHash $lockPath).Substring(0,16)
 $cache = Join-Path $mesa.devkit ('Toolchains/R4VKShaders/' + $identity)
 $source = Join-Path $cache 'Source'
+$hostName = if ($IsWindows) { 'Windows-x64' } else { 'Linux-x64' }
+$suffix = if ($IsWindows) { '.exe' } else { '' }
+$build = Join-Path $cache ('Build-' + $hostName)
+$output = [IO.Path]::GetFullPath($OutputRoot, $mesa.workspace)
+foreach ($protected in @($mesa.source, $source, $build)) {
+    $prefix = $protected.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    if ($output -eq $protected -or $output.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) { throw 'Generated shader output must be outside Mesa source/build trees.' }
+}
+[IO.Directory]::CreateDirectory($output) | Out-Null
+$recordPath = Join-Path $output 'shaders.json'
+if (Test-Path -LiteralPath $recordPath) { Remove-Item -LiteralPath $recordPath }
 # Use a separate complete source tree. Meson and the generator patch may not
 # alter the checksum-pinned source shared with the installed R4NAK compiler.
 foreach ($file in $mesa.files) {
@@ -65,20 +76,8 @@ $standaloneInputs = @(foreach ($file in Get-ChildItem -LiteralPath (Join-Path $m
 })
 Push-Location ([IO.Path]::GetPathRoot($source))
 try {
-    Run $tools.git @('apply', '--unsafe-paths', ('--directory=' + $source), '--check', $patch)
     Run $tools.git @('apply', '--unsafe-paths', ('--directory=' + $source), $patch)
 } finally { Pop-Location }
-$hostName = if ($IsWindows) { 'Windows-x64' } else { 'Linux-x64' }
-$suffix = if ($IsWindows) { '.exe' } else { '' }
-$build = Join-Path $cache ('Build-' + $hostName)
-$output = [IO.Path]::GetFullPath($OutputRoot, $mesa.workspace)
-foreach ($protected in @($mesa.source, $source, $build)) {
-    $prefix = $protected.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
-    if ($output -eq $protected -or $output.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) { throw 'Generated shader output must be outside Mesa source/build trees.' }
-}
-[IO.Directory]::CreateDirectory($output) | Out-Null
-$recordPath = Join-Path $output 'shaders.json'
-if (Test-Path -LiteralPath $recordPath) { Remove-Item -LiteralPath $recordPath }
 $options = @('--wrap-mode=nodownload', '--force-fallback-for=syn,paste,rustc-hash',
     '-Dr4os-nak=true', '-Dbuildtype=release', '-Db_ndebug=false', '-Dgallium-drivers=[]',
     '-Dvulkan-drivers=[]', '-Dplatforms=[]', '-Dglx=disabled', '-Degl=disabled', '-Dgbm=disabled',

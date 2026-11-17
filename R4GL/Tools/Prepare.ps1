@@ -70,8 +70,6 @@ Push-Location ([IO.Path]::GetPathRoot($source))
 try{
     foreach($relative in $patchPlan.patches){
         $patch=Join-Path $unit $relative
-        & $tools.git apply --unsafe-paths ('--directory='+$source) --check $patch
-        if($LASTEXITCODE){throw "R4GL patch check failed: $relative"}
         & $tools.git apply --unsafe-paths ('--directory='+$source) $patch
         if($LASTEXITCODE){throw "R4GL patch failed: $relative"}
     }

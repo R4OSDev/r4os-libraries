@@ -129,7 +129,6 @@ if (!(Test-Path -LiteralPath $preparedStamp)) {
     # can silently skip paths below its ignored DevKit directory.
     Push-Location ([IO.Path]::GetPathRoot($source))
     try {
-        Invoke-Checked $git @('apply', '--unsafe-paths', ('--directory=' + $source), '--check', $patch)
         Invoke-Checked $git @('apply', '--unsafe-paths', ('--directory=' + $source), $patch)
     } finally { Pop-Location }
     $packagecache = Join-Path $source 'subprojects/packagecache'

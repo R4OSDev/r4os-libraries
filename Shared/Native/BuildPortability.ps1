@@ -73,8 +73,6 @@ try {
         foreach ($patch in $sources.patches) {
             $path = Join-Path $unit $patch.path
             if ((Hash $path) -ne $patch.sha256) { throw "Patch drift: $($patch.path)" }
-            & $git apply --unsafe-paths ('--directory=' + $source) --check $path
-            if ($LASTEXITCODE) { throw "Patch check failed: $($patch.path)" }
             & $git apply --unsafe-paths ('--directory=' + $source) $path
             if ($LASTEXITCODE) { throw "Patch failed: $($patch.path)" }
         }

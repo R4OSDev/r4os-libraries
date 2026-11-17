@@ -22,6 +22,8 @@ function Run([string]$Program, [string[]]$Arguments) {
 $output = [IO.Path]::GetFullPath($OutputRoot, $workspace)
 $sourcePrefix = $source.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
 if ($output -eq $source -or $output.StartsWith($sourcePrefix, [StringComparison]::OrdinalIgnoreCase)) { throw 'R4VK generation must not modify the prepared Mesa source.' }
+$record = Join-Path $output 'prepare.json'
+if (Test-Path -LiteralPath $record) { Remove-Item -LiteralPath $record }
 $generated = Join-Path $output 'Generated'
 $overlay = Join-Path $output 'CSource'
 [IO.Directory]::CreateDirectory($generated) | Out-Null
@@ -52,7 +54,6 @@ foreach ($relative in $patchedFiles) {
 $git = (Get-Command git -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 Push-Location ([IO.Path]::GetPathRoot($overlay))
 try {
-    Run $git @('apply', '--unsafe-paths', ('--directory=' + $overlay), '--check', $patch)
     Run $git @('apply', '--unsafe-paths', ('--directory=' + $overlay), $patch)
 } finally { Pop-Location }
 }
@@ -117,5 +118,5 @@ $outputs = @(foreach ($directory in @($generated, $overlay)) {
     source_helper_sha256 = (Hash (Join-Path $PSScriptRoot 'MesaSource.ps1'))
     outputs = $outputs
     scope = 'Generated Vulkan/NVK/RADV/ACO tables and consistent private source overlays; no provider binary or runtime capability claim.'
-} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'prepare.json') -Encoding utf8NoBOM
+} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $record -Encoding utf8NoBOM
 Write-Host "R4VK pinned Mesa preparation: $output ($($outputs.Count) outputs)"
