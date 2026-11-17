@@ -78,6 +78,10 @@ fn newNotification(host: *const Host, storage: *u64) c_int {
 // uncontended lock/unlock needs only the current-thread identity lookup;
 // it performs no notification query, scheduler wait or wake.
 pub const Mutex = extern struct {
+    // The low three flag bits hold the C mutex type. Each notification in
+    // flight retains its handle until the host call returns.
+    const mode_mask: u32 = 7;
+    const wake_reference: u32 = mode_mask + 1;
     state: u32 = 0,
     owner: u32 = 0,
     depth: u32 = 0,
@@ -85,12 +89,13 @@ pub const Mutex = extern struct {
     notification: u64 = 0,
 
     pub fn init(self: *Mutex, host: *const Host, flags: u32) c_int {
-        if (flags & ~@as(u32, 7) != 0) return failed;
+        if (flags & ~mode_mask != 0) return failed;
         self.* = .{ .flags = flags };
         return newNotification(host, &self.notification);
     }
     pub fn destroy(self: *Mutex, host: *const Host) c_int {
         if (@atomicLoad(u32, &self.state, .acquire) != 0) return busy;
+        if (@atomicLoad(u32, &self.flags, .acquire) & ~mode_mask != 0) return busy;
         const handle = @atomicLoad(u64, &self.notification, .acquire);
         if (handle == 0) return success; // Unused static initializer.
         if (host.close(handle) != a.notification_ok) return failed;
@@ -101,7 +106,7 @@ pub const Mutex = extern struct {
         const thread = host.current();
         if (thread == 0) return failed;
         if (@atomicLoad(u32, &self.owner, .acquire) == thread) {
-            if (self.flags & recursive == 0) return busy;
+            if (@atomicLoad(u32, &self.flags, .monotonic) & recursive == 0) return busy;
             if (self.depth == std.math.maxInt(u32)) return failed;
             self.depth += 1;
             return success;
@@ -123,7 +128,7 @@ pub const Mutex = extern struct {
         while (true) {
             var sequence: u64 = 0;
             if (host.query(handle, &sequence) != a.notification_ok) return failed;
-            if (@atomicRmw(u32, &self.state, .Xchg, 2, .acquire) == 0) {
+            if (@atomicRmw(u32, &self.state, .Xchg, 2, .acq_rel) == 0) {
                 self.depth = 1;
                 @atomicStore(u32, &self.owner, thread, .release);
                 return success;
@@ -137,10 +142,14 @@ pub const Mutex = extern struct {
         if (thread == 0 or @atomicLoad(u32, &self.owner, .acquire) != thread or self.depth == 0) return failed;
         self.depth -= 1;
         if (self.depth != 0) return success;
-        const handle = @atomicLoad(u64, &self.notification, .acquire);
         @atomicStore(u32, &self.owner, 0, .monotonic);
-        const old = @atomicRmw(u32, &self.state, .Xchg, 0, .release);
-        if (old != 2) return success;
+        if (@cmpxchgStrong(u32, &self.state, 1, 0, .acq_rel, .acquire) == null) return success;
+        // Observing a contender acquires its handle publication. The mutex
+        // is still locked while the wake operation takes its reference.
+        const handle = @atomicLoad(u64, &self.notification, .acquire);
+        _ = @atomicRmw(u32, &self.flags, .Add, wake_reference, .monotonic);
+        @atomicStore(u32, &self.state, 0, .release);
+        defer _ = @atomicRmw(u32, &self.flags, .Sub, wake_reference, .release);
         return if (handle != 0 and host.notify(handle, 1) == a.notification_ok) success else failed;
     }
 };
