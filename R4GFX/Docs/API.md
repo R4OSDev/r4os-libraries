@@ -42,9 +42,9 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
 
 - ELF-Symbol: `r4gfx_device_v1`
 - ABI-Major: 1
-- Revision: 10
+- Revision: 11
 - Interface-ID: `0x52344f5330373931:0x5234474658444556`
-- Tabellengroesse: 304 Byte
+- Tabellengroesse: 312 Byte
 
 - Slot 0, Offset 32: `storage_size` - Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
@@ -114,6 +114,8 @@ Bounded per-caller graphics devices, resources and asynchronous copy lifetime. I
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
 - Slot 33, Offset 296: `resource_priority` - Sets eviction and reconstruction preference for an owned managed image. Higher values preserve it longer and prioritize requested reconstruction; memory_priority_pinned excludes eviction. No memory is reserved per application.
   Semantik: may_block, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs..
+- Slot 34, Offset 304: `swapchain_present_region` - Queue a completely valid immutable image with one conservative nonempty damage rectangle in image pixels. Rectangle is copied synchronously; all changed pixels since this same image was last presented must be included. New or invalidated image contents must be initialized completely. Native providers without region-present capability use the complete-image fallback; direct scanout still presents the whole image. Existing frame/deadline/blocker/render-job and physical-retirement contracts are unchanged.
+  Semantik: nonblocking, caller_serialized, not_reentrant; Fehlerdomaene `R4GFX_STATUS`; Besitz: Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion..
 
 COLOR_V1
 --------

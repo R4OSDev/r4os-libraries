@@ -2229,7 +2229,7 @@ impl<'a> RenderV1Client<'a> {
     }
 }
 
-pub const device_v1_expectation: Expectation = Expectation { interface_id_lo: 0x5234474658444556, interface_id_hi: 0x52344f5330373931, abi_major: 1, min_revision: 10, required_size: 304, known_required_flags: 0 };
+pub const device_v1_expectation: Expectation = Expectation { interface_id_lo: 0x5234474658444556, interface_id_hi: 0x52344f5330373931, abi_major: 1, min_revision: 11, required_size: 312, known_required_flags: 0 };
 pub const device_v1_export_name: &str = "DEVICE_V1";
 pub type DeviceV1_storage_sizeFn = unsafe extern "C" fn() -> u64;
 pub type DeviceV1_device_openFn = unsafe extern "C" fn(r#config: *const R4GfxDeviceConfig, r#output: *mut R4GfxDevice) -> i32;
@@ -2265,6 +2265,7 @@ pub type DeviceV1_memory_infoFn = unsafe extern "C" fn(r#device: *const R4GfxDev
 pub type DeviceV1_memory_trimFn = unsafe extern "C" fn(r#device: *const R4GfxDevice, r#deadline_ns: u64) -> i32;
 pub type DeviceV1_resource_residentFn = unsafe extern "C" fn(r#device: *const R4GfxDevice, r#resource: *const R4GfxResource, r#deadline_ns: u64) -> i32;
 pub type DeviceV1_resource_priorityFn = unsafe extern "C" fn(r#device: *const R4GfxDevice, r#resource: *const R4GfxResource, r#priority: u32) -> i32;
+pub type DeviceV1_swapchain_present_regionFn = unsafe extern "C" fn(r#device: *const R4GfxDevice, r#chain: *const R4GfxSwapchain, r#request: *const R4GfxSwapchainPresent, r#damage: *const R4GfxRect) -> i32;
 /// Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1.
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -2304,9 +2305,10 @@ pub struct DeviceV1 {
     pub r#memory_trim: Option<DeviceV1_memory_trimFn>,
     pub r#resource_resident: Option<DeviceV1_resource_residentFn>,
     pub r#resource_priority: Option<DeviceV1_resource_priorityFn>,
+    pub r#swapchain_present_region: Option<DeviceV1_swapchain_present_regionFn>,
 }
 const _: () = {
-    assert!(core::mem::size_of::<DeviceV1>() == 304);
+    assert!(core::mem::size_of::<DeviceV1>() == 312);
     assert!(core::mem::align_of::<DeviceV1>() == 8);
     assert!(core::mem::offset_of!(DeviceV1, r#storage_size) == 32);
     assert!(core::mem::offset_of!(DeviceV1, r#device_open) == 40);
@@ -2342,6 +2344,7 @@ const _: () = {
     assert!(core::mem::offset_of!(DeviceV1, r#memory_trim) == 280);
     assert!(core::mem::offset_of!(DeviceV1, r#resource_resident) == 288);
     assert!(core::mem::offset_of!(DeviceV1, r#resource_priority) == 296);
+    assert!(core::mem::offset_of!(DeviceV1, r#swapchain_present_region) == 304);
 };
 
 pub struct DeviceV1Client<'a> { interface: Interface<'a> }
@@ -2395,6 +2398,7 @@ impl<'a> DeviceV1Client<'a> {
         if interface.slot_address(280).is_none() { return Err(Error::MissingSlot); }
         if interface.slot_address(288).is_none() { return Err(Error::MissingSlot); }
         if interface.slot_address(296).is_none() { return Err(Error::MissingSlot); }
+        if interface.slot_address(304).is_none() { return Err(Error::MissingSlot); }
         Ok(Self { interface })
     }
     /// Required zeroed caller storage bytes, aligned to 8; allocation occurs once outside the library.
@@ -2756,6 +2760,18 @@ impl<'a> DeviceV1Client<'a> {
     pub unsafe fn r#resource_priority(&self, r#device: *const R4GfxDevice, r#resource: *const R4GfxResource, r#priority: u32) -> i32 {
         let function: DeviceV1_resource_priorityFn = unsafe { self.interface.function(296) }.expect("admitted R4L slot");
         unsafe { function(r#device, r#resource, r#priority) }
+    }
+    /// Queue a completely valid immutable image with one conservative nonempty damage rectangle in image pixels. Rectangle is copied synchronously; all changed pixels since this same image was last presented must be included. New or invalidated image contents must be initialized completely. Native providers without region-present capability use the complete-image fallback; direct scanout still presents the whole image. Existing frame/deadline/blocker/render-job and physical-retirement contracts are unchanged.
+    /// # Safety
+    /// Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion.
+    /// Blocking: nonblocking; threading: caller_serialized; reentrancy: not_reentrant.
+    /// device: input, borrowed, lifetime call, nullable=false.
+    /// chain: input, borrowed, lifetime call, nullable=false.
+    /// request: input, borrowed, lifetime call, nullable=false.
+    /// damage: input, borrowed, lifetime call, nullable=false.
+    pub unsafe fn r#swapchain_present_region(&self, r#device: *const R4GfxDevice, r#chain: *const R4GfxSwapchain, r#request: *const R4GfxSwapchainPresent, r#damage: *const R4GfxRect) -> i32 {
+        let function: DeviceV1_swapchain_present_regionFn = unsafe { self.interface.function(304) }.expect("admitted R4L slot");
+        unsafe { function(r#device, r#chain, r#request, r#damage) }
     }
 }
 

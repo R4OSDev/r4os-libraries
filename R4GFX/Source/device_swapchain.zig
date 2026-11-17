@@ -20,6 +20,7 @@ const Work = struct {
     path: u32 = 0,
     intent: u32 = 0,
     blockers: u32 = 0,
+    damage: ?c.R4GfxRect = null,
 };
 pub const Slot = struct {
     serial: u64 = 0,
@@ -28,6 +29,7 @@ pub const Slot = struct {
     info: a.DisplayPresentationInfo = .{},
     target: a.GfxOutputTarget = .{},
     queue: a.GfxQueueHandle = .{},
+    region_supported: bool = true,
     images: [s.capacity]c.R4GfxResource = @splat(empty_image),
     work: [s.capacity]Work = @splat(.{}),
     path: u32 = 0,
@@ -246,12 +248,21 @@ fn acquireImpl(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, inp
     return c.status_ok;
 }
 pub fn present(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, request: *const c.R4GfxSwapchainPresent) callconv(.c) i32 {
-    return presentImpl(handle, chain, request) catch |err| d.code(err);
+    return presentImpl(handle, chain, request, null) catch |err| d.code(err);
 }
-fn presentImpl(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, request: *const c.R4GfxSwapchainPresent) d.Error!i32 {
+pub fn presentRegion(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, request: *const c.R4GfxSwapchainPresent, damage: *const c.R4GfxRect) callconv(.c) i32 {
+    const device = d.get(handle, false) catch |err| return d.code(err);
+    const area = input(c.R4GfxRect, device, damage) catch |err| return d.code(err);
+    return presentImpl(handle, chain, request, area) catch |err| d.code(err);
+}
+fn presentImpl(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, request: *const c.R4GfxSwapchainPresent, damage: ?c.R4GfxRect) d.Error!i32 {
     const device = try d.get(handle, false); const slot = try get(device, chain);
     const value = try input(c.R4GfxSwapchainPresent, device, request);
     if (value.version != 1 or value.size != @sizeOf(c.R4GfxSwapchainPresent) or value.intent > 2 or value.blockers & ~@as(u32, 63) != 0) return error.Invalid;
+    if (damage) |area| {
+        if (area.x > std.math.maxInt(i32) or area.y > std.math.maxInt(i32) or area.width <= 0 or area.height <= 0 or
+            @as(u64, area.x) + area.width > slot.info.width or @as(u64, area.y) + area.height > slot.info.height) return error.Invalid;
+    }
     const key = try token(device, slot, &value.frame);
     const instant = try now(device);
     if (value.deadline_ns <= instant or value.deadline_ns == std.math.maxInt(u64)) return error.Invalid;
@@ -265,7 +276,7 @@ fn presentImpl(handle: *const c.R4GfxDevice, chain: *const c.R4GfxSwapchain, req
     const path = try presentPath(device, slot, value.frame.image, value.intent, value.blockers);
     slot.state.present(key, instant, path, render != null) catch |err| return stateError(err);
     if (render) |job| job.chain_refs += 1;
-    slot.work[key.slot - 1] = .{ .render = value.render_job, .deadline = value.deadline_ns, .path = @intFromEnum(path), .intent = value.intent, .blockers = value.blockers };
+    slot.work[key.slot - 1] = .{ .render = value.render_job, .deadline = value.deadline_ns, .path = @intFromEnum(path), .intent = value.intent, .blockers = value.blockers, .damage = damage };
     return c.status_ok;
 }
 fn receipt(device: *d.Device, job: c.R4GfxJob) d.Error!a.GfxFenceStatus {
@@ -342,11 +353,30 @@ fn progress(device: *d.Device, slot: *Slot) d.Error!void {
             if (rc == a.gfx_queue_error_busy) return;
             try d.platform(rc);
         }
-        _ = (if (slot.target.connector_id != 0) presenter.submitOutput(device, &request, &accepted, path == .direct, slot.target, slot.queue)
-            else presenter.submitPath(device, &request, &accepted, path == .direct)) catch |err| {
-            if (err == error.Busy) return;
-            slot.state.abandon(key, .failed) catch unreachable; return;
-        };
+        var offered_region = false;
+        if (path != .direct and slot.region_supported and slot.target.connector_id != 0) {
+            if (work.damage) |area| {
+                offered_region = true;
+                _ = presenter.submitOutputRegion(device, &request, &accepted, slot.target, slot.queue, area) catch |err| region_offer: {
+                    if (err == error.Busy) return;
+                    if (err == error.Unsupported) {
+                        // The absent optional operation changes no accepted job.
+                        slot.region_supported = false;
+                        offered_region = false;
+                        break :region_offer 0;
+                    } else {
+                        slot.state.abandon(key, .failed) catch unreachable; return;
+                    }
+                };
+            }
+        }
+        if (!offered_region) {
+            _ = (if (slot.target.connector_id != 0) presenter.submitOutput(device, &request, &accepted, path == .direct, slot.target, slot.queue)
+                else presenter.submitPath(device, &request, &accepted, path == .direct)) catch |err| {
+                if (err == error.Busy) return;
+                slot.state.abandon(key, .failed) catch unreachable; return;
+            };
+        }
         work.present = accepted;
         work.fence = (try device.job(work.present)).fence;
         slot.state.submitted(key, instant) catch unreachable;
@@ -370,7 +400,8 @@ fn submitCpu(device: *d.Device, slot: *Slot, key: s.Token, instant: u64) d.Error
     }
     const image = resource.image;
     const pixels: [*]const u32 = @ptrFromInt(address);
-    const rect: a.DisplayDamageRect = .{ .w = image.width, .h = image.height };
+    const rect: a.DisplayDamageRect = if (work.damage) |area| .{ .x = @intCast(area.x), .y = @intCast(area.y), .w = area.width, .h = area.height }
+        else .{ .w = image.width, .h = image.height };
     var result: a.DisplayPresentResult = .{};
     const rc = device.base().displayPresentRegions(&.{ .source_width = image.width, .source_height = image.height,
         .source_stride_pixels = @intCast(image.pitch / 4), .source_generation = key.serial }, pixels[0..@intCast(image.byte_length / 4)], (&rect)[0..1], &result);

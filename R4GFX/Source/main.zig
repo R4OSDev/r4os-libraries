@@ -95,6 +95,7 @@ pub export var r4gfx_device_v1: c.DeviceV1 align(8) linksection(".data.r4l_expor
     .swapchain_open = swapchain.open,
     .swapchain_acquire = swapchain.acquire,
     .swapchain_present = swapchain.present,
+    .swapchain_present_region = swapchain.presentRegion,
     .swapchain_poll = swapchain.poll,
     .swapchain_release = swapchain.release,
     .swapchain_resize = swapchain.resize,

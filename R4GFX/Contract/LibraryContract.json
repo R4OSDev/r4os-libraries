@@ -278,7 +278,7 @@
       "zig_type": "DeviceV1",
       "c_type": "R4GfxDeviceV1",
       "abi_major": 1,
-      "revision": 10,
+      "revision": 11,
       "interface_id_lo": 5923437777353196886,
       "interface_id_hi": 5923446628608850225,
       "known_required_flags": 0,
@@ -2207,6 +2207,81 @@
             "ownership": "Caller owns device storage and serializes all calls for it. Resource references and real queue fences define retained backing lifetime. Outputs never alias device storage or inputs."
           },
           "description": "Sets eviction and reconstruction preference for an owned managed image. Higher values preserve it longer and prioritize requested reconstruction; memory_priority_pinned excludes eviction. No memory is reserved per application."
+        },
+        {
+          "name": "swapchain_present_region",
+          "c_name": "r4gfx_swapchain_present_region",
+          "symbol": "r4gfx_swapchain_present_region_impl",
+          "slot": 34,
+          "since_revision": 11,
+          "returns": {
+            "name": "i32",
+            "pointer": "value",
+            "is_const": false,
+            "nullable": false
+          },
+          "parameters": [
+            {
+              "name": "device",
+              "type": {
+                "name": "R4GfxDevice",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "device"
+            },
+            {
+              "name": "chain",
+              "type": {
+                "name": "R4GfxSwapchain",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "chain"
+            },
+            {
+              "name": "request",
+              "type": {
+                "name": "R4GfxSwapchainPresent",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "request"
+            },
+            {
+              "name": "damage",
+              "type": {
+                "name": "R4GfxRect",
+                "pointer": "single",
+                "is_const": true,
+                "nullable": false
+              },
+              "direction": "input",
+              "ownership": "borrowed",
+              "lifetime": "call",
+              "description": "Nonempty conservative image-pixel damage, copied during this call."
+            }
+          ],
+          "operation": {
+            "blocking": "nonblocking",
+            "threading": "caller_serialized",
+            "reentrancy": "not_reentrant",
+            "error_domain": "R4GFX_STATUS",
+            "ownership": "Caller serializes this device. Bounded chain/frame identities retain resources and exact jobs until actual retirement. No global wait or timer-derived completion."
+          },
+          "description": "Queue a completely valid immutable image with one conservative nonempty damage rectangle in image pixels. Rectangle is copied synchronously; all changed pixels since this same image was last presented must be included. New or invalidated image contents must be initialized completely. Native providers without region-present capability use the complete-image fallback; direct scanout still presents the whole image. Existing frame/deadline/blocker/render-job and physical-retirement contracts are unchanged."
         }
       ],
       "description": "Bounded per-caller graphics devices, resources and asynchronous copy lifetime. Independent of existing API_V1 and RENDER_V1."

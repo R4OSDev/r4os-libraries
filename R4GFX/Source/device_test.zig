@@ -52,7 +52,7 @@ const Model = struct {
     var present_calls: u64 = 0;
     var fail_present = false;
     var retire_requested = false;
-    const Output = struct { target: a.GfxOutputTarget = .{}, info: a.DisplayPresentationInfo = .{}, status: a.GfxFenceStatus = .{}, request: a.GfxSubmission = .{}, live: bool = false, connected: bool = true };
+    const Output = struct { target: a.GfxOutputTarget = .{}, info: a.DisplayPresentationInfo = .{}, status: a.GfxFenceStatus = .{}, request: a.GfxSubmission = .{}, live: bool = false, connected: bool = true, region_supported: bool = true, region_offers: u32 = 0 };
     var outputs: [2]Output = @splat(.{});
     var output_color: a.GfxOutputColorState = .{};
     fn outputColor(identity: *const a.GfxOutputId, out: *a.GfxOutputColorState) callconv(.c) i32 {
@@ -275,7 +275,11 @@ const Model = struct {
             const queue = for (&queues) |*candidate| {
                 if (candidate.handle.timeline == handle.timeline) break candidate;
             } else unreachable;
-            std.debug.assert(queue.config.adapter_id == target.adapter_id and request.operation == a.gfx_queue_operation_present);
+            std.debug.assert(queue.config.adapter_id == target.adapter_id);
+            if (request.operation == a.gfx_queue_operation_present_region) {
+                output.region_offers += 1;
+                if (!output.region_supported) return a.gfx_queue_error_unsupported;
+            } else std.debug.assert(request.operation == a.gfx_queue_operation_present);
             submit_serial += 1;
             output.status = .{ .fence = .{ .slot = @intCast(index + 2), .timeline = handle.timeline, .point = submit_serial, .adapter_id = queue.config.adapter_id, .device_generation = queue.config.device_generation, .reset_generation = queue.config.reset_generation }, .phase = a.gfx_queue_phase_running, .flags = a.gfx_queue_flag_device_active | a.gfx_queue_flag_resources_held, .milestone = queue.config.milestone };
             output.request = request.*;
@@ -951,7 +955,7 @@ fn checkGeneration2(old_sys: *const @import("r4os").platform2.abi.R4XStartR4Sys2
         .{ .group_id = 1, .resolved_version = 2, .table = @intFromPtr(&sys) },
         .{ .group_id = 3, .resolved_version = 2, .table = @intFromPtr(&draw) },
         .{ .module_name = @intFromPtr("R4GFX"), .symbol_name = @intFromPtr("Query2"), .min_version = 2, .resolved_version = 2, .table = @intFromPtr(&@import("main.zig").r4gfx_query2) },
-        .{ .module_name = @intFromPtr("R4GFX"), .symbol_name = @intFromPtr("DEVICE_V1"), .min_version = 10, .resolved_version = 10, .table = @intFromPtr(api) },
+        .{ .module_name = @intFromPtr("R4GFX"), .symbol_name = @intFromPtr("DEVICE_V1"), .min_version = c.device_v1_header.abi_minor, .resolved_version = c.device_v1_header.abi_minor, .table = @intFromPtr(api) },
     };
     var raw: a2.R4XStartContext2 = .{ .imports = @intFromPtr(&imports), .import_count = imports.len, .instance_id = 7 };
     const client = try binding.DeviceV1Client.init2(&raw);
@@ -1755,8 +1759,22 @@ fn checkOutputSwapchains(input: c.R4GfxDeviceConfig) !void {
         const desc: c.R4GfxSwapchainDesc = .{ .version = 1, .size = @sizeOf(c.R4GfxSwapchainDesc), .head_id = Model.outputs[i].target.head_id, .policy = c.present_policy_fifo, .flags = 0, .count = 2, .display_generation = Model.outputs[i].target.display_generation, .images = @intFromPtr(pair) };
         try t.expectEqual(c.status_ok, api.swapchain_open(&handle, &desc, &chains[i]));
         try t.expectEqual(c.status_ok, api.swapchain_acquire(&handle, &chains[i], 0, &frames[i]));
-        try t.expectEqual(c.status_ok, api.swapchain_present(&handle, &chains[i], &presentRequest(frames[i])));
+        var damage: c.R4GfxRect = .{ .x = std.math.maxInt(u32), .y = 0, .width = 1, .height = 1 };
+        const refs_before = Model.referenceCount();
+        try t.expectEqual(c.status_invalid, api.swapchain_present_region(&handle, &chains[i], &presentRequest(frames[i]), &damage));
+        try t.expect(Model.referenceCount() == refs_before and !Model.outputs[i].live);
+        damage = .{ .x = 1, .y = 2, .width = 2, .height = 1 };
+        Model.outputs[i].region_supported = i == 0;
+        try t.expectEqual(c.status_ok, api.swapchain_present_region(&handle, &chains[i], &presentRequest(frames[i]), &damage));
+        damage.x = 3; damage.width = 1; // Caller mutation cannot change queued metadata.
         try t.expectEqual(c.status_ok, api.swapchain_poll(&handle, &chains[i], &statuses[i]));
+        try t.expectEqual(@as(u32, 1), Model.outputs[i].region_offers);
+        const queued = Model.outputs[i].request;
+        try t.expectEqual(if (i == 0) a.gfx_queue_operation_present_region else a.gfx_queue_operation_present, queued.operation);
+        try t.expectEqual(@as(u64, if (i == 0) 36 else 0), queued.source_offset);
+        try t.expectEqual(@as(u64, if (i == 0) 8 else 16), queued.byte_length);
+        try t.expectEqual(@as(u32, if (i == 0) 1 else 4), queued.row_count);
+        try t.expectEqual(@as(u64, 16), queued.source_pitch);
     }
     try t.expect(Model.outputs[0].live and Model.outputs[1].live and Model.present_calls == 0);
     try t.expect(Model.outputs[0].status.fence.timeline != Model.outputs[1].status.fence.timeline);

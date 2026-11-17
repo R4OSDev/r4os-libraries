@@ -830,14 +830,14 @@ pub const RenderV1 = extern struct {
 };
 
 pub const device_v1_export_name = "DEVICE_V1";
-pub const device_v1_revision: u16 = 10;
+pub const device_v1_revision: u16 = 11;
 pub const device_v1_header = InterfaceHeader{
     .magic = r4os.runtime_r4l.interface_magic,
     .header_version = r4os.runtime_r4l.interface_header_version,
     .flags = 0,
-    .size = 304,
+    .size = 312,
     .abi_major = 1,
-    .abi_minor = 10,
+    .abi_minor = 11,
     .interface_id_lo = 0x5234474658444556,
     .interface_id_hi = 0x52344f5330373931,
 };
@@ -875,6 +875,7 @@ pub const DeviceV1MemoryInfoFn = *const fn (device: *const R4GfxDevice, output: 
 pub const DeviceV1MemoryTrimFn = *const fn (device: *const R4GfxDevice, deadline_ns: u64) callconv(.c) i32;
 pub const DeviceV1ResourceResidentFn = *const fn (device: *const R4GfxDevice, resource: *const R4GfxResource, deadline_ns: u64) callconv(.c) i32;
 pub const DeviceV1ResourcePriorityFn = *const fn (device: *const R4GfxDevice, resource: *const R4GfxResource, priority: u32) callconv(.c) i32;
+pub const DeviceV1SwapchainPresentRegionFn = *const fn (device: *const R4GfxDevice, chain: *const R4GfxSwapchain, request: *const R4GfxSwapchainPresent, damage: *const R4GfxRect) callconv(.c) i32;
 pub const DeviceV1 = extern struct {
     header: InterfaceHeader,
     storage_size: DeviceV1StorageSizeFn,
@@ -911,6 +912,7 @@ pub const DeviceV1 = extern struct {
     memory_trim: DeviceV1MemoryTrimFn,
     resource_resident: DeviceV1ResourceResidentFn,
     resource_priority: DeviceV1ResourcePriorityFn,
+    swapchain_present_region: DeviceV1SwapchainPresentRegionFn,
 };
 
 pub const color_v1_export_name = "COLOR_V1";
@@ -1053,8 +1055,8 @@ pub const DeviceV1Client = struct {
             .interface_id_lo = 0x5234474658444556,
             .interface_id_hi = 0x52344f5330373931,
             .abi_major = 1,
-            .min_revision = 10,
-            .required_size = 304,
+            .min_revision = 11,
+            .required_size = 312,
             .known_required_flags = 0,
         });
         if (r4os.runtime_r4l.slotAddress(header, 32) == null) return error.MissingSlot;
@@ -1091,6 +1093,7 @@ pub const DeviceV1Client = struct {
         if (r4os.runtime_r4l.slotAddress(header, 280) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 288) == null) return error.MissingSlot;
         if (r4os.runtime_r4l.slotAddress(header, 296) == null) return error.MissingSlot;
+        if (r4os.runtime_r4l.slotAddress(header, 304) == null) return error.MissingSlot;
         return .{ .header = header };
     }
 
@@ -1262,6 +1265,11 @@ pub const DeviceV1Client = struct {
     pub fn resource_priority(self: *const DeviceV1Client, device: *const R4GfxDevice, resource: *const R4GfxResource, priority: u32) i32 {
         const function = r4os.runtime_r4l.functionAt(DeviceV1ResourcePriorityFn, self.header, 296) orelse unreachable;
         return function(device, resource, priority);
+    }
+
+    pub fn swapchain_present_region(self: *const DeviceV1Client, device: *const R4GfxDevice, chain: *const R4GfxSwapchain, request: *const R4GfxSwapchainPresent, damage: *const R4GfxRect) i32 {
+        const function = r4os.runtime_r4l.functionAt(DeviceV1SwapchainPresentRegionFn, self.header, 304) orelse unreachable;
+        return function(device, chain, request, damage);
     }
 };
 

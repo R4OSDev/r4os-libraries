@@ -9,7 +9,7 @@ pub fn submit(device: *d.Device, input: *const c.R4GfxImagePresentRequest, outpu
     return submitPath(device, input, output, false);
 }
 pub fn submitPath(device: *d.Device, input: *const c.R4GfxImagePresentRequest, output: *c.R4GfxJob, direct: bool) d.Error!i32 {
-    return submitImpl(device, input, output, direct, null);
+    return submitImpl(device, input, output, direct, null, null);
 }
 const Route = struct { target: a.GfxOutputTarget, queue: a.GfxQueueHandle };
 pub fn submitOutput(device: *d.Device, input: *const c.R4GfxImagePresentRequest, output: *c.R4GfxJob,
@@ -18,9 +18,13 @@ pub fn submitOutput(device: *d.Device, input: *const c.R4GfxImagePresentRequest,
     if (target.version != 1 or target.size != @sizeOf(a.GfxOutputTarget) or target.adapter_id == 0 or target.connector_id == 0 or
         target.device_generation == 0 or target.connection_generation == 0 or target.display_generation == 0 or target.reserved0 != 0 or
         target.head_id >= 8 or queue.timeline == 0) return error.Invalid;
-    return submitImpl(device, input, output, direct, .{ .target = target, .queue = queue });
+    return submitImpl(device, input, output, direct, .{ .target = target, .queue = queue }, null);
 }
-fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, output: *c.R4GfxJob, direct: bool, route: ?Route) d.Error!i32 {
+pub fn submitOutputRegion(device: *d.Device, input: *const c.R4GfxImagePresentRequest, output: *c.R4GfxJob,
+    target: a.GfxOutputTarget, queue: a.GfxQueueHandle, area: c.R4GfxRect) d.Error!i32 {
+    return submitImpl(device, input, output, false, .{ .target = target, .queue = queue }, area);
+}
+fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, output: *c.R4GfxJob, direct: bool, route: ?Route, damage: ?c.R4GfxRect) d.Error!i32 {
     _ = try d.pointer(c.R4GfxImagePresentRequest, @intFromPtr(input));
     try d.outputSafe(c.R4GfxJob, output, device);
     if (d.overlaps(@intFromPtr(input), @sizeOf(c.R4GfxImagePresentRequest), @intFromPtr(output), @sizeOf(c.R4GfxJob)) or
@@ -64,6 +68,14 @@ fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, outpu
     var submission: a.GfxSubmission = .{ .operation = if (direct) a.gfx_queue_operation_direct_present else a.gfx_queue_operation_present, .source = source.backing.reference,
         .byte_length = @as(u64, source.image.width) * 4, .row_count = source.image.height, .source_pitch = source.image.pitch,
         .frame_key = request.frame_key, .deadline_ns = request.deadline_ns, .dependency_count = request.dependency_count };
+    if (damage) |area| {
+        if (route == null or direct or area.x > std.math.maxInt(i32) or area.y > std.math.maxInt(i32) or area.width <= 0 or area.height <= 0 or
+            @as(u64, area.x) + area.width > source.image.width or @as(u64, area.y) + area.height > source.image.height) return error.Invalid;
+        submission.operation = a.gfx_queue_operation_present_region;
+        submission.source_offset = @as(u64, @intCast(area.y)) * source.image.pitch + @as(u64, @intCast(area.x)) * 4;
+        submission.byte_length = @as(u64, @intCast(area.width)) * 4;
+        submission.row_count = @intCast(area.height);
+    }
     @memcpy(submission.dependencies[0..request.dependency_count], dependencies[0..request.dependency_count]);
     const queues = device.queues();
     var accepted: a.GfxFenceStatus = .{};
@@ -75,7 +87,7 @@ fn submitImpl(device: *d.Device, input: *const c.R4GfxImagePresentRequest, outpu
         // Direct retains and flips the source image; final retirement does
         // not transfer its bytes. Composition presentation still counts its
         // complete copy after the exact successful completion receipt.
-        .bytes = if (direct) 0 else submission.byte_length * source.image.height };
+        .bytes = if (direct) 0 else submission.byte_length * submission.row_count };
     device.job_serial = serial;
     output.* = .{ .slot = @intCast(index + 1), .reserved = 0, .generation = serial, .device_generation = device.generation, .device_address = device.self_address };
     return c.status_ok;

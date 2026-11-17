@@ -529,7 +529,7 @@ comptime {
     if (@sizeOf(implementation.RenderV1) != 48 or @sizeOf(binding.RenderV1) != 48) @compileError("RenderV1 size drift");
     if (@offsetOf(implementation.RenderV1, "capabilities") != 32 or @offsetOf(binding.RenderV1, "capabilities") != 32) @compileError("RenderV1.capabilities slot drift");
     if (@offsetOf(implementation.RenderV1, "execute_cpu") != 40 or @offsetOf(binding.RenderV1, "execute_cpu") != 40) @compileError("RenderV1.execute_cpu slot drift");
-    if (@sizeOf(implementation.DeviceV1) != 304 or @sizeOf(binding.DeviceV1) != 304) @compileError("DeviceV1 size drift");
+    if (@sizeOf(implementation.DeviceV1) != 312 or @sizeOf(binding.DeviceV1) != 312) @compileError("DeviceV1 size drift");
     if (@offsetOf(implementation.DeviceV1, "storage_size") != 32 or @offsetOf(binding.DeviceV1, "storage_size") != 32) @compileError("DeviceV1.storage_size slot drift");
     if (@offsetOf(implementation.DeviceV1, "device_open") != 40 or @offsetOf(binding.DeviceV1, "device_open") != 40) @compileError("DeviceV1.device_open slot drift");
     if (@offsetOf(implementation.DeviceV1, "device_close") != 48 or @offsetOf(binding.DeviceV1, "device_close") != 48) @compileError("DeviceV1.device_close slot drift");
@@ -564,6 +564,7 @@ comptime {
     if (@offsetOf(implementation.DeviceV1, "memory_trim") != 280 or @offsetOf(binding.DeviceV1, "memory_trim") != 280) @compileError("DeviceV1.memory_trim slot drift");
     if (@offsetOf(implementation.DeviceV1, "resource_resident") != 288 or @offsetOf(binding.DeviceV1, "resource_resident") != 288) @compileError("DeviceV1.resource_resident slot drift");
     if (@offsetOf(implementation.DeviceV1, "resource_priority") != 296 or @offsetOf(binding.DeviceV1, "resource_priority") != 296) @compileError("DeviceV1.resource_priority slot drift");
+    if (@offsetOf(implementation.DeviceV1, "swapchain_present_region") != 304 or @offsetOf(binding.DeviceV1, "swapchain_present_region") != 304) @compileError("DeviceV1.swapchain_present_region slot drift");
     if (@sizeOf(implementation.ColorV1) != 152 or @sizeOf(binding.ColorV1) != 152) @compileError("ColorV1 size drift");
     if (@offsetOf(implementation.ColorV1, "color_description_validate") != 32 or @offsetOf(binding.ColorV1, "color_description_validate") != 32) @compileError("ColorV1.color_description_validate slot drift");
     if (@offsetOf(implementation.ColorV1, "color_profile_storage_size") != 40 or @offsetOf(binding.ColorV1, "color_profile_storage_size") != 40) @compileError("ColorV1.color_profile_storage_size slot drift");

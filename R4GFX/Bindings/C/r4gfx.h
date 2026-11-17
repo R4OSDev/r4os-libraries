@@ -1438,10 +1438,10 @@ static inline int32_t r4gfx_render_execute_cpu(R4GfxRenderV1Client *client, cons
 
 #define R4GFX_DEVICE_V1_EXPORT_NAME "DEVICE_V1"
 #define R4GFX_DEVICE_V1_ABI_MAJOR 1u
-#define R4GFX_DEVICE_V1_REVISION 10u
+#define R4GFX_DEVICE_V1_REVISION 11u
 #define R4GFX_DEVICE_V1_INTERFACE_ID_LO 0x5234474658444556ull
 #define R4GFX_DEVICE_V1_INTERFACE_ID_HI 0x52344f5330373931ull
-#define R4GFX_DEVICE_V1_TABLE_SIZE 304u
+#define R4GFX_DEVICE_V1_TABLE_SIZE 312u
 #define R4GFX_DEVICE_V1_HEADER_INITIALIZER { R4L_INTERFACE_MAGIC, R4L_INTERFACE_HEADER_VERSION, 0u, R4GFX_DEVICE_V1_TABLE_SIZE, R4GFX_DEVICE_V1_ABI_MAJOR, R4GFX_DEVICE_V1_REVISION, R4GFX_DEVICE_V1_INTERFACE_ID_LO, R4GFX_DEVICE_V1_INTERFACE_ID_HI }
 typedef uint64_t (*R4GfxDeviceV1StorageSizeFn)(void);
 typedef int32_t (*R4GfxDeviceV1DeviceOpenFn)(const R4GfxDeviceConfig * config, R4GfxDevice * output);
@@ -1477,6 +1477,7 @@ typedef int32_t (*R4GfxDeviceV1MemoryInfoFn)(const R4GfxDevice * device, R4GfxMe
 typedef int32_t (*R4GfxDeviceV1MemoryTrimFn)(const R4GfxDevice * device, uint64_t deadline_ns);
 typedef int32_t (*R4GfxDeviceV1ResourceResidentFn)(const R4GfxDevice * device, const R4GfxResource * resource, uint64_t deadline_ns);
 typedef int32_t (*R4GfxDeviceV1ResourcePriorityFn)(const R4GfxDevice * device, const R4GfxResource * resource, uint32_t priority);
+typedef int32_t (*R4GfxDeviceV1SwapchainPresentRegionFn)(const R4GfxDevice * device, const R4GfxSwapchain * chain, const R4GfxSwapchainPresent * request, const R4GfxRect * damage);
 typedef struct R4GfxDeviceV1 {
     R4LInterfaceHeader header;
     R4GfxDeviceV1StorageSizeFn storage_size;
@@ -1513,8 +1514,9 @@ typedef struct R4GfxDeviceV1 {
     R4GfxDeviceV1MemoryTrimFn memory_trim;
     R4GfxDeviceV1ResourceResidentFn resource_resident;
     R4GfxDeviceV1ResourcePriorityFn resource_priority;
+    R4GfxDeviceV1SwapchainPresentRegionFn swapchain_present_region;
 } R4GfxDeviceV1;
-_Static_assert(sizeof(R4GfxDeviceV1) == 304u, "R4GfxDeviceV1 size mismatch");
+_Static_assert(sizeof(R4GfxDeviceV1) == 312u, "R4GfxDeviceV1 size mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, storage_size) == 32u, "R4GfxDeviceV1.storage_size offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_open) == 40u, "R4GfxDeviceV1.device_open offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, device_close) == 48u, "R4GfxDeviceV1.device_close offset mismatch");
@@ -1549,12 +1551,13 @@ _Static_assert(offsetof(R4GfxDeviceV1, memory_info) == 272u, "R4GfxDeviceV1.memo
 _Static_assert(offsetof(R4GfxDeviceV1, memory_trim) == 280u, "R4GfxDeviceV1.memory_trim offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, resource_resident) == 288u, "R4GfxDeviceV1.resource_resident offset mismatch");
 _Static_assert(offsetof(R4GfxDeviceV1, resource_priority) == 296u, "R4GfxDeviceV1.resource_priority offset mismatch");
+_Static_assert(offsetof(R4GfxDeviceV1, swapchain_present_region) == 304u, "R4GfxDeviceV1.swapchain_present_region offset mismatch");
 typedef struct R4GfxDeviceV1Client { const R4LInterfaceHeader *header; } R4GfxDeviceV1Client;
 
 static inline int32_t r4gfx_device_v1_from_import(const R4XStartImport *item, R4GfxDeviceV1Client *out_client) {
     if (out_client == 0) return R4L_BINDING_INVALID_EXPECTATION;
     out_client->header = 0;
-    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 10u, 304u, 0u, 0u };
+    const R4LInterfaceExpectation expected = { 0x5234474658444556ull, 0x52344f5330373931ull, 1u, 11u, 312u, 0u, 0u };
     const R4LInterfaceHeader *header = 0;
     int32_t status = r4l_validate_import(item, &expected, &header);
     if (status != R4L_BINDING_OK) return status;
@@ -1592,6 +1595,7 @@ static inline int32_t r4gfx_device_v1_from_import(const R4XStartImport *item, R4
     if (r4l_slot_address(header, 280u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 288u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     if (r4l_slot_address(header, 296u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
+    if (r4l_slot_address(header, 304u) == 0) return R4L_BINDING_TABLE_TOO_SMALL;
     out_client->header = header;
     return R4L_BINDING_OK;
 }
@@ -1785,6 +1789,11 @@ static inline int32_t r4gfx_resource_resident(R4GfxDeviceV1Client *client, const
 static inline int32_t r4gfx_resource_priority(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxResource * resource, uint32_t priority) {
     R4GfxDeviceV1ResourcePriorityFn function = (R4GfxDeviceV1ResourcePriorityFn)r4l_slot_address(client->header, 296u);
     return function(device, resource, priority);
+}
+
+static inline int32_t r4gfx_swapchain_present_region(R4GfxDeviceV1Client *client, const R4GfxDevice * device, const R4GfxSwapchain * chain, const R4GfxSwapchainPresent * request, const R4GfxRect * damage) {
+    R4GfxDeviceV1SwapchainPresentRegionFn function = (R4GfxDeviceV1SwapchainPresentRegionFn)r4l_slot_address(client->header, 304u);
+    return function(device, chain, request, damage);
 }
 
 #define R4GFX_COLOR_V1_EXPORT_NAME "COLOR_V1"
