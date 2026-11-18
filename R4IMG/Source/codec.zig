@@ -262,7 +262,7 @@ pub fn scratchBytesFor(info: Info, encoded_bytes: usize) Error!usize {
 
 pub fn r4imgDecode(bytes: []const u8, content_type: []const u8, pixels: []u32, scratch: []u8) Error!Image {
     const expected = try r4imgProbe(bytes, content_type);
-    if (expected.format == .svg) return r4imgDecodeSvg(bytes, content_type, pixels, scratch, .{});
+    if (expected.format == .svg) return decodeSvgTarget(bytes, pixels, scratch, expected, .{});
     const count = try expected.pixelCount();
     if (pixels.len < count) return error.PixelBufferTooSmall;
     const required_scratch = try scratchBytesFor(expected, bytes.len);
